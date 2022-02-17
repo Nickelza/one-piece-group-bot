@@ -1,0 +1,11 @@
+# Environment variables
+ENV_TOKEN = 'TOKEN'
+# Chat ID's
+ENV_OPD_GROUP_ID = 'OPD_GROUP_ID'
+# Database
+ENV_DB_NAME = 'DB_NAME'
+ENV_DB_HOST = 'DB_HOST'
+ENV_DB_PORT = 'DB_PORT'
+ENV_DB_USER = 'DB_USER'
+ENV_DB_PASSWORD = 'DB_PASSWORD'
+
