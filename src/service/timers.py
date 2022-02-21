@@ -18,12 +18,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
 
     # Reddit post timer
     for reddit_post_timer in const.REDDIT_POST_TIMERS:
-        job = context.job_queue.run_custom(
+        context.job_queue.run_custom(
             callback=send_reddit_post,
             job_kwargs={"trigger": CronTrigger.from_crontab(reddit_post_timer['cron'])},
             name=reddit_post_timer['name'],
             context=reddit_post_timer['subreddit']
-
         )
-
-        job.run(dispatcher)
