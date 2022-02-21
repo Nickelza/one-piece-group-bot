@@ -4,8 +4,8 @@ from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
 
 import constants as const
-from model.RedditGroupPost import RedditGroupPost
-from model.pojo.Reddit import Reddit
+from src.model.RedditGroupPost import RedditGroupPost
+from src.model.pojo.Reddit import Reddit
 
 
 def manage(context: CallbackContext) -> None:
