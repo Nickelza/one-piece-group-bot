@@ -51,8 +51,7 @@ def update_group_user(tg_user_id: str, tg_username: str, tg_first_name: str) -> 
                 message_count=User.message_count + 1,
                 last_message_date=datetime.datetime.now()) \
         .on_conflict(
-            update={User.tg_username: tg_username,
-                    User.tg_first_name: tg_first_name,
+            update={User.tg_first_name: tg_first_name,
                     User.message_count: User.message_count + 1,
                     User.last_message_date: datetime.datetime.now()}) \
         .execute()
@@ -72,6 +71,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     db = init()
 
     # Insert or update user, with message count
-    update_group_user(update.effective_user.id, update.effective_user.username, update.effective_user.first_name)
+    if update.effective_user is not None:
+        update_group_user(update.effective_user.id, update.effective_user.username, update.effective_user.first_name)
 
     end(db)
