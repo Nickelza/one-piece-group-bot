@@ -58,7 +58,7 @@ def update_group_user(tg_user_id: str, tg_username: str, tg_first_name: str) -> 
         .execute()
 
 
-def manage(update: Update, context) -> None:
+def manage(update: Update, context: CallbackContext) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update

@@ -1,12 +1,13 @@
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-
 import logging
 import os
+
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 import constants as const
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
+from src.service.timers import set_timers
 
 
 def chat_id(update: Update, context: CallbackContext) -> None:
@@ -53,6 +54,11 @@ def main() -> None:
     dispatcher.add_handler(group_message_handler)
 
     updater.start_polling()
+
+    # Activate timers
+    set_timers(dispatcher)
+
+    updater.idle()
 
 
 if __name__ == '__main__':

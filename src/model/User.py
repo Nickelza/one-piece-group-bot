@@ -1,3 +1,5 @@
+import datetime
+
 from src.model.BaseModel import BaseModel
 from peewee import *
 
@@ -11,7 +13,7 @@ class User(BaseModel):
     tg_username = CharField(max_length=99)
     tg_first_name = CharField(max_length=99)
     message_count = IntegerField(default=0)
-    last_message_date = DateTimeField(null=True)
+    last_message_date = DateTimeField(default=datetime.datetime.now)
 
 
 User.create_table()
