@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -29,6 +30,12 @@ def main() -> None:
     :return: None
     :rtype: None
     """
+    # Set timezone: Only on linux
+    try:
+        time.tzset()
+    except AttributeError:
+        pass
+
     # logger = logging.getLogger('peewee')
     # logger.addHandler(logging.StreamHandler())
     # logger.setLevel(logging.DEBUG)
