@@ -2,4 +2,6 @@ python-dotenv~=0.19.2
 python-telegram-bot~=13.11
 peewee~=3.14.9
 praw~=7.5.0
-APScheduler~=3.6.3
+APScheduler~=3.8.1
+Pillow~=9.0.1
+validators~=0.18.2
