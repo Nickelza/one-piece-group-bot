@@ -31,13 +31,11 @@ def end(db: MySQLDatabase) -> None:
     db.close()
 
 
-def update_group_user(tg_user_id: str, tg_username: str, tg_first_name: str) -> None:
+def update_group_user(tg_user_id: str, tg_first_name: str) -> None:
     """
     Creates a new user or updates an existing user
     :param tg_user_id: Telegram user id
     :type tg_user_id: str
-    :param tg_username: Telegram username
-    :type tg_username: str
     :param tg_first_name: Telegram first name
     :type tg_first_name: str
     :return: None
@@ -46,7 +44,6 @@ def update_group_user(tg_user_id: str, tg_username: str, tg_first_name: str) -> 
 
     User \
         .insert(tg_user_id=tg_user_id,
-                tg_username=tg_username,
                 tg_first_name=tg_first_name,
                 message_count=User.message_count + 1,
                 last_message_date=datetime.datetime.now()) \
@@ -72,6 +69,6 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     # Insert or update user, with message count
     if update.effective_user is not None:
-        update_group_user(update.effective_user.id, update.effective_user.username, update.effective_user.first_name)
+        update_group_user(update.effective_user.id, update.effective_user.first_name)
 
     end(db)
