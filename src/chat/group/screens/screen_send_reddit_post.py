@@ -1,5 +1,7 @@
+import logging
 import os
 
+import telegram.error
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
 
@@ -42,17 +44,21 @@ def manage(context: CallbackContext) -> None:
                             escape_markdown(post.subreddit.display_name, 2), escape_markdown(subreddit_url, 2))
 
                 # Send in group
-                if post.url.startswith('https://i.redd.it'):
-                    # Send image
-                    message = context.bot.send_photo(os.environ[const.ENV_OPD_GROUP_ID], photo=post.url,
-                                                     caption=caption,
-                                                     parse_mode=const.DEFAULT_PARSE_MODE)
-                else:
-                    # Send link
-                    message = context.bot.send_message(os.environ[const.ENV_OPD_GROUP_ID], text=caption,
-                                                       parse_mode=const.DEFAULT_PARSE_MODE)
+                try:
+                    if post.url.startswith('https://i.redd.it'):
+                        # Send image
+                        message = context.bot.send_photo(os.environ[const.ENV_OPD_GROUP_ID], photo=post.url,
+                                                         caption=caption,
+                                                         parse_mode=const.DEFAULT_PARSE_MODE)
+                    else:
+                        # Send link
+                        message = context.bot.send_message(os.environ[const.ENV_OPD_GROUP_ID], text=caption,
+                                                           parse_mode=const.DEFAULT_PARSE_MODE)
 
-                # Save post
-                RedditGroupPost.create(short_link=post.shortlink, message_id=message.message_id)
+                    # Save post
+                    RedditGroupPost.create(short_link=post.shortlink, message_id=message.message_id)
 
-                break
+                    break
+                except telegram.error.BadRequest:
+                    logging.info('Failed to send reddit post: ' + post.shortlink)
+                    pass
