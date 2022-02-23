@@ -18,15 +18,19 @@ ENV_REDDIT_USER_AGENT = 'REDDIT_USER_AGENT'
 ENV_TEMP_DIR_CLEANUP_TIME_SECONDS = 'TEMP_DIR_CLEANUP_TIME_SECONDS'
 ENV_CRON_TEMP_DIR_CLEANUP = 'CRON_TEMP_DIR_CLEANUP'
 
+TIMER_TEMP_DIR_CLEANUP_NAME = 'cleanup_temp_folder'
+TIMER_REDDIT_POST_ONEPIECE_NAME = 'timer_reddit_post_onepiece'
+TIMER_REDDIT_POST_MEMEPIECE_NAME = 'timer_reddit_post_memepiece'
+
 # Timers
 REDDIT_POST_TIMERS = [
     {
-        'name': 'reddit_post_timer_onepiece',
+        'name': TIMER_REDDIT_POST_ONEPIECE_NAME,
         'cron': '0 0,12 * * *',  # every day at 00:00 and 12:00
         'subreddit': 'onepiece'
     },
     {
-        'name': 'reddit_post_timer_memepiece',
+        'name': TIMER_REDDIT_POST_MEMEPIECE_NAME,
         'cron': '0 6,18 * * *',  # every day at 06:00 and 18:00
         'subreddit': 'memepiece'
     },

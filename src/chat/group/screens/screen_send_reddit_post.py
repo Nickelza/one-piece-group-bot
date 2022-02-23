@@ -9,6 +9,7 @@ import constants as const
 from src.model.RedditGroupPost import RedditGroupPost
 from src.model.pojo.Reddit import Reddit
 from src.service.image_service import compress_image
+import src.chat.group.group_chat_manager as group_chat_manager
 
 
 def manage(context: CallbackContext) -> None:
@@ -17,6 +18,8 @@ def manage(context: CallbackContext) -> None:
     :param context: context of callback
     :type context: CallbackContext
     """
+
+    db = group_chat_manager.init()
 
     print('Running timer: ' + context.job.name)
 
@@ -88,3 +91,6 @@ def manage(context: CallbackContext) -> None:
                 except Exception as e:  # Stop if any other error
                     logging.error('Error sending reddit post {}: {}'.format(post.shortlink, e))
                     break
+
+    group_chat_manager.end(db)
+

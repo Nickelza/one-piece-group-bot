@@ -1,13 +1,11 @@
+import logging
 import os
+import pathlib
+import shutil
+import time
 import urllib.error
 import urllib.request
 import uuid
-import pathlib
-import time
-import logging
-import shutil
-
-from telegram.ext import CallbackContext
 
 import constants as const
 
@@ -34,11 +32,9 @@ def download_temp_file(url: str) -> str:
     return file_path
 
 
-def cleanup_temp_dir(context: CallbackContext) -> None:
+def cleanup_temp_dir() -> None:
     """
     Removes files older than x time from temp folder
-    :param context: context of callback
-    :type context: CallbackContext
     """
 
     current_time = time.time()
