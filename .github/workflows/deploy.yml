@@ -1,0 +1,20 @@
+name: Deploy on production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_KEY }}
+        port: ${{ secrets.PROD_PORT }}
+        script: ${{ secrets.PROD_DEPLOY_COMMAND }}
