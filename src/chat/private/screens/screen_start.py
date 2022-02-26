@@ -1,16 +1,16 @@
 from telegram import Update
+from telegram.ext import CallbackContext
+
+from src.service.message_service import full_message_send
 
 
-def manage(update: Update, context) -> None:
+def manage(update: Update, context: CallbackContext) -> None:
     """
-    Manage the start screen.
-    :param update: The update.
-    :type update: telegram.Update
-    :param context: The context.
-    :type context: telegram.ext.CallbackContext
+    Manage the start screen
+    :param update: The update
+    :param context: The context
     :return: None
-    :rtype: None
     """
 
-    text = "Welcome to @onepiecegroup Bot!"
-    context.bot.send_message(chat_id=update.effective_chat.id, text=text)
+    text = "Welcome to @onepiecegroup Bot\\!"
+    full_message_send(context, text, update)

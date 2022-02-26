@@ -4,8 +4,7 @@ from telegram.ext import CallbackContext
 from peewee import MySQLDatabase
 
 from resources.Database import Database
-from src.chat.private.screens.screen_start import manage as manage_screen_start
-import constants as c
+from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
 
 
 def init() -> MySQLDatabase:
@@ -44,8 +43,8 @@ def manage(update: Update, context) -> None:
     # Initialize
     db = init()
 
-    if update.message.text == c.COMMAND_PVT_START:
-        manage_screen_start(update, context)
+    if update.message.text is not None and update.message.text.startswith('/savemedia'):
+        manage_screen_save_media(update, context)
 
     end(db)
 

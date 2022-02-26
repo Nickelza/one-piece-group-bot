@@ -2,13 +2,18 @@ import logging
 import os
 import time
 
+import pytz
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, Defaults, \
+    CallbackQueryHandler
 
-import constants as const
+import constants as c
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
-from src.service.timers import set_timers
+from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
+from src.chat.manage_callback import manage as manage_callback
+from src.service.timer_service import set_timers
+from src.service.message_service import full_message_send
 
 
 def chat_id(update: Update, context: CallbackContext) -> None:
@@ -21,7 +26,7 @@ def chat_id(update: Update, context: CallbackContext) -> None:
     :return: None
     :rtype: None
     """
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.effective_chat.id)
+    full_message_send(context, update.effective_chat.id, update)
 
 
 def main() -> None:
@@ -36,6 +41,7 @@ def main() -> None:
     except AttributeError:
         pass
 
+    # Set Peewee logger
     # logger = logging.getLogger('peewee')
     # logger.addHandler(logging.StreamHandler())
     # logger.setLevel(logging.DEBUG)
@@ -43,7 +49,10 @@ def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
 
-    updater = Updater(token=os.environ[const.ENV_TOKEN], use_context=True)
+    """Instantiate a Defaults object"""
+    defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(os.environ.get('TZ')))
+
+    updater = Updater(token=os.environ[c.ENV_TOKEN], use_context=True, defaults=defaults)
     dispatcher = updater.dispatcher
 
     # Add handlers
@@ -52,15 +61,24 @@ def main() -> None:
     chat_id_handler = CommandHandler('chatid', chat_id)
     dispatcher.add_handler(chat_id_handler)
 
+    # Admin chat message handler
+    admin_group_message_handler = MessageHandler(Filters.chat(int(os.environ[c.ENV_ADMIN_GROUP_ID])),
+                                                 manage_admin_chat)
+    dispatcher.add_handler(admin_group_message_handler)
+
     # Private chat
     start_handler = MessageHandler(Filters.chat_type.private, manage_private_chat)
     dispatcher.add_handler(start_handler)
 
     # Group message handler
-    group_message_handler = MessageHandler(Filters.chat(int(os.environ[const.ENV_OPD_GROUP_ID])), manage_group_chat)
+    group_message_handler = MessageHandler(Filters.chat(int(os.environ[c.ENV_OPD_GROUP_ID])), manage_group_chat)
     dispatcher.add_handler(group_message_handler)
 
-    updater.start_polling()
+    # Callback query handler
+    callback_handler = CallbackQueryHandler(manage_callback)
+    dispatcher.add_handler(callback_handler)
+
+    updater.start_polling(drop_pending_updates=True)
 
     # Activate timers
     set_timers(dispatcher)

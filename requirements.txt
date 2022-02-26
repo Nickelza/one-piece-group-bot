@@ -6,3 +6,4 @@ APScheduler==3.6.3
 Pillow~=9.0.1
 validators~=0.18.2
 pymysql~=1.0.2
+pytz~=2021.3
