@@ -112,7 +112,6 @@ def manage(update: Update, context: CallbackContext) -> None:
 
 
 def dispatch_screens(update: Update, context: CallbackContext, user: User, screen: GroupScreen) -> None:
-
     keyboard = None
     if update.callback_query is not None:
         keyboard = get_keyboard_from_callback_query(update.callback_query)
@@ -125,6 +124,6 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, scree
             manage_screen_doc_q_game(update, context, user, keyboard)
 
         case _:  # Unknown screen
-            if update.effective_user is None or update.effective_user.is_bot is False:
+            if update.callback_query is not None:
                 ot_text = GroupChatError.UNRECOGNIZED_SCREEN.build()
                 full_message_send(context, ot_text, update, new_message=True)
