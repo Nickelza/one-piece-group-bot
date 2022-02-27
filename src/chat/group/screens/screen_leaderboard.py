@@ -71,8 +71,8 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
     :param leaderboard: The leaderboard
     :return: The leaderboard message
     """
-    ot_text = phrases.LEADERBOARD_HEADER.format(leaderboard.week, leaderboard.year, os.environ
-                                                .get(c.ENV_LEADERBOARD_LIMIT, c.DEFAULT_LEADERBOARD_LIMIT))
+    ot_text = phrases.LEADERBOARD_HEADER.format(leaderboard.week, leaderboard.year,
+                                                leaderboard.leaderboard_users.count())
 
     for leaderboard_user in leaderboard.leaderboard_users:
         user: User = User.get_by_id(leaderboard_user.user.id)
