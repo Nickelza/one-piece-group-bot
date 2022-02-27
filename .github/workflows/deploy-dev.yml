@@ -3,8 +3,8 @@ name: Deploy on dev
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
-    
+    branches: [ dev ]
+
 jobs:
   build:
     name: Build
