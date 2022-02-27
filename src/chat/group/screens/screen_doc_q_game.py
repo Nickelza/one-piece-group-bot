@@ -136,7 +136,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
 
         # SavedMedia is not found
         if doc_q_media is None:
-            full_message_send(context, phrases.DOC_Q_MEDIA_NOT_FOUND, update)
+            full_message_send(context, GroupChatError.DOC_Q_MEDIA_NOT_FOUND.build(), update)
             return
 
         play_amounts = get_play_amounts(user.bounty, c.DOC_Q_GAME_WIN_ODD)

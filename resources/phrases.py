@@ -1,10 +1,10 @@
-SHOW_USER_BOUNTY = 'User: {}\nBounty: *${}*'
+SHOW_USER_BOUNTY = 'User: {}\nBounty: ฿*{}*'
 SHOW_USER_BOUNTY_ADD_REPLY = '_Requested by {}_'
 BOUNTY_RESET = 'Bounties have been reset'
 BOUNTY_RESET_ALERT = 'Bounties will be reset in *{}*'
 
 LEADERBOARD_HEADER = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:\n'
-LEADERBOARD_ROW = '\n{}°: {} - *${}*'
+LEADERBOARD_ROW = '\n{}°: {} - ฿*{}*'
 
 SAVE_MEDIA_NOT_IN_REPLY = 'This command can only be used in a reply to a message'
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
@@ -12,25 +12,25 @@ SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
 SAVE_MEDIA_INVALID_FORMAT = 'Invalid format.\n\nCommand: /savemedia <name>'
 SAVE_MEDIA_SUCCESS = 'Media saved as *{}*'
 
-DOC_Q_GAME_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least *${}* to play Doc Q'
+DOC_Q_GAME_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least ฿*{}* to summon Doc Q'
 DOC_Q_GAME_LIMIT_REACHED = 'You have reached the limit of Doc Q games. You can play again in *{}*'
 DOC_Q_GAME_START = 'Hi {}, allow me to offer you an apple.' \
-                   '\nIf you choose the right one, you will win *{}* Bellys, else you will lose *{}* Bellys.' \
+                   '\nIf you choose the right one, you will win ฿*{}*, else you will lose ฿*{}*.' \
                    '\nChoose wisely!' \
-                   '\n\n_Current bounty: *${}*_'  \
-                   '\n_Final bounty if you win: *${}*_' \
-                   '\n_Final bounty if you lose: *${}*_'
+                   '\n\n_Current bounty: ฿*{}*_'  \
+                   '\n_Final bounty if you win: ฿*{}*_' \
+                   '\n_Final bounty if you lose: ฿*{}*_'
 DOC_Q_GAME_NOT_FOUND = 'Doc Q game not found'
 DOC_Q_GAME_NOT_OWNER = "I'm not here for you, call me with {} to play"
 DOC_Q_GAME_CANCEL = 'See you next time!'
 DOC_Q_GAME_WIN = "You're...haha...cough! cough! a really lucky one {}." \
-                 "\nLet's go, Stronger." \
-                 "\n\n_{}You won *{}* Bellys!_" \
-                 "\n_Current bounty: *${}*_"
-DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}, better luck next time." \
-                  "\nLet's go, Stronger." \
-                  "\n\n_{}You lost *{}* Bellys._" \
-                  "\n_Current bounty: *${}*_"
+                 "\nLet's go, Stronger...agh..!"\
+                 "\n\n_{}You won ฿*{}*!_" \
+                 "\n_Current bounty: ฿*{}*_"
+DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better luck next time." \
+                  "\nLet's go, Stronger...agh..!" \
+                  "\n\n_{}You lost ฿*{}*._" \
+                  "\n_Current bounty: ฿*{}*_"
 
 
 # Error messages
