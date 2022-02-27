@@ -54,7 +54,10 @@ def manage(context: CallbackContext) -> None:
                 try:
                     if post.url.startswith('https://i.redd.it'):
                         saved_media: SavedMedia = SavedMedia()
-                        saved_media.type = SavedMediaType.PHOTO.value
+                        if post.url.endswith('.gif'):
+                            saved_media.type = SavedMediaType.ANIMATION.value
+                        else:
+                            saved_media.type = SavedMediaType.PHOTO.value
                         saved_media.media_id = post.url
                         try:
                             # Send image

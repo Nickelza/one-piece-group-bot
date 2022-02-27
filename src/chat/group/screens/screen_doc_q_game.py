@@ -204,6 +204,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
                                                      get_bounty_formatted(play_amounts[1]),
                                                      get_bounty_formatted(user.bounty))
         # Save updates
+        user.can_play_doc_q = False
         user.save()
         doc_q_game.save()
 
