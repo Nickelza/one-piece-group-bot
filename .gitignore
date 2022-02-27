@@ -6,4 +6,5 @@
 
 # Production server
 /howtorun.sh
+/howtokill.sh
 /nohup.out
