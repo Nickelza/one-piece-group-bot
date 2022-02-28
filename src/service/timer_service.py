@@ -45,12 +45,14 @@ def add_to_context(context: CallbackContext, name: str, cron: str, job_context: 
     :param job_context: The job context
     :rtype: Job
     """
-    return context.job_queue.run_custom(
+    job = context.job_queue.run_custom(
         callback=run_timers,
         job_kwargs={"trigger": CronTrigger.from_crontab(cron)},
         name=name,
         context=job_context
     )
+    logging.info(f'Next run of "{name}" is {job.next_run_time}')
+    return job
 
 
 def set_timers(dispatcher: Dispatcher) -> None:
