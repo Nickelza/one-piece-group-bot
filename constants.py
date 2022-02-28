@@ -24,7 +24,7 @@ ENV_CRON_SEND_LEADERBOARD = 'CRON_SEND_LEADERBOARD'
 DEFAULT_CRON_SEND_LEADERBOARD = '0 0 * * Sun'  # every Sunday at midnight
 
 ENV_CRON_RESET_BOUNTY = 'CRON_RESET_BOUNTY'
-DEFAULT_CRON_RESET_BOUNTY = '0 0 1 * *'  # Every first of the month at midnight
+DEFAULT_CRON_RESET_BOUNTY = '10 0 1 * *'  # Every first of the month at 00:10
 ENV_CRON_RESET_BOUNTY_ALERT = 'CRON_RESET_BOUNTY_ALERT'
 DEFAULT_CRON_RESET_BOUNTY_ALERT = '0 0 last * *'  # Every last day of the month at midnight
 

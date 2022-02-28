@@ -47,6 +47,11 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     # If used in reply to a message, get the user from the message
     if update.effective_message.reply_to_message is not None:
+        # Used in reply to a bot
+        if update.effective_message.reply_to_message.from_user.is_bot:
+            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update)
+            return
+
         user = User.get_or_none(User.tg_user_id == update.effective_message.reply_to_message.from_user.id)
     else:
         user = User.get_or_none(User.tg_user_id == update.effective_user.id)

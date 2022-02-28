@@ -84,9 +84,10 @@ def manage(update: Update, context: CallbackContext) -> None:
     screen = GroupScreen.SCREEN_UNKNOWN
 
     # Insert or update user, with message count
-    user: User = User()
-    if update.effective_user is not None:
-        user = update_group_user(update)
+    if update.effective_user is None or update.effective_user.is_bot:
+        return
+
+    user = update_group_user(update)
 
     # Text message
     if update.message is not None:

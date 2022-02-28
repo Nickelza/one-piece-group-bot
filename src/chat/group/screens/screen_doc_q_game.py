@@ -45,7 +45,8 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     # User is owner of the game
     if doc_q_game is not None and doc_q_game.user != user:
-        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(c.COMMAND_GRP_DOC_Q_GAME), update)
+        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(c.COMMAND_GRP_DOC_Q_GAME), update,
+                          answer_callback=True, show_alert=True)
         return False
 
     if user.bounty < c.DOC_Q_GAME_REQUIRED_BOUNTY:

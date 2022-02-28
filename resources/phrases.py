@@ -1,3 +1,5 @@
+COMMAND_IN_REPLY_TO_BOT_ERROR = "You can't use this command in a reply to a bot"
+
 SHOW_USER_BOUNTY = 'User: {}\nBounty: ฿*{}*'
 SHOW_USER_BOUNTY_ADD_REPLY = '_Requested by {}_'
 BOUNTY_RESET = 'Bounties have been reset'
