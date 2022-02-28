@@ -51,7 +51,6 @@ def add_to_context(context: CallbackContext, name: str, cron: str, job_context: 
         name=name,
         context=job_context
     )
-    job.run(context.dispatcher)
     logging.info(f'Next run of "{name}" is {job.next_run_time}')
     return job
 

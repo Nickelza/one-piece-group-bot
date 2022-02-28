@@ -27,7 +27,8 @@ class Environment:
 
 
 # Bot
-TOKEN = Environment('TOKEN')
+BOT_TOKEN = Environment('BOT_TOKEN')
+BOT_DROP_PENDING_UPDATES = Environment('BOT_DROP_PENDIG_UPDATES', default_value='False')
 
 # CONFIG
 # Which timezone to use
@@ -74,5 +75,17 @@ CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
 
+# BOUNTY
+# How much a single message is worth. Default: 1,000,000
+BASE_MESSAGE_BELLY = Environment('BASE_MESSAGE_BELLY', default_value='1000000')
+
 # How many entries should be shown in the leaderboard. Default: 10
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
+
+# DOC Q
+# How much bounty is required to play the Doc Q game. Default: 100,000,000
+DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_value='100000000')
+# How many options should be shown in the Doc Q game. Default: 5
+DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value='5')
+# Chance of winning the game. Default: 0.2
+DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')

@@ -45,3 +45,5 @@ EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is N
 EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
 
 KEYBOARD_NOT_FOUND = 'Keyboard not found'
+
+PVT_CHAT_START = 'Welcome to @onepiecegroup Bot!'

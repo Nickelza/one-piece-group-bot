@@ -5,6 +5,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import constants as c
+import resources.Environment as Env
 from resources.Database import Database
 from src.chat.group.screens.screen_bounty import manage as manage_screen_show_bounty
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
@@ -45,7 +46,7 @@ def get_message_belly() -> int:
     """
 
     # Will be determined better later
-    return c.BASE_MESSAGE_BELLY
+    return int(Env.BASE_MESSAGE_BELLY.get())
 
 
 def update_group_user(update: Update) -> User:

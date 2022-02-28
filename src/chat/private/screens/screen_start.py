@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
+import resources.phrases as phrases
 from src.service.message_service import full_message_send
 
 
@@ -12,5 +13,4 @@ def manage(update: Update, context: CallbackContext) -> None:
     :return: None
     """
 
-    text = "Welcome to @onepiecegroup Bot\\!"
-    full_message_send(context, text, update)
+    full_message_send(context, phrases.PVT_CHAT_START, update)

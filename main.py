@@ -26,7 +26,7 @@ def chat_id(update: Update, context: CallbackContext) -> None:
     :return: None
     :rtype: None
     """
-    full_message_send(context, update.effective_chat.id, update)
+    full_message_send(context, str(update.effective_chat.id), update)
 
 
 def main() -> None:
@@ -52,7 +52,7 @@ def main() -> None:
     """Instantiate a Defaults object"""
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
-    updater = Updater(Env.TOKEN.get(), use_context=True, defaults=defaults)
+    updater = Updater(Env.BOT_TOKEN.get(), use_context=True, defaults=defaults)
     dispatcher = updater.dispatcher
 
     # Add handlers
@@ -62,7 +62,7 @@ def main() -> None:
     dispatcher.add_handler(chat_id_handler)
 
     # Admin chat message handler
-    admin_group_message_handler = MessageHandler(Filters.chat(Env.ADMIN_GROUP_ID.get()),
+    admin_group_message_handler = MessageHandler(Filters.chat(int(Env.ADMIN_GROUP_ID.get())),
                                                  manage_admin_chat)
     dispatcher.add_handler(admin_group_message_handler)
 
@@ -71,14 +71,14 @@ def main() -> None:
     dispatcher.add_handler(start_handler)
 
     # Group message handler
-    group_message_handler = MessageHandler(Filters.chat(Env.OPD_GROUP_ID.get()), manage_group_chat)
+    group_message_handler = MessageHandler(Filters.chat(int(Env.OPD_GROUP_ID.get())), manage_group_chat)
     dispatcher.add_handler(group_message_handler)
 
     # Callback query handler
     callback_handler = CallbackQueryHandler(manage_callback)
     dispatcher.add_handler(callback_handler)
 
-    updater.start_polling(drop_pending_updates=True)
+    updater.start_polling(drop_pending_updates=bool(Env.BOT_DROP_PENDING_UPDATES.get()))
 
     # Activate timers
     set_timers(dispatcher)
