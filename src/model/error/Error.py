@@ -5,6 +5,7 @@ class Error:
     """
     Error class
     """
+
     def __init__(self, code, message, source: ErrorSource, need_admin=False):
         self.code = code
         self.message = message

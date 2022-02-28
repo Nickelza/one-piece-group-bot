@@ -1,11 +1,10 @@
 import datetime
-import os
 
 from telegram import Message
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
-import constants as c
+import resources.Environment as Env
 import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
 from src.model.Leaderboard import Leaderboard
@@ -47,7 +46,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     """
     # Get the leaderboard users
     users: list[User] = User.select().order_by(User.bounty.desc()).limit(
-        int(os.environ.get(c.ENV_LEADERBOARD_LIMIT, c.DEFAULT_LEADERBOARD_LIMIT)))
+        int(Env.LEADERBOARD_LIMIT.get()))
 
     # Create a list of LeaderboardUsers
     leaderboard_users = []
@@ -94,7 +93,7 @@ def manage(context: CallbackContext) -> None:
 
     # Send the leaderboard to the group
     ot_text = get_leaderboard_message(leaderboard)
-    message: Message = full_message_send(context, ot_text, chat_id=os.environ[c.ENV_OPD_GROUP_ID])
+    message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get())
     message.pin(disable_notification=False)
 
     # Save the message id

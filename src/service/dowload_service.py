@@ -8,6 +8,7 @@ import urllib.request
 import uuid
 
 import constants as c
+import resources.Environment as Env
 
 
 def download_temp_file(url: str) -> str:
@@ -38,7 +39,7 @@ def cleanup_temp_dir() -> None:
     """
 
     current_time = time.time()
-    time_limit = float(os.environ[c.ENV_TEMP_DIR_CLEANUP_TIME_SECONDS])
+    time_limit = float(Env.TEMP_DIR_CLEANUP_TIME_SECONDS.get())
 
     # Delete temp folder
     if os.path.exists(c.TEMP_DIR):  # Temp folder exists

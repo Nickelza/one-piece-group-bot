@@ -1,11 +1,10 @@
+from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from peewee import MySQLDatabase
-
+import constants as c
 from resources.Database import Database
 from src.chat.private.screens.screen_start import manage as manage_screen_start
-import constants as c
 
 
 def init() -> MySQLDatabase:
@@ -48,4 +47,3 @@ def manage(update: Update, context) -> None:
         manage_screen_start(update, context)
 
     end(db)
-

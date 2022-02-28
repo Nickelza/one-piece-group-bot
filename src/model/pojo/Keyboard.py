@@ -1,8 +1,9 @@
 import json
-import constants as c
-from src.model.enums.GroupScreen import GroupScreen
 
 from telegram import CallbackQuery
+
+import constants as c
+from src.model.enums.GroupScreen import GroupScreen
 
 
 class Keyboard:

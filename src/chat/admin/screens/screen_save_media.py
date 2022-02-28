@@ -62,9 +62,3 @@ def manage(update: Update, context: CallbackContext) -> None:
     # Send the response
     ot_text = phrases.SAVE_MEDIA_SUCCESS.format(name)
     full_message_send(context, ot_text, update)
-
-
-
-
-
-

@@ -1,10 +1,8 @@
-import os
-
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
-import constants as c
+import resources.Environment as Env
 import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
 from src.model.User import User
@@ -21,7 +19,7 @@ def reset_bounty(context: CallbackContext) -> None:
     User.update(bounty=0).execute()
 
     ot_text = phrases.BOUNTY_RESET
-    full_message_send(context, ot_text, chat_id=int(os.environ[c.ENV_OPD_GROUP_ID])).pin(disable_notification=True)
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get()).pin(disable_notification=True)
 
 
 def reset_bounty_alert(context: CallbackContext) -> None:
@@ -31,10 +29,9 @@ def reset_bounty_alert(context: CallbackContext) -> None:
     :return: None
     """
 
-    ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(os.environ.get(c.ENV_CRON_RESET_BOUNTY,
-                                                                                        c.DEFAULT_CRON_RESET_BOUNTY)))
+    ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(Env.CRON_RESET_BOUNTY.get()))
 
-    full_message_send(context, ot_text, chat_id=int(os.environ[c.ENV_OPD_GROUP_ID])).pin(disable_notification=True)
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get()).pin(disable_notification=True)
 
 
 def manage(update: Update, context: CallbackContext) -> None:

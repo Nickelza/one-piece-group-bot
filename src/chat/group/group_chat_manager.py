@@ -6,13 +6,13 @@ from telegram.ext import CallbackContext
 
 import constants as c
 from resources.Database import Database
-from src.model.enums.GroupScreen import GroupScreen
 from src.chat.group.screens.screen_bounty import manage as manage_screen_show_bounty
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.model.User import User
-from src.service.message_service import full_message_send
+from src.model.enums.GroupScreen import GroupScreen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
+from src.service.message_service import full_message_send
 
 
 def init() -> MySQLDatabase:

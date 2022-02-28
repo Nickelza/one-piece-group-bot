@@ -1,7 +1,6 @@
+from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
-
-from peewee import MySQLDatabase
 
 from resources.Database import Database
 from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
@@ -47,4 +46,3 @@ def manage(update: Update, context) -> None:
         manage_screen_save_media(update, context)
 
     end(db)
-

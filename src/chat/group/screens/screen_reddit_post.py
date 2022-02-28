@@ -7,6 +7,7 @@ from telegram.ext import CallbackContext
 from telegram.message import Message
 
 import constants as c
+import resources.Environment as Env
 from src.model.RedditGroupPost import RedditGroupPost
 from src.model.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
@@ -23,9 +24,9 @@ def manage(context: CallbackContext) -> None:
 
     job = context.job
 
-    reddit = Reddit(client_id=os.environ[c.ENV_REDDIT_CLIENT_ID],
-                    client_secret=os.environ[c.ENV_REDDIT_CLIENT_SECRET],
-                    user_agent=os.environ[c.ENV_REDDIT_USER_AGENT])
+    reddit = Reddit(client_id=Env.REDDIT_CLIENT_ID.get(),
+                    client_secret=Env.REDDIT_CLIENT_SECRET.get(),
+                    user_agent=Env.REDDIT_USER_AGENT.get())
 
     subreddit_name = str(job.context)
 
@@ -62,7 +63,7 @@ def manage(context: CallbackContext) -> None:
                         try:
                             # Send image
                             message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=os.environ[c.ENV_OPD_GROUP_ID])
+                                                               chat_id=Env.OPD_GROUP_ID.get())
                         except BadRequest:
                             logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
 
@@ -70,7 +71,7 @@ def manage(context: CallbackContext) -> None:
                             image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
                             saved_media.media_id = open(image_path, 'rb')
                             message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=os.environ[c.ENV_OPD_GROUP_ID])
+                                                               chat_id=Env.OPD_GROUP_ID.get())
 
                             try:
                                 # Delete the temporary image
@@ -82,7 +83,7 @@ def manage(context: CallbackContext) -> None:
 
                     else:
                         # Send link
-                        message: Message = full_message_send(context, caption, chat_id=os.environ[c.ENV_OPD_GROUP_ID])
+                        message: Message = full_message_send(context, caption, chat_id=Env.OPD_GROUP_ID.get())
 
                     # Save post
                     reddit_group_post: RedditGroupPost = RedditGroupPost()

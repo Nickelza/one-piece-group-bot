@@ -1,4 +1,3 @@
-import os
 import random
 
 from telegram import Update, Message, TelegramError
@@ -6,6 +5,7 @@ from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
 import constants as c
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
 from src.model.SavedMedia import SavedMedia
@@ -56,7 +56,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     if not user.can_play_doc_q:
         ot_text = phrases.DOC_Q_GAME_LIMIT_REACHED.format(
-            cron_datetime_difference(os.environ.get(c.ENV_CRON_RESET_DOC_Q_GAME, c.DEFAULT_CRON_RESET_DOC_Q_GAME)))
+            cron_datetime_difference(Env.CRON_RESET_DOC_Q_GAME.get()))
         full_message_send(context, ot_text, update)
         return False
 

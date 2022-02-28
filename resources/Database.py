@@ -1,12 +1,11 @@
+import sys
 from abc import ABC
 
-import constants as c
-
-from os import environ
 from dotenv import load_dotenv
-import sys
 from peewee import *
 from playhouse.shortcuts import ReconnectMixin
+
+import resources.Environment as Env
 
 load_dotenv(sys.argv[1])
 
@@ -17,9 +16,8 @@ class ReconnectMySQLDatabase(ReconnectMixin, MySQLDatabase, ABC):
 
 class Database:
     def __init__(self):
-        self.db = ReconnectMySQLDatabase(environ[c.ENV_DB_NAME], host=environ[c.ENV_DB_HOST],
-                                         port=int(environ[c.ENV_DB_PORT]), user=environ[c.ENV_DB_USER],
-                                         password=environ[c.ENV_DB_PASSWORD])
+        self.db = ReconnectMySQLDatabase(Env.DB_NAME.get(), host=Env.DB_HOST.get(), port=int(Env.DB_PORT.get()),
+                                         user=Env.DB_USER.get(), password=Env.DB_PASSWORD.get())
 
     def get_db(self):
         if self.db.is_connection_usable():

@@ -1,11 +1,11 @@
 import logging
-import os
 
 from apscheduler.triggers.cron import CronTrigger
 from peewee import MySQLDatabase
 from telegram.ext import CallbackContext, Dispatcher, Job
 
 import constants as c
+import resources.Environment as Env
 from resources.Database import Database
 from src.chat.group.screens.screen_bounty import reset_bounty, reset_bounty_alert
 from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
@@ -51,6 +51,7 @@ def add_to_context(context: CallbackContext, name: str, cron: str, job_context: 
         name=name,
         context=job_context
     )
+    job.run(context.dispatcher)
     logging.info(f'Next run of "{name}" is {job.next_run_time}')
     return job
 
@@ -71,23 +72,19 @@ def set_timers(dispatcher: Dispatcher) -> None:
         add_to_context(context, reddit_post_timer['name'], reddit_post_timer['cron'], reddit_post_timer['subreddit'])
 
     # Temp folder cleanup timer
-    add_to_context(context, c.TIMER_TEMP_DIR_CLEANUP_NAME, os.environ[c.ENV_CRON_TEMP_DIR_CLEANUP])
+    add_to_context(context, c.TIMER_TEMP_DIR_CLEANUP_NAME, Env.CRON_TEMP_DIR_CLEANUP.get())
 
     # Leaderboard timer
-    add_to_context(context, c.TIMER_SEND_LEADERBOARD_NAME, os.environ.get(c.ENV_CRON_SEND_LEADERBOARD,
-                                                                          c.DEFAULT_CRON_SEND_LEADERBOARD))
+    add_to_context(context, c.TIMER_SEND_LEADERBOARD_NAME, Env.CRON_SEND_LEADERBOARD.get())
 
     # Reset bounty timer
-    add_to_context(context, c.TIMER_RESET_BOUNTY_NAME, os.environ.get(c.ENV_CRON_RESET_BOUNTY,
-                                                                      c.DEFAULT_CRON_RESET_BOUNTY))
+    add_to_context(context, c.TIMER_RESET_BOUNTY_NAME, Env.CRON_RESET_BOUNTY.get())
 
     # Reset bounty alert timer
-    add_to_context(context, c.TIMER_RESET_BOUNTY_ALERT_NAME, os.environ.get(c.ENV_CRON_RESET_BOUNTY_ALERT,
-                                                                            c.DEFAULT_CRON_RESET_BOUNTY_ALERT))
+    add_to_context(context, c.TIMER_RESET_BOUNTY_ALERT_NAME, Env.CRON_RESET_BOUNTY_ALERT.get())
 
     # Reset Doc Q Game timer
-    add_to_context(context, c.TIMER_RESET_DOC_Q_GAME_NAME, os.environ.get(c.ENV_CRON_RESET_DOC_Q_GAME,
-                                                                          c.DEFAULT_CRON_RESET_DOC_Q_GAME))
+    add_to_context(context, c.TIMER_RESET_DOC_Q_GAME_NAME, Env.CRON_RESET_DOC_Q_GAME.get())
 
 
 def run_timers(context: CallbackContext) -> None:

@@ -1,5 +1,5 @@
-from src.model.error.Error import Error
 import resources.phrases as phrases
+from src.model.error.Error import Error
 from src.model.error.ErrorSource import ErrorSource
 
 

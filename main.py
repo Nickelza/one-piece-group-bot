@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 
 import pytz
@@ -8,12 +7,13 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
     CallbackQueryHandler
 
 import constants as c
-from src.chat.group.group_chat_manager import manage as manage_group_chat
-from src.chat.private.private_chat_manager import manage as manage_private_chat
+import resources.Environment as Env
 from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
+from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.manage_callback import manage as manage_callback
-from src.service.timer_service import set_timers
+from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.service.message_service import full_message_send
+from src.service.timer_service import set_timers
 
 
 def chat_id(update: Update, context: CallbackContext) -> None:
@@ -50,9 +50,9 @@ def main() -> None:
                         level=logging.INFO)
 
     """Instantiate a Defaults object"""
-    defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(os.environ.get('TZ')))
+    defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
-    updater = Updater(token=os.environ[c.ENV_TOKEN], use_context=True, defaults=defaults)
+    updater = Updater(Env.TOKEN.get(), use_context=True, defaults=defaults)
     dispatcher = updater.dispatcher
 
     # Add handlers
@@ -62,7 +62,7 @@ def main() -> None:
     dispatcher.add_handler(chat_id_handler)
 
     # Admin chat message handler
-    admin_group_message_handler = MessageHandler(Filters.chat(int(os.environ[c.ENV_ADMIN_GROUP_ID])),
+    admin_group_message_handler = MessageHandler(Filters.chat(Env.ADMIN_GROUP_ID.get()),
                                                  manage_admin_chat)
     dispatcher.add_handler(admin_group_message_handler)
 
@@ -71,7 +71,7 @@ def main() -> None:
     dispatcher.add_handler(start_handler)
 
     # Group message handler
-    group_message_handler = MessageHandler(Filters.chat(int(os.environ[c.ENV_OPD_GROUP_ID])), manage_group_chat)
+    group_message_handler = MessageHandler(Filters.chat(Env.OPD_GROUP_ID.get()), manage_group_chat)
     dispatcher.add_handler(group_message_handler)
 
     # Callback query handler

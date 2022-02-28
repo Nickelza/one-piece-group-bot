@@ -19,21 +19,20 @@ DOC_Q_GAME_LIMIT_REACHED = 'You have reached the limit of Doc Q games. You can p
 DOC_Q_GAME_START = 'Hi {}, allow me to offer you an apple.' \
                    '\nIf you choose the right one, you will win ฿*{}*, else you will lose ฿*{}*.' \
                    '\nChoose wisely!' \
-                   '\n\n_Current bounty: ฿*{}*_'  \
+                   '\n\n_Current bounty: ฿*{}*_' \
                    '\n_Final bounty if you win: ฿*{}*_' \
                    '\n_Final bounty if you lose: ฿*{}*_'
 DOC_Q_GAME_NOT_FOUND = 'Doc Q game not found'
 DOC_Q_GAME_NOT_OWNER = "I'm not here for you, call me with {} to play"
 DOC_Q_GAME_CANCEL = 'See you next time!'
 DOC_Q_GAME_WIN = "You're...haha...cough! cough! a really lucky one {}." \
-                 "\nLet's go, Stronger...agh..!"\
+                 "\nLet's go, Stronger...agh..!" \
                  "\n\n_{}You won ฿*{}*!_" \
                  "\n_Current bounty: ฿*{}*_"
 DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better luck next time." \
                   "\nLet's go, Stronger...agh..!" \
                   "\n\n_{}You lost ฿*{}*._" \
                   "\n_Current bounty: ฿*{}*_"
-
 
 # Error messages
 USER_NOT_FOUND = 'User not found'

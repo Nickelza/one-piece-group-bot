@@ -1,14 +1,14 @@
 import re
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto,\
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation
 from telegram.ext import CallbackContext
 
 import constants as c
-from src.model.pojo.Keyboard import Keyboard
+import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
-import resources.phrases as phrases
+from src.model.pojo.Keyboard import Keyboard
 
 
 def escape_invalid_markdown_chars(text: str) -> str:
@@ -181,7 +181,7 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
 
 
 def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, update: Update = None,
-                    chat_id: int | str = None,  caption: str = None, keyboard: list[list[Keyboard]] = None,
+                    chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
                     answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
                     disable_notification: bool = True, reply_message_id: bool = None, protect_content: bool = False,
                     parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False,
