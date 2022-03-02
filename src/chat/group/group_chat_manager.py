@@ -13,7 +13,8 @@ from src.model.User import User
 from src.model.enums.GroupScreen import GroupScreen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
-from src.service.message_service import full_message_send
+from src.service.bounty_service import get_message_belly
+from src.service.message_service import full_message_send, is_command
 
 
 def init() -> MySQLDatabase:
@@ -39,16 +40,6 @@ def end(db: MySQLDatabase) -> None:
     db.close()
 
 
-def get_message_belly() -> int:
-    """
-    Calculates how much bellys a message is worth
-    :return: How much bellys a message is worth
-    """
-
-    # Will be determined better later
-    return int(Env.BASE_MESSAGE_BELLY.get())
-
-
 def update_group_user(update: Update) -> User:
     """
     Creates a new user or updates an existing user
@@ -63,7 +54,7 @@ def update_group_user(update: Update) -> User:
         user.tg_user_id = update.effective_user.id
 
     user.tg_first_name = update.effective_user.first_name
-    user.bounty += get_message_belly()
+    user.bounty += get_message_belly(update)
     user.last_message_date = datetime.datetime.now()
     user.save()
 
@@ -85,19 +76,24 @@ def manage(update: Update, context: CallbackContext) -> None:
     screen = GroupScreen.SCREEN_UNKNOWN
 
     # Insert or update user, with message count
-    if update.effective_user is None or update.effective_user.is_bot:
-        return
-
-    user = update_group_user(update)
+    try:
+        # Ignore self bot messages or from linked channel
+        if update.effective_user.is_bot or update.message.sender_chat.id == int(Env.OPD_CHANNEL_ID.get()):
+            return
+    except AttributeError:
+        pass
 
     # Text message
-    if update.message is not None:
+    if update.message is not None and update.message.text is not None and is_command(update.message.text):
+        # Remove command prefix
+        command_message = update.message.text[1:]
+
         # Bounty command
-        if update.message.text == c.COMMAND_GRP_BOUNTY:
+        if command_message == c.COMMAND_GRP_BOUNTY:
             screen = GroupScreen.SCREEN_BOUNTY
 
         # Doc Q Game
-        if update.message.text == c.COMMAND_GRP_DOC_Q_GAME:
+        if command_message == c.COMMAND_GRP_DOC_Q_GAME:
             screen = GroupScreen.SCREEN_DOC_Q_GAME
 
     # Screen still unknown, get from callback query
@@ -106,6 +102,8 @@ def manage(update: Update, context: CallbackContext) -> None:
             keyboard: Keyboard = get_keyboard_from_callback_query(update.callback_query)
             if keyboard is not None:
                 screen = keyboard.screen
+
+    user = update_group_user(update)
 
     dispatch_screens(update, context, user, screen)
 

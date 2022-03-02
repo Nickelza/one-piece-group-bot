@@ -49,6 +49,8 @@ DB_PASSWORD = Environment('DB_PASSWORD')
 # TELEGRAM CHAT
 # Group chat id
 OPD_GROUP_ID = Environment('OPD_GROUP_ID')
+# Main channel id
+OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
 # ChatID for admin commands
 ADMIN_GROUP_ID = Environment('ADMIN_GROUP_ID')
 
@@ -76,15 +78,19 @@ CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
 
 # BOUNTY
-# How much a single message is worth. Default: 1,000,000
-BASE_MESSAGE_BELLY = Environment('BASE_MESSAGE_BELLY', default_value='1000000')
+# How much a single message is worth. Default: 50,000
+BASE_MESSAGE_BELLY = Environment('BASE_MESSAGE_BELLY', default_value='50000')
+# Multiplier to use for each message. Default: 0.05
+CHARACTER_BELLY_MULTIPLIER = Environment('MESSAGE_BELLY_MULTIPLIER', default_value='0.05')
+# Multiplier for messages in reply to a channel post. Default: 1.3
+REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment('REPLY_TO_CHANNEL_POST_MULTIPLIER', default_value='1.3')
 
 # How many entries should be shown in the leaderboard. Default: 10
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
 
 # DOC Q
-# How much bounty is required to play the Doc Q game. Default: 100,000,000
-DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_value='100000000')
+# How much bounty is required to play the Doc Q game. Default: 10,000,000
+DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_value='10000000')
 # How many options should be shown in the Doc Q game. Default: 5
 DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value='5')
 # Chance of winning the game. Default: 0.2

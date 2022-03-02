@@ -2,8 +2,10 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
+import constants as c
 from resources.Database import Database
 from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
+from src.service.message_service import is_command
 
 
 def init() -> MySQLDatabase:
@@ -42,7 +44,10 @@ def manage(update: Update, context) -> None:
     # Initialize
     db = init()
 
-    if update.message.text is not None and update.message.text.startswith('/savemedia'):
-        manage_screen_save_media(update, context)
+    if update.message is not None and update.message.text is not None and is_command(update.message.text):
+        command_message = update.message.text[1:]
+
+        if command_message.startswith(c.COMMAND_ADM_SAVE_MEDIA):
+            manage_screen_save_media(update, context)
 
     end(db)

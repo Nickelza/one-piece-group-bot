@@ -5,6 +5,7 @@ from telegram.ext import CallbackContext
 import constants as c
 from resources.Database import Database
 from src.chat.private.screens.screen_start import manage as manage_screen_start
+from src.service.message_service import is_command
 
 
 def init() -> MySQLDatabase:
@@ -43,7 +44,10 @@ def manage(update: Update, context) -> None:
     # Initialize
     db = init()
 
-    if update.message.text == c.COMMAND_PVT_START:
-        manage_screen_start(update, context)
+    if update.message is not None and update.message.text is not None and is_command(update.message.text):
+        command_message = update.message.text[1:]
+
+        if command_message == c.COMMAND_PVT_START:
+            manage_screen_start(update, context)
 
     end(db)

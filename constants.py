@@ -50,7 +50,9 @@ EMOJI_DOC_Q_GAME_LOSE = '💥'
 EMOJI_CANCEL = '❌'
 
 # Commands
-COMMAND_PVT_START = '/start'
-COMMAND_GRP_DOC_Q_GAME = '/docq'
-COMMAND_GRP_BOUNTY = '/bounty'
-COMMAND_ADM_SAVE_MEDIA = '/savemedia'
+COMMAND_PREFIX = '/'
+COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
+COMMAND_PVT_START = 'start'
+COMMAND_GRP_DOC_Q_GAME = 'docq'
+COMMAND_GRP_BOUNTY = 'bounty'
+COMMAND_ADM_SAVE_MEDIA = 'savemedia'

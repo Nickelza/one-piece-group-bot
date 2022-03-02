@@ -282,3 +282,10 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                           message_id=update.callback_query.message.message_id,
                                           media=input_media,
                                           reply_markup=keyboard_markup)
+
+
+def is_command(text: str) -> bool:
+    """
+    Check if the message is a command
+    """
+    return text[0] in c.COMMAND_PREFIX_ALIASES
