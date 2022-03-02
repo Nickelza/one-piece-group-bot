@@ -3,6 +3,7 @@ import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation
 from telegram.ext import CallbackContext
+from telegram.utils.helpers import mention_markdown
 
 import constants as c
 import resources.phrases as phrases
@@ -289,3 +290,10 @@ def is_command(text: str) -> bool:
     Check if the message is a command
     """
     return text[0] in c.COMMAND_PREFIX_ALIASES
+
+
+def mention_markdown_v2(user_id: int | str, name: str) -> str:
+    """
+    Create a mention markdown v2
+    """
+    return mention_markdown(user_id, name, 2)

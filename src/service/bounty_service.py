@@ -57,4 +57,4 @@ def get_message_belly(update: Update) -> int:
     except AttributeError:
         pass
 
-    return int(final_belly)
+    return round(int(final_belly), -3)  # Round to the nearest thousandth

@@ -2,7 +2,6 @@ import random
 
 from telegram import Update, Message, TelegramError
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_markdown
 
 import constants as c
 import resources.Environment as Env
@@ -16,7 +15,7 @@ from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
 from src.service.cron_service import cron_datetime_difference
-from src.service.message_service import full_message_send, full_media_send
+from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
 
 def get_play_amounts(current_bounty: int, win_odds) -> list:
@@ -51,7 +50,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     if user.bounty < float(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get()):
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
-            int(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get())))
+            int(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get())), get_bounty_formatted(user.bounty))
         full_message_send(context, ot_text, update)
         return False
 
@@ -143,7 +142,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
 
         play_amounts = get_play_amounts(user.bounty, float(Env.DOC_Q_GAME_WIN_ODD.get()))
         # Send media
-        caption = phrases.DOC_Q_GAME_START.format(mention_markdown(user.tg_user_id, user.tg_first_name),
+        caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   get_bounty_formatted(play_amounts[0]),
                                                   get_bounty_formatted(play_amounts[1]),
                                                   get_bounty_formatted(user.bounty),
@@ -189,7 +188,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.status = GameStatus.WON.value
             doc_q_game.berry = play_amounts[0]
 
-            ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown(user.tg_user_id, user.tg_first_name),
+            ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                     c.EMOJI_DOC_Q_GAME_WIN,
                                                     get_bounty_formatted(play_amounts[0]),
                                                     get_bounty_formatted(user.bounty))
@@ -201,7 +200,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.status = GameStatus.LOST.value
             doc_q_game.berry = play_amounts[1]
 
-            ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown(user.tg_user_id, user.tg_first_name),
+            ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                      c.EMOJI_DOC_Q_GAME_LOSE,
                                                      get_bounty_formatted(play_amounts[1]),
                                                      get_bounty_formatted(user.bounty))

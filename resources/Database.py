@@ -17,7 +17,8 @@ class ReconnectMySQLDatabase(ReconnectMixin, MySQLDatabase, ABC):
 class Database:
     def __init__(self):
         self.db = ReconnectMySQLDatabase(Env.DB_NAME.get(), host=Env.DB_HOST.get(), port=int(Env.DB_PORT.get()),
-                                         user=Env.DB_USER.get(), password=Env.DB_PASSWORD.get())
+                                         user=Env.DB_USER.get(), password=Env.DB_PASSWORD.get(),
+                                         charset='utf8mb4')
 
     def get_db(self):
         if self.db.is_connection_usable():

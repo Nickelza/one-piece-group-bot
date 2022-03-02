@@ -2,7 +2,6 @@ import datetime
 
 from telegram import Message
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_markdown
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -11,7 +10,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.LeaderboardTitles import LeaderboardTitles
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, mention_markdown_v2
 
 
 def create_leaderboard() -> Leaderboard:
@@ -77,7 +76,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
         user: User = User.get_by_id(leaderboard_user.user.id)
 
         ot_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
-                                                  mention_markdown(user.tg_user_id, user.tg_first_name, 2),
+                                                  mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   bounty_service.get_bounty_formatted(user.bounty))
 
     return ot_text

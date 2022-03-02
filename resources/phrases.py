@@ -14,7 +14,8 @@ SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
 SAVE_MEDIA_INVALID_FORMAT = 'Invalid format.\n\nCommand: /savemedia <name>'
 SAVE_MEDIA_SUCCESS = 'Media saved as *{}*'
 
-DOC_Q_GAME_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least ฿*{}* to summon Doc Q'
+DOC_Q_GAME_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least ฿*{}* to summon Doc Q.' \
+                               '\n\n_Current bounty: ฿*{}*_'
 DOC_Q_GAME_LIMIT_REACHED = 'You have reached the limit of Doc Q games. You can play again in *{}*'
 DOC_Q_GAME_START = 'Hi {}, allow me to offer you an apple.' \
                    '\nIf you choose the right one, you will win ฿*{}*, else you will lose ฿*{}*.' \

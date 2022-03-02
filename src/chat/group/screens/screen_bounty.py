@@ -1,6 +1,5 @@
 from telegram import Update
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_markdown
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -8,7 +7,7 @@ import src.service.bounty_service as bounty_service
 from src.model.User import User
 from src.model.error.GroupChatError import GroupChatError
 from src.service.cron_service import cron_datetime_difference
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, mention_markdown_v2
 
 
 def reset_bounty(context: CallbackContext) -> None:
@@ -58,14 +57,14 @@ def manage(update: Update, context: CallbackContext) -> None:
         full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update)
         return
 
-    message_text = phrases.SHOW_USER_BOUNTY.format(mention_markdown(user.tg_user_id, user.tg_first_name),
+    message_text = phrases.SHOW_USER_BOUNTY.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                    bounty_service.get_bounty_formatted(user.bounty))
 
     # If used in reply to a message, reply to that message
     if update.effective_message.reply_to_message is not None:
         message_text += "\n\n" + phrases \
-            .SHOW_USER_BOUNTY_ADD_REPLY.format(mention_markdown(update.effective_user.id,
-                                                                update.effective_user.first_name))
+            .SHOW_USER_BOUNTY_ADD_REPLY.format(mention_markdown_v2(update.effective_user.id,
+                                                                   update.effective_user.first_name))
 
         full_message_send(context, message_text, update, quote=True)
     else:
