@@ -27,6 +27,8 @@ def get_message_belly(update: Update) -> int:
             return 0
     except AttributeError:
         pass
+    except TypeError:
+        pass
 
     # Callback query - No belly
     try:
