@@ -51,6 +51,8 @@ def get_message_belly(update: Update) -> int:
         final_belly *= (1 + (len(update.message.text) * float(Env.CHARACTER_BELLY_MULTIPLIER.get())))
     except AttributeError:
         pass
+    except TypeError:
+        pass
 
     # Reply to channel post multiplier
     try:

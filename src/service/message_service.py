@@ -21,7 +21,12 @@ def escape_invalid_markdown_chars(text: str) -> str:
 
     escape_chars = r'~>#+-=|{}.!'
 
-    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+    text = re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+
+    # Escape eventual quadruple backslashes with a double backslash
+    text = text.replace('\\\\', '\\')
+
+    return text
 
 
 def escape_valid_markdown_chars(text: str) -> str:
