@@ -28,7 +28,7 @@ class Environment:
 
 # Bot
 BOT_TOKEN = Environment('BOT_TOKEN')
-BOT_DROP_PENDING_UPDATES = Environment('BOT_DROP_PENDIG_UPDATES', default_value='False')
+BOT_DROP_PENDING_UPDATES = Environment('BOT_DROP_PENDING_UPDATES', default_value='False')
 
 # CONFIG
 # Which timezone to use
