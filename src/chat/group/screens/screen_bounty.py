@@ -4,10 +4,15 @@ from telegram.ext import CallbackContext
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
+from src.model.LeaderboardUser import LeaderboardUser
+from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums.LeaderboardTitle import LeaderboardTitle
+from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError
 from src.service.cron_service import cron_datetime_difference
-from src.service.message_service import full_message_send, mention_markdown_v2
+from src.service.leaderboard_service import get_current_leaderboard_user
+from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
 
 def reset_bounty(context: CallbackContext) -> None:
@@ -60,12 +65,24 @@ def manage(update: Update, context: CallbackContext) -> None:
     message_text = phrases.SHOW_USER_BOUNTY.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                    bounty_service.get_bounty_formatted(user.bounty))
 
-    # If used in reply to a message, reply to that message
+    # If used in reply to a message, reply to original message
+    reply_to_message_id = None
     if update.effective_message.reply_to_message is not None:
         message_text += "\n\n" + phrases \
             .SHOW_USER_BOUNTY_ADD_REPLY.format(mention_markdown_v2(update.effective_user.id,
                                                                    update.effective_user.first_name))
+        reply_to_message_id = update.effective_message.reply_to_message.message_id
 
-        full_message_send(context, message_text, update, quote=True)
-    else:
-        full_message_send(context, message_text, update)
+    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user)
+
+    # If user is in the leaderboard and their title is PIRATE_KING or EMPEROR, send bounty poster
+    if leaderboard_user is not None and (leaderboard_user.title == LeaderboardTitle.PIRATE_KING.value or
+                                         leaderboard_user.title == LeaderboardTitle.EMPEROR.value):
+        poster_path = bounty_service.get_poster(update, user)
+        poster: SavedMedia = SavedMedia()
+        poster.media_id = open(poster_path, 'rb')
+        poster.type = SavedMediaType.PHOTO.value
+        full_media_send(context, saved_media=poster, update=update, caption=message_text,
+                        reply_to_message_id=reply_to_message_id)
+    else:  # Send regular message
+        full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id)

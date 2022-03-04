@@ -8,9 +8,10 @@ import constants as c
 import resources.Environment as Env
 from resources.Database import Database
 from src.chat.group.screens.screen_bounty import reset_bounty, reset_bounty_alert
+from src.chat.group.screens.screen_doc_q_game import reset_playability as reset_doc_q_game
 from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
-from src.service.dowload_service import cleanup_temp_dir
+from src.service.download_service import cleanup_temp_dir
 
 
 def init() -> MySQLDatabase:
@@ -132,4 +133,9 @@ def execute(context: CallbackContext) -> None:
     # Reset bounty alert timer
     if job.name == c.TIMER_RESET_BOUNTY_ALERT_NAME:
         reset_bounty_alert(context)
+        return
+
+    # Reset Doc Q Game timer
+    if job.name == c.TIMER_RESET_DOC_Q_GAME_NAME:
+        reset_doc_q_game(context)
         return

@@ -12,6 +12,7 @@ class User(BaseModel):
     id = PrimaryKeyField()
     tg_user_id = CharField(max_length=99, unique=True)
     tg_first_name = CharField(max_length=99)
+    tg_last_name = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
     max_bounty = BigIntegerField(default=0)
     max_title = SmallIntegerField(null=True)
