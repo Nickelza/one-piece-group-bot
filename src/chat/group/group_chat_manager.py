@@ -86,7 +86,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     # Text message
     if update.message is not None and update.message.text is not None and is_command(update.message.text):
         # Remove command prefix
-        command_message = update.message.text[1:]
+        command_message = update.message.text[1:].lower()
 
         # Bounty command
         if command_message == c.COMMAND_GRP_BOUNTY:

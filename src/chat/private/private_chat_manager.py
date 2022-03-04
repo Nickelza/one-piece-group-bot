@@ -45,7 +45,7 @@ def manage(update: Update, context) -> None:
     db = init()
 
     if update.message is not None and update.message.text is not None and is_command(update.message.text):
-        command_message = update.message.text[1:]
+        command_message = update.message.text[1:].lower()
 
         if command_message == c.COMMAND_PVT_START:
             manage_screen_start(update, context)
