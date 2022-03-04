@@ -79,11 +79,17 @@ TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21
 
 # BOUNTY
 # How much a single message is worth. Default: 50,000
-BASE_MESSAGE_BELLY = Environment('BASE_MESSAGE_BELLY', default_value='50000')
+BELLY_BASE_MESSAGE = Environment('BELLY_BASE_MESSAGE', default_value='50000')
 # Multiplier to use for each message. Default: 0.05
-CHARACTER_BELLY_MULTIPLIER = Environment('MESSAGE_BELLY_MULTIPLIER', default_value='0.05')
+BELLY_CHARACTER_MULTIPLIER = Environment('BELLY_CHARACTER_MULTIPLIER', default_value='0.05')
+# How much multiple of the base message can the multiplier by character be, before it is capped. Default: 2
+BELLY_CHARACTER_MAX_MULTIPLE = Environment('BELLY_CHARACTER_MAX_MULTIPLE', default_value='2')
 # Multiplier for messages in reply to a channel post. Default: 1.3
-REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment('REPLY_TO_CHANNEL_POST_MULTIPLIER', default_value='1.3')
+BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment('BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER', default_value='1.3')
+# Multiplier for stickers. Default: 0.2
+BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value='0.2')
+# Multiplier for animations. Default: 0.2
+BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
 
 # How many entries should be shown in the leaderboard. Default: 10
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
