@@ -24,8 +24,7 @@ def download_temp_file(url: str) -> str:
         os.makedirs(c.TEMP_DIR)
 
     # File name
-    file_name = uuid.uuid4().hex + pathlib.Path(url).suffix
-    file_path = os.path.join(c.TEMP_DIR, file_name)
+    file_path = generate_temp_file_path(pathlib.Path(url).suffix)
 
     # Download file
     urllib.request.urlretrieve(url, file_path)
@@ -55,3 +54,18 @@ def cleanup_temp_dir() -> None:
                         shutil.rmtree(file_path)  # Is a folder
             except Exception as e:
                 logging.error('Error while deleting temp path: %s', e)
+
+
+def generate_temp_file_path(extension: str) -> str:
+    """
+    Generate temp file path
+    :param extension: file extension
+    :type extension: str
+    :return: path of temp file
+    """
+
+    # File name
+    file_name = uuid.uuid4().hex + '.' + extension
+
+    # File path
+    return os.path.join(c.TEMP_DIR, file_name)

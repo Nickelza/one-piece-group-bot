@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class LeaderboardTitles(Enum):
+class LeaderboardTitle(Enum):
     """
     Enum class for leaderboard titles.
     """

@@ -1,7 +1,7 @@
 import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
-    InputMediaVideo, InputMediaAnimation
+    InputMediaVideo, InputMediaAnimation, Chat
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
@@ -81,17 +81,27 @@ def get_keyboard(keyboard: list[list[Keyboard]]) -> InlineKeyboardMarkup | None:
     return keyboard_markup
 
 
-def get_reply_message_id(update: Update = None, quote: bool = False, reply_message_id: int = None) -> int | None:
+def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to_message_id: int = None,
+                            quote_if_group: bool = True) -> int | None:
     """
     Get reply message id
-    :param update: Update object. Required if reply_message_id is None
+    :param update: Update object. Required if reply_to_message_id is None
     :param quote: Quote message. Default: False
-    :param reply_message_id: Reply message id. Default: None
+    :param reply_to_message_id: Reply message id. Default: None
+    :param quote_if_group: If the message should be quoted if it is in a group and update is not None. Default: True
     :return: Reply message id
     """
 
-    if reply_message_id is not None:
-        return reply_message_id
+    if reply_to_message_id is not None:
+        return reply_to_message_id
+
+    # Group message quote
+    try:
+        if quote_if_group:
+            if update.effective_chat.type == Chat.GROUP or update.effective_chat.type == Chat.SUPERGROUP:
+                return update.message.message_id
+    except AttributeError:
+        pass
 
     if not quote:
         return None
@@ -104,9 +114,10 @@ def get_reply_message_id(update: Update = None, quote: bool = False, reply_messa
 
 def full_message_send(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
                       keyboard: list[list[Keyboard]] = None, answer_callback: bool = False, show_alert: bool = False,
-                      new_message: bool = False, disable_notification: bool = True, reply_message_id: bool = None,
-                      parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, protect_content: bool = False,
-                      disable_web_page_preview: bool = True, allow_sending_without_reply: bool = True) -> Message:
+                      new_message: bool = False, disable_notification: bool = True, reply_to_message_id: bool = None,
+                      parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
+                      protect_content: bool = False, disable_web_page_preview: bool = True,
+                      allow_sending_without_reply: bool = True) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -118,9 +129,10 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param show_alert: If to show an alert in the callback answer
     :param new_message: True if the message is a new message
     :param disable_notification: True if the message should not be displayed in the chat
-    :param reply_message_id: Message ID to reply to
+    :param reply_to_message_id: Message ID to reply to
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
+    :param quote_if_group: True if the message should be quoted if it is in a group and update is not None
     :param protect_content: True if the message should be protected from saving and forwarding
     :param disable_web_page_preview: True if the web page preview should be disabled
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
@@ -136,7 +148,9 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     # New message
     if new_message or update is None or update.callback_query is None:
         # Message in reply to
-        reply_message_id = get_reply_message_id(update=update, quote=quote, reply_message_id=reply_message_id)
+        reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
+                                                      reply_to_message_id=reply_to_message_id,
+                                                      quote_if_group=quote_if_group)
 
         return context.bot.send_message(text=text,
                                         chat_id=chat_id,
@@ -144,7 +158,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                                         disable_web_page_preview=disable_web_page_preview,
                                         parse_mode=parse_mode,
                                         disable_notification=disable_notification,
-                                        reply_to_message_id=reply_message_id,
+                                        reply_to_message_id=reply_to_message_id,
                                         allow_sending_without_reply=allow_sending_without_reply,
                                         protect_content=protect_content)
 
@@ -189,8 +203,8 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
 def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, update: Update = None,
                     chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
                     answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
-                    disable_notification: bool = True, reply_message_id: bool = None, protect_content: bool = False,
-                    parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False,
+                    disable_notification: bool = True, reply_to_message_id: bool = None, protect_content: bool = False,
+                    parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                     allow_sending_without_reply: bool = True, edit_only_keyboard: bool = False,
                     edit_only_caption_and_keyboard: bool = False) -> Message:
     """
@@ -205,10 +219,11 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
     :param show_alert: If to show an alert in the callback answer
     :param new_message: True if the message is a new message
     :param disable_notification: True if the message should not be displayed in the chat
-    :param reply_message_id: Message ID to reply to
+    :param reply_to_message_id: Message ID to reply to
     :param protect_content: True if the message should be protected from saving and forwarding
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
+    :param quote_if_group: True if the message should be quoted if it is a group message
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
     :param edit_only_keyboard: If only the keyboard should be edited
     :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If keyboard is None,
@@ -224,7 +239,9 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
 
     # New message
     if new_message or update is None or update.callback_query is None:
-        reply_message_id = get_reply_message_id(update=update, quote=quote, reply_message_id=reply_message_id)
+        reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
+                                                      reply_to_message_id=reply_to_message_id,
+                                                      quote_if_group=quote_if_group)
 
         match saved_media.type:
             # Photo
@@ -235,7 +252,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                               reply_markup=keyboard_markup,
                                               parse_mode=parse_mode,
                                               disable_notification=disable_notification,
-                                              reply_to_message_id=reply_message_id,
+                                              reply_to_message_id=reply_to_message_id,
                                               allow_sending_without_reply=allow_sending_without_reply,
                                               protect_content=protect_content)
             case SavedMediaType.VIDEO.value:  # Video
@@ -245,7 +262,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                               reply_markup=keyboard_markup,
                                               parse_mode=parse_mode,
                                               disable_notification=disable_notification,
-                                              reply_to_message_id=reply_message_id,
+                                              reply_to_message_id=reply_to_message_id,
                                               allow_sending_without_reply=allow_sending_without_reply,
                                               protect_content=protect_content)
             case SavedMediaType.ANIMATION.value:  # Animation
@@ -255,7 +272,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                                   reply_markup=keyboard_markup,
                                                   parse_mode=parse_mode,
                                                   disable_notification=disable_notification,
-                                                  reply_to_message_id=reply_message_id,
+                                                  reply_to_message_id=reply_to_message_id,
                                                   allow_sending_without_reply=allow_sending_without_reply,
                                                   protect_content=protect_content)
             case _:

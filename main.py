@@ -41,7 +41,7 @@ def main() -> None:
     except AttributeError:
         pass
 
-    # Set Peewee logger
+    # # Set Peewee logger
     # logger = logging.getLogger('peewee')
     # logger.addHandler(logging.StreamHandler())
     # logger.setLevel(logging.DEBUG)

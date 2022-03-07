@@ -54,6 +54,7 @@ def update_group_user(update: Update) -> User:
         user.tg_user_id = update.effective_user.id
 
     user.tg_first_name = update.effective_user.first_name
+    user.tg_last_name = update.effective_user.last_name
     user.bounty += get_message_belly(update)
     user.last_message_date = datetime.datetime.now()
     user.save()
