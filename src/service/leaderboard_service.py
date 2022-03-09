@@ -57,16 +57,30 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     return leaderboard_users
 
 
+def get_leaderboard(index: int = 0) -> Leaderboard | None:
+    """
+    Gets the current leaderboard
+    :param index: The index of the leaderboard to get. Higher the index, older the leaderboard
+    :return: The leaderboard
+    """
+    leaderboard: Leaderboard = (Leaderboard.select()
+                                .order_by(Leaderboard.year.desc(),
+                                          Leaderboard.week.desc())
+                                .limit(1)
+                                .offset(index)
+                                .first())
+    return leaderboard
+
+
 def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
     """
     Gets the current leaderboard user for the user
     :param user: The user to get the leaderboard user for
     :return: The leaderboard user
     """
-    leaderboard_user: LeaderboardUser = (LeaderboardUser.select()
-                                         .join(Leaderboard)
-                                         .order_by(LeaderboardUser.leaderboard.year.desc(),
-                                                   LeaderboardUser.leaderboard.week.desc())
-                                         .where(LeaderboardUser.user == user)
-                                         .first())
+    leaderboard: Leaderboard = get_leaderboard()
+    if leaderboard is None:
+        return None
+
+    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
     return leaderboard_user

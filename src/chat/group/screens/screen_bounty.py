@@ -4,14 +4,12 @@ from telegram.ext import CallbackContext
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
-from src.model.LeaderboardUser import LeaderboardUser
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
-from src.model.enums.LeaderboardTitle import LeaderboardTitle
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError
+from src.service.bounty_poster_service import get_bounty_poster
 from src.service.cron_service import cron_datetime_difference
-from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
 
@@ -73,16 +71,18 @@ def manage(update: Update, context: CallbackContext) -> None:
                                                                    update.effective_user.first_name))
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
-    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user)
-
-    # If user is in the leaderboard and their title is PIRATE_KING or EMPEROR, send bounty poster
-    if leaderboard_user is not None and (leaderboard_user.title == LeaderboardTitle.PIRATE_KING.value or
-                                         leaderboard_user.title == LeaderboardTitle.EMPEROR.value):
-        poster_path = bounty_service.get_poster(update, user)
+    # Send bounty poster if bounty_poster_limit is None or higher than 0
+    if user.bounty_poster_limit is None or user.bounty_poster_limit > 0:
+        poster_path = get_bounty_poster(update, user)
         poster: SavedMedia = SavedMedia()
         poster.media_id = open(poster_path, 'rb')
         poster.type = SavedMediaType.PHOTO.value
         full_media_send(context, saved_media=poster, update=update, caption=message_text,
                         reply_to_message_id=reply_to_message_id)
+
+        # Reduce bounty poster limit by 1 if it is not None
+        if user.bounty_poster_limit is not None:
+            user.bounty_poster_limit -= 1
+            user.save()
     else:  # Send regular message
         full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id)

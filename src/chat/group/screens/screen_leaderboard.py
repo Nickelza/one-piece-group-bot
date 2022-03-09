@@ -6,6 +6,7 @@ import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
 from src.model.Leaderboard import Leaderboard
 from src.model.User import User
+from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.leaderboard_service import create_leaderboard
 from src.service.message_service import full_message_send, mention_markdown_v2
 
@@ -45,3 +46,6 @@ def manage(context: CallbackContext) -> None:
     # Save the message id
     leaderboard.message_id = message.message_id
     leaderboard.save()
+
+    # Reset bounty poster limit
+    reset_bounty_poster_limit(context, reset_previous_leaderboard=True)

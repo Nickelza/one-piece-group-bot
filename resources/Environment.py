@@ -73,6 +73,8 @@ CRON_RESET_BOUNTY = Environment('CRON_RESET_BOUNTY', default_value='10 0 1 * *')
 CRON_RESET_BOUNTY_ALERT = Environment('CRON_RESET_BOUNTY_ALERT', default_value='10 0 last * *')
 # Reset Doc Q game playability. Default: Every day at midnight
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
+# Reset bounty poster limit. Default: Every day at 00:10
+CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -90,6 +92,16 @@ BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment('BELLY_REPLY_TO_CHANNEL_POS
 BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value='0.2')
 # Multiplier for animations. Default: 0.2
 BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
+
+# BOUNTY POSTER
+# How many times Pirate King can display bounty poster before it is reset. Default: None (unlimited)
+BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', can_be_empty=True)
+# How many times Emperors can display bounty poster before it is reset. Default: 1
+BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPERORS', default_value='1')
+# How many times First Mates can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_FIRST_MATE = Environment('BOUNTY_POSTER_LIMIT_FIRST_MATES', default_value='0')
+# How many times Supernovas can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_SUPERNOVA = Environment('BOUNTY_POSTER_LIMIT_SUPERNOVAS', default_value='0')
 
 # How many entries should be shown in the leaderboard. Default: 10
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
