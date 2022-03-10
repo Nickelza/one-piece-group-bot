@@ -2,6 +2,9 @@ COMMAND_IN_REPLY_TO_BOT_ERROR = "You can't use this command in a reply to a bot"
 
 SHOW_USER_BOUNTY = 'User: {}\nBounty: ฿*{}*'
 SHOW_USER_BOUNTY_ADD_REPLY = '_Requested by {}_'
+NOT_ALLOWED_TO_VIEW_REPLIED_BOUNTY = 'You can only view the bounty of those who rank below you.' \
+                                     '\n\n{} rank: {}' \
+                                     '\n{} rank: {}'
 BOUNTY_RESET = 'Bounties have been reset'
 BOUNTY_RESET_ALERT = 'Bounties will be reset in *{}*'
 

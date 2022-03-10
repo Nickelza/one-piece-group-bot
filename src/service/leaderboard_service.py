@@ -38,7 +38,7 @@ def get_leaderboard_title_message(position: int) -> str:
     :return: The leaderboard title message
     """
     leaderboard_title: LeaderboardTitle = get_title_by_position(position)
-    return leaderboard_title.emoji + " " + leaderboard_title.title_message
+    return leaderboard_title.get_emoji_and_title_message()
 
 
 def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:

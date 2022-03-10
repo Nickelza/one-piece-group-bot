@@ -6,10 +6,12 @@ import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums.LeaderboardTitle import get_title_by_leaderboard_user
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError
 from src.service.bounty_poster_service import get_bounty_poster
 from src.service.cron_service import cron_datetime_difference
+from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
 
@@ -59,6 +61,31 @@ def manage(update: Update, context: CallbackContext) -> None:
     if user is None:
         full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update)
         return
+
+    # If used in reply to a message, verify that requesting user ranks above the user being replied to
+    if update.effective_message.reply_to_message is not None:
+        requesting_user = User.get_or_none(User.tg_user_id == update.effective_user.id)
+        if requesting_user is None:
+            full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update)
+            return
+
+        leaderboard_user = get_current_leaderboard_user(user)
+        requesting_user_leaderboard_user = get_current_leaderboard_user(requesting_user)
+
+        if requesting_user_leaderboard_user is None or (
+                leaderboard_user is not None
+                and requesting_user_leaderboard_user.position >= leaderboard_user.position):
+            leaderboard_user_title = get_title_by_leaderboard_user(leaderboard_user)
+            requesting_user_leaderboard_user_title = get_title_by_leaderboard_user(requesting_user_leaderboard_user)
+
+            ot_text = phrases.NOT_ALLOWED_TO_VIEW_REPLIED_BOUNTY.format(
+                mention_markdown_v2(requesting_user.tg_user_id, 'Your'),
+                leaderboard_user_title.get_emoji_and_title_message(),
+                mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                requesting_user_leaderboard_user_title.get_emoji_and_title_message())
+
+            full_message_send(context, ot_text, update)
+            return
 
     message_text = phrases.SHOW_USER_BOUNTY.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                    bounty_service.get_bounty_formatted(user.bounty))
