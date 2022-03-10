@@ -4,11 +4,10 @@ from telegram.ext import CallbackContext
 from unidecode import unidecode
 
 import constants as c
-import resources.Environment as Env
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardTitle import LeaderboardTitle
+from src.model.enums.LeaderboardTitle import LeaderboardTitle, get_title_by_position
 from src.service.bounty_service import get_bounty_formatted
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_leaderboard
@@ -171,8 +170,6 @@ def get_bounty_poster(update: Update, user: User) -> str:
     profile_photo = Image.open(profile_photo_path)
     # Get profile photo size
     profile_photo_width, profile_photo_height = profile_photo.size
-    # Get delta between profile image height and image box height
-    delta = profile_photo_height - c.BOUNTY_POSTER_IMAGE_BOX_H
     # Get where profile image should be placed
     profile_photo_y = c.BOUNTY_POSTER_IMAGE_BOX_START_Y
     # Profile photo should be placed in the center of the poster template
@@ -207,19 +204,8 @@ def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int | None:
     :return: The bounty poster limit of the user
     """
 
-    # Pirate King
-    limit = 0
-    match leaderboard_user.title:
-        case LeaderboardTitle.PIRATE_KING.value:
-            limit = Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get()
-        case LeaderboardTitle.EMPEROR.value:
-            limit = Env.BOUNTY_POSTER_LIMIT_EMPEROR.get()
-        case LeaderboardTitle.FIRST_MATE.value:
-            limit = Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get()
-        case LeaderboardTitle.SUPERNOVA.value:
-            limit = Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get()
-
-    return int(limit) if limit is not None else None
+    leaderboard_title: LeaderboardTitle = get_title_by_position(leaderboard_user.title)
+    return leaderboard_title.bounty_poster_limit
 
 
 def reset_bounty_poster_limit(context: CallbackContext, reset_previous_leaderboard: bool = False) -> None:

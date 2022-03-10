@@ -5,6 +5,7 @@ from telegram.ext import CallbackContext
 
 import constants as c
 import resources.Environment as Env
+import resources.emoji as emj
 import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
 from src.model.SavedMedia import SavedMedia
@@ -119,17 +120,17 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         for i in range(int(Env.DOC_Q_GAME_OPTIONS_COUNT.get())):
             keyboard_data['b'] = int(i in correct_choices_index)
 
-            # Uncomment to show correct choice
-            # emoji = c.DOC_Q_GAME_OPTIONS_EMOJI
-            # if i in correct_choices_index:
-            #     emoji = '🍏'
-            # apples_keyboard.append(Keyboard(emoji, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
+            option_emoji = emj.DOC_Q_GAME_OPTION
 
-            apples_keyboard.append(Keyboard(c.EMOJI_DOC_Q_GAME_OPTIONS, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
+            # should show correct answer
+            if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
+                option_emoji = emj.DOC_Q_GAME_CORRECT_OPTION
+
+            apples_keyboard.append(Keyboard(option_emoji, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
 
         inline_keyboard.append(apples_keyboard)
         # Add cancel button
-        inline_keyboard.append([Keyboard(c.EMOJI_CANCEL + phrases.CANCEL, GroupScreen.SCREEN_DOC_Q_GAME,
+        inline_keyboard.append([Keyboard(emj.CANCEL + phrases.CANCEL, GroupScreen.SCREEN_DOC_Q_GAME,
                                          {'a': doc_q_game.id, 'x': 1})])
 
         # Get SavedMedia
@@ -189,7 +190,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.berry = play_amounts[0]
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                    c.EMOJI_DOC_Q_GAME_WIN,
+                                                    emj.DOC_Q_GAME_WIN,
                                                     get_bounty_formatted(play_amounts[0]),
                                                     get_bounty_formatted(user.bounty))
         else:  # User chose wrong option
@@ -201,7 +202,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.berry = play_amounts[1]
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                     c.EMOJI_DOC_Q_GAME_LOSE,
+                                                     emj.DOC_Q_GAME_LOSE,
                                                      get_bounty_formatted(play_amounts[1]),
                                                      get_bounty_formatted(user.bounty))
         # Save updates

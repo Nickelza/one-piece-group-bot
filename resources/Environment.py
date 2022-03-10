@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 
 
 class Environment:
@@ -24,6 +25,27 @@ class Environment:
             raise Exception(f"Environment variable {self.name} is not set")
 
         return value
+
+    def get_int(self) -> int:
+        """
+        Get the environment variable as an integer
+        :return: The environment variable as an integer
+        """
+        return int(self.get())
+
+    def get_float(self) -> float:
+        """
+        Get the environment variable as a float
+        :return: The environment variable as a float
+        """
+        return float(self.get())
+
+    def get_bool(self) -> bool:
+        """
+        Get the environment variable as a boolean
+        :return: The environment variable as a boolean
+        """
+        return strtobool(self.get())
 
 
 # Bot
@@ -97,14 +119,16 @@ BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_v
 # How many times Pirate King can display bounty poster before it is reset. Default: None (unlimited)
 BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', can_be_empty=True)
 # How many times Emperors can display bounty poster before it is reset. Default: 1
-BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPERORS', default_value='1')
+BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPEROR', default_value='1')
 # How many times First Mates can display bounty poster before it is reset. Default: 0
-BOUNTY_POSTER_LIMIT_FIRST_MATE = Environment('BOUNTY_POSTER_LIMIT_FIRST_MATES', default_value='0')
+BOUNTY_POSTER_LIMIT_FIRST_MATE = Environment('BOUNTY_POSTER_LIMIT_FIRST_MATE', default_value='0')
 # How many times Supernovas can display bounty poster before it is reset. Default: 0
-BOUNTY_POSTER_LIMIT_SUPERNOVA = Environment('BOUNTY_POSTER_LIMIT_SUPERNOVAS', default_value='0')
+BOUNTY_POSTER_LIMIT_SUPERNOVA = Environment('BOUNTY_POSTER_LIMIT_SUPERNOVA', default_value='0')
+# How many times Rookies can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_ROOKIE = Environment('BOUNTY_POSTER_LIMIT_ROOKIE', default_value='0')
 
-# How many entries should be shown in the leaderboard. Default: 10
-LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
+# How many entries should be shown in the leaderboard. Default: 20
+LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='20')
 
 # DOC Q
 # How much bounty is required to play the Doc Q game. Default: 10,000,000
@@ -113,3 +137,5 @@ DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_v
 DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value='5')
 # Chance of winning the game. Default: 0.2
 DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
+# Show correct option. Default: True
+DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='True')

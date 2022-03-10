@@ -6,7 +6,7 @@ BOUNTY_RESET = 'Bounties have been reset'
 BOUNTY_RESET_ALERT = 'Bounties will be reset in *{}*'
 
 LEADERBOARD_HEADER = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:\n'
-LEADERBOARD_ROW = '\n{}°: {} - ฿*{}*'
+LEADERBOARD_ROW = '{}°: {}\n{} - ฿*{}*'
 
 SAVE_MEDIA_NOT_IN_REPLY = 'This command can only be used in a reply to a message'
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
