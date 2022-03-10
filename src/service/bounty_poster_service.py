@@ -197,7 +197,7 @@ def get_bounty_poster(update: Update, user: User) -> str:
     return save_path
 
 
-def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int | None:
+def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
     """
     Gets the bounty poster limit of a user by their leaderboard position
     :param leaderboard_user: The user to get the bounty poster limit of

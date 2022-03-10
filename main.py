@@ -62,7 +62,7 @@ def main() -> None:
     dispatcher.add_handler(chat_id_handler)
 
     # Admin chat message handler
-    admin_group_message_handler = MessageHandler(Filters.chat(int(Env.ADMIN_GROUP_ID.get())),
+    admin_group_message_handler = MessageHandler(Filters.chat(Env.ADMIN_GROUP_ID.get_int()),
                                                  manage_admin_chat)
     dispatcher.add_handler(admin_group_message_handler)
 
@@ -71,14 +71,14 @@ def main() -> None:
     dispatcher.add_handler(start_handler)
 
     # Group message handler
-    group_message_handler = MessageHandler(Filters.chat(int(Env.OPD_GROUP_ID.get())), manage_group_chat)
+    group_message_handler = MessageHandler(Filters.chat(Env.OPD_GROUP_ID.get_int()), manage_group_chat)
     dispatcher.add_handler(group_message_handler)
 
     # Callback query handler
     callback_handler = CallbackQueryHandler(manage_callback)
     dispatcher.add_handler(callback_handler)
 
-    updater.start_polling(drop_pending_updates=bool(Env.BOT_DROP_PENDING_UPDATES.get()))
+    updater.start_polling(drop_pending_updates=Env.BOT_DROP_PENDING_UPDATES.get_bool())
 
     # Activate timers
     set_timers(dispatcher)

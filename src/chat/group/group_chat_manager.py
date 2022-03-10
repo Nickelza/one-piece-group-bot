@@ -79,7 +79,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     # Insert or update user, with message count
     try:
         # Ignore self bot messages or from linked channel
-        if update.effective_user.is_bot or update.message.sender_chat.id == int(Env.OPD_CHANNEL_ID.get()):
+        if update.effective_user.is_bot or update.message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int():
             return
     except AttributeError:
         pass

@@ -21,7 +21,7 @@ def reset_bounty(context: CallbackContext) -> None:
     User.update(bounty=0).execute()
 
     ot_text = phrases.BOUNTY_RESET
-    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get()).pin(disable_notification=True)
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
 
 
 def reset_bounty_alert(context: CallbackContext) -> None:
@@ -33,7 +33,7 @@ def reset_bounty_alert(context: CallbackContext) -> None:
 
     ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(Env.CRON_RESET_BOUNTY.get()))
 
-    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get()).pin(disable_notification=True)
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
 
 
 def manage(update: Update, context: CallbackContext) -> None:
@@ -72,7 +72,7 @@ def manage(update: Update, context: CallbackContext) -> None:
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if bounty_poster_limit is None or higher than 0
-    if user.bounty_poster_limit is None or user.bounty_poster_limit > 0:
+    if user.bounty_poster_limit == -1 or user.bounty_poster_limit > 0:
         poster_path = get_bounty_poster(update, user)
         poster: SavedMedia = SavedMedia()
         poster.media_id = open(poster_path, 'rb')
@@ -81,7 +81,7 @@ def manage(update: Update, context: CallbackContext) -> None:
                         reply_to_message_id=reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
-        if user.bounty_poster_limit is not None:
+        if user.bounty_poster_limit != -1:
             user.bounty_poster_limit -= 1
             user.save()
     else:  # Send regular message

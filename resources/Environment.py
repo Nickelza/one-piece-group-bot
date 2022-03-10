@@ -116,8 +116,8 @@ BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value
 BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
 
 # BOUNTY POSTER
-# How many times Pirate King can display bounty poster before it is reset. Default: None (unlimited)
-BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', can_be_empty=True)
+# How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)
+BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', default_value='-1')
 # How many times Emperors can display bounty poster before it is reset. Default: 1
 BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPEROR', default_value='1')
 # How many times First Mates can display bounty poster before it is reset. Default: 0

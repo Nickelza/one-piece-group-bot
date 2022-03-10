@@ -48,8 +48,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     :return: The leaderboard users
     """
     # Get the leaderboard users
-    users: list[User] = User.select().order_by(User.bounty.desc()).limit(
-        int(Env.LEADERBOARD_LIMIT.get()))
+    users: list[User] = User.select().order_by(User.bounty.desc()).limit(Env.LEADERBOARD_LIMIT.get_int())
 
     # Create a list of LeaderboardUsers
     leaderboard_users = []

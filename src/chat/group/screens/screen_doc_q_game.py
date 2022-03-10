@@ -49,9 +49,9 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
                           answer_callback=True, show_alert=True)
         return False
 
-    if user.bounty < float(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get()):
+    if user.bounty < Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_float():
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
-            int(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get())), get_bounty_formatted(user.bounty))
+            Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), get_bounty_formatted(user.bounty))
         full_message_send(context, ot_text, update)
         return False
 
@@ -103,21 +103,21 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.save()
 
         # Number of possible correct choices is determined by number of options * success rate
-        possible_correct_choices = int(int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) * float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        possible_correct_choices = int(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() * Env.DOC_Q_GAME_WIN_ODD.get_float())
 
         correct_choices_index = []
         # Generate correct choices
         for i in range(possible_correct_choices):
-            index = random.randint(0, int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) - 1)
+            index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
             while index in correct_choices_index:
-                index = random.randint(0, int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) - 1)
+                index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
             correct_choices_index.append(index)
 
         # Create Keyboard with 5 apple buttons
         keyboard_data: dict = {'a': doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
-        for i in range(int(Env.DOC_Q_GAME_OPTIONS_COUNT.get())):
+        for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
             keyboard_data['b'] = int(i in correct_choices_index)
 
             option_emoji = emj.DOC_Q_GAME_OPTION
@@ -141,7 +141,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             full_message_send(context, GroupChatError.DOC_Q_MEDIA_NOT_FOUND.build(), update)
             return
 
-        play_amounts = get_play_amounts(user.bounty, float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   get_bounty_formatted(play_amounts[0]),
@@ -179,7 +179,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             delete_game(update, context, doc_q_game)
             return
 
-        play_amounts = get_play_amounts(user.bounty, float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # User chose correct option
         if keyboard.info['b']:
             # Increase user's bounty

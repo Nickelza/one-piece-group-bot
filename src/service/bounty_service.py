@@ -38,17 +38,17 @@ def get_message_belly(update: Update) -> int:
     # Forwarded message - Base belly
     try:
         if update.message.forward_from is not None:
-            return int(Env.BELLY_BASE_MESSAGE.get())
+            return Env.BELLY_BASE_MESSAGE.get_int()
     except AttributeError:
         pass
 
-    final_belly: float = int(Env.BELLY_BASE_MESSAGE.get())
+    final_belly: float = Env.BELLY_BASE_MESSAGE.get_int()
 
     # Char multiplier - Text messages which are not forwarded
     try:
-        char_belly = (1 + (len(update.message.text) * float(Env.BELLY_CHARACTER_MULTIPLIER.get())))
+        char_belly = (1 + (len(update.message.text) * Env.BELLY_CHARACTER_MULTIPLIER.get_float()))
         # Cap if it exceeds the max allowed per character count
-        max_char_belly = float(Env.BELLY_CHARACTER_MAX_MULTIPLE.get()) * float(Env.BELLY_BASE_MESSAGE.get())
+        max_char_belly = Env.BELLY_CHARACTER_MAX_MULTIPLE.get_float() * Env.BELLY_BASE_MESSAGE.get_int()
         char_belly = char_belly if char_belly <= max_char_belly else max_char_belly
         final_belly += char_belly
     except (AttributeError, TypeError):
@@ -56,21 +56,21 @@ def get_message_belly(update: Update) -> int:
 
     # Reply to channel post multiplier
     try:
-        if update.message.reply_to_message.sender_chat.id == int(Env.OPD_CHANNEL_ID.get()):
-            final_belly *= float(Env.BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER.get())
+        if update.message.reply_to_message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int():
+            final_belly *= Env.BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER.get_float()
     except AttributeError:
         pass
 
     # Sticker multiplier
     try:
         if update.message.sticker is not None:
-            final_belly *= float(Env.BELLY_STICKER_MULTIPLIER.get())
+            final_belly *= Env.BELLY_STICKER_MULTIPLIER.get_float()
     except AttributeError:
         pass
     # Animation multiplier
     try:
         if update.message.animation is not None:
-            final_belly *= float(Env.BELLY_ANIMATION_MULTIPLIER.get())
+            final_belly *= Env.BELLY_ANIMATION_MULTIPLIER.get_float()
     except AttributeError:
         pass
 

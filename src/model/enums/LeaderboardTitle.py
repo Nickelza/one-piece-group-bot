@@ -23,23 +23,23 @@ class LeaderboardTitle:
         self.emoji: str = emoji
         self.leaderboard_start: int = leaderboard_start
         self.leaderboard_end: int = leaderboard_end
-        self.bounty_poster_limit: int | None = bounty_poster_limit
+        self.bounty_poster_limit: int = bounty_poster_limit
 
 
 PIRATE_KING = LeaderboardTitle(1, 'Pirate King', emj.LEADERBOARD_PIRATE_KING, 0, 0,
-                               Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get())
+                               Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int())
 
 EMPEROR = LeaderboardTitle(2, 'Emperor', emj.LEADERBOARD_EMPEROR, 1, 4,
-                           Env.BOUNTY_POSTER_LIMIT_EMPEROR.get())
+                           Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int())
 
 FIRST_MATE = LeaderboardTitle(3, 'First Mate', emj.LEADERBOARD_FIRST_MATE, 5, 8,
-                              Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get())
+                              Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int())
 
 SUPERNOVA = LeaderboardTitle(4, 'Supernova', emj.LEADERBOARD_SUPERNOVA, 9, 19,
-                             Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get())
+                             Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int())
 
 ROOKIE = LeaderboardTitle(5, 'Rookie', emj.LEADERBOARD_ROOKIE, 20, -1,
-                          Env.BOUNTY_POSTER_LIMIT_ROOKIE)
+                          Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int())
 
 LEADERBOARD_TITLES = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE]
 

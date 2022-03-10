@@ -45,7 +45,7 @@ def manage(context: CallbackContext) -> None:
 
     # Send the leaderboard to the group
     ot_text = get_leaderboard_message(leaderboard)
-    message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get())
+    message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
     message.pin(disable_notification=False)
 
     # Save the message id
