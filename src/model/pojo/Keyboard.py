@@ -27,7 +27,6 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery):
     """
     info: dict = json.loads(callback_query.data)
 
-    screen: GroupScreen = GroupScreen.SCREEN_UNKNOWN
     try:
         screen = GroupScreen(int(info[c.SCREEN_CODE]))
     except ValueError:

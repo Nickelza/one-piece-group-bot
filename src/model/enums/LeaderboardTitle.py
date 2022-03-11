@@ -1,5 +1,5 @@
 import resources.Environment as Env
-import resources.emoji as emj
+from src.model.enums.Emoji import Emoji
 from src.model.LeaderboardUser import LeaderboardUser
 
 
@@ -35,19 +35,19 @@ class LeaderboardTitle:
         return self.emoji + ' ' + self.title_message
 
 
-PIRATE_KING = LeaderboardTitle(1, 'Pirate King', emj.LEADERBOARD_PIRATE_KING, 0, 0,
+PIRATE_KING = LeaderboardTitle(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 0, 0,
                                Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int())
 
-EMPEROR = LeaderboardTitle(2, 'Emperor', emj.LEADERBOARD_EMPEROR, 1, 4,
+EMPEROR = LeaderboardTitle(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 1, 4,
                            Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int())
 
-FIRST_MATE = LeaderboardTitle(3, 'First Mate', emj.LEADERBOARD_FIRST_MATE, 5, 8,
+FIRST_MATE = LeaderboardTitle(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 5, 8,
                               Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int())
 
-SUPERNOVA = LeaderboardTitle(4, 'Supernova', emj.LEADERBOARD_SUPERNOVA, 9, 19,
+SUPERNOVA = LeaderboardTitle(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 9, 19,
                              Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int())
 
-ROOKIE = LeaderboardTitle(5, 'Rookie', emj.LEADERBOARD_ROOKIE, 20, -1,
+ROOKIE = LeaderboardTitle(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 20, -1,
                           Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int())
 
 LEADERBOARD_TITLES = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE]
