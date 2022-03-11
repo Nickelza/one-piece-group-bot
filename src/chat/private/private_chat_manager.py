@@ -2,9 +2,9 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import constants as c
 from resources.Database import Database
 from src.chat.private.screens.screen_start import manage as manage_screen_start
+from src.model.enums.Command import Command
 from src.service.message_service import is_command
 
 
@@ -47,7 +47,7 @@ def manage(update: Update, context) -> None:
     if update.message is not None and update.message.text is not None and is_command(update.message.text):
         command_message = update.message.text[1:].lower()
 
-        if command_message == c.COMMAND_PVT_START:
+        if command_message == Command.PVT_START.value:
             manage_screen_start(update, context)
 
     end(db)

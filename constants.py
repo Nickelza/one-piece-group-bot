@@ -45,13 +45,8 @@ SCREEN_CODE = 'sc'
 # Saved Media
 SAVED_MEDIA_NAME_DOC_Q = 'docq'
 
-# Commands
-COMMAND_PREFIX = '/'
+# Command
 COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
-COMMAND_PVT_START = 'start'
-COMMAND_GRP_DOC_Q_GAME = 'docq'
-COMMAND_GRP_BOUNTY = 'bounty'
-COMMAND_ADM_SAVE_MEDIA = 'savemedia'
 
 # Bounty poster
 BOUNTY_POSTER_EXTENSIION = 'jpg'

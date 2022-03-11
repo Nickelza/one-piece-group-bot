@@ -2,9 +2,9 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import constants as c
 from resources.Database import Database
 from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
+from src.model.enums.Command import Command
 from src.service.message_service import is_command
 
 
@@ -47,7 +47,7 @@ def manage(update: Update, context) -> None:
     if update.message is not None and update.message.text is not None and is_command(update.message.text):
         command_message = update.message.text[1:].lower()
 
-        if command_message.startswith(c.COMMAND_ADM_SAVE_MEDIA):
+        if command_message.startswith(Command.ADM_SAVE_MEDIA.value):
             manage_screen_save_media(update, context)
 
     end(db)

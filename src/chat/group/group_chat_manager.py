@@ -4,12 +4,12 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import constants as c
 import resources.Environment as Env
 from resources.Database import Database
 from src.chat.group.screens.screen_bounty import manage as manage_screen_show_bounty
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.model.User import User
+from src.model.enums.Command import Command
 from src.model.enums.GroupScreen import GroupScreen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
@@ -90,11 +90,11 @@ def manage(update: Update, context: CallbackContext) -> None:
         command_message = update.message.text[1:].lower()
 
         # Bounty command
-        if command_message == c.COMMAND_GRP_BOUNTY:
+        if command_message == Command.GRP_BOUNTY.value:
             screen = GroupScreen.SCREEN_BOUNTY
 
         # Doc Q Game
-        if command_message == c.COMMAND_GRP_DOC_Q_GAME:
+        if command_message == Command.GRP_DOC_Q_GAME:
             screen = GroupScreen.SCREEN_DOC_Q_GAME
 
     # Screen still unknown, get from callback query
