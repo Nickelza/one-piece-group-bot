@@ -95,7 +95,7 @@ def manage(update: Update, context: CallbackContext) -> None:
             screen = GroupScreen.SCREEN_USER_STATUS
 
         # Doc Q Game
-        if command_message == Command.GRP_DOC_Q_GAME:
+        if command_message == Command.GRP_DOC_Q_GAME.value:
             screen = GroupScreen.SCREEN_DOC_Q_GAME
 
         # Show bounty
