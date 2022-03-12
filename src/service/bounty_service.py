@@ -1,7 +1,12 @@
 from telegram import Update
+from telegram.ext import CallbackContext
 
 import constants as c
 import resources.Environment as Env
+import resources.phrases as phrases
+from src.model.User import User
+from src.service.cron_service import cron_datetime_difference
+from src.service.message_service import full_message_send
 
 
 def get_bounty_formatted(bounty: int) -> str:
@@ -75,3 +80,26 @@ def get_message_belly(update: Update) -> int:
         pass
 
     return round(int(final_belly), -3)  # Round to the nearest thousandth
+
+
+def reset_bounty(context: CallbackContext) -> None:
+    """
+    Resets the bounty to 0 for all users
+    :return: None
+    """
+    User.update(bounty=0).execute()
+
+    ot_text = phrases.BOUNTY_RESET
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
+
+
+def reset_bounty_alert(context: CallbackContext) -> None:
+    """
+    Sends a message to the group chat to alert that bounties will be reset
+    :param context: Telegram context
+    :return: None
+    """
+
+    ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(Env.CRON_RESET_BOUNTY.get()))
+
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)

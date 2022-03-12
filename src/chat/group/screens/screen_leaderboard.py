@@ -8,7 +8,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.leaderboard_service import create_leaderboard, get_leaderboard_title_message
+from src.service.leaderboard_service import create_leaderboard, get_leaderboard_rank_message
 from src.service.message_service import full_message_send, mention_markdown_v2
 
 
@@ -28,7 +28,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
         ot_text += '\n'
         ot_text += '\n' if index > 0 else ''
         ot_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
-                                                  get_leaderboard_title_message(leaderboard_user.title),
+                                                  get_leaderboard_rank_message(leaderboard_user.rank_index),
                                                   mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   bounty_service.get_bounty_formatted(user.bounty))
 

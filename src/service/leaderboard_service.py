@@ -4,7 +4,7 @@ import resources.Environment as Env
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardTitle import LeaderboardTitle, get_title_by_position, get_title_by_leaderboard_index
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, get_rank_by_leaderboard_position
 
 
 def create_leaderboard() -> Leaderboard:
@@ -31,14 +31,14 @@ def create_leaderboard() -> Leaderboard:
     return leaderboard
 
 
-def get_leaderboard_title_message(position: int) -> str:
+def get_leaderboard_rank_message(index: int) -> str:
     """
-    Gets the title message of a leaderboard title
-    :param position: The leaderboard title position
-    :return: The leaderboard title message
+    Gets the rank message of a leaderboard rank
+    :param index: The leaderboard rank index
+    :return: The leaderboard rank message
     """
-    leaderboard_title: LeaderboardTitle = get_title_by_position(position)
-    return leaderboard_title.get_emoji_and_title_message()
+    leaderboard_rank: LeaderboardRank = get_rank_by_index(index)
+    return leaderboard_rank.get_emoji_and_rank_message()
 
 
 def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
@@ -58,7 +58,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
         leaderboard_user.user = user
         leaderboard_user.position = index + 1
         leaderboard_user.bounty = user.bounty
-        leaderboard_user.title = get_title_by_leaderboard_index(index).position
+        leaderboard_user.rank_index = get_rank_by_leaderboard_position(index).index
         leaderboard_user.save()
 
         leaderboard_users.append(leaderboard_user)

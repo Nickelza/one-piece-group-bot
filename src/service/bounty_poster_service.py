@@ -7,7 +7,7 @@ import constants as c
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardTitle import LeaderboardTitle, get_title_by_position
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
 from src.service.bounty_service import get_bounty_formatted
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_leaderboard
@@ -204,8 +204,8 @@ def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
     :return: The bounty poster limit of the user
     """
 
-    leaderboard_title: LeaderboardTitle = get_title_by_position(leaderboard_user.title)
-    return leaderboard_title.bounty_poster_limit
+    leaderboard_rank: LeaderboardRank = get_rank_by_index(leaderboard_user.rank_index)
+    return leaderboard_rank.bounty_poster_limit
 
 
 def reset_bounty_poster_limit(context: CallbackContext, reset_previous_leaderboard: bool = False) -> None:

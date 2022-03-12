@@ -1,8 +1,11 @@
 COMMAND_IN_REPLY_TO_BOT_ERROR = "You can't use this command in a reply to a bot"
 
-SHOW_USER_BOUNTY = 'User: {}\nBounty: ฿*{}*'
-SHOW_USER_BOUNTY_ADD_REPLY = '_Requested by {}_'
-NOT_ALLOWED_TO_VIEW_REPLIED_BOUNTY = 'You can only view the bounty of those who rank below you.' \
+SHOW_BOUNTY_DEPRECATED = "This command is no longer available. Please use `/status` instead."
+SHOW_USER_STATUS = 'User: {}' \
+                   '\nBounty: ฿*{}*' \
+                   '\nRank: {}'
+SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
+NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
 BOUNTY_RESET = 'Bounties have been reset'

@@ -13,7 +13,7 @@ class LeaderboardUser(BaseModel):
     user = ForeignKeyField(User, backref='leaderboard_users', on_delete='CASCADE', on_update='CASCADE')
     position = IntegerField()
     bounty = BigIntegerField()
-    title = SmallIntegerField()
+    rank_index = SmallIntegerField()
 
     class Meta:
         db_table = 'leaderboard_user'
