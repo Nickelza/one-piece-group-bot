@@ -35,19 +35,19 @@ class LeaderboardRank:
         return self.emoji + ' ' + self.title
 
 
-PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 0, 0,
+PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 1, 1,
                               Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int())
 
-EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 1, 4,
+EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 2, 5,
                           Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int())
 
-FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 5, 8,
+FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 6, 9,
                              Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int())
 
-SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 9, 19,
+SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 10, 20,
                             Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int())
 
-ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 20, -1,
+ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 21, -1,
                          Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int())
 
 LEADERBOARD_RANKS = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE]
