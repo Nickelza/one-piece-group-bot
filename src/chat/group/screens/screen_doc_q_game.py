@@ -9,8 +9,10 @@ import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.GroupScreen import GroupScreen
+from src.model.enums.Emoji import Emoji
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
@@ -44,13 +46,13 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     # User is owner of the game
     if doc_q_game is not None and doc_q_game.user != user:
-        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(c.COMMAND_GRP_DOC_Q_GAME), update,
+        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(Command.GRP_DOC_Q_GAME.value), update,
                           answer_callback=True, show_alert=True)
         return False
 
-    if user.bounty < float(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get()):
+    if user.bounty < Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_float():
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
-            int(Env.DOC_Q_GAME_REQUIRED_BOUNTY.get())), get_bounty_formatted(user.bounty))
+            Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), get_bounty_formatted(user.bounty))
         full_message_send(context, ot_text, update)
         return False
 
@@ -102,34 +104,34 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.save()
 
         # Number of possible correct choices is determined by number of options * success rate
-        possible_correct_choices = int(int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) * float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        possible_correct_choices = int(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() * Env.DOC_Q_GAME_WIN_ODD.get_float())
 
         correct_choices_index = []
         # Generate correct choices
         for i in range(possible_correct_choices):
-            index = random.randint(0, int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) - 1)
+            index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
             while index in correct_choices_index:
-                index = random.randint(0, int(Env.DOC_Q_GAME_OPTIONS_COUNT.get()) - 1)
+                index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
             correct_choices_index.append(index)
 
         # Create Keyboard with 5 apple buttons
         keyboard_data: dict = {'a': doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
-        for i in range(int(Env.DOC_Q_GAME_OPTIONS_COUNT.get())):
+        for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
             keyboard_data['b'] = int(i in correct_choices_index)
 
-            # Uncomment to show correct choice
-            # emoji = c.DOC_Q_GAME_OPTIONS_EMOJI
-            # if i in correct_choices_index:
-            #     emoji = '🍏'
-            # apples_keyboard.append(Keyboard(emoji, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
+            option_emoji = Emoji.DOC_Q_GAME_OPTION.value
 
-            apples_keyboard.append(Keyboard(c.EMOJI_DOC_Q_GAME_OPTIONS, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
+            # should show correct answer
+            if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
+                option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION.value
+
+            apples_keyboard.append(Keyboard(option_emoji, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
 
         inline_keyboard.append(apples_keyboard)
         # Add cancel button
-        inline_keyboard.append([Keyboard(c.EMOJI_CANCEL + phrases.CANCEL, GroupScreen.SCREEN_DOC_Q_GAME,
+        inline_keyboard.append([Keyboard(Emoji.CANCEL.value + phrases.CANCEL, GroupScreen.SCREEN_DOC_Q_GAME,
                                          {'a': doc_q_game.id, 'x': 1})])
 
         # Get SavedMedia
@@ -140,7 +142,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             full_message_send(context, GroupChatError.DOC_Q_MEDIA_NOT_FOUND.build(), update)
             return
 
-        play_amounts = get_play_amounts(user.bounty, float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   get_bounty_formatted(play_amounts[0]),
@@ -178,7 +180,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             delete_game(update, context, doc_q_game)
             return
 
-        play_amounts = get_play_amounts(user.bounty, float(Env.DOC_Q_GAME_WIN_ODD.get()))
+        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # User chose correct option
         if keyboard.info['b']:
             # Increase user's bounty
@@ -189,7 +191,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.berry = play_amounts[0]
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                    c.EMOJI_DOC_Q_GAME_WIN,
+                                                    Emoji.DOC_Q_GAME_WIN.value,
                                                     get_bounty_formatted(play_amounts[0]),
                                                     get_bounty_formatted(user.bounty))
         else:  # User chose wrong option
@@ -201,7 +203,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             doc_q_game.berry = play_amounts[1]
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                     c.EMOJI_DOC_Q_GAME_LOSE,
+                                                     Emoji.DOC_Q_GAME_LOSE.value,
                                                      get_bounty_formatted(play_amounts[1]),
                                                      get_bounty_formatted(user.bounty))
         # Save updates

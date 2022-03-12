@@ -15,8 +15,9 @@ class User(BaseModel):
     tg_last_name = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
     max_bounty = BigIntegerField(default=0)
-    max_title = SmallIntegerField(null=True)
+    max_rank_index = SmallIntegerField(null=True)
     can_play_doc_q = BooleanField(default=True)
+    bounty_poster_limit = SmallIntegerField(default=0)
     last_message_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:

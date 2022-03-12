@@ -1,0 +1,92 @@
+import resources.Environment as Env
+from src.model.LeaderboardUser import LeaderboardUser
+from src.model.enums.Emoji import Emoji
+
+
+class LeaderboardRank:
+    """
+    Class for leaderboard ranks.
+    """
+
+    def __init__(self, index: int, title: str, emoji: str, leaderboard_start: int, leaderboard_end: int,
+                 bounty_poster_limit: int):
+        """
+        Constructor for leaderboard ranks
+        :param index: Index of the leaderboard rank
+        :param title: Title
+        :param emoji: Emoji
+        :param leaderboard_start: Start index
+        :param leaderboard_end: End index
+        :param bounty_poster_limit: Bounty poster limit
+        """
+        self.index: int = index
+        self.title: str = title
+        self.emoji: str = emoji
+        self.leaderboard_start: int = leaderboard_start
+        self.leaderboard_end: int = leaderboard_end
+        self.bounty_poster_limit: int = bounty_poster_limit
+
+    def get_emoji_and_rank_message(self) -> str:
+        """
+        Get emoji and rank message
+        :return: Emoji and rank message
+        """
+
+        return self.emoji + ' ' + self.title
+
+
+PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 0, 0,
+                              Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int())
+
+EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 1, 4,
+                          Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int())
+
+FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 5, 8,
+                             Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int())
+
+SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 9, 19,
+                            Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int())
+
+ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 20, -1,
+                         Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int())
+
+LEADERBOARD_RANKS = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE]
+
+
+def get_rank_by_index(index: int) -> LeaderboardRank:
+    """
+    Get the leaderboard rank for a given rank
+    :param index: Index
+    :return: Leaderboard rank
+    """
+    for rank in LEADERBOARD_RANKS:
+        if index == rank.index:
+            return rank
+
+    raise ValueError('Invalid index')
+
+
+def get_rank_by_leaderboard_user(leaderboard_user: LeaderboardUser | None) -> LeaderboardRank:
+    """
+    Get the leaderboard rank for a given leaderboard user
+    :param leaderboard_user: Leaderboard user
+    :return: Leaderboard rank
+    """
+    if leaderboard_user is None:
+        return ROOKIE
+
+    return get_rank_by_leaderboard_position(leaderboard_user.position)
+
+
+def get_rank_by_leaderboard_position(leaderboard_position: int) -> LeaderboardRank:
+    """
+    Get the leaderboard rank for a given leaderboard position
+    :param leaderboard_position: Leaderboard position
+    :return: Leaderboard rank
+    """
+    for rank in LEADERBOARD_RANKS:
+        if rank.leaderboard_start <= leaderboard_position <= rank.leaderboard_end \
+                or (leaderboard_position >= rank.leaderboard_start and rank.leaderboard_end == -1):
+            return rank
+
+    raise ValueError('Invalid leaderboard position')

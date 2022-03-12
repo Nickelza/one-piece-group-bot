@@ -63,7 +63,7 @@ def manage(context: CallbackContext) -> None:
                         try:
                             # Send image
                             message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=Env.OPD_GROUP_ID.get())
+                                                               chat_id=Env.OPD_GROUP_ID.get_int())
                         except BadRequest:
                             logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
 
@@ -71,7 +71,7 @@ def manage(context: CallbackContext) -> None:
                             image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
                             saved_media.media_id = open(image_path, 'rb')
                             message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=Env.OPD_GROUP_ID.get())
+                                                               chat_id=Env.OPD_GROUP_ID.get_int())
 
                             try:
                                 # Delete the temporary image
@@ -83,7 +83,7 @@ def manage(context: CallbackContext) -> None:
 
                     else:
                         # Send link
-                        message: Message = full_message_send(context, caption, chat_id=Env.OPD_GROUP_ID.get())
+                        message: Message = full_message_send(context, caption, chat_id=Env.OPD_GROUP_ID.get_int())
 
                     # Save post
                     reddit_group_post: RedditGroupPost = RedditGroupPost()

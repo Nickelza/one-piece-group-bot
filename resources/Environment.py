@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 
 
 class Environment:
@@ -24,6 +25,27 @@ class Environment:
             raise Exception(f"Environment variable {self.name} is not set")
 
         return value
+
+    def get_int(self) -> int:
+        """
+        Get the environment variable as an integer
+        :return: The environment variable as an integer
+        """
+        return int(self.get())
+
+    def get_float(self) -> float:
+        """
+        Get the environment variable as a float
+        :return: The environment variable as a float
+        """
+        return float(self.get())
+
+    def get_bool(self) -> bool:
+        """
+        Get the environment variable as a boolean
+        :return: The environment variable as a boolean
+        """
+        return strtobool(self.get())
 
 
 # Bot
@@ -73,6 +95,8 @@ CRON_RESET_BOUNTY = Environment('CRON_RESET_BOUNTY', default_value='10 0 1 * *')
 CRON_RESET_BOUNTY_ALERT = Environment('CRON_RESET_BOUNTY_ALERT', default_value='10 0 last * *')
 # Reset Doc Q game playability. Default: Every day at midnight
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
+# Reset bounty poster limit. Default: Every day at 00:10
+CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -91,8 +115,20 @@ BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value
 # Multiplier for animations. Default: 0.2
 BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
 
-# How many entries should be shown in the leaderboard. Default: 10
-LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='10')
+# BOUNTY POSTER
+# How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)
+BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', default_value='-1')
+# How many times Emperors can display bounty poster before it is reset. Default: 1
+BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPEROR', default_value='1')
+# How many times First Mates can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_FIRST_MATE = Environment('BOUNTY_POSTER_LIMIT_FIRST_MATE', default_value='0')
+# How many times Supernovas can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_SUPERNOVA = Environment('BOUNTY_POSTER_LIMIT_SUPERNOVA', default_value='0')
+# How many times Rookies can display bounty poster before it is reset. Default: 0
+BOUNTY_POSTER_LIMIT_ROOKIE = Environment('BOUNTY_POSTER_LIMIT_ROOKIE', default_value='0')
+
+# How many entries should be shown in the leaderboard. Default: 20
+LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='20')
 
 # DOC Q
 # How much bounty is required to play the Doc Q game. Default: 10,000,000
@@ -101,3 +137,5 @@ DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_v
 DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value='5')
 # Chance of winning the game. Default: 0.2
 DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
+# Show correct option. Default: True
+DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='True')

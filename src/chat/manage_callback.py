@@ -26,11 +26,11 @@ def manage(update: Update, context: CallbackContext) -> None:
             manage_private_chat(update, context)
 
         # Group chat
-        if chat_id == int(Env.OPD_GROUP_ID.get()):
+        if chat_id == Env.OPD_GROUP_ID.get_int():
             manage_group_chat(update, context)
 
         # Admin chat
-        if chat_id == int(Env.ADMIN_GROUP_ID.get()):
+        if chat_id == Env.ADMIN_GROUP_ID.get_int():
             manage_admin_chat(update, context)
 
     except Exception as e:

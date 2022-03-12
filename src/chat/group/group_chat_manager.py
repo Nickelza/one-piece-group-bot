@@ -4,12 +4,13 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import constants as c
 import resources.Environment as Env
 from resources.Database import Database
-from src.chat.group.screens.screen_bounty import manage as manage_screen_show_bounty
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.group.screens.screen_show_bounty import manage as manage_screen_show_bounty
+from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
+from src.model.enums.Command import Command
 from src.model.enums.GroupScreen import GroupScreen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
@@ -79,7 +80,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     # Insert or update user, with message count
     try:
         # Ignore self bot messages or from linked channel
-        if update.effective_user.is_bot or update.message.sender_chat.id == int(Env.OPD_CHANNEL_ID.get()):
+        if update.effective_user.is_bot or update.message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int():
             return
     except AttributeError:
         pass
@@ -89,13 +90,17 @@ def manage(update: Update, context: CallbackContext) -> None:
         # Remove command prefix
         command_message = update.message.text[1:].lower()
 
-        # Bounty command
-        if command_message == c.COMMAND_GRP_BOUNTY:
-            screen = GroupScreen.SCREEN_BOUNTY
+        # User status command
+        if command_message == Command.GRP_USER_STATUS.value:
+            screen = GroupScreen.SCREEN_USER_STATUS
 
         # Doc Q Game
-        if command_message == c.COMMAND_GRP_DOC_Q_GAME:
+        if command_message == Command.GRP_DOC_Q_GAME:
             screen = GroupScreen.SCREEN_DOC_Q_GAME
+
+        # Show bounty
+        if command_message == Command.GRP_SHOW_BOUNTY.value:
+            screen = GroupScreen.SCREEN_SHOW_BOUNTY
 
     # Screen still unknown, get from callback query
     if screen == GroupScreen.SCREEN_UNKNOWN:
@@ -118,11 +123,14 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, scree
         keyboard = get_keyboard_from_callback_query(update.callback_query)
 
     match screen:
-        case GroupScreen.SCREEN_BOUNTY:  # Bounty screen
-            manage_screen_show_bounty(update, context)
+        case GroupScreen.SCREEN_USER_STATUS:  # User status screen
+            manage_screen_show_status(update, context)
 
         case GroupScreen.SCREEN_DOC_Q_GAME:  # Doc Q Game screen
             manage_screen_doc_q_game(update, context, user, keyboard)
+
+        case GroupScreen.SCREEN_SHOW_BOUNTY:  # Show bounty screen
+            manage_screen_show_bounty(update, context)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

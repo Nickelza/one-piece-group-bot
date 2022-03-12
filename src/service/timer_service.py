@@ -7,10 +7,11 @@ from telegram.ext import CallbackContext, Dispatcher, Job
 import constants as c
 import resources.Environment as Env
 from resources.Database import Database
-from src.chat.group.screens.screen_bounty import reset_bounty, reset_bounty_alert
 from src.chat.group.screens.screen_doc_q_game import reset_playability as reset_doc_q_game
 from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
+from src.service.bounty_poster_service import reset_bounty_poster_limit
+from src.service.bounty_service import reset_bounty, reset_bounty_alert
 from src.service.download_service import cleanup_temp_dir
 
 
@@ -86,6 +87,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
     # Reset Doc Q Game timer
     add_to_context(context, c.TIMER_RESET_DOC_Q_GAME_NAME, Env.CRON_RESET_DOC_Q_GAME.get())
 
+    # Reset bounty poster limit
+    add_to_context(context, c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME, Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get())
+
 
 def run_timers(context: CallbackContext) -> None:
     """
@@ -138,4 +142,9 @@ def execute(context: CallbackContext) -> None:
     # Reset Doc Q Game timer
     if job.name == c.TIMER_RESET_DOC_Q_GAME_NAME:
         reset_doc_q_game(context)
+        return
+
+    # Reset bounty poster limit
+    if job.name == c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME:
+        reset_bounty_poster_limit(context)
         return

@@ -1,12 +1,18 @@
 COMMAND_IN_REPLY_TO_BOT_ERROR = "You can't use this command in a reply to a bot"
 
-SHOW_USER_BOUNTY = 'User: {}\nBounty: ฿*{}*'
-SHOW_USER_BOUNTY_ADD_REPLY = '_Requested by {}_'
+SHOW_BOUNTY_DEPRECATED = "This command is no longer available. Please use `/status` instead."
+SHOW_USER_STATUS = 'User: {}' \
+                   '\nBounty: ฿*{}*' \
+                   '\nRank: {}'
+SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
+NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
+                                     '\n\n{} rank: {}' \
+                                     '\n{} rank: {}'
 BOUNTY_RESET = 'Bounties have been reset'
 BOUNTY_RESET_ALERT = 'Bounties will be reset in *{}*'
 
 LEADERBOARD_HEADER = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:\n'
-LEADERBOARD_ROW = '\n{}°: {} - ฿*{}*'
+LEADERBOARD_ROW = '{}°: {}\n{} - ฿*{}*'
 
 SAVE_MEDIA_NOT_IN_REPLY = 'This command can only be used in a reply to a message'
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'

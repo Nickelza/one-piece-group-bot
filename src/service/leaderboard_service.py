@@ -4,7 +4,7 @@ import resources.Environment as Env
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardTitle import LeaderboardTitle
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, get_rank_by_leaderboard_position
 
 
 def create_leaderboard() -> Leaderboard:
@@ -31,6 +31,16 @@ def create_leaderboard() -> Leaderboard:
     return leaderboard
 
 
+def get_leaderboard_rank_message(index: int) -> str:
+    """
+    Gets the rank message of a leaderboard rank
+    :param index: The leaderboard rank index
+    :return: The leaderboard rank message
+    """
+    leaderboard_rank: LeaderboardRank = get_rank_by_index(index)
+    return leaderboard_rank.get_emoji_and_rank_message()
+
+
 def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     """
     Creates a leaderboard list
@@ -38,8 +48,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     :return: The leaderboard users
     """
     # Get the leaderboard users
-    users: list[User] = User.select().order_by(User.bounty.desc()).limit(
-        int(Env.LEADERBOARD_LIMIT.get()))
+    users: list[User] = User.select().order_by(User.bounty.desc()).limit(Env.LEADERBOARD_LIMIT.get_int())
 
     # Create a list of LeaderboardUsers
     leaderboard_users = []
@@ -49,12 +58,27 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
         leaderboard_user.user = user
         leaderboard_user.position = index + 1
         leaderboard_user.bounty = user.bounty
-        leaderboard_user.title = LeaderboardTitle.ND.value
+        leaderboard_user.rank_index = get_rank_by_leaderboard_position(index).index
         leaderboard_user.save()
 
         leaderboard_users.append(leaderboard_user)
 
     return leaderboard_users
+
+
+def get_leaderboard(index: int = 0) -> Leaderboard | None:
+    """
+    Gets the current leaderboard
+    :param index: The index of the leaderboard to get. Higher the index, older the leaderboard
+    :return: The leaderboard
+    """
+    leaderboard: Leaderboard = (Leaderboard.select()
+                                .order_by(Leaderboard.year.desc(),
+                                          Leaderboard.week.desc())
+                                .limit(1)
+                                .offset(index)
+                                .first())
+    return leaderboard
 
 
 def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
@@ -63,10 +87,9 @@ def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
     :param user: The user to get the leaderboard user for
     :return: The leaderboard user
     """
-    leaderboard_user: LeaderboardUser = (LeaderboardUser.select()
-                                         .join(Leaderboard)
-                                         .order_by(LeaderboardUser.leaderboard.year.desc(),
-                                                   LeaderboardUser.leaderboard.week.desc())
-                                         .where(LeaderboardUser.user == user)
-                                         .first())
+    leaderboard: Leaderboard = get_leaderboard()
+    if leaderboard is None:
+        return None
+
+    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
     return leaderboard_user
