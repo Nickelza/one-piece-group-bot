@@ -58,7 +58,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
         leaderboard_user.user = user
         leaderboard_user.position = index + 1
         leaderboard_user.bounty = user.bounty
-        leaderboard_user.rank_index = get_rank_by_leaderboard_position(index).index
+        leaderboard_user.rank_index = get_rank_by_leaderboard_position(index+1).index
         leaderboard_user.save()
 
         leaderboard_users.append(leaderboard_user)
