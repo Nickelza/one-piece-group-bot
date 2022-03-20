@@ -170,8 +170,16 @@ def get_bounty_poster(update: Update, user: User) -> str:
     profile_photo = Image.open(profile_photo_path)
     # Get profile photo size
     profile_photo_width, profile_photo_height = profile_photo.size
+
     # Get where profile image should be placed
-    profile_photo_y = c.BOUNTY_POSTER_IMAGE_BOX_START_Y
+    if profile_photo_path == c.BOUNTY_POSTER_NO_PHOTO_PATH:
+        # Excess photo parts should be evenly cropped from top and bottom
+        delta = profile_photo_height - c.BOUNTY_POSTER_IMAGE_BOX_H
+        profile_photo_y = c.BOUNTY_POSTER_IMAGE_BOX_START_Y - int(delta / 2)
+    else:
+        # Excess photo parts should be cropped from bottom
+        profile_photo_y = c.BOUNTY_POSTER_IMAGE_BOX_START_Y
+
     # Profile photo should be placed in the center of the poster template
     profile_photo_x = int((poster_template_width - profile_photo_width) / 2)
     # Paste profile image into the new image
