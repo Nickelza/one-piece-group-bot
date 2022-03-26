@@ -27,6 +27,20 @@ def get_message_belly(update: Update, user: User) -> int:
     :param user: The user who sent the message
     :return: How much bellys a message is worth
     """
+    # New chat members - No belly
+    try:
+        if len(update.message.new_chat_members) > 0:
+            return 0
+    except (AttributeError, TypeError):
+        pass
+
+    # Left chat member - No belly
+    try:
+        if update.message.left_chat_member is not None:
+            return 0
+    except (AttributeError, TypeError):
+        pass
+
     # Command message - No belly
     try:
         if update.message.text[0] in c.COMMAND_PREFIX_ALIASES:
