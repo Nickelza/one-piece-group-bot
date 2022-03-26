@@ -4,12 +4,12 @@ from apscheduler.triggers.cron import CronTrigger
 from peewee import MySQLDatabase
 from telegram.ext import CallbackContext, Dispatcher, Job
 
-import constants as c
 import resources.Environment as Env
 from resources.Database import Database
 from src.chat.group.screens.screen_doc_q_game import reset_playability as reset_doc_q_game
 from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
+from src.model.enums.Timer import Timer, REDDIT_POST_TIMERS
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import reset_bounty, reset_bounty_alert, add_region_bounty
 from src.service.download_service import cleanup_temp_dir
@@ -39,11 +39,11 @@ def end(db: MySQLDatabase) -> None:
     db.close()
 
 
-def add_to_context(context: CallbackContext, name: str, cron: str, job_context: str = None) -> Job:
+def add_to_context(context: CallbackContext, timer: Timer, cron: str, job_context: str = None) -> Job:
     """
     Add a job to the context
     :param context: The context
-    :param name: The name of the job
+    :param timer: The timer
     :param cron: The cron expression
     :param job_context: The job context
     :rtype: Job
@@ -51,10 +51,10 @@ def add_to_context(context: CallbackContext, name: str, cron: str, job_context: 
     job = context.job_queue.run_custom(
         callback=run_timers,
         job_kwargs={"trigger": CronTrigger.from_crontab(cron)},
-        name=name,
+        name=timer.value,
         context=job_context
     )
-    logging.info(f'Next run of "{name}" is {job.next_run_time}')
+    logging.info(f'Next run of "{timer.value}" is {job.next_run_time}')
     return job
 
 
@@ -70,32 +70,33 @@ def set_timers(dispatcher: Dispatcher) -> None:
     context = CallbackContext(dispatcher)
 
     # Reddit post timer
-    for reddit_post_timer in c.REDDIT_POST_TIMERS:
-        add_to_context(context, reddit_post_timer['name'], reddit_post_timer['cron'], reddit_post_timer['subreddit'])
+    for reddit_post_timer in REDDIT_POST_TIMERS:
+        add_to_context(context, reddit_post_timer['name'], reddit_post_timer['cron'],
+                       reddit_post_timer['subreddit'])
 
     # Temp folder cleanup timer
-    add_to_context(context, c.TIMER_TEMP_DIR_CLEANUP_NAME, Env.CRON_TEMP_DIR_CLEANUP.get())
+    add_to_context(context, Timer.TEMP_DIR_CLEANUP, Env.CRON_TEMP_DIR_CLEANUP.get())
 
     # Leaderboard timer
-    add_to_context(context, c.TIMER_SEND_LEADERBOARD_NAME, Env.CRON_SEND_LEADERBOARD.get())
+    add_to_context(context, Timer.TIMER_SEND_LEADERBOARD, Env.CRON_SEND_LEADERBOARD.get())
 
     # Reset bounty timer
-    add_to_context(context, c.TIMER_RESET_BOUNTY_NAME, Env.CRON_RESET_BOUNTY.get())
+    add_to_context(context, Timer.RESET_BOUNTY, Env.CRON_RESET_BOUNTY.get())
 
     # Reset bounty alert timer
-    add_to_context(context, c.TIMER_RESET_BOUNTY_ALERT_NAME, Env.CRON_RESET_BOUNTY_ALERT.get())
+    add_to_context(context, Timer.RESET_BOUNTY_ALERT, Env.CRON_RESET_BOUNTY_ALERT.get())
 
     # Reset Doc Q Game timer
-    add_to_context(context, c.TIMER_RESET_DOC_Q_GAME_NAME, Env.CRON_RESET_DOC_Q_GAME.get())
+    add_to_context(context, Timer.RESET_DOC_Q_GAME, Env.CRON_RESET_DOC_Q_GAME.get())
 
     # Reset bounty poster limit
-    add_to_context(context, c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME, Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get())
+    add_to_context(context, Timer.RESET_BOUNTY_POSTER_LIMIT, Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get())
 
     # Reset can change region
-    add_to_context(context, c.TIMER_RESET_CAN_CHANGE_REGION_NAME, Env.CRON_RESET_CAN_CHANGE_REGION.get())
+    add_to_context(context, Timer.RESET_CAN_CHANGE_REGION, Env.CRON_RESET_CAN_CHANGE_REGION.get())
 
     # Increment bounty by region
-    add_to_context(context, c.TIMER_ADD_REGION_BOUNTY_NAME, Env.CRON_ADD_REGION_BOUNTY.get()).run(dispatcher)
+    add_to_context(context, Timer.ADD_REGION_BOUNTY, Env.CRON_ADD_REGION_BOUNTY.get())
 
 
 def run_timers(context: CallbackContext) -> None:
@@ -120,48 +121,28 @@ def execute(context: CallbackContext) -> None:
     """
 
     job = context.job
+    timer: Timer = Timer(job.name)
 
-    # Reddit post timer
-    if job.name == c.TIMER_REDDIT_POST_ONEPIECE_NAME or job.name == c.TIMER_REDDIT_POST_MEMEPIECE_NAME:
-        send_reddit_post(context)
-        return
+    match timer:
+        case Timer.REDDIT_POST_ONEPIECE | Timer.REDDIT_POST_MEMEPIECE:
+            send_reddit_post(context)
+        case Timer.TEMP_DIR_CLEANUP:
+            cleanup_temp_dir()
+        case Timer.TIMER_SEND_LEADERBOARD:
+            send_leaderboard(context)
+        case Timer.RESET_BOUNTY:
+            reset_bounty(context)
+        case Timer.RESET_BOUNTY_ALERT:
+            reset_bounty_alert(context)
+        case Timer.RESET_DOC_Q_GAME:
+            reset_doc_q_game(context)
+        case Timer.RESET_BOUNTY_POSTER_LIMIT:
+            reset_bounty_poster_limit(context)
+        case Timer.RESET_CAN_CHANGE_REGION:
+            reset_can_change_region(context)
+        case Timer.ADD_REGION_BOUNTY:
+            add_region_bounty(context)
+        case _:
+            logging.error(f'Unknown timer {job.name}')
 
-    # Temp folder cleanup timer
-    if job.name == c.TIMER_TEMP_DIR_CLEANUP_NAME:
-        cleanup_temp_dir()
-        return
-
-    # Leaderboard timer
-    if job.name == c.TIMER_SEND_LEADERBOARD_NAME:
-        send_leaderboard(context)
-        return
-
-    # Reset bounty timer
-    if job.name == c.TIMER_RESET_BOUNTY_NAME:
-        reset_bounty(context)
-        return
-
-    # Reset bounty alert timer
-    if job.name == c.TIMER_RESET_BOUNTY_ALERT_NAME:
-        reset_bounty_alert(context)
-        return
-
-    # Reset Doc Q Game timer
-    if job.name == c.TIMER_RESET_DOC_Q_GAME_NAME:
-        reset_doc_q_game(context)
-        return
-
-    # Reset bounty poster limit
-    if job.name == c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME:
-        reset_bounty_poster_limit(context)
-        return
-
-    # Reset can change region
-    if job.name == c.TIMER_RESET_CAN_CHANGE_REGION_NAME:
-        reset_can_change_region(context)
-        return
-
-    # Add region bounty
-    if job.name == c.TIMER_ADD_REGION_BOUNTY_NAME:
-        add_region_bounty(context)
-        return
+    return

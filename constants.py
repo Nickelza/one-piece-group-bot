@@ -2,31 +2,6 @@ import os
 
 ROOT_DIR = os.path.dirname(__file__)
 
-# Timers
-TIMER_TEMP_DIR_CLEANUP_NAME = 'cleanup_temp_folder'
-TIMER_REDDIT_POST_ONEPIECE_NAME = 'timer_reddit_post_onepiece'
-TIMER_REDDIT_POST_MEMEPIECE_NAME = 'timer_reddit_post_memepiece'
-TIMER_SEND_LEADERBOARD_NAME = 'timer_send_leaderboard'
-TIMER_RESET_BOUNTY_NAME = 'timer_reset_bounty'
-TIMER_RESET_BOUNTY_ALERT_NAME = 'timer_reset_bounty_alert'
-TIMER_RESET_DOC_Q_GAME_NAME = 'timer_reset_doc_q_game'
-TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME = 'timer_reset_bounty_poster_limit'
-TIMER_RESET_CAN_CHANGE_REGION_NAME = 'timer_can_change_region'
-TIMER_ADD_REGION_BOUNTY_NAME = 'timer_add_region_bounty'
-
-REDDIT_POST_TIMERS = [
-    {
-        'name': TIMER_REDDIT_POST_ONEPIECE_NAME,
-        'cron': '0 0,12 * * *',  # every day at 00:00 and 12:00
-        'subreddit': 'onepiece'
-    },
-    {
-        'name': TIMER_REDDIT_POST_MEMEPIECE_NAME,
-        'cron': '0 6,18 * * *',  # every day at 06:00 and 18:00
-        'subreddit': 'memepiece'
-    },
-]
-
 REDDIT_USER_URL_PREFIX = 'https://www.reddit.com/user/'
 REDDIT_SUBREDDIT_URL_PREFIX = 'https://www.reddit.com/r/'
 
