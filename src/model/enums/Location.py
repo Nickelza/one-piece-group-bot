@@ -69,9 +69,9 @@ THRILLER_BARK = Location(19, 'Thriller Bark', Region.PARADISE, 300000000, True,
 SABAODY_ARCHIPELAGO = Location(20, 'Sabaody Archipelago', Region.PARADISE, 350000000, False,
                                Env.LOCATION_SABAODY_ARCHIPELAGO_IMAGE_URL.get())
 FISHMAN_ISLAND = Location(21, 'Fish-Man Island', Region.NEW_WORLD, 400000000, True,
-                          Env.LOCATION_FISHMAN_ISLAND_IMAGE_URL)
+                          Env.LOCATION_FISHMAN_ISLAND_IMAGE_URL.get())
 PUNK_HAZARD = Location(22, 'Punk Hazard', Region.NEW_WORLD, 420000000, False, Env.LOCATION_PUNK_HAZARD_IMAGE_URL.get())
-DRESSROSA = Location(23, 'Dressrosa', Region.NEW_WORLD, 450000000, False, Env.LOCATION_DRESSROSA_IMAGE_URL)
+DRESSROSA = Location(23, 'Dressrosa', Region.NEW_WORLD, 450000000, False, Env.LOCATION_DRESSROSA_IMAGE_URL.get())
 ZOU = Location(24, 'Zou', Region.NEW_WORLD, 500000000, True, Env.LOCATION_ZOU_IMAGE_URL.get())
 WHOLE_CAKE_ISLAND = Location(25, 'Whole Cake Island', Region.NEW_WORLD, 800000000, False,
                              Env.LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL.get())
