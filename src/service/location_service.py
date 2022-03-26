@@ -63,7 +63,8 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                                        effective_location.name,
                                                        ot_text_suffix)
 
-            message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False)
+            message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
+                                                 add_delete_button=True)
 
             # Should send poster if it hasn't been sent for this location ever
             if effective_location.show_poster:

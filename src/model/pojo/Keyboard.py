@@ -7,7 +7,7 @@ from src.model.enums.GroupScreen import GroupScreen
 
 
 class Keyboard:
-    def __init__(self, text: str, screen: GroupScreen, info: dict, url: str = None):
+    def __init__(self, text: str, info: dict, screen: GroupScreen = None, url: str = None):
         self.text = text
         self.screen: GroupScreen = screen
         self.info: dict = info
@@ -15,7 +15,8 @@ class Keyboard:
 
         # Create string data
         info_with_screen = info.copy()
-        info_with_screen[c.SCREEN_CODE] = screen.value
+        if screen is not None:
+            info_with_screen[c.SCREEN_CODE] = screen.value
         self.callback_data: str = json.dumps(info_with_screen)
 
 
@@ -29,9 +30,9 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery):
 
     try:
         screen = GroupScreen(int(info[c.SCREEN_CODE]))
-    except ValueError:
+    except (ValueError, KeyError):
         screen = GroupScreen.UNKNOWN
 
     text: str = ''
 
-    return Keyboard(text, screen, info)
+    return Keyboard(text, info, screen)

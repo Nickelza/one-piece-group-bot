@@ -58,24 +58,45 @@ def get_chat_id(update: Update = None, chat_id: int = None) -> int:
     return update.effective_chat.id
 
 
-def get_keyboard(keyboard: list[list[Keyboard]]) -> InlineKeyboardMarkup | None:
+def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
+                 authorized_users: list = None) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
     :param keyboard: Keyboard object
+    :param update: Update object
+    :param add_delete_button: True if the delete button should be added
+    :param authorized_users: List of user ids that are allowed to delete the message
     :return: Keyboard markup
     """
 
     keyboard_markup = None
-    if keyboard is not None:
+    if keyboard is not None or add_delete_button is True:
         keyboard_list: list[list[InlineKeyboardButton]] = []
-        for row in keyboard:
-            keyboard_row: list[InlineKeyboardButton] = []
-            for button in row:
-                if button.url is not None:
-                    keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
-                else:
-                    keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
-            keyboard_list.append(keyboard_row)
+        if keyboard is not None:
+            for row in keyboard:
+                keyboard_row: list[InlineKeyboardButton] = []
+                for button in row:
+                    if button.url is not None:
+                        keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
+                    else:
+                        keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+                keyboard_list.append(keyboard_row)
+
+        if add_delete_button is True:
+            if authorized_users is None:
+                authorized_users = []
+            try:
+                if update.effective_user.id not in authorized_users:
+                    authorized_users.append(update.effective_user.id)
+            except AttributeError:
+                pass
+
+            if not len(authorized_users) > 0:
+                raise Exception("No authorized users provided for delete button")
+
+            delete_button = get_delete_button(authorized_users)
+            keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
+
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
 
     return keyboard_markup
@@ -117,7 +138,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       new_message: bool = False, disable_notification: bool = True, reply_to_message_id: int = None,
                       parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                       protect_content: bool = False, disable_web_page_preview: bool = True,
-                      allow_sending_without_reply: bool = True) -> Message:
+                      allow_sending_without_reply: bool = True, add_delete_button: bool = False,
+                      authorized_users: list = None) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -136,6 +158,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param protect_content: True if the message should be protected from saving and forwarding
     :param disable_web_page_preview: True if the web page preview should be disabled
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
+    :param add_delete_button: True if the delete button should be added
+    :param authorized_users: List of user ids that are allowed to delete the message
     :return: Message
     """
 
@@ -143,7 +167,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
         text = escape_invalid_markdown_chars(text)
 
     chat_id = get_chat_id(update=update, chat_id=chat_id)
-    keyboard_markup = get_keyboard(keyboard)
+    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users)
 
     # New message
     if new_message or update is None or update.callback_query is None:
@@ -206,7 +230,8 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                     disable_notification: bool = True, reply_to_message_id: int = None, protect_content: bool = False,
                     parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                     allow_sending_without_reply: bool = True, edit_only_keyboard: bool = False,
-                    edit_only_caption_and_keyboard: bool = False) -> Message:
+                    edit_only_caption_and_keyboard: bool = False, add_delete_button: bool = False,
+                    authorized_users: list = None) -> Message:
     """
     Send a media
     :param context: CallbackContext object
@@ -228,6 +253,8 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
     :param edit_only_keyboard: If only the keyboard should be edited
     :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If keyboard is None,
             it will be removed
+    :param add_delete_button: True if the delete button should be added
+    :param authorized_users: List of user ids that are allowed to delete the message
     :return: Message
     """
 
@@ -235,7 +262,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
         caption = escape_invalid_markdown_chars(caption)
 
     chat_id = get_chat_id(update=update, chat_id=chat_id)
-    keyboard_markup = get_keyboard(keyboard)
+    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users)
 
     # New message
     if new_message or update is None or update.callback_query is None:
@@ -326,3 +353,13 @@ def get_image_preview(image_url: str) -> str:
     Create an image preview
     """
     return f'[​]({image_url})'
+
+
+def get_delete_button(tg_user_ids: list[int]) -> Keyboard:
+    """
+    Create a delete button
+    :param tg_user_ids: List of users ids that can operate the delete button
+    """
+    keyboard_data: dict = {'u': c.KEYBOARD_USER_SPLIT_CHAR.join(str(x) for x in tg_user_ids), 'del': 1}
+
+    return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)

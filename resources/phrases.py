@@ -52,6 +52,7 @@ DOC_Q_MEDIA_NOT_FOUND = 'Doc Q Media not found'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL.value + ' Cancel'
+KEYBOARD_OPTION_DELETE = Emoji.CANCEL.value + ' Delete'
 KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT.value + ' Accept'
 KEYBOARD_OPTION_REJECT = Emoji.REJECT.value + ' Reject'
 

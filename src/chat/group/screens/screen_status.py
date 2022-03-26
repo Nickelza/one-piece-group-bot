@@ -23,6 +23,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     """
 
     in_reply_to_message = update.message.reply_to_message is not None
+    can_delete_users: list = []
 
     # If used in reply to a message, get the user from the message
     if in_reply_to_message:
@@ -66,6 +67,9 @@ def manage(update: Update, context: CallbackContext) -> None:
             full_message_send(context, ot_text, update)
             return
 
+        # Add the requested user to the list of users that can delete the message
+        can_delete_users.append(user.tg_user_id)
+
     # Get location
     location: Location = Location.get_by_level(user.location_level)
 
@@ -91,11 +95,12 @@ def manage(update: Update, context: CallbackContext) -> None:
             user.bounty_poster_limit -= 1
             user.save()
     else:  # Send regular message
-        full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id)
+        full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
+                          add_delete_button=True, authorized_users=can_delete_users)
 
 
 def send_bounty_poster(context: CallbackContext, update: Update, user: User, caption: str = None,
-                       reply_to_message_id: int = None) -> None:
+                       reply_to_message_id: int = None, can_delete_users: list = None) -> None:
     poster_path = get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia()
     poster.media_id = open(poster_path, 'rb')

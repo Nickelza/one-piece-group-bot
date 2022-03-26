@@ -29,14 +29,14 @@ def validate_move_request(update: Update, context: CallbackContext, user: User, 
     location: Location = Location.get_by_level(user.location_level)
     if location.region == region:
         ot_text = phrases.LOCATION_ALREADY_IN_REGION.format(get_region_text(region))
-        full_message_send(context, ot_text, update=update)
+        full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
     # User cannot change region
     if not user.can_change_region:
         ot_text = phrases.LOCATION_CANNOT_CHANGE_REGION.format(
             cron_datetime_difference(Env.CRON_RESET_CAN_CHANGE_REGION.get()))
-        full_message_send(context, ot_text, update)
+        full_message_send(context, ot_text, update, add_delete_button=True)
         return False
 
     # Not enough bounty for New World
@@ -45,7 +45,7 @@ def validate_move_request(update: Update, context: CallbackContext, user: User, 
         if user.bounty < first_new_world_location.required_bounty:
             ot_text = phrases.LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY.format(
                 get_bounty_formatted(first_new_world_location.required_bounty))
-            full_message_send(context, ot_text, update=update)
+            full_message_send(context, ot_text, update=update, add_delete_button=True)
             return False
 
     return True
@@ -88,10 +88,10 @@ def send_proposal(update: Update, context: CallbackContext, user: User, region: 
     keyboard_data: dict = {'a': region.value, 'u': user.tg_user_id, 'b': 1}
 
     # Accept
-    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_ACCEPT, GroupScreen.CHANGE_REGION, keyboard_data))
+    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_ACCEPT, keyboard_data, GroupScreen.CHANGE_REGION))
     # Reject
     keyboard_data['b'] = 0
-    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_REJECT, GroupScreen.CHANGE_REGION, keyboard_data))
+    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_REJECT, keyboard_data, GroupScreen.CHANGE_REGION))
 
     inline_keyboard.append(keyboard_line)
 
@@ -130,7 +130,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             mention_markdown_v2(user.tg_user_id, user.tg_first_name),
             get_region_text(region),
             command.get_formatted())
-        full_message_send(context, ot_text, update=update)
+        full_message_send(context, ot_text, update=update, add_delete_button=True)
         return
 
 

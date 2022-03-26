@@ -127,12 +127,12 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
                 option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION.value
 
-            apples_keyboard.append(Keyboard(option_emoji, GroupScreen.DOC_Q_GAME, keyboard_data))
+            apples_keyboard.append(Keyboard(option_emoji, keyboard_data, GroupScreen.DOC_Q_GAME))
 
         inline_keyboard.append(apples_keyboard)
         # Add cancel button
-        inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, GroupScreen.DOC_Q_GAME,
-                                         {'a': doc_q_game.id, 'x': 1})])
+        inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, {'a': doc_q_game.id, 'x': 1},
+                                         GroupScreen.DOC_Q_GAME)])
 
         # Get SavedMedia
         doc_q_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == c.SAVED_MEDIA_NAME_DOC_Q)
@@ -212,7 +212,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         doc_q_game.save()
 
         # Send outcome text
-        full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True)
+        full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,
+                        add_delete_button=True)
 
 
 def reset_playability(context: CallbackContext) -> None:

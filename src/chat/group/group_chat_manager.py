@@ -1,7 +1,7 @@
 import datetime
 
 from peewee import MySQLDatabase
-from telegram import Update
+from telegram import Update, TelegramError
 from telegram.ext import CallbackContext
 
 import constants as c
@@ -116,6 +116,14 @@ def manage(update: Update, context: CallbackContext) -> None:
     if keyboard is not None and 'u' in keyboard.info:
         if user.tg_user_id not in str(keyboard.info['u']).split(c.KEYBOARD_USER_SPLIT_CHAR):  # Unauthorized
             full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
+            return
+
+        # Delete request, best effort
+        if 'del' in keyboard.info:
+            try:
+                update.effective_message.delete()
+            except TelegramError:
+                pass
             return
 
     dispatch_screens(update, context, user, screen, keyboard, command=command)
