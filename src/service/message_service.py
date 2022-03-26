@@ -114,7 +114,7 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
 
 def full_message_send(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
                       keyboard: list[list[Keyboard]] = None, answer_callback: bool = False, show_alert: bool = False,
-                      new_message: bool = False, disable_notification: bool = True, reply_to_message_id: bool = None,
+                      new_message: bool = False, disable_notification: bool = True, reply_to_message_id: int = None,
                       parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                       protect_content: bool = False, disable_web_page_preview: bool = True,
                       allow_sending_without_reply: bool = True) -> Message:
@@ -190,12 +190,12 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
     """
 
     match saved_media.type:
-        case SavedMediaType.PHOTO:
-            return InputMediaPhoto(media=saved_media.file_id, caption=caption, parse_mode=parse_mode)
-        case SavedMediaType.VIDEO:
-            return InputMediaVideo(media=saved_media.file_id, caption=caption, parse_mode=parse_mode)
-        case SavedMediaType.ANIMATION:
-            return InputMediaAnimation(media=saved_media.file_id, caption=caption, parse_mode=parse_mode)
+        case SavedMediaType.PHOTO.value:
+            return InputMediaPhoto(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
+        case SavedMediaType.VIDEO.value:
+            return InputMediaVideo(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
+        case SavedMediaType.ANIMATION.value:
+            return InputMediaAnimation(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
         case _:
             raise Exception(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE)
 
@@ -203,7 +203,7 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
 def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, update: Update = None,
                     chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
                     answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
-                    disable_notification: bool = True, reply_to_message_id: bool = None, protect_content: bool = False,
+                    disable_notification: bool = True, reply_to_message_id: int = None, protect_content: bool = False,
                     parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                     allow_sending_without_reply: bool = True, edit_only_keyboard: bool = False,
                     edit_only_caption_and_keyboard: bool = False) -> Message:
@@ -319,3 +319,10 @@ def mention_markdown_v2(user_id: int | str, name: str) -> str:
     Create a mention markdown v2
     """
     return mention_markdown(user_id, name, 2)
+
+
+def get_image_preview(image_url: str) -> str:
+    """
+    Create an image preview
+    """
+    return f'[​]({image_url})'

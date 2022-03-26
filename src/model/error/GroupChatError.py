@@ -10,4 +10,5 @@ class GroupChatError(Error):
     UNRECOGNIZED_SCREEN = Error(2, phrases.UNRECOGNIZED_SCREEN, source, True)
     DOC_Q_MEDIA_NOT_FOUND = Error(3, phrases.DOC_Q_MEDIA_NOT_FOUND, source, True)
     DOC_Q_GAME_NOT_FOUND = Error(4, phrases.DOC_Q_GAME_NOT_FOUND, source, True)
-    DOC_Q_KEYBOARD_NOT_FOUND = Error(5, phrases.KEYBOARD_NOT_FOUND, source, True)
+    KEYBOARD_NOT_FOUND = Error(5, phrases.KEYBOARD_NOT_FOUND, source, True)
+    INVALID_CHANGE_REGION_REQUEST = Error(6, phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST, source, True)

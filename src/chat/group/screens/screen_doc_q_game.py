@@ -10,9 +10,9 @@ from src.model.DocQGame import DocQGame
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.Command import Command
+from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.GroupScreen import GroupScreen
-from src.model.enums.Emoji import Emoji
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
@@ -127,11 +127,11 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
                 option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION.value
 
-            apples_keyboard.append(Keyboard(option_emoji, GroupScreen.SCREEN_DOC_Q_GAME, keyboard_data))
+            apples_keyboard.append(Keyboard(option_emoji, GroupScreen.DOC_Q_GAME, keyboard_data))
 
         inline_keyboard.append(apples_keyboard)
         # Add cancel button
-        inline_keyboard.append([Keyboard(Emoji.CANCEL.value + phrases.CANCEL, GroupScreen.SCREEN_DOC_Q_GAME,
+        inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, GroupScreen.DOC_Q_GAME,
                                          {'a': doc_q_game.id, 'x': 1})])
 
         # Get SavedMedia
@@ -241,7 +241,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
 
     # Interaction with keyboard
     if keyboard is None:
-        full_message_send(context, GroupChatError.DOC_Q_KEYBOARD_NOT_FOUND.build(), update)
+        full_message_send(context, GroupChatError.KEYBOARD_NOT_FOUND.build(), update)
         return
 
     keyboard_interaction(update, context, user, keyboard)

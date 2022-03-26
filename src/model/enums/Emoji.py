@@ -20,4 +20,6 @@ class Emoji(Enum):
     LEADERBOARD_ROOKIE = '👤'
 
     # Other
+    ACCEPT = '✅'
     CANCEL = '❌'
+    REJECT = '❌'

@@ -8,7 +8,12 @@ class Environment:
         self.default_value = default_value
         self.can_be_empty = can_be_empty
 
-    def get(self) -> str | None:
+    def get_or_none(self) -> str | None:
+        """
+        Get the environment variable or None if it is not set
+        :return: The environment variable or None if it is not set
+        :rtype: str | None
+        """
         # If default value is set, return the environment variable or the default value
         if self.default_value is not None:
             return os.environ.get(self.name, self.default_value)
@@ -21,6 +26,17 @@ class Environment:
             return None
 
         # If the environment variable is not set and the environment variable can not be empty, raise an exception
+        if value is None:
+            raise Exception(f"Environment variable {self.name} is not set")
+
+        return value
+
+    def get(self) -> str:
+        """
+        Get the environment variable
+        :return: The environment variable
+        """
+        value = self.get_or_none()
         if value is None:
             raise Exception(f"Environment variable {self.name} is not set")
 
@@ -67,6 +83,8 @@ DB_PORT = Environment('DB_PORT')
 DB_USER = Environment('DB_USER')
 # Database password
 DB_PASSWORD = Environment('DB_PASSWORD')
+# Log queries
+DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
 
 # TELEGRAM CHAT
 # Group chat id
@@ -97,6 +115,8 @@ CRON_RESET_BOUNTY_ALERT = Environment('CRON_RESET_BOUNTY_ALERT', default_value='
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
 # Reset bounty poster limit. Default: Every day at 00:10
 CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
+# Reset can change region. Default: Every sunday at midnight
+CRON_RESET_CAN_CHANGE_REGION = Environment('CRON_RESET_CAN_CHANGE_REGION', default_value='0 0 * * Sun')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -114,6 +134,8 @@ BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment('BELLY_REPLY_TO_CHANNEL_POS
 BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value='0.2')
 # Multiplier for animations. Default: 0.2
 BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
+# Multiplier percentage for location level. Default 10
+BELLY_LOCATION_LEVEL_MULTIPLIER = Environment('BELLY_LOCATION_LEVEL_MULTIPLIER', default_value='10')
 
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)
@@ -139,3 +161,61 @@ DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value
 DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
 # Show correct option. Default: True
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
+
+# LOCATION
+LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
+                                          default_value='https://i.imgur.com/omBDMbu.jpg')
+LOCATION_NEW_WORLD_IMAGE_URL = Environment('LOCATION_NEW_WORLD_IMAGE_URL',
+                                           default_value='https://i.imgur.com/J5EWet5.jpg')
+LOCATION_FOOSHA_VILLAGE_IMAGE_URL = Environment('LOCATION_FOOSHA_VILLAGE_IMAGE_URL',
+                                                default_value='https://i.imgur.com/v8W3lHy.png')
+LOCATION_SHELLS_TOWN_IMAGE_URL = Environment('LOCATION_SHELLS_TOWN_IMAGE_URL',
+                                             default_value='https://i.imgur.com/638z7dA.png')
+LOCATION_ORANGE_TOWN_IMAGE_URL = Environment('LOCATION_ORANGE_TOWN_IMAGE_URL',
+                                             default_value='https://i.imgur.com/2v2UAHc.png')
+LOCATION_ISLAND_OF_RARE_ANIMALS_IMAGE_URL = Environment('LOCATION_ISLAND_OF_RARE_ANIMALS_IMAGE_URL',
+                                                        default_value='https://i.imgur.com/S8ejYiJ.png')
+LOCATION_SYRUP_VILLAGE_IMAGE_URL = Environment('LOCATION_SYRUP_VILLAGE_IMAGE_URL',
+                                               default_value='https://imgur.com/klCUJHq.jpg')
+LOCATION_BARATIE_IMAGE_URL = Environment('LOCATION_BARATIE_IMAGE_URL',
+                                         default_value='https://i.imgur.com/41PA2tE.jpg')
+LOCATION_ARLONG_PARK_IMAGE_URL = Environment('LOCATION_ARLONG_PARK_IMAGE_URL',
+                                             default_value='https://i.imgur.com/6uAZaqn.jpg')
+LOCATION_LOUGETOWN_IMAGE_URL = Environment('LOCATION_LOUGETOWN_IMAGE_URL',
+                                           default_value='https://i.imgur.com/NfwXoAI.jpg')
+LOCATION_REVERSE_MOUNTAIN_IMAGE_URL = Environment('LOCATION_REVERSE_MOUNTAIN_IMAGE_URL',
+                                                  default_value='https://i.imgur.com/iamqwq8.png')
+LOCATION_WHISKEY_PEAK_IMAGE_URL = Environment('LOCATION_WHISKEY_PEAK_IMAGE_URL',
+                                              default_value='https://i.imgur.com/c5gfVLe.jpg')
+LOCATION_LITTLE_GARDEN_IMAGE_URL = Environment('LOCATION_LITTLE_GARDEN_IMAGE_URL',
+                                               default_value='https://i.imgur.com/ns5U5S6.png')
+LOCATION_DRUM_ISLAND_IMAGE_URL = Environment('LOCATION_DRUM_ISLAND_IMAGE_URL',
+                                             default_value='https://i.imgur.com/8lvNZbu.png')
+LOCATION_ARABASTA_KINGDOM_IMAGE_URL = Environment('LOCATION_ARABASTA_KINGDOM_IMAGE_URL',
+                                                  default_value='https://i.imgur.com/Cw9jqsJ.jpg')
+LOCATION_JAYA_IMAGE_URL = Environment('LOCATION_JAYA_IMAGE_URL',
+                                      default_value='https://i.imgur.com/e1NLOjT.png')
+LOCATION_SKYPIEA_IMAGE_URL = Environment('LOCATION_SKYPIEA_IMAGE_URL',
+                                         default_value='https://i.imgur.com/cfJ4o0Z.jpg')
+LOCATION_LONG_RING_LONG_LAND_IMAGE_URL = Environment('LOCATION_LONG_RING_LONG_LAND_IMAGE_URL',
+                                                     default_value='https://i.imgur.com/M1UZrls.png')
+LOCATION_WATER_7_IMAGE_URL = Environment('LOCATION_WATER_7_IMAGE_URL',
+                                         default_value='https://i.imgur.com/IqbkOAP.png')
+LOCATION_ENIES_LOBBY_IMAGE_URL = Environment('LOCATION_ENIES_LOBBY_IMAGE_URL',
+                                             default_value='https://i.imgur.com/56LeSDp.png')
+LOCATION_THRILLER_BARK_IMAGE_URL = Environment('LOCATION_THRILLER_BARK_IMAGE_URL',
+                                               default_value='https://i.imgur.com/vZpyTyU.png')
+LOCATION_SABAODY_ARCHIPELAGO_IMAGE_URL = Environment('LOCATION_SABAODY_ARCHIPELAGO_IMAGE_URL',
+                                                     default_value='https://i.imgur.com/DYssFxB.jpg')
+LOCATION_FISHMAN_ISLAND_IMAGE_URL = Environment('LOCATION_FISHMAN_ISLAND_IMAGE_URL',
+                                                default_value='https://i.imgur.com/kt7zEpu.jpg')
+LOCATION_PUNK_HAZARD_IMAGE_URL = Environment('LOCATION_PUNK_HAZARD_IMAGE_URL',
+                                             default_value='https://i.imgur.com/H5AszLU.png')
+LOCATION_DRESSROSA_IMAGE_URL = Environment('LOCATION_DRESSROSA_IMAGE_URL',
+                                           default_value='https://i.imgur.com/sGLRtpO.jpg')
+LOCATION_ZOU_IMAGE_URL = Environment('LOCATION_ZOU_IMAGE_URL',
+                                     default_value='https://i.imgur.com/UD2YCV4.jpg')
+LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment('LOCATION_WHOLE_CAKE_ISLAND',
+                                                   default_value='https://i.imgur.com/fEAM6eN.jpg')
+LOCATION_WANO_COUNTRY_IMAGE_URL = Environment('LOCATION_WANO_COUNTRY_IMAGE_URL',
+                                              default_value='https://i.imgur.com/vznQ3W2.jpg')

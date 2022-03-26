@@ -11,6 +11,7 @@ TIMER_RESET_BOUNTY_NAME = 'timer_reset_bounty'
 TIMER_RESET_BOUNTY_ALERT_NAME = 'timer_reset_bounty_alert'
 TIMER_RESET_DOC_Q_GAME_NAME = 'timer_reset_doc_q_game'
 TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME = 'timer_reset_bounty_poster_limit'
+TIMER_RESET_CAN_CHANGE_REGION_NAME = 'timer_can_change_region'
 
 REDDIT_POST_TIMERS = [
     {
@@ -47,6 +48,7 @@ SAVED_MEDIA_NAME_DOC_Q = 'docq'
 
 # Command
 COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
+KEYBOARD_USER_SPLIT_CHAR = "|"
 
 # Bounty poster
 BOUNTY_POSTER_EXTENSIION = 'jpg'
@@ -78,4 +80,3 @@ BOUNTY_POSTER_BERRY_TEXTURE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'imag
 BOUNTY_POSTER_BERRY_FONT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'fonts', 'Lilly__.ttf')
 BOUNTY_POSTER_COMPONENT_NAME = 1
 BOUNTY_POSTER_COMPONENT_BERRY = 2
-

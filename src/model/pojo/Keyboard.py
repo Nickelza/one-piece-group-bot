@@ -30,7 +30,7 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery):
     try:
         screen = GroupScreen(int(info[c.SCREEN_CODE]))
     except ValueError:
-        screen = GroupScreen.SCREEN_UNKNOWN
+        screen = GroupScreen.UNKNOWN
 
     text: str = ''
 

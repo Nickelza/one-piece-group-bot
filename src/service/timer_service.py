@@ -13,6 +13,7 @@ from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import reset_bounty, reset_bounty_alert
 from src.service.download_service import cleanup_temp_dir
+from src.service.location_service import reset_can_change_region
 
 
 def init() -> MySQLDatabase:
@@ -90,6 +91,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
     # Reset bounty poster limit
     add_to_context(context, c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME, Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get())
 
+    # Reset can change region
+    add_to_context(context, c.TIMER_RESET_CAN_CHANGE_REGION_NAME, Env.CRON_RESET_CAN_CHANGE_REGION.get())
+
 
 def run_timers(context: CallbackContext) -> None:
     """
@@ -147,4 +151,9 @@ def execute(context: CallbackContext) -> None:
     # Reset bounty poster limit
     if job.name == c.TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME:
         reset_bounty_poster_limit(context)
+        return
+
+    # Reset can change region
+    if job.name == c.TIMER_RESET_CAN_CHANGE_REGION_NAME:
+        reset_can_change_region(context)
         return

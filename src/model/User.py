@@ -18,6 +18,9 @@ class User(BaseModel):
     max_rank_index = SmallIntegerField(null=True)
     can_play_doc_q = BooleanField(default=True)
     bounty_poster_limit = SmallIntegerField(default=0)
+    location_level = SmallIntegerField(default=0)
+    should_propose_new_world = BooleanField(default=True)
+    can_change_region = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:

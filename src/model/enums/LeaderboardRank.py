@@ -9,7 +9,7 @@ class LeaderboardRank:
     """
 
     def __init__(self, index: int, title: str, emoji: str, leaderboard_start: int, leaderboard_end: int,
-                 bounty_poster_limit: int):
+                 bounty_poster_limit: int) -> None:
         """
         Constructor for leaderboard ranks
         :param index: Index of the leaderboard rank

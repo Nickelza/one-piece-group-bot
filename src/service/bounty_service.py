@@ -6,6 +6,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
 from src.service.cron_service import cron_datetime_difference
+from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
 
 
@@ -19,13 +20,13 @@ def get_bounty_formatted(bounty: int) -> str:
     return '{0:,}'.format(bounty)
 
 
-def get_message_belly(update: Update) -> int:
+def get_message_belly(update: Update, user: User) -> int:
     """
     Calculates how much bellys a message is worth
     :param update: Telegram update
+    :param user: The user who sent the message
     :return: How much bellys a message is worth
     """
-
     # Command message - No belly
     try:
         if update.message.text[0] in c.COMMAND_PREFIX_ALIASES:
@@ -79,6 +80,11 @@ def get_message_belly(update: Update) -> int:
     except AttributeError:
         pass
 
+    # Location level multiplier
+    location_percentage = Env.BELLY_LOCATION_LEVEL_MULTIPLIER.get_int() * user.location_level
+
+    final_belly += int((final_belly * location_percentage) / 100)
+
     return round(int(final_belly), -3)  # Round to the nearest thousandth
 
 
@@ -88,6 +94,9 @@ def reset_bounty(context: CallbackContext) -> None:
     :return: None
     """
     User.update(bounty=0).execute()
+
+    # Reset location
+    reset_location()
 
     ot_text = phrases.BOUNTY_RESET
     full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
@@ -103,3 +112,28 @@ def reset_bounty_alert(context: CallbackContext) -> None:
     ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(Env.CRON_RESET_BOUNTY.get()))
 
     full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
+
+
+def add_bounty(context: CallbackContext, user: User, amount: float, update: Update = None,
+               should_update_location: bool = True) -> User:
+    """
+    Adds a bounty to a user
+    :param context: Telegram context
+    :param user: The user to add the bounty to
+    :param amount: The amount to add to the bounty
+    :param update: Telegram update
+    :param should_update_location: Whether to update the user's location
+    :return: The updated user
+    """
+    from src.service.location_service import update_location
+
+    if amount <= 0:
+        return user
+
+    user.bounty += amount
+
+    # Update the user's location
+    if should_update_location:
+        update_location(context, user, update, send_update_message=True)
+
+    return user

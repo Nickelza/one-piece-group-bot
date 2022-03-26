@@ -8,7 +8,6 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
-from src.service.bounty_service import get_bounty_formatted
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_leaderboard
 from src.service.user_service import get_user_profile_photo
@@ -146,6 +145,8 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
 
 
 def get_bounty_poster(update: Update, user: User) -> str:
+    from src.service.bounty_service import get_bounty_formatted
+
     """
     Gets the bounty poster of a user
     :param update: Telegram update

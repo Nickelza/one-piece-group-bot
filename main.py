@@ -41,10 +41,11 @@ def main() -> None:
     except AttributeError:
         pass
 
-    # # Set Peewee logger
-    # logger = logging.getLogger('peewee')
-    # logger.addHandler(logging.StreamHandler())
-    # logger.setLevel(logging.DEBUG)
+    if Env.DB_LOG_QUERIES.get_bool():
+        # Set Peewee logger
+        logger = logging.getLogger('peewee')
+        logger.addHandler(logging.StreamHandler())
+        logger.setLevel(logging.DEBUG)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)

@@ -5,6 +5,7 @@ import resources.phrases as phrases
 import src.service.bounty_service as bounty_service
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums import Location
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError
@@ -65,26 +66,25 @@ def manage(update: Update, context: CallbackContext) -> None:
             full_message_send(context, ot_text, update)
             return
 
+    # Get location
+    location: Location = Location.get_by_level(user.location_level)
+
     message_text = phrases.SHOW_USER_STATUS.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                    bounty_service.get_bounty_formatted(user.bounty),
-                                                   leaderboard_user_rank.get_emoji_and_rank_message())
+                                                   leaderboard_user_rank.get_emoji_and_rank_message(),
+                                                   location.name)
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None
     if in_reply_to_message:
-        message_text += "\n\n" + phrases \
-            .SHOW_USER_STATUS_ADD_REPLY.format(mention_markdown_v2(update.effective_user.id,
-                                                                   update.effective_user.first_name))
+        message_text += "\n\n" + phrases.SHOW_USER_STATUS_ADD_REPLY.format(
+            mention_markdown_v2(update.effective_user.id,
+                                update.effective_user.first_name))
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0
     if not in_reply_to_message and (user.bounty_poster_limit == -1 or user.bounty_poster_limit > 0):
-        poster_path = get_bounty_poster(update, user)
-        poster: SavedMedia = SavedMedia()
-        poster.media_id = open(poster_path, 'rb')
-        poster.type = SavedMediaType.PHOTO.value
-        full_media_send(context, saved_media=poster, update=update, caption=message_text,
-                        reply_to_message_id=reply_to_message_id)
+        send_bounty_poster(context, update, user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
         if user.bounty_poster_limit != -1:
@@ -92,3 +92,14 @@ def manage(update: Update, context: CallbackContext) -> None:
             user.save()
     else:  # Send regular message
         full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id)
+
+
+def send_bounty_poster(context: CallbackContext, update: Update, user: User, caption: str = None,
+                       reply_to_message_id: int = None) -> None:
+    poster_path = get_bounty_poster(update, user)
+    poster: SavedMedia = SavedMedia()
+    poster.media_id = open(poster_path, 'rb')
+    poster.type = SavedMediaType.PHOTO.value
+
+    full_media_send(context, saved_media=poster, update=update, caption=caption,
+                    reply_to_message_id=reply_to_message_id, new_message=True)
