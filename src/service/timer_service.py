@@ -11,7 +11,7 @@ from src.chat.group.screens.screen_doc_q_game import reset_playability as reset_
 from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import reset_bounty, reset_bounty_alert
+from src.service.bounty_service import reset_bounty, reset_bounty_alert, add_region_bounty
 from src.service.download_service import cleanup_temp_dir
 from src.service.location_service import reset_can_change_region
 
@@ -94,6 +94,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
     # Reset can change region
     add_to_context(context, c.TIMER_RESET_CAN_CHANGE_REGION_NAME, Env.CRON_RESET_CAN_CHANGE_REGION.get())
 
+    # Increment bounty by region
+    add_to_context(context, c.TIMER_ADD_REGION_BOUNTY_NAME, Env.CRON_ADD_REGION_BOUNTY.get()).run(dispatcher)
+
 
 def run_timers(context: CallbackContext) -> None:
     """
@@ -156,4 +159,9 @@ def execute(context: CallbackContext) -> None:
     # Reset can change region
     if job.name == c.TIMER_RESET_CAN_CHANGE_REGION_NAME:
         reset_can_change_region(context)
+        return
+
+    # Add region bounty
+    if job.name == c.TIMER_ADD_REGION_BOUNTY_NAME:
+        add_region_bounty(context)
         return

@@ -12,6 +12,7 @@ TIMER_RESET_BOUNTY_ALERT_NAME = 'timer_reset_bounty_alert'
 TIMER_RESET_DOC_Q_GAME_NAME = 'timer_reset_doc_q_game'
 TIMER_RESET_BOUNTY_POSTER_LIMIT_NAME = 'timer_reset_bounty_poster_limit'
 TIMER_RESET_CAN_CHANGE_REGION_NAME = 'timer_can_change_region'
+TIMER_ADD_REGION_BOUNTY_NAME = 'timer_add_region_bounty'
 
 REDDIT_POST_TIMERS = [
     {

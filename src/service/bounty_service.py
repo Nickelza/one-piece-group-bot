@@ -1,3 +1,4 @@
+from peewee import Case
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -5,6 +6,7 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
+from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.service.cron_service import cron_datetime_difference
 from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
@@ -151,3 +153,20 @@ def add_bounty(context: CallbackContext, user: User, amount: float, update: Upda
         update_location(context, user, update, send_update_message=True)
 
     return user
+
+
+def add_region_bounty(context: CallbackContext) -> None:
+    """
+    Adds a bounty percentage to all users based on their region
+    :param context: Telegram context
+    :return: None
+    """
+
+    conditions: list[tuple[bool, int]] = [(User.location_level <= get_last_paradise().level,
+                                           User.bounty +
+                                           ((User.bounty * Env.LOCATION_PARADISE_BOUNTY_INCREMENT.get_float()) / 100)),
+                                          (User.location_level >= get_first_new_world().level,
+                                           User.bounty +
+                                           ((User.bounty * Env.LOCATION_NEW_WORLD_BOUNTY_INCREMENT.get_float()) / 100))]
+    case_stmt = Case(None, conditions)
+    User.update(bounty=case_stmt).execute()

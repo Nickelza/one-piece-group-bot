@@ -117,6 +117,8 @@ CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 
 CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 # Reset can change region. Default: Every sunday at midnight
 CRON_RESET_CAN_CHANGE_REGION = Environment('CRON_RESET_CAN_CHANGE_REGION', default_value='0 0 * * Sun')
+# Increment bounty for users in region. Default: Every day at 00:10
+CRON_ADD_REGION_BOUNTY = Environment('CRON_INCREMENT_BOUNTY_FOR_REGION', default_value='10 0 * * *')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -163,6 +165,11 @@ DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
 
 # LOCATION
+# Percentage that bounty is incremented by on timer for Paradise. Default: 0
+LOCATION_PARADISE_BOUNTY_INCREMENT = Environment('LOCATION_PARADISE_BOUNTY_INCREMENT', default_value='0')
+# Percentage that bounty is incremented by on timer for New World. Default: 1
+LOCATION_NEW_WORLD_BOUNTY_INCREMENT = Environment('LOCATION_NEW_WORLD_BOUNTY_INCREMENT', default_value='1')
+
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')
 LOCATION_NEW_WORLD_IMAGE_URL = Environment('LOCATION_NEW_WORLD_IMAGE_URL',
