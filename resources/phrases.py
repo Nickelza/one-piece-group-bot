@@ -49,7 +49,7 @@ DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better l
 # Error messages
 USER_NOT_FOUND = 'User not found'
 UNRECOGNIZED_SCREEN = 'Unrecognized command'
-SAVED_MEDIA_NOT_FOUND = 'Doc Q Media not found'
+SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
 COMMAND_NOT_IN_REPLY = 'This command can only be used in a reply to a message'
 COMMAND_FOR_NEW_WORLD_USERS = 'This command is only available for users in the New World'
 
