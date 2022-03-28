@@ -11,7 +11,7 @@ from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
 from src.model.enums.Timer import Timer, REDDIT_POST_TIMERS
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import reset_bounty, reset_bounty_alert, add_region_bounty
+from src.service.bounty_service import add_region_bounty
 from src.service.download_service import cleanup_temp_dir
 from src.service.location_service import reset_can_change_region
 
@@ -80,12 +80,6 @@ def set_timers(dispatcher: Dispatcher) -> None:
     # Leaderboard timer
     add_to_context(context, Timer.TIMER_SEND_LEADERBOARD, Env.CRON_SEND_LEADERBOARD.get())
 
-    # Reset bounty timer
-    add_to_context(context, Timer.RESET_BOUNTY, Env.CRON_RESET_BOUNTY.get())
-
-    # Reset bounty alert timer
-    add_to_context(context, Timer.RESET_BOUNTY_ALERT, Env.CRON_RESET_BOUNTY_ALERT.get())
-
     # Reset Doc Q Game timer
     add_to_context(context, Timer.RESET_DOC_Q_GAME, Env.CRON_RESET_DOC_Q_GAME.get())
 
@@ -130,10 +124,6 @@ def execute(context: CallbackContext) -> None:
             cleanup_temp_dir()
         case Timer.TIMER_SEND_LEADERBOARD:
             send_leaderboard(context)
-        case Timer.RESET_BOUNTY:
-            reset_bounty(context)
-        case Timer.RESET_BOUNTY_ALERT:
-            reset_bounty_alert(context)
         case Timer.RESET_DOC_Q_GAME:
             reset_doc_q_game(context)
         case Timer.RESET_BOUNTY_POSTER_LIMIT:

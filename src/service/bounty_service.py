@@ -7,7 +7,6 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.Location import get_last_paradise, get_first_new_world
-from src.service.cron_service import cron_datetime_difference
 from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
 
@@ -115,19 +114,7 @@ def reset_bounty(context: CallbackContext) -> None:
     reset_location()
 
     ot_text = phrases.BOUNTY_RESET
-    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
-
-
-def reset_bounty_alert(context: CallbackContext) -> None:
-    """
-    Sends a message to the group chat to alert that bounties will be reset
-    :param context: Telegram context
-    :return: None
-    """
-
-    ot_text = phrases.BOUNTY_RESET_ALERT.format(cron_datetime_difference(Env.CRON_RESET_BOUNTY.get()))
-
-    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int()).pin(disable_notification=True)
+    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
 
 def add_bounty(context: CallbackContext, user: User, amount: float, update: Update = None,

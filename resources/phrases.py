@@ -14,7 +14,6 @@ NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who 
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
 BOUNTY_RESET = 'Bounties have been reset'
-BOUNTY_RESET_ALERT = 'Bounties will be reset in *{}*'
 
 LEADERBOARD_HEADER = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:\n'
 LEADERBOARD_ROW = '{}°: {}\n{} - ฿*{}*'

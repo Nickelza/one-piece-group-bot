@@ -6,8 +6,6 @@ class Timer(Enum):
     REDDIT_POST_ONEPIECE = 'reddit_post_onepiece'
     REDDIT_POST_MEMEPIECE = 'reddit_post_memepiece'
     TIMER_SEND_LEADERBOARD = 'send_leaderboard'
-    RESET_BOUNTY = 'reset_bounty'
-    RESET_BOUNTY_ALERT = 'reset_bounty_alert'
     RESET_DOC_Q_GAME = 'reset_doc_q_game'
     RESET_BOUNTY_POSTER_LIMIT = 'reset_bounty_poster_limit'
     RESET_CAN_CHANGE_REGION = 'reset_can_change_region'

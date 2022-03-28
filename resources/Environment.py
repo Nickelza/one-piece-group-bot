@@ -107,10 +107,6 @@ REDDIT_USER_AGENT = Environment('REDDIT_USER_AGENT')
 CRON_TEMP_DIR_CLEANUP = Environment('CRON_TEMP_DIR_CLEANUP', default_value='0 */12 * * *')
 # Create and send the leaderboard. Default: Every sunday at midnight
 CRON_SEND_LEADERBOARD = Environment('CRON_SEND_LEADERBOARD', default_value='0 0 * * Sun')
-# Reset bounties. Default: Every first day of the month at 00:10
-CRON_RESET_BOUNTY = Environment('CRON_RESET_BOUNTY', default_value='10 0 1 * *')
-# Send an alert messaging informing when the next bounty reset is. Default: Every last day of the month at 00:10
-CRON_RESET_BOUNTY_ALERT = Environment('CRON_RESET_BOUNTY_ALERT', default_value='10 0 last * *')
 # Reset Doc Q game playability. Default: Every day at midnight
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
 # Reset bounty poster limit. Default: Every day at 00:10
