@@ -1,8 +1,21 @@
-def get_value_with_percentage(value: float, percentage: float) -> float:
+import random
+
+
+def get_value_from_percentage(value: float, percentage: float) -> float:
     """
-    Gets a value with a percentage added to it
-    :param value: The value to add the percentage to
-    :param percentage: The percentage to add
-    :return: The value with the percentage added
+    Gets a value from a percentage
+    :param value: The value to get the percentage from
+    :param percentage: The percentage to get the value from
+    :return: The value from the percentage
     """
-    return value + ((value * percentage) / 100)
+
+    return (value * percentage) / 100
+
+
+def get_random_win(percentage: float) -> bool:
+    """
+    Gets a random win based on the percentage
+    :param percentage: The percentage to get a win for
+    :return: True if the percentage is greater than a random number, False otherwise
+    """
+    return percentage >= random.randint(1, 100)

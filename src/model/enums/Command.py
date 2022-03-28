@@ -16,6 +16,7 @@ class Command(Enum):
     GRP_USER_STATUS = 'status'
     GRP_CHANGE_REGION_NEW_WORLD = 'newworld'
     GRP_CHANGE_REGION_PARADISE = 'paradise'
+    GRP_FIGHT = 'fight'
     # Deprecated
     GRP_SHOW_BOUNTY = 'bounty'
 

@@ -8,6 +8,7 @@ class GroupScreen(Enum):
     USER_STATUS = 1
     DOC_Q_GAME = 2
     CHANGE_REGION = 3
+    FIGHT = 4
 
     # Deprecated
     SHOW_BOUNTY = -1
@@ -18,5 +19,6 @@ COMMAND_TO_GROUP_SCREEN = {
     Command.GRP_DOC_Q_GAME: GroupScreen.DOC_Q_GAME,
     Command.GRP_CHANGE_REGION_NEW_WORLD: GroupScreen.CHANGE_REGION,
     Command.GRP_CHANGE_REGION_PARADISE: GroupScreen.CHANGE_REGION,
-    Command.GRP_SHOW_BOUNTY: GroupScreen.SHOW_BOUNTY
+    Command.GRP_SHOW_BOUNTY: GroupScreen.SHOW_BOUNTY,
+    Command.GRP_FIGHT: GroupScreen.FIGHT,
 }

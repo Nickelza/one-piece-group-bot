@@ -21,6 +21,7 @@ SCREEN_CODE = 'sc'
 
 # Saved Media
 SAVED_MEDIA_NAME_DOC_Q = 'docq'
+SAVED_MEDIA_NAME_FIGHT = 'fight'
 
 # Command
 COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]

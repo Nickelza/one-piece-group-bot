@@ -13,7 +13,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
 from src.service.cron_service import cron_datetime_difference
 from src.service.location_service import update_location
-from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview
+from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
 
 
 def validate_move_request(update: Update, context: CallbackContext, user: User, region: Region) -> bool:
@@ -82,18 +82,9 @@ def send_proposal(update: Update, context: CallbackContext, user: User, region: 
                                                              mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                              get_region_text(region))
     # Keyboard
-    inline_keyboard: list[list[Keyboard]] = []
-    keyboard_line: list[Keyboard] = []
-
-    keyboard_data: dict = {'a': region.value, 'u': user.tg_user_id, 'b': 1}
-
-    # Accept
-    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_ACCEPT, keyboard_data, GroupScreen.CHANGE_REGION))
-    # Reject
-    keyboard_data['b'] = 0
-    keyboard_line.append(Keyboard(phrases.KEYBOARD_OPTION_REJECT, keyboard_data, GroupScreen.CHANGE_REGION))
-
-    inline_keyboard.append(keyboard_line)
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, region.value, phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                 phrases.KEYBOARD_OPTION_REJECT,
+                                                                 GroupScreen.CHANGE_REGION)]
 
     full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False)
 
@@ -155,11 +146,11 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
         full_message_send(context, GroupChatError.INVALID_CHANGE_REGION_REQUEST.build(), update)
         return
 
+    if not validate_move_request(update, context, user, region):
+        return
+
     # Request to move
     if command.value is not None:
-        if not validate_move_request(update, context, user, region):
-            return
-
         send_proposal(update, context, user, region)
         return
 

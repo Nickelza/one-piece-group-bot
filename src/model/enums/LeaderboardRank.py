@@ -9,7 +9,7 @@ class LeaderboardRank:
     """
 
     def __init__(self, index: int, title: str, emoji: str, leaderboard_start: int, leaderboard_end: int,
-                 bounty_poster_limit: int) -> None:
+                 bounty_poster_limit: int, max_win_probability: float, min_win_probability: float) -> None:
         """
         Constructor for leaderboard ranks
         :param index: Index of the leaderboard rank
@@ -18,6 +18,8 @@ class LeaderboardRank:
         :param leaderboard_start: Start index
         :param leaderboard_end: End index
         :param bounty_poster_limit: Bounty poster limit
+        :param max_win_probability: Max win probability in percentage
+        :param min_win_probability: Min win probability in percentage
         """
         self.index: int = index
         self.title: str = title
@@ -25,6 +27,8 @@ class LeaderboardRank:
         self.leaderboard_start: int = leaderboard_start
         self.leaderboard_end: int = leaderboard_end
         self.bounty_poster_limit: int = bounty_poster_limit
+        self.max_win_probability: float = max_win_probability
+        self.min_win_probability: float = min_win_probability
 
     def get_emoji_and_rank_message(self) -> str:
         """
@@ -36,19 +40,29 @@ class LeaderboardRank:
 
 
 PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 1, 1,
-                              Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int())
+                              Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
+                              Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
+                              Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
 
 EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 2, 5,
-                          Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int())
+                          Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int(),
+                          Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
+                          Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
 FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 6, 9,
-                             Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int())
+                             Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int(),
+                             Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
+                             Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
 SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 10, 20,
-                            Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int())
+                            Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int(),
+                            Env.FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA.get_float(),
+                            Env.FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA.get_float())
 
 ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 21, -1,
-                         Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int())
+                         Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int(),
+                         Env.FIGHT_MAX_WIN_PROBABILITY_ROOKIE.get_float(),
+                         Env.FIGHT_MIN_WIN_PROBABILITY_ROOKIE.get_float())
 
 LEADERBOARD_RANKS = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE]
 

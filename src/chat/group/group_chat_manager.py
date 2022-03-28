@@ -10,6 +10,7 @@ import resources.phrases as phrases
 from resources.Database import Database
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_show_bounty import manage as manage_screen_show_bounty
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
@@ -135,17 +136,20 @@ def manage(update: Update, context: CallbackContext) -> None:
 def dispatch_screens(update: Update, context: CallbackContext, user: User, screen: GroupScreen, keyboard: Keyboard,
                      command: Command = None) -> None:
     match screen:
-        case GroupScreen.USER_STATUS:  # User status screen
+        case GroupScreen.USER_STATUS:  # User status
             manage_screen_show_status(update, context)
 
-        case GroupScreen.DOC_Q_GAME:  # Doc Q Game screen
+        case GroupScreen.DOC_Q_GAME:  # Doc Q Game
             manage_screen_doc_q_game(update, context, user, keyboard)
 
-        case GroupScreen.SHOW_BOUNTY:  # Show bounty screen
+        case GroupScreen.SHOW_BOUNTY:  # Show bounty
             manage_screen_show_bounty(update, context)
 
         case GroupScreen.CHANGE_REGION:  # Change region
             manage_screen_change_region(update, context, user, keyboard, command)
+
+        case GroupScreen.FIGHT:  # Fight
+            manage_screen_fight(update, context, user, keyboard, command)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

@@ -20,7 +20,7 @@ from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
 
-def get_play_amounts(current_bounty: int, win_odds) -> list:
+def get_play_amounts(current_bounty: int, win_odds) -> tuple[int, int, int, int]:
     """
     Get play amounts
     :param current_bounty: The current bounty
@@ -30,8 +30,8 @@ def get_play_amounts(current_bounty: int, win_odds) -> list:
 
     final_bounty_if_win = int(current_bounty / win_odds)
     final_bounty_if_lose = int(current_bounty * win_odds)
-    return [final_bounty_if_win - current_bounty, current_bounty - final_bounty_if_lose, final_bounty_if_win,
-            final_bounty_if_lose]
+    return (final_bounty_if_win - current_bounty, current_bounty - final_bounty_if_lose, final_bounty_if_win,
+            final_bounty_if_lose)
 
 
 def validate_play(update: Update, context: CallbackContext, user: User, doc_q_game: DocQGame = None) -> bool:
@@ -46,20 +46,20 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     # User is owner of the game
     if doc_q_game is not None and doc_q_game.user != user:
-        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(Command.GRP_DOC_Q_GAME.value), update,
+        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(Command.GRP_DOC_Q_GAME.value), update=update,
                           answer_callback=True, show_alert=True)
         return False
 
     if user.bounty < Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_float():
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
             Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), get_bounty_formatted(user.bounty))
-        full_message_send(context, ot_text, update)
+        full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
     if not user.can_play_doc_q:
         ot_text = phrases.DOC_Q_GAME_LIMIT_REACHED.format(
             cron_datetime_difference(Env.CRON_RESET_DOC_Q_GAME.get()))
-        full_message_send(context, ot_text, update)
+        full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
     # Delete all previous pending games
@@ -139,17 +139,18 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
 
         # SavedMedia is not found
         if doc_q_media is None:
-            full_message_send(context, GroupChatError.DOC_Q_MEDIA_NOT_FOUND.build(), update)
+            full_message_send(context, GroupChatError.SAVED_MEDIA_NOT_FOUND.build(), update)
             return
 
-        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
+        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
+            user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                  get_bounty_formatted(play_amounts[0]),
-                                                  get_bounty_formatted(play_amounts[1]),
+                                                  get_bounty_formatted(win_amount),
+                                                  get_bounty_formatted(lose_amount),
                                                   get_bounty_formatted(user.bounty),
-                                                  get_bounty_formatted(play_amounts[2]),
-                                                  get_bounty_formatted(play_amounts[3]))
+                                                  get_bounty_formatted(final_bounty_if_win),
+                                                  get_bounty_formatted(final_bounty_if_lose))
 
         message: Message = full_media_send(context, doc_q_media, update, caption=caption, keyboard=inline_keyboard)
         doc_q_game.message_id = message.message_id
@@ -180,40 +181,42 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             delete_game(update, context, doc_q_game)
             return
 
-        play_amounts = get_play_amounts(user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
+        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
+            user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # User chose correct option
         if keyboard.info['b']:
             # Increase user's bounty
-            user.bounty += play_amounts[0]
+            user.bounty += win_amount
 
             # Update game status
             doc_q_game.status = GameStatus.WON.value
-            doc_q_game.berry = play_amounts[0]
+            doc_q_game.berry = win_amount
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                     Emoji.DOC_Q_GAME_WIN.value,
-                                                    get_bounty_formatted(play_amounts[0]),
+                                                    get_bounty_formatted(win_amount),
                                                     get_bounty_formatted(user.bounty))
         else:  # User chose wrong option
             # Decrease user's bounty
-            user.bounty -= play_amounts[1]
+            user.bounty -= lose_amount
 
             # Update game status
             doc_q_game.status = GameStatus.LOST.value
-            doc_q_game.berry = play_amounts[1]
+            doc_q_game.berry = lose_amount
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                      Emoji.DOC_Q_GAME_LOSE.value,
-                                                     get_bounty_formatted(play_amounts[1]),
+                                                     get_bounty_formatted(lose_amount),
                                                      get_bounty_formatted(user.bounty))
-        # Save updates
-        user.can_play_doc_q = False
-        user.save()
-        doc_q_game.save()
 
         # Send outcome text
         full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,
                         add_delete_button=True)
+
+        # Save updates
+        user.can_play_doc_q = False
+        user.save()
+        doc_q_game.save()
 
 
 def reset_playability(context: CallbackContext) -> None:

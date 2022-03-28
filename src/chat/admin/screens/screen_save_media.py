@@ -24,7 +24,7 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     # Is in reply to a message
     if update.message.reply_to_message is None:
-        full_message_send(context, phrases.SAVE_MEDIA_NOT_IN_REPLY, update)
+        full_message_send(context, phrases.COMMAND_NOT_IN_REPLY, update)
         return
 
     # Is in reply to a media message

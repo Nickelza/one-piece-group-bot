@@ -226,3 +226,26 @@ LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment('LOCATION_WHOLE_CAKE_ISLAND',
                                                    default_value='https://i.imgur.com/fEAM6eN.jpg')
 LOCATION_WANO_COUNTRY_IMAGE_URL = Environment('LOCATION_WANO_COUNTRY_IMAGE_URL',
                                               default_value='https://i.imgur.com/vznQ3W2.jpg')
+
+# How long fight immunity lasts. Default: 24 hours
+FIGHT_IMMUNITY_DURATION = Environment('FIGHT_IMMUNITY_DURATION', default_value='24')
+# Maximum win probability for Pirate King. Default: 99%
+FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING', default_value='99')
+# Maximum win probability for Emperor. Default: 95%
+FIGHT_MAX_WIN_PROBABILITY_EMPEROR = Environment('FIGHT_MAX_WIN_PROBABILITY_EMPEROR', default_value='95')
+# Maximum win probability for First Mate. Default: 90%
+FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE = Environment('FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE', default_value='90')
+# Maximum win probability for Supernova. Default: 85%
+FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA', default_value='85')
+# Maximum win probability for Rookie. Default: 80%
+FIGHT_MAX_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MAX_WIN_PROBABILITY_ROOKIE', default_value='80')
+# Minimum win probability for Pirate King. Default: 1%
+FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING', default_value='1')
+# Minimum win probability for Emperor. Default: 1%
+FIGHT_MIN_WIN_PROBABILITY_EMPEROR = Environment('FIGHT_MIN_WIN_PROBABILITY_EMPEROR', default_value='1')
+# Minimum win probability for First Mate. Default: 1%
+FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE = Environment('FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE', default_value='1')
+# Minimum win probability for Supernova. Default: 1%
+FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA', default_value='1')
+# Minimum win probability for Rookie. Default: 1%
+FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE', default_value='1')

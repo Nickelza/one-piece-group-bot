@@ -2,12 +2,15 @@ import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation, Chat
+from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
 import constants as c
 import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
+from src.model.User import User
+from src.model.enums.GroupScreen import GroupScreen
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.pojo.Keyboard import Keyboard
 
@@ -334,6 +337,42 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                           reply_markup=keyboard_markup)
 
 
+def full_message_or_media_edit(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
+                               keyboard: list[list[Keyboard]] = None, parse_mode: str = c.TG_DEFAULT_PARSE_MODE,
+                               protect_content: bool = False, disable_web_page_preview: bool = True,
+                               edit_only_keyboard: bool = False, edit_only_caption_and_keyboard: bool = True,
+                               add_delete_button: bool = False, authorized_users: list = None) -> Message:
+    """
+    Edit a message or media, in case the type of message being edited is unknown
+    :param context: CallbackContext object
+    :param text: Text to send
+    :param update: Update object. Required if chat_id is None
+    :param chat_id: Chat id. Required if update is None
+    :param keyboard: Keyboard object
+    :param parse_mode: Parse mode
+    :param protect_content: True if the message should be protected from saving and forwarding
+    :param disable_web_page_preview: Only for text; True if the web page preview should be disabled
+    :param edit_only_keyboard: Only for Media; if only the keyboard should be edited
+    :param edit_only_caption_and_keyboard: Only for Media; If only the caption and keyboard should be edited.
+            If keyboard is None, it will be removed
+    :param add_delete_button: True if the delete button should be added
+    :param authorized_users: List of user ids that are allowed to delete the message
+    :return: Message
+    """
+
+    try:
+        return full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
+                                 parse_mode=parse_mode, disable_web_page_preview=disable_web_page_preview,
+                                 add_delete_button=add_delete_button, authorized_users=authorized_users,
+                                 protect_content=protect_content)
+    except BadRequest:
+        return full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
+                               parse_mode=parse_mode, add_delete_button=add_delete_button,
+                               edit_only_keyboard=edit_only_keyboard,
+                               edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
+                               authorized_users=authorized_users, protect_content=protect_content)
+
+
 def is_command(text: str) -> bool:
     """
     Check if the message is a command
@@ -346,6 +385,13 @@ def mention_markdown_v2(user_id: int | str, name: str) -> str:
     Create a mention markdown v2
     """
     return mention_markdown(user_id, name, 2)
+
+
+def mention_markdown_user(user: User) -> str:
+    """
+    Create a mention markdown given a user
+    """
+    return mention_markdown_v2(user.tg_user_id, user.tg_first_name)
 
 
 def get_image_preview(image_url: str) -> str:
@@ -363,3 +409,27 @@ def get_delete_button(tg_user_ids: list[int]) -> Keyboard:
     keyboard_data: dict = {'u': c.KEYBOARD_USER_SPLIT_CHAR.join(str(x) for x in tg_user_ids), 'del': 1}
 
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
+
+
+def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: GroupScreen
+                        ) -> list[Keyboard]:
+    """
+    Create a yes/no keyboard
+    :param user: User object
+    :param primary_key: Primary key
+    :param yes_text: Text for the yes button
+    :param no_text: Text for the no button
+    :param screen: Screen object
+    :return: List of keyboards
+    """
+
+    keyboard_line: list[Keyboard] = []
+    keyboard_data: dict = {'a': primary_key, 'u': user.tg_user_id, 'b': 1}
+
+    # Accept
+    keyboard_line.append(Keyboard(yes_text, keyboard_data, screen))
+    # Reject
+    keyboard_data['b'] = 0
+    keyboard_line.append(Keyboard(no_text, keyboard_data, screen))
+
+    return keyboard_line

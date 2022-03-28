@@ -19,6 +19,10 @@ class Emoji(Enum):
     LEADERBOARD_SUPERNOVA = '🌟'
     LEADERBOARD_ROOKIE = '👤'
 
+    # Fight
+    FIGHT = '⚔'
+    RETREAT = '🏳️'
+
     # Other
     ACCEPT = '✅'
     CANCEL = '❌'

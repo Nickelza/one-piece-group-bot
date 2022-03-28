@@ -1,3 +1,5 @@
+import datetime
+
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -10,6 +12,7 @@ from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError
 from src.service.bounty_poster_service import get_bounty_poster
+from src.service.cron_service import convert_seconds_to_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2
 
@@ -78,6 +81,13 @@ def manage(update: Update, context: CallbackContext) -> None:
                                                    leaderboard_user_rank.get_emoji_and_rank_message(),
                                                    location.name)
 
+    # Add fight immunity if active
+    if user.fight_immunity_end_date is not None and user.fight_immunity_end_date > datetime.datetime.now():
+        # Get remaining time
+        remaining_time = convert_seconds_to_time((user.fight_immunity_end_date - datetime.datetime.now())
+                                                 .total_seconds())
+        message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
+
     # If used in reply to a message, reply to original message
     reply_to_message_id = None
     if in_reply_to_message:
@@ -100,7 +110,7 @@ def manage(update: Update, context: CallbackContext) -> None:
 
 
 def send_bounty_poster(context: CallbackContext, update: Update, user: User, caption: str = None,
-                       reply_to_message_id: int = None, can_delete_users: list = None) -> None:
+                       reply_to_message_id: int = None) -> None:
     poster_path = get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia()
     poster.media_id = open(poster_path, 'rb')
