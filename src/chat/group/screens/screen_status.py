@@ -32,7 +32,7 @@ def manage(update: Update, context: CallbackContext) -> None:
     if in_reply_to_message:
         # Used in reply to a bot
         if update.effective_message.reply_to_message.from_user.is_bot:
-            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update)
+            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update, add_delete_button=True)
             return
 
         user = User.get_or_none(User.tg_user_id == update.effective_message.reply_to_message.from_user.id)
@@ -49,9 +49,13 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     # If used in reply to a message, verify that requesting user ranks above the user being replied to
     if in_reply_to_message:
+        # Add the requested user to the list of users that can delete the message
+        can_delete_users.append(user.tg_user_id)
+
         requesting_user = User.get_or_none(User.tg_user_id == update.effective_user.id)
         if requesting_user is None:
-            full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update)
+            full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update, add_delete_button=True,
+                              authorized_users=can_delete_users)
             return
 
         requesting_user_leaderboard_user = get_current_leaderboard_user(requesting_user)
@@ -67,11 +71,8 @@ def manage(update: Update, context: CallbackContext) -> None:
                 mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                 leaderboard_user_rank.get_emoji_and_rank_message())
 
-            full_message_send(context, ot_text, update)
+            full_message_send(context, ot_text, update, add_delete_button=True, authorized_users=can_delete_users)
             return
-
-        # Add the requested user to the list of users that can delete the message
-        can_delete_users.append(user.tg_user_id)
 
     # Get location
     location: Location = Location.get_by_level(user.location_level)
@@ -117,4 +118,4 @@ def send_bounty_poster(context: CallbackContext, update: Update, user: User, cap
     poster.type = SavedMediaType.PHOTO.value
 
     full_media_send(context, saved_media=poster, update=update, caption=caption,
-                    reply_to_message_id=reply_to_message_id, new_message=True)
+                    reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True)

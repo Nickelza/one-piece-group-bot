@@ -91,7 +91,7 @@ FIGHT_CONFIRMATION_REQUEST = '{} are you sure you want to fight {}?' \
 FIGHT_CONFIRMATION_OUTCOME_VICTORY = 'victory'
 FIGHT_CONFIRMATION_OUTCOME_DEFEAT = 'defeat'
 FIGHT_WIN = "Just as I foresaw, {} won the fight against {}.\n" \
-            " I don't need the cards to tell me that your strength is incredible..." + '\n\n' + GAME_WIN_STATUS
+            "I don't need the cards to tell me that your strength is incredible..." + '\n\n' + GAME_WIN_STATUS
 FIGHT_LOSE = "Just as I foresaw, {} lost the fight against {}.\n" \
              "Looks like your luck ran out..." + '\n\n' + GAME_LOSE_STATUS
 FIGHT_CONFIRMATION_RETREAT = 'You have successfully retreated'
