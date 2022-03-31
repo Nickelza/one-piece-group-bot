@@ -110,7 +110,10 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
 
     if text_w < max_w:
         width_difference = max_w - text_w
-        kern = int(width_difference / (len(text) - 1))
+        try:
+            kern = int(width_difference / (len(text) - 1))
+        except ZeroDivisionError:
+            kern = int(width_difference / (len(text)))
 
         # Avoid too much kerning
         if kern > max_kern:

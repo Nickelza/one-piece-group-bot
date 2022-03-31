@@ -67,6 +67,11 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
             full_message_send(context, phrases.FIGHT_CANNOT_FIGHT_YOURSELF, update=update,
                               add_delete_button=True)
             return False
+
+        # Cannot be in reply to a Bot
+        if update.effective_message.reply_to_message.from_user.is_bot:
+            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update, add_delete_button=True)
+            return False
     else:
         # Get opponent from fight id
         fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info['a']))
