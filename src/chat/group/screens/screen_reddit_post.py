@@ -12,8 +12,9 @@ from src.model.RedditGroupPost import RedditGroupPost
 from src.model.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.pojo.Reddit import Reddit
+from src.service.download_service import download_temp_file
 from src.service.image_service import compress_image
-from src.service.message_service import full_message_send, full_media_send, escape_valid_markdown_chars
+from src.service.message_service import full_media_send, escape_valid_markdown_chars
 
 
 def manage(context: CallbackContext) -> None:
@@ -53,48 +54,61 @@ def manage(context: CallbackContext) -> None:
 
                 # Send in group
                 try:
-                    if post.url.startswith('https://i.redd.it'):
+                    # Send only media
+                    if post.url.startswith('https://i.redd.it') or post.url.startswith('https://v.redd.it'):
                         saved_media: SavedMedia = SavedMedia()
-                        if post.url.endswith('.gif'):
+                        if post.url.startswith('https://v.redd.it'):
+                            saved_media.type = SavedMediaType.VIDEO.value
+                        elif post.url.endswith('.gif'):
                             saved_media.type = SavedMediaType.ANIMATION.value
                         else:
                             saved_media.type = SavedMediaType.PHOTO.value
                         saved_media.media_id = post.url
+
                         try:
-                            # Send image
+                            # If video, download to local
+                            if saved_media.type == SavedMediaType.VIDEO.value:
+                                try:
+                                    url = post.media['reddit_video']['fallback_url']
+                                    url = url.split("?")[0]
+                                    saved_media.media_id = open(download_temp_file(url), 'rb')
+                                except KeyError:
+                                    logging.error('Reddit post {} has no video'.format(post.shortlink))
+                                    continue
+
+                            # Send media
                             message: Message = full_media_send(context, saved_media, caption=caption,
                                                                chat_id=Env.OPD_GROUP_ID.get_int())
-                        except BadRequest:
-                            logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
+                        except BadRequest as exceptionBadRequest:
+                            # Resize if type is image
+                            if saved_media.type == SavedMediaType.PHOTO.value:
+                                logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
 
-                            # Try resending with a smaller image
-                            image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
-                            saved_media.media_id = open(image_path, 'rb')
-                            message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=Env.OPD_GROUP_ID.get_int())
+                                # Try resending with a smaller image
+                                image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
+                                saved_media.media_id = open(image_path, 'rb')
+                                message: Message = full_media_send(context, saved_media, caption=caption,
+                                                                   chat_id=Env.OPD_GROUP_ID.get_int())
 
-                            try:
-                                # Delete the temporary image
-                                os.remove(image_path)
-                            except OSError:
-                                # Ignore, will be deleted by auto-cleanup timer
-                                logging.warning('Error deleting temporary image {}'.format(image_path))
-                                pass
+                                try:
+                                    # Delete the temporary image
+                                    os.remove(image_path)
+                                except OSError:
+                                    # Ignore, will be deleted by auto-cleanup timer
+                                    logging.warning('Error deleting temporary image {}'.format(image_path))
+                                    pass
+                            else:
+                                raise exceptionBadRequest
 
-                    else:
-                        # Send link
-                        message: Message = full_message_send(context, caption, chat_id=Env.OPD_GROUP_ID.get_int())
-
-                    # Save post
-                    reddit_group_post: RedditGroupPost = RedditGroupPost()
-                    reddit_group_post.short_link = post.shortlink
-                    reddit_group_post.message_id = message.message_id
-                    reddit_group_post.save()
-
-                    break
+                        # Save post
+                        reddit_group_post: RedditGroupPost = RedditGroupPost()
+                        reddit_group_post.short_link = post.shortlink
+                        reddit_group_post.message_id = message.message_id
+                        reddit_group_post.save()
+                        break
                 except BadRequest as bad_request:  # Try again if BadRequest
                     logging.error('Error sending reddit post {}: {}'.format(post.shortlink, bad_request))
-                    pass
+                    continue
                 except Exception as e:  # Stop if any other error
                     logging.error('Error sending reddit post {}: {}'.format(post.shortlink, e))
                     raise e

@@ -65,7 +65,7 @@ def generate_temp_file_path(extension: str) -> str:
     """
 
     # File name
-    file_name = uuid.uuid4().hex + '.' + extension
+    file_name = uuid.uuid4().hex + ('.' if not extension.startswith('.') else '') + extension
 
     # File path
     return os.path.join(c.TEMP_DIR, file_name)

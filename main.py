@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 
 import pytz
@@ -48,7 +49,7 @@ def main() -> None:
         logger.setLevel(logging.DEBUG)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        level=logging.INFO)
+                        level=logging.INFO, stream=sys.stdout)
 
     """Instantiate a Defaults object"""
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
