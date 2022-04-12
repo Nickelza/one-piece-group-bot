@@ -115,7 +115,7 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     # Validate keyboard interaction
     if keyboard is not None and 'u' in keyboard.info:
-        if user.tg_user_id not in str(keyboard.info['u']).split(c.KEYBOARD_USER_SPLIT_CHAR):  # Unauthorized
+        if user.tg_user_id not in str(keyboard.info['u']).split(c.STANDARD_SPLIT_CHAR):  # Unauthorized
             full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
             return
 

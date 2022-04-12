@@ -25,7 +25,7 @@ SAVED_MEDIA_NAME_FIGHT = 'fight'
 
 # Command
 COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
-KEYBOARD_USER_SPLIT_CHAR = "|"
+STANDARD_SPLIT_CHAR = "|"
 
 # Bounty poster
 BOUNTY_POSTER_EXTENSIION = 'jpg'

@@ -114,13 +114,15 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
                 index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
             correct_choices_index.append(index)
 
+        # Add correct choices to game
+        doc_q_game.correct_choices_index = c.STANDARD_SPLIT_CHAR.join(str(i) for i in correct_choices_index)
+
         # Create Keyboard with 5 apple buttons
         keyboard_data: dict = {'a': doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
         for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
-            keyboard_data['b'] = int(i in correct_choices_index)
-
+            keyboard_data['b'] = i
             option_emoji = Emoji.DOC_Q_GAME_OPTION.value
 
             # should show correct answer
@@ -184,7 +186,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
             user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # User chose correct option
-        if keyboard.info['b']:
+        correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
+        if str(keyboard.info['b']) in correct_choices_index:
             # Increase user's bounty
             user.bounty += win_amount
 

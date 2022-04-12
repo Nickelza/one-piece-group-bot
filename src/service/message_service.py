@@ -406,7 +406,7 @@ def get_delete_button(tg_user_ids: list[int]) -> Keyboard:
     Create a delete button
     :param tg_user_ids: List of users ids that can operate the delete button
     """
-    keyboard_data: dict = {'u': c.KEYBOARD_USER_SPLIT_CHAR.join(str(x) for x in tg_user_ids), 'del': 1}
+    keyboard_data: dict = {'u': c.STANDARD_SPLIT_CHAR.join(str(x) for x in tg_user_ids), 'del': 1}
 
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
