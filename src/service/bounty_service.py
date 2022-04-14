@@ -105,10 +105,18 @@ def get_message_belly(update: Update, user: User) -> int:
 
 def reset_bounty(context: CallbackContext) -> None:
     """
-    Resets the bounty to 0 for all users
+    Resets the bounty for all users
     :return: None
     """
-    User.update(bounty=0).execute()
+
+    # If the bounty / 2 is higher than the required bounty for the first new world location, cap it
+    # If the bounty / 2 is lower than base message belly, set it to 0
+    # Else divide by 2
+    conditions: list[tuple[bool, int]] = [((User.bounty / 2) > get_first_new_world().required_bounty,
+                                           get_first_new_world().required_bounty),
+                                          ((User.bounty / 2) < Env.BELLY_BASE_MESSAGE.get_int(), 0)]
+    case_stmt = Case(None, conditions, User.bounty / 2)
+    User.update(bounty=case_stmt).execute()
 
     # Reset location
     reset_location()
