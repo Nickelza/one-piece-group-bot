@@ -1,9 +1,14 @@
-from src.model.enums.Command import Command
+import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
 
-COMMAND_IN_REPLY_TO_BOT_ERROR = "You can't use this command in a reply to a bot"
+COMMAND_NOT_IN_REPLY_ERROR = 'This command can only be used in a reply to a message'
+COMMAND_IN_REPLY_TO_BOT_ERROR = "This command can't be used in reply to a bot"
+COMMAND_IN_REPLY_TO_ERROR = "This command can't be used in a reply to your own message"
+COMMAND_NOT_ACTIVE_ERROR = "This command is no longer available"
+COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR = COMMAND_NOT_ACTIVE_ERROR + '. ' + 'Please Use {} instead'
+COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in the New World'
+COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*'
 
-SHOW_BOUNTY_DEPRECATED = "This command is no longer available. Please use `/status` instead."
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*' \
                    '\nRank: {}' \
@@ -39,7 +44,6 @@ DOC_Q_GAME_START = 'Hi {}, allow me to offer you an apple.' \
                    '\nChoose wisely!' + '\n\n' + GAME_WIN_LOSE_STATUS
 
 DOC_Q_GAME_NOT_FOUND = 'Doc Q game not found'
-DOC_Q_GAME_NOT_OWNER = "I'm not here for you, call me with {} to play"
 DOC_Q_GAME_CANCEL = 'See you next time!'
 DOC_Q_GAME_WIN = "You're...haha...cough! cough! a really lucky one {}." \
                  "\nLet's go, Stronger...agh..!" + '\n\n{}' + GAME_WIN_STATUS
@@ -50,8 +54,6 @@ DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better l
 USER_NOT_FOUND = 'User not found'
 UNRECOGNIZED_SCREEN = 'Unrecognized command'
 SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
-COMMAND_NOT_IN_REPLY = 'This command can only be used in a reply to a message'
-COMMAND_FOR_NEW_WORLD_USERS = 'This command is only available for users in the New World'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL.value + ' Cancel'
@@ -84,7 +86,6 @@ LOCATION_INVALID_CHANGE_REGION_REQUEST = 'Invalid region'
 
 FIGHT_NOT_FOUND = 'Fight not found'
 FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
-FIGHT_CANNOT_FIGHT_YOURSELF = "You can't fight yourself"
 FIGHT_CANNOT_FIGHT_USER = "You can't fight this user"
 FIGHT_CONFIRMATION_REQUEST = '{} are you sure you want to fight {}?' \
                              '\nI predict a {}% probability of {}.' + '\n\n' + GAME_WIN_LOSE_STATUS

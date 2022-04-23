@@ -1,53 +1,39 @@
-from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from resources.Database import Database
+import src.model.enums.Command as Command
 from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
-from src.model.enums.Command import Command
-from src.service.message_service import is_command
+from src.model.enums.Screen import Screen
+from src.model.error.AdminChatError import AdminChatError
+from src.service.message_service import full_message_send
 
 
-def init() -> MySQLDatabase:
+def manage(update: Update, context: CallbackContext, command: Command.Command) -> None:
     """
-    Initializes the group chat manager
-    :return: Database connection
-    :rtype: MySQLDatabase
-    """
-    db_obj = Database()
-    db = db_obj.get_db()
-
-    return db
-
-
-def end(db: MySQLDatabase) -> None:
-    """
-    Ends the group chat manager
-    :param db: Database connection
-    :type db: MySQLDatabase
-    :return: None
-    :rtype: None
-    """
-    db.close()
-
-
-def manage(update: Update, context) -> None:
-    """
-    Main function for the group chat manager
+    Main function for the admin chat manager
     :param update: Telegram update
-    :type update: Update
     :param context: Telegram context
-    :type context: CallbackContext
+    :param command: Command to execute
     :return: None
-    :rtype: None
     """
-    # Initialize
-    db = init()
 
-    if update.message is not None and update.message.text is not None and is_command(update.message.text):
-        command_message = update.message.text[1:].lower()
+    dispatch_screens(update, context, command)
 
-        if command_message.startswith(Command.ADM_SAVE_MEDIA.value):
-            manage_screen_save_media(update, context)
 
-    end(db)
+def dispatch_screens(update: Update, context: CallbackContext, command: Command.Command) -> None:
+    """
+    Dispatches the different screens
+    :param update: Telegram update
+    :param context: Telegram context
+    :param command: Command to execute
+    :return: None
+    """
+
+    if command is not Command.ND:
+        match command.screen:
+            case Screen.ADM_SAVE_MEDIA:  # User status
+                manage_screen_save_media(update, context)
+
+            case _:  # Unknown screen
+                if update.callback_query is not None:
+                    full_message_send(context, AdminChatError.UNRECOGNIZED_SCREEN.build(), update, new_message=True)

@@ -24,8 +24,8 @@ SAVED_MEDIA_NAME_DOC_Q = 'docq'
 SAVED_MEDIA_NAME_FIGHT = 'fight'
 
 # Command
-COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
 STANDARD_SPLIT_CHAR = "|"
+COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
 
 # Bounty poster
 BOUNTY_POSTER_EXTENSIION = 'jpg'

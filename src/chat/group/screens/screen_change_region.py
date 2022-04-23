@@ -3,11 +3,11 @@ from telegram.ext import CallbackContext
 
 import resources.Environment as Env
 import resources.phrases as phrases
+import src.model.enums.Command as Command
 from src.model.User import User
 from src.model.enums import Location
-from src.model.enums.Command import Command
-from src.model.enums.GroupScreen import GroupScreen
 from src.model.enums.Region import Region
+from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
@@ -84,7 +84,7 @@ def send_proposal(update: Update, context: CallbackContext, user: User, region: 
     # Keyboard
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, region.value, phrases.KEYBOARD_OPTION_ACCEPT,
                                                                  phrases.KEYBOARD_OPTION_REJECT,
-                                                                 GroupScreen.CHANGE_REGION)]
+                                                                 Screen.GRP_CHANGE_REGION)]
 
     full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False)
 
@@ -114,7 +114,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         return
 
     else:  # User rejected
-        command: Command = Command.GRP_CHANGE_REGION_PARADISE if region == Region.PARADISE else \
+        command: Command.Command = Command.GRP_CHANGE_REGION_PARADISE if region == Region.PARADISE else \
             Command.GRP_CHANGE_REGION_NEW_WORLD
         ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL_REJECTED.format(
             get_region_image_preview(region),
@@ -126,7 +126,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
 
 def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None,
-           command: Command = None) -> None:
+           command: Command.Command = None) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -138,7 +138,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
 
     # Move to new world request
-    if command.value is not None:
+    if command is not None:
         region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
     elif keyboard is not None:
         region = Region(keyboard.info['a'])
@@ -150,7 +150,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
         return
 
     # Request to move
-    if command.value is not None:
+    if command.name is not None:
         send_proposal(update, context, user, region)
         return
 

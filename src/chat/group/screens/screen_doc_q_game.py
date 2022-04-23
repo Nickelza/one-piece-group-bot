@@ -10,10 +10,9 @@ import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
-from src.model.enums.Command import Command
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.GroupScreen import GroupScreen
+from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
@@ -46,12 +45,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
     :return: None
     """
 
-    # User is owner of the game
-    if doc_q_game is not None and doc_q_game.user != user:
-        full_message_send(context, phrases.DOC_Q_GAME_NOT_OWNER.format(Command.GRP_DOC_Q_GAME.value), update=update,
-                          answer_callback=True, show_alert=True)
-        return False
-
+    # User has enough bounty
     if user.bounty < Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_float():
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
             Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), get_bounty_formatted(user.bounty))
@@ -126,7 +120,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.correct_choices_index = c.STANDARD_SPLIT_CHAR.join(str(i) for i in correct_choices_index)
 
         # Create Keyboard with 5 apple buttons
-        keyboard_data: dict = {'a': doc_q_game.id}
+        keyboard_data: dict = {'a': doc_q_game.id, 'u': str(update.effective_user.id)}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
         for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
@@ -137,12 +131,9 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
                 option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION.value
 
-            apples_keyboard.append(Keyboard(option_emoji, keyboard_data, GroupScreen.DOC_Q_GAME))
+            apples_keyboard.append(Keyboard(option_emoji, keyboard_data, Screen.GRP_DOC_Q_GAME))
 
         inline_keyboard.append(apples_keyboard)
-        # Add cancel button
-        inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, {'a': doc_q_game.id, 'x': 1},
-                                         GroupScreen.DOC_Q_GAME)])
 
         # Get SavedMedia
         doc_q_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == c.SAVED_MEDIA_NAME_DOC_Q)
@@ -162,7 +153,8 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
                                                   get_bounty_formatted(final_bounty_if_win),
                                                   get_bounty_formatted(final_bounty_if_lose))
 
-        message: Message = full_media_send(context, doc_q_media, update, caption=caption, keyboard=inline_keyboard)
+        message: Message = full_media_send(context, doc_q_media, update, caption=caption, keyboard=inline_keyboard,
+                                           add_delete_button=True)
         doc_q_game.message_id = message.message_id
         doc_q_game.save()
 
@@ -239,7 +231,6 @@ def reset_playability(context: CallbackContext) -> None:
     :param context: The context
     :return: None
     """
-
     User.update(can_play_doc_q=1).execute()
 
 

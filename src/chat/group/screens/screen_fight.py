@@ -6,14 +6,14 @@ from telegram.ext import CallbackContext
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
+import src.model.enums.Command as Command
 from src.model.Fight import Fight
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
-from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.GroupScreen import GroupScreen
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.Location import is_new_world_by_level
+from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
@@ -40,39 +40,16 @@ def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | Non
     return fight.opponent
 
 
-def validate(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> bool:
+def validate(update: Update, context: CallbackContext, keyboard: Keyboard = None) -> bool:
     """
     Validate the fight request
     :param update: The update object
     :param context: The context object
-    :param user: The user object
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
-
-    # User is not in New World
-    if not is_new_world_by_level(user.location_level):
-        full_message_or_media_edit(context, phrases.COMMAND_FOR_NEW_WORLD_USERS, update, add_delete_button=True)
-        return False
-
     # If not query callback
-    if update.callback_query is None:
-        # Must be used in response to a message
-        if update.message.reply_to_message is None:
-            full_message_send(context, phrases.COMMAND_NOT_IN_REPLY, update=update, add_delete_button=True)
-            return False
-
-        # Cannot be in reply to yourself
-        if update.message.reply_to_message.from_user.id == update.message.from_user.id:
-            full_message_send(context, phrases.FIGHT_CANNOT_FIGHT_YOURSELF, update=update,
-                              add_delete_button=True)
-            return False
-
-        # Cannot be in reply to a Bot
-        if update.effective_message.reply_to_message.from_user.is_bot:
-            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update, add_delete_button=True)
-            return False
-    else:
+    if update.callback_query is not None:
         # Get opponent from fight id
         fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info['a']))
         if fight is None:
@@ -200,7 +177,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     # Keyboard
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, fight.id, phrases.KEYBOARD_OPTION_FIGHT,
                                                                  phrases.KEYBOARD_OPTION_RETREAT,
-                                                                 GroupScreen.FIGHT)]
+                                                                 Screen.GRP_FIGHT)]
 
     message: Message = full_media_send(context, fight_media, update=update, caption=caption, keyboard=inline_keyboard)
     fight.message_id = message.message_id
@@ -271,8 +248,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     fight.save()
 
 
-def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None, command: Command = None
-           ) -> None:
+def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None,
+           command: Command.Command = None) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -284,11 +261,11 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
 
     # Validate the request
-    if not validate(update, context, user, keyboard):
+    if not validate(update, context, keyboard):
         return
 
     # Request to fight
-    if command.value is not None:
+    if command.name is not None:
         send_request(update, context, user)
         return
 

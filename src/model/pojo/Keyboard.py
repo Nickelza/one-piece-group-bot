@@ -3,13 +3,13 @@ import json
 from telegram import CallbackQuery
 
 import constants as c
-from src.model.enums.GroupScreen import GroupScreen
+from src.model.enums.Screen import Screen
 
 
 class Keyboard:
-    def __init__(self, text: str, info: dict, screen: GroupScreen = None, url: str = None):
+    def __init__(self, text: str, info: dict, screen: Screen = None, url: str = None):
         self.text = text
-        self.screen: GroupScreen = screen
+        self.screen = screen
         self.info: dict = info
         self.url: str = url
 
@@ -29,9 +29,12 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery):
     info: dict = json.loads(callback_query.data)
 
     try:
-        screen = GroupScreen(int(info[c.SCREEN_CODE]))
+        if c.SCREEN_CODE in info:
+            screen = Screen(info[c.SCREEN_CODE])
+        else:
+            screen = None
     except (ValueError, KeyError):
-        screen = GroupScreen.UNKNOWN
+        screen = Screen.UNKOWN
 
     text: str = ''
 

@@ -7,3 +7,4 @@ class ErrorSource(Enum):
     """
     GROUP_CHAT = 'G'
     PRIVATE_CHAT = 'P'
+    ADMIN_CHAT = 'A'

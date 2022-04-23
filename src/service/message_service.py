@@ -10,8 +10,8 @@ import constants as c
 import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
-from src.model.enums.GroupScreen import GroupScreen
 from src.model.enums.SavedMediaType import SavedMediaType
+from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 
 
@@ -377,7 +377,10 @@ def is_command(text: str) -> bool:
     """
     Check if the message is a command
     """
-    return text[0] in c.COMMAND_PREFIX_ALIASES
+    try:
+        return text[0] in c.COMMAND_PREFIX_ALIASES
+    except TypeError:
+        return False
 
 
 def mention_markdown_v2(user_id: int | str, name: str) -> str:
@@ -411,7 +414,7 @@ def get_delete_button(tg_user_ids: list[int]) -> Keyboard:
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
 
-def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: GroupScreen
+def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: Screen
                         ) -> list[Keyboard]:
     """
     Create a yes/no keyboard

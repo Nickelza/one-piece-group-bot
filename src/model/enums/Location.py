@@ -26,17 +26,31 @@ class Location:
 
     def is_paradise(self) -> bool:
         """
-        Check if the location is a paradise
-        :return: True if the location is a paradise
+        Check if the location is in Paradise
+        :return: True if the location is in Paradise
         """
         return is_paradise_by_level(self.level)
 
     def is_new_world(self) -> bool:
         """
-        Check if the location is a new world
-        :return: True if the location is a new world
+        Check if the location is in New World
+        :return: True if the location is in New World
         """
         return not is_paradise_by_level(self.level)
+
+    def is_last_paradise(self) -> bool:
+        """
+        Check if the location is the last location in Paradise
+        :return: True if the location is the last location in Paradise
+        """
+        return get_last_paradise() == self
+
+    def is_first_new_world(self) -> bool:
+        """
+        Check if the location is the first location in New World
+        :return: True if the location is the first location in New World
+        """
+        return get_first_new_world() == self
 
 
 ND = Location(0, "None", Region.ND, 0, False, '')
