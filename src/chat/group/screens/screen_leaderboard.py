@@ -48,13 +48,14 @@ def manage(context: CallbackContext) -> None:
     leaderboard = create_leaderboard()
 
     # Send the leaderboard to the group
-    ot_text = get_leaderboard_message(leaderboard)
-    message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
-    message.pin(disable_notification=True)
+    if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
+        ot_text = get_leaderboard_message(leaderboard)
+        message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
+        message.pin(disable_notification=True)
 
-    # Save the message id
-    leaderboard.message_id = message.message_id
-    leaderboard.save()
+        # Save the message id
+        leaderboard.message_id = message.message_id
+        leaderboard.save()
 
     # Reset bounty poster limit
     reset_bounty_poster_limit(context, reset_previous_leaderboard=True)

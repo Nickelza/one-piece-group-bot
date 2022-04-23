@@ -121,8 +121,9 @@ def reset_bounty(context: CallbackContext) -> None:
     # Reset location
     reset_location()
 
-    ot_text = phrases.BOUNTY_RESET
-    full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
+    if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
+        ot_text = phrases.BOUNTY_RESET
+        full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
 
 def add_bounty(context: CallbackContext, user: User, amount: float, update: Update = None,
@@ -145,7 +146,7 @@ def add_bounty(context: CallbackContext, user: User, amount: float, update: Upda
 
     # Update the user's location
     if should_update_location:
-        update_location(context, user, update, send_update_message=True)
+        update_location(context, user, update)
 
     return user
 

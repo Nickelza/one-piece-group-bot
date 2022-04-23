@@ -245,3 +245,12 @@ FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE = Environment('FIGHT_MIN_WIN_PROBABILITY_FI
 FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA', default_value='1')
 # Minimum win probability for Rookie. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE', default_value='1')
+
+# Send leaderboard message. Default: True
+SEND_MESSAGE_LEADERBOARD = Environment('SEND_MESSAGE_LEADERBOARD', default_value='True')
+# Send location update message. Default: True
+SEND_MESSAGE_LOCATION_UPDATE = Environment('SEND_MESSAGE_LOCATION_UPDATE', default_value='True')
+# Send move to new world proposal message. Default: True
+SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL = Environment('SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL', default_value='True')
+# Send bounty reset message. Default: True
+SEND_MESSAGE_BOUNTY_RESET = Environment('SEND_MESSAGE_BOUNTY_RESET', default_value='True')
