@@ -11,6 +11,7 @@ from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.model.User import User
+from src.model.enums.MessageSource import MessageSource
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
 from src.service.message_service import full_message_send, is_command
 
@@ -75,6 +76,15 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     chat_id = update.effective_chat.id
     user: User = get_user(update)
 
+    if chat_id == update.effective_user.id:
+        message_source = MessageSource.PRIVATE
+    elif chat_id == Env.OPD_GROUP_ID.get_int():
+        message_source = MessageSource.GROUP
+    elif chat_id == Env.ADMIN_GROUP_ID.get_int():
+        message_source = MessageSource.ADMIN
+    else:
+        return
+
     command: Command.Command = Command.ND
     keyboard = None
     try:
@@ -83,27 +93,26 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             command = Command.get_by_name(command_name)
     except (AttributeError, ValueError):
         if is_callback:
-            keyboard = get_keyboard_from_callback_query(update.callback_query)
+            keyboard = get_keyboard_from_callback_query(update.callback_query, message_source)
             if keyboard.screen is not None:
-                command = Command.get_by_screen(keyboard.screen)
+                try:
+                    command = Command.get_by_screen(keyboard.screen)
+                except ValueError:
+                    command = Command.Command('', keyboard.screen)
 
     if command != Command.ND or is_callback:
         if not validate(update, context, command, user, keyboard):
             return
 
-    # Admin chat
-    if chat_id == Env.ADMIN_GROUP_ID.get_int():
-        manage_admin_chat(update, context, command)
-        return
-
-    if chat_id == update.effective_user.id:
-        manage_private_chat(update, context, command)
-        return
-
-    # Group chat
-    if chat_id == Env.OPD_GROUP_ID.get_int():
-        manage_group_chat(update, context, command, user, keyboard)
-        return
+    match message_source:
+        case MessageSource.PRIVATE:
+            manage_private_chat(update, context, command, user, keyboard)
+        case MessageSource.GROUP:
+            manage_group_chat(update, context, command, user, keyboard)
+        case MessageSource.ADMIN:
+            manage_admin_chat(update, context, command)
+        case _:
+            raise ValueError('Invalid message source')
 
 
 def validate(update: Update, context: CallbackContext, command: Command.Command, user: User, keyboard: Keyboard

@@ -44,11 +44,12 @@ def escape_valid_markdown_chars(text: str) -> str:
     return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
 
 
-def get_chat_id(update: Update = None, chat_id: int = None) -> int:
+def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat: bool = False) -> int:
     """
     Get chat id
     :param update: Update object. Required if chat_id is None
     :param chat_id: Chat id. Required if update is None
+    :param send_in_private_chat: Send in private chat. Default: False
     :return: Chat id
     """
 
@@ -58,22 +59,26 @@ def get_chat_id(update: Update = None, chat_id: int = None) -> int:
     if update is None or update.effective_chat is None or update.effective_chat.id is None:
         raise Exception(phrases.EXCEPTION_CHAT_ID_NOT_PROVIDED)
 
+    if send_in_private_chat:
+        return update.effective_user.id
+
     return update.effective_chat.id
 
 
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
-                 authorized_users: list = None) -> InlineKeyboardMarkup | None:
+                 authorized_users: list = None, inbound_keyboard: Keyboard = None) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
     :param keyboard: Keyboard object
     :param update: Update object
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
+    :param inbound_keyboard: Inbound Keyboard object
     :return: Keyboard markup
     """
 
     keyboard_markup = None
-    if keyboard is not None or add_delete_button is True:
+    if keyboard is not None or add_delete_button is True or inbound_keyboard is not None:
         keyboard_list: list[list[InlineKeyboardButton]] = []
         if keyboard is not None:
             for row in keyboard:
@@ -82,6 +87,13 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                     if button.url is not None:
                         keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
                     else:
+                        # Add information about previous screen
+                        if inbound_keyboard is not None and inbound_keyboard.screen is not None:
+                            button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
+                            if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
+                                button.previous_screen_list.append(inbound_keyboard.screen)
+                            button.refresh_callback_data()
+
                         keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
                 keyboard_list.append(keyboard_row)
 
@@ -99,6 +111,10 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
 
             delete_button = get_delete_button(authorized_users)
             keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
+
+        if inbound_keyboard is not None:
+            back_button = get_back_button(inbound_keyboard)
+            keyboard_list.append([InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)])
 
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
 
@@ -142,7 +158,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                       protect_content: bool = False, disable_web_page_preview: bool = True,
                       allow_sending_without_reply: bool = True, add_delete_button: bool = False,
-                      authorized_users: list = None) -> Message:
+                      authorized_users: list = None, inbound_keyboard: Keyboard = None,
+                      send_in_private_chat: bool = False) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -163,14 +180,19 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
+    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
+    :param send_in_private_chat: True if the message should be sent in private chat
     :return: Message
     """
 
     if text is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         text = escape_invalid_markdown_chars(text)
 
-    chat_id = get_chat_id(update=update, chat_id=chat_id)
-    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users)
+    if send_in_private_chat:
+        new_message = True
+
+    chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
+    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users, inbound_keyboard)
 
     # New message
     if new_message or update is None or update.callback_query is None:
@@ -436,3 +458,13 @@ def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: st
     keyboard_line.append(Keyboard(no_text, keyboard_data, screen))
 
     return keyboard_line
+
+
+def get_back_button(inbound_keyboard: Keyboard) -> Keyboard:
+    """
+    Create a back button
+    :param inbound_keyboard: Keyboard object
+    """
+
+    return Keyboard(phrases.KEYBOARD_OPTION_BACK, screen=inbound_keyboard.previous_screen_list[-1],
+                    previous_screen_list=inbound_keyboard.previous_screen_list[:-1])

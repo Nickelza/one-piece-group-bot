@@ -37,9 +37,9 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     Main function for the group chat manager
     :param update: Telegram update
     :param context: Telegram context
-    :param user: User object
     :param command: Command to execute
-    :param keyboard: Keyboard to send
+    :param user: User object
+    :param keyboard: Keyboard
     :return: None
     """
 

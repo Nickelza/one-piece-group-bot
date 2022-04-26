@@ -150,7 +150,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
         return
 
     # Request to move
-    if command.name is not None:
+    if keyboard is None:
         send_proposal(update, context, user, region)
         return
 

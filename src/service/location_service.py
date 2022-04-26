@@ -48,7 +48,8 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
         except ValueError:
             ot_text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
 
-        if user.location_level != effective_location.level and Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool():
+        if user.location_level != effective_location.level and Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool() \
+                and (user.should_send_location_update or requested_by_user):
 
             # Determine preposition to use for the location
             if 'island' in effective_location.name.lower() or 'archipelago' in effective_location.name.lower():
@@ -65,7 +66,7 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                                        ot_text_suffix)
 
             message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
-                                                 add_delete_button=True)
+                                                 add_delete_button=True, send_in_private_chat=(not requested_by_user))
 
             # Should send poster if it hasn't been sent for this location ever
             if effective_location.show_poster:

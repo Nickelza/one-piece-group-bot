@@ -25,5 +25,9 @@ class Emoji(Enum):
 
     # Other
     ACCEPT = '✅'
+    ENABLED = '✅'
     CANCEL = '❌'
+    DISABLED = '❌'
     REJECT = '❌'
+    SETTINGS = '⚙'
+    BACK = '🔙'

@@ -62,6 +62,7 @@ KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT.value + ' Accept'
 KEYBOARD_OPTION_REJECT = Emoji.REJECT.value + ' Reject'
 KEYBOARD_OPTION_FIGHT = Emoji.FIGHT.value + ' Fight'
 KEYBOARD_OPTION_RETREAT = Emoji.RETREAT.value + ' Retreat'
+KEYBOARD_OPTION_BACK = Emoji.BACK.value + ' Back'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -70,7 +71,6 @@ EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
 KEYBOARD_NOT_FOUND = 'Keyboard not found'
 KEYBOARD_USE_UNAUTHORIZED = 'You are not authorized to use this keyboard'
 
-PVT_CHAT_START = 'Welcome to @onepiecegroup Bot!'
 
 LOCATION_LEVEL_UP = '{}Congratulations {}!' \
                     '\nYou are now {} {}' \
@@ -96,3 +96,16 @@ FIGHT_WIN = "Just as I foresaw, {} won the fight against {}.\n" \
 FIGHT_LOSE = "Just as I foresaw, {} lost the fight against {}.\n" \
              "Looks like your luck ran out..." + '\n\n' + GAME_LOSE_STATUS
 FIGHT_CONFIRMATION_RETREAT = 'You have successfully retreated'
+
+ENABLED = Emoji.ENABLED.value + ' Enabled'
+DISABLED = Emoji.DISABLED.value + ' Disabled'
+ENABLE = Emoji.ENABLED.value + ' Enable'
+DISABLE = Emoji.DISABLED.value + ' Disable'
+CURRENT_SETTING = 'Current setting: {}'
+
+# Private chat
+PVT_TXT_START = 'Welcome to @onepiecegroup Bot! From here you can manage your profile.'
+PVT_KEY_SETTINGS = Emoji.SETTINGS.value + ' Settings'
+PVT_TXT_SETTINGS = 'Which setting would you like to change?'
+PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
+PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'

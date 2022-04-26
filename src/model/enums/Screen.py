@@ -12,5 +12,7 @@ class Screen(Enum):
     GRP_SHOW_BOUNTY = 'G-1'
 
     PVT_START = 'P1'
+    PVT_SETTINGS = 'P2'
+    PVT_SETTINGS_LOCATION_UPDATE = 'P3'
 
     ADM_SAVE_MEDIA = 'A1'
