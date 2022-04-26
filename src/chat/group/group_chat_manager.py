@@ -13,7 +13,7 @@ from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, delete_message
 
 
 def update_user_bounty(update: Update, context: CallbackContext, user: User) -> User:
@@ -51,6 +51,9 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     except AttributeError:
         pass
 
+    if not validate(update, user):
+        return
+
     user = update_user_bounty(update, context, user)
 
     dispatch_screens(update, context, user, keyboard, command)
@@ -85,3 +88,42 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     full_message_send(context, GroupChatError.UNRECOGNIZED_SCREEN.build(), update, new_message=True)
+
+
+def validate(update: Update, user: User) -> bool:
+    """
+    Validates the message, deleting it if it's not valid
+    :param update: Telegram update
+    :param user: User object
+    :return: True if valid, False otherwise
+    """
+
+    # Stickers
+    try:
+        if update.message.sticker is not None \
+                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int():
+            delete_message(update)
+            return False
+    except AttributeError:
+        pass
+
+    # Animations
+    try:
+        if update.message.animation is not None \
+                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int():
+            delete_message(update)
+            return False
+    except AttributeError:
+        pass
+
+    # Forwarded
+    try:
+        if update.message.forward_from is not None \
+                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int() \
+                and str(update.message.forward_from.id) not in Env.WHITELIST_FORWARD_MESSAGE.get_list():
+            delete_message(update)
+            return False
+    except AttributeError:
+        pass
+
+    return True

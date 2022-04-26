@@ -1,5 +1,10 @@
 import os
+import sys
 from distutils.util import strtobool
+
+from dotenv import load_dotenv
+
+import constants as c
 
 
 class Environment:
@@ -63,10 +68,20 @@ class Environment:
         """
         return strtobool(self.get())
 
+    def get_list(self) -> list[str]:
+        """
+        Get the environment variable as a list
+        :return: The environment variable as a list
+        """
+        return self.get().split(c.STANDARD_SPLIT_CHAR)
+
+
+load_dotenv(sys.argv[1])
 
 # Bot
 BOT_TOKEN = Environment('BOT_TOKEN')
 BOT_DROP_PENDING_UPDATES = Environment('BOT_DROP_PENDING_UPDATES', default_value='False')
+BOT_ID = Environment('BOT_ID')
 
 # CONFIG
 # Which timezone to use
@@ -93,6 +108,8 @@ OPD_GROUP_ID = Environment('OPD_GROUP_ID')
 OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
 # ChatID for admin commands
 ADMIN_GROUP_ID = Environment('ADMIN_GROUP_ID')
+# OPMA bot id
+OPMA_BOT_ID = Environment('OPMA_BOT_ID', default_value='921260484')
 
 # REDDIT
 # Reddit client id
@@ -254,3 +271,18 @@ SEND_MESSAGE_LOCATION_UPDATE = Environment('SEND_MESSAGE_LOCATION_UPDATE', defau
 SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL = Environment('SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL', default_value='True')
 # Send bounty reset message. Default: True
 SEND_MESSAGE_BOUNTY_RESET = Environment('SEND_MESSAGE_BOUNTY_RESET', default_value='True')
+
+# Required location to use DocQ. Default: 14 (Jaya)
+REQUIRED_LOCATION_LEVEL_DOCQ = Environment('REQUIRED_LOCATION_DOCQ_LEVEL', default_value='14')
+# Required location to send stickers. Default: 11 (Little Garden)
+REQUIRED_LOCATION_LEVEL_SEND_STICKER = Environment('REQUIRED_LOCATION_SEND_STICKER_LEVEL', default_value='11')
+# Required location to send animations. Default: 11 (Little Garden)
+REQUIRED_LOCATION_LEVEL_SEND_ANIMATION = Environment('REQUIRED_LOCATION_SEND_ANIMATION_LEVEL', default_value='11')
+# Required location to forward messages. Default: 11 (Little Garden)
+REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE = Environment('REQUIRED_LOCATION_FORWARD_MESSAGE_LEVEL', default_value='11')
+# Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
+WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_value=(
+        OPD_CHANNEL_ID.get() + c.STANDARD_SPLIT_CHAR
+        + BOT_ID.get() + c.STANDARD_SPLIT_CHAR
+        + OPMA_BOT_ID.get()
+))

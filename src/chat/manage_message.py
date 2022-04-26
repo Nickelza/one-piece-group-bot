@@ -1,5 +1,5 @@
 from peewee import MySQLDatabase
-from telegram import Update, TelegramError
+from telegram import Update
 from telegram.ext import CallbackContext
 
 import constants as c
@@ -13,7 +13,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
-from src.service.message_service import full_message_send, is_command
+from src.service.message_service import full_message_send, is_command, delete_message
 
 
 def init() -> MySQLDatabase:
@@ -135,10 +135,7 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
 
         # Delete request, best effort
         if 'del' in keyboard.info:
-            try:
-                update.effective_message.delete()
-            except TelegramError:
-                pass
+            delete_message(update)
             return False
 
     # Is active

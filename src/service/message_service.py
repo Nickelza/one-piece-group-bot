@@ -2,7 +2,7 @@ import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation, Chat
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
@@ -468,3 +468,14 @@ def get_back_button(inbound_keyboard: Keyboard) -> Keyboard:
 
     return Keyboard(phrases.KEYBOARD_OPTION_BACK, screen=inbound_keyboard.previous_screen_list[-1],
                     previous_screen_list=inbound_keyboard.previous_screen_list[:-1])
+
+
+def delete_message(update: Update):
+    """
+    Delete a message with best effort
+    :param update: Update object
+    """
+    try:
+        update.effective_message.delete()
+    except TelegramError:
+        pass

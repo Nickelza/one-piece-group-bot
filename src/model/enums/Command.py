@@ -1,3 +1,4 @@
+import resources.Environment as Env
 import src.model.enums.Location as Location
 from src.model.enums.Screen import Screen
 
@@ -42,7 +43,8 @@ class Command:
 ND = None
 
 PVT_START = Command('start', Screen.PVT_START)
-GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.JAYA)
+GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_DOCQ.get_int()))
 GRP_USER_STATUS = Command('status', Screen.GRP_USER_STATUS)
 GRP_CHANGE_REGION_NEW_WORLD = Command('newworld', Screen.GRP_CHANGE_REGION,
                                       required_location=Location.get_last_paradise())

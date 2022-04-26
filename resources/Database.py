@@ -1,13 +1,9 @@
-import sys
 from abc import ABC
 
-from dotenv import load_dotenv
 from peewee import *
 from playhouse.shortcuts import ReconnectMixin
 
 import resources.Environment as Env
-
-load_dotenv(sys.argv[1])
 
 
 class ReconnectMySQLDatabase(ReconnectMixin, MySQLDatabase, ABC):

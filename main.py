@@ -51,7 +51,7 @@ def main() -> None:
     """Instantiate a Defaults object"""
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
-    updater = Updater(Env.BOT_TOKEN.get(), use_context=True, defaults=defaults)
+    updater = Updater(Env.BOT_TOKEN.get(), defaults=defaults)
     dispatcher = updater.dispatcher
 
     # Add handlers
