@@ -6,7 +6,6 @@ from telegram.ext import CallbackContext
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
-import src.model.enums.Command as Command
 from src.model.Fight import Fight
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
@@ -248,15 +247,13 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     fight.save()
 
 
-def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None,
-           command: Command.Command = None) -> None:
+def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:
     """
     Manage the change region request
     :param update: The update object
     :param context: The context object
     :param user: The user object
     :param keyboard: The keyboard object
-    :param command: The command message
     :return: None
     """
 
@@ -265,13 +262,8 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
         return
 
     # Request to fight
-    if command.name is not None:
-        send_request(update, context, user)
-        return
-
-    # Interaction with keyboard
     if keyboard is None:
-        full_message_send(context, GroupChatError.KEYBOARD_NOT_FOUND.build(), update)
+        send_request(update, context, user)
         return
 
     keyboard_interaction(update, context, user, keyboard)

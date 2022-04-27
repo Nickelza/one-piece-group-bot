@@ -77,13 +77,13 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
                 manage_screen_show_status(update, context)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
-                manage_screen_doc_q_game(update, context, user, keyboard)
+                manage_screen_doc_q_game(update, context, user, keyboard=keyboard)
 
             case Screen.GRP_CHANGE_REGION:  # Change region
-                manage_screen_change_region(update, context, user, keyboard, command)
+                manage_screen_change_region(update, context, user, keyboard=keyboard, command=command)
 
             case Screen.GRP_FIGHT:  # Fight
-                manage_screen_fight(update, context, user, keyboard, command)
+                manage_screen_fight(update, context, user, keyboard=keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

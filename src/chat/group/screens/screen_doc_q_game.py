@@ -244,13 +244,8 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     :return: None
     """
     # Request to play
-    if update.message is not None:
-        play_request(update, context, user)
-        return
-
-    # Interaction with keyboard
     if keyboard is None:
-        full_message_send(context, GroupChatError.KEYBOARD_NOT_FOUND.build(), update)
+        play_request(update, context, user)
         return
 
     keyboard_interaction(update, context, user, keyboard)
