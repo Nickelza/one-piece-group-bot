@@ -76,6 +76,10 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     chat_id = update.effective_chat.id
     user: User = get_user(update)
 
+    # Check if the user is authorized
+    if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
+        return
+
     if chat_id == update.effective_user.id:
         message_source = MessageSource.PRIVATE
     elif chat_id == Env.OPD_GROUP_ID.get_int():

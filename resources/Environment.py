@@ -102,6 +102,10 @@ DB_PASSWORD = Environment('DB_PASSWORD')
 DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
 
 # TELEGRAM CHAT
+# Limit interaction to authorized users
+LIMIT_TO_AUTHORIZED_USERS = Environment('LIMIT_TO_AUTHORIZED_USERS', default_value='False')
+# List of authorized users
+AUTHORIZED_USERS = Environment('AUTHORIZED_USERS', default_value='')
 # Group chat id
 OPD_GROUP_ID = Environment('OPD_GROUP_ID')
 # Main channel id
