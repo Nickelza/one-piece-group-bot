@@ -6,16 +6,16 @@ from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
-from model.enums.GameStatus import GameStatus
-from model.game.GameTurn import GameTurn
-from model.game.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameOutcome import GameOutcome
+from src.model.game.GameTurn import GameTurn
 from src.model.game.RockPaperScissors import RockPaperScissors
+from src.model.game.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
 from src.service.message_service import full_message_send, mention_markdown_user
