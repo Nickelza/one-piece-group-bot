@@ -1,11 +1,10 @@
 from enum import Enum
 
 
-class GameStatus(Enum):
+class GameOutcome(Enum):
     """
     Enum for the status of a game.
     """
-    IN_PROGRESS = 0
-    WON = 1
-    LOST = 2
+    CHALLENGER_WON = 1
+    OPPONENT_WON = 2
     DRAW = 3

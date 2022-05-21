@@ -6,6 +6,10 @@ import src.model.enums.Command as Command
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
+from src.chat.group.screens.screen_game import manage as manage_screen_game
+from src.chat.group.screens.screen_game_opponent_confirmation import manage as manage_screen_game_opponent_confirmation
+from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
+from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
@@ -84,6 +88,18 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
 
             case Screen.GRP_FIGHT:  # Fight
                 manage_screen_fight(update, context, user, keyboard=keyboard)
+
+            case Screen.GRP_GAME:  # Game
+                manage_screen_game(update, context, user, command)
+
+            case Screen.GRP_GAME_SELECTION:  # Game selection
+                manage_screen_game_selection(update, context, inbound_keyboard=keyboard)
+
+            case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
+                manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=keyboard)
+
+            case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game rps
+                manage_screen_game_rps(update, context, user, inbound_keyboard=keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

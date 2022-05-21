@@ -31,3 +31,8 @@ class Emoji(Enum):
     REJECT = '❌'
     SETTINGS = '⚙'
     BACK = '🔙'
+
+    # Rock Paper Scissors
+    ROCK = '✊'
+    PAPER = '🖐'
+    SCISSORS = '✌'

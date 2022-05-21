@@ -2,7 +2,6 @@ from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
@@ -13,7 +12,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
-from src.service.message_service import full_message_send, is_command, delete_message
+from src.service.message_service import full_message_send, is_command, delete_message, get_message_source
 
 
 def init() -> MySQLDatabase:
@@ -73,20 +72,15 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     :return: None
     """
 
-    chat_id = update.effective_chat.id
     user: User = get_user(update)
 
     # Check if the user is authorized
     if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
         return
 
-    if chat_id == update.effective_user.id:
-        message_source = MessageSource.PRIVATE
-    elif chat_id == Env.OPD_GROUP_ID.get_int():
-        message_source = MessageSource.GROUP
-    elif chat_id == Env.ADMIN_GROUP_ID.get_int():
-        message_source = MessageSource.ADMIN
-    else:
+    # Recast necessary for match case to work, don't ask me why
+    message_source: MessageSource = MessageSource(get_message_source(update).value)
+    if message_source is MessageSource.ND:
         return
 
     command: Command.Command = Command.ND
@@ -94,7 +88,12 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     try:
         if is_command(update.message.text):
             command_name = (update.message.text.split(' ')[0])[1:].lower()
+            command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
             command = Command.get_by_name(command_name)
+            try:
+                command.parameters = update.message.text.split(' ')[1:]
+            except IndexError:
+                pass
     except (AttributeError, ValueError):
         if is_callback:
             keyboard = get_keyboard_from_callback_query(update.callback_query, message_source)
@@ -133,7 +132,7 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
 
     # Validate keyboard interaction
     if keyboard is not None and 'u' in keyboard.info:
-        if user.tg_user_id not in str(keyboard.info['u']).split(c.STANDARD_SPLIT_CHAR):  # Unauthorized
+        if int(user.id) not in keyboard.info['u']:  # Unauthorized
             full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
             return False
 

@@ -26,6 +26,7 @@ class Command:
         self.allow_reply_to_bot = allow_reply_to_bot
         self.screen = screen
         self.required_location = required_location
+        self.parameters = []
 
     def get_formatted(self):
         """
@@ -52,11 +53,12 @@ GRP_CHANGE_REGION_PARADISE = Command('paradise', Screen.GRP_CHANGE_REGION,
                                      required_location=Location.get_last_paradise())
 GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True, required_location=Location.get_first_new_world())
 GRP_SHOW_BOUNTY = Command('bounty', Screen.GRP_SHOW_BOUNTY, active=False, replaced_by='status')
+GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True, required_location=Location.get_first_new_world())
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
 COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NEW_WORLD,
-            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA]
+            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, GRP_GAME]
 
 
 def get_by_name(name: str):

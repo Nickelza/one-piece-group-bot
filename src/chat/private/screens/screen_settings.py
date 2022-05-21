@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
-from model.enums.Screen import Screen
+from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 

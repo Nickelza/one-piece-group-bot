@@ -1,3 +1,4 @@
+import logging
 import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
@@ -7,7 +8,9 @@ from telegram.ext import CallbackContext
 from telegram.utils.helpers import mention_markdown
 
 import constants as c
+import resources.Environment as Env
 import resources.phrases as phrases
+from model.enums.MessageSource import MessageSource
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.SavedMediaType import SavedMediaType
@@ -66,16 +69,38 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
 
 
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
-                 authorized_users: list = None, inbound_keyboard: Keyboard = None) -> InlineKeyboardMarkup | None:
+                 authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
+                 only_authorized_users_can_interact: bool = True) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
     :param keyboard: Keyboard object
     :param update: Update object
     :param add_delete_button: True if the delete button should be added
-    :param authorized_users: List of user ids that are allowed to delete the message
+    :param authorized_users_tg_ids: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the keyboard
     :return: Keyboard markup
     """
+
+    # Do not validate user interaction for private chats
+    if update is not None:
+        message_source = get_message_source(update)
+        if message_source is MessageSource.ND:
+            only_authorized_users_can_interact = False
+
+    if authorized_users_tg_ids is None:
+        authorized_users_tg_ids = []
+    try:
+        if update.effective_user.id not in authorized_users_tg_ids:
+            authorized_users_tg_ids.append(update.effective_user.id)
+    except AttributeError:
+        pass
+
+    authorized_users_ids: list[int] = []
+    for tg_user_id in authorized_users_tg_ids:
+        user = User.get_or_none(User.tg_user_id == tg_user_id)
+        if user is not None:
+            authorized_users_ids.append(user.id)
 
     keyboard_markup = None
     if keyboard is not None or add_delete_button is True or inbound_keyboard is not None:
@@ -92,24 +117,24 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                             button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
                             if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
                                 button.previous_screen_list.append(inbound_keyboard.screen)
-                            button.refresh_callback_data()
 
+                        # Add list of authorized users
+                        if only_authorized_users_can_interact and button.inherit_authorized_users:
+                            if update is not None and update.effective_chat.type != Chat.PRIVATE:
+                                button.info['u'] = authorized_users_ids
+                        elif not button.inherit_authorized_users:
+                            button.info['u'] = [u.id for u in button.authorized_users]
+
+                        button.refresh_callback_data()
                         keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+
                 keyboard_list.append(keyboard_row)
 
         if add_delete_button is True:
-            if authorized_users is None:
-                authorized_users = []
-            try:
-                if update.effective_user.id not in authorized_users:
-                    authorized_users.append(update.effective_user.id)
-            except AttributeError:
-                pass
-
-            if not len(authorized_users) > 0:
+            if not len(authorized_users_ids) > 0:
                 raise Exception("No authorized users provided for delete button")
 
-            delete_button = get_delete_button(authorized_users)
+            delete_button = get_delete_button(authorized_users_ids)
             keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
 
         if inbound_keyboard is not None:
@@ -159,7 +184,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       protect_content: bool = False, disable_web_page_preview: bool = True,
                       allow_sending_without_reply: bool = True, add_delete_button: bool = False,
                       authorized_users: list = None, inbound_keyboard: Keyboard = None,
-                      send_in_private_chat: bool = False) -> Message:
+                      send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -182,6 +207,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param authorized_users: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :return: Message
     """
 
@@ -192,7 +218,9 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
         new_message = True
 
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
-    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users, inbound_keyboard)
+    keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
+                                   authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
+                                   only_authorized_users_can_interact=only_authorized_users_can_interact)
 
     # New message
     if new_message or update is None or update.callback_query is None:
@@ -426,12 +454,12 @@ def get_image_preview(image_url: str) -> str:
     return f'[​]({image_url})'
 
 
-def get_delete_button(tg_user_ids: list[int]) -> Keyboard:
+def get_delete_button(user_ids: list[int]) -> Keyboard:
     """
     Create a delete button
-    :param tg_user_ids: List of users ids that can operate the delete button
+    :param user_ids: List of users ids that can operate the delete button
     """
-    keyboard_data: dict = {'u': c.STANDARD_SPLIT_CHAR.join(str(x) for x in tg_user_ids), 'del': 1}
+    keyboard_data: dict = {'u': user_ids, 'del': 1}
 
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
@@ -449,13 +477,15 @@ def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: st
     """
 
     keyboard_line: list[Keyboard] = []
-    keyboard_data: dict = {'a': primary_key, 'u': user.tg_user_id, 'b': 1}
+    keyboard_data_yes: dict = {'a': primary_key, 'b': 1}
 
     # Accept
-    keyboard_line.append(Keyboard(yes_text, keyboard_data, screen))
+    keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=screen, authorized_users=[user],
+                                  inherit_authorized_users=False))
     # Reject
-    keyboard_data['b'] = 0
-    keyboard_line.append(Keyboard(no_text, keyboard_data, screen))
+    keyboard_data_no: dict = {'a': primary_key, 'b': 0}
+    keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=screen, authorized_users=[user],
+                                  inherit_authorized_users=False))
 
     return keyboard_line
 
@@ -479,3 +509,23 @@ def delete_message(update: Update):
         update.effective_message.delete()
     except TelegramError:
         pass
+
+
+def get_message_source(update: Update) -> MessageSource:
+    """
+    Get the message source
+    :param update: Update object
+    :return: MessageSource object
+    """
+
+    if update.effective_chat.type == Chat.PRIVATE:
+        return MessageSource.PRIVATE
+
+    if update.effective_chat.id == Env.OPD_GROUP_ID.get_int():
+        return MessageSource.GROUP
+
+    if update.effective_chat.id == Env.ADMIN_GROUP_ID.get_int():
+        return MessageSource.ADMIN
+
+    logging.error(f'Unknown message source for {update.effective_chat.id}')
+    return MessageSource.ND

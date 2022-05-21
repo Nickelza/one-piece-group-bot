@@ -14,3 +14,5 @@ class GroupChatError(Error):
     INVALID_CHANGE_REGION_REQUEST = Error(6, phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST, source, True)
     FIGHT_NOT_FOUND = Error(7, phrases.FIGHT_NOT_FOUND, source, True)
     FIGHT_OPPONENT_NOT_FOUND = Error(8, phrases.FIGHT_OPPONENT_NOT_FOUND, source, True)
+    GAME_NOT_FOUND = Error(9, phrases.GAME_NOT_FOUND, source, True)
+    INVALID_GAME = Error(10, phrases.GAME_INVALID, source, True)

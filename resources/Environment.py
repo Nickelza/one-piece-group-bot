@@ -66,7 +66,7 @@ class Environment:
         Get the environment variable as a boolean
         :return: The environment variable as a boolean
         """
-        return strtobool(self.get())
+        return True if strtobool(self.get()) else False
 
     def get_list(self) -> list[str]:
         """
@@ -82,6 +82,7 @@ load_dotenv(sys.argv[1])
 BOT_TOKEN = Environment('BOT_TOKEN')
 BOT_DROP_PENDING_UPDATES = Environment('BOT_DROP_PENDING_UPDATES', default_value='False')
 BOT_ID = Environment('BOT_ID')
+BOT_USERNAME = Environment('BOT_USERNAME')
 
 # CONFIG
 # Which timezone to use

@@ -71,7 +71,6 @@ EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
 KEYBOARD_NOT_FOUND = 'Keyboard not found'
 KEYBOARD_USE_UNAUTHORIZED = 'You are not authorized to use this keyboard'
 
-
 LOCATION_LEVEL_UP = '{}Congratulations {}!' \
                     '\nYou are now {} {}' \
                     '\n\n{}'
@@ -109,3 +108,31 @@ PVT_KEY_SETTINGS = Emoji.SETTINGS.value + ' Settings'
 PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
+
+GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
+GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
+GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount'
+GAME_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number with only '.' or ',' as decimal separator"
+GAME_INSUFFICIENT_BOUNTY = "Insufficient bounty"
+GAME_NOT_FOUND = 'Game not found'
+GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
+               '\nWould you like to accept?'
+GAME_CANCELED = 'Game cancelled'
+GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
+GAME_INVALID = 'Invalid game'
+GAME_UNKNOWN_NAME = 'Unknown'
+
+ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
+ROCK_PAPER_SCISSORS_GAME_TEXT = '*Rock Paper Scissors*' \
+                                '\n{} vs {}' \
+                                '\n*Wager:* ฿*{}*' \
+                                '\n\n{}'
+ROCK_PAPER_SCISSORS_CHOICE = 'You chose {}'
+ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK.value + ' Rock'
+ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER.value + ' Paper'
+ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS.value + ' Scissors'
+
+GAME_STATUS_AWAITING_CHOICE = 'Status: Awaiting choice'
+GAME_STATUS_AWAITING_USER_CHOICE = 'Status: Awaiting {} choice'
+GAME_RESULT_DRAW = 'Result: Draw'
+GAME_RESULT_WIN = 'Winner: {}'

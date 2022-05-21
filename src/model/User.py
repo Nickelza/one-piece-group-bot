@@ -14,7 +14,7 @@ class User(BaseModel):
     tg_first_name = CharField(max_length=99)
     tg_last_name = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
-    max_bounty = BigIntegerField(default=0)
+    pending_bounty = BigIntegerField(default=0)
     max_rank_index = SmallIntegerField(null=True)
     can_play_doc_q = BooleanField(default=True)
     bounty_poster_limit = SmallIntegerField(default=0)

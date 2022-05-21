@@ -120,7 +120,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.correct_choices_index = c.STANDARD_SPLIT_CHAR.join(str(i) for i in correct_choices_index)
 
         # Create Keyboard with 5 apple buttons
-        keyboard_data: dict = {'a': doc_q_game.id, 'u': str(update.effective_user.id)}
+        keyboard_data: dict = {'a': doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
         for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
