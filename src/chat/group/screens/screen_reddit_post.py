@@ -17,22 +17,19 @@ from src.service.image_service import compress_image
 from src.service.message_service import full_media_send, escape_valid_markdown_chars
 
 
-def manage(context: CallbackContext) -> None:
+def manage(context: CallbackContext, subreddit_name: str) -> None:
     """
     Send a reddit post to the chat group
     :param context: Context of callback
+    :param subreddit_name: Name of the subreddit
     """
-
-    job = context.job
 
     reddit = Reddit(client_id=Env.REDDIT_CLIENT_ID.get(),
                     client_secret=Env.REDDIT_CLIENT_SECRET.get(),
                     user_agent=Env.REDDIT_USER_AGENT.get())
 
-    subreddit_name = str(job.context)
-
     # Get first 10 hot posts
-    for post in reddit.get_subreddit_hot_posts(subreddit_name, 10):
+    for post in reddit.get_subreddit_hot_posts(subreddit_name):
         post: Submission = post
 
         # Post is valid if it's not stickied and not nsfw

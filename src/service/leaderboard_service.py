@@ -17,7 +17,7 @@ def create_leaderboard() -> Leaderboard:
     week = datetime.datetime.now().isocalendar()[1]
 
     # Delete the leaderboard if it exists
-    Leaderboard.delete().where(Leaderboard.year == year, Leaderboard.week == week).execute()
+    Leaderboard.delete().where(Leaderboard.year == year, Leaderboard.week == week).run()
 
     # Create a leaderboard for the current week and year
     leaderboard = Leaderboard()

@@ -108,10 +108,10 @@ def reset_location() -> None:
     for location in reversed(Location.LOCATIONS):
         conditions.append((User.bounty >= location.required_bounty, location.level))
     case_stmt = Case(None, conditions)
-    User.update(location_level=case_stmt).execute()
+    User.update(location_level=case_stmt).run()
 
     # Reset new world proposal
-    User.update(should_propose_new_world=True).where(User.should_propose_new_world is False).execute()
+    User.update(should_propose_new_world=True).where(User.should_propose_new_world is False).run()
 
 
 def reset_can_change_region(context: CallbackContext) -> None:
@@ -121,4 +121,4 @@ def reset_can_change_region(context: CallbackContext) -> None:
     :return: None
     """
 
-    User.update(can_change_region=True).where(User.can_change_region is True).execute()
+    User.update(can_change_region=True).where(User.can_change_region is True).run()

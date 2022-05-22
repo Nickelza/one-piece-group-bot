@@ -233,7 +233,7 @@ def reset_bounty_poster_limit(context: CallbackContext, reset_previous_leaderboa
         previous_leaderboard_users_id = LeaderboardUser.select(LeaderboardUser.user) \
             .where(LeaderboardUser.leaderboard == previous_leaderboard)
         if previous_leaderboard is not None:
-            User.update(bounty_poster_limit=0).where(User.id.in_(previous_leaderboard_users_id)).execute()
+            User.update(bounty_poster_limit=0).where(User.id.in_(previous_leaderboard_users_id)).run()
 
     # Reset the limit for the current leaderboard users
     current_leaderboard: Leaderboard = get_leaderboard()
@@ -242,4 +242,4 @@ def reset_bounty_poster_limit(context: CallbackContext, reset_previous_leaderboa
             leaderboard_user: LeaderboardUser = leaderboard_user
 
             User.update(bounty_poster_limit=get_bounty_poster_limit(leaderboard_user)) \
-                .where(User.id == leaderboard_user.user).execute()
+                .where(User.id == leaderboard_user.user).run()
