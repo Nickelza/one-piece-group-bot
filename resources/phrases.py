@@ -10,9 +10,10 @@ COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*'
 
 SHOW_USER_STATUS = 'User: {}' \
-                   '\nBounty: ฿*{}*' \
+                   '\nBounty: ฿*{}*{}' \
                    '\nRank: {}' \
                    '\nLocation: {}'
+USER_STATUS_PENDING_BOUNTY = '\nPending bounty: ฿*{}*'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \

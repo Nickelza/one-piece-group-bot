@@ -77,8 +77,12 @@ def manage(update: Update, context: CallbackContext) -> None:
     # Get location
     location: Location = Location.get_by_level(user.location_level)
 
+    pending_bounty_addendum = '' if user.pending_bounty == 0 else phrases.USER_STATUS_PENDING_BOUNTY.format(
+        bounty_service.get_bounty_formatted(user.pending_bounty))
+
     message_text = phrases.SHOW_USER_STATUS.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                    bounty_service.get_bounty_formatted(user.bounty),
+                                                   pending_bounty_addendum,
                                                    leaderboard_user_rank.get_emoji_and_rank_message(),
                                                    location.name)
 
