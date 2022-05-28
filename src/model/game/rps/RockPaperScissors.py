@@ -1,32 +1,33 @@
 import json
 
+from model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
-from src.model.game.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 
 
 class RockPaperScissors:
-    def __init__(self, challenger_choice: RPSChoice = RPSChoice.NONE, opponent_choice: RPSChoice = RPSChoice.NONE):
+    def __init__(self, game_turn: GameTurn = GameTurn.CHALLENGER, challenger_choice: RPSChoice = RPSChoice.NONE,
+                 opponent_choice: RPSChoice = RPSChoice.NONE):
+        self.game_turn = game_turn
         self.challenger_choice: RPSChoice = challenger_choice
         self.opponent_choice: RPSChoice = opponent_choice
 
-    def get_turn(self) -> GameTurn:
+    def is_finished(self) -> bool:
         """
         Returns the turn of the game
         :return: GameTurn
         """
-        if self.challenger_choice == RPSChoice.NONE:
-            return GameTurn.CHALLENGER
-        elif self.opponent_choice == RPSChoice.NONE:
-            return GameTurn.OPPONENT
-        else:
-            return GameTurn.FINISHED
+
+        return self.challenger_choice != RPSChoice.NONE and self.opponent_choice != RPSChoice.NONE
 
     def get_outcome(self) -> GameOutcome:
         """
         Returns the outcome of the game
         :return: GameOutcome
         """
+
+        if not self.is_finished():
+            return GameOutcome.NONE
 
         if self.challenger_choice == self.opponent_choice:
             return GameOutcome.DRAW
@@ -48,4 +49,4 @@ class RockPaperScissors:
         :return: string
         """
 
-        return json.dumps(self.__dict__)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)

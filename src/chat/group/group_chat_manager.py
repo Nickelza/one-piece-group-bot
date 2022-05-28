@@ -9,6 +9,7 @@ from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
 from src.chat.group.screens.screen_game_opponent_confirmation import manage as manage_screen_game_opponent_confirmation
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
+from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
 from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
@@ -98,8 +99,11 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
             case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
                 manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=keyboard)
 
-            case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game rps
+            case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game Rock Paper Scissors
                 manage_screen_game_rps(update, context, user, inbound_keyboard=keyboard)
+
+            case Screen.GRP_RUSSIAN_ROULETTE_GAME:  # Game Russian Roulette
+                manage_screen_game_rr(update, context, user, inbound_keyboard=keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

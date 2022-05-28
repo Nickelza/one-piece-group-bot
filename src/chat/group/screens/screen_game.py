@@ -101,6 +101,12 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
                                  screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rps])
 
+    # Russian Roulette
+    button_info = {'a': game.id, 'b': GameType.RUSSIAN_ROULETTE.value}
+    btn_rr: Keyboard = Keyboard(phrases.RUSSIAN_ROULETTE_GAME_NAME, info=button_info,
+                                screen=Screen.GRP_GAME_SELECTION)
+    inline_keyboard.append([btn_rr])
+
     ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
     message: Message = full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
                                          add_delete_button=True)

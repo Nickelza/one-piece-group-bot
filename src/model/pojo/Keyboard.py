@@ -42,7 +42,7 @@ class Keyboard:
         if self.screen is not None:
             info_with_screen[c.SCREEN_CODE] = int(self.screen.value[1:])
 
-        if self.previous_screen_list is not None:
+        if self.previous_screen_list is not None and len(self.previous_screen_list) > 0:
             info_with_screen[c.PREVIOUS_SCREEN_CODE] = [int(screen.value[1:]) for screen in self.previous_screen_list]
 
         return json.dumps(info_with_screen, separators=(',', ':'))

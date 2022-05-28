@@ -1,5 +1,6 @@
 from peewee import Case
 from telegram import Update, Message
+from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 
 import resources.Environment as Env
@@ -65,22 +66,25 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                                        effective_location.name,
                                                        ot_text_suffix)
 
-            message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
-                                                 add_delete_button=True, send_in_private_chat=(not requested_by_user))
+            try:
+                message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
+                                                     add_delete_button=True,
+                                                     send_in_private_chat=(not requested_by_user))
+                # Should send poster if it hasn't been sent for this location ever
+                if effective_location.show_poster:
+                    user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
+                        (UserLocationBountyPoster.user == user)
+                        & (UserLocationBountyPoster.location_level == effective_location.level))
+                    if user_location_bounty_poster is None:
+                        send_bounty_poster(context, update, user, reply_to_message_id=message.message_id)
 
-            # Should send poster if it hasn't been sent for this location ever
-            if effective_location.show_poster:
-                user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
-                    (UserLocationBountyPoster.user == user)
-                    & (UserLocationBountyPoster.location_level == effective_location.level))
-                if user_location_bounty_poster is None:
-                    send_bounty_poster(context, update, user, reply_to_message_id=message.message_id)
-
-                    # Save the poster as sent for this location
-                    user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()
-                    user_location_bounty_poster.user = user
-                    user_location_bounty_poster.location_level = effective_location.level
-                    user_location_bounty_poster.save()
+                        # Save the poster as sent for this location
+                        user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()
+                        user_location_bounty_poster.user = user
+                        user_location_bounty_poster.location_level = effective_location.level
+                        user_location_bounty_poster.save()
+            except Unauthorized:  # User blocked the bot in private chat
+                pass
 
         # Update user location
         user.location_level = effective_location.level

@@ -198,6 +198,10 @@ DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
 # Show correct option. Default: False
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
 
+# RUSSIAN ROULETTE
+# Show bullet location. Default: False
+RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
+
 # LOCATION
 # Percentage that bounty is incremented by on timer for Paradise. Default: 0
 LOCATION_PARADISE_BOUNTY_INCREMENT = Environment('LOCATION_PARADISE_BOUNTY_INCREMENT', default_value='0')

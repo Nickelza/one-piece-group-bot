@@ -32,7 +32,16 @@ class Emoji(Enum):
     SETTINGS = '⚙'
     BACK = '🔙'
 
+    # Game
+    WINNER = '🏆'
+
     # Rock Paper Scissors
     ROCK = '✊'
     PAPER = '🖐'
     SCISSORS = '✌'
+
+    # Russian Roulette
+    NOT_FIRED_CHAMBER = '🔴'
+    FIRED_EMPTY_CHAMBER = '⭕'
+    FIRED_BULLET_CHAMBER = '💥'
+    CENTER_CHAMBER = '⚪'

@@ -97,6 +97,11 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     except (AttributeError, ValueError):
         if is_callback:
             keyboard = get_keyboard_from_callback_query(update.callback_query, message_source)
+
+            if not keyboard.info:
+                # No provided info, do nothing
+                return
+
             if keyboard.screen is not None:
                 try:
                     command = Command.get_by_screen(keyboard.screen)

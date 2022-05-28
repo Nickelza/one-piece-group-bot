@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
 from src.chat.group.screens.screen_game_rps import manage as manage_rps
+from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
 from src.model.User import User
 from src.model.error.GroupChatError import GroupChatError
@@ -94,5 +95,8 @@ def dispatch_game(update: Update, context: CallbackContext, user: User, inbound_
     match game_type:
         case GameType.ROCK_PAPER_SCISSORS:
             manage_rps(update, context, user, inbound_keyboard, game)
+
+        case GameType.RUSSIAN_ROULETTE:
+            manage_rr(update, context, user, inbound_keyboard, game)
         case _:
             full_message_send(context, GroupChatError.INVALID_GAME.build(), update=update)

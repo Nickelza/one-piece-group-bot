@@ -112,21 +112,29 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                     if button.url is not None:
                         keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
                     else:
-                        # Add information about previous screen
-                        if inbound_keyboard is not None and inbound_keyboard.screen is not None:
-                            button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
-                            if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
-                                button.previous_screen_list.append(inbound_keyboard.screen)
+                        if button.info:
+                            # Already has some info. If it has no info, nothing should be added
 
-                        # Add list of authorized users
-                        if only_authorized_users_can_interact and button.inherit_authorized_users:
-                            if update is not None and update.effective_chat.type != Chat.PRIVATE:
-                                button.info['u'] = authorized_users_ids
-                        elif not button.inherit_authorized_users:
-                            button.info['u'] = [u.id for u in button.authorized_users]
+                            # Add information about previous screen
+                            if inbound_keyboard is not None and inbound_keyboard.screen is not None:
+                                button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
+                                if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
+                                    button.previous_screen_list.append(inbound_keyboard.screen)
 
-                        button.refresh_callback_data()
-                        keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+                            # Add list of authorized users
+                            if only_authorized_users_can_interact and button.inherit_authorized_users:
+                                if update is not None and update.effective_chat.type != Chat.PRIVATE:
+                                    button.info['u'] = authorized_users_ids
+                            elif not button.inherit_authorized_users:
+                                button.info['u'] = [u.id for u in button.authorized_users]
+
+                            button.refresh_callback_data()
+
+                        try:
+                            keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+                        except AttributeError:
+                            logging.error(f'Button {button} does not have a callback_data')
+                            pass
 
                 keyboard_list.append(keyboard_row)
 

@@ -50,5 +50,8 @@ def get_game_name(game_type: GameType) -> str:
         case GameType.ROCK_PAPER_SCISSORS:
             return phrases.ROCK_PAPER_SCISSORS_GAME_NAME
 
+        case GameType.RUSSIAN_ROULETTE:
+            return phrases.RUSSIAN_ROULETTE_GAME_NAME
+
         case _:
             return phrases.GAME_UNKNOWN_NAME

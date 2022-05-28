@@ -123,16 +123,27 @@ GAME_INVALID = 'Invalid game'
 GAME_UNKNOWN_NAME = 'Unknown'
 
 ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
-ROCK_PAPER_SCISSORS_GAME_TEXT = '*Rock Paper Scissors*' \
-                                '\n{} vs {}' \
-                                '\n*Wager:* ฿*{}*' \
-                                '\n\n{}'
-ROCK_PAPER_SCISSORS_CHOICE = 'You chose {}'
+
+ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
 ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK.value + ' Rock'
 ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER.value + ' Paper'
 ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS.value + ' Scissors'
+ROCK_PAPER_SCISSORS_CHOICES = '{} chose {} ' \
+                              '\n{} chose {}\n\n'
 
+RUSSIAN_ROULETTE_GAME_NAME = 'Russian Roulette'
+RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fired. Choose another one.'
+RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
+RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
+
+GAME_TEXT = '*{}*' \
+            '\n\n{} vs {}' \
+            '\n*Wager:* ฿*{}*' \
+            '\n\n{}'
 GAME_STATUS_AWAITING_CHOICE = 'Status: Awaiting choice'
-GAME_STATUS_AWAITING_USER_CHOICE = 'Status: Awaiting {} choice'
+GAME_STATUS_AWAITING_USER_CHOICE = "Status: Awaiting {}'s choice"
 GAME_RESULT_DRAW = 'Result: Draw'
-GAME_RESULT_WIN = 'Winner: {}'
+GAME_RESULT_WIN = Emoji.WINNER.value + ' {} won'
+GAME_NOT_YOUR_TURN = "It's not your turn"
+GAME_TURN = "Status: {}'s turn"
+GAME_ENDED = 'This game has ended'
