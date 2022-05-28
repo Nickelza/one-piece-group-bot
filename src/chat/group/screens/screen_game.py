@@ -6,7 +6,7 @@ import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Command import Command
-from src.model.enums.GameStatus import GameStatus
+from src.model.enums.GameStatus import get_finished_statuses
 from src.model.enums.Location import is_new_world_by_level
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
@@ -50,7 +50,8 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where(Game.challenger == challenger,
-                                                        Game.status == GameStatus.IN_PROGRESS.value)
+                                                        Game.status not in [
+                                                            status.value for status in get_finished_statuses()])
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
                                                url=get_message_url(Env.OPD_GROUP_ID.get_int(), game.message_id))])

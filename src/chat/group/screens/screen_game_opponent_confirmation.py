@@ -9,7 +9,7 @@ from src.model.User import User
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.game_service import delete_game
+from src.service.game_service import delete_game, validate_game
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
@@ -23,10 +23,9 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     :return: None
     """
 
-    try:
-        game: Game = Game.get_by_id(inbound_keyboard.info['a'])
-    except IndexError:
-        full_message_send(context, GroupChatError.GAME_NOT_FOUND.build(), update=update)
+    # Get the game from validation, will handle error messages
+    game = validate_game(update, context, inbound_keyboard)
+    if game is None:
         return
 
     # User clicked on cancel button

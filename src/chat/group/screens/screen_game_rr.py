@@ -10,7 +10,6 @@ import src.service.game_service as game_service
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.russianroulette.RussianRoulette import RussianRoulette
@@ -30,60 +29,56 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     :return: None
     """
 
+    # Get the game from validation, will handle error messages
+    game = game_service.validate_game(update, context, inbound_keyboard, game)
     if game is None:
-        game: Game = game_service.get_game_from_keyboard(update, context, inbound_keyboard)
-
-    if game.status != GameStatus.IN_PROGRESS.value:
-        full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
         return
 
-    # get_game_from_keyboard will send error message if game is not found
-    if game is not None:
-        game, russian_roulette = get_board(game)
+    game, russian_roulette = get_board(game)
 
-        # Not invoked from opponent confirmation
+    # Not invoked from opponent confirmation
+    if inbound_keyboard.screen == Screen.GRP_RUSSIAN_ROULETTE_GAME:
+        # Not user's turn
+        if not russian_roulette.is_user_turn(user, game):
+            full_message_send(context, phrases.GAME_NOT_YOUR_TURN, update=update, answer_callback=True,
+                              show_alert=True)
+            return
+
+        x, y = inbound_keyboard.info['b']
+        # Chamber is already fired
+        if russian_roulette.cylinder[x][y] == RRChamberStatus.FIRED:
+            full_message_send(context, phrases.RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED, update=update,
+                              answer_callback=True, show_alert=True)
+            return
+
+        russian_roulette.cylinder[x][y] = RRChamberStatus.FIRED
+
+        full_message_send(context, get_choice_text(russian_roulette.bullet_is_fired()), update=update,
+                          answer_callback=True)
+
+    # Game is finished
+    if russian_roulette.is_finished():
+        game_outcome: GameOutcome = russian_roulette.get_outcome()
+        game = game_service.end_game(game, game_outcome)
+
+        # Send result
+        full_message_send(context, get_text(game, russian_roulette), update=update,
+                          keyboard=get_outbound_keyboard(game, russian_roulette),
+                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+    else:
         if inbound_keyboard.screen == Screen.GRP_RUSSIAN_ROULETTE_GAME:
-            # Not user's turn
-            if not russian_roulette.is_user_turn(user, game):
-                full_message_send(context, phrases.GAME_NOT_YOUR_TURN, update=update, answer_callback=True,
-                                  show_alert=True)
-                return
+            # Update turn only on regular interaction
+            russian_roulette.set_turn()
 
-            x, y = inbound_keyboard.info['b']
-            # Chamber is already fired
-            if russian_roulette.cylinder[x][y] == RRChamberStatus.FIRED:
-                full_message_send(context, phrases.RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED, update=update,
-                                  answer_callback=True, show_alert=True)
-                return
+        # Create outbound keyboard
 
-            russian_roulette.cylinder[x][y] = RRChamberStatus.FIRED
+        # Send message
+        full_message_send(context, get_text(game, russian_roulette), update=update,
+                          keyboard=get_outbound_keyboard(game, russian_roulette),
+                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
 
-            full_message_send(context, get_choice_text(russian_roulette.bullet_is_fired()), update=update,
-                              answer_callback=True)
-
-        # Game is finished
-        if russian_roulette.is_finished():
-            game_outcome: GameOutcome = russian_roulette.get_outcome()
-            game = game_service.end_game(game, game_outcome)
-
-            # Send result
-            full_message_send(context, get_text(game, russian_roulette), update=update,
-                              keyboard=get_outbound_keyboard(game, russian_roulette),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game))
-        else:
-            if inbound_keyboard.screen == Screen.GRP_RUSSIAN_ROULETTE_GAME:
-                # Update turn only on regular interaction
-                russian_roulette.set_turn()
-
-            # Create outbound keyboard
-
-            # Send message
-            full_message_send(context, get_text(game, russian_roulette), update=update,
-                              keyboard=get_outbound_keyboard(game, russian_roulette),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game))
-
-        game.board = russian_roulette.get_board_json()
-        game.save()
+    game.board = russian_roulette.get_board_json()
+    game.save()
 
 
 def get_outbound_keyboard(game: Game, russian_roulette: RussianRoulette) -> list[list[Keyboard]]:

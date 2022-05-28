@@ -108,6 +108,13 @@ def reset_bounty(context: CallbackContext) -> None:
     Resets the bounty for all users
     :return: None
     """
+    from src.service.game_service import force_end_all_active as force_end_all_active_games  # Avoid circular import
+
+    # End all active games and return the wagers
+    force_end_all_active_games()
+
+    # Return all pending bounty
+    User.update(bounty=User.bounty + User.pending_bounty, pending_bounty=0).execute()
 
     # If the bounty / 2 is higher than the required bounty for the first new world location, cap it
     # If the bounty / 2 is lower than base message belly, set it to 0

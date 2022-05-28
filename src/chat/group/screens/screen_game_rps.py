@@ -10,7 +10,6 @@ import src.service.game_service as game_service
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.rps.RockPaperScissors import RockPaperScissors
@@ -31,51 +30,46 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     :return: None
     """
 
-    # Get the game
+    # Get the game from validation, will handle error messages
+    game = game_service.validate_game(update, context, inbound_keyboard, game)
     if game is None:
-        game = game_service.get_game_from_keyboard(update, context, inbound_keyboard)
-
-    if game.status != GameStatus.IN_PROGRESS.value:
-        full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
         return
 
-    # get_game_from_keyboard will send error message if game is not found
-    if game is not None:
-        game, rock_paper_scissors = get_board(game)
+    game, rock_paper_scissors = get_board(game)
 
-        if inbound_keyboard.screen == Screen.GRP_ROCK_PAPER_SCISSORS_GAME:
-            rps_choice = RPSChoice(inbound_keyboard.info['b'])
-            # Save choice
-            if user == game.challenger:
-                rock_paper_scissors.challenger_choice = rps_choice.value
-            else:
-                rock_paper_scissors.opponent_choice = rps_choice.value
+    if inbound_keyboard.screen == Screen.GRP_ROCK_PAPER_SCISSORS_GAME:
+        rps_choice = RPSChoice(inbound_keyboard.info['b'])
+        # Save choice
+        if user == game.challenger:
+            rock_paper_scissors.challenger_choice = rps_choice.value
+        else:
+            rock_paper_scissors.opponent_choice = rps_choice.value
 
-            game.board = rock_paper_scissors.get_board_json()
-            game.save()
+        game.board = rock_paper_scissors.get_board_json()
+        game.save()
 
-            full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
-                              show_alert=True)
+        full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
+                          show_alert=True)
 
-        # Game is finished
-        if rock_paper_scissors.is_finished():
-            game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
-            game = game_service.end_game(game, game_outcome)
+    # Game is finished
+    if rock_paper_scissors.is_finished():
+        game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
+        game = game_service.end_game(game, game_outcome)
 
-            # Send result
-            full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                              keyboard=get_outbound_keyboard(game),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game))
-            return
+        # Send result
+        full_message_send(context, get_text(game, rock_paper_scissors), update=update,
+                          keyboard=get_outbound_keyboard(game),
+                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        return
 
-        # Send message
-        try:
-            full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                              keyboard=get_outbound_keyboard(game),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game))
-        except BadRequest:
-            # Possible when user changes a choice, so the output message stays the same
-            pass
+    # Send message
+    try:
+        full_message_send(context, get_text(game, rock_paper_scissors), update=update,
+                          keyboard=get_outbound_keyboard(game),
+                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+    except BadRequest:
+        # Possible when user changes a choice, so the output message stays the same
+        pass
 
 
 def get_outbound_keyboard(game) -> list[list[Keyboard]]:

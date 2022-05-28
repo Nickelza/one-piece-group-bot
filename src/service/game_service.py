@@ -5,7 +5,7 @@ from telegram.ext import CallbackContext
 import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
-from src.model.enums.GameStatus import GameStatus
+from src.model.enums.GameStatus import GameStatus, is_finished_by_status, get_finished_statuses
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameOutcome import GameOutcome
 from src.model.pojo.Keyboard import Keyboard
@@ -140,3 +140,47 @@ def reset_can_initiate_game(context: CallbackContext) -> None:
     """
 
     User.update(can_initiate_game=True).where(User.can_initiate_game is True).execute()
+
+
+def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, game: Game = None
+                  ) -> Game | None:
+    """
+    Validate the game
+    :param update: The update
+    :param context: The context
+    :param inbound_keyboard: The keyboard
+    :param game: The game
+    :return: The game if valid, None otherwise
+    """
+
+    # Get the game
+    if game is None:
+        game = get_game_from_keyboard(update, context, inbound_keyboard)
+
+    if game is None:
+        # Error message already send by get_game_from_keyboard
+        return None
+
+    if game.status == GameStatus.FORCED_END.value:
+        full_message_send(context, phrases.GAME_FORCED_END, update=update)
+        return None
+
+    if is_finished_by_status(GameStatus(game.status)):
+        full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
+        return None
+
+    return game
+
+
+def force_end_all_active() -> None:
+    """
+    Force all games in progress to end, returning wagers
+    :return:
+    """
+
+    finished_status_values = [status.value for status in get_finished_statuses()]
+    active_games = Game.select().where(Game.status.not_in(finished_status_values))
+
+    for game in active_games:
+        game.status = GameStatus.FORCED_END.value
+        game.save()
