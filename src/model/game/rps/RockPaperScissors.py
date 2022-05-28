@@ -1,8 +1,8 @@
 import json
 
-from model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
+from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 
 
 class RockPaperScissors:

@@ -7,14 +7,14 @@ from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
 import src.service.game_service as game_service
-from model.game.rps.RockPaperScissors import RockPaperScissors
-from model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
+from src.model.game.rps.RockPaperScissors import RockPaperScissors
+from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
 from src.service.message_service import full_message_send, mention_markdown_user
