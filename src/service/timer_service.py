@@ -11,6 +11,7 @@ from src.chat.manage_message import init, end
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import add_region_bounty
 from src.service.download_service import cleanup_temp_dir
+from src.service.game_service import reset_can_initiate_game
 from src.service.location_service import reset_can_change_region
 
 
@@ -66,6 +67,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
     # Increment bounty by region
     add_to_context(context, Timer.ADD_REGION_BOUNTY)
 
+    # Reset can initiate game
+    add_to_context(context, Timer.RESET_CAN_INITIATE_GAME)
+
 
 def run(context: CallbackContext) -> None:
     """
@@ -102,6 +106,8 @@ def run(context: CallbackContext) -> None:
             reset_can_change_region(context)
         case Timer.ADD_REGION_BOUNTY:
             add_region_bounty(context)
+        case Timer.RESET_CAN_INITIATE_GAME:
+            reset_can_initiate_game(context)
         case _:
             logging.error(f'Unknown timer {job.name}')
 

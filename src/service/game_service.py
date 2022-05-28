@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
@@ -102,3 +103,40 @@ def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOu
                                     mention_markdown_user(game.opponent),
                                     get_bounty_formatted(game.wager),
                                     added_ot_text)
+
+
+def delete_game(update: Update, context: CallbackContext, game: Game, delete_message: bool = True) -> None:
+    """
+    Delete game
+    :param update: The update
+    :param context: The context
+    :param game: The game
+    :param delete_message: If the message should be deleted
+    :return: None
+    """
+    # Try to delete message
+    if delete_message:
+        try:
+            context.bot.delete_message(update.effective_chat.id, game.message_id)
+        except TelegramError:
+            pass
+
+    # Return wager to challenger
+    challenger: User = game.challenger
+    challenger.can_initiate_game = True
+    challenger.bounty += game.wager
+    challenger.pending_bounty -= game.wager
+    challenger.save()
+
+    # Delete game
+    game.delete_instance()
+
+
+def reset_can_initiate_game(context: CallbackContext) -> None:
+    """
+    Reset the user's can_change_region flag
+    :param context:
+    :return: None
+    """
+
+    User.update(can_initiate_game=True).where(User.can_initiate_game is True).execute()

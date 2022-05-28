@@ -147,3 +147,7 @@ GAME_RESULT_WIN = Emoji.WINNER.value + ' {} won'
 GAME_NOT_YOUR_TURN = "It's not your turn"
 GAME_TURN = "Status: {}'s turn"
 GAME_ENDED = 'This game has ended'
+GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any pending challenges.' \
+                       '\nYou can initiate another challenge in *{}*, but in the meantime you can ask another user ' \
+                       'to challenge you.'
+GAME_PENDING_KEY = 'Pending challenge'

@@ -8,6 +8,7 @@ from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
+from src.service.game_service import delete_game
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard
 
 
@@ -24,6 +25,11 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
         game: Game = Game.get_by_id(inbound_keyboard.info['a'])
     except IndexError:
         full_message_send(context, GroupChatError.GAME_NOT_FOUND.build(), update=update)
+        return
+
+    # User clicked on cancel button
+    if 'x' in inbound_keyboard.info:
+        delete_game(update, context, game)
         return
 
     game.type = GameType(inbound_keyboard.info['b']).value

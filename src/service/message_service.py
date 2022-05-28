@@ -537,3 +537,15 @@ def get_message_source(update: Update) -> MessageSource:
 
     logging.error(f'Unknown message source for {update.effective_chat.id}')
     return MessageSource.ND
+
+
+def get_message_url(chat_id: int, message_id: int) -> str:
+    """
+    Get the message url
+    :param chat_id: Chat id
+    :param message_id: Message id
+    :return: Message url
+    """
+
+    chat_id_cleaned = str(chat_id).replace('-100', '')
+    return f'https://t.me/c/{chat_id_cleaned}/{message_id}'

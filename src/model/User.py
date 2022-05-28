@@ -17,6 +17,7 @@ class User(BaseModel):
     pending_bounty = BigIntegerField(default=0)
     max_rank_index = SmallIntegerField(null=True)
     can_play_doc_q = BooleanField(default=True)
+    can_initiate_game = BooleanField(default=True)
     bounty_poster_limit = SmallIntegerField(default=0)
     location_level = SmallIntegerField(default=0)
     should_propose_new_world = BooleanField(default=True)

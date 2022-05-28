@@ -1,4 +1,4 @@
-from telegram import Update, TelegramError
+from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
@@ -9,6 +9,7 @@ from src.model.User import User
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
+from src.service.game_service import delete_game
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
@@ -40,7 +41,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         delete_game(update, context, game, delete_message=delete_message)
         return
 
-    # Challenger does not have enough bounty
+    # Opponent does not have enough bounty
     if user.bounty < game.wager:
         full_message_send(context, phrases.GAME_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
         return
@@ -52,32 +53,6 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     game.save()
 
     dispatch_game(update, context, user, inbound_keyboard, game)
-
-
-def delete_game(update: Update, context: CallbackContext, game: Game, delete_message: bool = True) -> None:
-    """
-    Delete game
-    :param update: The update
-    :param context: The context
-    :param game: The game
-    :param delete_message: If the message should be deleted
-    :return: None
-    """
-    # Try to delete message
-    if delete_message:
-        try:
-            context.bot.delete_message(update.effective_chat.id, game.message_id)
-        except TelegramError:
-            pass
-
-    # Return wager to challenger
-    challenger: User = game.challenger
-    challenger.bounty += game.wager
-    challenger.pending_bounty -= game.wager
-    challenger.save()
-
-    # Delete game
-    game.delete_instance()
 
 
 def dispatch_game(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, game: Game) -> None:

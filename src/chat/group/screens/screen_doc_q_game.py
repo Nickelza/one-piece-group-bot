@@ -231,7 +231,7 @@ def reset_playability(context: CallbackContext) -> None:
     :param context: The context
     :return: None
     """
-    User.update(can_play_doc_q=1).run()
+    User.update(can_play_doc_q=1).execute()
 
 
 def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:

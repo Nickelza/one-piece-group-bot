@@ -116,7 +116,7 @@ def reset_bounty(context: CallbackContext) -> None:
                                            get_first_new_world().required_bounty),
                                           ((User.bounty / 2) < Env.BELLY_BASE_MESSAGE.get_int(), 0)]
     case_stmt = Case(None, conditions, User.bounty / 2)
-    User.update(bounty=case_stmt).run()
+    User.update(bounty=case_stmt).execute()
 
     # Reset location
     reset_location()
@@ -165,4 +165,4 @@ def add_region_bounty(context: CallbackContext) -> None:
                                            User.bounty +
                                            ((User.bounty * Env.LOCATION_NEW_WORLD_BOUNTY_INCREMENT.get_float()) / 100))]
     case_stmt = Case(None, conditions)
-    User.update(bounty=case_stmt).run()
+    User.update(bounty=case_stmt).execute()

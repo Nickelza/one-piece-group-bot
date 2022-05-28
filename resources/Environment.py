@@ -153,6 +153,9 @@ ENABLE_TIMER_REDDIT_POST_ONE_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_ONE_P
 # Reddit Meme post Piece. Default: Every day at 06:00 and 18:00
 CRON_REDDIT_POST_MEME_PIECE = Environment('CRON_REDDIT_POST_MEME_PIECE', default_value='0 6,18 * * *')
 ENABLE_TIMER_REDDIT_POST_MEME_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_MEME_PIECE', default_value='True')
+# Rest can initiate game. Default: Every 8 hours
+CRON_RESET_CAN_INITIATE_GAME = Environment('CRON_RESET_CAN_INITIATE_GAME', default_value='0 */8 * * *')
+ENABLE_TIMER_RESET_CAN_INITIATE_GAME = Environment('ENABLE_TIMER_RESET_CAN_INITIATE_GAME', default_value='True')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -198,7 +201,6 @@ DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
 # Show correct option. Default: False
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
 
-# RUSSIAN ROULETTE
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
 

@@ -31,3 +31,5 @@ RESET_CAN_CHANGE_REGION = Timer('reset_can_change_region', Env.CRON_RESET_CAN_CH
                                 Env.ENABLE_TIMER_RESET_CAN_CHANGE_REGION.get_bool())
 ADD_REGION_BOUNTY = Timer('add_region_bounty', Env.CRON_ADD_REGION_BOUNTY.get(),
                           Env.ENABLE_TIMER_ADD_REGION_BOUNTY.get_bool())
+RESET_CAN_INITIATE_GAME = Timer('reset_can_initiate_game', Env.CRON_RESET_CAN_INITIATE_GAME.get(),
+                                Env.ENABLE_TIMER_RESET_CAN_INITIATE_GAME.get_bool())
