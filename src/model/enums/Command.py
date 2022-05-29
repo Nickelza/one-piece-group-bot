@@ -54,10 +54,11 @@ GRP_CHANGE_REGION_NEW_WORLD = Command('newworld', Screen.GRP_CHANGE_REGION,
                                       required_location=Location.get_last_paradise())
 GRP_CHANGE_REGION_PARADISE = Command('paradise', Screen.GRP_CHANGE_REGION,
                                      required_location=Location.get_last_paradise())
-GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True, required_location=Location.get_first_new_world())
+GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True,
+                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()))
 GRP_SHOW_BOUNTY = Command('bounty', Screen.GRP_SHOW_BOUNTY, active=False, replaced_by='status')
 GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True,
-                   required_location=Location.get_first_new_world())
+                   required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 

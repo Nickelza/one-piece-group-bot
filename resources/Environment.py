@@ -300,13 +300,17 @@ SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL = Environment('SEND_MESSAGE_MOVE_TO_NEW_
 SEND_MESSAGE_BOUNTY_RESET = Environment('SEND_MESSAGE_BOUNTY_RESET', default_value='True')
 
 # Required location to use DocQ. Default: 14 (Jaya)
-REQUIRED_LOCATION_LEVEL_DOCQ = Environment('REQUIRED_LOCATION_DOCQ_LEVEL', default_value='14')
+REQUIRED_LOCATION_LEVEL_DOCQ = Environment('REQUIRED_LOCATION_LEVEL_DOCQ', default_value='14')
 # Required location to send stickers. Default: 11 (Little Garden)
-REQUIRED_LOCATION_LEVEL_SEND_STICKER = Environment('REQUIRED_LOCATION_SEND_STICKER_LEVEL', default_value='11')
+REQUIRED_LOCATION_LEVEL_SEND_STICKER = Environment('REQUIRED_LOCATION_LEVEL_SEND_STICKER', default_value='11')
 # Required location to send animations. Default: 11 (Little Garden)
-REQUIRED_LOCATION_LEVEL_SEND_ANIMATION = Environment('REQUIRED_LOCATION_SEND_ANIMATION_LEVEL', default_value='11')
+REQUIRED_LOCATION_LEVEL_SEND_ANIMATION = Environment('REQUIRED_LOCATION_LEVEL_SEND_ANIMATION', default_value='11')
 # Required location to forward messages. Default: 11 (Little Garden)
-REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE = Environment('REQUIRED_LOCATION_FORWARD_MESSAGE_LEVEL', default_value='11')
+REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE = Environment('REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE', default_value='11')
+# Required location to fight. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_FIGHT = Environment('REQUIRED_LOCATION_LEVEL_FIGHT', default_value='21')
+# Required location to play games. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_GAME = Environment('REQUIRED_LOCATION_LEVEL_GAME', default_value='21')
 # Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
 WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_value=(
         OPD_CHANNEL_ID.get() + c.STANDARD_SPLIT_CHAR

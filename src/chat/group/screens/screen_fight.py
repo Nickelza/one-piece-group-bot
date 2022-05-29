@@ -11,7 +11,6 @@ from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
-from src.model.enums.Location import is_new_world_by_level
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
@@ -63,8 +62,8 @@ def validate(update: Update, context: CallbackContext, keyboard: Keyboard = None
         full_message_or_media_edit(context, GroupChatError.FIGHT_OPPONENT_NOT_FOUND.build(), update=update)
         return False
 
-    # Opponent is not in New World
-    if not is_new_world_by_level(opponent.location_level):
+    # Opponent is not in the minimum required location
+    if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int():
         full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update, add_delete_button=True)
         return False
 

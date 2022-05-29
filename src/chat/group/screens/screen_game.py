@@ -7,7 +7,6 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import get_finished_statuses
-from src.model.enums.Location import is_new_world_by_level
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
@@ -59,8 +58,8 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
         full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False
 
-    # Opponent is not in New World
-    if not is_new_world_by_level(opponent.location_level):
+    # Opponent is not in the minimum required location
+    if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
         full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update, add_delete_button=True)
         return False
 
