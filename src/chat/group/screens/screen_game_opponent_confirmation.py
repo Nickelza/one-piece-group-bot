@@ -42,6 +42,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
+        delete_game(update, context, game, delete_message=False)
         full_message_send(context, phrases.GAME_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
         return
 

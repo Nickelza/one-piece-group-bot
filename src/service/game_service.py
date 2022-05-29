@@ -46,11 +46,14 @@ def end_game(game: Game, game_outcome: GameOutcome) -> Game:
         challenger.bounty += game.wager
     elif game_outcome == GameOutcome.OPPONENT_WON:
         game.status = GameStatus.LOST.value
-        challenger.bounty += game.wager
+        opponent.bounty += game.wager
     else:
         game.status = GameStatus.DRAW.value
         challenger.bounty += game.wager / 2
         opponent.bounty += game.wager / 2
+
+    challenger.pending_bounty -= game.wager / 2
+    opponent.pending_bounty -= game.wager / 2
 
     # Refresh
     game.challenger = challenger
