@@ -115,9 +115,11 @@ PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you mo
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
-GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount'
+GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
+                       '\n\nExample: `/challenge 10.000.000`'
 GAME_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number with only '.' or ',' as decimal separator"
 GAME_INSUFFICIENT_BOUNTY = "Insufficient bounty"
+GAME_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
 GAME_NOT_FOUND = 'Game not found'
 GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
                '\nWould you like to accept?'

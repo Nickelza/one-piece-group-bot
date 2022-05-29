@@ -11,6 +11,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_bounty_formatted
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
 
@@ -34,6 +35,12 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
             # Challenger does not have enough bounty
             if challenger.bounty < wager_amount:
                 full_message_send(context, phrases.GAME_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
+                return False
+
+            # Wager less than minimum required
+            if wager_amount < Env.GAME_MIN_WAGER.get_int():
+                ot_text = phrases.GAME_WAGER_LESS_THAN_MIN.format(get_bounty_formatted(Env.GAME_MIN_WAGER.get_int()))
+                full_message_send(context, ot_text, update=update, add_delete_button=True)
                 return False
 
         except ValueError:

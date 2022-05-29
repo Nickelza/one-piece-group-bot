@@ -115,7 +115,8 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
         if not validate(update, context, command, user, keyboard):
             return
 
-    command.message_source = message_source
+    if command is not None:
+        command.message_source = message_source
     match message_source:
         case MessageSource.PRIVATE:
             manage_private_chat(update, context, command, user, keyboard)

@@ -290,6 +290,9 @@ FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MIN_WIN_PROBABILITY_SUP
 # Minimum win probability for Rookie. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE', default_value='1')
 
+# Minimum wager for games. Default: 10 million
+GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
+
 # Send leaderboard message. Default: True
 SEND_MESSAGE_LEADERBOARD = Environment('SEND_MESSAGE_LEADERBOARD', default_value='True')
 # Send location update message. Default: True
