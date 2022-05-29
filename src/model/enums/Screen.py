@@ -20,5 +20,6 @@ class Screen(Enum):
     PVT_START = 'P1'
     PVT_SETTINGS = 'P2'
     PVT_SETTINGS_LOCATION_UPDATE = 'P3'
+    PVT_USER_STATUS = 'P4'
 
     ADM_SAVE_MEDIA = 'A1'

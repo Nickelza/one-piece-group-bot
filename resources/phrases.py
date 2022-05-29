@@ -19,6 +19,8 @@ SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
+ROOKIE_STATUS_PRIVATE_CHAT_ONLY = 'Rookies can only view their status in Private Chat'
+STATUS_PRIVATE_CHAT_KEY = 'View in Private Chat'
 BOUNTY_RESET = 'Bounties have been reset'
 
 LEADERBOARD_HEADER = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:\n'
@@ -106,6 +108,7 @@ CURRENT_SETTING = 'Current setting: {}'
 # Private chat
 PVT_TXT_START = 'Welcome to @onepiecegroup Bot! From here you can manage your profile.'
 PVT_KEY_SETTINGS = Emoji.SETTINGS.value + ' Settings'
+PVT_KEY_STATUS = Emoji.STATUS.value + ' Status'
 PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'

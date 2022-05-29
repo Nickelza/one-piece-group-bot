@@ -549,3 +549,12 @@ def get_message_url(chat_id: int, message_id: int) -> str:
 
     chat_id_cleaned = str(chat_id).replace('-100', '')
     return f'https://t.me/c/{chat_id_cleaned}/{message_id}'
+
+
+def get_start_with_command_url(command: str) -> str:
+    """
+    Get the start with command url
+    :param command: Command
+    :return: Start with command url
+    """
+    return f'https://t.me/{Env.BOT_USERNAME.get()}?start={command}'

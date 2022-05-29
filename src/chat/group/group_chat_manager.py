@@ -79,7 +79,7 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
     if command is not Command.ND:
         match command.screen:
             case Screen.GRP_USER_STATUS:  # User status
-                manage_screen_show_status(update, context)
+                manage_screen_show_status(update, context, command)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
                 manage_screen_doc_q_game(update, context, user, keyboard=keyboard)

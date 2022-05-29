@@ -31,6 +31,7 @@ class Emoji(Enum):
     REJECT = '❌'
     SETTINGS = '⚙'
     BACK = '🔙'
+    STATUS = '📈'
 
     # Game
     WINNER = '🏆'

@@ -87,9 +87,12 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     keyboard = None
     try:
         if is_command(update.message.text):
-            command_name = (update.message.text.split(' ')[0])[1:].lower()
-            command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
-            command = Command.get_by_name(command_name)
+            if '/start ' in update.message.text:  # Start with parameter
+                command_name = update.message.text.replace('/start ', '').lower()
+            else:
+                command_name = (update.message.text.split(' ')[0])[1:].lower()
+                command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
+            command = Command.get_by_name(command_name, message_source)
             try:
                 command.parameters = update.message.text.split(' ')[1:]
             except IndexError:
@@ -112,6 +115,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
         if not validate(update, context, command, user, keyboard):
             return
 
+    command.message_source = message_source
     match message_source:
         case MessageSource.PRIVATE:
             manage_private_chat(update, context, command, user, keyboard)

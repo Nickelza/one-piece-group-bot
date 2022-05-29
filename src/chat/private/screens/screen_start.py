@@ -15,7 +15,13 @@ def manage(update: Update, context: CallbackContext) -> None:
     :return: None
     """
 
+    outbound_keyboard: list[list[Keyboard]] = [[]]
+
+    # Keyboard with status option
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_STATUS, screen=Screen.PVT_USER_STATUS,
+                                       previous_screen_list=[Screen.PVT_START])])
     # Keyboard with settings option
-    keyboard: Keyboard = Keyboard(phrases.PVT_KEY_SETTINGS, screen=Screen.PVT_SETTINGS,
-                                  previous_screen_list=[Screen.PVT_START])
-    full_message_send(context, phrases.PVT_TXT_START, update, keyboard=[[keyboard]])
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS, screen=Screen.PVT_SETTINGS,
+                                       previous_screen_list=[Screen.PVT_START])])
+
+    full_message_send(context, phrases.PVT_TXT_START, update, keyboard=outbound_keyboard)
