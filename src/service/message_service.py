@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 
@@ -112,9 +113,11 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                     if button.url is not None:
                         keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
                     else:
-                        if button.info:
-                            # Already has some info. If it has no info, nothing should be added
-
+                        # Already has some callback_data. If it has no data, nothing should be added
+                        # callback_data is a string initialized for an empty dict, so even if empty the string will have
+                        # value '{}'. So, to confirm that it is empty, we first revert to a dictionary and check if the
+                        # dict is empty.
+                        if json.loads(button.callback_data):
                             # Add information about previous screen
                             if inbound_keyboard is not None and inbound_keyboard.screen is not None:
                                 button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
