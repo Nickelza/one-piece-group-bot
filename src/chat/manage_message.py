@@ -1,3 +1,5 @@
+import logging
+
 from peewee import MySQLDatabase
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -59,8 +61,13 @@ def manage(update: Update, context: CallbackContext, is_callback: bool = False) 
     :return: None
     """
     db = init()
-    manage_after_db(update, context, is_callback)
-    end(db)
+    try:
+        manage_after_db(update, context, is_callback)
+    except Exception as e:
+        logging.error(update)
+        logging.error(e, exc_info=True)
+    finally:
+        end(db)
 
 
 def manage_after_db(update: Update, context: CallbackContext, is_callback: bool = False) -> None:
