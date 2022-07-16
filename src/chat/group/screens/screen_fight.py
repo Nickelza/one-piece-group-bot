@@ -15,6 +15,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted
+from src.service.cron_service import convert_seconds_to_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
@@ -38,11 +39,12 @@ def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | Non
     return fight.opponent
 
 
-def validate(update: Update, context: CallbackContext, keyboard: Keyboard = None) -> bool:
+def validate(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> bool:
     """
     Validate the fight request
     :param update: The update object
     :param context: The context object
+    :param user: The user object
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
@@ -71,6 +73,15 @@ def validate(update: Update, context: CallbackContext, keyboard: Keyboard = None
     now = datetime.datetime.now()
     if opponent.fight_immunity_end_date is not None and opponent.fight_immunity_end_date > now:
         full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update, add_delete_button=True)
+        return False
+
+    # User is in fight cooldown
+    if user.fight_cooldown_end_date is not None and user.fight_cooldown_end_date > now:
+        # Get remaining time
+        remaining_time = convert_seconds_to_time((user.fight_cooldown_end_date - datetime.datetime.now())
+                                                 .total_seconds())
+        ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
+        full_message_or_media_edit(context, ot_text, update, add_delete_button=True)
         return False
 
     return True
@@ -236,6 +247,12 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     # Remove fight immunity from user
     user.fight_immunity_end_date = None
 
+    # Add fight cooldown to user
+    user.fight_cooldown_end_date = datetime.datetime.now() + datetime.timedelta(
+        hours=Env.FIGHT_COOLDOWN_DURATION.get_int())
+    # Remove fight cooldown from opponent
+    opponent.fight_cooldown_end_date = None
+
     # Send message
     full_media_send(context, caption=caption, update=update, add_delete_button=True,
                     edit_only_caption_and_keyboard=True)
@@ -257,7 +274,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
 
     # Validate the request
-    if not validate(update, context, keyboard):
+    if not validate(update, context, user, keyboard):
         return
 
     # Request to fight

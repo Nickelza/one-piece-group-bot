@@ -267,8 +267,10 @@ LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment('LOCATION_WHOLE_CAKE_ISLAND',
 LOCATION_WANO_COUNTRY_IMAGE_URL = Environment('LOCATION_WANO_COUNTRY_IMAGE_URL',
                                               default_value='https://i.imgur.com/vznQ3W2.jpg')
 
-# How long fight immunity lasts. Default: 24 hours
+# How long fight immunity lasts in hours. Default: 24 hours
 FIGHT_IMMUNITY_DURATION = Environment('FIGHT_IMMUNITY_DURATION', default_value='24')
+# How long a user has to wait before fighting another user in hours. Default: 1 hour
+FIGHT_COOLDOWN_DURATION = Environment('FIGHT_COOLDOWN_DURATION', default_value='1')
 # Maximum win probability for Pirate King. Default: 99%
 FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING', default_value='99')
 # Maximum win probability for Emperor. Default: 95%

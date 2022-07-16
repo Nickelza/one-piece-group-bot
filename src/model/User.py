@@ -23,6 +23,7 @@ class User(BaseModel):
     should_propose_new_world = BooleanField(default=True)
     can_change_region = BooleanField(default=True)
     fight_immunity_end_date = DateTimeField(null=True)
+    fight_cooldown_end_date = DateTimeField(null=True)
     should_send_location_update = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
 

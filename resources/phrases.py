@@ -13,8 +13,9 @@ SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
                    '\nRank: {}' \
                    '\nLocation: {}'
-USER_STATUS_PENDING_BOUNTY = '\nPending bounty: ฿*{}*'
+SHOW_USER_STATUS_PENDING_BOUNTY = '\nPending bounty: ฿*{}*'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
+SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
@@ -89,6 +90,7 @@ LOCATION_INVALID_CHANGE_REGION_REQUEST = 'Invalid region'
 FIGHT_NOT_FOUND = 'Fight not found'
 FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
 FIGHT_CANNOT_FIGHT_USER = "You can't fight this user"
+FIGHT_USER_IN_COOLDOWN = "Fight cooldown active. You can initiate a fight in *{}*"
 FIGHT_CONFIRMATION_REQUEST = '{} are you sure you want to fight {}?' \
                              '\nI predict a {}% probability of {}.' + '\n\n' + GAME_WIN_LOSE_STATUS
 FIGHT_CONFIRMATION_OUTCOME_VICTORY = 'victory'

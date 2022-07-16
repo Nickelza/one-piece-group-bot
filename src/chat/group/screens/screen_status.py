@@ -103,7 +103,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
     # Get location
     location: Location = Location.get_by_level(target_user.location_level)
 
-    pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.USER_STATUS_PENDING_BOUNTY.format(
+    pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
         bounty_service.get_bounty_formatted(target_user.pending_bounty))
 
     message_text = phrases.SHOW_USER_STATUS.format(
@@ -120,6 +120,14 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         remaining_time = convert_seconds_to_time((target_user.fight_immunity_end_date - datetime.datetime.now())
                                                  .total_seconds())
         message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
+
+    # Add fight cooldown if active
+    if target_user.fight_cooldown_end_date is not None and \
+            target_user.fight_cooldown_end_date > datetime.datetime.now():
+        # Get remaining time
+        remaining_time = convert_seconds_to_time((target_user.fight_cooldown_end_date - datetime.datetime.now())
+                                                 .total_seconds())
+        message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None
