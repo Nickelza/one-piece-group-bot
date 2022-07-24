@@ -145,7 +145,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     :return: None
     """
 
-    # Delete all previous pending pending
+    # Delete all previous pending fights
     previous_fights: list[Fight] = Fight.select().where((Fight.challenger == user) &
                                                         (Fight.status == GameStatus.IN_PROGRESS.value))
     for previous_fight in previous_fights:
