@@ -76,7 +76,7 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                         (UserLocationBountyPoster.user == user)
                         & (UserLocationBountyPoster.location_level == effective_location.level))
                     if user_location_bounty_poster is None:
-                        send_bounty_poster(context, update, user, reply_to_message_id=message.message_id)
+                        send_bounty_poster(context, update, user, send_in_private_chat=True)
 
                         # Save the poster as sent for this location
                         user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()

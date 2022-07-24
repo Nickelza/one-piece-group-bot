@@ -152,11 +152,12 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
 
 
 def send_bounty_poster(context: CallbackContext, update: Update, user: User, caption: str = None,
-                       reply_to_message_id: int = None) -> None:
+                       reply_to_message_id: int = None, send_in_private_chat=False) -> None:
     poster_path = get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia()
     poster.media_id = open(poster_path, 'rb')
     poster.type = SavedMediaType.PHOTO.value
 
     full_media_send(context, saved_media=poster, update=update, caption=caption,
-                    reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True)
+                    reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,
+                    send_in_private_chat=send_in_private_chat)

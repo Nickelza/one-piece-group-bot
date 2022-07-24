@@ -295,7 +295,8 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                     parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
                     allow_sending_without_reply: bool = True, edit_only_keyboard: bool = False,
                     edit_only_caption_and_keyboard: bool = False, add_delete_button: bool = False,
-                    authorized_users: list = None) -> Message:
+                    authorized_users: list = None, inbound_keyboard: Keyboard = None,
+                    send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True) -> Message:
     """
     Send a media
     :param context: CallbackContext object
@@ -319,14 +320,19 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
             it will be removed
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
+        :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
+    :param send_in_private_chat: True if the message should be sent in private chat
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :return: Message
     """
 
     if caption is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         caption = escape_invalid_markdown_chars(caption)
 
-    chat_id = get_chat_id(update=update, chat_id=chat_id)
-    keyboard_markup = get_keyboard(keyboard, update, add_delete_button, authorized_users)
+    chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
+    keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
+                                   authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
+                                   only_authorized_users_can_interact=only_authorized_users_can_interact)
 
     # New message
     if new_message or update is None or update.callback_query is None:
