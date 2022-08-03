@@ -15,22 +15,26 @@ from src.service.math_service import get_percentage_from_value
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 
 
-def send(context: CallbackContext, prediction: Prediction) -> None:
+def send(context: CallbackContext, prediction: Prediction, is_resent: bool = False) -> None:
     """
     Send prediction
     :param context: Telegram context
     :param prediction: Prediction
+    :param is_resent: If prediction was already sent
     """
-    if PredictionStatus(prediction.status) is not PredictionStatus.NEW:
-        raise PredictionException(phrases.PREDICTION_NOT_IN_NEW_STATUS)
 
-    prediction.status = PredictionStatus.SENT.value
+    # Do not change status or message_id if prediction is resent
+    if not is_resent:
+        if PredictionStatus(prediction.status) is not PredictionStatus.NEW:
+            raise PredictionException(phrases.PREDICTION_NOT_IN_NEW_STATUS)
+
+        prediction.status = PredictionStatus.SENT.value
+        prediction.send_date = datetime.datetime.now()
 
     message: Message = full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
     message.pin(disable_notification=True)
 
     prediction.message_id = message.message_id
-    prediction.send_date = datetime.datetime.now()
     prediction.save()
 
 

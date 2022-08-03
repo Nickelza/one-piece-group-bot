@@ -12,6 +12,7 @@ class TgRestPredictionAction(StrEnum):
     CLOSE_BETS = 'close_bets'
     SET_RESULTS = 'set_results'
     REFRESH = 'refresh'
+    RESEND = 'resend'
 
 
 class TgRestPrediction(TgRest):

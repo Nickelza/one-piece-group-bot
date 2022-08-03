@@ -1,4 +1,3 @@
-from telegram import Update
 from telegram.ext import CallbackContext
 
 from resources import phrases
@@ -10,10 +9,9 @@ from src.model.tgrest.TgRestPrediction import TgRestPrediction, TgRestPrediction
 from src.service.prediction_service import send, close_bets, set_results, refresh
 
 
-def manage(update: Update, context: CallbackContext, tg_rest_prediction: TgRestPrediction):
+def manage(context: CallbackContext, tg_rest_prediction: TgRestPrediction):
     """
     Main function for the TG Rest chat manage
-    :param update: Telegram update
     :param context: Telegram context
     :param tg_rest_prediction: TG Rest prediction
     """
@@ -37,6 +35,9 @@ def manage(update: Update, context: CallbackContext, tg_rest_prediction: TgRestP
 
             case TgRestPredictionAction.REFRESH:
                 refresh(context, prediction)
+
+            case TgRestPredictionAction.RESEND:
+                send(context, prediction, is_resent=True)
 
             case _:
                 raise TgRestException(TgRestChatError.UNKNOWN_PREDICTION_ACTION.build())

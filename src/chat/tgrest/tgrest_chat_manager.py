@@ -33,7 +33,7 @@ def manage(update: Update, context: CallbackContext) -> None:
         match tg_rest.object_type:
             case TgRestObjectType.PREDICTION:
                 tg_rest_prediction = TgRestPrediction(**tg_rest_dict)
-                manage_screen_prediction(update, context, tg_rest_prediction)
+                manage_screen_prediction(context, tg_rest_prediction)
 
             case _:
                 raise TgRestException("Unknown object type")
