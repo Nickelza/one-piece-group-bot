@@ -11,6 +11,7 @@ from resources.Database import Database
 from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
+from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
@@ -79,11 +80,13 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     :return: None
     """
 
-    user: User = get_user(update)
+    user = User()
+    if update.effective_user is not None:
+        user: User = get_user(update)
 
-    # Check if the user is authorized
-    if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
-        return
+        # Check if the user is authorized
+        if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
+            return
 
     # Recast necessary for match case to work, don't ask me why
     message_source: MessageSource = MessageSource(get_message_source(update).value)
@@ -131,6 +134,8 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             manage_group_chat(update, context, command, user, keyboard)
         case MessageSource.ADMIN:
             manage_admin_chat(update, context, command)
+        case MessageSource.TG_REST:
+            manage_tgrest_chat(update, context)
         case _:
             raise ValueError('Invalid message source')
 

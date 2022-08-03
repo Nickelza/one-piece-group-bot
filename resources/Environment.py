@@ -116,6 +116,9 @@ ADMIN_GROUP_ID = Environment('ADMIN_GROUP_ID')
 # OPMA bot id
 OPMA_BOT_ID = Environment('OPMA_BOT_ID', default_value='921260484')
 
+# TgRest Channel ID
+TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
+
 # REDDIT
 # Reddit client id
 REDDIT_CLIENT_ID = Environment('REDDIT_CLIENT_ID')

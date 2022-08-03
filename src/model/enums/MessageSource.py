@@ -9,3 +9,4 @@ class MessageSource(Enum):
     PRIVATE = 'P'
     GROUP = 'G'
     ADMIN = 'A'
+    TG_REST = 'T'

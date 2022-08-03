@@ -175,17 +175,17 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
     try:
         if quote_if_group:
             if update.effective_chat.type == Chat.GROUP or update.effective_chat.type == Chat.SUPERGROUP:
-                return update.message.message_id
+                return update.effective_message.message_id
     except AttributeError:
         pass
 
     if not quote:
         return None
 
-    if update.message is None:
+    if update.effective_message is None:
         raise Exception("No message to quote")
     else:
-        return update.message.message_id
+        return update.effective_message.message_id
 
 
 def full_message_send(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
@@ -543,6 +543,9 @@ def get_message_source(update: Update) -> MessageSource:
 
     if update.effective_chat.id == Env.ADMIN_GROUP_ID.get_int():
         return MessageSource.ADMIN
+
+    if update.effective_chat.id == Env.TG_REST_CHANNEL_ID.get_int():
+        return MessageSource.TG_REST
 
     logging.error(f'Unknown message source for {update.effective_chat.id}')
     return MessageSource.ND

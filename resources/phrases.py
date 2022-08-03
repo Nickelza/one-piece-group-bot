@@ -160,3 +160,9 @@ GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any
                        'to challenge you.'
 GAME_PENDING_KEY = 'Pending challenge'
 GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the participants.'
+
+PREDICTION_NOT_FOUND = 'Prediction not found'
+PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'
+PREDICTION_NOT_IN_SENT_STATUS = 'Prediction not in SENT status'
+PREDICTION_NOT_IN_BETS_CLOSED_STATUS = 'Prediction not in BETS_CLOSED status'
+UNKNOWN_PREDICTION_ACTION = 'Unknown prediction action'
