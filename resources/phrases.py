@@ -163,6 +163,17 @@ GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been 
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'
+PREDICTION_NOT_SENT = 'Prediction not sent'
 PREDICTION_NOT_IN_SENT_STATUS = 'Prediction not in SENT status'
 PREDICTION_NOT_IN_BETS_CLOSED_STATUS = 'Prediction not in BETS_CLOSED status'
 UNKNOWN_PREDICTION_ACTION = 'Unknown prediction action'
+PREDICTION_TEXT = '*{}*' \
+                  '\n{}' \
+                  '\n\n*Status*: {}' \
+                  '{}'
+PREDICTION_TEXT_OPTION = '\n{}. {} \\({}%\\)'
+PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
+PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
+PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.ENABLED.value} Wagers refunded'
+PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.ENABLED.value} Multiple bets allowed'
+PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.ENABLED.value} Can withdraw bets'

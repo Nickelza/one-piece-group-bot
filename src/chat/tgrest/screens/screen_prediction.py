@@ -27,16 +27,16 @@ def manage(update: Update, context: CallbackContext, tg_rest_prediction: TgRestP
     try:
         match tg_rest_prediction.action:
             case TgRestPredictionAction.SEND:
-                send(update, context, prediction)
+                send(context, prediction)
 
             case TgRestPredictionAction.CLOSE_BETS:
-                close_bets(update, context, prediction)
+                close_bets(context, prediction)
 
             case TgRestPredictionAction.SET_RESULTS:
-                set_results(update, context, prediction)
+                set_results(context, prediction)
 
             case TgRestPredictionAction.REFRESH:
-                refresh(update, context, prediction)
+                refresh(context, prediction)
 
             case _:
                 raise TgRestException(TgRestChatError.UNKNOWN_PREDICTION_ACTION.build())

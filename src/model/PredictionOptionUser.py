@@ -17,3 +17,6 @@ class PredictionOptionUser(BaseModel):
 
     class Meta:
         db_table = 'prediction_option_user'
+
+
+PredictionOptionUser.create_table()

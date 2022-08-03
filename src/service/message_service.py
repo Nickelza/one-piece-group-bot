@@ -195,7 +195,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       protect_content: bool = False, disable_web_page_preview: bool = True,
                       allow_sending_without_reply: bool = True, add_delete_button: bool = False,
                       authorized_users: list = None, inbound_keyboard: Keyboard = None,
-                      send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True) -> Message:
+                      send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
+                      edit_message_id: int = None) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -219,6 +220,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
+    :param edit_message_id: ID of the message to edit
     :return: Message
     """
 
@@ -234,7 +236,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                                    only_authorized_users_can_interact=only_authorized_users_can_interact)
 
     # New message
-    if new_message or update is None or update.callback_query is None:
+    if (new_message or update is None or update.callback_query is None) and edit_message_id is None:
         # Message in reply to
         reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
                                                       reply_to_message_id=reply_to_message_id,
@@ -251,7 +253,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                                         protect_content=protect_content)
 
     # No message to edit or answer callback
-    if update.callback_query is None:
+    if (update is None or update.callback_query is None) and edit_message_id is None:
         raise Exception(phrases.EXCEPTION_NO_EDIT_MESSAGE)
 
     # Answer callback
@@ -259,12 +261,13 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
         return context.bot.answer_callback_query(update.callback_query.id, text=text, show_alert=show_alert)
 
     # Edit message
+    edit_message_id = edit_message_id if edit_message_id is not None else update.callback_query.message.message_id
     return context.bot.edit_message_text(text=text,
                                          chat_id=chat_id,
                                          reply_markup=keyboard_markup,
                                          parse_mode=parse_mode,
                                          disable_web_page_preview=disable_web_page_preview,
-                                         message_id=update.callback_query.message.message_id)
+                                         message_id=edit_message_id)
 
 
 def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = None,

@@ -19,3 +19,22 @@ def get_random_win(percentage: float) -> bool:
     :return: True if the percentage is greater than a random number, False otherwise
     """
     return percentage >= random.randint(1, 100)
+
+
+def get_percentage_from_value(value: float, total: float, add_decimal=True) -> float:
+    """
+    Gets a percentage from a value
+    :param value: The value to get the percentage from
+    :param total: The total value
+    :param add_decimal: True if the percentage should have a decimals, False otherwise
+    :return: The percentage from the value
+    """
+
+    try:
+        result = (value / total) * 100
+        if not add_decimal:
+            return int(result)
+
+        return result
+    except ZeroDivisionError:
+        return 0

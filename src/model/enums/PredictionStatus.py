@@ -10,7 +10,7 @@ class PredictionStatus(IntEnum):
 
 PREDICTION_STATUS_NAME_MAP = {
     PredictionStatus.NEW: "New",
-    PredictionStatus.SENT: "Sent",
+    PredictionStatus.SENT: "Open",
     PredictionStatus.BETS_CLOSED: "Bets closed",
     PredictionStatus.RESULT_SET: "Result set"
 }
