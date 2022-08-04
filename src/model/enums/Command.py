@@ -27,7 +27,7 @@ class Command:
         self.allow_reply_to_bot = allow_reply_to_bot
         self.screen = screen
         self.required_location = required_location
-        self.parameters = []
+        self.parameters: list[str] = []
         self.message_source: MessageSource = message_source
 
     def get_formatted(self):
@@ -46,8 +46,9 @@ class Command:
 ND = None
 
 PVT_START = Command('start', Screen.PVT_START)
+
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
-    Env.REQUIRED_LOCATION_LEVEL_DOCQ.get_int()))
+    Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()))
 GRP_USER_STATUS = Command('status', Screen.GRP_USER_STATUS)
 PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS)
 GRP_CHANGE_REGION_NEW_WORLD = Command('newworld', Screen.GRP_CHANGE_REGION,
@@ -59,11 +60,15 @@ GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True,
 GRP_SHOW_BOUNTY = Command('bounty', Screen.GRP_SHOW_BOUNTY, active=False, replaced_by='status')
 GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True,
                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
+GRP_PREDICTION_BET = Command('bet', Screen.GRP_PREDICTION_BET, only_in_reply=True,
+                             required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_PREDICTION_BET
+                                                                     .get_int()), allow_reply_to_bot=True)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
 COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NEW_WORLD,
-            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME]
+            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
+            GRP_PREDICTION_BET]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):

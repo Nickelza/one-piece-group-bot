@@ -11,7 +11,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_wager_amount, validate_wager
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
 
@@ -27,27 +27,13 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
     :return: True if the request is valid, False otherwise
     """
 
-    # Command has wager amount
-    if len(command.parameters) > 0:
-        try:
-            wager_amount: int = get_wager_amount(command.parameters[0])
-
-            # Challenger does not have enough bounty
-            if challenger.bounty < wager_amount:
-                full_message_send(context, phrases.GAME_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
-                return False
-
-            # Wager less than minimum required
-            if wager_amount < Env.GAME_MIN_WAGER.get_int():
-                ot_text = phrases.GAME_WAGER_LESS_THAN_MIN.format(get_bounty_formatted(Env.GAME_MIN_WAGER.get_int()))
-                full_message_send(context, ot_text, update=update, add_delete_button=True)
-                return False
-
-        except ValueError:
-            full_message_send(context, phrases.GAME_INVALID_WAGER_AMOUNT, update=update, add_delete_button=True)
-            return False
-    else:
+    # Command does not have wager amount
+    if len(command.parameters) == 0:
         full_message_send(context, phrases.GAME_NO_WAGER_AMOUNT, update=update, add_delete_button=True)
+        return False
+
+    # Wager basic validation, error message is sent by validate_wager
+    if not validate_wager(update, context, challenger, command.parameters[0], Env.GAME_MIN_WAGER.get_int()):
         return False
 
     # Challenger cannot initiate a game
@@ -141,12 +127,3 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
     game.message_id = message.message_id
     game.save()
 
-
-def get_wager_amount(amount_str: str) -> int:
-    """
-    Get the wager amount
-    :param amount_str: The wager amount
-    :return: The wager amount
-    """
-    amount_str = amount_str.strip().replace(',', '').replace('.', '')
-    return int(amount_str)

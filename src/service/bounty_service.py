@@ -173,3 +173,45 @@ def add_region_bounty(context: CallbackContext) -> None:
                                            ((User.bounty * Env.LOCATION_NEW_WORLD_BOUNTY_INCREMENT.get_float()) / 100))]
     case_stmt = Case(None, conditions)
     User.update(bounty=case_stmt).execute()
+
+
+def get_wager_amount(amount_str: str) -> int:
+    """
+    Get the wager amount
+    :param amount_str: The wager amount
+    :return: The wager amount
+    """
+    amount_str = amount_str.strip().replace(',', '').replace('.', '')
+    return int(amount_str)
+
+
+def validate_wager(update: Update, context: CallbackContext, user: User, wager_str: str, required_belly: int) -> bool:
+    """
+    Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if the wager is
+    higher than the required belly
+    :param update: Telegram update
+    :param context: Telegram context
+    :param user: The user to validate the wager for
+    :param wager_str: The wager string
+    :param required_belly: The required belly
+    :return: Whether the wager is valid
+    """
+
+    try:
+        wager: int = get_wager_amount(wager_str)
+    except ValueError:
+        full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update, add_delete_button=True)
+        return False
+
+    # Challenger does not have enough bounty
+    if user.bounty < wager:
+        full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
+        return False
+
+    # Wager less than minimum required
+    if wager < Env.GAME_MIN_WAGER.get_int():
+        ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_bounty_formatted(required_belly))
+        full_message_send(context, ot_text, update=update, add_delete_button=True)
+        return False
+
+    return True

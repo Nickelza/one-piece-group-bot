@@ -59,7 +59,7 @@ def get_prediction_text(prediction: Prediction) -> str:
         ]
         option_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_option_users)
         options_text += phrases.PREDICTION_TEXT_OPTION.format(
-            index + 1,
+            prediction_option.number,
             escape_valid_markdown_chars(prediction_option.option),
             get_percentage_from_value(option_wager, total_wager, add_decimal=False),
             len(prediction_option_users)

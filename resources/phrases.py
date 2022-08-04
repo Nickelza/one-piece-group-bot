@@ -115,13 +115,15 @@ PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
 
+ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
+ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
+ACTION_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number with only '.' or ',' as decimal separator"
+
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
 GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
-                       '\n\nExample: `/challenge 10.000.000`'
-GAME_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number with only '.' or ',' as decimal separator"
-GAME_INSUFFICIENT_BOUNTY = "Insufficient bounty"
-GAME_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
+                       f'\n\nExample: {Command.GRP_FIGHT.get_formatted()} 10.000.000'
+
 GAME_NOT_FOUND = 'Game not found'
 GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
                '\nWould you like to accept?'
@@ -171,9 +173,17 @@ PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Status*: {}' \
                   '{}'
-PREDICTION_TEXT_OPTION = '\n{}. {} \\({}%\\)'
+PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\)'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
 PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.ENABLED.value} Wagers refunded'
 PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.ENABLED.value} Multiple bets allowed'
 PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.ENABLED.value} Can withdraw bets'
+PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
+                                f'\n`{Command.GRP_PREDICTION_BET} <amount> <option>`' \
+                                f'\n\nExample: {Command.GRP_PREDICTION_BET} 10.000.000 1'
+PREDICTION_CLOSED_FOR_BETS = 'This prediction is closed for bets'
+PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
+PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
+PREDICTION_OPTION_NOT_FOUND = 'Option {} not found in prediction'
+PREDICTION_BET_SUCCESS = 'Bet placed successfully'

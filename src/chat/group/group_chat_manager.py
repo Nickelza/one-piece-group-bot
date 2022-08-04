@@ -11,6 +11,7 @@ from src.chat.group.screens.screen_game_opponent_confirmation import manage as m
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
 from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
+from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
@@ -104,6 +105,9 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
 
             case Screen.GRP_RUSSIAN_ROULETTE_GAME:  # Game Russian Roulette
                 manage_screen_game_rr(update, context, user, inbound_keyboard=keyboard)
+
+            case Screen.GRP_PREDICTION_BET:  # Prediction bet
+                manage_screen_prediction_bet(update, context, user, command)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

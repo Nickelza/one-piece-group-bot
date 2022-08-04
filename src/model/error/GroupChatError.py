@@ -16,3 +16,4 @@ class GroupChatError(Error):
     FIGHT_OPPONENT_NOT_FOUND = Error(8, phrases.FIGHT_OPPONENT_NOT_FOUND, source, True)
     GAME_NOT_FOUND = Error(9, phrases.GAME_NOT_FOUND, source, True)
     INVALID_GAME = Error(10, phrases.GAME_INVALID, source, True)
+    PREDICTION_NOT_FOUND = Error(11, phrases.PREDICTION_NOT_FOUND, source, True)
