@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -14,6 +16,7 @@ class PredictionOptionUser(BaseModel):
                                         on_update='RESTRICT')
     user = ForeignKeyField(User, backref='prediction_option_users', on_delete='CASCADE', on_update='CASCADE')
     wager = IntegerField()
+    date = DateTimeField(default=datetime.now)
 
     class Meta:
         db_table = 'prediction_option_user'

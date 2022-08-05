@@ -9,6 +9,7 @@ import resources.phrases as phrases
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
+from src.model.User import User
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
 from src.service.math_service import get_percentage_from_value
@@ -104,6 +105,31 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     """
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
         raise PredictionException(phrases.PREDICTION_NOT_IN_SENT_STATUS)
+
+    # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
+    if prediction.cut_off_date is not None:
+        invalid_prediction_option_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
+            PredictionOptionUser.date > prediction.cut_off_date)
+        for invalid_prediction_option_user in invalid_prediction_option_users:
+            user: User = invalid_prediction_option_user.user
+            # Return wager and subtract from pending bounty
+            user.pending_bounty -= invalid_prediction_option_user.wager
+            user.bounty += invalid_prediction_option_user.wager
+            user.save()
+
+            invalid_prediction_option_user.delete_instance()
+
+    # Update status
+    prediction.status = PredictionStatus.BETS_CLOSED.value
+    prediction.end_date = datetime.datetime.now()
+    prediction.save()
+
+    # Update prediction message
+    refresh(context, prediction)
+
+    # Send message in reply notifying users that bets are closed
+    full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, chat_id=Env.OPD_GROUP_ID.get(),
+                      reply_to_message_id=prediction.message_id)
 
 
 def set_results(context: CallbackContext, prediction: Prediction) -> None:

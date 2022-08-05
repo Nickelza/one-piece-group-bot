@@ -180,9 +180,9 @@ PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.ENABLED.value} Wagers refunded'
 PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.ENABLED.value} Multiple bets allowed'
 PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.ENABLED.value} Can withdraw bets'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
-                                f'\n`{Command.GRP_PREDICTION_BET} <amount> <option>`' \
-                                f'\n\nExample: {Command.GRP_PREDICTION_BET} 10.000.000 1'
-PREDICTION_CLOSED_FOR_BETS = 'This prediction is closed for bets'
+                                f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option>' \
+                                f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
+PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
 PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_OPTION_NOT_FOUND = 'Option {} not found in prediction'
