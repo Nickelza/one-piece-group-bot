@@ -84,12 +84,14 @@ def run(context: CallbackContext) -> None:
         return
 
     timer: Timer.Timer = job.context
-    if not timer.is_enabled:
+    if not timer.is_enabled and timer.should_log:
         logging.info(f'Skipping timer {job.name}')
         return
 
     db = init()
-    logging.info(f'Running timer {context.job.name}')
+
+    if timer.should_log:
+        logging.info(f'Running timer {context.job.name}')
 
     match timer:
         case Timer.REDDIT_POST_ONE_PIECE | Timer.REDDIT_POST_MEME_PIECE:
@@ -111,7 +113,8 @@ def run(context: CallbackContext) -> None:
         case _:
             logging.error(f'Unknown timer {job.name}')
 
-    logging.info(f'Finished timer {context.job.name}')
+    if timer.should_log:
+        logging.info(f'Finished timer {context.job.name}')
     end(db)
 
     return
