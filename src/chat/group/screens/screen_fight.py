@@ -14,7 +14,7 @@ from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_bounty_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
@@ -224,7 +224,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         fight.status = GameStatus.WON.value
         fight.berry = win_amount
         # Add bounty to challenger
-        user.bounty += win_amount
+        user = add_bounty(user, win_amount)
         # Remove bounty from opponent
         opponent.bounty -= win_amount
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
@@ -236,7 +236,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         # Remove bounty from challenger
         user.bounty -= lose_amount
         # Add bounty to opponent
-        opponent.bounty += lose_amount
+        opponent = add_bounty(opponent, lose_amount)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_bounty_formatted(lose_amount),
                                             get_bounty_formatted(user.bounty))

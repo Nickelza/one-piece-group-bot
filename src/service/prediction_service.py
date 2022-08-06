@@ -165,7 +165,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
             value_from_total_wager = round_belly_up(get_value_from_percentage(total_wager, percentage_of_correct_wager))
 
             # Add to bounty
-            user = add_bounty(context, user, value_from_total_wager, pending_belly_amount=prediction_option_user.wager)
+            user = add_bounty(user, value_from_total_wager, pending_belly_amount=prediction_option_user.wager)
 
         # Subtract bet wager from user pending bounty
         user.pending_bounty -= prediction_option_user.wager

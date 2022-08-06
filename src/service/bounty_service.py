@@ -135,7 +135,7 @@ def reset_bounty(context: CallbackContext) -> None:
         full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
 
-def add_bounty(context: CallbackContext, user: User, amount: float, update: Update = None,
+def add_bounty(user: User, amount: float, context: CallbackContext = None, update: Update = None,
                should_update_location: bool = False, pending_belly_amount: int = 0) -> User:
     """
     Adds a bounty to a user
@@ -157,6 +157,8 @@ def add_bounty(context: CallbackContext, user: User, amount: float, update: Upda
 
     # Update the user's location
     if should_update_location:
+        if context is None:
+            raise ValueError('Context is required when updating the location')
         update_location(context, user, update)
 
     return user

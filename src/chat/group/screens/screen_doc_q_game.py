@@ -15,7 +15,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_bounty_formatted, add_bounty
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_edit, \
     mention_markdown_v2
@@ -192,7 +192,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
         if str(keyboard.info['b']) in correct_choices_index:
             # Increase user's bounty
-            user.bounty += win_amount
+            user = add_bounty(user, win_amount)
 
             # Update game status
             doc_q_game.status = GameStatus.WON.value

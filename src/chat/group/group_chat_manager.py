@@ -31,7 +31,8 @@ def update_user_bounty(update: Update, context: CallbackContext, user: User) -> 
     :return: Updated user
     """
 
-    user = add_bounty(context, user, get_message_belly(update, user), update, should_update_location=True)
+    user = add_bounty(user, get_message_belly(update, user), context=context, update=update,
+                      should_update_location=True)
     user.save()
 
     return user

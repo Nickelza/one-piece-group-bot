@@ -9,7 +9,7 @@ from src.model.enums.GameStatus import GameStatus, is_finished_by_status, get_fi
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameOutcome import GameOutcome
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_bounty_formatted, add_bounty
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
@@ -40,20 +40,21 @@ def end_game(game: Game, game_outcome: GameOutcome) -> Game:
 
     challenger: User = game.challenger
     opponent: User = game.opponent
+    half_wager: int = game.wager / 2
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
         game.status = GameStatus.WON.value
-        challenger.bounty += game.wager
+        challenger = add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
     elif game_outcome == GameOutcome.OPPONENT_WON:
         game.status = GameStatus.LOST.value
-        opponent.bounty += game.wager
+        opponent = add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
     else:
         game.status = GameStatus.DRAW.value
-        challenger.bounty += game.wager / 2
-        opponent.bounty += game.wager / 2
+        challenger = add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
+        opponent = add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
 
-    challenger.pending_bounty -= game.wager / 2
-    opponent.pending_bounty -= game.wager / 2
+    challenger.pending_bounty -= half_wager
+    opponent.pending_bounty -= half_wager
 
     # Refresh
     game.challenger = challenger
