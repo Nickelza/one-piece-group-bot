@@ -191,6 +191,8 @@ BELLY_STICKER_MULTIPLIER = Environment('BELLY_STICKER_MULTIPLIER', default_value
 BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_value='0.2')
 # Multiplier percentage for location level. Default 10
 BELLY_LOCATION_LEVEL_MULTIPLIER = Environment('BELLY_LOCATION_LEVEL_MULTIPLIER', default_value='10')
+# How much should belly be upper rounded. Default: 1000
+BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value='1000')
 
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)

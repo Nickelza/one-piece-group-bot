@@ -1,3 +1,5 @@
+from math import ceil
+
 from peewee import Case
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -100,7 +102,7 @@ def get_message_belly(update: Update, user: User) -> int:
 
     final_belly += int((final_belly * location_percentage) / 100)
 
-    return round(int(final_belly), -3)  # Round to the nearest thousandth
+    return round_belly_up(final_belly)
 
 
 def reset_bounty(context: CallbackContext) -> None:
@@ -134,7 +136,7 @@ def reset_bounty(context: CallbackContext) -> None:
 
 
 def add_bounty(context: CallbackContext, user: User, amount: float, update: Update = None,
-               should_update_location: bool = True) -> User:
+               should_update_location: bool = False, pending_belly_amount: int = 0) -> User:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -142,6 +144,8 @@ def add_bounty(context: CallbackContext, user: User, amount: float, update: Upda
     :param amount: The amount to add to the bounty
     :param update: Telegram update
     :param should_update_location: Whether to update the user's location
+    :param pending_belly_amount: How much of the amount is from pending belly, so not newly acquired. Will be used to
+                                 calculate eventual taxes
     :return: The updated user
     """
     from src.service.location_service import update_location
@@ -215,3 +219,12 @@ def validate_wager(update: Update, context: CallbackContext, user: User, wager_s
         return False
 
     return True
+
+
+def round_belly_up(belly: float) -> int:
+    """
+    Rounds the belly up to the nearest given defined amount
+    :param belly: The belly to round up
+    :return: The rounded belly
+    """
+    return ceil(belly / Env.BELLY_UPPER_ROUND_AMOUNT.get_int()) * Env.BELLY_UPPER_ROUND_AMOUNT.get_int()

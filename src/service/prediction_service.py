@@ -12,7 +12,8 @@ from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
-from src.service.math_service import get_percentage_from_value
+from src.service.bounty_service import round_belly_up, add_bounty
+from src.service.math_service import get_percentage_from_value, get_value_from_percentage
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 
 
@@ -109,7 +110,8 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
     if prediction.cut_off_date is not None:
         invalid_prediction_option_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-            PredictionOptionUser.date > prediction.cut_off_date)
+            (PredictionOptionUser.prediction_option in prediction.prediction_options)
+            & (PredictionOptionUser.date > prediction.cut_off_date))
         for invalid_prediction_option_user in invalid_prediction_option_users:
             user: User = invalid_prediction_option_user.user
             # Return wager and subtract from pending bounty
@@ -140,6 +142,46 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
     """
     if PredictionStatus(prediction.status) is not PredictionStatus.BETS_CLOSED:
         raise PredictionException(phrases.PREDICTION_NOT_IN_BETS_CLOSED_STATUS)
+
+    prediction_options: list[PredictionOption] = prediction.prediction_options
+    prediction_options_correct: list[PredictionOption] = [prediction_option for prediction_option in prediction_options
+                                                          if prediction_option.is_correct]
+    prediction_options_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
+        PredictionOptionUser.prediction_option.in_(prediction_options))
+
+    total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
+    total_correct_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users
+                              if prediction_option_user.prediction_option.is_correct)
+
+    for prediction_option_user in prediction_options_users:
+        user: User = prediction_option_user.user
+
+        # Correct prediction
+        if prediction_option_user.prediction_option.is_correct:
+            # What percent of the total correct wager is this user's wager
+            percentage_of_correct_wager = get_percentage_from_value(prediction_option_user.wager, total_correct_wager)
+
+            # How much is this percentage in the total wager
+            value_from_total_wager = round_belly_up(get_value_from_percentage(total_wager, percentage_of_correct_wager))
+
+            # Add to bounty
+            user = add_bounty(context, user, value_from_total_wager, pending_belly_amount=prediction_option_user.wager)
+
+        # Subtract bet wager from user pending bounty
+        user.pending_bounty -= prediction_option_user.wager
+
+        # Should refund wager or no correct options
+        if prediction.refund_wager or len(prediction_options_correct) == 0:
+            user.bounty += prediction_option_user.wager
+
+        user.save()
+
+    # Refresh prediction
+    refresh(context, prediction)
+
+    # Send message in reply notifying users that results are set
+    full_message_send(context, phrases.PREDICTION_RESULTS_SET, chat_id=Env.OPD_GROUP_ID.get(),
+                      reply_to_message_id=prediction.message_id)
 
 
 def refresh(context: CallbackContext, prediction: Prediction) -> None:

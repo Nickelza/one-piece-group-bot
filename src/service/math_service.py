@@ -1,15 +1,15 @@
 import random
 
 
-def get_value_from_percentage(value: float, percentage: float) -> float:
+def get_value_from_percentage(total: float, percentage: float) -> float:
     """
     Gets a value from a percentage
-    :param value: The value to get the percentage from
+    :param total: The value to get the percentage from
     :param percentage: The percentage to get the value from
     :return: The value from the percentage
     """
 
-    return (value * percentage) / 100
+    return (total * percentage) / 100
 
 
 def get_random_win(percentage: float) -> bool:
@@ -38,3 +38,4 @@ def get_percentage_from_value(value: float, total: float, add_decimal=True) -> f
         return result
     except ZeroDivisionError:
         return 0
+

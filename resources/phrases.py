@@ -187,3 +187,4 @@ PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make s
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_OPTION_NOT_FOUND = 'Option {} not found in prediction'
 PREDICTION_BET_SUCCESS = 'Bet placed successfully'
+PREDICTION_RESULTS_SET = 'The results of this prediction have been set'

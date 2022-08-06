@@ -95,6 +95,11 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     prediction_option_user.wager = wager
     prediction_option_user.save()
 
+    # Remove wager from user balance
+    user.bounty -= wager
+    user.pending_bounty += wager
+    user.save()
+
     # Send success message
     full_message_send(context, phrases.PREDICTION_BET_SUCCESS, update=update, add_delete_button=True)
 
