@@ -167,20 +167,20 @@ PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'
 PREDICTION_NOT_SENT = 'Prediction not sent'
 PREDICTION_NOT_IN_SENT_STATUS = 'Prediction not in SENT status'
-PREDICTION_NOT_IN_BETS_CLOSED_STATUS = 'Prediction not in BETS_CLOSED status'
+PREDICTION_NOT_IN_BETS_CLOSED_STATUS = 'Prediction not in BETS\\_CLOSED status'
 UNKNOWN_PREDICTION_ACTION = 'Unknown prediction action'
 PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Status*: {}' \
                   '{}'
-PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\)'
+PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
 PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.ENABLED.value} Wagers refunded'
 PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.ENABLED.value} Multiple bets allowed'
 PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.ENABLED.value} Can withdraw bets'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
-                                f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option>' \
+                                f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
 PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
 PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'

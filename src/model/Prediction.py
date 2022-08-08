@@ -19,6 +19,7 @@ class Prediction(BaseModel):
     allow_multiple_choices = BooleanField()
     can_withdraw_bet = BooleanField()
     message_id = IntegerField(null=True)
+    result_set_date = DateTimeField(null=True)
 
     class Meta:
         db_table = 'prediction'

@@ -10,6 +10,7 @@ from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
+from src.model.enums.Emoji import Emoji
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
 from src.service.bounty_service import round_belly_up, add_bounty
@@ -64,7 +65,7 @@ def get_prediction_text(prediction: Prediction) -> str:
             prediction_option.number,
             escape_valid_markdown_chars(prediction_option.option),
             get_percentage_from_value(option_wager, total_wager, add_decimal=False),
-            len(prediction_option_users)
+            (Emoji.CORRECT.value if prediction_option.is_correct else "")
         )
 
     added_text = ""
@@ -175,6 +176,11 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
             user.bounty += prediction_option_user.wager
 
         user.save()
+
+    # Update status
+    prediction.status = PredictionStatus.RESULT_SET.value
+    prediction.result_set_date = datetime.datetime.now()
+    prediction.save()
 
     # Refresh prediction
     refresh(context, prediction)
