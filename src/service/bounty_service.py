@@ -209,13 +209,13 @@ def validate_wager(update: Update, context: CallbackContext, user: User, wager_s
         full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update, add_delete_button=True)
         return False
 
-    # Challenger does not have enough bounty
+    # User does not have enough bounty
     if user.bounty < wager:
         full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
         return False
 
     # Wager less than minimum required
-    if wager < Env.GAME_MIN_WAGER.get_int():
+    if wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_bounty_formatted(required_belly))
         full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False

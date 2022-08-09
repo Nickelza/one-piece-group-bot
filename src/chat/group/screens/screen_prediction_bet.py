@@ -10,8 +10,8 @@ from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.PredictionStatus import PredictionStatus
 from src.service.bounty_service import get_wager_amount, validate_wager
-from src.service.message_service import full_message_send
-from src.service.prediction_service import refresh
+from src.service.message_service import full_message_send, escape_valid_markdown_chars
+from src.service.prediction_service import refresh, get_prediction_options_user
 
 
 def validate(update: Update, context: CallbackContext, user: User, command: Command) -> tuple[Prediction,
@@ -51,18 +51,17 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     prediction_options: list[PredictionOption] = prediction.prediction_options
 
     # User has already bet and prediction does not allow multiple bets
-    prediction_options_user: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-        (PredictionOptionUser.prediction_option.in_(prediction_options))
-        & (PredictionOptionUser.user == user))
+    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
     if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
         full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update)
         return error_tuple
 
     # Option is not valid
     prediction_option = [prediction_option for prediction_option in prediction_options if
-                         prediction_option.number == int(command.parameters[1])]
+                         str(prediction_option.number) == command.parameters[1]]
     if len(prediction_option) == 0:
-        full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(command.parameters[1]), update=update)
+        full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(
+            escape_valid_markdown_chars(command.parameters[1])), update=update)
         return error_tuple
 
     return prediction, prediction_option[0], get_wager_amount(command.parameters[0]), int(command.parameters[1])
@@ -90,6 +89,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
 
     # Add prediction option user
     prediction_option_user = PredictionOptionUser()
+    prediction_option_user.prediction = prediction
     prediction_option_user.prediction_option = prediction_option
     prediction_option_user.user = user
     prediction_option_user.wager = wager

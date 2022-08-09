@@ -51,8 +51,7 @@ def get_prediction_text(prediction: Prediction) -> str:
     # Options text
     options_text = ""
     prediction_options: list[PredictionOption] = prediction.prediction_options
-    prediction_options_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-        PredictionOptionUser.prediction_option.in_(prediction_options))
+    prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
     total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
 
     for index, prediction_option in enumerate(prediction_options):
@@ -111,7 +110,7 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
     if prediction.cut_off_date is not None:
         invalid_prediction_option_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-            (PredictionOptionUser.prediction_option in prediction.prediction_options)
+            (PredictionOptionUser.prediction == prediction)
             & (PredictionOptionUser.date > prediction.cut_off_date))
         for invalid_prediction_option_user in invalid_prediction_option_users:
             user: User = invalid_prediction_option_user.user
@@ -147,8 +146,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
     prediction_options: list[PredictionOption] = prediction.prediction_options
     prediction_options_correct: list[PredictionOption] = [prediction_option for prediction_option in prediction_options
                                                           if prediction_option.is_correct]
-    prediction_options_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-        PredictionOptionUser.prediction_option.in_(prediction_options))
+    prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
 
     total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
     total_correct_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users
@@ -206,3 +204,24 @@ def refresh(context: CallbackContext, prediction: Prediction) -> None:
         if br.message != "Message is not modified: specified new message content and reply markup are exactly the " \
                          "same as a current content and reply markup of the message":
             raise br
+
+
+def get_prediction_options_user(prediction: Prediction, user: User) -> list[PredictionOptionUser]:
+    """
+    Get all prediction options for a user
+    :param prediction: Prediction
+    :param user: User
+    :return: List of prediction options user
+    """
+
+    return PredictionOptionUser.select().where((PredictionOptionUser.prediction == prediction)
+                                               & (PredictionOptionUser.user == user))
+
+
+def get_prediction_options_users(prediction: Prediction) -> list[PredictionOptionUser]:
+    """
+    Get all prediction options users for a prediction
+    :param prediction: Prediction
+    :return: List of prediction options users
+    """
+    return PredictionOptionUser.select().where(PredictionOptionUser.prediction == prediction)
