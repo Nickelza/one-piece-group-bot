@@ -71,6 +71,7 @@ def main() -> None:
 
     # Activate timers
     set_timers(dispatcher)
+    logging.getLogger('apscheduler.executors.default').propagate = False
 
     updater.idle()
 

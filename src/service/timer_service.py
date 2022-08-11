@@ -45,7 +45,10 @@ def set_timers(dispatcher: Dispatcher) -> None:
     context = CallbackContext(dispatcher)
 
     for timer in Timer.TIMERS:
-        add_to_context(context, timer)
+        if timer.is_enabled:
+            add_to_context(context, timer)
+        else:
+            logging.info(f'Timer {timer.name} is disabled')
 
 
 def run(context: CallbackContext) -> None:
@@ -61,9 +64,6 @@ def run(context: CallbackContext) -> None:
         return
 
     timer: Timer.Timer = job.context
-    if not timer.is_enabled and timer.should_log:
-        logging.info(f'Skipping timer {job.name}')
-        return
 
     db = init()
 
