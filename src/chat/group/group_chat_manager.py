@@ -13,6 +13,7 @@ from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_r
 from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_prediction_bet_remove import manage as manage_screen_prediction_bet_remove
+from src.chat.group.screens.screen_prediction_bet_status import manage as manage_screen_prediction_bet_status
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
@@ -113,6 +114,9 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
 
             case Screen.GRP_PREDICTION_BET_REMOVE:  # Prediction bet remove
                 manage_screen_prediction_bet_remove(update, context, user, command)
+
+            case Screen.GRP_PREDICTION_BET_STATUS:  # Prediction bet status
+                manage_screen_prediction_bet_status(update, context, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

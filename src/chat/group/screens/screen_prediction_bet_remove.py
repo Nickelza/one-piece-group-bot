@@ -21,7 +21,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     :param context: The context object
     :param user: The user object
     :param command: The command
-    :return: None if validation failed or (prediction, prediction_option, wager, option number) if validation succeeded
+    :return: None if validation failed or (prediction, prediction_option) if validation succeeded
     """
 
     error_tuple = None, None
@@ -51,7 +51,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
 
     # User has not bet on this prediction
     if len(prediction_options_user) == 0:
-        full_message_send(context, phrases.PREDICTION_BET_REMOVE_NOT_BET, update=update)
+        full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update)
         return error_tuple
 
     prediction_option = None

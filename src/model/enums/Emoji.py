@@ -36,6 +36,11 @@ class Emoji(Enum):
 
     # Game
     WINNER = '🏆'
+    LOSER = '💥'
+
+    # Prediction
+    PREDICTION_BET_WIN = '🏆'
+    PREDICTION_BET_LOSE = '❗'
 
     # Rock Paper Scissors
     ROCK = '✊'

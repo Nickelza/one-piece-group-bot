@@ -148,23 +148,15 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
                                                           if prediction_option.is_correct]
     prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
 
-    total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
-    total_correct_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users
-                              if prediction_option_user.prediction_option.is_correct)
-
     for prediction_option_user in prediction_options_users:
         user: User = prediction_option_user.user
 
         # Correct prediction
         if prediction_option_user.prediction_option.is_correct:
-            # What percent of the total correct wager is this user's wager
-            percentage_of_correct_wager = get_percentage_from_value(prediction_option_user.wager, total_correct_wager)
-
-            # How much is this percentage in the total wager
-            value_from_total_wager = round_belly_up(get_value_from_percentage(total_wager, percentage_of_correct_wager))
-
+            win_amount = get_prediction_option_user_win(prediction_option_user,
+                                                        prediction_options_users=prediction_options_users)
             # Add to bounty
-            user = add_bounty(user, value_from_total_wager, pending_belly_amount=prediction_option_user.wager)
+            user = add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
 
         # Subtract bet wager from user pending bounty
         user.pending_bounty -= prediction_option_user.wager
@@ -214,8 +206,12 @@ def get_prediction_options_user(prediction: Prediction, user: User) -> list[Pred
     :return: List of prediction options user
     """
 
-    return PredictionOptionUser.select().where((PredictionOptionUser.prediction == prediction)
-                                               & (PredictionOptionUser.user == user))
+    result = (PredictionOptionUser.select()
+              .join(PredictionOption)
+              .where((PredictionOptionUser.prediction == prediction) & (PredictionOptionUser.user == user))
+              .order_by(PredictionOption.number.asc()))
+
+    return result
 
 
 def get_prediction_options_users(prediction: Prediction) -> list[PredictionOptionUser]:
@@ -225,3 +221,34 @@ def get_prediction_options_users(prediction: Prediction) -> list[PredictionOptio
     :return: List of prediction options users
     """
     return PredictionOptionUser.select().where(PredictionOptionUser.prediction == prediction)
+
+
+def get_prediction_option_user_win(prediction_option_user: PredictionOptionUser,
+                                   prediction_options_users: list[PredictionOptionUser] = None,
+                                   is_potential: bool = False) -> int:
+    """
+    Get prediction option user potential win
+    :param prediction_option_user: PredictionOptionUser for which to get potential win
+    :param prediction_options_users: List of PredictionOptionUser for the same prediction
+    :param is_potential: If True, assume that the prediction option is correct
+    :return: Prediction option user potential win
+    """
+
+    if prediction_options_users is None:
+        prediction_options_users = get_prediction_options_users(prediction_option_user.prediction)
+
+    total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
+
+    if not is_potential:
+        total_correct_wager = sum(pou.wager for pou in prediction_options_users if pou.prediction_option.is_correct)
+    else:
+        total_correct_wager = sum(pou.wager for pou in prediction_options_users
+                                  if pou.prediction_option == prediction_option_user.prediction_option)
+
+    # What percent of the total correct wager is this user's wager
+    percentage_of_correct_wager = get_percentage_from_value(prediction_option_user.wager, total_correct_wager)
+
+    # How much is this percentage in the total wager
+    value_from_total_wager = round_belly_up(get_value_from_percentage(total_wager, percentage_of_correct_wager))
+
+    return value_from_total_wager

@@ -87,12 +87,22 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     if prediction is None or prediction_option is None or wager is None or option_number is None:
         return
 
-    # Add prediction option user
-    prediction_option_user = PredictionOptionUser()
-    prediction_option_user.prediction = prediction
-    prediction_option_user.prediction_option = prediction_option
-    prediction_option_user.user = user
-    prediction_option_user.wager = wager
+    # Find existing prediction option user if it exists
+    prediction_option_user: PredictionOptionUser = PredictionOptionUser.get_or_none(
+        (PredictionOptionUser.user == user)
+        & (PredictionOptionUser.prediction_option == prediction_option))
+
+    # User has already bet on this option, add the wager to the existing bet
+    if prediction_option_user is not None:
+        prediction_option_user.wager += wager
+    else:
+        # Create prediction option user
+        prediction_option_user = PredictionOptionUser()
+        prediction_option_user.prediction = prediction
+        prediction_option_user.prediction_option = prediction_option
+        prediction_option_user.user = user
+        prediction_option_user.wager = wager
+
     prediction_option_user.save()
 
     # Remove wager from user balance

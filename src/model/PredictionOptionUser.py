@@ -13,11 +13,11 @@ class PredictionOptionUser(BaseModel):
     Prediction option user class
     """
     id = PrimaryKeyField()
-    prediction = ForeignKeyField(Prediction, backref='prediction_option_users', on_delete='RESTRICT',
+    prediction = ForeignKeyField(Prediction, backref='prediction_options_users', on_delete='RESTRICT',
                                  on_update='RESTRICT')
-    prediction_option = ForeignKeyField(PredictionOption, backref='prediction_option_users', on_delete='RESTRICT',
+    prediction_option = ForeignKeyField(PredictionOption, backref='prediction_options_users', on_delete='RESTRICT',
                                         on_update='RESTRICT')
-    user = ForeignKeyField(User, backref='prediction_option_users', on_delete='CASCADE', on_update='CASCADE')
+    user = ForeignKeyField(User, backref='prediction_options_users', on_delete='CASCADE', on_update='CASCADE')
     wager = IntegerField()
     date = DateTimeField(default=datetime.now)
 
