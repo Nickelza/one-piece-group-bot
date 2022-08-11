@@ -7,7 +7,7 @@ from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_pr
 from src.model.tgrest.TgRest import TgRest, TgRestException
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
 from src.model.tgrest.TgRestPrediction import TgRestPrediction
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
 def manage(update: Update, context: CallbackContext) -> None:
@@ -39,5 +39,5 @@ def manage(update: Update, context: CallbackContext) -> None:
                 raise TgRestException("Unknown object type")
         full_message_send(context, "Request received", update=update, quote=True)
     except TgRestException as e:
-        full_message_send(context, "Error: " + e.message, update=update, quote=True)
+        full_message_send(context, "Error: " + escape_valid_markdown_chars(e.message), update=update, quote=True)
         return
