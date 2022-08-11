@@ -136,14 +136,17 @@ REDDIT_MEME_PIECE_SUBREDDIT = Environment('REDDIT_MEME_PIECE_SUBREDDIT', default
 CRON_TEMP_DIR_CLEANUP = Environment('CRON_TEMP_DIR_CLEANUP', default_value='0 */12 * * *')
 ENABLE_TIMER_TEMP_DIR_CLEANUP = Environment('ENABLE_TIMER_TEMP_DIR_CLEANUP', default_value='True')
 SHOULD_LOG_TIMER_TEMP_DIR_CLEANUP = Environment('SHOULD_LOG_TIMER_TEMP_DIR_CLEANUP', default_value='False')
+
 # Create and send the leaderboard. Default: Every sunday at midnight
 CRON_SEND_LEADERBOARD = Environment('CRON_SEND_LEADERBOARD', default_value='0 0 * * Sun')
 ENABLE_TIMER_SEND_LEADERBOARD = Environment('ENABLE_TIMER_SEND_LEADERBOARD', default_value='True')
 SHOULD_LOG_TIMER_SEND_LEADERBOARD = Environment('SHOULD_LOG_TIMER_SEND_LEADERBOARD', default_value='False')
+
 # Reset Doc Q game playability. Default: Every day at midnight
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
 ENABLE_TIMER_RESET_DOC_Q_GAME = Environment('ENABLE_TIMER_RESET_DOC_Q_GAME', default_value='True')
 SHOULD_LOG_TIMER_RESET_DOC_Q_GAME = Environment('SHOULD_LOG_TIMER_RESET_DOC_Q_GAME', default_value='False')
+
 # Reset bounty poster limit. Default: Every day at 00:10
 CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT = Environment('ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT', default_value='True')
@@ -167,11 +170,24 @@ SHOULD_LOG_TIMER_REDDIT_POST_ONE_PIECE = Environment('SHOULD_LOG_TIMER_REDDIT_PO
 CRON_REDDIT_POST_MEME_PIECE = Environment('CRON_REDDIT_POST_MEME_PIECE', default_value='0 6,18 * * *')
 ENABLE_TIMER_REDDIT_POST_MEME_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_MEME_PIECE', default_value='True')
 SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE = Environment('SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE', default_value='False')
-# Rest can initiate game. Default: Every 8 hours
+
+# Reset can initiate game. Default: Every 8 hours
 CRON_RESET_CAN_INITIATE_GAME = Environment('CRON_RESET_CAN_INITIATE_GAME', default_value='0 */8 * * *')
 ENABLE_TIMER_RESET_CAN_INITIATE_GAME = Environment('ENABLE_TIMER_RESET_CAN_INITIATE_GAME', default_value='True')
 SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME = Environment('SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME',
                                                        default_value='False')
+
+# Send scheduled predictions. Default: Every 1 minute
+CRON_SEND_SCHEDULED_PREDICTIONS = Environment('CRON_SEND_SCHEDULED_PREDICTIONS', default_value='*/1 * * * *')
+ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS = Environment('ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS', default_value='True')
+SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS = Environment('SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS',
+                                                          default_value='False')
+
+# Close scheduled predictions. Default: Every 1 minute
+CRON_CLOSE_SCHEDULED_PREDICTIONS = Environment('CRON_CLOSE_SCHEDULED_PREDICTIONS', default_value='*/1 * * * *')
+ENABLE_TIMER_CLOSE_SCHEDULED_PREDICTIONS = Environment('ENABLE_TIMER_CLOSE_SCHEDULED_PREDICTIONS', default_value='True')
+SHOULD_LOG_TIMER_CLOSE_SCHEDULED_PREDICTIONS = Environment('SHOULD_LOG_TIMER_CLOSE_SCHEDULED_PREDICTIONS',
+                                                           default_value='False')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')

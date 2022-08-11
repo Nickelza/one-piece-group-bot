@@ -13,6 +13,7 @@ from src.service.bounty_service import add_region_bounty
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import reset_can_initiate_game
 from src.service.location_service import reset_can_change_region
+from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions
 
 
 def add_to_context(context: CallbackContext, timer: Timer.Timer) -> Job:
@@ -43,32 +44,8 @@ def set_timers(dispatcher: Dispatcher) -> None:
 
     context = CallbackContext(dispatcher)
 
-    # Temp folder cleanup timer
-    add_to_context(context, Timer.TEMP_DIR_CLEANUP)
-
-    # Reddit post One Piece
-    add_to_context(context, Timer.REDDIT_POST_ONE_PIECE)
-
-    # Reddit post Meme Piece
-    add_to_context(context, Timer.REDDIT_POST_MEME_PIECE)
-
-    # Leaderboard timer
-    add_to_context(context, Timer.TIMER_SEND_LEADERBOARD)
-
-    # Reset Doc Q Game timer
-    add_to_context(context, Timer.RESET_DOC_Q_GAME)
-
-    # Reset bounty poster limit
-    add_to_context(context, Timer.RESET_BOUNTY_POSTER_LIMIT)
-
-    # Reset can change region
-    add_to_context(context, Timer.RESET_CAN_CHANGE_REGION)
-
-    # Increment bounty by region
-    add_to_context(context, Timer.ADD_REGION_BOUNTY)
-
-    # Reset can initiate game
-    add_to_context(context, Timer.RESET_CAN_INITIATE_GAME)
+    for timer in Timer.TIMERS:
+        add_to_context(context, timer)
 
 
 def run(context: CallbackContext) -> None:
@@ -110,6 +87,10 @@ def run(context: CallbackContext) -> None:
             add_region_bounty(context)
         case Timer.RESET_CAN_INITIATE_GAME:
             reset_can_initiate_game(context)
+        case Timer.SEND_SCHEDULED_PREDICTIONS:
+            send_scheduled_predictions(context)
+        case Timer.CLOSE_SCHEDULED_PREDICTIONS:
+            close_scheduled_predictions(context)
         case _:
             logging.error(f'Unknown timer {job.name}')
 

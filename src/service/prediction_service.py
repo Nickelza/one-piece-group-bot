@@ -252,3 +252,33 @@ def get_prediction_option_user_win(prediction_option_user: PredictionOptionUser,
     value_from_total_wager = round_belly_up(get_value_from_percentage(total_wager, percentage_of_correct_wager))
 
     return value_from_total_wager
+
+
+def send_scheduled_predictions(context: CallbackContext) -> None:
+    """
+    Send scheduled predictions
+    :param context: Telegram context
+    """
+
+    # Select not sent predictions with send date in the past
+    predictions: list[Prediction] = Prediction.select().where((Prediction.send_date.is_null(False))
+                                                              & (Prediction.send_date <= datetime.datetime.now())
+                                                              & (Prediction.status == PredictionStatus.NEW.value))
+
+    for prediction in predictions:
+        send(context, prediction)
+
+
+def close_scheduled_predictions(context: CallbackContext) -> None:
+    """
+    Close scheduled predictions
+    :param context: Telegram context
+    """
+
+    # Select sent predictions with end date in the past
+    predictions: list[Prediction] = Prediction.select().where((Prediction.end_date.is_null(False))
+                                                              & (Prediction.end_date <= datetime.datetime.now())
+                                                              & (Prediction.status == PredictionStatus.SENT.value))
+
+    for prediction in predictions:
+        close_bets(context, prediction)
