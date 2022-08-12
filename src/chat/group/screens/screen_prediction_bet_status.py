@@ -112,5 +112,12 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
                     ot_text += phrases.PREDICTION_STATUS_NET_LOSS.format(get_bounty_formatted(total_loss_amount))
                 else:  # All options were wrong, show total loss
                     ot_text += phrases.PREDICTION_STATUS_TOTAL_LOSS.format(get_bounty_formatted(total_loss_amount))
+        # Open prediction, show command to remove single bet
+        elif prediction_status is PredictionStatus.SENT:
+            ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_BET
+
+    # Open prediction, show command to remove all bets
+    if prediction_status is PredictionStatus.SENT:
+        ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
 
     full_message_send(context, ot_text, update=update, add_delete_button=True)

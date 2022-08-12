@@ -172,21 +172,33 @@ UNKNOWN_PREDICTION_ACTION = 'Unknown prediction action'
 PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Status*: {}' \
-                  '{}'
+                  '{}{}'
 PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
-PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.ENABLED.value} Wagers refunded'
-PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.ENABLED.value} Multiple bets allowed'
-PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.ENABLED.value} Can withdraw bets'
+PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Wagers refunded'
+PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Multiple bets allowed'
+PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Can withdraw bets'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
                                 f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
+PREDICTION_BET_HOW_TO_PLACE_BET = '\n\n_To place a bet, reply to this message with the following command:' \
+                                  f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
+                                  f'\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1_'
+PREDICTION_BET_HOW_TO_REMOVE_BET = '\n\n_To remove a bet, reply to the prediction with the following command:' \
+                                   f'\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} <option number>' \
+                                   f'\nExample: {Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} 1_'
+PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS = '\n\n_To remove all bets, reply to the prediction with the following command:' \
+                                        f'\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()}_'
+PREDICTION_BET_HOW_TO_VIEW_BET_STATUS = '\n\n_To view your bet status, reply to the prediction with the following ' \
+                                        'command:' \
+                                        f'\n{Command.GRP_PREDICTION_BET_STATUS.get_formatted()}_'
+
 PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
 PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_OPTION_NOT_FOUND = 'Option *{}* not found in prediction'
-PREDICTION_BET_SUCCESS = 'Bet placed successfully'
+PREDICTION_BET_SUCCESS = 'Bet placed successfully' + PREDICTION_BET_HOW_TO_VIEW_BET_STATUS
 PREDICTION_RESULTS_SET = 'The results of this prediction have been set'
 PREDICTION_BET_REMOVE_INVALID_FORMAT = 'Make sure your command is in the following format:' \
                                        f'\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} ]<option number>' \

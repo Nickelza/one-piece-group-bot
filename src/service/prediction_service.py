@@ -84,6 +84,11 @@ def get_prediction_text(prediction: Prediction) -> str:
     # Bet withdrawal allowed
     optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS if prediction.can_withdraw_bet else ""
 
+    # Add command to place bets if prediction is open
+    how_to_bet_command_text = ""
+    if PredictionStatus(prediction.status) is PredictionStatus.SENT:
+        how_to_bet_command_text = phrases.PREDICTION_BET_HOW_TO_PLACE_BET
+
     # Append \n if not empty
     optional_text = "\n" + optional_text if optional_text != "" else ""
     added_text += optional_text
@@ -93,7 +98,8 @@ def get_prediction_text(prediction: Prediction) -> str:
         escape_valid_markdown_chars(prediction.question),
         options_text,
         get_prediction_status_name_by_key(PredictionStatus(prediction.status)),
-        added_text)
+        added_text,
+        how_to_bet_command_text)
 
     return prediction_text
 

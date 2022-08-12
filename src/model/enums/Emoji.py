@@ -41,6 +41,7 @@ class Emoji(Enum):
     # Prediction
     PREDICTION_BET_WIN = '🏆'
     PREDICTION_BET_LOSE = '❗'
+    PREDICTION_FEATURE_ENABLED = '✔'
 
     # Rock Paper Scissors
     ROCK = '✊'
