@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from telegram import Message
 from telegram.error import BadRequest
@@ -288,3 +289,27 @@ def close_scheduled_predictions(context: CallbackContext) -> None:
 
     for prediction in predictions:
         close_bets(context, prediction)
+
+
+def remove_all_bets_from_active_predictions(context: CallbackContext) -> None:
+    """
+    Remove all bets from active predictions due to bounty reset
+    :param context: Telegram context
+    """
+
+    # Select active predictions
+    active_statuses = [PredictionStatus.SENT.value, PredictionStatus.BETS_CLOSED.value]
+    predictions: list[Prediction] = Prediction.select().where(Prediction.status.in_(active_statuses))
+
+    for prediction in predictions:
+        PredictionOptionUser.delete().where(PredictionOptionUser.prediction == prediction).execute()
+        if prediction.message_id is not None:  # Should always be true
+            try:
+                full_message_send(context, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET,
+                                  chat_id=Env.OPD_GROUP_ID.get(), reply_to_message_id=prediction.message_id,
+                                  allow_sending_without_reply=False)
+            except BadRequest as br:  # Log error if reply message is not found
+                if 'Replied message not found' in br.message:
+                    logging.error(f"Replied message not found for prediction {prediction.id}")
+        else:
+            logging.error(f"Prediction {prediction.id} has no message_id")

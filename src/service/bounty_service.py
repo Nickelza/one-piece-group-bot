@@ -110,10 +110,15 @@ def reset_bounty(context: CallbackContext) -> None:
     Resets the bounty for all users
     :return: None
     """
-    from src.service.game_service import force_end_all_active as force_end_all_active_games  # Avoid circular import
+    # Avoid circular import
+    from src.service.game_service import force_end_all_active as force_end_all_active_games
+    from src.service.prediction_service import remove_all_bets_from_active_predictions as remove_all_bets
 
-    # End all active games and return the wagers
+    # End all active games
     force_end_all_active_games()
+
+    # Remove bets from all prediction which result have not been set
+    remove_all_bets(context)
 
     # Return all pending bounty
     User.update(bounty=User.bounty + User.pending_bounty, pending_bounty=0).execute()
