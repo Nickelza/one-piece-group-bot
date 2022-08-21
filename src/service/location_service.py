@@ -125,4 +125,4 @@ def reset_can_change_region(context: CallbackContext) -> None:
     :return: None
     """
 
-    User.update(can_change_region=True).where(User.can_change_region is True)
+    User.update(can_change_region=True).where(User.can_change_region is False)
