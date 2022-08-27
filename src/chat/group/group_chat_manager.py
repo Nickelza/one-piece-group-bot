@@ -17,6 +17,7 @@ from src.chat.group.screens.screen_prediction_bet_status import manage as manage
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import MessageValidationException
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
@@ -134,9 +135,7 @@ def validate(update: Update, user: User) -> bool:
     # Stickers
     try:
         if (update.message.sticker is not None
-                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int()
-                     or user.is_arrested())):
-            delete_message(update)
+                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int())):
             return False
     except AttributeError:
         pass
@@ -144,9 +143,7 @@ def validate(update: Update, user: User) -> bool:
     # Animations
     try:
         if (update.message.animation is not None
-                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int()
-                     or user.is_arrested())):
-            delete_message(update)
+                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int())):
             return False
     except AttributeError:
         pass
@@ -154,12 +151,61 @@ def validate(update: Update, user: User) -> bool:
     # Forwarded
     try:
         if (update.message.forward_from is not None
-                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int()
-                     or user.is_arrested())
-                and str(update.message.forward_from.id) not in Env.WHITELIST_FORWARD_MESSAGE.get_list()):
-            delete_message(update)
+                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
+                                                identifier=str(update.message.forward_from.id),
+                                                allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list())):
             return False
     except AttributeError:
         pass
+
+    # Dice emoji
+    try:
+        if (update.message.dice is not None
+                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int())):
+            return False
+    except AttributeError:
+        pass
+
+    # Inline Bot
+    try:
+        if (update.message.via_bot is not None
+                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
+                                                identifier=str(update.message.via_bot.id),
+                                                allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list())):
+            return False
+    except AttributeError:
+        pass
+
+    return True
+
+
+def validate_location_level(update: Update, user: User, location_level: int, identifier: str = None,
+                            allowed_identifiers: list[str] = None) -> bool:
+    """
+    Validates the location level of the user
+    :param update: Telegram update
+    :param user: User object
+    :param location_level: Location level to validate
+    :param identifier: If not None, check if is in the list of allowed identifiers
+    :param allowed_identifiers: Identifiers to allow. If not None, identifier must be not None
+    :return: True if valid, False otherwise
+    """
+
+    if identifier is not None and allowed_identifiers is None:
+        raise ValueError('allowed_identifiers must be not None if identifier is not None')
+
+    try:
+        if identifier is not None and identifier in allowed_identifiers:
+            return True
+
+        if user.is_arrested():
+            raise MessageValidationException()
+
+        if user.location_level < location_level:
+            raise MessageValidationException()
+
+    except MessageValidationException:
+        delete_message(update)
+        return False
 
     return True

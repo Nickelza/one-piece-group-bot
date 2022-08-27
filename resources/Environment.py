@@ -349,6 +349,10 @@ REQUIRED_LOCATION_LEVEL_SEND_STICKER = Environment('REQUIRED_LOCATION_LEVEL_SEND
 REQUIRED_LOCATION_LEVEL_SEND_ANIMATION = Environment('REQUIRED_LOCATION_LEVEL_SEND_ANIMATION', default_value='10')
 # Required location to forward messages. Default: 10 (Whiskey Peak)
 REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE = Environment('REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE', default_value='10')
+# Required location to send dice emoji. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI = Environment('REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI', default_value='21')
+# Required location to use inline bots. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS = Environment('REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS', default_value='21')
 # Required location to fight. Default: 21 (Fishman Island)
 REQUIRED_LOCATION_LEVEL_FIGHT = Environment('REQUIRED_LOCATION_LEVEL_FIGHT', default_value='21')
 # Required location to play games. Default: 21 (Fishman Island)
@@ -362,3 +366,5 @@ WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_val
         + BOT_ID.get() + c.STANDARD_SPLIT_CHAR
         + OPMA_BOT_ID.get()
 ))
+# Whitelist of bot ids which users can use inline mode. Default: Empty
+WHITELIST_INLINE_BOTS = Environment('WHITELIST_INLINE_BOTS', default_value='')

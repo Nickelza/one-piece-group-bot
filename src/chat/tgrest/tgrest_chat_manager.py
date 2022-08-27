@@ -23,8 +23,12 @@ def manage(update: Update, context: CallbackContext) -> None:
     try:
         # Try parsing object
         try:
-            # If starts with "Error", ignore
-            if update.effective_message.text.startswith("Error"):
+            # Try parsing object
+            try:
+                # If starts with "Error" or "Request", ignore
+                if update.message.text.startswith("Error") or update.message.text.startswith("Request"):
+                    return
+            except AttributeError:
                 return
 
             tg_rest_dict = json.loads(update.effective_message.text)
