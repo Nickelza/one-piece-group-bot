@@ -133,8 +133,9 @@ def validate(update: Update, user: User) -> bool:
 
     # Stickers
     try:
-        if update.message.sticker is not None \
-                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int():
+        if (update.message.sticker is not None
+                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int()
+                     or user.is_arrested())):
             delete_message(update)
             return False
     except AttributeError:
@@ -142,8 +143,9 @@ def validate(update: Update, user: User) -> bool:
 
     # Animations
     try:
-        if update.message.animation is not None \
-                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int():
+        if (update.message.animation is not None
+                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int()
+                     or user.is_arrested())):
             delete_message(update)
             return False
     except AttributeError:
@@ -151,9 +153,10 @@ def validate(update: Update, user: User) -> bool:
 
     # Forwarded
     try:
-        if update.message.forward_from is not None \
-                and user.location_level < Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int() \
-                and str(update.message.forward_from.id) not in Env.WHITELIST_FORWARD_MESSAGE.get_list():
+        if (update.message.forward_from is not None
+                and (user.location_level < Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int()
+                     or user.is_arrested())
+                and str(update.message.forward_from.id) not in Env.WHITELIST_FORWARD_MESSAGE.get_list()):
             delete_message(update)
             return False
     except AttributeError:

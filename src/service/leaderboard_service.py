@@ -53,6 +53,11 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     # Create a list of LeaderboardUsers
     leaderboard_users = []
     for index, user in enumerate(users):
+
+        # Arrested user
+        if user.is_arrested():
+            continue
+
         leaderboard_user = LeaderboardUser()
         leaderboard_user.leaderboard = leaderboard
         leaderboard_user.user = user

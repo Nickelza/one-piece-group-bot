@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from peewee import MySQLDatabase
 from telegram import Update
@@ -173,6 +174,12 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
         full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
+    # Cannot be used while arrested
+    if not command.allow_while_arrested:
+        if user.is_arrested():
+            full_message_send(context, phrases.COMMAND_WHILE_ARRESTED_ERROR, update=update, add_delete_button=True)
+            return False
+
     # Required location
     if command.required_location is not None:
         if user.location_level < command.required_location.level:
@@ -231,6 +238,8 @@ def get_user(update: Update) -> User:
 
     user.tg_first_name = update.effective_user.first_name
     user.tg_last_name = update.effective_user.last_name
+    user.tg_username = update.effective_user.username
+    user.last_message_date = datetime.now()
     user.save()
 
     return user

@@ -8,12 +8,18 @@ COMMAND_NOT_ACTIVE_ERROR = "This command is no longer available"
 COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR = COMMAND_NOT_ACTIVE_ERROR + '. ' + 'Please Use {} instead'
 COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in the New World'
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*'
+COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
                    '\nRank: {}' \
                    '\nLocation: {}'
+SHOW_USER_STATUS_FROZEN_BOUNTY = ' \\(Frozen\\)'
+SHOW_USER_STATUS_RANK_PRISONER = Emoji.PRISONER.value + ' Prisoner'
+SHOW_USER_STATUS_IMPEL_DOWN = 'Impel Down'
 SHOW_USER_STATUS_PENDING_BOUNTY = '\nPending bounty: ฿*{}*'
+SHOW_USER_STATUS_REMAINING_SENTENCE = '\nRemaining sentence: {}'
+SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
@@ -21,6 +27,7 @@ NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who 
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
 ROOKIE_STATUS_PRIVATE_CHAT_ONLY = 'Rookies can only view their status in Private Chat'
+PRISONER_STATUS_PRIVATE_CHAT_ONLY = 'Prisoners can only view their status in Private Chat'
 STATUS_PRIVATE_CHAT_KEY = 'View in Private Chat'
 BOUNTY_RESET = 'Bounties have been reset'
 

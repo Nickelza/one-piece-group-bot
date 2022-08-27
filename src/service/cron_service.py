@@ -68,3 +68,13 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
 
     next_run = get_next_run(cron_expression, start_datetime)
     return convert_seconds_to_time((next_run - start_datetime).total_seconds())
+
+
+def get_remaining_time(end_datetime: datetime) -> str:
+    """
+    Get the remaining time until the end_datetime
+    :param end_datetime: The end datetime
+    :return: The remaining time in days and hours e.g. 1 day 2h hours
+    """
+
+    return convert_seconds_to_time((end_datetime - datetime.datetime.now()).total_seconds())

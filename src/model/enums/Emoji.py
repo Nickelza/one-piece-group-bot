@@ -33,6 +33,7 @@ class Emoji(Enum):
     SETTINGS = '⚙'
     BACK = '🔙'
     STATUS = '📈'
+    PRISONER = '🚫'
 
     # Game
     WINNER = '🏆'

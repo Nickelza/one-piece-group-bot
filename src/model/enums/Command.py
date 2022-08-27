@@ -18,13 +18,15 @@ class Command:
 
     def __init__(self, name: str, screen: Screen, active: bool = True, replaced_by: str = None,
                  only_in_reply: bool = False, allow_self_reply: bool = False, allow_reply_to_bot: bool = False,
-                 required_location: Location.Location = None, message_source: MessageSource = MessageSource.ND):
+                 allow_while_arrested: bool = False, required_location: Location.Location = None,
+                 message_source: MessageSource = MessageSource.ND):
         self.name = name
         self.active = active
         self.replaced_by = replaced_by
         self.only_in_reply = only_in_reply
         self.allow_self_reply = allow_self_reply
         self.allow_reply_to_bot = allow_reply_to_bot
+        self.allow_while_arrested = allow_while_arrested
         self.screen = screen
         self.required_location = required_location
         self.parameters: list[str] = []
@@ -45,12 +47,12 @@ class Command:
 
 ND = None
 
-PVT_START = Command('start', Screen.PVT_START)
+PVT_START = Command('start', Screen.PVT_START, allow_while_arrested=True)
+PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS, allow_while_arrested=True)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()))
-GRP_USER_STATUS = Command('status', Screen.GRP_USER_STATUS)
-PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS)
+GRP_USER_STATUS = Command('status', Screen.GRP_USER_STATUS, allow_while_arrested=True)
 GRP_CHANGE_REGION_NEW_WORLD = Command('newworld', Screen.GRP_CHANGE_REGION,
                                       required_location=Location.get_last_paradise())
 GRP_CHANGE_REGION_PARADISE = Command('paradise', Screen.GRP_CHANGE_REGION,

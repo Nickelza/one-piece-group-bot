@@ -8,6 +8,7 @@ from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import get_finished_statuses
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
@@ -51,9 +52,21 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
         full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False
 
-    # Opponent is not in the minimum required location
-    if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
-        full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update, add_delete_button=True)
+    # Opponent validation
+    try:
+        # Opponent is not in the minimum required location
+        if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
+            raise OpponentValidationException()
+
+        # Opponent is arrested
+        if opponent.is_arrested():
+            raise OpponentValidationException()
+
+    except OpponentValidationException as ove:
+        if ove.message is not None:
+            full_message_send(context, ove.message, update)
+        else:
+            full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update, add_delete_button=True)
         return False
 
     return True

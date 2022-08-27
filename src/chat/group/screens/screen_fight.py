@@ -12,6 +12,7 @@ from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_bounty_formatted, add_bounty
@@ -56,23 +57,33 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
             full_message_or_media_edit(context, GroupChatError.FIGHT_NOT_FOUND.build(), update=update)
             return False
 
-    # Get opponent
-    opponent: User = get_opponent(update, keyboard)
+    # Opponent validation
+    try:
+        # Get opponent
+        opponent: User = get_opponent(update, keyboard)
 
-    # If opponent is not found, send error
-    if opponent is None:
-        full_message_or_media_edit(context, GroupChatError.FIGHT_OPPONENT_NOT_FOUND.build(), update=update)
-        return False
+        # If opponent is not found, send error
+        if opponent is None:
+            raise OpponentValidationException(GroupChatError.FIGHT_OPPONENT_NOT_FOUND.build())
 
-    # Opponent is not in the minimum required location
-    if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int():
-        full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update, add_delete_button=True)
-        return False
+        # Opponent is not in the minimum required location
+        if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int():
+            raise OpponentValidationException()
 
-    # Opponent has fight immunity
-    now = datetime.datetime.now()
-    if opponent.fight_immunity_end_date is not None and opponent.fight_immunity_end_date > now:
-        full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update, add_delete_button=True)
+        # Opponent has fight immunity
+        now = datetime.datetime.now()
+        if opponent.fight_immunity_end_date is not None and opponent.fight_immunity_end_date > now:
+            raise OpponentValidationException()
+
+        # Opponent is arrested
+        if opponent.is_arrested():
+            raise OpponentValidationException()
+
+    except OpponentValidationException as ove:
+        if ove.message is not None:
+            full_message_or_media_edit(context, ove.message, update)
+        else:
+            full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update=update, add_delete_button=True)
         return False
 
     # User is in fight cooldown

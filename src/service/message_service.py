@@ -218,7 +218,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
-    :param send_in_private_chat: True if the message should be sent in private chat
+    :param send_in_private_chat: True if the message should be sent in private chat. Not necessary if update is not None
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :param edit_message_id: ID of the message to edit
     :return: Message

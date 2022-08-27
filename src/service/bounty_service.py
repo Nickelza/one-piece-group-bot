@@ -158,6 +158,10 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
     if amount <= 0:
         return user
 
+    # User is arrested, no bounty is gained
+    if user.is_arrested():
+        return user
+
     user.bounty += amount
 
     # Update the user's location
