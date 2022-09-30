@@ -8,7 +8,7 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.PredictionStatus import PredictionStatus
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
@@ -69,7 +69,7 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
         # Option
         ot_text += phrases.PREDICTION_STATUS_OPTION.format(prediction_option.number,
                                                            escape_valid_markdown_chars(prediction_option.option),
-                                                           get_bounty_formatted(prediction_option_user.wager))
+                                                           get_belly_formatted(prediction_option_user.wager))
 
         # If the prediction results are not set, assume the option is correct
         is_potential = prediction_status is not PredictionStatus.RESULT_SET
@@ -77,7 +77,7 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
         potential_win_amount = prediction_service.get_prediction_option_user_win(prediction_option_user,
                                                                                  is_potential=is_potential)
 
-        potential_win_amount_formatted = get_bounty_formatted(potential_win_amount)
+        potential_win_amount_formatted = get_belly_formatted(potential_win_amount)
 
         # Result not set, add potential win
         if prediction_status is not PredictionStatus.RESULT_SET:
@@ -103,15 +103,15 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
         if prediction_status is PredictionStatus.RESULT_SET:
             if total_win_amount >= 0:  # Won
                 if total_loss_count > 0:  # At least one option was wrong, show net win
-                    ot_text += phrases.PREDICTION_STATUS_NET_WIN.format(get_bounty_formatted(total_win_amount))
+                    ot_text += phrases.PREDICTION_STATUS_NET_WIN.format(get_belly_formatted(total_win_amount))
                 else:  # All options were correct, show total win
-                    ot_text += phrases.PREDICTION_STATUS_TOTAL_WIN.format(get_bounty_formatted(total_win_amount))
+                    ot_text += phrases.PREDICTION_STATUS_TOTAL_WIN.format(get_belly_formatted(total_win_amount))
             else:
                 total_loss_amount = abs(total_win_amount)
                 if total_win_count > 0:  # At least one option was correct, show net loss
-                    ot_text += phrases.PREDICTION_STATUS_NET_LOSS.format(get_bounty_formatted(total_loss_amount))
+                    ot_text += phrases.PREDICTION_STATUS_NET_LOSS.format(get_belly_formatted(total_loss_amount))
                 else:  # All options were wrong, show total loss
-                    ot_text += phrases.PREDICTION_STATUS_TOTAL_LOSS.format(get_bounty_formatted(total_loss_amount))
+                    ot_text += phrases.PREDICTION_STATUS_TOTAL_LOSS.format(get_belly_formatted(total_loss_amount))
         # Open prediction, show command to remove single bet
         elif prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
             ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_BET

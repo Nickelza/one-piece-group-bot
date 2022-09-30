@@ -15,7 +15,7 @@ from src.model.game.GameOutcome import GameOutcome
 from src.model.game.rps.RockPaperScissors import RockPaperScissors
 from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
@@ -147,7 +147,7 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors) -> str:
     return phrases.GAME_TEXT.format(phrases.ROCK_PAPER_SCISSORS_GAME_NAME,
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
-                                    get_bounty_formatted(game.wager),
+                                    get_belly_formatted(game.wager),
                                     added_ot_text)
 
 

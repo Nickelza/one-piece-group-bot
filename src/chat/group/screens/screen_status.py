@@ -98,7 +98,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         return
 
     pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
-        bounty_service.get_bounty_formatted(target_user.pending_bounty))
+        bounty_service.get_belly_formatted(target_user.pending_bounty))
 
     bounty_string = target_user.get_bounty_formatted()
     if target_user.is_arrested():

@@ -13,14 +13,14 @@ from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
 
 
-def get_bounty_formatted(bounty: int) -> str:
+def get_belly_formatted(belly: int) -> str:
     """
-    Returns a formatted string of the bounty
-    :param bounty: The bounty to format e.g. 1000000
-    :return: The formatted string e.g. 1,000,000
+    Returns a formatted string of the belly
+    :param belly: The belly to format e.g. 1000000
+    :return: The formatted belly e.g. 1,000,000
     """
 
-    return '{0:,}'.format(bounty)
+    return '{0:,}'.format(belly)
 
 
 def get_message_belly(update: Update, user: User) -> int:
@@ -225,7 +225,7 @@ def validate_wager(update: Update, context: CallbackContext, user: User, wager_s
 
     # Wager less than minimum required
     if wager < required_belly:
-        ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_bounty_formatted(required_belly))
+        ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
         full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 

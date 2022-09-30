@@ -5,7 +5,7 @@ import resources.phrases as phrases
 from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_belly_formatted
 from src.service.game_service import delete_game, validate_game
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard
 
@@ -35,7 +35,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
     ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(game.opponent),
                                           mention_markdown_user(game.challenger),
                                           get_game_name(GameType(game.type)),
-                                          get_bounty_formatted(game.wager))
+                                          get_belly_formatted(game.wager))
     outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(game.opponent, game.id,
                                                                    phrases.KEYBOARD_OPTION_ACCEPT,
                                                                    phrases.KEYBOARD_OPTION_REJECT,

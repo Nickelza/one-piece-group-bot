@@ -27,7 +27,7 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
     """
 
     from src.chat.group.screens.screen_change_region import send_proposal as send_new_world_proposal
-    from src.service.bounty_service import get_bounty_formatted
+    from src.service.bounty_service import get_belly_formatted
 
     # Get location that corresponds to the user current bounty
     new_location: Location = Location.get_by_bounty(user.bounty)
@@ -45,7 +45,7 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
         try:
             next_location = Location.get_by_level(effective_location.level + 1)
             ot_text_suffix = phrases.LOCATION_NEXT_LEVEL_REQUIREMENT.format(
-                get_bounty_formatted(next_location.required_bounty))
+                get_belly_formatted(next_location.required_bounty))
         except ValueError:
             ot_text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
 

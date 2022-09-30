@@ -148,8 +148,6 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
 
 
 def get_bounty_poster(update: Update, user: User) -> str:
-    from src.service.bounty_service import get_bounty_formatted
-
     """
     Gets the bounty poster of a user
     :param update: Telegram update
@@ -198,7 +196,7 @@ def get_bounty_poster(update: Update, user: User) -> str:
     new_image.paste(name_component, (0, c.BOUNTY_POSTER_NAME_START_Y), name_component)
 
     # Add berry component
-    berry = get_bounty_formatted(user.bounty) + '-'
+    berry = user.get_bounty_formatted() + '-'
     berry_component: Image = get_bounty_poster_component(berry, c.BOUNTY_POSTER_COMPONENT_BERRY)
     new_image.paste(berry_component, (0, c.BOUNTY_POSTER_BERRY_START_Y), berry_component)
 

@@ -15,7 +15,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted, add_bounty
+from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_edit, \
     mention_markdown_v2
@@ -47,8 +47,8 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     # User has enough bounty
     if user.bounty < Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_float():
-        ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_bounty_formatted(
-            Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), get_bounty_formatted(user.bounty))
+        ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(
+            Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), user.get_bounty_formatted())
         try:
             full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:
@@ -147,11 +147,11 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
             user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                  get_bounty_formatted(win_amount),
-                                                  get_bounty_formatted(lose_amount),
-                                                  get_bounty_formatted(user.bounty),
-                                                  get_bounty_formatted(final_bounty_if_win),
-                                                  get_bounty_formatted(final_bounty_if_lose))
+                                                  get_belly_formatted(win_amount),
+                                                  get_belly_formatted(lose_amount),
+                                                  user.get_bounty_formatted(),
+                                                  get_belly_formatted(final_bounty_if_win),
+                                                  get_belly_formatted(final_bounty_if_lose))
 
         message: Message = full_media_send(context, doc_q_media, update, caption=caption, keyboard=inline_keyboard,
                                            add_delete_button=True)
@@ -200,8 +200,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                     Emoji.DOC_Q_GAME_WIN.value,
-                                                    get_bounty_formatted(win_amount),
-                                                    get_bounty_formatted(user.bounty))
+                                                    get_belly_formatted(win_amount),
+                                                    user.get_bounty_formatted())
         else:  # User chose wrong option
             # Decrease user's bounty
             user.bounty -= lose_amount
@@ -212,8 +212,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                      Emoji.DOC_Q_GAME_LOSE.value,
-                                                     get_bounty_formatted(lose_amount),
-                                                     get_bounty_formatted(user.bounty))
+                                                     get_belly_formatted(lose_amount),
+                                                     user.get_bounty_formatted())
 
         # Send outcome text
         full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,

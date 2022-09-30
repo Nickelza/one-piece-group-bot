@@ -15,7 +15,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted, add_bounty
+from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
@@ -190,9 +190,9 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
         return
 
     caption = phrases.FIGHT_CONFIRMATION_REQUEST.format(mention_markdown_user(user), mention_markdown_user(opponent),
-                                                        outcome_probability, outcome, get_bounty_formatted(user.bounty),
-                                                        get_bounty_formatted(final_bounty_if_win),
-                                                        get_bounty_formatted(final_bounty_if_lose))
+                                                        outcome_probability, outcome, user.get_bounty_formatted(),
+                                                        get_belly_formatted(final_bounty_if_win),
+                                                        get_belly_formatted(final_bounty_if_lose))
 
     # Keyboard
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, fight.id, phrases.KEYBOARD_OPTION_FIGHT,
@@ -239,8 +239,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         # Remove bounty from opponent
         opponent.bounty -= win_amount
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
-                                           mention_markdown_user(opponent), get_bounty_formatted(win_amount),
-                                           get_bounty_formatted(user.bounty))
+                                           mention_markdown_user(opponent), get_belly_formatted(win_amount),
+                                           user.get_bounty_formatted())
     else:  # Challenger lost
         fight.status = GameStatus.LOST.value
         fight.berry = lose_amount
@@ -249,8 +249,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         # Add bounty to opponent
         opponent = add_bounty(opponent, lose_amount)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
-                                            mention_markdown_user(opponent), get_bounty_formatted(lose_amount),
-                                            get_bounty_formatted(user.bounty))
+                                            mention_markdown_user(opponent), get_belly_formatted(lose_amount),
+                                            user.get_bounty_formatted())
 
     # Add fight immunity to opponent
     opponent.fight_immunity_end_date = datetime.datetime.now() + datetime.timedelta(

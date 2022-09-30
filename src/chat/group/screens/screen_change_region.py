@@ -10,7 +10,7 @@ from src.model.enums.Region import Region
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted
+from src.service.bounty_service import get_belly_formatted
 from src.service.cron_service import cron_datetime_difference
 from src.service.location_service import update_location
 from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
@@ -44,7 +44,7 @@ def validate_move_request(update: Update, context: CallbackContext, user: User, 
         first_new_world_location: Location = Location.get_first_new_world()
         if user.bounty < first_new_world_location.required_bounty:
             ot_text = phrases.LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY.format(
-                get_bounty_formatted(first_new_world_location.required_bounty))
+                get_belly_formatted(first_new_world_location.required_bounty))
             full_message_send(context, ot_text, update=update, add_delete_button=True)
             return False
 

@@ -9,7 +9,7 @@ from src.model.enums.GameStatus import GameStatus, is_finished_by_status, get_fi
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameOutcome import GameOutcome
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_bounty_formatted, add_bounty
+from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
@@ -105,7 +105,7 @@ def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOu
     return phrases.GAME_TEXT.format(game_name,
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
-                                    get_bounty_formatted(game.wager),
+                                    get_belly_formatted(game.wager),
                                     added_ot_text)
 
 

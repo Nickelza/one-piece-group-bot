@@ -5,7 +5,6 @@ from telegram.ext import CallbackContext
 
 import resources.Environment as Env
 import resources.phrases as phrases
-import src.service.bounty_service as bounty_service
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
@@ -34,7 +33,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
         ot_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
                                                   get_leaderboard_rank_message(leaderboard_user.rank_index),
                                                   mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                  bounty_service.get_bounty_formatted(user.bounty))
+                                                  user.get_bounty_formatted())
 
     return ot_text
 
