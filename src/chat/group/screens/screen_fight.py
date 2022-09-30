@@ -171,7 +171,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     fight.challenger = user
     fight.opponent = opponent
     fight.win_probability = win_probability
-    fight.berry = win_amount
+    fight.belly = win_amount
     fight.save()
 
     if win_probability > 50:
@@ -233,7 +233,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
     if get_random_win(win_probability):  # Challenger won
         fight.status = GameStatus.WON.value
-        fight.berry = win_amount
+        fight.belly = win_amount
         # Add bounty to challenger
         user = add_bounty(user, win_amount)
         # Remove bounty from opponent
@@ -243,7 +243,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
                                            user.get_bounty_formatted())
     else:  # Challenger lost
         fight.status = GameStatus.LOST.value
-        fight.berry = lose_amount
+        fight.belly = lose_amount
         # Remove bounty from challenger
         user.bounty -= lose_amount
         # Add bounty to opponent

@@ -196,7 +196,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
             # Update game status
             doc_q_game.status = GameStatus.WON.value
-            doc_q_game.berry = win_amount
+            doc_q_game.belly = win_amount
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                     Emoji.DOC_Q_GAME_WIN.value,
@@ -208,7 +208,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
             # Update game status
             doc_q_game.status = GameStatus.LOST.value
-            doc_q_game.berry = lose_amount
+            doc_q_game.belly = lose_amount
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                      Emoji.DOC_Q_GAME_LOSE.value,

@@ -71,7 +71,7 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
     """
     Get a component of the poster
     :param text: Text to be written
-    :param c_type: Type of component (1 - name, 2 - berry)
+    :param c_type: Type of component (1 - name, 2 - belly)
     :return: Component image
     """
 
@@ -84,14 +84,14 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
         x_pos = c.BOUNTY_POSTER_NAME_START_X
         box_h = c.BOUNTY_POSTER_NAME_H
 
-    elif c_type == c.BOUNTY_POSTER_COMPONENT_BERRY:  # Berry component
-        texture_path = c.BOUNTY_POSTER_BERRY_TEXTURE_PATH
-        font_path = c.BOUNTY_POSTER_BERRY_FONT_PATH
-        font_size = c.BOUNTY_POSTER_BERRY_FONT_SIZE
-        max_w = c.BOUNTY_POSTER_BERRY_MAX_W
-        max_kern = c.BOUNTY_POSTER_BERRY_MAX_KERN
-        x_pos = c.BOUNTY_POSTER_BERRY_START_X
-        box_h = c.BOUNTY_POSTER_BERRY_H
+    elif c_type == c.BOUNTY_POSTER_COMPONENT_BELLY:  # Belly component
+        texture_path = c.BOUNTY_POSTER_BELLY_TEXTURE_PATH
+        font_path = c.BOUNTY_POSTER_BELLY_FONT_PATH
+        font_size = c.BOUNTY_POSTER_BELLY_FONT_SIZE
+        max_w = c.BOUNTY_POSTER_BELLY_MAX_W
+        max_kern = c.BOUNTY_POSTER_BELLY_MAX_KERN
+        x_pos = c.BOUNTY_POSTER_BELLY_START_X
+        box_h = c.BOUNTY_POSTER_BELLY_H
     else:
         raise Exception('Invalid component type')
 
@@ -195,10 +195,10 @@ def get_bounty_poster(update: Update, user: User) -> str:
     name_component: Image = get_bounty_poster_component(full_name, c.BOUNTY_POSTER_COMPONENT_NAME)
     new_image.paste(name_component, (0, c.BOUNTY_POSTER_NAME_START_Y), name_component)
 
-    # Add berry component
-    berry = user.get_bounty_formatted() + '-'
-    berry_component: Image = get_bounty_poster_component(berry, c.BOUNTY_POSTER_COMPONENT_BERRY)
-    new_image.paste(berry_component, (0, c.BOUNTY_POSTER_BERRY_START_Y), berry_component)
+    # Add belly component
+    belly = user.get_bounty_formatted() + '-'
+    belly_component: Image = get_bounty_poster_component(belly, c.BOUNTY_POSTER_COMPONENT_BELLY)
+    new_image.paste(belly_component, (0, c.BOUNTY_POSTER_BELLY_START_Y), belly_component)
 
     # Save image
     save_path = generate_temp_file_path(c.BOUNTY_POSTER_EXTENSIION)

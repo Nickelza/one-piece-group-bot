@@ -17,7 +17,7 @@ class DocQGame(BaseModel):
     status = SmallIntegerField(default=GameStatus.IN_PROGRESS.value)
     correct_choices_index = CharField(max_length=99, null=True)
     message_id = IntegerField(null=True)
-    berry = BigIntegerField(null=True)
+    belly = BigIntegerField(null=True)
 
     class Meta:
         db_table = 'doc_q_game'

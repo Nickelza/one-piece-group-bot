@@ -14,11 +14,11 @@ class Fight(BaseModel):
     id = PrimaryKeyField()
     challenger = ForeignKeyField(User, backref='fight_challengers', on_delete='CASCADE', on_update='CASCADE')
     opponent = ForeignKeyField(User, backref='fight_opponents', on_delete='CASCADE', on_update='CASCADE')
-    win_probability = FloatField(null=False)
+    win_probability = FloatField()
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.IN_PROGRESS.value)
     message_id = IntegerField(null=True)
-    berry = IntegerField(null=True)
+    belly = IntegerField(null=True)
 
     class Meta:
         db_table = 'fight'
