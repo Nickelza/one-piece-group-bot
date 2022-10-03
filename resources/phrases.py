@@ -1,3 +1,4 @@
+import resources.Environment as Env
 import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
 
@@ -65,6 +66,7 @@ DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better l
 USER_NOT_FOUND = 'User not found'
 UNRECOGNIZED_SCREEN = 'Unrecognized command'
 SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
+UNKNOWN_EXTRA_STEP = 'Unknown extra step'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL.value + ' Cancel'
@@ -115,12 +117,15 @@ DISABLE = Emoji.DISABLED.value + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
 
 # Private chat
-PVT_TXT_START = 'Welcome to @onepiecegroup Bot! From here you can manage your profile.'
+PVT_TXT_START = f'Welcome to @{Env.OPD_GROUP_USERNAME.get()} Bot! From here you can manage your profile.'
 PVT_KEY_SETTINGS = Emoji.SETTINGS.value + ' Settings'
 PVT_KEY_STATUS = Emoji.STATUS.value + ' Status'
 PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
+PVT_KEY_CREW = Emoji.CREW.value + ' Crew'
+PVT_KEY_CREW_CREATE = 'Create'
+PVT_KEY_CREW_LEAVE = 'Leave'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
@@ -228,3 +233,23 @@ PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN.value +
 PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE.value + '฿{}'
 PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE.value + '฿{}'
 PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
+CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
+
+# Crew
+CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_MENTION} to join' \
+                        f' one or create your own.' \
+                        f'\n\nTo create a Crew, you must have appeared in the the last ' \
+                        f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards.'
+CREW_OVERVIEW = '*{}*\n{}'
+CREW_OVERVIEW_MEMBER = '\n{}'
+CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
+CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
+CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = 'You must have appeared in the the last ' \
+                                                           f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()}' \
+                                                           f' leaderboards'
+CREW_CANNOT_CREATE_CREW = 'You can create a Crew in {}'
+CREW_CREATE_REQUEST_NAME = 'Send the name of your Crew'
+CREW_CREATE_NAME_ALREADY_EXISTS = 'A Crew with this name already exists'
+CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH.get_int()} characters'
+CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
+                      f'\n\nHead over to the {CHAT_GROUP_MENTION} to start recruiting members!'

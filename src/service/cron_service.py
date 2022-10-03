@@ -3,19 +3,21 @@ import datetime
 from apscheduler.triggers.cron import CronTrigger
 
 
-def get_next_run(cron_expression: str, start_datetime: datetime = None) -> datetime:
+def get_next_run(cron_expression: str, start_datetime: datetime = None, previous_fire_time: datetime = None
+                 ) -> datetime:
     """
     Get the next run time
     :param cron_expression: The cron expression
     :param start_datetime: The start datetime. If None, the current datetime is used
+    :param previous_fire_time: The previous fire time
     :return: The next run time
     """
 
     if start_datetime is None:
-        start_datetime = datetime.datetime.now()
+        start_datetime = datetime.datetime.now(datetime.timezone.utc)
 
     cron_trigger = CronTrigger.from_crontab(cron_expression)
-    return cron_trigger.get_next_fire_time(None, start_datetime)
+    return cron_trigger.get_next_fire_time(previous_fire_time, start_datetime)
 
 
 def convert_seconds_to_time(seconds: int) -> str:
@@ -76,5 +78,6 @@ def get_remaining_time(end_datetime: datetime) -> str:
     :param end_datetime: The end datetime
     :return: The remaining time in days and hours e.g. 1 day 2h hours
     """
-
+    # Remove offset awareness from end_datetime
+    end_datetime = end_datetime.replace(tzinfo=None)
     return convert_seconds_to_time((end_datetime - datetime.datetime.now()).total_seconds())

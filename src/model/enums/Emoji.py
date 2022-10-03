@@ -54,3 +54,6 @@ class Emoji(Enum):
     FIRED_EMPTY_CHAMBER = '⭕'
     FIRED_BULLET_CHAMBER = '💥'
     CENTER_CHAMBER = '⚪'
+
+    # Crew
+    CREW = '👥'

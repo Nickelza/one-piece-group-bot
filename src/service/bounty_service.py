@@ -1,3 +1,4 @@
+import datetime
 from math import ceil
 
 from peewee import Case
@@ -9,6 +10,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.Location import get_last_paradise, get_first_new_world
+from src.service.cron_service import get_next_run
 from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
 
@@ -135,6 +137,9 @@ def reset_bounty(context: CallbackContext) -> None:
     # Reset location
     reset_location()
 
+    # Reset can create crew flag
+    User.update(can_create_crew=True).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
@@ -239,3 +244,36 @@ def round_belly_up(belly: float) -> int:
     :return: The rounded belly
     """
     return ceil(belly / Env.BELLY_UPPER_ROUND_AMOUNT.get_int()) * Env.BELLY_UPPER_ROUND_AMOUNT.get_int()
+
+
+def get_next_bounty_reset_time() -> datetime:
+    """
+    Get the next bounty reset time
+    :return: The next bounty reset time
+    """
+
+    start_datetime = datetime.datetime.now(datetime.timezone.utc)
+    current_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
+    while True:
+        # Get next execution of leaderboard
+        next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(), start_datetime=start_datetime)
+
+        if should_reset_bounty(run_time=next_run_time):
+            return current_run_time
+
+        current_run_time = next_run_time
+        start_datetime = next_run_time + datetime.timedelta(seconds=1)
+
+
+def should_reset_bounty(run_time: datetime = None) -> bool:
+    """
+    Checks if the bounty should be reset given the run time
+    :param run_time: The run time
+    :return: Whether the bounty should be reset
+    """
+
+    if run_time is None:
+        run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
+
+    # Reset if this is the last leaderboard of the month
+    return datetime.datetime.now().month != run_time.month

@@ -17,10 +17,15 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     outbound_keyboard: list[list[Keyboard]] = [[]]
 
-    # Keyboard with status option
+    # Status button
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_STATUS, screen=Screen.PVT_USER_STATUS,
                                        previous_screen_list=[Screen.PVT_START])])
-    # Keyboard with settings option
+
+    # Crew button
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_CREW, screen=Screen.PVT_CREW,
+                                       previous_screen_list=[Screen.PVT_START])])
+
+    # Settings button
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS, screen=Screen.PVT_SETTINGS,
                                        previous_screen_list=[Screen.PVT_START])])
 

@@ -109,6 +109,8 @@ LIMIT_TO_AUTHORIZED_USERS = Environment('LIMIT_TO_AUTHORIZED_USERS', default_val
 AUTHORIZED_USERS = Environment('AUTHORIZED_USERS', default_value='')
 # Group chat id
 OPD_GROUP_ID = Environment('OPD_GROUP_ID')
+# Group chat username
+OPD_GROUP_USERNAME = Environment('OPD_GROUP_USERNAME')
 # Main channel id
 OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
 # ChatID for admin commands
@@ -368,3 +370,8 @@ WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_val
 ))
 # Whitelist of bot ids which users can use inline mode. Default: Empty
 WHITELIST_INLINE_BOTS = Environment('WHITELIST_INLINE_BOTS', default_value='')
+
+# How many latest leaderboard user has to be in to be able to create a Crew. Default: 4
+CREW_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')
+# Maximum length of Crew name. Default: 50
+CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')

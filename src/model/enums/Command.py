@@ -19,7 +19,21 @@ class Command:
     def __init__(self, name: str, screen: Screen, active: bool = True, replaced_by: str = None,
                  only_in_reply: bool = False, allow_self_reply: bool = False, allow_reply_to_bot: bool = False,
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
-                 message_source: MessageSource = MessageSource.ND):
+                 parameters: list = None, message_source: MessageSource = MessageSource.ND):
+        """
+        Constructor
+        :param name: The name of the command
+        :param screen: The screen the command is used in
+        :param active: True if the command is active
+        :param replaced_by: The command that replaces this command
+        :param only_in_reply: True if the command can only be used in reply to a message
+        :param allow_self_reply: True if the command can be used in reply to a message sent by the user
+        :param allow_reply_to_bot: True if the command can be used in reply to a message sent by the bot
+        :param allow_while_arrested: True if the command can be used while the user is arrested
+        :param required_location: The location required to use the command
+        :param parameters: The parameters of the command
+        :param message_source: The source of the message
+        """
         self.name = name
         self.active = active
         self.replaced_by = replaced_by
@@ -29,7 +43,7 @@ class Command:
         self.allow_while_arrested = allow_while_arrested
         self.screen = screen
         self.required_location = required_location
-        self.parameters: list[str] = []
+        self.parameters: list[str] = [] if parameters is None else parameters
         self.message_source: MessageSource = message_source
 
     def get_formatted(self):

@@ -196,7 +196,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       allow_sending_without_reply: bool = True, add_delete_button: bool = False,
                       authorized_users: list = None, inbound_keyboard: Keyboard = None,
                       send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
-                      edit_message_id: int = None) -> Message:
+                      edit_message_id: int = None, previous_screens: list[Screen] = None) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -221,6 +221,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param send_in_private_chat: True if the message should be sent in private chat. Not necessary if update is not None
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :param edit_message_id: ID of the message to edit
+    :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
     :return: Message
     """
 
@@ -229,6 +230,9 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
 
     if send_in_private_chat:
         new_message = True
+
+    if previous_screens is not None and inbound_keyboard is None:
+        inbound_keyboard = Keyboard('', previous_screen_list=previous_screens, screen=previous_screens[-1])
 
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,

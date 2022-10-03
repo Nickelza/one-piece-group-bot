@@ -74,7 +74,7 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
 def get_leaderboard(index: int = 0) -> Leaderboard | None:
     """
     Gets the current leaderboard
-    :param index: The index of the leaderboard to get. Higher the index, older the leaderboard
+    :param index: The index of the leaderboard to get. Higher the index, older the leaderboard.
     :return: The leaderboard
     """
     leaderboard: Leaderboard = (Leaderboard.select()
@@ -86,15 +86,30 @@ def get_leaderboard(index: int = 0) -> Leaderboard | None:
     return leaderboard
 
 
+def get_leaderboard_user(user: User, leaderboard: Leaderboard = None, index: int = None) -> LeaderboardUser | None:
+    """
+    Gets the leaderboard user for the user
+    :param user: The user to get the leaderboard user for
+    :param leaderboard: The leaderboard to get the leaderboard user for
+    :param index: The index of the leaderboard to get. Higher the index, older the leaderboard
+    :return: The leaderboard user
+    """
+
+    if leaderboard is None and index is None:
+        raise ValueError("Either leaderboard or index must be provided")
+
+    if leaderboard is None:
+        leaderboard = get_leaderboard(index)
+
+    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
+    return leaderboard_user
+
+
 def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
     """
     Gets the current leaderboard user for the user
     :param user: The user to get the leaderboard user for
     :return: The leaderboard user
     """
-    leaderboard: Leaderboard = get_leaderboard()
-    if leaderboard is None:
-        return None
 
-    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
-    return leaderboard_user
+    return get_leaderboard_user(user, index=0)

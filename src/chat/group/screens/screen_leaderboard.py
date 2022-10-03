@@ -1,5 +1,3 @@
-import datetime
-
 from telegram import Message
 from telegram.ext import CallbackContext
 
@@ -9,8 +7,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import reset_bounty
-from src.service.cron_service import get_next_run
+from src.service.bounty_service import reset_bounty, should_reset_bounty
 from src.service.leaderboard_service import create_leaderboard, get_leaderboard_rank_message
 from src.service.message_service import full_message_send, mention_markdown_v2
 
@@ -59,9 +56,9 @@ def manage(context: CallbackContext) -> None:
     # Reset bounty poster limit
     reset_bounty_poster_limit(context, reset_previous_leaderboard=True)
 
+    # Reset can join crew flag
+    User.update(can_join_crew=True).execute()
+
     # Reset bounty if last leaderboard of the month
-    now = datetime.datetime.now()
-    next_run = get_next_run(Env.CRON_SEND_LEADERBOARD.get())  # Get next execution of leaderboard
-    if now.month != next_run.month:  # If next run is not in the same month
-        # Reset bounty
+    if should_reset_bounty():
         reset_bounty(context)
