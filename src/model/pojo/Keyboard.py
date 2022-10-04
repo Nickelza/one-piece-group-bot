@@ -46,6 +46,11 @@ class Keyboard:
             info_with_screen[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [
                 int(screen[1:]) for screen in self.previous_screen_list]
 
+        # Convert boolean to int
+        for key, value in info_with_screen.items():
+            if isinstance(value, bool):
+                info_with_screen[key] = int(value)
+
         return json.dumps(info_with_screen, separators=(',', ':'))
 
     def refresh_callback_data(self):

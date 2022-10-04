@@ -42,7 +42,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
                                                                    phrases.KEYBOARD_OPTION_REJECT,
                                                                    Screen.GRP_GAME_OPPONENT_CONFIRMATION)]
 
-    button_delete_info = {'a': game.id, 'u': [game.challenger.id, game.opponent.id], ReservedKeyboardKeys.DELETE: 1}
+    button_delete_info = {'a': game.id, 'u': [game.challenger.id, game.opponent.id], ReservedKeyboardKeys.DELETE: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
