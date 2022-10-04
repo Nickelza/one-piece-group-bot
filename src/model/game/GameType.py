@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class GameType(Enum):
+class GameType(IntEnum):
     """
     Enum for the game type
     """

@@ -18,7 +18,7 @@ class Game(BaseModel):
     type = SmallIntegerField(null=True)
     board = CharField(max_length=999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION.value)
+    status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION)
     message_id = IntegerField(null=True)
     wager = IntegerField(null=True)
 

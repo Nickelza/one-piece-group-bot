@@ -1,7 +1,7 @@
-from enum import Enum
+from strenum import StrEnum
 
 
-class ErrorSource(Enum):
+class ErrorSource(StrEnum):
     """
     Enum for error source
     """

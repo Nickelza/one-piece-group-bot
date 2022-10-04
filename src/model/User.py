@@ -70,10 +70,10 @@ class User(BaseModel):
 
         if previous_screen_list is not None:
             self.private_screen_step = None  # Will have to update when Skip button is present
-            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join([str(s.value) for s in previous_screen_list])
+            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(previous_screen_list)
 
         if self.private_screen_list is None or screen is Screen.PVT_START:
-            self.private_screen_list = str(screen.value)
+            self.private_screen_list = screen
         else:
             private_screen_list = self.get_private_screen_list()
 
@@ -83,7 +83,7 @@ class User(BaseModel):
             elif private_screen_list[-1] is not screen:  # Add screen
                 private_screen_list.append(screen)
 
-            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join([str(s.value) for s in private_screen_list])
+            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(private_screen_list)
 
         if len(self.private_screen_list) == 0:
             self.private_screen_list = None

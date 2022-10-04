@@ -158,7 +158,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
 
     # Delete all previous pending fights
     previous_fights: list[Fight] = Fight.select().where((Fight.challenger == user) &
-                                                        (Fight.status == GameStatus.IN_PROGRESS.value))
+                                                        (Fight.status == GameStatus.IN_PROGRESS))
     for previous_fight in previous_fights:
         delete_fight(update, context, previous_fight)
 
@@ -232,7 +232,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     fight.date = datetime.datetime.now()
 
     if get_random_win(win_probability):  # Challenger won
-        fight.status = GameStatus.WON.value
+        fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
         user = add_bounty(user, win_amount)
@@ -242,7 +242,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
                                            mention_markdown_user(opponent), get_belly_formatted(win_amount),
                                            user.get_bounty_formatted())
     else:  # Challenger lost
-        fight.status = GameStatus.LOST.value
+        fight.status = GameStatus.LOST
         fight.belly = lose_amount
         # Remove bounty from challenger
         user.bounty -= lose_amount

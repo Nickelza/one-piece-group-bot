@@ -1,7 +1,7 @@
-from enum import Enum
+from strenum import StrEnum
 
 
-class Emoji(Enum):
+class Emoji(StrEnum):
     """
     Enum class for Emoji
     """

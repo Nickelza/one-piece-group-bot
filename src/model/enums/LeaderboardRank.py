@@ -39,27 +39,27 @@ class LeaderboardRank:
         return self.emoji + ' ' + self.title
 
 
-PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING.value, 1, 1,
+PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING, 1, 1,
                               Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
                               Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
                               Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
 
-EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR.value, 2, 5,
+EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR, 2, 5,
                           Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int(),
                           Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
                           Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
-FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE.value, 6, 9,
+FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE, 6, 9,
                              Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int(),
                              Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
                              Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
-SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA.value, 10, 20,
+SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA, 10, 20,
                             Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int(),
                             Env.FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA.get_float(),
                             Env.FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA.get_float())
 
-ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE.value, 21, -1,
+ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE, 21, -1,
                          Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int(),
                          Env.FIGHT_MAX_WIN_PROBABILITY_ROOKIE.get_float(),
                          Env.FIGHT_MIN_WIN_PROBABILITY_ROOKIE.get_float())

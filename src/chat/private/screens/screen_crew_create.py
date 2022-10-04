@@ -1,5 +1,5 @@
 import datetime
-from enum import Enum
+from enum import IntEnum
 
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -18,7 +18,7 @@ from src.service.leaderboard_service import get_leaderboard_user
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
-class Step(Enum):
+class Step(IntEnum):
     REQUEST_NAME = 0
     END = 1
 
@@ -38,7 +38,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         return
 
     if user.private_screen_step is None:
-        user.private_screen_step = Step.REQUEST_NAME.value
+        user.private_screen_step = Step.REQUEST_NAME
 
     try:
         match Step(user.private_screen_step):
@@ -63,7 +63,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
 
                 # Add user to crew
                 user.crew = crew
-                user.crew_role = CrewRole.CrewRole.CAPTAIN.value
+                user.crew_role = CrewRole.CrewRole.CAPTAIN
                 user.crew_join_date = datetime.datetime.now()
 
                 ot_text = phrases.CREW_CREATE_SUCCESS.format(escape_valid_markdown_chars(crew_name))

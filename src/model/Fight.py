@@ -16,7 +16,7 @@ class Fight(BaseModel):
     opponent = ForeignKeyField(User, backref='fight_opponents', on_delete='CASCADE', on_update='CASCADE')
     win_probability = FloatField()
     date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=GameStatus.IN_PROGRESS.value)
+    status = SmallIntegerField(default=GameStatus.IN_PROGRESS)
     message_id = IntegerField(null=True)
     belly = IntegerField(null=True)
 

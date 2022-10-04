@@ -43,13 +43,13 @@ def end_game(game: Game, game_outcome: GameOutcome) -> Game:
     half_wager: int = game.wager / 2
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
-        game.status = GameStatus.WON.value
+        game.status = GameStatus.WON
         challenger = add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
     elif game_outcome == GameOutcome.OPPONENT_WON:
-        game.status = GameStatus.LOST.value
+        game.status = GameStatus.LOST
         opponent = add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
     else:
-        game.status = GameStatus.DRAW.value
+        game.status = GameStatus.DRAW
         challenger = add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
         opponent = add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
 
@@ -165,7 +165,7 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
         # Error message already send by get_game_from_keyboard
         return None
 
-    if game.status == GameStatus.FORCED_END.value:
+    if game.status == GameStatus.FORCED_END:
         full_message_send(context, phrases.GAME_FORCED_END, update=update)
         return None
 
@@ -182,9 +182,8 @@ def force_end_all_active() -> None:
     :return:
     """
 
-    finished_status_values = [status.value for status in get_finished_statuses()]
-    active_games = Game.select().where(Game.status.not_in(finished_status_values))
+    active_games = Game.select().where(Game.status.not_in(get_finished_statuses()))
 
     for game in active_games:
-        game.status = GameStatus.FORCED_END.value
+        game.status = GameStatus.FORCED_END
         game.save()

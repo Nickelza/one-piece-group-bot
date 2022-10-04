@@ -30,7 +30,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
         delete_game(update, context, game)
         return
 
-    game.type = GameType(inbound_keyboard.info['b']).value
+    game.type = GameType(inbound_keyboard.info['b'])
     game.save()
 
     ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(game.opponent),

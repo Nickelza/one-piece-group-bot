@@ -42,14 +42,14 @@ def manage(update: Update, context: CallbackContext) -> None:
         saved_media.name = name
 
     if update.message.reply_to_message.animation is not None:  # Animation
-        saved_media.type = SavedMediaType.ANIMATION.value
+        saved_media.type = SavedMediaType.ANIMATION
         saved_media.media_id = update.message.reply_to_message.animation.file_id
     elif (update.message.reply_to_message.photo is not None
           and len(update.message.reply_to_message.photo) > 0):  # Photo
-        saved_media.type = SavedMediaType.PHOTO.value
+        saved_media.type = SavedMediaType.PHOTO
         saved_media.media_id = update.message.reply_to_message.photo[-1].file_id
     elif update.message.reply_to_message.video is not None:  # Video
-        saved_media.type = SavedMediaType.value
+        saved_media.type = SavedMediaType
         saved_media.media_id = update.message.reply_to_message.video.file_id
     else:  # Not supported
         accepted_types = [e.name for e in SavedMediaType]

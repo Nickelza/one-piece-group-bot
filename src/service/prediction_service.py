@@ -32,7 +32,7 @@ def send(context: CallbackContext, prediction: Prediction, is_resent: bool = Fal
         if PredictionStatus(prediction.status) is not PredictionStatus.NEW:
             raise PredictionException(phrases.PREDICTION_NOT_IN_NEW_STATUS)
 
-        prediction.status = PredictionStatus.SENT.value
+        prediction.status = PredictionStatus.SENT
         prediction.send_date = datetime.datetime.now()
 
     message: Message = full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
@@ -65,7 +65,7 @@ def get_prediction_text(prediction: Prediction) -> str:
             prediction_option.number,
             escape_valid_markdown_chars(prediction_option.option),
             get_percentage_from_value(option_wager, total_wager, add_decimal=False),
-            (Emoji.CORRECT.value if prediction_option.is_correct else "")
+            (Emoji.CORRECT if prediction_option.is_correct else "")
         )
 
     added_text = ""
@@ -129,7 +129,7 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
             invalid_prediction_option_user.delete_instance()
 
     # Update status
-    prediction.status = PredictionStatus.BETS_CLOSED.value
+    prediction.status = PredictionStatus.BETS_CLOSED
     prediction.end_date = datetime.datetime.now()
     prediction.save()
 
@@ -175,7 +175,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
         user.save()
 
     # Update status
-    prediction.status = PredictionStatus.RESULT_SET.value
+    prediction.status = PredictionStatus.RESULT_SET
     prediction.result_set_date = datetime.datetime.now()
     prediction.save()
 
@@ -270,7 +270,7 @@ def send_scheduled_predictions(context: CallbackContext) -> None:
     # Select not sent predictions with send date in the past
     predictions: list[Prediction] = Prediction.select().where((Prediction.send_date.is_null(False))
                                                               & (Prediction.send_date <= datetime.datetime.now())
-                                                              & (Prediction.status == PredictionStatus.NEW.value))
+                                                              & (Prediction.status == PredictionStatus.NEW))
 
     for prediction in predictions:
         send(context, prediction)
@@ -285,7 +285,7 @@ def close_scheduled_predictions(context: CallbackContext) -> None:
     # Select sent predictions with end date in the past
     predictions: list[Prediction] = Prediction.select().where((Prediction.end_date.is_null(False))
                                                               & (Prediction.end_date <= datetime.datetime.now())
-                                                              & (Prediction.status == PredictionStatus.SENT.value))
+                                                              & (Prediction.status == PredictionStatus.SENT))
 
     for prediction in predictions:
         close_bets(context, prediction)
@@ -298,7 +298,7 @@ def remove_all_bets_from_active_predictions(context: CallbackContext) -> None:
     """
 
     # Select active predictions
-    active_statuses = [PredictionStatus.SENT.value, PredictionStatus.BETS_CLOSED.value]
+    active_statuses = [PredictionStatus.SENT, PredictionStatus.BETS_CLOSED]
     predictions: list[Prediction] = Prediction.select().where(Prediction.status.in_(active_statuses))
 
     for prediction in predictions:

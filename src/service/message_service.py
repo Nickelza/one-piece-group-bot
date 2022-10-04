@@ -285,11 +285,11 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
     """
 
     match saved_media.type:
-        case SavedMediaType.PHOTO.value:
+        case SavedMediaType.PHOTO:
             return InputMediaPhoto(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
-        case SavedMediaType.VIDEO.value:
+        case SavedMediaType.VIDEO:
             return InputMediaVideo(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
-        case SavedMediaType.ANIMATION.value:
+        case SavedMediaType.ANIMATION:
             return InputMediaAnimation(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
         case _:
             raise Exception(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE)
@@ -349,7 +349,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
 
         match saved_media.type:
             # Photo
-            case SavedMediaType.PHOTO.value:  # Photo
+            case SavedMediaType.PHOTO:  # Photo
                 return context.bot.send_photo(chat_id=chat_id,
                                               photo=saved_media.media_id,
                                               caption=caption,
@@ -359,7 +359,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                               reply_to_message_id=reply_to_message_id,
                                               allow_sending_without_reply=allow_sending_without_reply,
                                               protect_content=protect_content)
-            case SavedMediaType.VIDEO.value:  # Video
+            case SavedMediaType.VIDEO:  # Video
                 return context.bot.send_video(chat_id=chat_id,
                                               video=saved_media.media_id,
                                               caption=caption,
@@ -369,7 +369,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                               reply_to_message_id=reply_to_message_id,
                                               allow_sending_without_reply=allow_sending_without_reply,
                                               protect_content=protect_content)
-            case SavedMediaType.ANIMATION.value:  # Animation
+            case SavedMediaType.ANIMATION:  # Animation
                 return context.bot.send_animation(chat_id=chat_id,
                                                   animation=saved_media.media_id,
                                                   caption=caption,

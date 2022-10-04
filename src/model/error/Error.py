@@ -13,7 +13,7 @@ class Error:
         self.need_admin = need_admin
 
     def __str__(self):
-        result = 'Error ' + self.source.value + str(self.code) + ': ' + self.message
+        result = 'Error ' + self.source + str(self.code) + ': ' + self.message
         if self.need_admin:
             result += '. Please forward this message to an Admin.'
         return result

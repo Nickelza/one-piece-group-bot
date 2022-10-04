@@ -68,7 +68,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
 
     # Delete all previous pending games
     previous_games: list[DocQGame] = DocQGame.select().where(DocQGame.user == user &
-                                                             DocQGame.status == GameStatus.IN_PROGRESS.value)
+                                                             DocQGame.status == GameStatus.IN_PROGRESS)
     for previous_game in previous_games:
         if previous_game != doc_q_game:
             delete_game(update, context, previous_game)
@@ -127,11 +127,11 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         apples_keyboard: list[Keyboard] = []
         for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
             keyboard_data['b'] = i
-            option_emoji = Emoji.DOC_Q_GAME_OPTION.value
+            option_emoji = Emoji.DOC_Q_GAME_OPTION
 
             # should show correct answer
             if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
-                option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION.value
+                option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION
 
             apples_keyboard.append(Keyboard(option_emoji, keyboard_data, Screen.GRP_DOC_Q_GAME))
 
@@ -197,11 +197,11 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             user = add_bounty(user, win_amount)
 
             # Update game status
-            doc_q_game.status = GameStatus.WON.value
+            doc_q_game.status = GameStatus.WON
             doc_q_game.belly = win_amount
 
             ot_text = phrases.DOC_Q_GAME_WIN.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                    Emoji.DOC_Q_GAME_WIN.value,
+                                                    Emoji.DOC_Q_GAME_WIN,
                                                     get_belly_formatted(win_amount),
                                                     user.get_bounty_formatted())
         else:  # User chose wrong option
@@ -209,11 +209,11 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             user.bounty -= lose_amount
 
             # Update game status
-            doc_q_game.status = GameStatus.LOST.value
+            doc_q_game.status = GameStatus.LOST
             doc_q_game.belly = lose_amount
 
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                     Emoji.DOC_Q_GAME_LOSE.value,
+                                                     Emoji.DOC_Q_GAME_LOSE,
                                                      get_belly_formatted(lose_amount),
                                                      user.get_bounty_formatted())
 

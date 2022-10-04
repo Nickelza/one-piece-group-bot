@@ -16,7 +16,7 @@ SHOW_USER_STATUS = 'User: {}' \
                    '\nRank: {}' \
                    '\nLocation: {}'
 SHOW_USER_STATUS_FROZEN_BOUNTY = ' \\(Frozen\\)'
-SHOW_USER_STATUS_RANK_PRISONER = Emoji.PRISONER.value + ' Prisoner'
+SHOW_USER_STATUS_RANK_PRISONER = Emoji.PRISONER + ' Prisoner'
 SHOW_USER_STATUS_IMPEL_DOWN = 'Impel Down'
 SHOW_USER_STATUS_PENDING_BOUNTY = '\nPending bounty: ฿*{}*'
 SHOW_USER_STATUS_REMAINING_SENTENCE = '\nRemaining sentence: {}'
@@ -69,13 +69,13 @@ SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
 UNKNOWN_EXTRA_STEP = 'Unknown extra step'
 
 # Keyboard options
-KEYBOARD_OPTION_CANCEL = Emoji.CANCEL.value + ' Cancel'
-KEYBOARD_OPTION_DELETE = Emoji.CANCEL.value + ' Delete'
-KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT.value + ' Accept'
-KEYBOARD_OPTION_REJECT = Emoji.REJECT.value + ' Reject'
-KEYBOARD_OPTION_FIGHT = Emoji.FIGHT.value + ' Fight'
-KEYBOARD_OPTION_RETREAT = Emoji.RETREAT.value + ' Retreat'
-KEYBOARD_OPTION_BACK = Emoji.BACK.value + ' Back'
+KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
+KEYBOARD_OPTION_DELETE = Emoji.CANCEL + ' Delete'
+KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT + ' Accept'
+KEYBOARD_OPTION_REJECT = Emoji.REJECT + ' Reject'
+KEYBOARD_OPTION_FIGHT = Emoji.FIGHT + ' Fight'
+KEYBOARD_OPTION_RETREAT = Emoji.RETREAT + ' Retreat'
+KEYBOARD_OPTION_BACK = Emoji.BACK + ' Back'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -110,20 +110,20 @@ FIGHT_LOSE = "Just as I foresaw, {} lost the fight against {}.\n" \
              "Looks like your luck ran out..." + '\n\n' + GAME_LOSE_STATUS
 FIGHT_CONFIRMATION_RETREAT = 'You have successfully retreated'
 
-ENABLED = Emoji.ENABLED.value + ' Enabled'
-DISABLED = Emoji.DISABLED.value + ' Disabled'
-ENABLE = Emoji.ENABLED.value + ' Enable'
-DISABLE = Emoji.DISABLED.value + ' Disable'
+ENABLED = Emoji.ENABLED + ' Enabled'
+DISABLED = Emoji.DISABLED + ' Disabled'
+ENABLE = Emoji.ENABLED + ' Enable'
+DISABLE = Emoji.DISABLED + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
 
 # Private chat
 PVT_TXT_START = f'Welcome to @{Env.OPD_GROUP_USERNAME.get()} Bot! From here you can manage your profile.'
-PVT_KEY_SETTINGS = Emoji.SETTINGS.value + ' Settings'
-PVT_KEY_STATUS = Emoji.STATUS.value + ' Status'
+PVT_KEY_SETTINGS = Emoji.SETTINGS + ' Settings'
+PVT_KEY_STATUS = Emoji.STATUS + ' Status'
 PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
-PVT_KEY_CREW = Emoji.CREW.value + ' Crew'
+PVT_KEY_CREW = Emoji.CREW + ' Crew'
 PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
 
@@ -147,9 +147,9 @@ GAME_UNKNOWN_NAME = 'Unknown'
 ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
 
 ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
-ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK.value + ' Rock'
-ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER.value + ' Paper'
-ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS.value + ' Scissors'
+ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + ' Rock'
+ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + ' Paper'
+ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS + ' Scissors'
 ROCK_PAPER_SCISSORS_CHOICES = '{} chose {} ' \
                               '\n{} chose {}\n\n'
 
@@ -165,7 +165,7 @@ GAME_TEXT = '*{}*' \
 GAME_STATUS_AWAITING_CHOICE = 'Status: Awaiting choice'
 GAME_STATUS_AWAITING_USER_CHOICE = "Status: Awaiting {}'s choice"
 GAME_RESULT_DRAW = 'Result: Draw'
-GAME_RESULT_WIN = Emoji.WINNER.value + ' {} won'
+GAME_RESULT_WIN = Emoji.WINNER + ' {} won'
 GAME_NOT_YOUR_TURN = "It's not your turn"
 GAME_TURN = "Status: {}'s turn"
 GAME_ENDED = 'This game has ended'
@@ -188,9 +188,9 @@ PREDICTION_TEXT = '*{}*' \
 PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
-PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Wagers refunded'
-PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Multiple bets allowed'
-PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.PREDICTION_FEATURE_ENABLED.value} Can withdraw bets'
+PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Wagers refunded'
+PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Multiple bets allowed'
+PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Can withdraw bets'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
                                 f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
@@ -225,13 +225,13 @@ PREDICTION_STATUS_BETS_HEADER = '*Bets*'
 PREDICTION_STATUS_OPTION = '\n\n*{}*. {} ' \
                            '\n*Amount*: ฿{}'
 PREDICTION_STATUS_POTENTIAL_WIN = '\n*Potential win*: ฿{}'
-PREDICTION_STATUS_RESULT_LOST = '\n*Result*: ' + Emoji.PREDICTION_BET_LOSE.value + 'Lost'
+PREDICTION_STATUS_RESULT_LOST = '\n*Result*: ' + Emoji.PREDICTION_BET_LOSE + 'Lost'
 PREDICTION_STATUS_RESULT_LOSS_REFUNDED = ' \\(Refunded\\)'
-PREDICTION_STATUS_RESULT_WIN = '\n*Result*: ' + Emoji.PREDICTION_BET_WIN.value + '฿{}'
-PREDICTION_STATUS_TOTAL_WIN = '\n\n*Total win*: ' + Emoji.PREDICTION_BET_WIN.value + '฿{}'
-PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN.value + '฿{}'
-PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE.value + '฿{}'
-PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE.value + '฿{}'
+PREDICTION_STATUS_RESULT_WIN = '\n*Result*: ' + Emoji.PREDICTION_BET_WIN + '฿{}'
+PREDICTION_STATUS_TOTAL_WIN = '\n\n*Total win*: ' + Emoji.PREDICTION_BET_WIN + '฿{}'
+PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN + '฿{}'
+PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
+PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 

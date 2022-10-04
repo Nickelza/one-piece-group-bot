@@ -98,7 +98,7 @@ def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):
     for command in COMMANDS:
         if command is not None and command.name == name:
             if message_source is not MessageSource.ND:
-                if command.screen.value[0] == message_source.value[0]:
+                if command.screen[0] == message_source[0]:
                     return command
             else:
                 return command

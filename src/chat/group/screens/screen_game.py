@@ -44,8 +44,7 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where(Game.challenger == challenger,
-                                                        Game.status not in [
-                                                            status.value for status in get_finished_statuses()])
+                                                        Game.status not in get_finished_statuses())
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
                                                url=get_message_url(Env.OPD_GROUP_ID.get_int(), game.message_id))])
@@ -121,13 +120,13 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
     inline_keyboard: list[list[Keyboard]] = [[]]
 
     # Rock Paper Scissors
-    button_info: dict = {'a': game.id, 'b': GameType.ROCK_PAPER_SCISSORS.value}
+    button_info: dict = {'a': game.id, 'b': GameType.ROCK_PAPER_SCISSORS}
     btn_rps: Keyboard = Keyboard(phrases.ROCK_PAPER_SCISSORS_GAME_NAME, info=button_info,
                                  screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rps])
 
     # Russian Roulette
-    button_info = {'a': game.id, 'b': GameType.RUSSIAN_ROULETTE.value}
+    button_info = {'a': game.id, 'b': GameType.RUSSIAN_ROULETTE}
     btn_rr: Keyboard = Keyboard(phrases.RUSSIAN_ROULETTE_GAME_NAME, info=button_info,
                                 screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rr])

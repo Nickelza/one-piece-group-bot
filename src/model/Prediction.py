@@ -10,7 +10,7 @@ class Prediction(BaseModel):
     """
     id = PrimaryKeyField()
     type = CharField(max_length=20, null=False)
-    status = SmallIntegerField(default=PredictionStatus.NEW.value)
+    status = SmallIntegerField(default=PredictionStatus.NEW)
     question = CharField(max_length=999, unique=True)
     send_date = DateTimeField(null=True)
     end_date = DateTimeField(null=True)

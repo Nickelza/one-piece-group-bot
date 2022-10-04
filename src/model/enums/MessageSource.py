@@ -1,7 +1,7 @@
-from enum import Enum
+from strenum import StrEnum
 
 
-class MessageSource(Enum):
+class MessageSource(StrEnum):
     """
     Enum class for message source.
     """

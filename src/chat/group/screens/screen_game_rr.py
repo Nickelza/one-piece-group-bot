@@ -96,7 +96,7 @@ def get_outbound_keyboard(game: Game, russian_roulette: RussianRoulette) -> list
         for chamber_index, chamber in enumerate(row):
             # Is center chamber
             if russian_roulette.is_chamber_center(row_index, chamber_index):
-                keyboard_line.append(Keyboard(Emoji.CENTER_CHAMBER.value))
+                keyboard_line.append(Keyboard(Emoji.CENTER_CHAMBER))
 
             else:
                 button_info = {'a': game.id, 'b': (row_index, chamber_index)}
@@ -111,7 +111,7 @@ def get_outbound_keyboard(game: Game, russian_roulette: RussianRoulette) -> list
                     else:
                         emoji = Emoji.FIRED_EMPTY_CHAMBER
 
-                keyboard_line.append(Keyboard(emoji.value, info=button_info, screen=Screen.GRP_RUSSIAN_ROULETTE_GAME))
+                keyboard_line.append(Keyboard(emoji, info=button_info, screen=Screen.GRP_RUSSIAN_ROULETTE_GAME))
 
         outbound_keyboard.append(keyboard_line)
 

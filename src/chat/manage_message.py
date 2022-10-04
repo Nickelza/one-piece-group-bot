@@ -90,7 +90,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             return
 
     # Recast necessary for match case to work, don't ask me why
-    message_source: MessageSource = MessageSource(get_message_source(update).value)
+    message_source: MessageSource = MessageSource(get_message_source(update))
     if message_source is MessageSource.ND:
         return
 

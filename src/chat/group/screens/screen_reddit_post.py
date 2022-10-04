@@ -55,16 +55,16 @@ def manage(context: CallbackContext, subreddit_name: str) -> None:
                     if post.url.startswith('https://i.redd.it') or post.url.startswith('https://v.redd.it'):
                         saved_media: SavedMedia = SavedMedia()
                         if post.url.startswith('https://v.redd.it'):
-                            saved_media.type = SavedMediaType.VIDEO.value
+                            saved_media.type = SavedMediaType.VIDEO
                         elif post.url.endswith('.gif'):
-                            saved_media.type = SavedMediaType.ANIMATION.value
+                            saved_media.type = SavedMediaType.ANIMATION
                         else:
-                            saved_media.type = SavedMediaType.PHOTO.value
+                            saved_media.type = SavedMediaType.PHOTO
                         saved_media.media_id = post.url
 
                         try:
                             # If video, download to local
-                            if saved_media.type == SavedMediaType.VIDEO.value:
+                            if saved_media.type == SavedMediaType.VIDEO:
                                 try:
                                     url = post.media['reddit_video']['fallback_url']
                                     url = url.split("?")[0]
@@ -78,7 +78,7 @@ def manage(context: CallbackContext, subreddit_name: str) -> None:
                                                                chat_id=Env.OPD_GROUP_ID.get_int())
                         except BadRequest as exceptionBadRequest:
                             # Resize if type is image
-                            if saved_media.type == SavedMediaType.PHOTO.value:
+                            if saved_media.type == SavedMediaType.PHOTO:
                                 logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
 
                                 # Try resending with a smaller image

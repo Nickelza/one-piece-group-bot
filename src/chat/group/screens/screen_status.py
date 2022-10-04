@@ -166,7 +166,7 @@ def send_bounty_poster(context: CallbackContext, update: Update, user: User, cap
     poster_path = get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia()
     poster.media_id = open(poster_path, 'rb')
-    poster.type = SavedMediaType.PHOTO.value
+    poster.type = SavedMediaType.PHOTO
 
     full_media_send(context, saved_media=poster, update=update, caption=caption,
                     reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,

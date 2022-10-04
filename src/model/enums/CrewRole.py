@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class CrewRole(Enum):
+class CrewRole(IntEnum):
     """
     Enum class for Crew Roles
     """

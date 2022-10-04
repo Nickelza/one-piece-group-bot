@@ -41,9 +41,9 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         rps_choice = RPSChoice(inbound_keyboard.info['b'])
         # Save choice
         if user == game.challenger:
-            rock_paper_scissors.challenger_choice = rps_choice.value
+            rock_paper_scissors.challenger_choice = rps_choice
         else:
-            rock_paper_scissors.opponent_choice = rps_choice.value
+            rock_paper_scissors.opponent_choice = rps_choice
 
         game.board = rock_paper_scissors.get_board_json()
         game.save()
@@ -83,12 +83,12 @@ def get_outbound_keyboard(game) -> list[list[Keyboard]]:
 
     keyboard_line: list[Keyboard] = []
     button_info_rock = {'a': game.id, 'b': RPSChoice.ROCK}
-    keyboard_line.append(Keyboard(Emoji.ROCK.value, info=button_info_rock, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
+    keyboard_line.append(Keyboard(Emoji.ROCK, info=button_info_rock, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
     button_info_paper = {'a': game.id, 'b': RPSChoice.PAPER}
-    keyboard_line.append(Keyboard(Emoji.PAPER.value, info=button_info_paper,
+    keyboard_line.append(Keyboard(Emoji.PAPER, info=button_info_paper,
                                   screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
     button_info_scissors = {'a': game.id, 'b': RPSChoice.SCISSORS}
-    keyboard_line.append(Keyboard(Emoji.SCISSORS.value, info=button_info_scissors,
+    keyboard_line.append(Keyboard(Emoji.SCISSORS, info=button_info_scissors,
                                   screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
     outbound_keyboard.append(keyboard_line)
 
@@ -179,11 +179,11 @@ def get_choice_emoji(rps_choice: RPSChoice) -> str:
 
     match rps_choice:
         case RPSChoice.ROCK:
-            return Emoji.ROCK.value
+            return Emoji.ROCK
         case RPSChoice.PAPER:
-            return Emoji.PAPER.value
+            return Emoji.PAPER
         case RPSChoice.SCISSORS:
-            return Emoji.SCISSORS.value
+            return Emoji.SCISSORS
 
         case _:
             raise ValueError(f'Unknown Rock Paper Scissors choice: {rps_choice}')

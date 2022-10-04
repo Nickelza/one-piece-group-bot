@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class GameParticipant(Enum):
+class GameParticipant(IntEnum):
     """
     Enum for the status of a game.
     """

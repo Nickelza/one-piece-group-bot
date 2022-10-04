@@ -82,7 +82,7 @@ def send_proposal(update: Update, context: CallbackContext, user: User, region: 
                                                              mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                              get_region_text(region))
     # Keyboard
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, region.value, phrases.KEYBOARD_OPTION_ACCEPT,
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, region, phrases.KEYBOARD_OPTION_ACCEPT,
                                                                  phrases.KEYBOARD_OPTION_REJECT,
                                                                  Screen.GRP_CHANGE_REGION)]
 

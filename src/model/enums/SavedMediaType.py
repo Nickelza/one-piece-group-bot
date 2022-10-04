@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class SavedMediaType(Enum):
+class SavedMediaType(IntEnum):
     """
     Enum class for saved media types.
     """

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class Region(Enum):
+class Region(IntEnum):
     """
     Enum class for region.
     """

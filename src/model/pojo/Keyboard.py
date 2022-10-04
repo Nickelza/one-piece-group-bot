@@ -40,11 +40,11 @@ class Keyboard:
         info_with_screen = self.info.copy()
 
         if self.screen is not None:
-            info_with_screen[ReservedKeyboardKeys.SCREEN] = int(self.screen.value[1:])
+            info_with_screen[ReservedKeyboardKeys.SCREEN] = int(self.screen[1:])
 
         if self.previous_screen_list is not None and len(self.previous_screen_list) > 0:
             info_with_screen[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [
-                int(screen.value[1:]) for screen in self.previous_screen_list]
+                int(screen[1:]) for screen in self.previous_screen_list]
 
         return json.dumps(info_with_screen, separators=(',', ':'))
 
@@ -66,7 +66,7 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery, message_sour
 
     try:
         if ReservedKeyboardKeys.SCREEN in info:
-            screen = Screen(message_source.value + str(info[ReservedKeyboardKeys.SCREEN]))
+            screen = Screen(message_source + str(info[ReservedKeyboardKeys.SCREEN]))
         else:
             screen = None
     except (ValueError, KeyError):
@@ -74,7 +74,7 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery, message_sour
 
     if ReservedKeyboardKeys.PREVIOUS_SCREEN in info:
         previous_screen_list = [
-            Screen(message_source.value + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
+            Screen(message_source + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
     else:
         previous_screen_list = []
 

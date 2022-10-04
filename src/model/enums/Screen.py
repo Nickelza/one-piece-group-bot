@@ -1,7 +1,7 @@
-from enum import Enum
+from strenum import StrEnum
 
 
-class Screen(Enum):
+class Screen(StrEnum):
     UNKNOWN = '0'
 
     GRP_USER_STATUS = 'G1'
