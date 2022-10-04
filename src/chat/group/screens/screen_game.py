@@ -6,7 +6,7 @@ import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Command import Command
-from src.model.enums.GameStatus import get_finished_statuses
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
@@ -44,7 +44,7 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where(Game.challenger == challenger,
-                                                        Game.status not in get_finished_statuses())
+                                                        Game.status not in GameStatus.get_finished())
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
                                                url=get_message_url(Env.OPD_GROUP_ID.get_int(), game.message_id))])

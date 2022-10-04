@@ -5,7 +5,7 @@ from telegram.ext import CallbackContext
 import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
-from src.model.enums.GameStatus import GameStatus, is_finished_by_status, get_finished_statuses
+from src.model.enums.GameStatus import GameStatus
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameOutcome import GameOutcome
 from src.model.pojo.Keyboard import Keyboard
@@ -169,7 +169,7 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
         full_message_send(context, phrases.GAME_FORCED_END, update=update)
         return None
 
-    if is_finished_by_status(GameStatus(game.status)):
+    if GameStatus(game.status).is_finished():
         full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
         return None
 
@@ -182,7 +182,7 @@ def force_end_all_active() -> None:
     :return:
     """
 
-    active_games = Game.select().where(Game.status.not_in(get_finished_statuses()))
+    active_games = Game.select().where(Game.status.not_in(GameStatus.get_finished()))
 
     for game in active_games:
         game.status = GameStatus.FORCED_END

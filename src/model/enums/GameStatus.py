@@ -13,19 +13,17 @@ class GameStatus(IntEnum):
     AWAITING_OPPONENT_CONFIRMATION = 5
     FORCED_END = 6
 
+    @staticmethod
+    def get_finished() -> list['GameStatus']:
+        """
+        Get the finished statuses.
+        :return: The finished statuses
+        """
+        return [GameStatus.WON, GameStatus.LOST, GameStatus.DRAW, GameStatus.FORCED_END]
 
-def get_finished_statuses() -> list[GameStatus]:
-    """
-    Get the finished statuses
-    :return: The finished statuses
-    """
-    return [GameStatus.WON, GameStatus.LOST, GameStatus.DRAW, GameStatus.FORCED_END]
-
-
-def is_finished_by_status(game_status: GameStatus) -> bool:
-    """
-    Is the game finished by status
-    :param game_status: The game status
-    :return: Is the game finished
-    """
-    return game_status in get_finished_statuses()
+    def is_finished(self) -> bool:
+        """
+        Check if the status is finished.
+        :return: True if finished, False otherwise
+        """
+        return self in GameStatus.get_finished()

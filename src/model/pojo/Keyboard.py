@@ -54,30 +54,30 @@ class Keyboard:
         """
         self.callback_data = self.create_callback_data()
 
+    @staticmethod
+    def get_from_callback_query(callback_query: CallbackQuery, message_source: MessageSource):
+        """
+        Create a Keyboard object from a CallbackQuery object
+        :param callback_query: CallbackQuery object
+        :param message_source: Source of the message
+        :return: Keyboard object
+        """
+        info: dict = json.loads(callback_query.data)
 
-def get_keyboard_from_callback_query(callback_query: CallbackQuery, message_source: MessageSource):
-    """
-    Create a Keyboard object from a CallbackQuery object
-    :param callback_query: CallbackQuery object
-    :param message_source: Source of the message
-    :return: Keyboard object
-    """
-    info: dict = json.loads(callback_query.data)
+        try:
+            if ReservedKeyboardKeys.SCREEN in info:
+                screen = Screen(message_source + str(info[ReservedKeyboardKeys.SCREEN]))
+            else:
+                screen = None
+        except (ValueError, KeyError):
+            screen = Screen.UNKNOWN
 
-    try:
-        if ReservedKeyboardKeys.SCREEN in info:
-            screen = Screen(message_source + str(info[ReservedKeyboardKeys.SCREEN]))
+        if ReservedKeyboardKeys.PREVIOUS_SCREEN in info:
+            previous_screen_list = [
+                Screen(message_source + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
         else:
-            screen = None
-    except (ValueError, KeyError):
-        screen = Screen.UNKNOWN
+            previous_screen_list = []
 
-    if ReservedKeyboardKeys.PREVIOUS_SCREEN in info:
-        previous_screen_list = [
-            Screen(message_source + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
-    else:
-        previous_screen_list = []
+        text: str = ''
 
-    text: str = ''
-
-    return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list)
+        return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list)

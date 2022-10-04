@@ -15,7 +15,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
-from src.model.pojo.Keyboard import Keyboard, get_keyboard_from_callback_query
+from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source
 
 
@@ -110,7 +110,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
                 pass
     except (AttributeError, ValueError):
         if is_callback:
-            keyboard = get_keyboard_from_callback_query(update.callback_query, message_source)
+            keyboard = Keyboard.get_from_callback_query(update.callback_query, message_source)
 
             if not keyboard.info:
                 # No provided info, do nothing
