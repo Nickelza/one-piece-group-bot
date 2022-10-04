@@ -131,8 +131,7 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
                                 screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rr])
 
-    # Delete button
-    # TODO Check why this can't be replaced with add_delete_button
+    # Delete button, can't be replaced by add_delete_button because wagers have to be returned
     inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_DELETE, info={'a': game.id,
                                                                            ReservedKeyboardKeys.DELETE: True},
                                      screen=Screen.GRP_GAME_SELECTION)])

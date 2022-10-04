@@ -16,19 +16,19 @@ from src.service.location_service import update_location
 from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
 
 
-def validate_move_request(update: Update, context: CallbackContext, user: User, region: Region) -> bool:
+def validate_move_request(update: Update, context: CallbackContext, user: User, destination_region: Region) -> bool:
     """
     Validate the move request
     :param update: The update
     :param context: The context
     :param user: The user
-    :param region: The region to move to
+    :param destination_region: The region to move to
     :return: True if the move is valid
     """
     # User is already in requested region
     location: Location = Location.get_by_level(user.location_level)
-    if location.region == region:
-        ot_text = phrases.LOCATION_ALREADY_IN_REGION.format(get_region_text(region))
+    if location.region == destination_region:
+        ot_text = phrases.LOCATION_ALREADY_IN_REGION.format(get_region_text(destination_region))
         full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
@@ -40,7 +40,7 @@ def validate_move_request(update: Update, context: CallbackContext, user: User, 
         return False
 
     # Not enough bounty for New World
-    if region == Region.NEW_WORLD:
+    if destination_region == Region.NEW_WORLD:
         first_new_world_location: Location = Location.get_first_new_world()
         if user.bounty < first_new_world_location.required_bounty:
             ot_text = phrases.LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY.format(
@@ -138,10 +138,10 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
 
     # Move to new world request
-    if command is not None:
-        region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
-    elif keyboard is not None:
+    if keyboard is not None:
         region = Region(keyboard.info['a'])
+    elif command is not None:
+        region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
     else:
         full_message_send(context, GroupChatError.INVALID_CHANGE_REGION_REQUEST.build(), update)
         return

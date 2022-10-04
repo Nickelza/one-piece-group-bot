@@ -58,6 +58,16 @@ class Command:
         """
         return get_formatted_from_string(self.replaced_by)
 
+    def __eq__(self, other):
+        """
+        Overrides the default implementation
+        """
+
+        if isinstance(other, Command):
+            return self.name == other.name and self.screen == other.screen
+
+        return False
+
 
 ND = None
 
