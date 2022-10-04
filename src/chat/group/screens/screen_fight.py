@@ -3,7 +3,6 @@ import datetime
 from telegram import Update, TelegramError, Message
 from telegram.ext import CallbackContext
 
-import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Fight import Fight
@@ -11,6 +10,7 @@ from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError
@@ -182,7 +182,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
         outcome_probability = 100 - win_probability
 
     # Get SavedMedia
-    fight_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == c.SAVED_MEDIA_NAME_FIGHT)
+    fight_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == SavedMediaName.FIGHT)
 
     # SavedMedia is not found
     if fight_media is None:

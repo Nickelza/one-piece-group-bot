@@ -7,6 +7,7 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import get_finished_statuses
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError
@@ -132,11 +133,12 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
     inline_keyboard.append([btn_rr])
 
     # Delete button
-    inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_DELETE, info={'a': game.id, 'x': True},
+    # TODO Check why this can't be replaced with add_delete_button
+    inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_DELETE, info={'a': game.id,
+                                                                           ReservedKeyboardKeys.DELETE: True},
                                      screen=Screen.GRP_GAME_SELECTION)])
 
     ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
     message: Message = full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
     game.message_id = message.message_id
     game.save()
-

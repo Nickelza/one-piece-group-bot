@@ -6,6 +6,7 @@ from src.chat.group.screens.screen_game_rps import manage as manage_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.GroupChatError import GroupChatError
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
@@ -29,7 +30,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         return
 
     # User clicked on cancel button
-    if 'x' in inbound_keyboard.info or inbound_keyboard.info['b'] == 0:
+    if ReservedKeyboardKeys.DELETE in inbound_keyboard.info or inbound_keyboard.info['b'] == 0:
         delete_message = True
         if 'b' in inbound_keyboard.info:
             delete_message = False

@@ -201,7 +201,7 @@ def get_bounty_poster(update: Update, user: User) -> str:
     new_image.paste(belly_component, (0, c.BOUNTY_POSTER_BELLY_START_Y), belly_component)
 
     # Save image
-    save_path = generate_temp_file_path(c.BOUNTY_POSTER_EXTENSIION)
+    save_path = generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION)
     new_image.save(save_path)
 
     return save_path

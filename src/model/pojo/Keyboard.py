@@ -2,9 +2,9 @@ import json
 
 from telegram import CallbackQuery
 
-import constants as c
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 
 
@@ -40,10 +40,11 @@ class Keyboard:
         info_with_screen = self.info.copy()
 
         if self.screen is not None:
-            info_with_screen[c.SCREEN_CODE] = int(self.screen.value[1:])
+            info_with_screen[ReservedKeyboardKeys.SCREEN] = int(self.screen.value[1:])
 
         if self.previous_screen_list is not None and len(self.previous_screen_list) > 0:
-            info_with_screen[c.PREVIOUS_SCREEN_CODE] = [int(screen.value[1:]) for screen in self.previous_screen_list]
+            info_with_screen[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [
+                int(screen.value[1:]) for screen in self.previous_screen_list]
 
         return json.dumps(info_with_screen, separators=(',', ':'))
 
@@ -64,15 +65,16 @@ def get_keyboard_from_callback_query(callback_query: CallbackQuery, message_sour
     info: dict = json.loads(callback_query.data)
 
     try:
-        if c.SCREEN_CODE in info:
-            screen = Screen(message_source.value + str(info[c.SCREEN_CODE]))
+        if ReservedKeyboardKeys.SCREEN in info:
+            screen = Screen(message_source.value + str(info[ReservedKeyboardKeys.SCREEN]))
         else:
             screen = None
     except (ValueError, KeyError):
         screen = Screen.UNKNOWN
 
-    if c.PREVIOUS_SCREEN_CODE in info:
-        previous_screen_list = [Screen(message_source.value + str(screen)) for screen in info[c.PREVIOUS_SCREEN_CODE]]
+    if ReservedKeyboardKeys.PREVIOUS_SCREEN in info:
+        previous_screen_list = [
+            Screen(message_source.value + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
     else:
         previous_screen_list = []
 

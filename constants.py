@@ -13,13 +13,6 @@ TG_PROFILE_PHOTO_EXTENSION = 'jpg'
 
 TEMP_DIR = os.path.join(ROOT_DIR, 'temp')
 
-# Language code
-LANG_CODE_EN = 'en'
-DEFAULT_LANG_CODE = LANG_CODE_EN
-
-SCREEN_CODE = 'sc'
-PREVIOUS_SCREEN_CODE = 'psc'
-
 # Saved Media
 SAVED_MEDIA_NAME_DOC_Q = 'docq'
 SAVED_MEDIA_NAME_FIGHT = 'fight'
@@ -29,7 +22,7 @@ STANDARD_SPLIT_CHAR = "|"
 COMMAND_PREFIX_ALIASES = ["/", ".", ", ", "!"]
 
 # Bounty poster
-BOUNTY_POSTER_EXTENSIION = 'jpg'
+BOUNTY_POSTER_EXTENSION = 'jpg'
 BOUNTY_POSTER_ASSETS_PATH = os.path.join(ROOT_DIR, 'assets', 'bounty_poster')
 BOUNTY_POSTER_TEMPLATE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'template.png')
 BOUNTY_POSTER_NO_PHOTO_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'no_photo.jpg')

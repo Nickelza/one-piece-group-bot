@@ -2,6 +2,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
@@ -25,7 +26,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
         return
 
     # User clicked on cancel button
-    if 'x' in inbound_keyboard.info:
+    if ReservedKeyboardKeys.DELETE in inbound_keyboard.info:
         delete_game(update, context, game)
         return
 
@@ -41,7 +42,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
                                                                    phrases.KEYBOARD_OPTION_REJECT,
                                                                    Screen.GRP_GAME_OPPONENT_CONFIRMATION)]
 
-    button_delete_info = {'a': game.id, 'u': [game.challenger.id, game.opponent.id], 'x': 1}
+    button_delete_info = {'a': game.id, 'u': [game.challenger.id, game.opponent.id], ReservedKeyboardKeys.DELETE: 1}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 

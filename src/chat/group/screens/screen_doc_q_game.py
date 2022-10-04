@@ -12,6 +12,8 @@ from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
@@ -136,7 +138,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         inline_keyboard.append(apples_keyboard)
 
         # Get SavedMedia
-        doc_q_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == c.SAVED_MEDIA_NAME_DOC_Q)
+        doc_q_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == SavedMediaName.DOC_Q)
 
         # SavedMedia is not found
         if doc_q_media is None:
@@ -180,7 +182,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
     if validate_play(update, context, user, doc_q_game):
         # User clicked on cancel button
-        if 'x' in keyboard.info:
+        if ReservedKeyboardKeys.DELETE in keyboard.info:
             # Answer callback with goodbye message
             full_message_send(context, phrases.DOC_Q_GAME_CANCEL, update, answer_callback=True)
             delete_game(update, context, doc_q_game)
