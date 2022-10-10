@@ -67,6 +67,7 @@ USER_NOT_FOUND = 'User not found'
 UNRECOGNIZED_SCREEN = 'Unrecognized command'
 SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
 UNKNOWN_EXTRA_STEP = 'Unknown extra step'
+PRIVATE_STEP_NOT_SET = 'Private step not set'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
@@ -126,6 +127,7 @@ PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you mo
 PVT_KEY_CREW = Emoji.CREW + ' Crew'
 PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
+PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
@@ -253,3 +255,7 @@ CREW_CREATE_NAME_ALREADY_EXISTS = 'A Crew with this name already exists'
 CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH.get_int()} characters'
 CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
                       f'\n\nHead over to the {CHAT_GROUP_MENTION} to start recruiting members!'
+CREW_NAME_EDIT_SUCCESS = 'Crew name updated successfully'
+
+STEP_REQUIRES_TEXT = 'Please send a valid text'
+ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'

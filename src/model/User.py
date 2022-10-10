@@ -39,6 +39,7 @@ class User(BaseModel):
     last_message_date = DateTimeField(default=datetime.datetime.now)
     private_screen_list = CharField(max_length=99)
     private_screen_step = SmallIntegerField()
+    private_screen_in_edit_id = IntegerField(null=True)
 
     class Meta:
         db_table = 'user'
@@ -61,7 +62,7 @@ class User(BaseModel):
         return ((self.impel_down_release_date is not None and self.impel_down_release_date > datetime.datetime.now())
                 or self.impel_down_is_permanent)
 
-    def update_private_screen_list(self, screen: Screen, previous_screen_list: list[Screen] = None) -> 'User':
+    def update_private_screen_list(self, screen: Screen, previous_screen_list: list[Screen] = None):
         """
         Updates the private screen list
         :param screen: The screen
@@ -88,9 +89,6 @@ class User(BaseModel):
         if len(self.private_screen_list) == 0:
             self.private_screen_list = None
 
-        self.save()
-        return self
-
     def get_private_screen_list(self) -> list[Screen]:
         """
         Returns the private screen list
@@ -101,6 +99,22 @@ class User(BaseModel):
             return []
 
         return [Screen(str(screen)) for screen in self.private_screen_list.split(c.STANDARD_SPLIT_CHAR)]
+
+    def get_current_private_screen(self) -> Screen:
+        """
+        Returns the current saved private screen
+        :return: The private screen
+        """
+
+        return (self.get_private_screen_list() or [None])[-1]
+
+    def reset_private_screen(self):
+        """
+        Resets the private screen
+        """
+
+        self.private_screen_step = None
+        self.private_screen_in_edit_id = None
 
 
 User.create_table()

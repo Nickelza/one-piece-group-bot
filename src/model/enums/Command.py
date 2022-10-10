@@ -16,7 +16,7 @@ class Command:
     Class for Commands
     """
 
-    def __init__(self, name: str, screen: Screen, active: bool = True, replaced_by: str = None,
+    def __init__(self, name: str | None, screen: Screen, active: bool = True, replaced_by: str = None,
                  only_in_reply: bool = False, allow_self_reply: bool = False, allow_reply_to_bot: bool = False,
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
                  parameters: list = None, message_source: MessageSource = MessageSource.ND):

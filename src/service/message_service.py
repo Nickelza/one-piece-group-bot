@@ -577,3 +577,26 @@ def get_start_with_command_url(command: str) -> str:
     :return: Start with command url
     """
     return f'https://t.me/{Env.BOT_USERNAME.get()}?start={command}'
+
+
+def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[bool, bool, bool]:
+    """
+    Get the item creation/edit status
+    :param user: User object
+    :param inbound_keyboard: Keyboard object
+    :return: Tuple with should ignore input, should create item and should validate input
+    """
+
+    should_create_item = True
+    should_validate_input = True
+    should_ignore_input = False
+
+    if inbound_keyboard is None and user.private_screen_step is None and user.private_screen_in_edit_id is None:
+        should_ignore_input = True
+    else:
+        if user.private_screen_in_edit_id is not None:
+            should_create_item = False
+            if inbound_keyboard is not None:  # Keyboard interaction
+                should_validate_input = False
+
+    return should_ignore_input, should_create_item, should_validate_input

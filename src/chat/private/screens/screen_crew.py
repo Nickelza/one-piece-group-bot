@@ -3,8 +3,10 @@ from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
 import src.model.enums.CrewRole as CrewRole
+from src.chat.private.screens.screen_crew_create import Step
 from src.model.Crew import Crew
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, mention_markdown_user, escape_valid_markdown_chars
@@ -25,7 +27,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         ot_text = phrases.CREW_USER_NOT_IN_CREW
 
         # Create crew button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_CREATE, screen=Screen.PVT_CREW_CREATE)])
+        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_CREATE, screen=Screen.PVT_CREW_CREATE_OR_EDIT)])
     else:
         crew: Crew = user.crew
         crew_members: list[User] = crew.get_members()
@@ -41,7 +43,14 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
 
         ot_text = phrases.CREW_OVERVIEW.format(escape_valid_markdown_chars(crew.name), crew_members_text)
 
-        # Leave crew button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)])
+        if CrewRole.CrewRole(user.crew_role) is CrewRole.CrewRole.CAPTAIN:
+            # Name edit button
+            button_info = {ReservedKeyboardKeys.IN_EDIT_ID: crew.id,
+                           ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_NAME}
+            inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_EDIT_NAME, screen=Screen.PVT_CREW_CREATE_OR_EDIT,
+                                             info=button_info)])
+        else:
+            # Leave crew button
+            inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)])
 
     full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)

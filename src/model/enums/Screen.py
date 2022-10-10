@@ -25,7 +25,7 @@ class Screen(StrEnum):
     PVT_SETTINGS_LOCATION_UPDATE = 'P3'
     PVT_USER_STATUS = 'P4'
     PVT_CREW = 'P5'
-    PVT_CREW_CREATE = 'P6'
+    PVT_CREW_CREATE_OR_EDIT = 'P6'
     PVT_CREW_LEAVE = 'P7'
 
     ADM_SAVE_MEDIA = 'A1'

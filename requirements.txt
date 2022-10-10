@@ -1,5 +1,5 @@
 python-dotenv==0.20.0
-python-telegram-bot==13.13
+python-telegram-bot==13.14
 peewee==3.15.2
 praw~=7.6.0
 APScheduler==3.6.3

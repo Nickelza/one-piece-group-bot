@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from peewee import MySQLDatabase
+from peewee import MySQLDatabase, DoesNotExist
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -15,6 +15,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
+from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source
 
@@ -120,7 +121,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
                 try:
                     command = Command.get_by_screen(keyboard.screen)
                 except ValueError:
-                    command = Command.Command('', keyboard.screen)
+                    command = Command.Command(None, keyboard.screen)
 
     if command != Command.ND or is_callback:
         if not validate(update, context, command, user, keyboard):
@@ -128,17 +129,26 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
 
     if command is not None:
         command.message_source = message_source
-    match message_source:
-        case MessageSource.PRIVATE:
-            manage_private_chat(update, context, command, user, keyboard)
-        case MessageSource.GROUP:
-            manage_group_chat(update, context, command, user, keyboard)
-        case MessageSource.ADMIN:
-            manage_admin_chat(update, context, command)
-        case MessageSource.TG_REST:
-            manage_tgrest_chat(update, context)
-        case _:
-            raise ValueError('Invalid message source')
+
+    try:
+        match message_source:
+            case MessageSource.PRIVATE:
+                manage_private_chat(update, context, command, user, keyboard)
+            case MessageSource.GROUP:
+                manage_group_chat(update, context, command, user, keyboard)
+            case MessageSource.ADMIN:
+                manage_admin_chat(update, context, command)
+            case MessageSource.TG_REST:
+                manage_tgrest_chat(update, context)
+            case _:
+                raise ValueError('Invalid message source')
+    except DoesNotExist:
+        full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
+    except PrivateChatException as ce:
+        # Manages system errors
+        full_message_send(context, str(ce), update=update)
+
+    user.save()
 
 
 def validate(update: Update, context: CallbackContext, command: Command.Command, user: User, keyboard: Keyboard
