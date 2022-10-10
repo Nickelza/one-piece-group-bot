@@ -108,9 +108,9 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             return
 
         # Refresh location
-        user = update_location(context, user, update, cap_to_paradise=False, region=region, requested_by_user=True)
+        update_location(context, user, update, cap_to_paradise=False, region=region, requested_by_user=True)
         user.can_change_region = False
-        user.save()
+
         return
 
     else:  # User rejected

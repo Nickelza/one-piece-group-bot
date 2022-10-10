@@ -101,7 +101,6 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     user.bounty -= game.wager
     user.pending_bounty += game.wager
     user.can_initiate_game = False
-    user.save()
 
     # Display available games
     display_games(game, update, context, opponent)

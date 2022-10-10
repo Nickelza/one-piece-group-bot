@@ -21,7 +21,6 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     # Toggle
     if 'a' in inbound_keyboard.info:
         user.should_send_location_update = inbound_keyboard.info['a']
-        user.save()
 
     ot_text = get_current_setting_text(user.should_send_location_update, phrases.PVT_TXT_SETTINGS_LOCATION_UPDATE)
     inline_keyboard: list[list[Keyboard]] = [[get_toggle_keyboard(user.should_send_location_update,

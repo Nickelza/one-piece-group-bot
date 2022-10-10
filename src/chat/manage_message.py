@@ -250,6 +250,8 @@ def get_user(update: Update) -> User:
     user.tg_last_name = update.effective_user.last_name
     user.tg_username = update.effective_user.username
     user.last_message_date = datetime.now()
-    user.save()
+
+    if user.id is None:  # Save immediately if New since id might be accessed, else will be updated later
+        user.save()
 
     return user

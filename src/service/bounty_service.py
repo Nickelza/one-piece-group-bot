@@ -146,7 +146,7 @@ def reset_bounty(context: CallbackContext) -> None:
 
 
 def add_bounty(user: User, amount: float, context: CallbackContext = None, update: Update = None,
-               should_update_location: bool = False, pending_belly_amount: int = 0) -> User:
+               should_update_location: bool = False, pending_belly_amount: int = 0) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -161,11 +161,11 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
     from src.service.location_service import update_location
 
     if amount <= 0:
-        return user
+        return
 
     # User is arrested, no bounty is gained
     if user.is_arrested():
-        return user
+        return
 
     user.bounty += amount
 
@@ -174,8 +174,6 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
         if context is None:
             raise ValueError('Context is required when updating the location')
         update_location(context, user, update)
-
-    return user
 
 
 def add_region_bounty(context: CallbackContext) -> None:

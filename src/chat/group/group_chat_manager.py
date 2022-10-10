@@ -25,7 +25,7 @@ from src.service.bounty_service import get_message_belly
 from src.service.message_service import full_message_send, delete_message
 
 
-def update_user_bounty(update: Update, context: CallbackContext, user: User) -> User:
+def update_user_bounty(update: Update, context: CallbackContext, user: User) -> None:
     """
     Creates a new user or updates an existing user
     :param update: Telegram update
@@ -34,11 +34,8 @@ def update_user_bounty(update: Update, context: CallbackContext, user: User) -> 
     :return: Updated user
     """
 
-    user = add_bounty(user, get_message_belly(update, user), context=context, update=update,
-                      should_update_location=True)
-    user.save()
-
-    return user
+    add_bounty(user, get_message_belly(update, user), context=context, update=update,
+               should_update_location=True)
 
 
 def manage(update: Update, context: CallbackContext, command: Command.Command, user: User, keyboard: Keyboard = None
@@ -64,7 +61,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     if not validate(update, user):
         return
 
-    user = update_user_bounty(update, context, user)
+    update_user_bounty(update, context, user)
 
     dispatch_screens(update, context, user, keyboard, command)
 

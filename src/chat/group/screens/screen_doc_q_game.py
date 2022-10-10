@@ -194,7 +194,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
         if str(keyboard.info['b']) in correct_choices_index:
             # Increase user's bounty
-            user = add_bounty(user, win_amount)
+            add_bounty(user, win_amount)
 
             # Update game status
             doc_q_game.status = GameStatus.WON
@@ -223,7 +223,6 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
         # Save updates
         user.can_play_doc_q = False
-        user.save()
         doc_q_game.save()
 
 

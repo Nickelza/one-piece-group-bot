@@ -163,7 +163,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
-            user = add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+            add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
 
         # Subtract bet wager from user pending bounty
         user.pending_bounty -= prediction_option_user.wager

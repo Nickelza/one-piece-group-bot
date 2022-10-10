@@ -49,7 +49,6 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
 
     user.bounty -= game.wager
     user.pending_bounty += game.wager
-    user.save()
     game.wager += game.wager
     game.save()
 

@@ -235,7 +235,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
-        user = add_bounty(user, win_amount)
+        add_bounty(user, win_amount)
         # Remove bounty from opponent
         opponent.bounty -= win_amount
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
@@ -247,7 +247,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         # Remove bounty from challenger
         user.bounty -= lose_amount
         # Add bounty to opponent
-        opponent = add_bounty(opponent, lose_amount)
+        add_bounty(opponent, lose_amount)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())
@@ -269,7 +269,6 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
                     edit_only_caption_and_keyboard=True)
 
     # Save info
-    user.save()
     opponent.save()
     fight.save()
 

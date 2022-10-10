@@ -1,5 +1,5 @@
 from peewee import Case
-from telegram import Update, Message
+from telegram import Update
 from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 
@@ -14,7 +14,7 @@ from src.service.message_service import full_message_send, get_image_preview, me
 
 
 def update_location(context: CallbackContext, user: User, update: Update = None, cap_to_paradise: bool = True,
-                    region: Region = None, requested_by_user=False) -> User:
+                    region: Region = None, requested_by_user=False) -> None:
     """
     Refresh the location of the user
     :param context: Telegram context
@@ -67,9 +67,9 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                                        ot_text_suffix)
 
             try:
-                message: Message = full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
-                                                     add_delete_button=True,
-                                                     send_in_private_chat=(not requested_by_user))
+                full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
+                                  add_delete_button=True,
+                                  send_in_private_chat=(not requested_by_user))
                 # Should send poster if it hasn't been sent for this location ever
                 if effective_location.show_poster:
                     user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
@@ -88,7 +88,6 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
 
         # Update user location
         user.location_level = effective_location.level
-        user.save()
 
     # Move to New World proposal
     if new_location.region == Region.NEW_WORLD and user.location_level == Location.get_last_paradise().level \
@@ -96,9 +95,6 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
         if requested_by_user or Env.SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL.get_bool():
             send_new_world_proposal(update, context, user, Region.NEW_WORLD)
             user.should_propose_new_world = False
-            user.save()
-
-    return user
 
 
 def reset_location() -> None:

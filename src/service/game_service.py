@@ -44,14 +44,14 @@ def end_game(game: Game, game_outcome: GameOutcome) -> Game:
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
         game.status = GameStatus.WON
-        challenger = add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
+        add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
     elif game_outcome == GameOutcome.OPPONENT_WON:
         game.status = GameStatus.LOST
-        opponent = add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
+        add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
     else:
         game.status = GameStatus.DRAW
-        challenger = add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
-        opponent = add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
+        add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
+        add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
 
     challenger.pending_bounty -= half_wager
     opponent.pending_bounty -= half_wager
