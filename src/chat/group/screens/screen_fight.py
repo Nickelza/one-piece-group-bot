@@ -13,7 +13,7 @@ from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
@@ -54,8 +54,7 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
         # Get opponent from fight id
         fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info['a']))
         if fight is None:
-            full_message_or_media_edit(context, GroupChatError.FIGHT_NOT_FOUND.build(), update=update)
-            return False
+            raise GroupChatException(GroupChatError.FIGHT_NOT_FOUND)
 
     # Opponent validation
     try:
@@ -186,8 +185,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
 
     # SavedMedia is not found
     if fight_media is None:
-        full_message_send(context, GroupChatError.SAVED_MEDIA_NOT_FOUND.build(), update)
-        return
+        raise GroupChatException(GroupChatError.SAVED_MEDIA_NOT_FOUND)
 
     caption = phrases.FIGHT_CONFIRMATION_REQUEST.format(mention_markdown_user(user), mention_markdown_user(opponent),
                                                         outcome_probability, outcome, user.get_bounty_formatted(),

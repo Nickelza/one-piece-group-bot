@@ -16,4 +16,9 @@ class GroupChatError(Error):
     FIGHT_OPPONENT_NOT_FOUND = Error(8, phrases.FIGHT_OPPONENT_NOT_FOUND, source)
     GAME_NOT_FOUND = Error(9, phrases.GAME_NOT_FOUND, source)
     INVALID_GAME = Error(10, phrases.GAME_INVALID, source)
-    PREDICTION_NOT_FOUND = Error(11, phrases.PREDICTION_NOT_FOUND, source)
+
+
+class GroupChatException(Exception):
+    def __init__(self, error: GroupChatError):
+        self.message = error.build()
+        super().__init__(self.message)

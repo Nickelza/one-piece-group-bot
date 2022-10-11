@@ -12,7 +12,7 @@ from src.model.User import User
 from src.model.enums import Location
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.SavedMediaType import SavedMediaType
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
 from src.service.cron_service import get_remaining_time
@@ -53,8 +53,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
 
     # If the user is not in the database, error
     if target_user is None:
-        full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update)
-        return
+        raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
 
     leaderboard_target_user = get_current_leaderboard_user(target_user)
     leaderboard_target_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_target_user)

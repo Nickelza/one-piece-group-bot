@@ -18,11 +18,11 @@ from src.chat.group.screens.screen_status import manage as manage_screen_show_st
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
-from src.service.message_service import full_message_send, delete_message
+from src.service.message_service import delete_message
 
 
 def update_user_bounty(update: Update, context: CallbackContext, user: User) -> None:
@@ -118,7 +118,7 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, keybo
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
-                    full_message_send(context, GroupChatError.UNRECOGNIZED_SCREEN.build(), update, new_message=True)
+                    raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
 
 def validate(update: Update, user: User) -> bool:

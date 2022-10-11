@@ -6,18 +6,16 @@ import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameOutcome import GameOutcome
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.message_service import full_message_send, mention_markdown_user
 
 
-def get_game_from_keyboard(update: Update, context: CallbackContext, inbound_keyboard: Keyboard) -> Game | None:
+def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
     """
     Get the game from the keyboard
-    :param update: The update
-    :param context: The context
     :param inbound_keyboard: The keyboard
     :return: The game
     """
@@ -26,8 +24,7 @@ def get_game_from_keyboard(update: Update, context: CallbackContext, inbound_key
         game: Game = Game.get_by_id(inbound_keyboard.info['a'])
         return game
     except IndexError:
-        full_message_send(context, GroupChatError.GAME_NOT_FOUND.build(), update=update)
-        return None
+        raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
 
 
 def end_game(game: Game, game_outcome: GameOutcome) -> Game:
@@ -159,11 +156,7 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
 
     # Get the game
     if game is None:
-        game = get_game_from_keyboard(update, context, inbound_keyboard)
-
-    if game is None:
-        # Error message already send by get_game_from_keyboard
-        return None
+        game = get_game_from_keyboard(inbound_keyboard)
 
     if game.status == GameStatus.FORCED_END:
         full_message_send(context, phrases.GAME_FORCED_END, update=update)

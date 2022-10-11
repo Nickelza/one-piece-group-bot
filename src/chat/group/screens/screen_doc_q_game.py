@@ -15,7 +15,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import cron_datetime_difference
@@ -142,8 +142,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
 
         # SavedMedia is not found
         if doc_q_media is None:
-            full_message_send(context, GroupChatError.SAVED_MEDIA_NOT_FOUND.build(), update)
-            return
+            raise GroupChatException(GroupChatError.SAVED_MEDIA_NOT_FOUND)
 
         win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
             user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
@@ -174,11 +173,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     doc_q_game: DocQGame = DocQGame.get_or_none(DocQGame.id == keyboard.info['a'])
 
     if doc_q_game is None:
-        try:
-            full_message_send(context, GroupChatError.DOC_Q_GAME_NOT_FOUND.build(), update)
-        except BadRequest:
-            full_message_or_media_edit(context, GroupChatError.DOC_Q_GAME_NOT_FOUND.build(), update=update)
-        return
+        raise GroupChatException(GroupChatError.DOC_Q_GAME_NOT_FOUND)
 
     if validate_play(update, context, user, doc_q_game):
         # User clicked on cancel button

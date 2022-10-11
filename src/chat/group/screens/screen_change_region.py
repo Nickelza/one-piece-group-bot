@@ -8,7 +8,7 @@ from src.model.User import User
 from src.model.enums import Location
 from src.model.enums.Region import Region
 from src.model.enums.Screen import Screen
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.cron_service import cron_datetime_difference
@@ -74,9 +74,8 @@ def send_proposal(update: Update, context: CallbackContext, user: User, region: 
     :return: None
     """
 
-    if region == Region.ND:
-        full_message_send(context, GroupChatError.INVALID_CHANGE_REGION_REQUEST.build(), update)
-        return
+    if region is Region.ND:
+        raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
 
     ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL.format(get_region_image_preview(region),
                                                              mention_markdown_v2(user.tg_user_id, user.tg_first_name),
@@ -143,8 +142,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     elif command is not None:
         region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
     else:
-        full_message_send(context, GroupChatError.INVALID_CHANGE_REGION_REQUEST.build(), update)
-        return
+        raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
 
     if not validate_move_request(update, context, user, region):
         return
@@ -156,7 +154,6 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
 
     # Interaction with keyboard
     if keyboard is None:
-        full_message_send(context, GroupChatError.KEYBOARD_NOT_FOUND.build(), update)
-        return
+        raise GroupChatException(GroupChatError.KEYBOARD_NOT_FOUND)
 
     keyboard_interaction(update, context, user, keyboard, region)

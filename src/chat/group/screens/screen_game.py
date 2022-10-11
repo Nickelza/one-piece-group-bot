@@ -10,7 +10,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
-from src.model.error.GroupChatError import GroupChatError
+from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_wager_amount, validate_wager
@@ -84,8 +84,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     opponent: User = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
 
     if opponent is None:
-        full_message_send(context, GroupChatError.USER_NOT_IN_DB.build(), update=update)
-        return
+        raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
 
     # Validate the request
     if not validate(update, context, user, opponent, command):
