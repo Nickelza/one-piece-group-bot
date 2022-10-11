@@ -17,7 +17,7 @@ from src.chat.group.screens.screen_prediction_bet_status import manage as manage
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import MessageValidationException
+from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
@@ -196,12 +196,12 @@ def validate_location_level(update: Update, user: User, location_level: int, ide
             return True
 
         if user.is_arrested():
-            raise MessageValidationException()
+            raise GroupMessageValidationException()
 
         if user.location_level < location_level:
-            raise MessageValidationException()
+            raise GroupMessageValidationException()
 
-    except MessageValidationException:
+    except GroupMessageValidationException:
         delete_message(update)
         return False
 
