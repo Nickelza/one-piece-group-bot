@@ -16,6 +16,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
+from src.model.error.AdminChatError import AdminChatException
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -147,7 +148,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
                 raise ValueError('Invalid message source')
     except DoesNotExist:
         full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
-    except (PrivateChatException, GroupChatException) as ce:
+    except (PrivateChatException, GroupChatException, AdminChatException) as ce:
         # Manages system errors
         try:
             full_message_send(context, str(ce), update=update)

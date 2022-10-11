@@ -4,8 +4,7 @@ from telegram.ext import CallbackContext
 import src.model.enums.Command as Command
 from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
 from src.model.enums.Screen import Screen
-from src.model.error.AdminChatError import AdminChatError
-from src.service.message_service import full_message_send
+from src.model.error.AdminChatError import AdminChatError, AdminChatException
 
 
 def manage(update: Update, context: CallbackContext, command: Command.Command) -> None:
@@ -36,4 +35,4 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
-                    full_message_send(context, AdminChatError.UNRECOGNIZED_SCREEN.build(), update, new_message=True)
+                    raise AdminChatException(AdminChatError.UNRECOGNIZED_SCREEN)
