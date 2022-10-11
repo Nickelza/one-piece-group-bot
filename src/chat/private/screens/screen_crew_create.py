@@ -10,7 +10,7 @@ import src.model.enums.CrewRole as CrewRole
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.error.CustomException import CrewValidationException
-from src.model.error.PrivateChatError import PrivateChatError
+from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
 from src.service.cron_service import get_remaining_time
@@ -82,7 +82,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
                     user.reset_private_screen()
 
                 case _:
-                    raise CrewValidationException(PrivateChatError.UNKNOWN_EXTRA_STEP)
+                    raise PrivateChatException(PrivateChatError.UNKNOWN_EXTRA_STEP)
 
             if user.private_screen_step is not None:
                 user.private_screen_step += 1

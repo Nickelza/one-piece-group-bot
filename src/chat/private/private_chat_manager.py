@@ -13,7 +13,6 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.message_service import full_message_send
 
 
 def manage(update: Update, context: CallbackContext, command: Command.Command, user: User,
@@ -96,4 +95,4 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
-                    full_message_send(context, PrivateChatError.UNRECOGNIZED_SCREEN.build(), update, new_message=True)
+                    raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)

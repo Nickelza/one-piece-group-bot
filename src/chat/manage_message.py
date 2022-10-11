@@ -3,6 +3,7 @@ from datetime import datetime
 
 from peewee import MySQLDatabase, DoesNotExist
 from telegram import Update
+from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 
 import resources.Environment as Env
@@ -17,7 +18,8 @@ from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.message_service import full_message_send, is_command, delete_message, get_message_source
+from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
+    full_message_or_media_edit
 
 
 def init() -> MySQLDatabase:
@@ -146,7 +148,10 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
         full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
     except PrivateChatException as ce:
         # Manages system errors
-        full_message_send(context, str(ce), update=update)
+        try:
+            full_message_send(context, str(ce), update=update)
+        except BadRequest:
+            full_message_or_media_edit(context, str(ce), update=update)
 
     user.save()
 
