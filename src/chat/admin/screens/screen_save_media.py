@@ -4,7 +4,7 @@ from telegram.ext import CallbackContext
 import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
 def manage(update: Update, context: CallbackContext) -> None:
@@ -60,5 +60,5 @@ def manage(update: Update, context: CallbackContext) -> None:
     saved_media.save()
 
     # Send the response
-    ot_text = phrases.SAVE_MEDIA_SUCCESS.format(name)
+    ot_text = phrases.SAVE_MEDIA_SUCCESS.format(escape_valid_markdown_chars(name))
     full_message_send(context, ot_text, update)

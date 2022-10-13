@@ -16,6 +16,8 @@ class Screen(StrEnum):
     GRP_PREDICTION_BET = 'G10'
     GRP_PREDICTION_BET_REMOVE = 'G11'
     GRP_PREDICTION_BET_STATUS = 'G12'
+    GRP_CREW_JOIN = 'G13'
+    GRP_CREW_INVITE = 'G14'
 
     # Deprecated
     GRP_SHOW_BOUNTY = 'G-1'

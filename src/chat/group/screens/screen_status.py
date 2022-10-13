@@ -18,7 +18,7 @@ from src.service.bounty_poster_service import get_bounty_poster
 from src.service.cron_service import get_remaining_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
-    get_start_with_command_url
+    get_start_with_command_url, escape_valid_markdown_chars
 
 
 def manage(update: Update, context: CallbackContext, command: Command.Command, inbound_keyboard: Keyboard = None
@@ -136,6 +136,11 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         # Get remaining time
         remaining_time = get_remaining_time(target_user.fight_cooldown_end_date)
         message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
+
+    # Add Crew if in one
+    if target_user.is_crew_member():
+        crew = target_user.crew
+        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

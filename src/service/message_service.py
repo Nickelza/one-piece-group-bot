@@ -411,11 +411,12 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
                                           reply_markup=keyboard_markup)
 
 
-def full_message_or_media_edit(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
-                               keyboard: list[list[Keyboard]] = None, parse_mode: str = c.TG_DEFAULT_PARSE_MODE,
-                               protect_content: bool = False, disable_web_page_preview: bool = True,
-                               edit_only_keyboard: bool = False, edit_only_caption_and_keyboard: bool = True,
-                               add_delete_button: bool = False, authorized_users: list = None) -> Message:
+def full_message_or_media_send_or_edit(context: CallbackContext, text: str, update: Update = None,
+                                       chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
+                                       parse_mode: str = c.TG_DEFAULT_PARSE_MODE, protect_content: bool = False,
+                                       disable_web_page_preview: bool = True, edit_only_keyboard: bool = False,
+                                       edit_only_caption_and_keyboard: bool = True, add_delete_button: bool = False,
+                                       authorized_users: list = None) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
     :param context: CallbackContext object
@@ -488,26 +489,33 @@ def get_delete_button(user_ids: list[int]) -> Keyboard:
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
 
-def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: Screen
-                        ) -> list[Keyboard]:
+def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: Screen,
+                        extra_keys: list[dict] = None) -> list[Keyboard]:
     """
     Create a yes/no keyboard
-    :param user: User object
+    :param user: User that can operate the keyboard
     :param primary_key: Primary key
     :param yes_text: Text for the yes button
     :param no_text: Text for the no button
     :param screen: Screen object
+    :param extra_keys: List of extra keys, in a dict of key and value
     :return: List of keyboards
     """
 
     keyboard_line: list[Keyboard] = []
-    keyboard_data_yes: dict = {'a': primary_key, 'b': 1}
+    keyboard_data_yes: dict = {'a': primary_key, 'b': True}
+
+    if extra_keys is not None:
+        for extra_key in extra_keys:
+            for key, value in extra_key.items():
+                keyboard_data_yes[key] = value
 
     # Accept
     keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=screen, authorized_users=[user],
                                   inherit_authorized_users=False))
     # Reject
-    keyboard_data_no: dict = {'a': primary_key, 'b': 0}
+    keyboard_data_no: dict = keyboard_data_yes.copy()
+    keyboard_data_no['b'] = False
     keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=screen, authorized_users=[user],
                                   inherit_authorized_users=False))
 

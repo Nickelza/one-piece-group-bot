@@ -5,6 +5,7 @@ from peewee import *
 import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
+from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Screen import Screen
 
 
@@ -115,6 +116,35 @@ class User(BaseModel):
 
         self.private_screen_step = None
         self.private_screen_in_edit_id = None
+
+    def is_crew_captain(self):
+        """
+        Returns True if the user is the captain of a Crew
+        :return: True if the user is the captain of a Crew
+        """
+
+        if self.is_crew_member():
+            return CrewRole(self.crew_role) is CrewRole.CAPTAIN
+
+        return False
+
+    @staticmethod
+    def get_by_tg_id(tg_user_id: str) -> 'User':
+        """
+        Returns the User by the Telegram user id
+        :param tg_user_id: The Telegram user id
+        :return: The User
+        """
+
+        return User.get_or_none(User.tg_user_id == tg_user_id)
+
+    def is_crew_member(self):
+        """
+        Returns True if the user is in a crew
+        :return: True if the user is in a crew
+        """
+
+        return self.crew is not None
 
 
 User.create_table()

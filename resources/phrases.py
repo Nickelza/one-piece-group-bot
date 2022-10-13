@@ -10,6 +10,8 @@ COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR = COMMAND_NOT_ACTIVE_ERROR + '. ' + 'P
 COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in the New World'
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*'
 COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
+COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
+COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
@@ -23,6 +25,7 @@ SHOW_USER_STATUS_REMAINING_SENTENCE = '\nRemaining sentence: {}'
 SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
+SHOW_USER_STATUS_CREW = '\nCrew: {}'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
@@ -246,6 +249,7 @@ CREW_OVERVIEW = '*{}*\n{}'
 CREW_OVERVIEW_MEMBER = '\n{}'
 CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
+CREW_REQUESTING_USER_ALREADY_IN_CREW = 'The User is already in a Crew'
 CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = 'You must have appeared in the the last ' \
                                                            f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()}' \
                                                            f' leaderboards'
@@ -256,6 +260,14 @@ CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH
 CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
                       f'\n\nHead over to the {CHAT_GROUP_MENTION} to start recruiting members!'
 CREW_NAME_EDIT_SUCCESS = 'Crew name updated successfully'
+CREW_JOIN_REQUEST_CREW_FULL = 'This Crew is full'
+CREW_NOT_FOUND = 'Crew not found'
+CREW_JOIN_REQUEST_CAPTION = 'My name is {}!!! I do not know who you are, but I ask you!!' \
+                            '\nLet me ride on your ship!!' \
+                            '\n\n_Only the [Captain](tg://user?id={}) can accept or reject this request_'
+CREW_JOIN_REQUEST_CAPTAIN_CHANGED = 'You can no longer accept or reject this request'
+CREW_JOIN_REQUEST_ACCEPTED = "[You](tg://user?id={}) are now a member of the *{}*!"
+CREW_JOIN_REQUEST_REJECTED = "[Your](tg://user?id={}) request to join the *{}* has been rejected, but don't give up!!"
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'

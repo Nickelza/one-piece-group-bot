@@ -19,7 +19,8 @@ class Command:
     def __init__(self, name: str | None, screen: Screen, active: bool = True, replaced_by: str = None,
                  only_in_reply: bool = False, allow_self_reply: bool = False, allow_reply_to_bot: bool = False,
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
-                 parameters: list = None, message_source: MessageSource = MessageSource.ND):
+                 parameters: list = None, message_source: MessageSource = MessageSource.ND,
+                 only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False):
         """
         Constructor
         :param name: The name of the command
@@ -33,6 +34,9 @@ class Command:
         :param required_location: The location required to use the command
         :param parameters: The parameters of the command
         :param message_source: The source of the message
+        :param only_by_crew_captain: True if the command can only be used by a Crew Captain
+        :param only_in_reply_to_crew_member: True if the command can only be used in reply to a Crew Member.
+                                             Automatically sets only_in_reply to True if True
         """
         self.name = name
         self.active = active
@@ -45,6 +49,11 @@ class Command:
         self.required_location = required_location
         self.parameters: list[str] = [] if parameters is None else parameters
         self.message_source: MessageSource = message_source
+        self.only_by_crew_captain = only_by_crew_captain
+        self.only_in_reply_to_crew_member = only_in_reply_to_crew_member
+
+        if only_in_reply_to_crew_member and not only_in_reply:
+            self.only_in_reply = True
 
     def get_formatted(self):
         """
@@ -93,12 +102,14 @@ GRP_PREDICTION_BET_REMOVE = Command('bremove', Screen.GRP_PREDICTION_BET_REMOVE,
                                     allow_reply_to_bot=True)
 GRP_PREDICTION_BET_STATUS = Command('bstatus', Screen.GRP_PREDICTION_BET_STATUS, only_in_reply=True,
                                     allow_reply_to_bot=True)
+GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True)
+GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
 COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NEW_WORLD,
             GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
-            GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS]
+            GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):

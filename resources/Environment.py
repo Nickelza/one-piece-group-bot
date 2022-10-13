@@ -375,3 +375,5 @@ WHITELIST_INLINE_BOTS = Environment('WHITELIST_INLINE_BOTS', default_value='')
 CREW_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
+# Maximum number of Crew members. Default: 10
+CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')

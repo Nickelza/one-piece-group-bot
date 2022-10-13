@@ -19,7 +19,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import cron_datetime_difference
-from src.service.message_service import full_message_send, full_media_send, full_message_or_media_edit, \
+from src.service.message_service import full_message_send, full_media_send, full_message_or_media_send_or_edit, \
     mention_markdown_v2
 
 
@@ -54,7 +54,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
         try:
             full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:
-            full_message_or_media_edit(context, ot_text, update=update, add_delete_button=True)
+            full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
         return False
 
     if not user.can_play_doc_q:
@@ -63,7 +63,7 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
         try:
             full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:
-            full_message_or_media_edit(context, ot_text, update=update, add_delete_button=True)
+            full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
         return False
 
     # Delete all previous pending games

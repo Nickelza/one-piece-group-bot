@@ -20,7 +20,7 @@ from src.service.cron_service import convert_seconds_to_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
-    mention_markdown_v2, full_media_send, full_message_or_media_edit
+    mention_markdown_v2, full_media_send, full_message_or_media_send_or_edit
 
 
 def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | None:
@@ -80,9 +80,10 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
 
     except OpponentValidationException as ove:
         if ove.message is not None:
-            full_message_or_media_edit(context, ove.message, update)
+            full_message_or_media_send_or_edit(context, ove.message, update)
         else:
-            full_message_or_media_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update=update, add_delete_button=True)
+            full_message_or_media_send_or_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update=update,
+                                               add_delete_button=True)
         return False
 
     # User is in fight cooldown
@@ -91,7 +92,7 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
         remaining_time = convert_seconds_to_time((user.fight_cooldown_end_date - datetime.datetime.now())
                                                  .total_seconds())
         ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
-        full_message_or_media_edit(context, ot_text, update, add_delete_button=True)
+        full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False
 
     return True
@@ -130,7 +131,7 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
 
 def delete_fight(update: Update, context: CallbackContext, fight: Fight) -> None:
     """
-    Delete game
+    Delete fight
     :param update: The update
     :param context: The context
     :param fight: The fight
@@ -273,7 +274,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
 
 def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:
     """
-    Manage the change region request
+    Manage the fight request
     :param update: The update object
     :param context: The context object
     :param user: The user object

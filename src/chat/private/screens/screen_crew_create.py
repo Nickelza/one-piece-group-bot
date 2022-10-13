@@ -107,7 +107,7 @@ def validate(update: Update, context: CallbackContext, inbound_keyboard: Keyboar
 
     try:
         # User already in a crew
-        if user.crew is not None:
+        if user.is_crew_member():
             raise CrewValidationException(phrases.CREW_USER_ALREADY_IN_CREW)
 
         # User cannot create a crew

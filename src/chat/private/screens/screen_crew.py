@@ -23,7 +23,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     """
 
     inline_keyboard: list[list[Keyboard]] = []
-    if user.crew is None:
+    if not user.is_crew_member():
         ot_text = phrases.CREW_USER_NOT_IN_CREW
 
         # Create crew button
@@ -43,7 +43,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
 
         ot_text = phrases.CREW_OVERVIEW.format(escape_valid_markdown_chars(crew.name), crew_members_text)
 
-        if CrewRole.CrewRole(user.crew_role) is CrewRole.CrewRole.CAPTAIN:
+        if user.is_crew_captain():
             # Name edit button
             button_info = {ReservedKeyboardKeys.IN_EDIT_ID: crew.id,
                            ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_NAME}

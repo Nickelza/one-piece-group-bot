@@ -1,9 +1,11 @@
 import datetime
+from typing import Any
 
 from peewee import *
 
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
+from src.model.enums.CrewRole import CrewRole
 
 
 class Crew(BaseModel):
@@ -54,6 +56,33 @@ class Crew(BaseModel):
         """
 
         return Crew.get_or_none(Crew.name ** name)
+
+    def is_full(self) -> bool:
+        """
+        Returns True if the crew is full
+        :return: True if the crew is full
+        """
+
+        return len(self.get_members()) > Env.CREW_MAX_MEMBERS.get_int()
+
+    @staticmethod
+    def logical_get(crew_id: int) -> 'Crew':
+        """
+        Returns the Crew if it exists and is active
+        :param crew_id: The crew id
+        :return: The crew
+        """
+
+        return Crew.get_or_none((Crew.id == crew_id) & (Crew.is_active == True))
+
+    def get_captain(self) -> Any:
+        """
+        Returns the crew captain
+        :return: The crew captain
+        """
+
+        from src.model.User import User
+        return self.crew_members.select().where(User.crew_role == CrewRole.CAPTAIN).get()
 
 
 Crew.create_table()
