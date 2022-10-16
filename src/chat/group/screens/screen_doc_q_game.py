@@ -138,11 +138,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         inline_keyboard.append(apples_keyboard)
 
         # Get SavedMedia
-        doc_q_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == SavedMediaName.DOC_Q)
-
-        # SavedMedia is not found
-        if doc_q_media is None:
-            raise GroupChatException(GroupChatError.SAVED_MEDIA_NOT_FOUND)
+        doc_q_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.DOC_Q)
 
         win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
             user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())

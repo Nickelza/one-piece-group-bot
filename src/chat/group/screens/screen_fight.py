@@ -182,11 +182,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
         outcome_probability = 100 - win_probability
 
     # Get SavedMedia
-    fight_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == SavedMediaName.FIGHT)
-
-    # SavedMedia is not found
-    if fight_media is None:
-        raise GroupChatException(GroupChatError.SAVED_MEDIA_NOT_FOUND)
+    fight_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.FIGHT)
 
     caption = phrases.FIGHT_CONFIRMATION_REQUEST.format(mention_markdown_user(user), mention_markdown_user(opponent),
                                                         outcome_probability, outcome, user.get_bounty_formatted(),
