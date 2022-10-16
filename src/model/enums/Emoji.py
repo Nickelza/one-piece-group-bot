@@ -28,6 +28,7 @@ class Emoji(StrEnum):
     ENABLED = '✅'
     CORRECT = '✅'
     CANCEL = '❌'
+    DELETE = '🗑'
     DISABLED = '❌'
     REJECT = '❌'
     SETTINGS = '⚙'

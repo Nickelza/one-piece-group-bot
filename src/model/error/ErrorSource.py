@@ -9,3 +9,4 @@ class ErrorSource(StrEnum):
     PRIVATE_CHAT = 'P'
     ADMIN_CHAT = 'A'
     TG_REST = 'T'
+    COMMON = 'C'

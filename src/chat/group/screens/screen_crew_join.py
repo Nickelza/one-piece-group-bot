@@ -2,16 +2,18 @@ from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import CrewValidationException
-from src.model.error.GroupChatError import GroupChatError, GroupChatException
+from src.model.error.CustomException import CrewValidationException, CrewJoinValidationCrewException, \
+    CrewJoinValidationUserException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member
+from src.service.cron_service import get_remaining_time_from_next_cron
 from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, \
     full_media_send, full_message_or_media_send_or_edit, escape_valid_markdown_chars
 
@@ -23,6 +25,7 @@ class CrewReservedKeys(StrEnum):
     CREW_ID = 'a'
     ACCEPT = 'b'
     REQUESTING_USER_ID = 'c'
+    CAPTAIN_USER_ID = 'd'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User) -> None:
@@ -57,11 +60,13 @@ def get_crew(target_user: User, inbound_keyboard: Keyboard) -> Crew:
     :return: The crew
     """
 
-    if target_user is not None:
-        return target_user.crew
+    if target_user is None and inbound_keyboard is None:
+        raise ValueError('target_user and inbound_keyboard cannot be None at the same time')
 
-    # Get crew
-    crew: Crew = Crew.logical_get(inbound_keyboard.info[CrewReservedKeys.CREW_ID])
+    if inbound_keyboard is not None:
+        crew: Crew = Crew.logical_get(inbound_keyboard.info[CrewReservedKeys.CREW_ID])
+    else:
+        crew: Crew = target_user.crew
 
     # Crew is not found
     if crew is None:
@@ -70,21 +75,36 @@ def get_crew(target_user: User, inbound_keyboard: Keyboard) -> Crew:
     return crew
 
 
-def request_validation(user: User, crew: Crew) -> None:
+def validate(user: User, crew: Crew, specific_user_error: bool = False, specific_crew_error: bool = False) -> None:
     """
     Validate the crew join request
     :param user: The user object
     :param crew: The crew object
+    :param specific_user_error: If True, raise a specific error message for the user
+    :param specific_crew_error: If True, raise a specific error message for the crew
     :return: Raise an exception if the request is not valid
     """
+    try:
+        # User already in a Crew
+        if user.is_crew_member():
+            raise CrewJoinValidationUserException(phrases.CREW_USER_ALREADY_IN_CREW if specific_user_error else None)
 
-    # User already in a Crew
-    if user.is_crew_member():
-        raise CrewValidationException(phrases.CREW_USER_ALREADY_IN_CREW)
+        # User cannot join a Crew
+        if not user.can_join_crew:
+            raise CrewJoinValidationUserException(phrases.CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET.format(
+                get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())) if specific_user_error else None)
 
-    # Target crew has reached the maximum number of members
-    if crew.is_full():
-        raise CrewValidationException(phrases.CREW_JOIN_REQUEST_CREW_FULL)
+        # Target crew has reached the maximum number of members
+        if crew.is_full():
+            raise CrewJoinValidationCrewException(
+                phrases.CREW_JOIN_REQUEST_CREW_FULL if specific_crew_error else None)
+
+    except CrewJoinValidationUserException as e:
+        raise CrewValidationException(
+            e.message if e.message is not None else phrases.CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER)
+    except CrewJoinValidationCrewException as e:
+        raise CrewValidationException(
+            e.message if e.message is not None else phrases.CREW_JOIN_REQUEST_USER_CANNOT_JOIN_CREW)
 
 
 def send_request(update: Update, context: CallbackContext, user: User, crew: Crew) -> None:
@@ -97,13 +117,7 @@ def send_request(update: Update, context: CallbackContext, user: User, crew: Cre
     :return: None
     """
 
-    request_validation(user, crew)
-
-    # Get SavedMedia
-    join_crew_media: SavedMedia = SavedMedia.get_or_none(SavedMedia.name == SavedMediaName.JOIN_CREW)
-    # SavedMedia is not found
-    if join_crew_media is None:
-        raise GroupChatException(GroupChatError.SAVED_MEDIA_NOT_FOUND)
+    validate(user, crew, specific_user_error=True)
 
     # Get captain
     captain: User = crew.get_captain()
@@ -116,35 +130,10 @@ def send_request(update: Update, context: CallbackContext, user: User, crew: Cre
                                                                  phrases.KEYBOARD_OPTION_REJECT,
                                                                  Screen.GRP_CREW_JOIN, extra_keys=extra_keys)]
 
+    # Get SavedMedia
+    join_crew_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.JOIN_CREW)
     full_media_send(context, join_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
                     add_delete_button=True)
-
-
-def keyboard_interaction_validation(captain: User, crew: Crew, requesting_user: User, inbound_keyboard_info: dict
-                                    ) -> None:
-    """
-    Validate the crew join request confirmation or rejection
-    :param captain: The captain of the crew
-    :param crew: The crew object
-    :param requesting_user: The requesting user
-    :param inbound_keyboard_info: The inbound keyboard info
-    :return: Raise an exception if the request is not valid
-    """
-    # Captain is not the same
-    if crew.get_captain() != captain:
-        raise CrewValidationException(phrases.CREW_JOIN_REQUEST_CAPTAIN_CHANGED)
-
-    # Request rejected, no further validation needed
-    if not inbound_keyboard_info[CrewReservedKeys.ACCEPT]:
-        return
-
-    # Requesting user already in a Crew
-    if requesting_user.is_crew_member():
-        raise CrewValidationException(phrases.CREW_REQUESTING_USER_ALREADY_IN_CREW)
-
-    # Crew has reached the maximum number of members
-    if crew.is_full():
-        raise CrewValidationException(phrases.CREW_JOIN_REQUEST_CREW_FULL)
 
 
 def keyboard_interaction(update: Update, context: CallbackContext, captain: User, crew: Crew, inbound_keyboard: Keyboard
@@ -160,16 +149,17 @@ def keyboard_interaction(update: Update, context: CallbackContext, captain: User
     """
 
     requesting_user: User = User.get(inbound_keyboard.info[CrewReservedKeys.REQUESTING_USER_ID])
-    keyboard_interaction_validation(captain, crew, requesting_user, inbound_keyboard.info)
 
     # Captain clicked on reject button
-    if not inbound_keyboard.info['b']:
+    if not inbound_keyboard.info[CrewReservedKeys.ACCEPT]:
         ot_text = phrases.CREW_JOIN_REQUEST_REJECTED.format(requesting_user.tg_user_id,
                                                             escape_valid_markdown_chars(crew.name))
         full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
                         authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
                         edit_only_caption_and_keyboard=True)
         return
+
+    validate(requesting_user, crew, specific_crew_error=True)
 
     # Add requesting user to crew
     add_member(requesting_user, crew)

@@ -74,7 +74,7 @@ PRIVATE_STEP_NOT_SET = 'Private step not set'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
-KEYBOARD_OPTION_DELETE = Emoji.CANCEL + ' Delete'
+KEYBOARD_OPTION_DELETE = Emoji.DELETE + ' Delete'
 KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT + ' Accept'
 KEYBOARD_OPTION_REJECT = Emoji.REJECT + ' Reject'
 KEYBOARD_OPTION_FIGHT = Emoji.FIGHT + ' Fight'
@@ -240,7 +240,7 @@ PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE + 'à
 PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 
-# Crew
+# Crew - Private
 CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_MENTION} to join' \
                         f' one or create your own.' \
                         f'\n\nTo create a Crew, you must have appeared in the the last ' \
@@ -249,7 +249,6 @@ CREW_OVERVIEW = '*{}*\n{}'
 CREW_OVERVIEW_MEMBER = '\n{}'
 CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
-CREW_REQUESTING_USER_ALREADY_IN_CREW = 'The User is already in a Crew'
 CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = 'You must have appeared in the the last ' \
                                                            f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()}' \
                                                            f' leaderboards'
@@ -260,14 +259,24 @@ CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH
 CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
                       f'\n\nHead over to the {CHAT_GROUP_MENTION} to start recruiting members!'
 CREW_NAME_EDIT_SUCCESS = 'Crew name updated successfully'
-CREW_JOIN_REQUEST_CREW_FULL = 'This Crew is full'
+
+# Crew - Join request
+CREW_JOIN_REQUEST_CREW_FULL = 'The Crew is full'
 CREW_NOT_FOUND = 'Crew not found'
 CREW_JOIN_REQUEST_CAPTION = 'My name is {}!!! I do not know who you are, but I ask you!!' \
                             '\nLet me ride on your ship!!' \
                             '\n\n_Only the [Captain](tg://user?id={}) can accept or reject this request_'
-CREW_JOIN_REQUEST_CAPTAIN_CHANGED = 'You can no longer accept or reject this request'
 CREW_JOIN_REQUEST_ACCEPTED = "[You](tg://user?id={}) are now a member of the *{}*!"
 CREW_JOIN_REQUEST_REJECTED = "[Your](tg://user?id={}) request to join the *{}* has been rejected, but don't give up!!"
+CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER = 'The User cannot join this Crew'
+CREW_JOIN_REQUEST_USER_CANNOT_JOIN_CREW = 'You cannot join this Crew'
+CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET = 'You cannot join a Crew until the next weekly leaderboard in {}'
+
+# Crew - Invite request
+CREW_INVITE_REQUEST_CAPTION = "I'm {} and this meeting must be fate, {}! " \
+                              "\nWhat do you say to turning the world upside down with me?"
+CREW_INVITE_REQUEST_ACCEPTED = "{} is now a member of {}"
+CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by {}"
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'

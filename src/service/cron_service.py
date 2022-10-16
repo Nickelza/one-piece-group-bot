@@ -81,3 +81,17 @@ def get_remaining_time(end_datetime: datetime) -> str:
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
     return convert_seconds_to_time((end_datetime - datetime.datetime.now()).total_seconds())
+
+
+def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: datetime = None) -> str:
+    """
+    Get the remaining time until the next cron run
+    :param cron_expression: The cron expression
+    :param start_datetime: The start datetime. If None, the current datetime is used
+    :return: The remaining time in days and hours e.g. 1 day 2h hours
+    """
+    if start_datetime is None:
+        start_datetime = datetime.datetime.now(datetime.timezone.utc)
+
+    next_run = get_next_run(cron_expression, start_datetime)
+    return get_remaining_time(next_run)
