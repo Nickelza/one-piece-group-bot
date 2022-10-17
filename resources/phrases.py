@@ -80,6 +80,8 @@ KEYBOARD_OPTION_REJECT = Emoji.REJECT + ' Reject'
 KEYBOARD_OPTION_FIGHT = Emoji.FIGHT + ' Fight'
 KEYBOARD_OPTION_RETREAT = Emoji.RETREAT + ' Retreat'
 KEYBOARD_OPTION_BACK = Emoji.BACK + ' Back'
+KEYBOARD_OPTION_YES = Emoji.YES + ' Yes'
+KEYBOARD_OPTION_NO = Emoji.NO + ' No'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'

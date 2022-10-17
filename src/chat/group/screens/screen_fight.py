@@ -190,9 +190,10 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
                                                         get_belly_formatted(final_bounty_if_lose))
 
     # Keyboard
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, fight.id, phrases.KEYBOARD_OPTION_FIGHT,
-                                                                 phrases.KEYBOARD_OPTION_RETREAT,
-                                                                 Screen.GRP_FIGHT)]
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.GRP_FIGHT,
+                                                                 yes_text=phrases.KEYBOARD_OPTION_FIGHT,
+                                                                 no_text=phrases.KEYBOARD_OPTION_RETREAT,
+                                                                 primary_key=fight.id)]
 
     message: Message = full_media_send(context, fight_media, update=update, caption=caption, keyboard=inline_keyboard)
     fight.message_id = message.message_id

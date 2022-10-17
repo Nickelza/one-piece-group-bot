@@ -489,7 +489,8 @@ def get_delete_button(user_ids: list[int]) -> Keyboard:
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
 
-def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: str, screen: Screen,
+def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
+                        no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
                         extra_keys: list[dict] = None) -> list[Keyboard]:
     """
     Create a yes/no keyboard
@@ -503,17 +504,20 @@ def get_yes_no_keyboard(user: User, primary_key: int, yes_text: str, no_text: st
     """
 
     keyboard_line: list[Keyboard] = []
-    keyboard_data_yes: dict = {'a': primary_key, 'b': True}
+    keyboard_data_yes: dict = {'b': True}
+
+    if primary_key is not None:
+        keyboard_data_yes['a'] = primary_key
 
     if extra_keys is not None:
         for extra_key in extra_keys:
             for key, value in extra_key.items():
                 keyboard_data_yes[key] = value
 
-    # Accept
+    # Yes
     keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=screen, authorized_users=[user],
                                   inherit_authorized_users=False))
-    # Reject
+    # No
     keyboard_data_no: dict = keyboard_data_yes.copy()
     keyboard_data_no['b'] = False
     keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=screen, authorized_users=[user],

@@ -35,6 +35,8 @@ class Emoji(StrEnum):
     BACK = '🔙'
     STATUS = '📈'
     PRISONER = '🚫'
+    YES = '✅'
+    NO = '❌'
 
     # Game
     WINNER = '🏆'

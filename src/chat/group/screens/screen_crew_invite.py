@@ -57,9 +57,10 @@ def send_request(update: Update, context: CallbackContext, captain: User, target
 
     # Keyboard
     extra_keys = [{CrewReservedKeys.CAPTAIN_USER_ID: captain.id}]
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(target_user, crew.id, phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                 phrases.KEYBOARD_OPTION_REJECT,
-                                                                 Screen.GRP_CREW_INVITE, extra_keys=extra_keys)]
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(target_user, screen=Screen.GRP_CREW_INVITE,
+                                                                 yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                 no_text=phrases.KEYBOARD_OPTION_REJECT,
+                                                                 primary_key=crew.id, extra_keys=extra_keys)]
 
     # Get SavedMedia
     invite_to_crew_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.INVITE_TO_CREW)

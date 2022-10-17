@@ -37,10 +37,11 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
                                           mention_markdown_user(game.challenger),
                                           get_game_name(GameType(game.type)),
                                           get_belly_formatted(game.wager))
-    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(game.opponent, game.id,
-                                                                   phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                   phrases.KEYBOARD_OPTION_REJECT,
-                                                                   Screen.GRP_GAME_OPPONENT_CONFIRMATION)]
+    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(game.opponent,
+                                                                   screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                                                                   yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                   no_text=phrases.KEYBOARD_OPTION_REJECT,
+                                                                   primary_key=game.id)]
 
     button_delete_info = {'a': game.id, 'u': [game.challenger.id, game.opponent.id], ReservedKeyboardKeys.DELETE: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
