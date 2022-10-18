@@ -4,6 +4,7 @@ from telegram.ext import CallbackContext
 import src.model.enums.Command as Command
 from src.chat.private.screens.screen_crew import manage as manage_screen_crew
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
+from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_location_update import manage as manage_screen_settings_location_update
 from src.chat.private.screens.screen_start import manage as manage_screen_start
@@ -92,6 +93,9 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
                 manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_LEAVE:  # Crew Leave
+                manage_screen_crew_leave(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

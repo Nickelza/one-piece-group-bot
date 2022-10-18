@@ -123,7 +123,7 @@ class User(BaseModel):
         :return: True if the user is the captain of a Crew
         """
 
-        if self.is_crew_member():
+        if self.is_crew_member() and self.crew_role is not None:
             return CrewRole(self.crew_role) is CrewRole.CAPTAIN
 
         return False

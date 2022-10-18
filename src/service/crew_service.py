@@ -17,3 +17,15 @@ def add_member(user: User, crew: Crew, role: CrewRole = None) -> None:
     user.crew_role = role
     user.crew_join_date = datetime.now()
     user.save()
+
+
+def remove_member(user: User) -> None:
+    """
+    Removes a member from a crew
+    :param user: The user
+    """
+
+    user.crew = None
+    user.crew_role = None
+    user.crew_join_date = None
+    user.save()

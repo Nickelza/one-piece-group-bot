@@ -491,36 +491,61 @@ def get_delete_button(user_ids: list[int]) -> Keyboard:
 
 def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
                         no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
-                        extra_keys: list[dict] = None) -> list[Keyboard]:
+                        extra_keys: list[dict] = None, yes_screen: Screen = None, no_screen: Screen = None,
+                        yes_extra_keys: list[dict] = None, no_extra_keys: list[dict] = None) -> list[Keyboard]:
     """
     Create a yes/no keyboard
     :param user: User that can operate the keyboard
     :param primary_key: Primary key
     :param yes_text: Text for the yes button
     :param no_text: Text for the no button
-    :param screen: Screen object
-    :param extra_keys: List of extra keys, in a dict of key and value
-    :return: List of keyboards
+    :param screen: The default screen that will be called when the user clicks on the yes/no button
+    :param extra_keys: List of extra keys to add to the keyboard
+    :param yes_screen: Screen to call when the user clicks on the yes button. If None, the default screen will be called
+    :param no_screen: Screen to call when the user clicks on the no button. If None, the default screen will be called
+    :param yes_extra_keys: List of extra keys for the yes button, in a dict of key and value
+    :param no_extra_keys: List of extra keys for the no button, in a dict of key and value
+    :return: The yes and no keyboard
     """
 
+    if screen is None and (yes_screen is None or no_screen is None):
+        raise ValueError('screen or yes_screen and no_screen must be specified')
+
     keyboard_line: list[Keyboard] = []
-    keyboard_data_yes: dict = {'b': True}
 
+    default_keyboard_data = {}
+
+    # Add primary key
     if primary_key is not None:
-        keyboard_data_yes['a'] = primary_key
+        default_keyboard_data['a'] = primary_key
 
+    # Add extra keys
     if extra_keys is not None:
         for extra_key in extra_keys:
             for key, value in extra_key.items():
-                keyboard_data_yes[key] = value
+                default_keyboard_data[key] = value
 
     # Yes
-    keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=screen, authorized_users=[user],
+    # If screen is being changed, discard yes key value
+    keyboard_data_yes: dict = default_keyboard_data | ({'b': True} if screen != yes_screen else {})
+    if yes_extra_keys is not None:
+        for extra_key in yes_extra_keys:
+            for key, value in extra_key.items():
+                keyboard_data_yes[key] = value
+
+    yes_screen = screen if yes_screen is None else yes_screen
+    keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
                                   inherit_authorized_users=False))
+
     # No
-    keyboard_data_no: dict = keyboard_data_yes.copy()
-    keyboard_data_no['b'] = False
-    keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=screen, authorized_users=[user],
+    # If screen is being changed, discard no key value
+    keyboard_data_no: dict = default_keyboard_data | ({'b': False} if screen != no_screen else {})
+    if no_extra_keys is not None:
+        for extra_key in no_extra_keys:
+            for key, value in extra_key.items():
+                keyboard_data_no[key] = value
+    no_screen = screen if no_screen is None else no_screen
+    keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
                                   inherit_authorized_users=False))
 
     return keyboard_line

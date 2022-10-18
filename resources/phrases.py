@@ -282,3 +282,8 @@ CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'
+
+# Crew - Leave
+CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?\n' \
+                          'You will not be able to join another Crew until the next weekly leaderboard in {}'
+CREW_LEAVE_SUCCESS = 'You have left the Crew'
