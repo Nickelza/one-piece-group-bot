@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
-from src.chat.group.screens.screen_crew_join import CrewReservedKeys, get_crew, validate
+from src.chat.group.screens.screen_crew_join import CrewReservedKeys, validate
 from src.model.Crew import Crew
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
@@ -10,7 +10,7 @@ from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import add_member
+from src.service.crew_service import add_member, get_crew
 from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, \
     full_media_send, full_message_or_media_send_or_edit, escape_valid_markdown_chars
 
@@ -27,7 +27,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     """
 
     try:
-        crew: Crew = get_crew(user, inbound_keyboard)
+        crew: Crew = get_crew(user=user, inbound_keyboard=inbound_keyboard, crew_id_key=CrewReservedKeys.CREW_ID)
 
         # Invite to a Crew
         if inbound_keyboard is None:

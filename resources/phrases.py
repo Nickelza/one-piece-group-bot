@@ -132,6 +132,7 @@ PVT_KEY_CREW = Emoji.CREW + ' Crew'
 PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
+PVT_KEY_CREW_DISBAND = 'Disband'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
@@ -291,12 +292,22 @@ CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?\n' \
                           'You will not be able to join another Crew until the next weekly leaderboard in {}'
 CREW_LEAVE_SUCCESS = 'You have left the Crew'
 
-# Notifications - Crew
+# Crew - Disband
+CREW_DISBAND_CONFIRMATION = 'Are you sure you want to disband the Crew?\n' \
+                            'You will not be able to create another Crew until the next bounty reset in {}'
+CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
+
+# Notifications - Crew Leave
 NOTIFICATION_CATEGORY_CREW = 'Crew'
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
 CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
-                                      '\nApplicable if you are the Captain of the Crew.'
+                                      '\nApplicable only if you are the Captain of the Crew.'
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew Leave'
+# Notifications - Crew Disband
+CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
+CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.' \
+                                        '\nApplicable only if you are not the Captain of the Crew.'
+CREW_DISBAND_NOTIFICATION_KEY = 'Crew Disband'
 # Notifications - Location
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \

@@ -24,6 +24,7 @@ class NotificationType(IntEnum):
 
     CREW_LEAVE = 1
     LOCATION_UPDATE = 2
+    CREW_DISBAND = 3
 
 
 class Notification:
@@ -121,7 +122,24 @@ class LocationUpdateNotification(Notification):
                                 text_suffix)
 
 
-NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification()]
+class CrewDisbandNotification(Notification):
+    """Class for crew disband notifications."""
+
+    def __init__(self):
+        """Constructor"""
+
+        super().__init__(NotificationCategory.CREW, NotificationType.CREW_DISBAND,
+                         phrases.CREW_DISBAND_NOTIFICATION,
+                         phrases.CREW_DISBAND_NOTIFICATION_DESCRIPTION,
+                         phrases.CREW_DISBAND_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        return self.text
+
+
+NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

@@ -49,6 +49,10 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
                            ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_NAME}
             inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_EDIT_NAME, screen=Screen.PVT_CREW_CREATE_OR_EDIT,
                                              info=button_info)])
+
+            # Disband button
+            inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_DISBAND, screen=Screen.PVT_CREW_DISBAND,
+                                             info=button_info)])
         else:
             # Leave crew button
             inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)])

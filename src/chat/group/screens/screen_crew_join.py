@@ -12,7 +12,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException, CrewJoinValidationCrewException, \
     CrewJoinValidationUserException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import add_member
+from src.service.crew_service import add_member, get_crew
 from src.service.cron_service import get_remaining_time_from_next_cron
 from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, \
     full_media_send, full_message_or_media_send_or_edit, escape_valid_markdown_chars
@@ -40,7 +40,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     """
 
     try:
-        crew: Crew = get_crew(target_user, inbound_keyboard)
+        crew: Crew = get_crew(user=target_user, inbound_keyboard=inbound_keyboard, crew_id_key=CrewReservedKeys.CREW_ID)
 
         # Request to join a Crew
         if inbound_keyboard is None:
@@ -50,29 +50,6 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         keyboard_interaction(update, context, user, crew, inbound_keyboard)
     except CrewValidationException as cve:
         full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
-
-
-def get_crew(target_user: User, inbound_keyboard: Keyboard) -> Crew:
-    """
-    Get crew
-    :param target_user: The target user
-    :param inbound_keyboard: The inbound keyboard
-    :return: The crew
-    """
-
-    if target_user is None and inbound_keyboard is None:
-        raise ValueError('target_user and inbound_keyboard cannot be None at the same time')
-
-    if inbound_keyboard is not None:
-        crew: Crew = Crew.logical_get(inbound_keyboard.info[CrewReservedKeys.CREW_ID])
-    else:
-        crew: Crew = target_user.crew
-
-    # Crew is not found
-    if crew is None:
-        raise CrewValidationException(phrases.CREW_NOT_FOUND)
-
-    return crew
 
 
 def validate(user: User, crew: Crew, specific_user_error: bool = False, specific_crew_error: bool = False) -> None:

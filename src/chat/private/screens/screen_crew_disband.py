@@ -2,24 +2,24 @@ from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
-import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.User import User
-from src.model.enums.Notification import CrewLeaveNotification
+from src.model.enums.Notification import CrewDisbandNotification
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_next_bounty_reset_time
 from src.service.crew_service import remove_member as remove_member_from_crew, get_crew
-from src.service.cron_service import get_remaining_time_from_next_cron
+from src.service.cron_service import get_remaining_time
 from src.service.message_service import full_message_send
 from src.service.message_service import get_yes_no_keyboard
 from src.service.notification_service import send_notification
 
 
-class CrewLeaveReservedKeys(StrEnum):
+class CrewDisbandReservedKeys(StrEnum):
     """
-    The reserved keys for the Crew leave screen
+    The reserved keys for the Crew disband screen
     """
     CREW_ID = 'a'
     CONFIRM = 'b'
@@ -27,7 +27,7 @@ class CrewLeaveReservedKeys(StrEnum):
 
 def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
     """
-    Manage the Crew leave screen
+    Manage the Crew disband screen
     :param update: The update object
     :param context: The context object
     :param user: The user object
@@ -41,22 +41,30 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
-    if CrewLeaveReservedKeys.CONFIRM not in inbound_keyboard.info:
-        # Send leave confirmation request
-        ot_text = phrases.CREW_LEAVE_CONFIRMATION.format(
-            get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))
-        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_LEAVE,
+    if CrewDisbandReservedKeys.CONFIRM not in inbound_keyboard.info:
+        # Send disband confirmation request
+        ot_text = phrases.CREW_DISBAND_CONFIRMATION.format(get_remaining_time(get_next_bounty_reset_time()))
+        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_DISBAND,
                                                                      no_screen=Screen.PVT_CREW)]
 
         full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
         return
 
-    # Leave crew
-    remove_member_from_crew(user)
+    crew_members: list[User] = crew.get_members()
+
+    for member in crew_members:
+        is_captain = (member.id == user.id)
+
+        if is_captain:
+            user.can_create_crew = False
+            remove_member_from_crew(user)  # Else user will not be updated
+        else:
+            remove_member_from_crew(member)
+            send_notification(context, member, CrewDisbandNotification())
+
+    crew.is_active = False
+    crew.save()
 
     # Send success message
-    ot_text = phrases.CREW_LEAVE_SUCCESS
+    ot_text = phrases.CREW_DISBAND_SUCCESS
     full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)
-
-    # Send notification to captain
-    send_notification(context, crew.get_captain(), CrewLeaveNotification(user))
