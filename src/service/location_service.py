@@ -3,9 +3,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.Environment as Env
-from src.chat.group.screens.screen_status import send_bounty_poster
 from src.model.User import User
-from src.model.UserLocationBountyPoster import UserLocationBountyPoster
 from src.model.enums import Location
 from src.model.enums.Notification import LocationUpdateNotification
 from src.model.enums.Region import Region
@@ -48,20 +46,6 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                   disable_web_page_preview=False, add_delete_button=True)
             else:  # Update after bounty change, send notification
                 send_notification(context, user, location_update_notification)
-
-            # Should send poster if it hasn't been sent for this location ever
-            if effective_location.show_poster:
-                user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
-                    (UserLocationBountyPoster.user == user)
-                    & (UserLocationBountyPoster.location_level == effective_location.level))
-                if user_location_bounty_poster is None:
-                    send_bounty_poster(context, update, user, send_in_private_chat=True)
-
-                    # Save the poster as sent for this location
-                    user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()
-                    user_location_bounty_poster.user = user
-                    user_location_bounty_poster.location_level = effective_location.level
-                    user_location_bounty_poster.save()
 
         # Update user location
         user.location_level = effective_location.level
