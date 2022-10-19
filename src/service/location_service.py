@@ -1,16 +1,16 @@
 from peewee import Case
 from telegram import Update
-from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 
 import resources.Environment as Env
-import resources.phrases as phrases
 from src.chat.group.screens.screen_status import send_bounty_poster
 from src.model.User import User
 from src.model.UserLocationBountyPoster import UserLocationBountyPoster
 from src.model.enums import Location
+from src.model.enums.Notification import LocationUpdateNotification
 from src.model.enums.Region import Region
-from src.service.message_service import full_message_send, get_image_preview, mention_markdown_v2
+from src.service.message_service import full_message_send
+from src.service.notification_service import send_notification
 
 
 def update_location(context: CallbackContext, user: User, update: Update = None, cap_to_paradise: bool = True,
@@ -27,7 +27,6 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
     """
 
     from src.chat.group.screens.screen_change_region import send_proposal as send_new_world_proposal
-    from src.service.bounty_service import get_belly_formatted
 
     # Get location that corresponds to the user current bounty
     new_location: Location = Location.get_by_bounty(user.bounty)
@@ -41,50 +40,28 @@ def update_location(context: CallbackContext, user: User, update: Update = None,
                                          and Location.is_new_world_by_level(new_location.level) and cap_to_paradise):
             effective_location: Location = Location.get_last_paradise()
 
-        # Show level up message
-        try:
-            next_location = Location.get_by_level(effective_location.level + 1)
-            ot_text_suffix = phrases.LOCATION_NEXT_LEVEL_REQUIREMENT.format(
-                get_belly_formatted(next_location.required_bounty))
-        except ValueError:
-            ot_text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
+        if user.location_level != effective_location.level and Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool():
 
-        if user.location_level != effective_location.level and Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool() \
-                and (user.should_send_location_update or requested_by_user):
+            location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user, new_location)
+            if requested_by_user:  # Update after region change, edit group message
+                full_message_send(context, location_update_notification.build(), update=update,
+                                  disable_web_page_preview=False, add_delete_button=True)
+            else:  # Update after bounty change, send notification
+                send_notification(context, user, location_update_notification)
 
-            # Determine preposition to use for the location
-            if 'island' in effective_location.name.lower() or 'archipelago' in effective_location.name.lower():
-                preposition = 'on'
-                if effective_location.name.lower().startswith('island'):
-                    preposition += ' the'
-            else:
-                preposition = 'in'
+            # Should send poster if it hasn't been sent for this location ever
+            if effective_location.show_poster:
+                user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
+                    (UserLocationBountyPoster.user == user)
+                    & (UserLocationBountyPoster.location_level == effective_location.level))
+                if user_location_bounty_poster is None:
+                    send_bounty_poster(context, update, user, send_in_private_chat=True)
 
-            ot_text = phrases.LOCATION_LEVEL_UP.format(get_image_preview(effective_location.image_url),
-                                                       mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                       preposition,
-                                                       effective_location.name,
-                                                       ot_text_suffix)
-
-            try:
-                full_message_send(context, ot_text, update=update, disable_web_page_preview=False,
-                                  add_delete_button=True,
-                                  send_in_private_chat=(not requested_by_user))
-                # Should send poster if it hasn't been sent for this location ever
-                if effective_location.show_poster:
-                    user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster.get_or_none(
-                        (UserLocationBountyPoster.user == user)
-                        & (UserLocationBountyPoster.location_level == effective_location.level))
-                    if user_location_bounty_poster is None:
-                        send_bounty_poster(context, update, user, send_in_private_chat=True)
-
-                        # Save the poster as sent for this location
-                        user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()
-                        user_location_bounty_poster.user = user
-                        user_location_bounty_poster.location_level = effective_location.level
-                        user_location_bounty_poster.save()
-            except Unauthorized:  # User blocked the bot in private chat
-                pass
+                    # Save the poster as sent for this location
+                    user_location_bounty_poster: UserLocationBountyPoster = UserLocationBountyPoster()
+                    user_location_bounty_poster.user = user
+                    user_location_bounty_poster.location_level = effective_location.level
+                    user_location_bounty_poster.save()
 
         # Update user location
         user.location_level = effective_location.level

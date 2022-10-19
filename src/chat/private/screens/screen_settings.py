@@ -16,15 +16,9 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
     :return: None
     """
 
-    inline_keyboard: list[list[Keyboard]] = []
-
-    # Location update
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS_LOCATION_UPDATE,
-                                     screen=Screen.PVT_SETTINGS_LOCATION_UPDATE)])
-
     # Notifications
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS_NOTIFICATIONS,
-                                     screen=Screen.PVT_SETTINGS_NOTIFICATIONS)])
+    inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.PVT_KEY_SETTINGS_NOTIFICATIONS,
+                                                       screen=Screen.PVT_SETTINGS_NOTIFICATIONS)]]
 
     full_message_send(context, phrases.PVT_TXT_SETTINGS, update=update, keyboard=inline_keyboard,
                       inbound_keyboard=inbound_keyboard)

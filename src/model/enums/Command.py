@@ -82,6 +82,8 @@ ND = None
 
 PVT_START = Command('start', Screen.PVT_START, allow_while_arrested=True)
 PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS, allow_while_arrested=True)
+# Deprecated
+PVT_SETTINGS_LOCATION_UPDATE = Command('', Screen.PVT_SETTINGS_LOCATION_UPDATE, active=False)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()))
@@ -105,11 +107,13 @@ GRP_PREDICTION_BET_STATUS = Command('bstatus', Screen.GRP_PREDICTION_BET_STATUS,
 GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True)
 GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True)
 
+
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
 COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NEW_WORLD,
             GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
-            GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE]
+            GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE,
+            PVT_SETTINGS_LOCATION_UPDATE]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):

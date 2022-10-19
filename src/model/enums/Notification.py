@@ -1,6 +1,7 @@
 from enum import IntEnum
 
 import resources.phrases as phrases
+import src.model.enums.Location as Location
 from src.model.User import User
 from src.service.message_service import mention_markdown_user
 
@@ -9,10 +10,12 @@ class NotificationCategory(IntEnum):
     """Enum for different categories of notifications"""
 
     CREW = 1
+    LOCATION = 2
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
-    NotificationCategory.CREW: phrases.NOTIFICATION_CATEGORY_CREW
+    NotificationCategory.CREW: phrases.NOTIFICATION_CATEGORY_CREW,
+    NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION
 }
 
 
@@ -20,13 +23,14 @@ class NotificationType(IntEnum):
     """Enum for the different types of notifications."""
 
     CREW_LEAVE = 1
+    LOCATION_UPDATE = 2
 
 
 class Notification:
     """Class for notifications."""
 
     def __init__(self, category: NotificationCategory, notification_type: NotificationType, text: str, description: str,
-                 button_text: str):
+                 button_text: str, disable_web_page_preview: bool = True):
         """
         Constructor
 
@@ -35,6 +39,7 @@ class Notification:
         :param text: Base text that will be sent
         :param description: Description of the notification to be provided in settings
         :param button_text: Text for the button to change the notification settings
+        :param disable_web_page_preview: True if the web page preview should be disabled
         """
 
         self.category = category
@@ -42,6 +47,7 @@ class Notification:
         self.text = text
         self.description = description
         self.button_text = button_text
+        self.disable_web_page_preview = disable_web_page_preview
 
     def build(self):
         """Builds the notification."""
@@ -63,13 +69,59 @@ class CrewLeaveNotification(Notification):
                          phrases.CREW_LEAVE_NOTIFICATION_DESCRIPTION,
                          phrases.CREW_LEAVE_NOTIFICATION_KEY)
 
-    def build(self):
+    def build(self) -> str:
         """Builds the notification."""
 
         return self.text.format(mention_markdown_user(self.crew_member))
 
 
-NOTIFICATIONS = [CrewLeaveNotification()]
+class LocationUpdateNotification(Notification):
+    """Class for location update notifications."""
+
+    def __init__(self, user: User = None, location: Location.Location = None):
+        """
+        :param user: User
+        :param location: The new location
+        """
+
+        self.user = user
+        self.location = location
+        super().__init__(NotificationCategory.LOCATION, NotificationType.LOCATION_UPDATE,
+                         phrases.LOCATION_UPDATE_NOTIFICATION,
+                         phrases.LOCATION_UPDATE_NOTIFICATION_DESCRIPTION,
+                         phrases.LOCATION_UPDATE_NOTIFICATION_KEY,
+                         disable_web_page_preview=False)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        from src.service.message_service import get_image_preview
+        from src.service.bounty_service import get_belly_formatted
+
+        # Determine preposition to use for the location
+        if 'island' in self.location.name.lower() or 'archipelago' in self.location.name.lower():
+            preposition = 'on'
+            if self.location.name.lower().startswith('island'):
+                preposition += ' the'
+        else:
+            preposition = 'in'
+
+        # Determine text suffix
+        try:
+            next_location = Location.get_by_level(self.location.level + 1)
+            text_suffix = phrases.LOCATION_NEXT_LEVEL_REQUIREMENT.format(
+                get_belly_formatted(next_location.required_bounty))
+        except ValueError:
+            text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
+
+        return self.text.format(get_image_preview(self.location.image_url),
+                                mention_markdown_user(self.user),
+                                preposition,
+                                self.location.name,
+                                text_suffix)
+
+
+NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

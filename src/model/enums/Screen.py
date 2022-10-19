@@ -24,7 +24,7 @@ class Screen(StrEnum):
 
     PVT_START = 'P1'
     PVT_SETTINGS = 'P2'
-    PVT_SETTINGS_LOCATION_UPDATE = 'P3'
+    PVT_SETTINGS_LOCATION_UPDATE = 'P3'  # Deprecated
     PVT_USER_STATUS = 'P4'
     PVT_CREW = 'P5'
     PVT_CREW_CREATE_OR_EDIT = 'P6'

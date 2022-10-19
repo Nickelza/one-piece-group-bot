@@ -29,7 +29,6 @@ class User(BaseModel):
     can_change_region = BooleanField(default=True)
     fight_immunity_end_date = DateTimeField(null=True)
     fight_cooldown_end_date = DateTimeField(null=True)
-    should_send_location_update = BooleanField(default=True)
     impel_down_release_date = DateTimeField(null=True)
     impel_down_is_permanent = BooleanField(default=False)
     crew = ForeignKeyField(Crew, backref='crew_members', null=True)

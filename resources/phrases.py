@@ -93,8 +93,7 @@ KEYBOARD_USE_UNAUTHORIZED = 'You are not authorized to use this keyboard'
 LOCATION_LEVEL_UP = '{}Congratulations {}!' \
                     '\nYou are now {} {}' \
                     '\n\n{}'
-LOCATION_NEXT_LEVEL_REQUIREMENT = '_Requirement for next location: ฿*{}*_'
-LOCATION_CURRENT_LEVEL_MAX = '_You have reached the maximum location_'
+
 LOCATION_CHANGE_REGION_PROPOSAL = '{}{} would you like to move to {}?'
 LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = '{}{} You can move to {} later with {} command'
 LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least ฿*{}* to move to the New World.'
@@ -292,9 +291,18 @@ CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?\n' \
                           'You will not be able to join another Crew until the next weekly leaderboard in {}'
 CREW_LEAVE_SUCCESS = 'You have left the Crew'
 
+# Notifications - Crew
+NOTIFICATION_CATEGORY_CREW = 'Crew'
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
 CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
                                       '\nApplicable if you are the Captain of the Crew.'
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew Leave'
-
-NOTIFICATION_CATEGORY_CREW = 'Crew'
+# Notifications - Location
+NOTIFICATION_CATEGORY_LOCATION = 'Location'
+LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \
+                               '\nYou are now {} {}' \
+                               '\n\n{}'
+LOCATION_NEXT_LEVEL_REQUIREMENT = '_Requirement for next location: ฿*{}*_'
+LOCATION_CURRENT_LEVEL_MAX = '_You have reached the maximum location_'
+LOCATION_UPDATE_NOTIFICATION_DESCRIPTION = 'If to be notified when you level up to a new location.'
+LOCATION_UPDATE_NOTIFICATION_KEY = 'Location Update'

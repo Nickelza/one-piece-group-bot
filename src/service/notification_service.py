@@ -1,3 +1,4 @@
+from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
@@ -31,7 +32,11 @@ def send_notification(context: CallbackContext, user: User, notification: Notifi
                                          screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
                                          previous_screen_list=previous_screens)])
 
-        full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard)
+        try:
+            full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
+                              disable_web_page_preview=notification.disable_web_page_preview)
+        except Unauthorized:  # User has blocked the bot
+            pass
 
 
 def is_enabled(user: User, notification: Notification) -> bool:
