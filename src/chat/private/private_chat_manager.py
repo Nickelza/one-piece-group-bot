@@ -51,7 +51,7 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
     screen: Screen = Screen.UNKNOWN
     if command is not Command.ND:
         screen = command.screen
-    elif user.private_screen_list is not None and user.private_screen_in_edit_id is not None:
+    elif user.private_screen_list is not None:
         screen = user.get_current_private_screen()
 
     if screen is not Screen.UNKNOWN:
