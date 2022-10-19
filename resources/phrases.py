@@ -133,6 +133,10 @@ PVT_KEY_CREW = Emoji.CREW + ' Crew'
 PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
+PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
+PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
+PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
+PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
@@ -268,7 +272,7 @@ CREW_NOT_FOUND = 'Crew not found'
 CREW_JOIN_REQUEST_CAPTION = 'My name is {}!!! I do not know who you are, but I ask you!!' \
                             '\nLet me ride on your ship!!' \
                             '\n\n_Only the [Captain](tg://user?id={}) can accept or reject this request_'
-CREW_JOIN_REQUEST_ACCEPTED = "[You](tg://user?id={}) are now a member of the *{}*!"
+CREW_JOIN_REQUEST_ACCEPTED = "{} is now a member of {}!"
 CREW_JOIN_REQUEST_REJECTED = "[Your](tg://user?id={}) request to join the *{}* has been rejected, but don't give up!!"
 CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER = 'The User cannot join this Crew'
 CREW_JOIN_REQUEST_USER_CANNOT_JOIN_CREW = 'You cannot join this Crew'
@@ -277,7 +281,7 @@ CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET = 'You cannot join a Crew until the next 
 # Crew - Invite request
 CREW_INVITE_REQUEST_CAPTION = "I'm {} and this meeting must be fate, {}! " \
                               "\nWhat do you say to turning the world upside down with me?"
-CREW_INVITE_REQUEST_ACCEPTED = "{} is now a member of {}"
+CREW_INVITE_REQUEST_ACCEPTED = "{} is now a member of {}!"
 CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by {}"
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
@@ -287,3 +291,10 @@ ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact
 CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?\n' \
                           'You will not be able to join another Crew until the next weekly leaderboard in {}'
 CREW_LEAVE_SUCCESS = 'You have left the Crew'
+
+CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
+CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
+                                      '\nApplicable if you are the Captain of the Crew.'
+CREW_LEAVE_NOTIFICATION_KEY = 'Crew Leave'
+
+NOTIFICATION_CATEGORY_CREW = 'Crew'

@@ -1,10 +1,16 @@
+from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
+from src.model.enums.Notification import NOTIFICATION_CATEGORY_DESCRIPTIONS
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
+
+
+class NotificationReservedKeys(StrEnum):
+    CATEGORY = 'a'
 
 
 def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard) -> None:
@@ -16,15 +22,11 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
     :return: None
     """
 
+    # View all categories
     inline_keyboard: list[list[Keyboard]] = []
+    for category, description in NOTIFICATION_CATEGORY_DESCRIPTIONS.items():
+        inline_keyboard.append([Keyboard(description, screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
+                                         info={NotificationReservedKeys.CATEGORY: category})])
 
-    # Location update
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS_LOCATION_UPDATE,
-                                     screen=Screen.PVT_SETTINGS_LOCATION_UPDATE)])
-
-    # Notifications
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS_NOTIFICATIONS,
-                                     screen=Screen.PVT_SETTINGS_NOTIFICATIONS)])
-
-    full_message_send(context, phrases.PVT_TXT_SETTINGS, update=update, keyboard=inline_keyboard,
+    full_message_send(context, phrases.PVT_TXT_SETTINGS_NOTIFICATIONS, update=update, keyboard=inline_keyboard,
                       inbound_keyboard=inbound_keyboard)

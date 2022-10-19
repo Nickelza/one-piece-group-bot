@@ -8,6 +8,7 @@ from src.model.enums.CrewRole import CrewRole
 def add_member(user: User, crew: Crew, role: CrewRole = None) -> None:
     """
     Adds a member to a crew
+
     :param user: The user
     :param crew: The crew
     :param role: The role
@@ -19,13 +20,16 @@ def add_member(user: User, crew: Crew, role: CrewRole = None) -> None:
     user.save()
 
 
-def remove_member(user: User) -> None:
+def remove_member(user) -> None:
     """
     Removes a member from a crew
+
     :param user: The user
+    :return: None
     """
 
     user.crew = None
     user.crew_role = None
     user.crew_join_date = None
+    user.can_join_crew = False
     user.save()

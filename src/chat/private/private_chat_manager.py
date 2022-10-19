@@ -7,6 +7,11 @@ from src.chat.private.screens.screen_crew_create import manage as manage_screen_
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_location_update import manage as manage_screen_settings_location_update
+from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
+from src.chat.private.screens.screen_settings_notifications_type import manage as \
+    manage_screen_settings_notifications_type
+from src.chat.private.screens.screen_settings_notifications_type_edit import manage as \
+    manage_screen_settings_notifications_type_edit
 from src.chat.private.screens.screen_start import manage as manage_screen_start
 from src.chat.private.screens.screen_status import manage as manage_screen_status
 from src.model.User import User
@@ -96,6 +101,15 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case Screen.PVT_CREW_LEAVE:  # Crew Leave
                 manage_screen_crew_leave(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
+                manage_screen_settings_notifications(update, context, inbound_keyboard)
+
+            case Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE:  # Notifications Type
+                manage_screen_settings_notifications_type(update, context, inbound_keyboard)
+
+            case Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT:  # Notifications Type Edit
+                manage_screen_settings_notifications_type_edit(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

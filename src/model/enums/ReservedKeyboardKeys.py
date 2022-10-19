@@ -7,3 +7,4 @@ class ReservedKeyboardKeys(str, Enum):
     DELETE = 'x'
     IN_EDIT_ID = 'z'
     SCREEN_STEP = 'y'
+    TOGGLE = 'w'

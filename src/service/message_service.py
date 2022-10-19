@@ -14,6 +14,7 @@ import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
@@ -71,7 +72,8 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
 
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
                  authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
-                 only_authorized_users_can_interact: bool = True) -> InlineKeyboardMarkup | None:
+                 only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None
+                 ) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
     :param keyboard: Keyboard object
@@ -80,6 +82,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     :param authorized_users_tg_ids: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object
     :param only_authorized_users_can_interact: True if only authorized users can interact with the keyboard
+    :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
     :return: Keyboard markup
     """
 
@@ -149,7 +152,8 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
             keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
 
         if inbound_keyboard is not None:
-            back_button = get_back_button(inbound_keyboard)
+            back_button = get_back_button(inbound_keyboard, excluded_keys=excluded_keys_from_back_button)
+            back_button.refresh_callback_data()
             keyboard_list.append([InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)])
 
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
@@ -196,7 +200,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       allow_sending_without_reply: bool = True, add_delete_button: bool = False,
                       authorized_users: list = None, inbound_keyboard: Keyboard = None,
                       send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
-                      edit_message_id: int = None, previous_screens: list[Screen] = None) -> Message:
+                      edit_message_id: int = None, previous_screens: list[Screen] = None,
+                      excluded_keys_from_back_button: list[str] = None) -> Message:
     """
     Send a message
     :param context: CallbackContext object
@@ -222,6 +227,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :param edit_message_id: ID of the message to edit
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
+    :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
     :return: Message
     """
 
@@ -237,7 +243,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
                                    authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
-                                   only_authorized_users_can_interact=only_authorized_users_can_interact)
+                                   only_authorized_users_can_interact=only_authorized_users_can_interact,
+                                   excluded_keys_from_back_button=excluded_keys_from_back_button)
 
     # New message
     if (new_message or update is None or update.callback_query is None) and edit_message_id is None:
@@ -551,14 +558,23 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     return keyboard_line
 
 
-def get_back_button(inbound_keyboard: Keyboard) -> Keyboard:
+def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None) -> Keyboard:
     """
     Create a back button
     :param inbound_keyboard: Keyboard object
+    :param excluded_keys: List of keys to exclude from the copy of info dict
     """
 
+    info_copy = inbound_keyboard.info.copy()
+    if excluded_keys is not None:
+        for key in excluded_keys:
+            info_copy.pop(key, None)
+
+    # Always remove toggle key
+    info_copy.pop(ReservedKeyboardKeys.TOGGLE, None)
+
     return Keyboard(phrases.KEYBOARD_OPTION_BACK, screen=inbound_keyboard.previous_screen_list[-1],
-                    previous_screen_list=inbound_keyboard.previous_screen_list[:-1])
+                    previous_screen_list=inbound_keyboard.previous_screen_list[:-1], inbound_info=info_copy)
 
 
 def delete_message(update: Update):

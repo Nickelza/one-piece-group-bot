@@ -10,7 +10,8 @@ from src.model.enums.Screen import Screen
 
 class Keyboard:
     def __init__(self, text: str, info: dict = None, screen: Screen = None, previous_screen_list: list[Screen] = None,
-                 url: str = None, inherit_authorized_users: bool = True, authorized_users: list[User] = None):
+                 url: str = None, inherit_authorized_users: bool = True, authorized_users: list[User] = None,
+                 inbound_info: dict = None):
         """
         Creates a keyboard object
         :param text: The text to be displayed on the keyboard
@@ -20,6 +21,7 @@ class Keyboard:
         :param url: The url to be displayed on the keyboard
         :param inherit_authorized_users: If the authorized users list should be inherited from the default value
         :param authorized_users: The authorized users list
+        :param inbound_info: The inbound info to be added to the keyboard info
         """
         self.text = text
         self.info: dict = info if info is not None else {}
@@ -29,6 +31,9 @@ class Keyboard:
         self.callback_data: str = self.create_callback_data()
         self.inherit_authorized_users: bool = inherit_authorized_users
         self.authorized_users: list[User] = authorized_users if authorized_users is not None else []
+
+        if inbound_info is not None:
+            self.info = inbound_info | self.info
 
     def create_callback_data(self) -> str:
         """

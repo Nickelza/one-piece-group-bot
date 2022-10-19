@@ -166,7 +166,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, captain: User
     add_member(requesting_user, crew)
 
     # Accepted message
-    ot_text = phrases.CREW_JOIN_REQUEST_ACCEPTED.format(requesting_user.tg_user_id,
+    ot_text = phrases.CREW_JOIN_REQUEST_ACCEPTED.format(mention_markdown_user(requesting_user),
                                                         escape_valid_markdown_chars(crew.name))
     full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
                     authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
