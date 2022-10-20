@@ -8,6 +8,7 @@ from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import reset_bounty, should_reset_bounty
+from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
 from src.service.leaderboard_service import create_leaderboard, get_leaderboard_rank_message
 from src.service.message_service import full_message_send, mention_markdown_v2
 
@@ -62,3 +63,9 @@ def manage(context: CallbackContext) -> None:
     # Reset bounty if last leaderboard of the month
     if should_reset_bounty():
         reset_bounty(context)
+
+    # Disband inactive crews
+    disband_inactive_crews(context)
+
+    # Warn captains about inactive crews
+    warn_inactive_captains(context)

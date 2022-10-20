@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
 from src.model.User import User
@@ -25,6 +26,7 @@ class NotificationType(IntEnum):
     CREW_LEAVE = 1
     LOCATION_UPDATE = 2
     CREW_DISBAND = 3
+    CREW_DISBAND_WARNING = 4
 
 
 class Notification:
@@ -139,7 +141,25 @@ class CrewDisbandNotification(Notification):
         return self.text
 
 
-NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification()]
+class CrewDisbandWarningNotification(Notification):
+    """Class for crew disband warning notifications."""
+
+    def __init__(self):
+        """Constructor"""
+
+        super().__init__(NotificationCategory.CREW, NotificationType.CREW_DISBAND_WARNING,
+                         phrases.CREW_DISBAND_WARNING_NOTIFICATION,
+                         phrases.CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION,
+                         phrases.CREW_DISBAND_WARNING_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        return self.text.format(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
+
+
+NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
+                 CrewDisbandWarningNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

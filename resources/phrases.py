@@ -305,9 +305,17 @@ CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves th
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew Leave'
 # Notifications - Crew Disband
 CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
-CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.' \
-                                        '\nApplicable only if you are not the Captain of the Crew.'
+CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.'
 CREW_DISBAND_NOTIFICATION_KEY = 'Crew Disband'
+# Notifications - Crew disband warning
+CREW_DISBAND_WARNING_NOTIFICATION = 'You have not appeared in the last {} leaderboards. ' \
+                                    '\nIf you do not appear in the next leaderboard, your Crew will be disbanded'
+CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = 'If to be notified a week before your Crew is disbanded due to ' \
+                                                f'not appearing in the leaderboard for ' \
+                                                f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive ' \
+                                                f'weeks.' \
+                                                '\nApplicable only if you are the Captain of the Crew.'
+CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew Disband Warning'
 # Notifications - Location
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \

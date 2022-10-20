@@ -3,18 +3,15 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
-from src.model.Crew import Crew
 from src.model.User import User
-from src.model.enums.Notification import CrewDisbandNotification
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
-from src.service.crew_service import remove_member as remove_member_from_crew, get_crew
+from src.service.crew_service import get_crew, disband_crew
 from src.service.cron_service import get_remaining_time
 from src.service.message_service import full_message_send
 from src.service.message_service import get_yes_no_keyboard
-from src.service.notification_service import send_notification
 
 
 class CrewDisbandReservedKeys(StrEnum):
@@ -36,7 +33,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     """
 
     try:
-        crew: Crew = get_crew(user=user)
+        get_crew(user=user)
     except CrewValidationException as cve:
         full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
@@ -50,20 +47,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
         return
 
-    crew_members: list[User] = crew.get_members()
-
-    for member in crew_members:
-        is_captain = (member.id == user.id)
-
-        if is_captain:
-            user.can_create_crew = False
-            remove_member_from_crew(user)  # Else user will not be updated
-        else:
-            remove_member_from_crew(member)
-            send_notification(context, member, CrewDisbandNotification())
-
-    crew.is_active = False
-    crew.save()
+    disband_crew(context, user)
 
     # Send success message
     ot_text = phrases.CREW_DISBAND_SUCCESS
