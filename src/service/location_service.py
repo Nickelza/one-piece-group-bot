@@ -75,10 +75,10 @@ def reset_location() -> None:
     User.update(should_propose_new_world=True).where(User.should_propose_new_world is False).execute()
 
 
-def reset_can_change_region(context: CallbackContext) -> None:
+def reset_can_change_region() -> None:
     """
     Reset the user's can_change_region flag
-    :param context:
+
     :return: None
     """
 

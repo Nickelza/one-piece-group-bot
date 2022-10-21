@@ -55,7 +55,7 @@ def manage(context: CallbackContext) -> None:
         leaderboard.save()
 
     # Reset bounty poster limit
-    reset_bounty_poster_limit(context, reset_previous_leaderboard=True)
+    reset_bounty_poster_limit(reset_previous_leaderboard=True)
 
     # Reset can join crew flag
     User.update(can_join_crew=True).execute()

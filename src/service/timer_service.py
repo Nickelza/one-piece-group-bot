@@ -46,7 +46,9 @@ def set_timers(dispatcher: Dispatcher) -> None:
 
     for timer in Timer.TIMERS:
         if timer.is_enabled:
-            add_to_context(context, timer)
+            res = add_to_context(context, timer)
+            res.run(dispatcher)
+
         else:
             logging.info(f'Timer {timer.name} is disabled')
 
@@ -78,15 +80,15 @@ def run(context: CallbackContext) -> None:
         case Timer.TIMER_SEND_LEADERBOARD:
             send_leaderboard(context)
         case Timer.RESET_DOC_Q_GAME:
-            reset_doc_q_game(context)
+            reset_doc_q_game()
         case Timer.RESET_BOUNTY_POSTER_LIMIT:
-            reset_bounty_poster_limit(context)
+            reset_bounty_poster_limit()
         case Timer.RESET_CAN_CHANGE_REGION:
-            reset_can_change_region(context)
+            reset_can_change_region()
         case Timer.ADD_REGION_BOUNTY:
-            add_region_bounty(context)
+            add_region_bounty()
         case Timer.RESET_CAN_INITIATE_GAME:
-            reset_can_initiate_game(context)
+            reset_can_initiate_game()
         case Timer.SEND_SCHEDULED_PREDICTIONS:
             send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:

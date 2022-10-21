@@ -38,4 +38,3 @@ def get_percentage_from_value(value: float, total: float, add_decimal=True) -> f
         return result
     except ZeroDivisionError:
         return 0
-

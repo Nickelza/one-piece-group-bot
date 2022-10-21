@@ -176,10 +176,10 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
         update_location(context, user, update)
 
 
-def add_region_bounty(context: CallbackContext) -> None:
+def add_region_bounty() -> None:
     """
     Adds a bounty percentage to all users based on their region
-    :param context: Telegram context
+
     :return: None
     """
 

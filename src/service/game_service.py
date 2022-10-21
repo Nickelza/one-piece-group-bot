@@ -141,10 +141,10 @@ def delete_game(update: Update, context: CallbackContext, game: Game, delete_mes
     game.delete_instance()
 
 
-def reset_can_initiate_game(context: CallbackContext) -> None:
+def reset_can_initiate_game() -> None:
     """
     Reset the user's can_change_region flag
-    :param context:
+
     :return: None
     """
 

@@ -217,10 +217,10 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         doc_q_game.save()
 
 
-def reset_playability(context: CallbackContext) -> None:
+def reset_playability() -> None:
     """
     Reset playability
-    :param context: The context
+
     :return: None
     """
     User.update(can_play_doc_q=1).execute()

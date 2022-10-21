@@ -1,6 +1,5 @@
 from PIL import Image, ImageFont, ImageDraw
 from telegram import Update
-from telegram.ext import CallbackContext
 from unidecode import unidecode
 
 import constants as c
@@ -218,10 +217,10 @@ def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
     return leaderboard_rank.bounty_poster_limit
 
 
-def reset_bounty_poster_limit(context: CallbackContext, reset_previous_leaderboard: bool = False) -> None:
+def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) -> None:
     """
     Resets the bounty poster limit
-    :param context: The context of the callback
+
     :param reset_previous_leaderboard: If to reset the limit for users if the previous leaderboard
     """
 
