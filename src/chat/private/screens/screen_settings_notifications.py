@@ -24,7 +24,8 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
 
     # View all categories
     inline_keyboard: list[list[Keyboard]] = []
-    for category, description in NOTIFICATION_CATEGORY_DESCRIPTIONS.items():
+    notifications_sorted = dict(sorted(NOTIFICATION_CATEGORY_DESCRIPTIONS.items(), key=lambda x: x[1]))
+    for category, description in notifications_sorted.items():
         inline_keyboard.append([Keyboard(description, screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
                                          info={NotificationReservedKeys.CATEGORY: category})])
 

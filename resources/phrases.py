@@ -145,7 +145,7 @@ ACTION_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number wi
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
 GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
-                       f'\n\nExample: {Command.GRP_FIGHT.get_formatted()} 10.000.000'
+                       f'\n\nExample: {Command.GRP_GAME.get_formatted()} 10.000.000'
 
 GAME_NOT_FOUND = 'Game not found'
 GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
@@ -316,6 +316,14 @@ CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = 'If to be notified a week before
                                                 f'weeks.' \
                                                 '\nApplicable only if you are the Captain of the Crew.'
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew Disband Warning'
+# Notification - Game turn
+NOTIFICATION_CATEGORY_GAME = 'Game'
+GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
+                         f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' \
+                         f'(t.me/]{Env.OPD_GROUP_USERNAME.get()}/' + '{})'
+GAME_TURN_NOTIFICATION_DESCRIPTION = 'If to be notified when it is your turn to play in a game if no action is taken ' \
+                                     f'for {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds'
+GAME_TURN_NOTIFICATION_KEY = 'Game Turn'
 # Notifications - Location
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \

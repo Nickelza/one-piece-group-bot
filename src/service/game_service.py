@@ -1,16 +1,24 @@
+import asyncio
+import threading
+
 from telegram import Update
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.Notification import GameTurnNotification
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameOutcome import GameOutcome
+from src.model.game.GameTurn import GameTurn
+from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.message_service import full_message_send, mention_markdown_user
+from src.service.notification_service import send_notification
 
 
 def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
@@ -172,7 +180,8 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
 def force_end_all_active() -> None:
     """
     Force all games in progress to end, returning wagers
-    :return:
+
+    :return: None
     """
 
     active_games = Game.select().where(Game.status.not_in(GameStatus.get_finished()))
@@ -180,3 +189,71 @@ def force_end_all_active() -> None:
     for game in active_games:
         game.status = GameStatus.FORCED_END
         game.save()
+
+
+def notify_game_turn(context: CallbackContext, game: Game, game_turn: GameTurn):
+    """
+    Notify a user that it's their turn
+
+    :param context: The context
+    :param game: The game
+    :param game_turn: The game turn
+    :return: None
+    """
+
+    if game_turn == GameTurn.CHALLENGER:
+        user_turn: User = game.challenger
+        opponent: User = game.opponent
+    else:
+        user_turn: User = game.opponent
+        opponent: User = game.challenger
+
+    # Fire and forget
+    t = threading.Thread(target=run_async_loop_in_thread, args=(context, user_turn, opponent, game))
+    t.start()
+
+
+def run_async_loop_in_thread(context: CallbackContext, user: User, opponent: User, game: Game):
+    """
+    Run the async loop in a thread
+
+    :param context: The context
+    :param user: The user
+    :param opponent: The opponent
+    :param game: The game
+    :return: None
+    """
+    asyncio.run(enqueue_game_turn_notification(context, user, opponent, game))
+
+
+async def enqueue_game_turn_notification(context: CallbackContext, user: User, opponent: User, game: Game):
+    """
+    Enqueue a game turn notification. Waits for N time and if the game board is still the same, sends the notification
+
+    :param context: The context
+    :param user: The user
+    :param opponent: The opponent
+    :param game: The game
+    :return: None
+    """
+
+    # Wait for N time
+    await asyncio.sleep(Env.GAME_TURN_NOTIFICATION_TIME.get_int())
+
+    updated_game = Game.get_by_id(game.id)
+
+    # Check if the game board is still the same
+    if updated_game.board == game.board:
+        send_notification(context, user, GameTurnNotification(game, opponent))
+
+
+def get_game_name(game_type: GameType) -> str:
+    match game_type:
+        case GameType.ROCK_PAPER_SCISSORS:
+            return phrases.ROCK_PAPER_SCISSORS_GAME_NAME
+
+        case GameType.RUSSIAN_ROULETTE:
+            return phrases.RUSSIAN_ROULETTE_GAME_NAME
+
+        case _:
+            return phrases.GAME_UNKNOWN_NAME

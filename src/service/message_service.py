@@ -204,6 +204,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       excluded_keys_from_back_button: list[str] = None) -> Message:
     """
     Send a message
+
     :param context: CallbackContext object
     :param text: Text to send
     :param update: Update object. Required if chat_id is None
@@ -212,7 +213,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param answer_callback: If it is an answer callback
     :param show_alert: If to show an alert in the callback answer
     :param new_message: True if the message is a new message
-    :param disable_notification: True if the message should not be displayed in the chat
+    :param disable_notification: True if a notification should not be sent
     :param reply_to_message_id: Message ID to reply to
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
@@ -322,7 +323,7 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
     :param answer_callback: If it is an answer callback
     :param show_alert: If to show an alert in the callback answer
     :param new_message: True if the message is a new message
-    :param disable_notification: True if the message should not be displayed in the chat
+    :param disable_notification: True if a notification should not be sent
     :param reply_to_message_id: Message ID to reply to
     :param protect_content: True if the message should be protected from saving and forwarding
     :param parse_mode: Parse mode

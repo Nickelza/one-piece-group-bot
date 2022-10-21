@@ -35,7 +35,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
 
     ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(game.opponent),
                                           mention_markdown_user(game.challenger),
-                                          get_game_name(GameType(game.type)),
+                                          (GameType(game.type)),
                                           get_belly_formatted(game.wager))
     outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(game.opponent,
                                                                    screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
@@ -48,15 +48,3 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
     full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard)
-
-
-def get_game_name(game_type: GameType) -> str:
-    match game_type:
-        case GameType.ROCK_PAPER_SCISSORS:
-            return phrases.ROCK_PAPER_SCISSORS_GAME_NAME
-
-        case GameType.RUSSIAN_ROULETTE:
-            return phrases.RUSSIAN_ROULETTE_GAME_NAME
-
-        case _:
-            return phrases.GAME_UNKNOWN_NAME

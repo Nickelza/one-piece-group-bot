@@ -37,6 +37,8 @@ class Emoji(StrEnum):
     PRISONER = '🚫'
     YES = '✅'
     NO = '❌'
+    RIGHT_ARROW = '➡'
+    LEFT_ARROW = '⬅'
 
     # Game
     WINNER = '🏆'

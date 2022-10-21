@@ -237,6 +237,10 @@ DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
 # Show correct option. Default: False
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
 
+# Minimum wager for games. Default: 10 million
+GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
+# After how much time in seconds without action should a user be notified about their turn. Default: 60 seconds
+GAME_TURN_NOTIFICATION_TIME = Environment('GAME_TURN_NOTIFICATION_TIME', default_value='60')
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
 
@@ -327,9 +331,6 @@ FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE = Environment('FIGHT_MIN_WIN_PROBABILITY_FI
 FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA', default_value='1')
 # Minimum win probability for Rookie. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE', default_value='1')
-
-# Minimum wager for games. Default: 10 million
-GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
 
 # Minimum wager for prediction bets. Default: 10 million
 PREDICTION_BET_MIN_WAGER = Environment('PREDICTION_BET_MIN_WAGER', default_value='10000000')

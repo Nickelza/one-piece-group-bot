@@ -50,3 +50,10 @@ class RockPaperScissors:
         """
 
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
+
+    def set_turn(self):
+        """
+        Sets the turn
+        """
+
+        self.game_turn = GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT

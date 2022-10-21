@@ -84,10 +84,7 @@ class RussianRoulette:
         Sets the turn
         """
 
-        if self.game_turn is GameTurn.CHALLENGER:
-            self.game_turn = GameTurn.OPPONENT
-        else:
-            self.game_turn = GameTurn.CHALLENGER
+        self.game_turn = GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
 
     def get_outcome(self) -> GameOutcome:
         """

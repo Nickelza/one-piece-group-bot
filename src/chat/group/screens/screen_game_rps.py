@@ -48,8 +48,12 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         game.board = rock_paper_scissors.get_board_json()
         game.save()
 
+        # Alert showing choice
         full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
                           show_alert=True)
+
+        # Update turn
+        rock_paper_scissors.set_turn()
 
     # Game is finished
     if rock_paper_scissors.is_finished():
@@ -67,6 +71,10 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         full_message_send(context, get_text(game, rock_paper_scissors), update=update,
                           keyboard=get_outbound_keyboard(game),
                           authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+
+        pass
+        # Notify user turn. After message send to avoid double notification in case user changes choice
+        game_service.notify_game_turn(context, game, rock_paper_scissors.game_turn)
     except BadRequest:
         # Possible when user changes a choice, so the output message stays the same
         pass

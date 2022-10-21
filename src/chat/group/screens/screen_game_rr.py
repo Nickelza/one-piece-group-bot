@@ -56,6 +56,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         full_message_send(context, get_choice_text(russian_roulette.bullet_is_fired()), update=update,
                           answer_callback=True)
 
+    should_notify_of_turn = False
     # Game is finished
     if russian_roulette.is_finished():
         game_outcome: GameOutcome = russian_roulette.get_outcome()
@@ -70,15 +71,17 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
             # Update turn only on regular interaction
             russian_roulette.set_turn()
 
-        # Create outbound keyboard
-
         # Send message
         full_message_send(context, get_text(game, russian_roulette), update=update,
                           keyboard=get_outbound_keyboard(game, russian_roulette),
                           authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        should_notify_of_turn = True
 
     game.board = russian_roulette.get_board_json()
     game.save()
+
+    if should_notify_of_turn:
+        game_service.notify_game_turn(context, game, russian_roulette.game_turn)
 
 
 def get_outbound_keyboard(game: Game, russian_roulette: RussianRoulette) -> list[list[Keyboard]]:

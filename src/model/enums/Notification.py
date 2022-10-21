@@ -3,7 +3,9 @@ from enum import IntEnum
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
+from src.model.Game import Game
 from src.model.User import User
+from src.model.game.GameType import GameType
 from src.service.message_service import mention_markdown_user
 
 
@@ -12,11 +14,13 @@ class NotificationCategory(IntEnum):
 
     CREW = 1
     LOCATION = 2
+    GAME = 3
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.CREW: phrases.NOTIFICATION_CATEGORY_CREW,
-    NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION
+    NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION,
+    NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME
 }
 
 
@@ -27,13 +31,14 @@ class NotificationType(IntEnum):
     LOCATION_UPDATE = 2
     CREW_DISBAND = 3
     CREW_DISBAND_WARNING = 4
+    GAME_TURN = 5
 
 
 class Notification:
     """Class for notifications."""
 
     def __init__(self, category: NotificationCategory, notification_type: NotificationType, text: str, description: str,
-                 button_text: str, disable_web_page_preview: bool = True):
+                 button_text: str, disable_web_page_preview: bool = True, disable_notification: bool = True):
         """
         Constructor
 
@@ -43,6 +48,7 @@ class Notification:
         :param description: Description of the notification to be provided in settings
         :param button_text: Text for the button to change the notification settings
         :param disable_web_page_preview: True if the web page preview should be disabled
+        :param disable_notification: True if telegram should not notify of the message
         """
 
         self.category = category
@@ -51,6 +57,7 @@ class Notification:
         self.description = description
         self.button_text = button_text
         self.disable_web_page_preview = disable_web_page_preview
+        self.disable_notification = disable_notification
 
     def build(self):
         """Builds the notification."""
@@ -158,8 +165,36 @@ class CrewDisbandWarningNotification(Notification):
         return self.text.format(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
 
+class GameTurnNotification(Notification):
+    """Class for game turn notifications."""
+
+    def __init__(self, game: Game = None, opponent: User = None):
+        """Constructor
+
+        :param game: The game
+        :param opponent: The opponent whose turn it's not
+        """
+
+        self.game = game
+        self.opponent = opponent
+        super().__init__(NotificationCategory.GAME, NotificationType.GAME_TURN,
+                         phrases.GAME_TURN_NOTIFICATION,
+                         phrases.GAME_TURN_NOTIFICATION_DESCRIPTION,
+                         phrases.GAME_TURN_NOTIFICATION_KEY,
+                         disable_notification=False)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        from src.service.game_service import get_game_name
+
+        return self.text.format(get_game_name(GameType(self.game.type)),
+                                mention_markdown_user(self.opponent),
+                                self.game.message_id)
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
-                 CrewDisbandWarningNotification()]
+                 CrewDisbandWarningNotification(), GameTurnNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

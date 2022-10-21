@@ -34,7 +34,8 @@ def send_notification(context: CallbackContext, user: User, notification: Notifi
 
         try:
             full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
-                              disable_web_page_preview=notification.disable_web_page_preview)
+                              disable_web_page_preview=notification.disable_web_page_preview,
+                              disable_notification=notification.disable_notification)
         except Unauthorized:  # User has blocked the bot
             pass
 
