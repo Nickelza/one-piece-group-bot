@@ -46,9 +46,7 @@ def set_timers(dispatcher: Dispatcher) -> None:
 
     for timer in Timer.TIMERS:
         if timer.is_enabled:
-            res = add_to_context(context, timer)
-            res.run(dispatcher)
-
+            add_to_context(context, timer)
         else:
             logging.info(f'Timer {timer.name} is disabled')
 
