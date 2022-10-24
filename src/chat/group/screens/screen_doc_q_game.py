@@ -1,5 +1,6 @@
 import random
 
+from strenum import StrEnum
 from telegram import Update, Message, TelegramError
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
@@ -12,7 +13,6 @@ from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -21,6 +21,15 @@ from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_send_or_edit, \
     mention_markdown_v2
+
+
+class DocQReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+    DOC_Q_ID = 'a'
+    CHOICE_INDEX = 'b'
+    CANCEL = 'c'
 
 
 def get_play_amounts(current_bounty: int, win_odds) -> tuple[int, int, int, int]:
@@ -122,11 +131,11 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.correct_choices_index = c.STANDARD_SPLIT_CHAR.join(str(i) for i in correct_choices_index)
 
         # Create Keyboard with 5 apple buttons
-        keyboard_data: dict = {'a': doc_q_game.id}
+        keyboard_data: dict = {DocQReservedKeys.DOC_Q_ID: doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
         for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
-            keyboard_data['b'] = i
+            keyboard_data[DocQReservedKeys.CHOICE_INDEX] = i
             option_emoji = Emoji.DOC_Q_GAME_OPTION
 
             # should show correct answer
@@ -156,7 +165,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.save()
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:
+def keyboard_interaction(update: Update, context: CallbackContext, user: User, keyboard: Keyboard) -> None:
     """
     Keyboard interaction
     :param update: The update
@@ -166,14 +175,14 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     :return: None
     """
 
-    doc_q_game: DocQGame = DocQGame.get_or_none(DocQGame.id == keyboard.info['a'])
+    doc_q_game: DocQGame = DocQGame.get_or_none(DocQGame.id == keyboard.info[DocQReservedKeys.DOC_Q_ID])
 
     if doc_q_game is None:
         raise GroupChatException(GroupChatError.DOC_Q_GAME_NOT_FOUND)
 
     if validate_play(update, context, user, doc_q_game):
         # User clicked on cancel button
-        if ReservedKeyboardKeys.DELETE in keyboard.info:
+        if DocQReservedKeys.CANCEL in keyboard.info:
             # Answer callback with goodbye message
             full_message_send(context, phrases.DOC_Q_GAME_CANCEL, update, answer_callback=True)
             delete_game(update, context, doc_q_game)
@@ -183,7 +192,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
         # User chose correct option
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
-        if str(keyboard.info['b']) in correct_choices_index:
+        if str(keyboard.info[DocQReservedKeys.CHOICE_INDEX]) in correct_choices_index:
             # Increase user's bounty
             add_bounty(user, win_amount)
 

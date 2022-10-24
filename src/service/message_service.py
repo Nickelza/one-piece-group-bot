@@ -133,9 +133,10 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                             # Add list of authorized users
                             if only_authorized_users_can_interact and button.inherit_authorized_users:
                                 if update is not None and update.effective_chat.type != Chat.PRIVATE:
-                                    button.info['u'] = authorized_users_ids
+                                    button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = authorized_users_ids
                             elif not button.inherit_authorized_users:
-                                button.info['u'] = [u.id for u in button.authorized_users]
+                                button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
+                                    u.id for u in button.authorized_users]
 
                             button.refresh_callback_data()
 
@@ -499,7 +500,7 @@ def get_delete_button(user_ids: list[int]) -> Keyboard:
     Create a delete button
     :param user_ids: List of users ids that can operate the delete button
     """
-    keyboard_data: dict = {'u': user_ids, 'del': 1}
+    keyboard_data: dict = {ReservedKeyboardKeys.AUTHORIZED_USER: user_ids, ReservedKeyboardKeys.DELETE: True}
 
     return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
 
@@ -508,8 +509,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
                         no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
                         extra_keys: list[dict] = None, yes_screen: Screen = None, no_screen: Screen = None,
                         yes_extra_keys: list[dict] = None, no_extra_keys: list[dict] = None,
-                        confirm_key: str = None, inbound_keyboard: Keyboard = None, yes_is_back_button: bool = False,
-                        no_is_back_button: bool = False) -> list[Keyboard]:
+                        confirm_key: str = ReservedKeyboardKeys.CONFIRM, inbound_keyboard: Keyboard = None,
+                        yes_is_back_button: bool = False, no_is_back_button: bool = False) -> list[Keyboard]:
     """
     Create a yes/no keyboard
     
@@ -523,7 +524,7 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     :param no_screen: Screen to call when the user clicks on the no button. If None, the default screen will be called
     :param yes_extra_keys: List of extra keys for the yes button, in a dict of key and value
     :param no_extra_keys: List of extra keys for the no button, in a dict of key and value
-    :param confirm_key: Yes or no key. If None, 'b' will be used
+    :param confirm_key: Yes or no key. If None, default valu will be used
     :param inbound_keyboard: The inbound keyboard
     :param yes_is_back_button: True if the yes button should be a back button
     :param no_is_back_button: True if the no button should be a back button
@@ -536,16 +537,13 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     if (yes_is_back_button or no_is_back_button) and inbound_keyboard is None:
         raise ValueError('inbound_keyboard must be specified if yes_is_back_button or no_is_back_button is True')
 
-    if confirm_key is None:
-        confirm_key = ReservedKeyboardKeys.CONFIRM
-
     keyboard_line: list[Keyboard] = []
 
     default_keyboard_data = {}
 
     # Add primary key
     if primary_key is not None:
-        default_keyboard_data['a'] = primary_key
+        default_keyboard_data[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY] = primary_key
 
     # Add extra keys
     if extra_keys is not None:

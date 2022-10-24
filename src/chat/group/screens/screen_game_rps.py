@@ -1,6 +1,7 @@
 import json
 from typing import Tuple
 
+from strenum import StrEnum
 from telegram import Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
@@ -17,6 +18,15 @@ from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice a
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, mention_markdown_user
+
+
+class GameRPSReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    GAME_ID = 'a'
+    CHOICE = 'b'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, game: Game = None) -> None:
@@ -38,7 +48,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     game, rock_paper_scissors = get_board(game)
 
     if inbound_keyboard.screen == Screen.GRP_ROCK_PAPER_SCISSORS_GAME:
-        rps_choice = RPSChoice(inbound_keyboard.info['b'])
+        rps_choice = RPSChoice(inbound_keyboard.info[GameRPSReservedKeys.CHOICE])
         # Save choice
         if user == game.challenger:
             rock_paper_scissors.challenger_choice = rps_choice
@@ -90,12 +100,12 @@ def get_outbound_keyboard(game) -> list[list[Keyboard]]:
     outbound_keyboard: list[list[Keyboard]] = []
 
     keyboard_line: list[Keyboard] = []
-    button_info_rock = {'a': game.id, 'b': RPSChoice.ROCK}
+    button_info_rock = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.ROCK}
     keyboard_line.append(Keyboard(Emoji.ROCK, info=button_info_rock, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
-    button_info_paper = {'a': game.id, 'b': RPSChoice.PAPER}
+    button_info_paper = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.PAPER}
     keyboard_line.append(Keyboard(Emoji.PAPER, info=button_info_paper,
                                   screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
-    button_info_scissors = {'a': game.id, 'b': RPSChoice.SCISSORS}
+    button_info_scissors = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.SCISSORS}
     keyboard_line.append(Keyboard(Emoji.SCISSORS, info=button_info_scissors,
                                   screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
     outbound_keyboard.append(keyboard_line)

@@ -16,6 +16,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.AdminChatError import AdminChatException
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import CommandValidationException, NavigationLimitReachedException
@@ -185,13 +186,13 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
     """
 
     # Validate keyboard interaction
-    if inbound_keyboard is not None and 'u' in inbound_keyboard.info:
-        if int(user.id) not in inbound_keyboard.info['u']:  # Unauthorized
+    if inbound_keyboard is not None and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
+        if int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]:  # Unauthorized
             full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
             return False
 
         # Delete request, best effort
-        if 'del' in inbound_keyboard.info:
+        if ReservedKeyboardKeys.DELETE in inbound_keyboard.info:
             delete_message(update)
             return False
 

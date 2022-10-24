@@ -1,3 +1,4 @@
+from strenum import StrEnum
 from telegram import Update, Message
 from telegram.ext import CallbackContext
 
@@ -7,7 +8,6 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -16,6 +16,16 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_wager_amount, validate_wager
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
+
+
+class GameReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    GAME_ID = 'a'
+    GAME_TYPE = 'b'
+    CANCEL = 'c'
 
 
 def validate(update: Update, context: CallbackContext, challenger: User, opponent: User, command: Command) -> bool:
@@ -118,20 +128,20 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
     inline_keyboard: list[list[Keyboard]] = [[]]
 
     # Rock Paper Scissors
-    button_info: dict = {'a': game.id, 'b': GameType.ROCK_PAPER_SCISSORS}
+    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.ROCK_PAPER_SCISSORS}
     btn_rps: Keyboard = Keyboard(phrases.ROCK_PAPER_SCISSORS_GAME_NAME, info=button_info,
                                  screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rps])
 
     # Russian Roulette
-    button_info = {'a': game.id, 'b': GameType.RUSSIAN_ROULETTE}
+    button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.RUSSIAN_ROULETTE}
     btn_rr: Keyboard = Keyboard(phrases.RUSSIAN_ROULETTE_GAME_NAME, info=button_info,
                                 screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rr])
 
     # Delete button, can't be replaced by add_delete_button because wagers have to be returned
-    inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_DELETE, info={'a': game.id,
-                                                                           ReservedKeyboardKeys.DELETE: True},
+    inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info={GameReservedKeys.GAME_ID: game.id,
+                                                                           GameReservedKeys.CANCEL: True},
                                      screen=Screen.GRP_GAME_SELECTION)])
 
     ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))

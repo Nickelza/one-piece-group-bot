@@ -11,6 +11,7 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Notification import GameTurnNotification
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
@@ -29,7 +30,7 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
     """
 
     try:
-        game: Game = Game.get_by_id(inbound_keyboard.info['a'])
+        game: Game = Game.get_by_id(inbound_keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY])
         return game
     except IndexError:
         raise GroupChatException(GroupChatError.GAME_NOT_FOUND)

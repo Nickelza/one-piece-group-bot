@@ -1,3 +1,4 @@
+from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -12,6 +13,15 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import delete_game, validate_game
 from src.service.message_service import full_message_send, mention_markdown_user
+
+
+class GameOpponentConfirmationReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    GAME_ID = 'a'
+    CANCEL = 'b'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard) -> None:
@@ -30,9 +40,10 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         return
 
     # User clicked on cancel button
-    if ReservedKeyboardKeys.DELETE in inbound_keyboard.info or inbound_keyboard.info['b'] == 0:
+    if (GameOpponentConfirmationReservedKeys.CANCEL in inbound_keyboard.info
+            or not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]):
         delete_message = True
-        if 'b' in inbound_keyboard.info:
+        if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:
             delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
             full_message_send(context, ot_text, update=update, authorized_users=[game.challenger, game.opponent],

@@ -1,3 +1,4 @@
+from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -7,6 +8,7 @@ import src.model.enums.Command as Command
 from src.model.User import User
 from src.model.enums import Location
 from src.model.enums.Region import Region
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -14,6 +16,13 @@ from src.service.bounty_service import get_belly_formatted
 from src.service.cron_service import cron_datetime_difference
 from src.service.location_service import update_location
 from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
+
+
+class ChangeRegionReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+    REGION = 'a'
 
 
 def validate_move_request(update: Update, context: CallbackContext, user: User, destination_region: Region) -> bool:
@@ -102,7 +111,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     """
 
     # User accepted
-    if keyboard.info['b'] == 1:
+    if keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         # Verify that user can move
         if not validate_move_request(update, context, user, region):
             return
@@ -139,7 +148,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
 
     # Move to new world request
     if keyboard is not None:
-        region = Region(keyboard.info['a'])
+        region = Region(keyboard.info[ChangeRegionReservedKeys.REGION])
     elif command is not None:
         region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
     else:

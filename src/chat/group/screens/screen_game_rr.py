@@ -1,6 +1,7 @@
 import json
 from typing import Tuple
 
+from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -16,6 +17,15 @@ from src.model.game.russianroulette.RussianRoulette import RussianRoulette
 from src.model.game.russianroulette.RussianRouletteChamberStatus import RussianRouletteChamberStatus as RRChamberStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
+
+
+class GameRRReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    GAME_ID = 'a'
+    POSITION = 'b'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, game: Game = None) -> None:
@@ -44,7 +54,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
                               show_alert=True)
             return
 
-        x, y = inbound_keyboard.info['b']
+        x, y = inbound_keyboard.info[GameRRReservedKeys.POSITION]
         # Chamber is already fired
         if russian_roulette.cylinder[x][y] == RRChamberStatus.FIRED:
             full_message_send(context, phrases.RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED, update=update,
@@ -102,7 +112,8 @@ def get_outbound_keyboard(game: Game, russian_roulette: RussianRoulette) -> list
                 keyboard_line.append(Keyboard(Emoji.CENTER_CHAMBER))
 
             else:
-                button_info = {'a': game.id, 'b': (row_index, chamber_index)}
+                button_info = {GameRRReservedKeys.GAME_ID: game.id,
+                               GameRRReservedKeys.POSITION: (row_index, chamber_index)}
                 if row_index == russian_roulette.bullet_x and chamber_index == russian_roulette.bullet_y and \
                         Env.RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION.get_bool():
                     emoji = Emoji.FIRED_BULLET_CHAMBER

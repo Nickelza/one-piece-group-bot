@@ -1,5 +1,6 @@
 import datetime
 
+from strenum import StrEnum
 from telegram import Update, TelegramError, Message
 from telegram.ext import CallbackContext
 
@@ -10,6 +11,7 @@ from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import OpponentValidationException
@@ -23,6 +25,14 @@ from src.service.message_service import full_message_send, mention_markdown_user
     mention_markdown_v2, full_media_send, full_message_or_media_send_or_edit
 
 
+class FightReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    FIGHT_ID = 'a'
+
+
 def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | None:
     """
     Get opponent from update or keyboard
@@ -34,7 +44,7 @@ def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | Non
     if update.callback_query is None:
         return User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
 
-    fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info['a']))
+    fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info[FightReservedKeys.FIGHT_ID]))
     if fight is None:
         return None
     return fight.opponent
@@ -52,7 +62,7 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
     # If not query callback
     if update.callback_query is not None:
         # Get opponent from fight id
-        fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info['a']))
+        fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info[FightReservedKeys.FIGHT_ID]))
         if fight is None:
             raise GroupChatException(GroupChatError.FIGHT_NOT_FOUND)
 
@@ -211,10 +221,10 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     """
 
     # Get fight
-    fight: Fight = Fight.get_or_none(Fight.id == keyboard.info['a'])
+    fight: Fight = Fight.get_or_none(Fight.id == keyboard.info[FightReservedKeys.FIGHT_ID])
 
     # User clicked on retreat button
-    if not keyboard.info['b']:
+    if not keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         # Answer callback with retreat message
         full_message_send(context, phrases.FIGHT_CONFIRMATION_RETREAT, update, answer_callback=True)
         delete_fight(update, context, fight)
