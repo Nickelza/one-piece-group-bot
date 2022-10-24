@@ -8,3 +8,5 @@ class ReservedKeyboardKeys(str, Enum):
     IN_EDIT_ID = 'z'
     SCREEN_STEP = 'y'
     TOGGLE = 'w'
+    PAGE = 'v'
+    CONFIRM = 'u'

@@ -6,6 +6,8 @@ from src.chat.private.screens.screen_crew import manage as manage_screen_crew
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
+from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
+from src.chat.private.screens.screen_crew_member_remove import manage as manage_screen_crew_member_remove
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import manage as \
@@ -101,6 +103,12 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case Screen.PVT_CREW_DISBAND:  # Crew Disband
                 manage_screen_crew_disband(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MEMBER:  # Crew Member
+                manage_screen_crew_member(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MEMBER_REMOVE:  # Crew Member Remove
+                manage_screen_crew_member_remove(update, context, inbound_keyboard, user)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
                 manage_screen_settings_notifications(update, context, inbound_keyboard)

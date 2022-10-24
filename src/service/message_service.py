@@ -72,10 +72,11 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
 
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
                  authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
-                 only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None
-                 ) -> InlineKeyboardMarkup | None:
+                 only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None,
+                 back_screen_index: int = 0) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
+
     :param keyboard: Keyboard object
     :param update: Update object
     :param add_delete_button: True if the delete button should be added
@@ -83,6 +84,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     :param inbound_keyboard: Inbound Keyboard object
     :param only_authorized_users_can_interact: True if only authorized users can interact with the keyboard
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
+    :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
     :return: Keyboard markup
     """
 
@@ -122,10 +124,11 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                         # dict is empty.
                         if json.loads(button.callback_data):
                             # Add information about previous screen
-                            if inbound_keyboard is not None and inbound_keyboard.screen is not None:
-                                button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
-                                if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
-                                    button.previous_screen_list.append(inbound_keyboard.screen)
+                            if len(button.previous_screen_list) == 0:  # Do not alter if already set
+                                if inbound_keyboard is not None and inbound_keyboard.screen is not None:
+                                    button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
+                                    if button.previous_screen_list[-1] != inbound_keyboard.screen != button.screen:
+                                        button.previous_screen_list.append(inbound_keyboard.screen)
 
                             # Add list of authorized users
                             if only_authorized_users_can_interact and button.inherit_authorized_users:
@@ -152,7 +155,8 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
             keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
 
         if inbound_keyboard is not None:
-            back_button = get_back_button(inbound_keyboard, excluded_keys=excluded_keys_from_back_button)
+            back_button = get_back_button(inbound_keyboard, excluded_keys=excluded_keys_from_back_button,
+                                          back_screen_index=back_screen_index)
             back_button.refresh_callback_data()
             keyboard_list.append([InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)])
 
@@ -201,7 +205,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                       authorized_users: list = None, inbound_keyboard: Keyboard = None,
                       send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
                       edit_message_id: int = None, previous_screens: list[Screen] = None,
-                      excluded_keys_from_back_button: list[str] = None) -> Message:
+                      excluded_keys_from_back_button: list[str] = None,
+                      back_screen_index: int = 0) -> Message:
     """
     Send a message
 
@@ -229,6 +234,7 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     :param edit_message_id: ID of the message to edit
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
+    :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
     :return: Message
     """
 
@@ -245,7 +251,8 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
                                    authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
                                    only_authorized_users_can_interact=only_authorized_users_can_interact,
-                                   excluded_keys_from_back_button=excluded_keys_from_back_button)
+                                   excluded_keys_from_back_button=excluded_keys_from_back_button,
+                                   back_screen_index=back_screen_index)
 
     # New message
     if (new_message or update is None or update.callback_query is None) and edit_message_id is None:
@@ -500,9 +507,12 @@ def get_delete_button(user_ids: list[int]) -> Keyboard:
 def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
                         no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
                         extra_keys: list[dict] = None, yes_screen: Screen = None, no_screen: Screen = None,
-                        yes_extra_keys: list[dict] = None, no_extra_keys: list[dict] = None) -> list[Keyboard]:
+                        yes_extra_keys: list[dict] = None, no_extra_keys: list[dict] = None,
+                        confirm_key: str = None, inbound_keyboard: Keyboard = None, yes_is_back_button: bool = False,
+                        no_is_back_button: bool = False) -> list[Keyboard]:
     """
     Create a yes/no keyboard
+    
     :param user: User that can operate the keyboard
     :param primary_key: Primary key
     :param yes_text: Text for the yes button
@@ -513,11 +523,21 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     :param no_screen: Screen to call when the user clicks on the no button. If None, the default screen will be called
     :param yes_extra_keys: List of extra keys for the yes button, in a dict of key and value
     :param no_extra_keys: List of extra keys for the no button, in a dict of key and value
+    :param confirm_key: Yes or no key. If None, 'b' will be used
+    :param inbound_keyboard: The inbound keyboard
+    :param yes_is_back_button: True if the yes button should be a back button
+    :param no_is_back_button: True if the no button should be a back button
     :return: The yes and no keyboard
     """
 
     if screen is None and (yes_screen is None or no_screen is None):
         raise ValueError('screen or yes_screen and no_screen must be specified')
+
+    if (yes_is_back_button or no_is_back_button) and inbound_keyboard is None:
+        raise ValueError('inbound_keyboard must be specified if yes_is_back_button or no_is_back_button is True')
+
+    if confirm_key is None:
+        confirm_key = ReservedKeyboardKeys.CONFIRM
 
     keyboard_line: list[Keyboard] = []
 
@@ -534,36 +554,48 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
                 default_keyboard_data[key] = value
 
     # Yes
-    # If screen is being changed, discard yes key value
-    keyboard_data_yes: dict = default_keyboard_data | ({'b': True} if screen != yes_screen else {})
-    if yes_extra_keys is not None:
-        for extra_key in yes_extra_keys:
-            for key, value in extra_key.items():
-                keyboard_data_yes[key] = value
+    if yes_is_back_button:
+        keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text))
+    else:
+        # If screen is being changed, discard yes key value
+        keyboard_data_yes: dict = default_keyboard_data | (
+            {confirm_key: True} if not (yes_screen is not None and screen is not yes_screen) else {})
+        if yes_extra_keys is not None:
+            for extra_key in yes_extra_keys:
+                for key, value in extra_key.items():
+                    keyboard_data_yes[key] = value
 
-    yes_screen = screen if yes_screen is None else yes_screen
-    keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
-                                  inherit_authorized_users=False))
+        yes_screen = screen if yes_screen is None else yes_screen
+        keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
+                                      inherit_authorized_users=False))
 
     # No
-    # If screen is being changed, discard no key value
-    keyboard_data_no: dict = default_keyboard_data | ({'b': False} if screen != no_screen else {})
-    if no_extra_keys is not None:
-        for extra_key in no_extra_keys:
-            for key, value in extra_key.items():
-                keyboard_data_no[key] = value
-    no_screen = screen if no_screen is None else no_screen
-    keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
-                                  inherit_authorized_users=False))
+    if no_is_back_button:
+        keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text))
+    else:
+        # If screen is being changed, discard no key value
+        keyboard_data_no: dict = default_keyboard_data | (
+            {confirm_key: False} if not (no_screen is not None and screen is not no_screen) else {})
+        if no_extra_keys is not None:
+            for extra_key in no_extra_keys:
+                for key, value in extra_key.items():
+                    keyboard_data_no[key] = value
+        no_screen = screen if no_screen is None else no_screen
+        keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
+                                      inherit_authorized_users=False))
 
     return keyboard_line
 
 
-def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None) -> Keyboard:
+def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None, back_screen_index: int = 0,
+                    key_text: str = phrases.KEYBOARD_OPTION_BACK) -> Keyboard:
     """
     Create a back button
+
     :param inbound_keyboard: Keyboard object
     :param excluded_keys: List of keys to exclude from the copy of info dict
+    :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
+    :param key_text: Text for the back button
     """
 
     info_copy = inbound_keyboard.info.copy()
@@ -571,11 +603,16 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None)
         for key in excluded_keys:
             info_copy.pop(key, None)
 
-    # Always remove toggle key
+    # Always excluded keys
+    # Toggle
     info_copy.pop(ReservedKeyboardKeys.TOGGLE, None)
+    # Confirm
+    info_copy.pop(ReservedKeyboardKeys.CONFIRM, None)
 
-    return Keyboard(phrases.KEYBOARD_OPTION_BACK, screen=inbound_keyboard.previous_screen_list[-1],
-                    previous_screen_list=inbound_keyboard.previous_screen_list[:-1], inbound_info=info_copy)
+    previous_screen_end_index = -1 - back_screen_index
+    return Keyboard(key_text, screen=inbound_keyboard.previous_screen_list[previous_screen_end_index],
+                    previous_screen_list=inbound_keyboard.previous_screen_list[:previous_screen_end_index],
+                    inbound_info=info_copy)
 
 
 def delete_message(update: Update):

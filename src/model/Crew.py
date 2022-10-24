@@ -38,13 +38,20 @@ class Crew(BaseModel):
         from src.model.User import User
         return self.crew_members.select(fn.Avg(User.location_level)).scalar()
 
-    def get_members(self) -> list:
+    def get_members(self, limit: int = None, page: int = 1) -> list:
         """
-        Returns the crew members
+        Returns the crew members ordered by join date
+
+        :param limit: The number of members to return. If None, returns all members
+        :param page: The page to return. If None, returns the first page
         :return: The crew member
         """
 
         from src.model.User import User
+
+        if limit is not None:
+            return self.crew_members.select().order_by(User.crew_join_date.asc()).paginate(page, limit)
+
         return self.crew_members.select().order_by(User.crew_join_date.asc())
 
     @staticmethod
@@ -83,6 +90,14 @@ class Crew(BaseModel):
 
         from src.model.User import User
         return self.crew_members.select().where(User.crew_role == CrewRole.CAPTAIN).get()
+
+    def get_members_count(self) -> int:
+        """
+        Returns the number of crew members
+        :return: The number of crew members
+        """
+
+        return self.crew_members.select().count()
 
 
 Crew.create_table()

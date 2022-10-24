@@ -133,10 +133,13 @@ PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
+PVT_KEY_CREW_MEMBER_REMOVE = 'Remove'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
+PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
+PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
@@ -252,7 +255,7 @@ CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_ME
                         f'\n\nTo create a Crew, you must have appeared in the the last ' \
                         f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards.'
 CREW_OVERVIEW = '*{}*\n{}'
-CREW_OVERVIEW_MEMBER = '\n{}'
+CREW_OVERVIEW_MEMBER = '\n{}. {}'
 CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
 CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = 'You must have appeared in the the last ' \
@@ -297,17 +300,31 @@ CREW_DISBAND_CONFIRMATION = 'Are you sure you want to disband the Crew?\n' \
                             'You will not be able to create another Crew until the next bounty reset in {}'
 CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 
-# Notifications - Crew Leave
+# Crew - Member
+CREW_MEMBER = '*{}*' \
+              '\n\n*Bounty*: ฿{}' \
+              '\n*Join Date*: {}'
+
+# Crew - Remove member
+CREW_NOT_SAME = 'You are not in the same Crew'
+CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the Crew?'
+CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
+
+# Notification - Crew Leave
 NOTIFICATION_CATEGORY_CREW = 'Crew'
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
 CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
                                       '\nApplicable only if you are the Captain of the Crew.'
-CREW_LEAVE_NOTIFICATION_KEY = 'Crew Leave'
-# Notifications - Crew Disband
+CREW_LEAVE_NOTIFICATION_KEY = 'Crew leave'
+# Notification - Crew Member removed
+CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been removed from the Crew'
+CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = 'If to be notified when you are removed from the Crew.'
+CREW_MEMBER_REMOVE_NOTIFICATION_KEY = 'Crew member removed'
+# Notification - Crew Disband
 CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
 CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.'
-CREW_DISBAND_NOTIFICATION_KEY = 'Crew Disband'
-# Notifications - Crew disband warning
+CREW_DISBAND_NOTIFICATION_KEY = 'Crew disband'
+# Notification - Crew disband warning
 CREW_DISBAND_WARNING_NOTIFICATION = 'You have not appeared in the last {} leaderboards. ' \
                                     '\nIf you do not appear in the next leaderboard, your Crew will be disbanded'
 CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = 'If to be notified a week before your Crew is disbanded due to ' \
@@ -315,7 +332,7 @@ CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = 'If to be notified a week before
                                                 f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive ' \
                                                 f'weeks.' \
                                                 '\nApplicable only if you are the Captain of the Crew.'
-CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew Disband Warning'
+CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 # Notification - Game turn
 NOTIFICATION_CATEGORY_GAME = 'Game'
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
@@ -323,8 +340,8 @@ GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
                          f'(t.me/]{Env.OPD_GROUP_USERNAME.get()}/' + '{})'
 GAME_TURN_NOTIFICATION_DESCRIPTION = 'If to be notified when it is your turn to play in a game if no action is taken ' \
                                      f'for {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds'
-GAME_TURN_NOTIFICATION_KEY = 'Game Turn'
-# Notifications - Location
+GAME_TURN_NOTIFICATION_KEY = 'Game turn'
+# Notification - Location
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \
                                '\nYou are now {} {}' \
@@ -332,4 +349,8 @@ LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \
 LOCATION_NEXT_LEVEL_REQUIREMENT = '_Requirement for next location: ฿*{}*_'
 LOCATION_CURRENT_LEVEL_MAX = '_You have reached the maximum location_'
 LOCATION_UPDATE_NOTIFICATION_DESCRIPTION = 'If to be notified when you level up to a new location.'
-LOCATION_UPDATE_NOTIFICATION_KEY = 'Location Update'
+LOCATION_UPDATE_NOTIFICATION_KEY = 'Location update'
+
+# List
+LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
+NAVIGATION_LIMIT_REACHED = 'Limit reached'

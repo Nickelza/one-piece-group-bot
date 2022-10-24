@@ -145,5 +145,15 @@ class User(BaseModel):
 
         return self.crew is not None
 
+    def get_markdown_mention(self):
+        """
+        Returns the markdown mention of the user
+        :return: The markdown mention of the user
+        """
+
+        from src.service.message_service import mention_markdown_v2
+
+        return mention_markdown_v2(str(self.tg_user_id), str(self.tg_first_name))
+
 
 User.create_table()

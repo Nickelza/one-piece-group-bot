@@ -9,7 +9,8 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.CrewRole import CrewRole
-from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWarningNotification
+from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWarningNotification, \
+    CrewLeaveNotification, CrewMemberRemoveNotification
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.notification_service import send_notification
@@ -30,13 +31,19 @@ def add_member(user: User, crew: Crew, role: CrewRole = None) -> None:
     user.save()
 
 
-def remove_member(user) -> None:
+def remove_member(user, context: CallbackContext = None, send_notification_to_captain: bool = False,
+                  send_notification_to_member: bool = False) -> None:
     """
     Removes a member from a crew
 
+    :param context: The context
     :param user: The user
+    :param send_notification_to_captain: Whether to send a notification to the captain
+    :param send_notification_to_member: Whether to send a notification to the member
     :return: None
     """
+
+    crew: Crew = user.crew
 
     user.crew = None
     user.crew_role = None
@@ -44,15 +51,24 @@ def remove_member(user) -> None:
     user.can_join_crew = False
     user.save()
 
+    # User left
+    if send_notification_to_captain:
+        send_notification(context, crew.get_captain(), CrewLeaveNotification(user))
 
-def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard = None, crew_id_key: str = None
-             ) -> Crew:
+    # User was removed
+    if send_notification_to_member:
+        send_notification(context, user, CrewMemberRemoveNotification(user))
+
+
+def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard = None, crew_id_key: str = None,
+             validate_against_crew: Crew = None) -> Crew:
     """
     Get crew
     :param user: The target user
     :param crew_id: The crew id
     :param inbound_keyboard: The inbound keyboard
     :param crew_id_key: The crew id key
+    :param validate_against_crew: The crew to validate against and make sure the user is in the same crew
     :return: The crew
     """
 
@@ -72,6 +88,10 @@ def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard 
     # Crew is not found or is not active
     if crew is None or not crew.is_active:
         raise CrewValidationException(phrases.CREW_NOT_FOUND)
+
+    # Crew is not the same
+    if validate_against_crew is not None and crew != validate_against_crew:
+        raise CrewValidationException(phrases.CREW_NOT_SAME)
 
     return crew
 

@@ -18,7 +18,7 @@ from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.error.AdminChatError import AdminChatException
 from src.model.error.CommonChatError import CommonChatException
-from src.model.error.CustomException import CommandValidationException
+from src.model.error.CustomException import CommandValidationException, NavigationLimitReachedException
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -164,6 +164,9 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             full_message_send(context, str(ce), update=update)
         except BadRequest:
             full_message_or_media_send_or_edit(context, str(ce), update=update)
+    except NavigationLimitReachedException:
+        full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
+                          show_alert=True)
 
     user.save()
 

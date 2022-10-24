@@ -32,6 +32,7 @@ class NotificationType(IntEnum):
     CREW_DISBAND = 3
     CREW_DISBAND_WARNING = 4
     GAME_TURN = 5
+    CREW_MEMBER_REMOVE = 6
 
 
 class Notification:
@@ -193,8 +194,29 @@ class GameTurnNotification(Notification):
                                 self.game.message_id)
 
 
+class CrewMemberRemoveNotification(Notification):
+    """Class for crew member remove notifications."""
+
+    def __init__(self, crew_member: User = None):
+        """Constructor
+
+        :param crew_member: The crew member that was removed
+        """
+
+        self.crew_member = crew_member
+        super().__init__(NotificationCategory.CREW, NotificationType.CREW_MEMBER_REMOVE,
+                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION,
+                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION,
+                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification"""
+
+        return self.text.format(mention_markdown_user(self.crew_member))
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
-                 CrewDisbandWarningNotification(), GameTurnNotification()]
+                 CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

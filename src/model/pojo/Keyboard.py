@@ -47,9 +47,12 @@ class Keyboard:
         if self.screen is not None:
             info_with_screen[ReservedKeyboardKeys.SCREEN] = int(self.screen[1:])
 
+        temp_screen_code: int = (info_with_screen[ReservedKeyboardKeys.SCREEN]
+                                 if ReservedKeyboardKeys.SCREEN in info_with_screen else None)
+
         if self.previous_screen_list is not None and len(self.previous_screen_list) > 0:
             info_with_screen[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [
-                int(screen[1:]) for screen in self.previous_screen_list]
+                int(screen[1:]) for screen in self.previous_screen_list if int(screen[1:]) != temp_screen_code]
 
         # Convert boolean to int
         for key, value in info_with_screen.items():

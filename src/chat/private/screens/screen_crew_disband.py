@@ -42,7 +42,8 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         # Send disband confirmation request
         ot_text = phrases.CREW_DISBAND_CONFIRMATION.format(get_remaining_time(get_next_bounty_reset_time()))
         inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_DISBAND,
-                                                                     no_screen=Screen.PVT_CREW)]
+                                                                     inbound_keyboard=inbound_keyboard,
+                                                                     no_is_back_button=True)]
 
         full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
         return
