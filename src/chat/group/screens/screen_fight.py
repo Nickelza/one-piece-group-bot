@@ -121,7 +121,7 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
             [3] - Final bounty if user win, [4] - Final bounty if user lose
     """
     # Probability of winning - How much percent more is the challenger bounty compared to the opponent
-    win_probability = (challenger.bounty / opponent.bounty) * 50
+    win_probability = (challenger.bounty / opponent.get_max_bounty()) * 50
 
     # Cap probability
     leaderboard_user = get_current_leaderboard_user(challenger)
