@@ -115,6 +115,11 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         target_user_rank,
         location_name)
 
+    # Add Crew if in one
+    if target_user.is_crew_member():
+        crew = target_user.crew
+        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
+
     # Remaining sentence if arrested
     if target_user.is_arrested():
         if not user.impel_down_is_permanent:
@@ -137,10 +142,22 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         remaining_time = get_remaining_time(target_user.fight_cooldown_end_date)
         message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
-    # Add Crew if in one
-    if target_user.is_crew_member():
-        crew = target_user.crew
-        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
+    # BOUNTY BONUSES
+    has_bounty_bonus = False
+    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES
+
+    # Crew Bounty Bonus
+    if user.is_crew_member() and user.has_higher_bounty_than_crew_average():
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW
+        has_bounty_bonus = True
+
+    # New World Bounty Bonus
+    if target_user.in_new_world():
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD
+        has_bounty_bonus = True
+
+    if has_bounty_bonus:
+        message_text += bounty_bonus_text
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

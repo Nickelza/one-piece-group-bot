@@ -179,5 +179,25 @@ class User(BaseModel):
 
         return int(str(self.bounty))
 
+    def in_new_world(self):
+        """
+        Returns True if the user is in the New World
+        :return: True if the user is in the New World
+        """
+
+        from src.model.enums.Location import is_new_world_by_level
+        return is_new_world_by_level(int(str(self.location_level)))
+
+    def has_higher_bounty_than_crew_average(self) -> bool:
+        """
+        Returns True if the user has a higher bounty than the crew average
+        :return: True if the user has a higher bounty than the crew average
+        """
+
+        if not self.is_crew_member():
+            raise ValueError('User is not in a crew')
+
+        return int(str(self.bounty)) > self.crew.get_average_bounty()
+
 
 User.create_table()
