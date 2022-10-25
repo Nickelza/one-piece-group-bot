@@ -159,11 +159,17 @@ CRON_RESET_CAN_CHANGE_REGION = Environment('CRON_RESET_CAN_CHANGE_REGION', defau
 ENABLE_TIMER_RESET_CAN_CHANGE_REGION = Environment('ENABLE_TIMER_RESET_CAN_CHANGE_REGION', default_value='True')
 SHOULD_LOG_TIMER_RESET_CAN_CHANGE_REGION = Environment('SHOULD_LOG_TIMER_RESET_CAN_CHANGE_REGION',
                                                        default_value='False')
-# Increment bounty for users in region. Default: Every day at 00:10
-CRON_ADD_REGION_BOUNTY = Environment('CRON_INCREMENT_BOUNTY_FOR_REGION', default_value='10 0 * * *')
-ENABLE_TIMER_ADD_REGION_BOUNTY = Environment('ENABLE_TIMER_INCREMENT_BOUNTY_FOR_REGION', default_value='True')
-SHOULD_LOG_TIMER_ADD_REGION_BOUNTY = Environment('SHOULD_LOG_TIMER_INCREMENT_BOUNTY_FOR_REGION',
-                                                 default_value='False')
+
+# Bounty bonus for users in region. Default: Every day at 00:10
+CRON_ADD_REGION_BOUNTY_BONUS = Environment('CRON_ADD_REGION_BOUNTY_BONUS', default_value='10 0 * * *')
+ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS', default_value='True')
+SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS',
+                                                       default_value='False')
+# Bounty bonus for Crew members with bounty higher than crew average. Default: Every day at 00:10
+CRON_ADD_CREW_BOUNTY_BONUS = Environment('CRON_ADD_CREW_BOUNTY_BONUS', default_value='10 0 * * *')
+ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='True')
+SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='False')
+
 # Reddit post One Piece. Default: Every day at 00:00 and 12:00
 CRON_REDDIT_POST_ONE_PIECE = Environment('CRON_REDDIT_POST_ONE_PIECE', default_value='0 0,12 * * *')
 ENABLE_TIMER_REDDIT_POST_ONE_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_ONE_PIECE', default_value='True')
@@ -212,6 +218,15 @@ BELLY_LOCATION_LEVEL_MULTIPLIER = Environment('BELLY_LOCATION_LEVEL_MULTIPLIER',
 # How much should belly be upper rounded. Default: 1000
 BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value='1000')
 
+# BOUNTY BONUS
+# LOCATION
+# Percentage that bounty is incremented by on timer for Paradise. Default: 0
+PARADISE_BOUNTY_BONUS = Environment('PARADISE_BOUNTY_BONUS', default_value='0')
+# Percentage that bounty is incremented by on timer for New World. Default: 1
+NEW_WORLD_BOUNTY_BONUS = Environment('NEW_WORLD_BOUNTY_BONUS', default_value='1')
+# Percentage that bounty is incremented by on timer for Crew members with bounty higher than crew average. Default: 1
+CREW_BOUNTY_BONUS = Environment('CREW_BOUNTY_BONUS', default_value='1')
+
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)
 BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', default_value='-1')
@@ -243,12 +258,6 @@ GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
 GAME_TURN_NOTIFICATION_TIME = Environment('GAME_TURN_NOTIFICATION_TIME', default_value='60')
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
-
-# LOCATION
-# Percentage that bounty is incremented by on timer for Paradise. Default: 0
-LOCATION_PARADISE_BOUNTY_INCREMENT = Environment('LOCATION_PARADISE_BOUNTY_INCREMENT', default_value='0')
-# Percentage that bounty is incremented by on timer for New World. Default: 1
-LOCATION_NEW_WORLD_BOUNTY_INCREMENT = Environment('LOCATION_NEW_WORLD_BOUNTY_INCREMENT', default_value='1')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')

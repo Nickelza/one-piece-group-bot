@@ -50,10 +50,15 @@ RESET_CAN_CHANGE_REGION = Timer('reset_can_change_region', Env.CRON_RESET_CAN_CH
                                 Env.SHOULD_LOG_TIMER_RESET_CAN_CHANGE_REGION.get_bool())
 TIMERS.append(RESET_CAN_CHANGE_REGION)
 
-ADD_REGION_BOUNTY = Timer('add_region_bounty', Env.CRON_ADD_REGION_BOUNTY.get(),
-                          Env.ENABLE_TIMER_ADD_REGION_BOUNTY.get_bool(),
-                          Env.SHOULD_LOG_TIMER_ADD_REGION_BOUNTY.get_bool())
-TIMERS.append(ADD_REGION_BOUNTY)
+ADD_REGION_BOUNTY_BONUS = Timer('add_region_bounty_bonus', Env.CRON_ADD_REGION_BOUNTY_BONUS.get(),
+                                Env.ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS.get_bool(),
+                                Env.SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS.get_bool())
+TIMERS.append(ADD_REGION_BOUNTY_BONUS)
+
+ADD_CREW_BOUNTY_BONUS = Timer('add_crew_bounty_bonus', Env.CRON_ADD_CREW_BOUNTY_BONUS.get(),
+                              Env.ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS.get_bool(),
+                              Env.SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS.get_bool())
+TIMERS.append(ADD_CREW_BOUNTY_BONUS)
 
 RESET_CAN_INITIATE_GAME = Timer('reset_can_initiate_game', Env.CRON_RESET_CAN_INITIATE_GAME.get(),
                                 Env.ENABLE_TIMER_RESET_CAN_INITIATE_GAME.get_bool(),

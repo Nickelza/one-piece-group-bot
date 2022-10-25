@@ -1,7 +1,7 @@
 import datetime
 from math import ceil
 
-from peewee import Case
+from peewee import Case, fn
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -176,7 +176,7 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
         update_location(user, context, update)
 
 
-def add_region_bounty() -> None:
+def add_region_bounty_bonus() -> None:
     """
     Adds a bounty percentage to all users based on their region
 
@@ -185,11 +185,24 @@ def add_region_bounty() -> None:
 
     conditions: list[tuple[bool, int]] = [(User.location_level <= get_last_paradise().level,
                                            User.bounty +
-                                           ((User.bounty * Env.LOCATION_PARADISE_BOUNTY_INCREMENT.get_float()) / 100)),
+                                           ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
                                           (User.location_level >= get_first_new_world().level,
                                            User.bounty +
-                                           ((User.bounty * Env.LOCATION_NEW_WORLD_BOUNTY_INCREMENT.get_float()) / 100))]
+                                           ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
     case_stmt = Case(None, conditions)
+    User.update(bounty=case_stmt).execute()
+
+
+def add_crew_bounty_bonus() -> None:
+    """
+    Adds a bounty percentage to users in a crew with bounty higher than the crew average
+    """
+
+    condition: tuple[bool, int] = (
+        User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()),
+        User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100))
+
+    case_stmt = Case(None, [condition], User.bounty)
     User.update(bounty=case_stmt).execute()
 
 
