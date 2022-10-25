@@ -306,6 +306,8 @@ LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment('LOCATION_WHOLE_CAKE_ISLAND',
                                                    default_value='https://i.imgur.com/fEAM6eN.jpg')
 LOCATION_WANO_COUNTRY_IMAGE_URL = Environment('LOCATION_WANO_COUNTRY_IMAGE_URL',
                                               default_value='https://i.imgur.com/vznQ3W2.jpg')
+LOCATION_EGGHEAD_IMAGE_URL = Environment('LOCATION_EGGHEAD_IMAGE_URL',
+                                         default_value='https://i.imgur.com/mPsUp7x.jpeg')
 
 # How long fight immunity lasts in hours. Default: 24 hours
 FIGHT_IMMUNITY_DURATION = Environment('FIGHT_IMMUNITY_DURATION', default_value='24')
