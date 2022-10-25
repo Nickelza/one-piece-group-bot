@@ -71,6 +71,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     if russian_roulette.is_finished():
         game_outcome: GameOutcome = russian_roulette.get_outcome()
         game = game_service.end_game(game, game_outcome)
+        user.should_update_model = False
 
         # Send result
         full_message_send(context, get_text(game, russian_roulette), update=update,

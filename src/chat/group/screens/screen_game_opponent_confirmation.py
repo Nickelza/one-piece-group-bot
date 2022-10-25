@@ -21,7 +21,7 @@ class GameOpponentConfirmationReservedKeys(StrEnum):
     """
 
     GAME_ID = 'a'
-    CANCEL = 'b'
+    CANCEL = 'c'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard) -> None:
@@ -39,23 +39,26 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     if game is None:
         return
 
-    # User clicked on cancel button
+    # User clicked on cancel button or opponent rejected
     if (GameOpponentConfirmationReservedKeys.CANCEL in inbound_keyboard.info
             or not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]):
         delete_message = True
-        if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:
+
+        if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:  # Opponent rejected
             delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
             full_message_send(context, ot_text, update=update, authorized_users=[game.challenger, game.opponent],
                               add_delete_button=True)
 
         delete_game(update, context, game, delete_message=delete_message)
+        user.should_update_model = False
         return
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
         delete_game(update, context, game, delete_message=False)
         full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
+        user.should_update_model = False
         return
 
     user.bounty -= game.wager

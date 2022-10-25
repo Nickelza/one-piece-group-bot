@@ -16,48 +16,48 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.notification_service import send_notification
 
 
-def add_member(user: User, crew: Crew, role: CrewRole = None) -> None:
+def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
     """
     Adds a member to a crew
 
-    :param user: The user
+    :param crew_member: The user
     :param crew: The crew
     :param role: The role
     """
 
-    user.crew = crew
-    user.crew_role = role
-    user.crew_join_date = datetime.now()
-    user.save()
+    crew_member.crew = crew
+    crew_member.crew_role = role
+    crew_member.crew_join_date = datetime.now()
+    crew_member.save()
 
 
-def remove_member(user, context: CallbackContext = None, send_notification_to_captain: bool = False,
+def remove_member(crew_member, context: CallbackContext = None, send_notification_to_captain: bool = False,
                   send_notification_to_member: bool = False) -> None:
     """
     Removes a member from a crew
 
     :param context: The context
-    :param user: The user
+    :param crew_member: The user
     :param send_notification_to_captain: Whether to send a notification to the captain
     :param send_notification_to_member: Whether to send a notification to the member
     :return: None
     """
 
-    crew: Crew = user.crew
+    crew: Crew = crew_member.crew
 
-    user.crew = None
-    user.crew_role = None
-    user.crew_join_date = None
-    user.can_join_crew = False
-    user.save()
+    crew_member.crew = None
+    crew_member.crew_role = None
+    crew_member.crew_join_date = None
+    crew_member.can_join_crew = False
+    crew_member.save()
 
     # User left
     if send_notification_to_captain:
-        send_notification(context, crew.get_captain(), CrewLeaveNotification(user))
+        send_notification(context, crew.get_captain(), CrewLeaveNotification(crew_member))
 
     # User was removed
     if send_notification_to_member:
-        send_notification(context, user, CrewMemberRemoveNotification(user))
+        send_notification(context, crew_member, CrewMemberRemoveNotification(crew_member))
 
 
 def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard = None, crew_id_key: str = None,

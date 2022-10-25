@@ -158,7 +158,6 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         # Reduce bounty poster limit by 1 if it is not None
         if target_user.bounty_poster_limit != -1:
             target_user.bounty_poster_limit -= 1
-            target_user.save()
     else:  # Send regular message
         full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
                           add_delete_button=(inbound_keyboard is None), authorized_users=can_delete_users,

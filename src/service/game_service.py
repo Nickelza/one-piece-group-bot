@@ -180,7 +180,7 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
 
 def force_end_all_active() -> None:
     """
-    Force all games in progress to end, returning wagers
+    Force all games in progress to end
 
     :return: None
     """

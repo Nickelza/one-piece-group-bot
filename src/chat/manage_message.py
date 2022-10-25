@@ -133,8 +133,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     target_user: User | None = None
     if keyboard is None:
         try:
-            target_user: User = get_user(update.effective_message.reply_to_message.from_user,
-                                         should_update_immediately=True)
+            target_user: User = get_user(update.effective_message.reply_to_message.from_user)
         except AttributeError:
             pass
 
@@ -169,7 +168,8 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
         full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                           show_alert=True)
 
-    user.save()
+    if user.should_update_model:
+        user.save()
 
 
 def validate(update: Update, context: CallbackContext, command: Command.Command, user: User, inbound_keyboard: Keyboard,
@@ -262,11 +262,10 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
     return True
 
 
-def get_user(effective_user: TelegramUser, should_update_immediately: bool = False) -> User:
+def get_user(effective_user: TelegramUser) -> User:
     """
     Create or update the user
     :param effective_user: The Telegram user
-    :param should_update_immediately: If the user should be updated immediately
     :return: The user
     """
 
@@ -281,7 +280,6 @@ def get_user(effective_user: TelegramUser, should_update_immediately: bool = Fal
     user.tg_username = effective_user.username
     user.last_message_date = datetime.now()
 
-    if user.id is None or should_update_immediately:  # Else, will be updated later
-        user.save()
+    user.save()
 
     return user

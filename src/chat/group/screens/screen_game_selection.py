@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
+from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
@@ -22,11 +23,12 @@ class GameSelectionReservedKeys(StrEnum):
     CANCEL = 'c'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard) -> None:
+def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard) -> None:
     """
     Manage the game screen
     :param update: The update object
     :param context: The context object
+    :param user: The user object
     :param inbound_keyboard: The inbound keyboard
     :return: None
     """
@@ -39,6 +41,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
         delete_game(update, context, game)
+        user.should_update_model = False
         return
 
     game.type = GameType(inbound_keyboard.info[GameSelectionReservedKeys.GAME_TYPE])

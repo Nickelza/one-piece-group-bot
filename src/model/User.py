@@ -41,6 +41,12 @@ class User(BaseModel):
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
 
+    # Transient fields
+
+    # If the model should be updated at script end. Sometimes the model is updated in functions where it can not be
+    # passed as a parameter, so updating it at the end of the script would overwrite the changes
+    should_update_model: bool = True
+
     class Meta:
         db_table = 'user'
 
@@ -145,7 +151,7 @@ class User(BaseModel):
 
         return self.crew is not None
 
-    def get_markdown_mention(self):
+    def get_markdown_mention(self) -> str:
         """
         Returns the markdown mention of the user
         :return: The markdown mention of the user
@@ -154,6 +160,14 @@ class User(BaseModel):
         from src.service.message_service import mention_markdown_v2
 
         return mention_markdown_v2(str(self.tg_user_id), str(self.tg_first_name))
+
+    def refresh(self) -> 'User':
+        """
+        Refreshes the user
+        :return: The refreshed user
+        """
+
+        return type(self).get(self._pk_expr())
 
 
 User.create_table()

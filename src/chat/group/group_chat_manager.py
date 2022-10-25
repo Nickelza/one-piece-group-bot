@@ -100,7 +100,7 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, inbou
                 manage_screen_game(update, context, user, command)
 
             case Screen.GRP_GAME_SELECTION:  # Game selection
-                manage_screen_game_selection(update, context, inbound_keyboard=inbound_keyboard)
+                manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)
 
             case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
                 manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=inbound_keyboard)
