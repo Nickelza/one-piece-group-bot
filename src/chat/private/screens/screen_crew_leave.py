@@ -5,13 +5,14 @@ from telegram.ext import CallbackContext
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
+from src.model.enums.Location import get_by_bounty
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import remove_member as remove_member_from_crew, get_crew
 from src.service.cron_service import get_remaining_time_from_next_cron
-from src.service.message_service import full_message_send, get_yes_no_keyboard
+from src.service.message_service import full_message_send, get_yes_no_keyboard, escape_valid_markdown_chars
 
 
 class CrewLeaveReservedKeys(StrEnum):
@@ -38,9 +39,19 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         return
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
-        # Send leave confirmation request
         ot_text = phrases.CREW_LEAVE_CONFIRMATION.format(
             get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))
+
+        # Check if the new location after leaving Crew is lower than the current one
+        current_location = get_by_bounty(user.get_max_bounty())
+        new_location = get_by_bounty(user.bounty)
+        if new_location.level < user.location_level:
+            ot_text += (phrases
+                        .CREW_LEAVE_CONFIRMATION_LOCATION_DOWNGRADE
+                        .format(escape_valid_markdown_chars(new_location.name),
+                                escape_valid_markdown_chars(current_location.name)))
+
+        # Send leave confirmation request
         inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_LEAVE,
                                                                      inbound_keyboard=inbound_keyboard,
                                                                      no_is_back_button=True)]

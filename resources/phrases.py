@@ -93,10 +93,6 @@ EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
 KEYBOARD_NOT_FOUND = 'Keyboard not found'
 KEYBOARD_USE_UNAUTHORIZED = 'You are not authorized to use this keyboard'
 
-LOCATION_LEVEL_UP = '{}Congratulations {}!' \
-                    '\nYou are now {} {}' \
-                    '\n\n{}'
-
 LOCATION_CHANGE_REGION_PROPOSAL = '{}{} would you like to move to {}?'
 LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = '{}{} You can move to {} later with {} command'
 LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY = 'You need a bounty of at least ฿*{}* to move to the New World.'
@@ -299,6 +295,7 @@ ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact
 # Crew - Leave
 CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?' \
                           '\nYou will not be able to join another Crew until the next weekly leaderboard in {}'
+CREW_LEAVE_CONFIRMATION_LOCATION_DOWNGRADE = ' and your location will be downgraded to {} \\(current location: {}\\)'
 CREW_LEAVE_SUCCESS = 'You have left the Crew'
 
 # Crew - Disband

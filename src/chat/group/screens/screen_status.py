@@ -113,7 +113,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         bounty_string,
         pending_bounty_addendum,
         target_user_rank,
-        location_name)
+        escape_valid_markdown_chars(location_name))
 
     # Add Crew if in one
     if target_user.is_crew_member():

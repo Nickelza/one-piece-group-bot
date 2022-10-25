@@ -106,7 +106,7 @@ class LocationUpdateNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        from src.service.message_service import get_image_preview
+        from src.service.message_service import get_image_preview, escape_valid_markdown_chars
         from src.service.bounty_service import get_belly_formatted
 
         # Determine preposition to use for the location
@@ -128,7 +128,7 @@ class LocationUpdateNotification(Notification):
         return self.text.format(get_image_preview(self.location.image_url),
                                 mention_markdown_user(self.user),
                                 preposition,
-                                self.location.name,
+                                escape_valid_markdown_chars(self.location.name),
                                 text_suffix)
 
 
