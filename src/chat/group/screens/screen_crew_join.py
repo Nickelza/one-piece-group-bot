@@ -76,6 +76,13 @@ def validate(user: User, crew: Crew, specific_user_error: bool = False, specific
             raise CrewJoinValidationCrewException(
                 phrases.CREW_JOIN_REQUEST_CREW_FULL if specific_crew_error else None)
 
+        # Target crew cannot accept new members
+        if not crew.can_accept_new_members:
+            raise CrewJoinValidationCrewException(
+                phrases.CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_NEW_MEMBERS_UNTIL_NEXT_RESET.format(
+                    get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))
+                if specific_crew_error else None)
+
     except CrewJoinValidationUserException as e:
         raise CrewValidationException(
             e.message if e.message is not None else phrases.CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER)

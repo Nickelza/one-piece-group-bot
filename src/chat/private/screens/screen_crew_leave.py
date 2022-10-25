@@ -49,7 +49,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         return
 
     # Leave crew
-    remove_member_from_crew(user, context=context, send_notification_to_captain=True)
+    remove_member_from_crew(user, context=context, send_notification_to_captain=True, disable_user_can_join_crew=True)
 
     # Send success message
     ot_text = phrases.CREW_LEAVE_SUCCESS

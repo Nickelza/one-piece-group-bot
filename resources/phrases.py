@@ -281,6 +281,8 @@ CREW_JOIN_REQUEST_REJECTED = "[Your](tg://user?id={}) request to join the *{}* h
 CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER = 'The User cannot join this Crew'
 CREW_JOIN_REQUEST_USER_CANNOT_JOIN_CREW = 'You cannot join this Crew'
 CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET = 'You cannot join a Crew until the next weekly leaderboard in {}'
+CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_NEW_MEMBERS_UNTIL_NEXT_RESET = 'The Crew cannot accept new members until the ' \
+                                                                    'next weekly leaderboard in {}'
 
 # Crew - Invite request
 CREW_INVITE_REQUEST_CAPTION = "I'm {} and this meeting must be fate, {}! " \
@@ -292,8 +294,8 @@ STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'
 
 # Crew - Leave
-CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?\n' \
-                          'You will not be able to join another Crew until the next weekly leaderboard in {}'
+CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?' \
+                          '\nYou will not be able to join another Crew until the next weekly leaderboard in {}'
 CREW_LEAVE_SUCCESS = 'You have left the Crew'
 
 # Crew - Disband
@@ -308,7 +310,8 @@ CREW_MEMBER = '*{}*' \
 
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'
-CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the Crew?'
+CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the Crew?' \
+                                  '\nYou will not be able accept new members until the next weekly leaderboard in {}'
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
 
 # Notification - Crew Leave

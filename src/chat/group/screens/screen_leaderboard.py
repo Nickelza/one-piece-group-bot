@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.model.Crew import Crew
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
@@ -59,6 +60,9 @@ def manage(context: CallbackContext) -> None:
 
     # Reset can join crew flag
     User.update(can_join_crew=True).execute()
+
+    # Rest crew can accept new members flag
+    Crew.update(can_accept_new_members=True).execute()
 
     # Reset bounty if last leaderboard of the month
     if should_reset_bounty():

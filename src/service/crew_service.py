@@ -36,7 +36,8 @@ def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
 
 
 def remove_member(crew_member, context: CallbackContext = None, send_notification_to_captain: bool = False,
-                  send_notification_to_member: bool = False) -> None:
+                  send_notification_to_member: bool = False, disable_user_can_join_crew: bool = False,
+                  disable_crew_can_accept_new_members: bool = False) -> None:
     """
     Removes a member from a crew
 
@@ -44,6 +45,8 @@ def remove_member(crew_member, context: CallbackContext = None, send_notificatio
     :param crew_member: The user
     :param send_notification_to_captain: Whether to send a notification to the captain
     :param send_notification_to_member: Whether to send a notification to the member
+    :param disable_user_can_join_crew: Whether to set user can_join_crew to False
+    :param disable_crew_can_accept_new_members: Whether to set crew can_accept_new_members to False
     :return: None
     """
 
@@ -52,11 +55,17 @@ def remove_member(crew_member, context: CallbackContext = None, send_notificatio
     crew_member.crew = None
     crew_member.crew_role = None
     crew_member.crew_join_date = None
-    crew_member.can_join_crew = False
+
+    if disable_user_can_join_crew:
+        crew_member.can_join_crew = False
 
     update_location(crew_member, should_passive_update=True, can_scale_down=True)
 
     crew_member.save()
+
+    if disable_crew_can_accept_new_members:
+        crew.can_accept_new_members = False
+        crew.save()
 
     # User left
     if send_notification_to_captain:
