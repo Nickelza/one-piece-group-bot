@@ -173,7 +173,7 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
     if should_update_location:
         if context is None:
             raise ValueError('Context is required when updating the location')
-        update_location(context, user, update)
+        update_location(user, context, update)
 
 
 def add_region_bounty() -> None:

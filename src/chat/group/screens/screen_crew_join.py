@@ -7,6 +7,7 @@ import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException, CrewJoinValidationCrewException, \
@@ -23,9 +24,8 @@ class CrewReservedKeys(StrEnum):
     The reserved keys for the Crew join screen
     """
     CREW_ID = 'a'
-    ACCEPT = 'b'
-    REQUESTING_USER_ID = 'c'
-    CAPTAIN_USER_ID = 'd'
+    REQUESTING_USER_ID = 'b'
+    CAPTAIN_USER_ID = 'c'
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User) -> None:
@@ -129,7 +129,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, captain: User
     requesting_user: User = User.get(inbound_keyboard.info[CrewReservedKeys.REQUESTING_USER_ID])
 
     # Captain clicked on reject button
-    if not inbound_keyboard.info[CrewReservedKeys.ACCEPT]:
+    if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_JOIN_REQUEST_REJECTED.format(requesting_user.tg_user_id,
                                                             escape_valid_markdown_chars(crew.name))
         full_media_send(context, caption=ot_text, update=update, add_delete_button=True,

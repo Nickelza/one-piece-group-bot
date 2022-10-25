@@ -4,6 +4,7 @@ from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
@@ -19,7 +20,6 @@ class CrewDisbandReservedKeys(StrEnum):
     The reserved keys for the Crew disband screen
     """
     CREW_ID = 'a'
-    CONFIRM = 'b'
 
 
 def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
@@ -38,7 +38,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
-    if CrewDisbandReservedKeys.CONFIRM not in inbound_keyboard.info:
+    if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         # Send disband confirmation request
         ot_text = phrases.CREW_DISBAND_CONFIRMATION.format(get_remaining_time(get_next_bounty_reset_time()))
         inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_DISBAND,

@@ -13,6 +13,7 @@ from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWar
     CrewLeaveNotification, CrewMemberRemoveNotification
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.location_service import update_location
 from src.service.notification_service import send_notification
 
 
@@ -28,6 +29,9 @@ def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
     crew_member.crew = crew
     crew_member.crew_role = role
     crew_member.crew_join_date = datetime.now()
+
+    update_location(crew_member, should_passive_update=True)
+
     crew_member.save()
 
 
@@ -49,6 +53,9 @@ def remove_member(crew_member, context: CallbackContext = None, send_notificatio
     crew_member.crew_role = None
     crew_member.crew_join_date = None
     crew_member.can_join_crew = False
+
+    update_location(crew_member, should_passive_update=True, can_scale_down=True)
+
     crew_member.save()
 
     # User left

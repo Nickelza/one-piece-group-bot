@@ -82,6 +82,10 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
         else:
             user.update_private_screen_list(screen)
 
+            # Text message but not in edit mode and screen is not start, return
+            if user.private_screen_in_edit_id is None and screen is not Screen.PVT_START:
+                return
+
         match screen:
             case Screen.PVT_START:  # Start
                 manage_screen_start(update, context)

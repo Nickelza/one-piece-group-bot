@@ -6,6 +6,7 @@ from src.chat.group.screens.screen_crew_join import CrewReservedKeys, validate
 from src.model.Crew import Crew
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
@@ -83,7 +84,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, invited_user:
     captain: User = User.get(inbound_keyboard.info[CrewReservedKeys.CAPTAIN_USER_ID])
 
     # User clicked on reject button
-    if not inbound_keyboard.info[CrewReservedKeys.ACCEPT]:
+    if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_INVITE_REQUEST_REJECTED.format(escape_valid_markdown_chars(crew.name),
                                                               mention_markdown_user(invited_user))
         full_media_send(context, caption=ot_text, update=update, add_delete_button=True,

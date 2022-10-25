@@ -5,6 +5,7 @@ from telegram.ext import CallbackContext
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
@@ -18,7 +19,6 @@ class CrewLeaveReservedKeys(StrEnum):
     The reserved keys for the Crew leave screen
     """
     CREW_ID = 'a'
-    CONFIRM = 'b'
 
 
 def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
@@ -37,7 +37,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
-    if CrewLeaveReservedKeys.CONFIRM not in inbound_keyboard.info:
+    if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         # Send leave confirmation request
         ot_text = phrases.CREW_LEAVE_CONFIRMATION.format(
             get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))

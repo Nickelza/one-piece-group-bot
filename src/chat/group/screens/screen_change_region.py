@@ -51,7 +51,7 @@ def validate_move_request(update: Update, context: CallbackContext, user: User, 
     # Not enough bounty for New World
     if destination_region == Region.NEW_WORLD:
         first_new_world_location: Location = Location.get_first_new_world()
-        if user.bounty < first_new_world_location.required_bounty:
+        if user.get_max_bounty() < first_new_world_location.required_bounty:
             ot_text = phrases.LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY.format(
                 get_belly_formatted(first_new_world_location.required_bounty))
             full_message_send(context, ot_text, update=update, add_delete_button=True)
@@ -117,7 +117,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             return
 
         # Refresh location
-        update_location(context, user, update, cap_to_paradise=False, region=region, requested_by_user=True)
+        update_location(user, context, update, cap_to_paradise=False, region=region, requested_by_user=True)
         user.can_change_region = False
 
         return

@@ -169,5 +169,16 @@ class User(BaseModel):
 
         return type(self).get(self._pk_expr())
 
+    def get_max_bounty(self) -> int:
+        """
+        Returns the max bounty between the user and the crew average
+        :return: The max bounty between the user and the crew average
+        """
+
+        if self.is_crew_member():
+            return max(int(str(self.bounty)), self.crew.get_average_bounty())
+
+        return int(str(self.bounty))
+
 
 User.create_table()
