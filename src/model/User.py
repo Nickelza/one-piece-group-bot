@@ -94,6 +94,14 @@ class User(BaseModel):
         if len(self.private_screen_list) == 0:
             self.private_screen_list = None
 
+    def in_edit_mode(self):
+        """
+        Returns True if the user is in edit mode
+        :return: True if the user is in edit mode
+        """
+
+        return self.private_screen_step is not None
+
     def get_private_screen_list(self) -> list[Screen]:
         """
         Returns the private screen list
