@@ -147,7 +147,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
     bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES
 
     # Crew Bounty Bonus
-    if user.is_crew_member() and user.has_higher_bounty_than_crew_average():
+    if user.has_higher_bounty_than_crew_average():
         bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW
         has_bounty_bonus = True
 

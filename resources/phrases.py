@@ -105,8 +105,9 @@ FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
 FIGHT_CANNOT_FIGHT_USER = "You can't fight this user"
 FIGHT_CANNOT_FIGHT_CREW_MEMBER = "You can't fight a member of your Crew"
 FIGHT_USER_IN_COOLDOWN = "Fight cooldown active. You can initiate a fight in *{}*"
+FIGHT_CONFIRMATION_ODDS_RECALCULATED = "\n_*\\(Probability recalculated with opponent's Crew average bounty\\)*_"
 FIGHT_CONFIRMATION_REQUEST = '{} are you sure you want to fight {}?' \
-                             '\nI predict a {}% probability of {}.' + '\n\n' + GAME_WIN_LOSE_STATUS
+                             '\nI predict a {}% probability of {}.' + '{}\n\n' + GAME_WIN_LOSE_STATUS
 FIGHT_CONFIRMATION_OUTCOME_VICTORY = 'victory'
 FIGHT_CONFIRMATION_OUTCOME_DEFEAT = 'defeat'
 FIGHT_WIN = "Just as I foresaw, {} won the fight against {}.\n" \

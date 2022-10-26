@@ -202,10 +202,10 @@ class User(BaseModel):
         :return: True if the user has a higher bounty than the crew average
         """
 
-        if not self.is_crew_member():
-            raise ValueError('User is not in a crew')
+        if self.is_crew_member():
+            return int(str(self.bounty)) > self.crew.get_average_bounty()
 
-        return int(str(self.bounty)) > self.crew.get_average_bounty()
+        return False
 
 
 User.create_table()
