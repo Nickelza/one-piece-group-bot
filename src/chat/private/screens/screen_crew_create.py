@@ -7,6 +7,7 @@ from telegram.ext import CallbackContext
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.CrewRole as CrewRole
+import src.model.enums.LeaderboardRank as LeaderboardRank
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.error.CustomException import CrewValidationException
@@ -116,8 +117,11 @@ def validate(update: Update, context: CallbackContext, inbound_keyboard: Keyboar
             raise CrewValidationException(ot_text)
 
         # User has not appeared in the latest required leaderboards
-        for i in range(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()):
-            if get_leaderboard_user(user, index=i) is None:
+        required_rank = LeaderboardRank.get_rank_by_index(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK.get_int())
+        for i in range(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()):
+            leaderboard_rank: LeaderboardRank.LeaderboardRank = LeaderboardRank.get_rank_by_leaderboard_user(
+                get_leaderboard_user(user, index=i))
+            if not leaderboard_rank.is_equal_or_higher(required_rank):
                 raise CrewValidationException(phrases.CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES)
 
     except CrewValidationException as e:

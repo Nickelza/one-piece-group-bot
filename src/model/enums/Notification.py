@@ -163,7 +163,7 @@ class CrewDisbandWarningNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        return self.text.format(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
+        return self.text.format(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
 
 class GameTurnNotification(Notification):

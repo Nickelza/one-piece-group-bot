@@ -8,6 +8,7 @@ from src.model.Crew import Crew
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
+from src.model.enums import LeaderboardRank
 from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWarningNotification, \
     CrewLeaveNotification, CrewMemberRemoveNotification
@@ -149,7 +150,7 @@ def disband_inactive_crews(context: CallbackContext) -> None:
     """
 
     # Find captains of a Crew that have not been in the latest required leaderboards
-    inactive_crew_captains = get_inactive_captains(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int())
+    inactive_crew_captains = get_inactive_captains(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int())
 
     # Disband inactive crews
     for captain in inactive_crew_captains:
@@ -164,7 +165,7 @@ def warn_inactive_captains(context: CallbackContext) -> None:
     :return: None
     """
 
-    inactive_captains = get_inactive_captains(Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
+    inactive_captains = get_inactive_captains(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
     for captain in inactive_captains:
         send_notification(context, captain, CrewDisbandWarningNotification())
@@ -172,7 +173,7 @@ def warn_inactive_captains(context: CallbackContext) -> None:
 
 def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
     """
-    Find captains of a Crew that have not been in the latest N leaderboards
+    Find captains of a Crew that have not been in the latest N leaderboards in the required rank
 
     :param latest_leaderboard_appearance: The latest leaderboard appearance
     :return: The inactive captains
@@ -185,12 +186,14 @@ def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
                                 .execute())
     latest_leaderboards: list[Leaderboard] = list(query)
 
-    # Captains of Crews that appeared in the latest N leaderboards
+    # Captains of Crews that appeared in the latest N leaderboards in the required role
+    required_rank = LeaderboardRank.get_rank_by_index(Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK.get_int())
     query: list[User] = (User.select()
                          .join(LeaderboardUser)
                          .join(Leaderboard)
-                         .where((User.crew_role == CrewRole.CAPTAIN) &
-                                (Leaderboard.id.in_(latest_leaderboards)))
+                         .where((User.crew_role == CrewRole.CAPTAIN)
+                                & (Leaderboard.id.in_(latest_leaderboards))
+                                & (LeaderboardUser.rank_index <= required_rank.index))
                          .execute())
     active_captains: list[User] = list(query)
 

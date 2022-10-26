@@ -12,7 +12,7 @@ class LeaderboardRank:
                  bounty_poster_limit: int, max_win_probability: float, min_win_probability: float) -> None:
         """
         Constructor for leaderboard ranks
-        :param index: Index of the leaderboard rank
+        :param index: Index of the leaderboard rank. Lower index means higher rank
         :param title: Title
         :param emoji: Emoji
         :param leaderboard_start: Start index
@@ -37,6 +37,14 @@ class LeaderboardRank:
         """
 
         return self.emoji + ' ' + self.title
+
+    def is_equal_or_higher(self, other: 'LeaderboardRank') -> bool:
+        """
+        Checks if current rank is equal or higher than the other rank
+        :param other: The other rank
+        :return: True if the rank is higher than the other rank
+        """
+        return self.index <= other.index
 
 
 PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING, 1, 1,

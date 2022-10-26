@@ -384,7 +384,13 @@ WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_val
 WHITELIST_INLINE_BOTS = Environment('WHITELIST_INLINE_BOTS', default_value='')
 
 # How many latest leaderboard user has to be in to be able to create a Crew. Default: 4
-CREW_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')
+CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE',
+                                                            default_value='4')
+# Which rank user must have attained in the latest leaderboards to be able to create a Crew. Default: 2 (Emperor)
+CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK', default_value='2')
+# Which rank user must have attained in at least one of the latest leaderboards to be able to maintain a Crew.
+# Default: 3 (First Mate)
+CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK', default_value='3')
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
 # Maximum number of Crew members. Default: 10

@@ -1,6 +1,8 @@
 import resources.Environment as Env
 import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
+from src.model.enums.LeaderboardRank import get_rank_by_index
+from src.service.english_phrase_service import get_word_with_article
 
 COMMAND_NOT_IN_REPLY_ERROR = 'This command can only be used in a reply to a message'
 COMMAND_IN_REPLY_TO_BOT_ERROR = "This command can't be used in reply to a bot"
@@ -251,17 +253,20 @@ PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for t
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 
 # Crew - Private
+CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = \
+    f'{Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards as at least ' \
+    f'{get_word_with_article(get_rank_by_index(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK.get_int()).title)}'
 CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_MENTION} to join' \
                         f' one or create your own.' \
                         f'\n\nTo create a Crew, you must have appeared in the the last ' \
-                        f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards.'
+                        f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.'
 CREW_OVERVIEW = '*{}*\n{}'
 CREW_OVERVIEW_MEMBER = '\n{}. {}'
 CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
-CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = 'You must have appeared in the the last ' \
-                                                           f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()}' \
-                                                           f' leaderboards'
+CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = \
+    'You must have appeared in the the last ' \
+    f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}'
 CREW_CANNOT_CREATE_CREW = 'You can create a Crew in {}'
 CREW_CREATE_REQUEST_NAME = 'Send the name of your Crew'
 CREW_CREATE_NAME_ALREADY_EXISTS = 'A Crew with this name already exists'
@@ -330,13 +335,14 @@ CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
 CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.'
 CREW_DISBAND_NOTIFICATION_KEY = 'Crew disband'
 # Notification - Crew disband warning
-CREW_DISBAND_WARNING_NOTIFICATION = 'You have not appeared in the last {} leaderboards. ' \
-                                    '\nIf you do not appear in the next leaderboard, your Crew will be disbanded'
-CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = 'If to be notified a week before your Crew is disbanded due to ' \
-                                                f'not appearing in the leaderboard for ' \
-                                                f'{Env.CREW_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive ' \
-                                                f'weeks.' \
-                                                '\nApplicable only if you are the Captain of the Crew.'
+CREW_DISBAND_WARNING_NOTIFICATION = f'You have not appeared in the last ' \
+                                    f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.' \
+                                    '\nIf you do not appear in the next leaderboard, your Crew will be disbanded.'
+CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = \
+    'If to be notified a week before your Crew is disbanded due to not appearing in the leaderboard for ' \
+    f'{Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive leaderboards as at least ' \
+    f'{get_word_with_article(get_rank_by_index(Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK.get_int()).title)}.' \
+    f'\nApplicable only if you are the Captain of the Crew.'
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 # Notification - Game turn
 NOTIFICATION_CATEGORY_GAME = 'Game'
