@@ -25,6 +25,10 @@ def manage(update: Update, context: CallbackContext) -> None:
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_CREW, screen=Screen.PVT_CREW,
                                        previous_screen_list=[Screen.PVT_START])])
 
+    # Logs
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_LOGS, screen=Screen.PVT_LOGS,
+                                       previous_screen_list=[Screen.PVT_START])])
+
     # Settings button
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS, screen=Screen.PVT_SETTINGS,
                                        previous_screen_list=[Screen.PVT_START])])

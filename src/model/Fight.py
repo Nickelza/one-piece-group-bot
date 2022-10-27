@@ -23,5 +23,18 @@ class Fight(BaseModel):
     class Meta:
         db_table = 'fight'
 
+    def get_win_probability(self, user) -> float:
+        """
+        Get the win probability given a user
+
+        :param user: The user
+        :return: The win probability
+        """
+
+        if user.id == self.challenger.id:
+            return float(str(self.win_probability))
+        else:
+            return 100 - self.win_probability
+
 
 Fight.create_table()

@@ -135,7 +135,7 @@ def get_crew_members_text_keyboard(inbound_keyboard: Keyboard, crew: Crew) -> tu
         keyboard_line.append(button)
 
         # Add new keyboard line if needed
-        if index % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
+        if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
             inline_keyboard.append(keyboard_line)
             keyboard_line = []
 

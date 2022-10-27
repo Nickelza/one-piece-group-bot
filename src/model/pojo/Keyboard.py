@@ -94,3 +94,30 @@ class Keyboard:
         text: str = ''
 
         return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list)
+
+    def get(self, key: str):
+        """
+        Get a value from the keyboard info
+        :param key: The key
+        :return: The value
+        """
+
+        return self.info.get(key)
+
+    def get_int(self, key: str):
+        """
+        Get an int value from the keyboard info
+        :param key: The key
+        :return: The value
+        """
+
+        return int(self.info.get(key))
+
+    def get_bool(self, key: str):
+        """
+        Get a bool value from the keyboard info
+        :param key: The key
+        :return: The value
+        """
+
+        return bool(self.info.get(key))

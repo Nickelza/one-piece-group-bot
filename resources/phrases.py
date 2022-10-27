@@ -90,6 +90,8 @@ KEYBOARD_OPTION_NO = Emoji.NO + ' No'
 
 TEXT_YES = f'{Emoji.YES}Yes'
 TEXT_NO = f'{Emoji.NO}No'
+TEXT_WON = 'won'
+TEXT_LOST = 'lost'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -105,6 +107,8 @@ LOCATION_ALREADY_IN_REGION = 'You are already in {}'
 LOCATION_CANNOT_CHANGE_REGION = 'You can change region in *{}*'
 LOCATION_INVALID_CHANGE_REGION_REQUEST = 'Invalid region'
 
+FIGHT_CHALLENGER = 'Challenger'
+FIGHT_OPPONENT = 'Opponent'
 FIGHT_NOT_FOUND = 'Fight not found'
 FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
 FIGHT_CANNOT_FIGHT_USER = "You can't fight this user"
@@ -144,6 +148,8 @@ PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
+PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
+PVT_TXT_LOGS = 'Which log would you like to view?'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 
@@ -194,6 +200,15 @@ GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any
                        'to challenge you.'
 GAME_PENDING_KEY = 'Pending challenge'
 GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the participants.'
+
+GAME_STATUS_ND = 'Not defined'
+GAME_STATUS_IN_PROGRESS = 'In progress'
+GAME_STATUS_WON = 'Won'
+GAME_STATUS_LOST = 'Lost'
+GAME_STATUS_DRAW = 'Draw'
+GAME_STATUS_AWAITING_SELECTION = 'Awaiting game selection'
+GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION = 'Awaiting opponent confirmation'
+GAME_STATUS_FORCED_END = 'Forced end due to bounty reset'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'
@@ -253,7 +268,9 @@ PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN + '฿{
 PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
+
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
+CHAT_GROUP_MESSAGE_URL = f'https://t.me/{Env.OPD_GROUP_USERNAME.get()}/' + '{}'
 
 # Crew - Private
 CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = \
@@ -352,7 +369,7 @@ CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 NOTIFICATION_CATEGORY_GAME = 'Game'
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
                          f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' \
-                         f'(t.me/]{Env.OPD_GROUP_USERNAME.get()}/' + '{})'
+                         f'\\({CHAT_GROUP_MESSAGE_URL}\\)'
 GAME_TURN_NOTIFICATION_DESCRIPTION = 'If to be notified when it is your turn to play in a game if no action is taken ' \
                                      f'for {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds'
 GAME_TURN_NOTIFICATION_KEY = 'Game turn'
@@ -367,5 +384,20 @@ LOCATION_UPDATE_NOTIFICATION_DESCRIPTION = 'If to be notified when you level up 
 LOCATION_UPDATE_NOTIFICATION_KEY = 'Location update'
 
 # List
+LIST_OVERVIEW = 'Select' + ' an item from the list below\n{}'
+LIST_ITEM_TEXT = '\n*{}*. {}'
 LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
 NAVIGATION_LIMIT_REACHED = 'Limit reached'
+
+# Logs
+FIGHT_LOG_KEY = 'Fights'
+FIGHT_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
+LOG_ITEM_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
+                         '\n_\\(The message may no longer be available\\)_'
+FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
+                             '\n*Date*: {}' \
+                             '\n*Win probability*: {}%' \
+                             '\n\n{}' \
+                             f'{LOG_ITEM_GO_TO_MESSAGE}'
+FIGHT_LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}* ฿{}'
+FIGHT_LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'

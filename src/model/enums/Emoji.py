@@ -62,3 +62,9 @@ class Emoji(StrEnum):
 
     # Crew
     CREW = '👥'
+
+    # Logs
+    LOGS = '📋'
+    LOG_POSITIVE = '🟢'
+    LOG_NEGATIVE = '🔴'
+    LOG_NEUTRAL = '⚪'

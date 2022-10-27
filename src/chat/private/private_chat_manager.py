@@ -8,6 +8,9 @@ from src.chat.private.screens.screen_crew_disband import manage as manage_screen
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
 from src.chat.private.screens.screen_crew_member_remove import manage as manage_screen_crew_member_remove
+from src.chat.private.screens.screen_logs import manage as manage_screen_logs
+from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
+from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import manage as \
@@ -122,6 +125,15 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT:  # Notifications Type Edit
                 manage_screen_settings_notifications_type_edit(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_LOGS:  # Logs
+                manage_screen_logs(update, context, inbound_keyboard)
+
+            case Screen.PVT_LOGS_TYPE:  # Logs Type
+                manage_screen_logs_type(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_LOGS_TYPE_DETAIL:  # Logs Type Detail
+                manage_screen_logs_type_detail(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

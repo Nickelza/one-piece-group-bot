@@ -199,7 +199,8 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     fight_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.FIGHT)
 
     odds_recalculated_text = (phrases.FIGHT_CONFIRMATION_ODDS_RECALCULATED
-                              if not opponent.has_higher_bounty_than_crew_average() else "")
+                              if not opponent.is_crew_member() and opponent.has_higher_bounty_than_crew_average()
+                              else "")
 
     caption = phrases.FIGHT_CONFIRMATION_REQUEST.format(mention_markdown_user(user), mention_markdown_user(opponent),
                                                         outcome_probability, outcome, odds_recalculated_text,

@@ -1,0 +1,158 @@
+from abc import ABC, abstractmethod
+from enum import IntEnum
+
+import constants as c
+import resources.phrases as phrases
+from src.model.BaseModel import BaseModel
+from src.model.Fight import Fight
+from src.model.User import User
+from src.model.enums.Emoji import Emoji
+from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
+from src.service.bounty_service import get_belly_formatted
+
+
+class LogType(IntEnum):
+    """Enum for different types of logs"""
+
+    FIGHT = 1
+
+
+LOG_TYPE_BUTTON_TEXTS = {
+    LogType.FIGHT: phrases.FIGHT_LOG_KEY
+}
+
+
+class Log(ABC):
+    """Abstract class for logs."""
+
+    def __init__(self, log_type: LogType):
+        """
+        Constructor
+
+        :param log_type: The type of log
+        """
+
+        self.type: LogType = log_type
+        self.user: User = User()
+        self.object: BaseModel = BaseModel()
+
+    @abstractmethod
+    def set_object(self, object_id: int) -> None:
+        """
+        Set the object of the log
+
+        :param object_id: The object id
+        :return: None
+        """
+        pass
+
+    @abstractmethod
+    def get_items(self, page: int) -> list[BaseModel]:
+        """
+        Get a list item for the log
+
+        :param page: The page
+        :return: The list item
+        """
+        pass
+
+    @abstractmethod
+    def get_total_items_count(self) -> int:
+        """
+        Get the total number of items for the log
+
+        :return: The total number of items
+        """
+        pass
+
+    @abstractmethod
+    def get_item_text(self) -> str:
+        """
+        Get the text for an item in the list
+
+        :return: The text
+        """
+        pass
+
+    @abstractmethod
+    def get_item_detail_text(self) -> str:
+        """
+        Get the details for the log item
+
+        :return: The details
+        """
+        pass
+
+
+class FightLog(Log):
+    """Class for fight logs."""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.FIGHT)
+
+        self.object: Fight = Fight()
+        self.opponent: User = User()
+        self.effective_status: GameStatus = GameStatus.ND
+        self.user_is_challenger: bool = False
+
+    def set_object(self, object_id: int) -> None:
+        self.object = Fight.get(Fight.id == object_id)
+        self.user_is_challenger = self.object.challenger == self.user
+        self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
+        self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
+            self.user_is_challenger)
+
+    def get_items(self, page) -> list:
+        return (self.object
+                .select()
+                .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
+                .order_by(Fight.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.FIGHT_LOG_ITEM_TEXT.format(self.opponent.get_markdown_mention(),
+                                                  self.effective_status.get_log_emoji(),
+                                                  get_belly_formatted(self.object.belly))
+
+    def get_item_detail_text(self) -> str:
+        challenger_text = phrases.FIGHT_CHALLENGER if self.user_is_challenger else phrases.FIGHT_OPPONENT
+        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+
+        if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
+            won = self.effective_status is GameStatus.WON
+            outcome_text = phrases.FIGHT_LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
+                (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
+                (phrases.TEXT_WON if won else phrases.TEXT_LOST),
+                get_belly_formatted(self.object.belly))
+        else:
+            outcome_text = phrases.FIGHT_LOG_ITEM_DETAIL_STATUS_TEXT.format(
+                GAME_STATUS_DESCRIPTIONS[self.effective_status])
+
+        return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(challenger_text, self.opponent.get_markdown_mention(),
+                                                         date, self.object.get_win_probability(self.user),
+                                                         outcome_text, self.object.message_id)
+
+
+LOGS = [FightLog()]
+
+
+def get_log_by_type(log_type: LogType) -> Log:
+    """
+    Get a notification by type
+
+    :param log_type: The type of log
+    :return: The notification
+    """
+
+    return next(log for log in LOGS if log.type is log_type)
