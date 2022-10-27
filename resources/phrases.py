@@ -107,8 +107,9 @@ LOCATION_ALREADY_IN_REGION = 'You are already in {}'
 LOCATION_CANNOT_CHANGE_REGION = 'You can change region in *{}*'
 LOCATION_INVALID_CHANGE_REGION_REQUEST = 'Invalid region'
 
-FIGHT_CHALLENGER = 'Challenger'
-FIGHT_OPPONENT = 'Opponent'
+CHALLENGER = 'Challenger'
+OPPONENT = 'Opponent'
+
 FIGHT_NOT_FOUND = 'Fight not found'
 FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
 FIGHT_CANNOT_FIGHT_USER = "You can't fight this user"
@@ -390,7 +391,8 @@ LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
 NAVIGATION_LIMIT_REACHED = 'Limit reached'
 
 # Logs
-LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}* ฿{}'
+LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}*'
+LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
                                 '\n_\\(The message may no longer be available\\)_'
@@ -409,3 +411,12 @@ DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
                                   '\n\n{}' \
                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+# Logs - Game
+GAME_LOG_KEY = 'Challenges'
+GAME_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
+GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
+                            '\n*Game*: {}' \
+                            '\n*Date*: {}' \
+                            '\n*Wager*: ฿{}' \
+                            '\n\n{}' \
+                            f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'

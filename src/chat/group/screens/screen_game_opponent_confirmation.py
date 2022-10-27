@@ -7,6 +7,7 @@ from src.chat.group.screens.screen_game_rps import manage as manage_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
 from src.model.User import User
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
@@ -64,6 +65,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     user.bounty -= game.wager
     user.pending_bounty += game.wager
     game.wager += game.wager
+    game.status = GameStatus.IN_PROGRESS
     game.save()
 
     dispatch_game(update, context, user, inbound_keyboard, game)

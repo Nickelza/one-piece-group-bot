@@ -67,4 +67,6 @@ class Emoji(StrEnum):
     LOGS = '📋'
     LOG_POSITIVE = '🟢'
     LOG_NEGATIVE = '🔴'
+    LOG_DRAW = '🔵'
     LOG_NEUTRAL = '⚪'
+    LOG_FORCED_END = '🟡'

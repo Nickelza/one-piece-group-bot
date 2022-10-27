@@ -41,6 +41,10 @@ class GameStatus(IntEnum):
             return Emoji.LOG_POSITIVE
         elif self == GameStatus.LOST:
             return Emoji.LOG_NEGATIVE
+        elif self == GameStatus.DRAW:
+            return Emoji.LOG_DRAW
+        elif self == GameStatus.FORCED_END:
+            return Emoji.LOG_FORCED_END
 
         return Emoji.LOG_NEUTRAL
 

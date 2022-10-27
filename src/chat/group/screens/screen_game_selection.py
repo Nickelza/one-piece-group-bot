@@ -4,6 +4,7 @@ from telegram.ext import CallbackContext
 
 import resources.phrases as phrases
 from src.model.User import User
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
@@ -45,6 +46,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         return
 
     game.type = GameType(inbound_keyboard.info[GameSelectionReservedKeys.GAME_TYPE])
+    game.status = GameStatus.AWAITING_OPPONENT_CONFIRMATION
     game.save()
 
     ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(game.opponent),
