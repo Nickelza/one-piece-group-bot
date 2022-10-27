@@ -40,7 +40,8 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
 
     # Get crew member text
     ot_text = phrases.CREW_MEMBER.format(member.get_markdown_mention(), member.get_bounty_formatted(),
-                                         member.crew_join_date.strftime(c.STANDARD_DATE_FORMAT))
+                                         member.crew_join_date.strftime(c.STANDARD_DATE_FORMAT),
+                                         (phrases.TEXT_YES if member.has_crew_bonus() else phrases.TEXT_NO))
 
     inline_keyboard: list[list[Keyboard]] = []
     # Show remove button if user is captain and member is not captain

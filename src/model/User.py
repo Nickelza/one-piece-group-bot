@@ -207,5 +207,21 @@ class User(BaseModel):
 
         return False
 
+    def has_new_world_bonus(self) -> bool:
+        """
+        Returns True if the user has the New World bonus
+        :return: True if the user has the New World bonus
+        """
+
+        return self.in_new_world()
+
+    def has_crew_bonus(self) -> bool:
+        """
+        Returns True if the user has the Crew bonus
+        :return: True if the user has the Crew bonus
+        """
+
+        return self.has_higher_bounty_than_crew_average()
+
 
 User.create_table()

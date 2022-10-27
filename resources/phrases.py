@@ -88,6 +88,9 @@ KEYBOARD_OPTION_BACK = Emoji.BACK + ' Back'
 KEYBOARD_OPTION_YES = Emoji.YES + ' Yes'
 KEYBOARD_OPTION_NO = Emoji.NO + ' No'
 
+TEXT_YES = f'{Emoji.YES}Yes'
+TEXT_NO = f'{Emoji.NO}No'
+
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
 EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
@@ -312,7 +315,8 @@ CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 # Crew - Member
 CREW_MEMBER = '*{}*' \
               '\n\n*Bounty*: ฿{}' \
-              '\n*Join Date*: {}'
+              '\n*Join Date*: {}' \
+              '\n\nCrew Bonus: {}'
 
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'
