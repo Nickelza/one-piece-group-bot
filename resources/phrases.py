@@ -390,14 +390,22 @@ LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
 NAVIGATION_LIMIT_REACHED = 'Limit reached'
 
 # Logs
+LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}* ฿{}'
+LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
+LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
+                                '\n_\\(The message may no longer be available\\)_'
+# Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
-LOG_ITEM_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
-                         '\n_\\(The message may no longer be available\\)_'
 FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Date*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
-                             f'{LOG_ITEM_GO_TO_MESSAGE}'
-FIGHT_LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}* ฿{}'
-FIGHT_LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
+                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+# Logs - DocQ
+DOC_Q_GAME_LOG_KEY = 'Doc Q'
+DOC_Q_GAME_LOG_ITEM_TEXT = '{} ฿{}'
+DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
+                                  '\n*Correct apple*: {}°' \
+                                  '\n\n{}' \
+                                  f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'

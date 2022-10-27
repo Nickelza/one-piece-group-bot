@@ -4,6 +4,7 @@ from enum import IntEnum
 import constants as c
 import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
+from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
@@ -15,10 +16,12 @@ class LogType(IntEnum):
     """Enum for different types of logs"""
 
     FIGHT = 1
+    DOC_Q_GAME = 2
 
 
 LOG_TYPE_BUTTON_TEXTS = {
-    LogType.FIGHT: phrases.FIGHT_LOG_KEY
+    LogType.FIGHT: phrases.FIGHT_LOG_KEY,
+    LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_KEY
 }
 
 
@@ -85,7 +88,7 @@ class Log(ABC):
 
 
 class FightLog(Log):
-    """Class for fight logs."""
+    """Class for fight logs"""
 
     def __init__(self):
         """
@@ -107,7 +110,7 @@ class FightLog(Log):
         self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
             self.user_is_challenger)
 
-    def get_items(self, page) -> list:
+    def get_items(self, page) -> list[Fight]:
         return (self.object
                 .select()
                 .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
@@ -131,12 +134,12 @@ class FightLog(Log):
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
-            outcome_text = phrases.FIGHT_LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
+            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
                 (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
                 (phrases.TEXT_WON if won else phrases.TEXT_LOST),
                 get_belly_formatted(self.object.belly))
         else:
-            outcome_text = phrases.FIGHT_LOG_ITEM_DETAIL_STATUS_TEXT.format(
+            outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
                 GAME_STATUS_DESCRIPTIONS[self.effective_status])
 
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(challenger_text, self.opponent.get_markdown_mention(),
@@ -144,7 +147,52 @@ class FightLog(Log):
                                                          outcome_text, self.object.message_id)
 
 
-LOGS = [FightLog()]
+class DocQGameLog(Log):
+    """Class for DocQGame logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.DOC_Q_GAME)
+
+        self.object: DocQGame = DocQGame()
+
+    def set_object(self, object_id: int) -> None:
+        self.object = DocQGame.get(DocQGame.id == object_id)
+
+    def get_items(self, page) -> list[DocQGame]:
+        return (self.object
+                .select()
+                .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
+                .order_by(DocQGame.datetime.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.DOC_Q_GAME_LOG_ITEM_TEXT.format(GameStatus(self.object.status).get_log_emoji(),
+                                                       get_belly_formatted(self.object.belly))
+
+    def get_item_detail_text(self) -> str:
+        date = self.object.datetime.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        correct_apple = int((str(self.object.correct_choices_index).split(c.STANDARD_SPLIT_CHAR))[0]) + 1
+        won = GameStatus(self.object.status) is GameStatus.WON
+        outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
+            (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
+            (phrases.TEXT_WON if won else phrases.TEXT_LOST),
+            get_belly_formatted(self.object.belly))
+
+        return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(date, correct_apple, outcome_text, self.object.message_id)
+
+
+LOGS = [FightLog(), DocQGameLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:
