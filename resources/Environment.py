@@ -165,10 +165,15 @@ CRON_ADD_REGION_BOUNTY_BONUS = Environment('CRON_ADD_REGION_BOUNTY_BONUS', defau
 ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS', default_value='True')
 SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS',
                                                        default_value='False')
-# Bounty bonus for Crew members with bounty higher than crew average. Default: Every day at 00:10
+# Bounty bonus for Crew members. Default: Every day at 00:10
 CRON_ADD_CREW_BOUNTY_BONUS = Environment('CRON_ADD_CREW_BOUNTY_BONUS', default_value='10 0 * * *')
 ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='True')
 SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='False')
+# Bounty bonus for Crew members with bounty higher than crew average. Default: Every day at 00:10
+CRON_ADD_CREW_MVP_BOUNTY_BONUS = Environment('CRON_ADD_CREW_MVP_BOUNTY_BONUS', default_value='10 0 * * *')
+ENABLE_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_CREW_MVP_BOUNTY_BONUS', default_value='True')
+SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS',
+                                                         default_value='False')
 
 # Reddit post One Piece. Default: Every day at 00:00 and 12:00
 CRON_REDDIT_POST_ONE_PIECE = Environment('CRON_REDDIT_POST_ONE_PIECE', default_value='0 0,12 * * *')
@@ -222,10 +227,12 @@ BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value
 # LOCATION
 # Percentage that bounty is incremented by on timer for Paradise. Default: 0
 PARADISE_BOUNTY_BONUS = Environment('PARADISE_BOUNTY_BONUS', default_value='0')
-# Percentage that bounty is incremented by on timer for New World. Default: 1
-NEW_WORLD_BOUNTY_BONUS = Environment('NEW_WORLD_BOUNTY_BONUS', default_value='1')
+# Percentage that bounty is incremented by on timer for New World. Default: -3
+NEW_WORLD_BOUNTY_BONUS = Environment('NEW_WORLD_BOUNTY_BONUS', default_value='-3')
+# Percentage that bounty is incremented by on timer for Crew members. Default: 2
+CREW_BOUNTY_BONUS = Environment('CREW_BOUNTY_BONUS', default_value='2')
 # Percentage that bounty is incremented by on timer for Crew members with bounty higher than crew average. Default: 1
-CREW_BOUNTY_BONUS = Environment('CREW_BOUNTY_BONUS', default_value='1')
+CREW_MVP_BOUNTY_BONUS = Environment('CREW_MVP_BOUNTY_BONUS', default_value='1')
 
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)

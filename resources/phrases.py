@@ -28,9 +28,11 @@ SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
 SHOW_USER_STATUS_CREW = '\nCrew: {}'
-SHOW_USER_STATUS_BOUNTY_BONUSES = '\n\n*Bounty bonuses*:'
-SHOW_USER_STATUS_BOUNTY_BONUS_CREW = '\n- Crew'
-SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD = '\n- New World'
+SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE = '\n\n*Bounty bonuses*:'
+SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = '\n{}{} \\({}%\\)'
+SHOW_USER_STATUS_BOUNTY_BONUS_CREW = 'Crew'
+SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP = 'Crew MVP'
+SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD = 'New World'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
@@ -334,7 +336,7 @@ CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 CREW_MEMBER = '*{}*' \
               '\n\n*Bounty*: ฿{}' \
               '\n*Join Date*: {}' \
-              '\n\nCrew Bonus: {}'
+              '\n\nCrew MVP Bonus: {}'
 
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'

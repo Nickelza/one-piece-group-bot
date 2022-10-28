@@ -231,6 +231,14 @@ class User(BaseModel):
         :return: True if the user has the Crew bonus
         """
 
+        return self.is_crew_member()
+
+    def has_crew_mvp_bonus(self) -> bool:
+        """
+        Returns True if the user has the Crew MVP bonus
+        :return: True if the user has the Crew MVP bonus
+        """
+
         return self.has_higher_bounty_than_crew_average()
 
 

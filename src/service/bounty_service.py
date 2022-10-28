@@ -197,13 +197,23 @@ def add_region_bounty_bonus() -> None:
 
 def add_crew_bounty_bonus() -> None:
     """
+    Adds a bounty percentage to users in a crew
+    """
+
+    (User.update(bounty=((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100))
+     .where(User.crew.is_null(False))
+     .execute())
+
+
+def add_crew_mvp_bounty_bonus() -> None:
+    """
     Adds a bounty percentage to users in a crew with bounty higher than the crew average
     """
 
     condition: tuple[bool, int] = (
         (User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar())
          & (User.get_is_not_arrested_statement_condition())),
-        User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100))
+        User.bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
 
     case_stmt = Case(None, [condition], User.bounty)
     User.update(bounty=case_stmt).execute()

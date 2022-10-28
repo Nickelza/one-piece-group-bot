@@ -9,7 +9,7 @@ from src.chat.group.screens.screen_leaderboard import manage as send_leaderboard
 from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
 from src.chat.manage_message import init, end
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus
+from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import reset_can_initiate_game
 from src.service.location_service import reset_can_change_region
@@ -87,6 +87,8 @@ def run(context: CallbackContext) -> None:
             add_region_bounty_bonus()
         case Timer.ADD_CREW_BOUNTY_BONUS:
             add_crew_bounty_bonus()
+        case Timer.ADD_CREW_MVP_BOUNTY_BONUS:
+            add_crew_mvp_bounty_bonus()
         case Timer.RESET_CAN_INITIATE_GAME:
             reset_can_initiate_game()
         case Timer.SEND_SCHEDULED_PREDICTIONS:

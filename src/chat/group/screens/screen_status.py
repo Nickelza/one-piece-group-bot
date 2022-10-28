@@ -3,6 +3,7 @@ import datetime
 from telegram import Update
 from telegram.ext import CallbackContext
 
+import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
@@ -10,6 +11,7 @@ import src.service.bounty_service as bounty_service
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums import Location
+from src.model.enums.Emoji import Emoji
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -144,16 +146,30 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
 
     # BOUNTY BONUSES
     has_bounty_bonus = False
-    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES
+    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE
 
     # Crew Bounty Bonus
     if user.has_crew_bonus():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_POSITIVE if Env.CREW_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
+            Env.CREW_BOUNTY_BONUS.get_int())
+        has_bounty_bonus = True
+
+    # Crew MVP Bounty Bonus
+    if user.has_crew_mvp_bonus():
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_POSITIVE if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
+            Env.CREW_MVP_BOUNTY_BONUS.get_int())
         has_bounty_bonus = True
 
     # New World Bounty Bonus
     if target_user.has_new_world_bonus():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_POSITIVE if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD,
+            Env.NEW_WORLD_BOUNTY_BONUS.get_int())
         has_bounty_bonus = True
 
     if has_bounty_bonus:
