@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import IntEnum
 
 import resources.Environment as Env
@@ -5,8 +6,11 @@ import resources.phrases as phrases
 import src.model.enums.Location as Location
 from src.model.Game import Game
 from src.model.User import User
+from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
+from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
-from src.service.message_service import mention_markdown_user
+from src.service.cron_service import get_remaining_time
+from src.service.message_service import mention_markdown_user, escape_valid_markdown_chars
 
 
 class NotificationCategory(IntEnum):
@@ -15,12 +19,14 @@ class NotificationCategory(IntEnum):
     CREW = 1
     LOCATION = 2
     GAME = 3
+    IMPEL_DOWN = 4
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.CREW: phrases.NOTIFICATION_CATEGORY_CREW,
     NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION,
-    NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME
+    NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME,
+    NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN
 }
 
 
@@ -33,6 +39,8 @@ class NotificationType(IntEnum):
     CREW_DISBAND_WARNING = 4
     GAME_TURN = 5
     CREW_MEMBER_REMOVE = 6
+    IMPEL_DOWN_RESTRICTION_PLACED = 7
+    IMPEL_DOWN_RESTRICTION_REMOVED = 8
 
 
 class Notification:
@@ -215,8 +223,68 @@ class CrewMemberRemoveNotification(Notification):
         return self.text.format(mention_markdown_user(self.crew_member))
 
 
+class ImpelDownNotificationRestrictionPlaced(Notification):
+    """Class for impel down restriction place notifications."""
+
+    def __init__(self, sentence_type: ImpelDownSentenceType = None, release_date_time: datetime = None,
+                 bounty_action: ImpelDownBountyAction = None, reason: str = None):
+        """
+        Constructor
+
+        :param sentence_type: The sentence type
+        :param release_date_time: The release date time
+        :param bounty_action: The bounty action
+        :param reason: The reason
+        """
+
+        self.sentence_type = sentence_type
+        self.release_date_time = release_date_time
+        self.bounty_action = bounty_action
+        self.reason = reason
+
+        super().__init__(NotificationCategory.IMPEL_DOWN, NotificationType.IMPEL_DOWN_RESTRICTION_PLACED,
+                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION,
+                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION,
+                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification"""
+
+        restriction_text = ''
+        duration_text = ''
+
+        # Bounty action
+        if self.bounty_action is ImpelDownBountyAction.HALVE:
+            restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_HALVED
+        elif self.bounty_action is ImpelDownBountyAction.ERASE:
+            restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_ERASED
+
+        # Sentence type
+        if self.sentence_type is not ImpelDownSentenceType.NONE:
+            restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION
+
+            duration_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION.format(
+                get_remaining_time(self.release_date_time) if self.sentence_type is ImpelDownSentenceType.TEMPORARY
+                else phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT)
+
+        return self.text.format(escape_valid_markdown_chars(self.reason), restriction_text, duration_text)
+
+
+class ImpelDownNotificationRestrictionRemoved(Notification):
+    """Class for impel down restriction remove notifications."""
+
+    def __init__(self):
+        """Constructor"""
+
+        super().__init__(NotificationCategory.IMPEL_DOWN, NotificationType.IMPEL_DOWN_RESTRICTION_REMOVED,
+                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION,
+                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION,
+                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY)
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
-                 CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification()]
+                 CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
+                 ImpelDownNotificationRestrictionPlaced()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

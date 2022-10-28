@@ -70,3 +70,6 @@ class Emoji(StrEnum):
     LOG_DRAW = '🔵'
     LOG_NEUTRAL = '⚪'
     LOG_FORCED_END = '🟡'
+
+    # Impel Down
+    DISCIPLINARY_ACTION = '⛔'

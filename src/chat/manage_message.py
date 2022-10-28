@@ -168,7 +168,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
         full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                           show_alert=True)
 
-    if user.should_update_model:
+    if user.should_update_model and user.tg_user_id is not None:
         user.save()
 
 

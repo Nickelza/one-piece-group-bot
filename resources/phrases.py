@@ -385,6 +385,26 @@ LOCATION_NEXT_LEVEL_REQUIREMENT = '_Requirement for next location: ฿*{}*_'
 LOCATION_CURRENT_LEVEL_MAX = '_You have reached the maximum location_'
 LOCATION_UPDATE_NOTIFICATION_DESCRIPTION = 'If to be notified when you level up to a new location.'
 LOCATION_UPDATE_NOTIFICATION_KEY = 'Location update'
+# Notification - Impel Down restriction placed
+NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION = f'{Emoji.DISCIPLINARY_ACTION}*DISCIPLINARY ACTION*' \
+                                             f'{Emoji.DISCIPLINARY_ACTION}' \
+                                             '\n\n*Reason*: {}' \
+                                             '\n\n*Restrictions*:{}{}'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_HALVED = '\n- Bounty halved'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_ERASED = '\n- Bounty erased'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION = "\n- You can't acquire any new bounty" \
+                                                           "\n- You can't appear in the leaderboard" \
+                                                           "\n- You can't challenge other users or play games" \
+                                                           "\n- You can't bet in polls"
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION = '\n\n*Duration*: {}'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT = 'Permanent'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are restricted'
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY = 'Restriction placed'
+# Notification - Impel Down restriction removed
+IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION = 'All restrictions have been removed'
+IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION = 'If to be notified when all restrictions are removed'
+IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
 
 # List
 LIST_OVERVIEW = 'Select' + ' an item from the list below\n{}'

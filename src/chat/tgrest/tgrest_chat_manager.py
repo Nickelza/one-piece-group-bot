@@ -5,11 +5,15 @@ from telegram.ext import CallbackContext
 
 from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.tgrest.screens.screen_send_private_message import manage as manage_screen_send_private_message
+from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced
+from src.model.enums.Notification import ImpelDownNotificationRestrictionRemoved
 from src.model.tgrest.TgRest import TgRest, TgRestException
+from src.model.tgrest.TgRestImpelDownNotification import TgRestImpelDownNotification
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
 from src.model.tgrest.TgRestPrediction import TgRestPrediction
 from src.model.tgrest.TgRestPrivateMessage import TgRestPrivateMessage
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
+from src.service.notification_service import send_notification
 
 
 def manage(update: Update, context: CallbackContext) -> None:
@@ -26,7 +30,8 @@ def manage(update: Update, context: CallbackContext) -> None:
             # Try parsing object
             try:
                 # If starts with "Error" or "Request", ignore
-                if update.message.text.startswith("Error") or update.message.text.startswith("Request"):
+                if (update.effective_message.text.startswith("Error")
+                        or update.effective_message.text.startswith("Request")):
                     return
             except AttributeError:
                 return
@@ -48,6 +53,19 @@ def manage(update: Update, context: CallbackContext) -> None:
             case TgRestObjectType.PRIVATE_MESSAGE:
                 tg_rest_private_message = TgRestPrivateMessage(**tg_rest_dict)
                 manage_screen_send_private_message(context, tg_rest_private_message)
+
+            case TgRestObjectType.IMPEL_DOWN_NOTIFICATION:
+                tg_rest_impel_down_notification = TgRestImpelDownNotification(**tg_rest_dict)
+                if tg_rest_impel_down_notification.restriction_removed():
+                    notification = ImpelDownNotificationRestrictionRemoved()
+                else:
+                    notification = ImpelDownNotificationRestrictionPlaced(
+                        tg_rest_impel_down_notification.sentence_type,
+                        tg_rest_impel_down_notification.release_date_time,
+                        tg_rest_impel_down_notification.bounty_action,
+                        tg_rest_impel_down_notification.reason)
+
+                send_notification(context, tg_rest_impel_down_notification.user, notification)
 
             case _:
                 raise TgRestException("Unknown object type")

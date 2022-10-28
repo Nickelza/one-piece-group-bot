@@ -7,3 +7,4 @@ class TgRestObjectType(StrEnum):
     """
     PREDICTION = 'prediction'
     PRIVATE_MESSAGE = 'private_message'
+    IMPEL_DOWN_NOTIFICATION = 'impel_down_notification'
