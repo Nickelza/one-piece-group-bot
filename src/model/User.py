@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from peewee import *
 
@@ -66,6 +67,15 @@ class User(BaseModel):
 
         return ((self.impel_down_release_date is not None and self.impel_down_release_date > datetime.datetime.now())
                 or self.impel_down_is_permanent)
+
+    @staticmethod
+    def get_is_not_arrested_statement_condition() -> Any:
+        """
+        Returns a case statement condition which returns true if the user is not arrested
+        :return: The case statement
+        """
+        return ((User.impel_down_is_permanent == False) &
+                ((User.impel_down_release_date.is_null()) | (User.impel_down_release_date < datetime.datetime.now())))
 
     def update_private_screen_list(self, screen: Screen, previous_screen_list: list[Screen] = None):
         """

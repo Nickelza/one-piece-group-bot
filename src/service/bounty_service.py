@@ -183,13 +183,15 @@ def add_region_bounty_bonus() -> None:
     :return: None
     """
 
-    conditions: list[tuple[bool, int]] = [(User.location_level <= get_last_paradise().level,
+    conditions: list[tuple[bool, int]] = [((User.location_level <= get_last_paradise().level)
+                                           & (User.get_is_not_arrested_statement_condition()),
                                            User.bounty +
                                            ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
-                                          (User.location_level >= get_first_new_world().level,
+                                          ((User.location_level >= get_first_new_world().level)
+                                           & (User.get_is_not_arrested_statement_condition()),
                                            User.bounty +
                                            ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
-    case_stmt = Case(None, conditions)
+    case_stmt = Case(None, conditions, User.bounty)
     User.update(bounty=case_stmt).execute()
 
 
@@ -199,7 +201,8 @@ def add_crew_bounty_bonus() -> None:
     """
 
     condition: tuple[bool, int] = (
-        User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()),
+        (User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar())
+         & (User.get_is_not_arrested_statement_condition())),
         User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100))
 
     case_stmt = Case(None, [condition], User.bounty)
