@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -103,6 +105,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
         prediction_option_user.user = user
         prediction_option_user.wager = wager
 
+    prediction_option_user.date = datetime.now()
     prediction_option_user.save()
 
     # Remove wager from user balance

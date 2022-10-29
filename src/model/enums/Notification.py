@@ -7,12 +7,14 @@ import src.model.enums.Location as Location
 from src.model.Game import Game
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
+from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
 from src.service.cron_service import get_remaining_time
+from src.service.date_service import default_datetime_format
 from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user
 
 
@@ -47,6 +49,7 @@ class NotificationType(IntEnum):
     IMPEL_DOWN_RESTRICTION_PLACED = 7
     IMPEL_DOWN_RESTRICTION_REMOVED = 8
     PREDICTION_RESULT = 9
+    PREDICTION_BET_INVALID = 10
 
 
 class Notification:
@@ -312,9 +315,10 @@ class PredictionResultNotification(Notification):
                          phrases.PREDICTION_RESULT_NOTIFICATION_KEY)
 
     def build(self) -> str:
+        """Builds the notification"""
+
         from src.service.bounty_service import get_belly_formatted
 
-        """Builds the notification"""
         # Result text
         result_text = phrases.TEXT_WON if self.total_win >= 0 else phrases.TEXT_LOST
 
@@ -360,10 +364,54 @@ class PredictionResultNotification(Notification):
                                 correct_prediction_options_text, wager_refunded_text, self.prediction.message_id)
 
 
+class PredictionBetInvalidNotification(Notification):
+    """Class for invalid prediction bet notifications."""
+
+    def __init__(self, prediction: Prediction = None, prediction_options_user: list[PredictionOptionUser] = None,
+                 total_refund: int = None):
+        """
+        Constructor
+
+        :param prediction: The prediction
+        :param prediction_options_user: The invalid prediction options that were chosen by the user
+        :param total_refund: The total refund
+        """
+
+        self.prediction = prediction
+        self.prediction_options_user = prediction_options_user
+        self.total_refund = total_refund
+
+        super().__init__(NotificationCategory.PREDICTION, NotificationType.PREDICTION_BET_INVALID,
+                         phrases.PREDICTION_BET_INVALID_NOTIFICATION,
+                         phrases.PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION,
+                         phrases.PREDICTION_BET_INVALID_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        if len(self.prediction_options_user) == 1:
+            bet_has = phrases.PREDICTION_BET_INVALID_BET_HAS
+            it_was = phrases.TEXT_IT_WAS
+        else:
+            bet_has = phrases.PREDICTION_BET_INVALID_BETS_HAVE
+            it_was = phrases.TEXT_THEY_WERE
+
+        invalid_prediction_options_list = ''
+        for prediction_option_user in self.prediction_options_user:
+            prediction_option: PredictionOption = prediction_option_user.prediction_option
+            invalid_prediction_options_list += phrases.PREDICTION_BET_INVALID_NOTIFICATION_OPTION.format(
+                escape_valid_markdown_chars(prediction_option.option),
+                default_datetime_format(prediction_option_user.date))
+
+        return self.text.format(bet_has, it_was, escape_valid_markdown_chars(self.prediction.question),
+                                default_datetime_format(self.prediction.cut_off_date), invalid_prediction_options_list,
+                                get_belly_formatted(self.total_refund), self.prediction.message_id)
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
-                 PredictionResultNotification()]
+                 PredictionResultNotification(), PredictionBetInvalidNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

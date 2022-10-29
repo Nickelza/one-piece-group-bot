@@ -94,6 +94,8 @@ TEXT_YES = f'{Emoji.YES}Yes'
 TEXT_NO = f'{Emoji.NO}No'
 TEXT_WON = 'won'
 TEXT_LOST = 'lost'
+TEXT_IT_WAS = 'it was'
+TEXT_THEY_WERE = 'they were'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -405,7 +407,7 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY = 'Restriction placed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION = 'All restrictions have been removed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION = 'If to be notified when all restrictions are removed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
-# Notification - Prediction
+# Notification - Prediction result
 PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
     f'\n\n{Emoji.RIGHT_ARROW}[Go to prediction message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
     '\n_\\(The message may no longer be available\\)_'
@@ -423,6 +425,17 @@ PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTION = '\n\n*Correct option*: {}'
 PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTIONS = '\n\n*Correct options*: {}'
 PREDICTION_RESULT_NOTIFICATION_DESCRIPTION = 'If to be notified of the outcome of a prediction you participated in'
 PREDICTION_RESULT_NOTIFICATION_KEY = 'Prediction result'
+# Notification - Prediction bet invalid
+PREDICTION_BET_INVALID_BET_HAS = 'bet has'
+PREDICTION_BET_INVALID_BETS_HAVE = 'bets have'
+PREDICTION_BET_INVALID_NOTIFICATION = 'The following {} been removed from the prediction "*{}*"' + \
+                                      ' because {} placed after the cut off time \\({}\\):\n{}' + \
+                                      '\n\n_You have been refunded ฿{}_' + \
+                                      PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
+PREDICTION_BET_INVALID_NOTIFICATION_OPTION = '\n- {} \\({}\\)'
+PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION = 'If to be notified when a bet you placed is removed from a ' \
+                                                  'because it was placed after the cut off time'
+PREDICTION_BET_INVALID_NOTIFICATION_KEY = 'Prediction bet removed'
 
 # List
 LIST_OVERVIEW = 'Select' + ' an item from the list below\n{}'

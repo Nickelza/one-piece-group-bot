@@ -1,5 +1,6 @@
 import datetime
 import logging
+from datetime import datetime
 
 from telegram import Message
 from telegram.error import BadRequest
@@ -12,7 +13,7 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.Notification import PredictionResultNotification
+from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
 from src.service.bounty_service import round_belly_up, add_bounty
@@ -35,7 +36,7 @@ def send(context: CallbackContext, prediction: Prediction, is_resent: bool = Fal
             raise PredictionException(phrases.PREDICTION_NOT_IN_NEW_STATUS)
 
         prediction.status = PredictionStatus.SENT
-        prediction.send_date = datetime.datetime.now()
+        prediction.send_date = datetime.now()
 
     message: Message = full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
     message.pin(disable_notification=True)
@@ -116,6 +117,9 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
         raise PredictionException(phrases.PREDICTION_NOT_IN_SENT_STATUS)
 
+    # Dictionary with key: user_id, value: user, prediction option user, total refund
+    users_invalid_prediction_options: dict[int, [User, list[PredictionOptionUser], int]] = {}
+
     # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
     if prediction.cut_off_date is not None:
         invalid_prediction_option_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
@@ -128,11 +132,18 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
             user.bounty += invalid_prediction_option_user.wager
             user.save()
 
+            # Add to users_invalid_prediction_options
+            if user.id not in users_invalid_prediction_options:
+                users_invalid_prediction_options[user.id] = [user, [], 0]
+
+            users_invalid_prediction_options[user.id][1].append(invalid_prediction_option_user)
+            users_invalid_prediction_options[user.id][2] += invalid_prediction_option_user.wager
+
             invalid_prediction_option_user.delete_instance()
 
     # Update status
     prediction.status = PredictionStatus.BETS_CLOSED
-    prediction.end_date = datetime.datetime.now()
+    prediction.end_date = datetime.now()
     prediction.save()
 
     # Update prediction message
@@ -141,6 +152,17 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     # Send message in reply notifying users that bets are closed
     full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, chat_id=Env.OPD_GROUP_ID.get(),
                       reply_to_message_id=prediction.message_id)
+
+    # Send notification to users
+    for user_id, value in users_invalid_prediction_options.items():
+        user: User = value[0]
+        prediction_options_user = value[1]
+        total_refund = value[2]
+
+        notification: PredictionBetInvalidNotification = PredictionBetInvalidNotification(
+            prediction, prediction_options_user, total_refund)
+
+        send_notification(context, user, notification)
 
 
 def set_results(context: CallbackContext, prediction: Prediction) -> None:
@@ -195,7 +217,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
 
     # Update status
     prediction.status = PredictionStatus.RESULT_SET
-    prediction.result_set_date = datetime.datetime.now()
+    prediction.result_set_date = datetime.now()
     prediction.save()
 
     # Refresh prediction
@@ -299,7 +321,7 @@ def send_scheduled_predictions(context: CallbackContext) -> None:
 
     # Select not sent predictions with send date in the past
     predictions: list[Prediction] = Prediction.select().where((Prediction.send_date.is_null(False))
-                                                              & (Prediction.send_date <= datetime.datetime.now())
+                                                              & (Prediction.send_date <= datetime.now())
                                                               & (Prediction.status == PredictionStatus.NEW))
 
     for prediction in predictions:
@@ -314,7 +336,7 @@ def close_scheduled_predictions(context: CallbackContext) -> None:
 
     # Select sent predictions with end date in the past
     predictions: list[Prediction] = Prediction.select().where((Prediction.end_date.is_null(False))
-                                                              & (Prediction.end_date <= datetime.datetime.now())
+                                                              & (Prediction.end_date <= datetime.now())
                                                               & (Prediction.status == PredictionStatus.SENT))
 
     for prediction in predictions:
