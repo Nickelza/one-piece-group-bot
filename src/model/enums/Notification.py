@@ -5,12 +5,15 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
 from src.model.Game import Game
+from src.model.Prediction import Prediction
+from src.model.PredictionOption import PredictionOption
 from src.model.User import User
+from src.model.enums.Emoji import Emoji
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
 from src.service.cron_service import get_remaining_time
-from src.service.message_service import mention_markdown_user, escape_valid_markdown_chars
+from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user
 
 
 class NotificationCategory(IntEnum):
@@ -20,13 +23,15 @@ class NotificationCategory(IntEnum):
     LOCATION = 2
     GAME = 3
     IMPEL_DOWN = 4
+    PREDICTION = 5
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.CREW: phrases.NOTIFICATION_CATEGORY_CREW,
     NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION,
     NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME,
-    NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN
+    NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN,
+    NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION
 }
 
 
@@ -41,6 +46,7 @@ class NotificationType(IntEnum):
     CREW_MEMBER_REMOVE = 6
     IMPEL_DOWN_RESTRICTION_PLACED = 7
     IMPEL_DOWN_RESTRICTION_REMOVED = 8
+    PREDICTION_RESULT = 9
 
 
 class Notification:
@@ -114,7 +120,6 @@ class LocationUpdateNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        from src.service.message_service import get_image_preview, escape_valid_markdown_chars
         from src.service.bounty_service import get_belly_formatted
 
         # Determine preposition to use for the location
@@ -282,9 +287,83 @@ class ImpelDownNotificationRestrictionRemoved(Notification):
                          phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY)
 
 
+class PredictionResultNotification(Notification):
+    """Class for prediction result notifications."""
+
+    def __init__(self, prediction: Prediction = None, prediction_options: list[PredictionOption] = None,
+                 correct_prediction_options: list[PredictionOption] = None, total_win: int = None):
+        """
+        Constructor
+
+        :param prediction: The prediction
+        :param prediction_options: The prediction options that were chosen by the user
+        :param correct_prediction_options: The correct prediction options
+        :param total_win: The total win
+        """
+
+        self.prediction = prediction
+        self.prediction_options = prediction_options
+        self.correct_prediction_options = correct_prediction_options
+        self.total_win = total_win
+
+        super().__init__(NotificationCategory.PREDICTION, NotificationType.PREDICTION_RESULT,
+                         phrases.PREDICTION_RESULT_NOTIFICATION,
+                         phrases.PREDICTION_RESULT_NOTIFICATION_DESCRIPTION,
+                         phrases.PREDICTION_RESULT_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        """Builds the notification"""
+        # Result text
+        result_text = phrases.TEXT_WON if self.total_win >= 0 else phrases.TEXT_LOST
+
+        # User prediction options
+        user_prediction_options_list = ''
+        for option in self.prediction_options:
+            option_emoji = Emoji.LOG_POSITIVE if option.is_correct else Emoji.LOG_NEGATIVE
+            user_prediction_options_list += phrases.PREDICTION_RESULT_NOTIFICATION_OPTION.format(
+                option_emoji, escape_valid_markdown_chars(option.option))
+        phrase_to_use = (phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTION
+                         if len(self.prediction_options) == 1
+                         else phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTIONS)
+        user_prediction_options_text = phrase_to_use.format(user_prediction_options_list)
+
+        prediction_has_correct_options = len(self.correct_prediction_options) > 0
+        # Correct prediction options
+        prediction_has_multiple_options = len(self.correct_prediction_options) > 0 or len(self.prediction_options) > 0
+        user_got_the_only_correct_option = len(self.correct_prediction_options) == 1 and len(
+            [option for option in self.prediction_options if option.is_correct]) == 1
+
+        # Show correct options list if:
+        # - Prediction has at least one correct option
+        # - Prediction has multiple options or didn't get the only correct option
+        correct_prediction_options_text = ''
+        if prediction_has_correct_options and (prediction_has_multiple_options
+                                               and not user_got_the_only_correct_option):
+            correct_prediction_options_list = ''
+            for option in self.correct_prediction_options:
+                correct_prediction_options_list += phrases.PREDICTION_RESULT_NOTIFICATION_OPTION_NO_EMOJI.format(
+                    escape_valid_markdown_chars(option.option))
+            correct_prediction_options_text = phrases.PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTIONS.format(
+                correct_prediction_options_list)
+
+        # Wager refunded notice
+        wager_refunded_text = ''
+        if not prediction_has_correct_options:
+            wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS
+        elif self.prediction.refund_wager:
+            wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED
+
+        return self.text.format(result_text, get_belly_formatted(abs(self.total_win)),
+                                escape_valid_markdown_chars(self.prediction.question), user_prediction_options_text,
+                                correct_prediction_options_text, wager_refunded_text, self.prediction.message_id)
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
-                 ImpelDownNotificationRestrictionPlaced()]
+                 ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
+                 PredictionResultNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

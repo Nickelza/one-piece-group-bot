@@ -12,11 +12,13 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.Notification import PredictionResultNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
 from src.service.bounty_service import round_belly_up, add_bounty
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
+from src.service.notification_service import send_notification
 
 
 def send(context: CallbackContext, prediction: Prediction, is_resent: bool = False) -> None:
@@ -155,15 +157,32 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
                                                           if prediction_option.is_correct]
     prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
 
+    # Dictionary with key: user_id, value: list (user, total_win, list of prediction_options)
+    users_total_win: dict[int, list[User, int, list[PredictionOption]]] = {}
+
     for prediction_option_user in prediction_options_users:
         user: User = prediction_option_user.user
 
+        # If user is not in dictionary, add it
+        if user.id not in users_total_win:
+            users_total_win[user.id] = [user, 0, []]
+
+        # Add prediction option to list
+        prediction_option: PredictionOption = prediction_option_user.prediction_option
+        users_total_win[user.id][2].append(prediction_option)
+
         # Correct prediction
-        if prediction_option_user.prediction_option.is_correct:
+        if prediction_option.is_correct:
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
             add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+
+            # Add to total win
+            users_total_win[user.id][1] += win_amount
+        else:
+            # Remove from total win
+            users_total_win[user.id][1] -= prediction_option_user.wager
 
         # Subtract bet wager from user pending bounty
         user.pending_bounty -= prediction_option_user.wager
@@ -185,6 +204,17 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
     # Send message in reply notifying users that results are set
     full_message_send(context, phrases.PREDICTION_RESULTS_SET, chat_id=Env.OPD_GROUP_ID.get(),
                       reply_to_message_id=prediction.message_id)
+
+    # Send notification to users
+    for user_id, value in users_total_win.items():
+        user: User = value[0]
+        total_win: int = value[1]
+        user_prediction_options: list[PredictionOption] = value[2]
+
+        notification: PredictionResultNotification = PredictionResultNotification(
+            prediction, user_prediction_options, prediction_options_correct, total_win)
+
+        send_notification(context, user, notification)
 
 
 def refresh(context: CallbackContext, prediction: Prediction) -> None:

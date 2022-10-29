@@ -405,6 +405,24 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY = 'Restriction placed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION = 'All restrictions have been removed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION = 'If to be notified when all restrictions are removed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
+# Notification - Prediction
+PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
+    f'\n\n{Emoji.RIGHT_ARROW}[Go to prediction message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
+    '\n_\\(The message may no longer be available\\)_'
+NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
+PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}' + \
+                                 PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
+PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = '_\n\n\\(Your wager was refunded\\)_'
+PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS = '_\n\n\\(Your wager was refunded because there' \
+                                                                   ' were no correct options\\)_'
+PREDICTION_RESULT_NOTIFICATION_OPTION = '\n{}{}'
+PREDICTION_RESULT_NOTIFICATION_OPTION_NO_EMOJI = '\n- {}'
+PREDICTION_RESULT_NOTIFICATION_YOUR_OPTION = '\n\n*Your option*: {}'
+PREDICTION_RESULT_NOTIFICATION_YOUR_OPTIONS = '\n\n*Your options*: {}'
+PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTION = '\n\n*Correct option*: {}'
+PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTIONS = '\n\n*Correct options*: {}'
+PREDICTION_RESULT_NOTIFICATION_DESCRIPTION = 'If to be notified of the outcome of a prediction you participated in'
+PREDICTION_RESULT_NOTIFICATION_KEY = 'Prediction result'
 
 # List
 LIST_OVERVIEW = 'Select' + ' an item from the list below\n{}'
