@@ -87,4 +87,4 @@ def reset_can_change_region() -> None:
     :return: None
     """
 
-    User.update(can_change_region=True).where(User.can_change_region is False)
+    User.update(can_change_region=True).where(User.can_change_region is False).execute()
