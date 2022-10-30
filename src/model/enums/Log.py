@@ -134,8 +134,8 @@ class FightLog(Log):
                 .count())
 
     def get_item_text(self) -> str:
-        return phrases.FIGHT_LOG_ITEM_TEXT.format(self.opponent.get_markdown_mention(),
-                                                  self.effective_status.get_log_emoji(),
+        return phrases.FIGHT_LOG_ITEM_TEXT.format(self.effective_status.get_log_emoji(),
+                                                  self.opponent.get_markdown_mention(),
                                                   get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
@@ -240,8 +240,8 @@ class GameLog(Log):
                 .count())
 
     def get_item_text(self) -> str:
-        return phrases.GAME_LOG_ITEM_TEXT.format(self.opponent.get_markdown_mention(),
-                                                 self.effective_status.get_log_emoji(),
+        return phrases.GAME_LOG_ITEM_TEXT.format(self.effective_status.get_log_emoji(),
+                                                 self.opponent.get_markdown_mention(),
                                                  get_belly_formatted(self.object.wager))
 
     def get_item_detail_text(self) -> str:

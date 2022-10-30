@@ -452,7 +452,7 @@ LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_G
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
-FIGHT_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
+FIGHT_LOG_ITEM_TEXT = '{} vs {} \\(฿{}\\)'
 FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Date*: {}' \
                              '\n*Win probability*: {}%' \
@@ -469,7 +469,7 @@ DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
 # Logs - Game
 GAME_LOG_KEY = 'Challenges'
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'
-GAME_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
+GAME_LOG_ITEM_TEXT = '{} vs {} \\(฿{}\\)'
 GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Game*: {}' \
                             '\n*Date*: {}' \
