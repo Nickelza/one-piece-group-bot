@@ -60,6 +60,13 @@ def get_message_belly(update: Update, user: User) -> int:
     except AttributeError:
         pass
 
+    # Inline Bot - No belly
+    try:
+        if update.effective_message.via_bot is not None:
+            return 0
+    except AttributeError:
+        pass
+
     # Forwarded message - Base belly
     try:
         if update.message.forward_from is not None:
