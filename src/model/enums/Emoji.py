@@ -47,7 +47,8 @@ class Emoji(StrEnum):
     # Prediction
     PREDICTION_BET_WIN = '🏆'
     PREDICTION_BET_LOSE = '❗'
-    PREDICTION_FEATURE_ENABLED = '✔'
+    PREDICTION_FEATURE_ENABLED = '🟢'
+    PREDICTION_FEATURE_DISABLED = '🔴'
 
     # Rock Paper Scissors
     ROCK = '✊'

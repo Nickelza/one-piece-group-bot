@@ -82,11 +82,16 @@ def get_prediction_text(prediction: Prediction) -> str:
 
     optional_text = ""
     # Wagers refunded
-    optional_text += phrases.PREDICTION_WAGERS_REFUNDED if prediction.refund_wager else ""
+    enabled_emoji = Emoji.PREDICTION_FEATURE_ENABLED if prediction.refund_wager else Emoji.PREDICTION_FEATURE_DISABLED
+    optional_text += phrases.PREDICTION_WAGERS_REFUNDED.format(enabled_emoji)
     # Multiple bets allowed
-    optional_text += phrases.PREDICTION_MULTIPLE_BETS_ALLOWED if prediction.allow_multiple_choices else ""
+    enabled_emoji = (Emoji.PREDICTION_FEATURE_ENABLED if prediction.allow_multiple_choices
+                     else Emoji.PREDICTION_FEATURE_DISABLED)
+    optional_text += phrases.PREDICTION_MULTIPLE_BETS_ALLOWED.format(enabled_emoji)
     # Bet withdrawal allowed
-    optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS if prediction.can_withdraw_bet else ""
+    enabled_emoji = (Emoji.PREDICTION_FEATURE_ENABLED if prediction.can_withdraw_bet
+                     else Emoji.PREDICTION_FEATURE_DISABLED)
+    optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS.format(enabled_emoji)
 
     # Add command to place bets if prediction is open
     how_to_bet_command_text = ""

@@ -228,9 +228,9 @@ PREDICTION_TEXT = '*{}*' \
 PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
-PREDICTION_WAGERS_REFUNDED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Wagers refunded'
-PREDICTION_MULTIPLE_BETS_ALLOWED = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Multiple bets allowed'
-PREDICTION_CAN_WITHDRAW_BETS = f'\n{Emoji.PREDICTION_FEATURE_ENABLED} Can withdraw bets'
+PREDICTION_WAGERS_REFUNDED = '\n{} Wagers refunded'
+PREDICTION_MULTIPLE_BETS_ALLOWED = '\n{} Multiple bets allowed'
+PREDICTION_CAN_WITHDRAW_BETS = '\n{} Can withdraw bets'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
                                 f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
