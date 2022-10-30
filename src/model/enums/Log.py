@@ -133,7 +133,7 @@ class FightLog(Log):
                                                   get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
-        challenger_text = phrases.CHALLENGER if self.user_is_challenger else phrases.OPPONENT
+        challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
@@ -241,7 +241,7 @@ class GameLog(Log):
     def get_item_detail_text(self) -> str:
         from src.service.game_service import get_game_name
 
-        challenger_text = phrases.CHALLENGER if self.user_is_challenger else phrases.OPPONENT
+        challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
         game_name = get_game_name(GameType(self.object.type))
 
