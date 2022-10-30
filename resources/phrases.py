@@ -438,7 +438,7 @@ PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION = 'If to be notified when a bet 
 PREDICTION_BET_INVALID_NOTIFICATION_KEY = 'Prediction bet removed'
 
 # List
-LIST_OVERVIEW = 'Select' + ' an item from the list below\n{}'
+LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
 LIST_ITEM_TEXT = '\n*{}*. {}'
 LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
 NAVIGATION_LIMIT_REACHED = 'Limit reached'
@@ -451,6 +451,7 @@ LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_G
                                 '\n_\\(The message may no longer be available\\)_'
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
+FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
 FIGHT_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
 FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Date*: {}' \
@@ -459,6 +460,7 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
+DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Doc Q Game'
 DOC_Q_GAME_LOG_ITEM_TEXT = '{} ฿{}'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
@@ -466,6 +468,7 @@ DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - Game
 GAME_LOG_KEY = 'Challenges'
+GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'
 GAME_LOG_ITEM_TEXT = 'vs {} \\({}฿{}\\)'
 GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Game*: {}' \

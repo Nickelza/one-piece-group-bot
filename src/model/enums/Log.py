@@ -28,6 +28,12 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.GAME: phrases.GAME_LOG_KEY
 }
 
+LOG_TYPE_DETAIL_TEXT_FILL_IN = {
+    LogType.FIGHT: phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.GAME: phrases.GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN
+}
+
 
 class Log(ABC):
     """Abstract class for logs."""

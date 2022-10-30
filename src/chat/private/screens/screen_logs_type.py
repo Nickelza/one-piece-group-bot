@@ -5,11 +5,12 @@ from telegram.ext import CallbackContext
 import constants as c
 import resources.phrases as phrases
 from src.model.User import User
-from src.model.enums.Log import Log, LogType, get_log_by_type
+from src.model.enums.Log import Log, LogType, get_log_by_type, LOG_TYPE_DETAIL_TEXT_FILL_IN
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import NavigationLimitReachedException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_page, get_navigation_buttons
 from src.service.message_service import full_message_send
 
@@ -36,7 +37,8 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     log.user = user
     items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log)
 
-    ot_text = phrases.LIST_OVERVIEW.format(items_text)
+    log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
+    ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 
     full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
                       excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
