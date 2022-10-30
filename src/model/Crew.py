@@ -71,7 +71,7 @@ class Crew(BaseModel):
         :return: True if the crew is full
         """
 
-        return len(self.get_members()) > Env.CREW_MAX_MEMBERS.get_int()
+        return len(self.get_members()) >= Env.CREW_MAX_MEMBERS.get_int()
 
     @staticmethod
     def logical_get(crew_id: int) -> 'Crew':
