@@ -207,7 +207,7 @@ def add_crew_bounty_bonus() -> None:
     Adds a bounty percentage to users in a crew
     """
 
-    (User.update(bounty=((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100))
+    (User.update(bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
      .where(User.crew.is_null(False))
      .execute())
 
