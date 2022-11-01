@@ -347,8 +347,15 @@ CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the C
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
 
-# Notification - Crew Leave
+# Notification - Categories
 NOTIFICATION_CATEGORY_CREW = 'Crew'
+NOTIFICATION_CATEGORY_GAME = 'Game'
+NOTIFICATION_CATEGORY_LOCATION = 'Location'
+NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
+NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
+NOTIFICATION_CATEGORY_DELETED_MESSAGE = 'Deleted Message'
+
+# Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
 CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
                                       '\nApplicable only if you are the Captain of the Crew.'
@@ -372,7 +379,6 @@ CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = \
     f'\nApplicable only if you are the Captain of the Crew.'
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 # Notification - Game turn
-NOTIFICATION_CATEGORY_GAME = 'Game'
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
                          f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' \
                          f'\\({CHAT_GROUP_MESSAGE_URL}\\)'
@@ -380,7 +386,6 @@ GAME_TURN_NOTIFICATION_DESCRIPTION = 'If to be notified when it is your turn to 
                                      f'for {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds'
 GAME_TURN_NOTIFICATION_KEY = 'Game turn'
 # Notification - Location
-NOTIFICATION_CATEGORY_LOCATION = 'Location'
 LOCATION_UPDATE_NOTIFICATION = '{}Congratulations {}!' \
                                '\nYou are now {} {}' \
                                '\n\n{}'
@@ -389,7 +394,6 @@ LOCATION_CURRENT_LEVEL_MAX = '_You have reached the maximum location_'
 LOCATION_UPDATE_NOTIFICATION_DESCRIPTION = 'If to be notified when you level up to a new location.'
 LOCATION_UPDATE_NOTIFICATION_KEY = 'Location update'
 # Notification - Impel Down restriction placed
-NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION = f'{Emoji.DISCIPLINARY_ACTION}*DISCIPLINARY ACTION*' \
                                              f'{Emoji.DISCIPLINARY_ACTION}' \
                                              '\n\n*Reason*: {}' \
@@ -412,7 +416,6 @@ IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
 PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
     f'\n\n{Emoji.RIGHT_ARROW}[Go to prediction message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
     '\n_\\(The message may no longer be available\\)_'
-NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
 PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}' + \
                                  PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = '_\n\n\\(Your wager was refunded\\)_'
@@ -437,6 +440,26 @@ PREDICTION_BET_INVALID_NOTIFICATION_OPTION = '\n- {} \\({}\\)'
 PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION = 'If to be notified when a bet you placed is removed from a ' \
                                                   'because it was placed after the cut off time'
 PREDICTION_BET_INVALID_NOTIFICATION_KEY = 'Prediction bet removed'
+# Notification - Deleted message because of arrest
+ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP = f'The above message was deleted from the {CHAT_GROUP_MENTION} because you '
+DELETED_MESSAGE_ARREST_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} are arrested'
+DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
+                                                  f'{CHAT_GROUP_MENTION} was deleted because you are arrested'
+DELETED_MESSAGE_ARREST_NOTIFICATION_KEY = 'Deleted message arrest'
+# Notification - Deleted message because of user is muted
+DELETED_MESSAGE_MUTE_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} are muted'
+DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
+                                                f'{CHAT_GROUP_MENTION} was deleted because you are muted'
+DELETED_MESSAGE_MUTE_NOTIFICATION_KEY = 'Deleted message mute'
+# Notification - Deleted message because of user has not reached the required location
+DELETED_MESSAGE_LOCATION_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} have not reached the required ' \
+                                        'location to send this type of message.' \
+                                        '\n\n*Your location*: {}' \
+                                        '\n*Required location*: {}'
+DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
+                                                    f'{CHAT_GROUP_MENTION} was deleted because you have not reached ' \
+                                                    f'the required location to send that type of message'
+DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY = 'Deleted message location'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL

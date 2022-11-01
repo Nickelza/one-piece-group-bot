@@ -1,3 +1,4 @@
+from telegram import Update, Message
 from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 
@@ -11,14 +12,20 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
 
-def send_notification(context: CallbackContext, user: User, notification: Notification) -> None:
+def send_notification(context: CallbackContext, user: User, notification: Notification,
+                      should_forward_message: bool = False, update: Update = None) -> None:
     """
     Sends a notification to the user
     :param context: The context object
     :param user: User
     :param notification: Notification
+    :param should_forward_message: If the message of the update should be forwarded
+    :param update: The update object
     :return: None
     """
+
+    if should_forward_message is not None and update is None:
+        raise ValueError("If should_forward_message is not None, update must be not None")
 
     if is_enabled(user, notification):
         # Create Keyboard for notification management
@@ -33,9 +40,15 @@ def send_notification(context: CallbackContext, user: User, notification: Notifi
                                          previous_screen_list=previous_screens)])
 
         try:
+            quote_message_id = None
+            if should_forward_message:
+                message: Message = update.message.forward(user.tg_user_id, disable_notification=True)
+                quote_message_id = message.message_id
+
             full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
                               disable_web_page_preview=notification.disable_web_page_preview,
-                              disable_notification=notification.disable_notification)
+                              disable_notification=notification.disable_notification,
+                              reply_to_message_id=quote_message_id)
         except Unauthorized:  # User has blocked the bot
             pass
 

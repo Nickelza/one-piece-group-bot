@@ -10,6 +10,7 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.Location import Location, get_by_level as get_location_by_level
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
@@ -26,6 +27,7 @@ class NotificationCategory(IntEnum):
     GAME = 3
     IMPEL_DOWN = 4
     PREDICTION = 5
+    DELETED_MESSAGE = 6
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -33,7 +35,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.LOCATION: phrases.NOTIFICATION_CATEGORY_LOCATION,
     NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME,
     NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN,
-    NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION
+    NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION,
+    NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE
 }
 
 
@@ -50,6 +53,9 @@ class NotificationType(IntEnum):
     IMPEL_DOWN_RESTRICTION_REMOVED = 8
     PREDICTION_RESULT = 9
     PREDICTION_BET_INVALID = 10
+    DELETED_MESSAGE_ARREST = 11
+    DELETED_MESSAGE_MUTE = 12
+    DELETED_MESSAGE_LOCATION = 13
 
 
 class Notification:
@@ -106,7 +112,7 @@ class CrewLeaveNotification(Notification):
 class LocationUpdateNotification(Notification):
     """Class for location update notifications."""
 
-    def __init__(self, user: User = None, location: Location.Location = None):
+    def __init__(self, user: User = None, location: Location = None):
         """
         :param user: User
         :param location: The new location
@@ -408,10 +414,64 @@ class PredictionBetInvalidNotification(Notification):
                                 get_belly_formatted(self.total_refund), self.prediction.message_id)
 
 
+class DeletedMessageArrestNotification(Notification):
+    """Class for deleted messages because user is arrested notifications."""
+
+    def __init__(self):
+        """Constructor"""
+
+        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_ARREST,
+                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION,
+                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION,
+                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_KEY,
+                         disable_notification=False)
+
+
+class DeletedMessageMuteNotification(Notification):
+    """Class for deleted messages because user is muted notifications."""
+
+    def __init__(self):
+        """Constructor"""
+
+        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_MUTE,
+                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION,
+                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION,
+                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_KEY,
+                         disable_notification=False)
+
+
+class DeletedMessageLocationNotification(Notification):
+    """Class for deleted messages because user has not reached the required location notifications."""
+
+    def __init__(self, user: User = None, required_location_level: int = None):
+        """
+        Constructor
+
+        :param user: The user
+        :param required_location_level: The required location level
+        """
+
+        self.user = user
+        self.required_location_level = required_location_level
+
+        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_LOCATION,
+                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION,
+                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION,
+                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY,
+                         disable_notification=False)
+
+    def build(self) -> str:
+        current_location: Location = get_location_by_level(self.user.location_level)
+        required_location: Location = get_location_by_level(self.required_location_level)
+        return self.text.format(escape_valid_markdown_chars(current_location.name),
+                                escape_valid_markdown_chars(required_location.name), )
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
-                 PredictionResultNotification(), PredictionBetInvalidNotification()]
+                 PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
+                 DeletedMessageMuteNotification(), DeletedMessageLocationNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

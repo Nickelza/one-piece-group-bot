@@ -21,6 +21,8 @@ from src.chat.group.screens.screen_silence_end import manage as manage_screen_si
 from src.chat.group.screens.screen_speak import manage as manage_screen_speak
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
+from src.model.enums.Notification import DeletedMessageArrestNotification, DeletedMessageMuteNotification, \
+    DeletedMessageLocationNotification
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -28,6 +30,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
 from src.service.message_service import delete_message
+from src.service.notification_service import send_notification
 from src.service.user_service import user_is_muted
 
 
@@ -66,7 +69,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     except AttributeError:
         pass
 
-    if not validate(update, user, is_callback):
+    if not validate(update, context, user, is_callback):
         return
 
     update_user_bounty(update, context, user)
@@ -145,23 +148,25 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, inbou
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
 
-def validate(update: Update, user: User, is_callback: bool) -> bool:
+def validate(update: Update, context: CallbackContext, user: User, is_callback: bool) -> bool:
     """
     Validates the message, deleting it if it's not valid
     :param update: Telegram update
+    :param context: Telegram context
     :param user: User object
     :param is_callback: True if the message is a callback, False otherwise
     :return: True if valid, False otherwise
     """
     # Regular message
     if not is_callback:
-        if not validate_location_level(update, user, 1):
+        if not validate_location_level(update, context, user, 1):
             return False
 
     # Stickers
     try:
         if (update.message.sticker is not None
-                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int())):
+                and not validate_location_level(update, context, user,
+                                                Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int())):
             return False
     except AttributeError:
         pass
@@ -169,7 +174,8 @@ def validate(update: Update, user: User, is_callback: bool) -> bool:
     # Animations
     try:
         if (update.message.animation is not None
-                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int())):
+                and not validate_location_level(update, context, user,
+                                                Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int())):
             return False
     except AttributeError:
         pass
@@ -177,7 +183,8 @@ def validate(update: Update, user: User, is_callback: bool) -> bool:
     # Forwarded
     try:
         if (update.message.forward_from is not None
-                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
+                and not validate_location_level(update, context, user,
+                                                Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
                                                 identifier=str(update.message.forward_from.id),
                                                 allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list())):
             return False
@@ -187,7 +194,8 @@ def validate(update: Update, user: User, is_callback: bool) -> bool:
     # Dice emoji
     try:
         if (update.message.dice is not None
-                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int())):
+                and not validate_location_level(update, context, user,
+                                                Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int())):
             return False
     except AttributeError:
         pass
@@ -195,7 +203,8 @@ def validate(update: Update, user: User, is_callback: bool) -> bool:
     # Inline Bot
     try:
         if (update.message.via_bot is not None
-                and not validate_location_level(update, user, Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
+                and not validate_location_level(update, context, user,
+                                                Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
                                                 identifier=str(update.message.via_bot.id),
                                                 allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list())):
             return False
@@ -205,11 +214,12 @@ def validate(update: Update, user: User, is_callback: bool) -> bool:
     return True
 
 
-def validate_location_level(update: Update, user: User, location_level: int, identifier: str = None,
-                            allowed_identifiers: list[str] = None) -> bool:
+def validate_location_level(update: Update, context: CallbackContext, user: User, location_level: int,
+                            identifier: str = None, allowed_identifiers: list[str] = None) -> bool:
     """
     Validates the location level of the user
     :param update: Telegram update
+    :param context: Telegram context
     :param user: User object
     :param location_level: Location level to validate
     :param identifier: If not None, check if is in the list of allowed identifiers
@@ -225,15 +235,16 @@ def validate_location_level(update: Update, user: User, location_level: int, ide
             return True
 
         if user.is_arrested() and location_level > 1:
-            raise GroupMessageValidationException()
+            raise GroupMessageValidationException(notification=DeletedMessageArrestNotification())
 
         if user_is_muted(user, update):
-            raise GroupMessageValidationException()
+            raise GroupMessageValidationException(notification=DeletedMessageMuteNotification())
 
         if user.location_level < location_level:
-            raise GroupMessageValidationException()
+            raise GroupMessageValidationException(notification=DeletedMessageLocationNotification(user, location_level))
 
-    except GroupMessageValidationException:
+    except GroupMessageValidationException as e:
+        send_notification(context, user, e.notification, should_forward_message=True, update=update)
         delete_message(update)
         return False
 

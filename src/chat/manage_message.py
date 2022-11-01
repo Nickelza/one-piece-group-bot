@@ -139,7 +139,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             pass
 
     if command != Command.ND or is_callback:
-        if not validate(update, context, command, user, keyboard, target_user):
+        if not validate(update, context, command, user, keyboard, target_user, is_callback):
             return
 
     if command is not None:
@@ -174,7 +174,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
 
 
 def validate(update: Update, context: CallbackContext, command: Command.Command, user: User, inbound_keyboard: Keyboard,
-             target_user: User) -> bool:
+             target_user: User, is_callback: bool) -> bool:
     """
     Validate the command
     :param update: Telegram update
@@ -183,11 +183,12 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
     :param user: The user
     :param inbound_keyboard: The keyboard
     :param target_user: The target user in case of a reply
+    :param is_callback: True if the message is a callback
     :return: True if the command is valid
     """
 
     # Validate keyboard interaction
-    if inbound_keyboard is not None and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
+    if is_callback and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
         if int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]:  # Unauthorized
             full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
             return False
@@ -237,7 +238,7 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
                 pass
 
         # Cannot be in reply to a Bot
-        if not command.allow_reply_to_bot:
+        if not command.allow_reply_to_bot and not is_callback:
             try:
                 if update.effective_message.reply_to_message.from_user.is_bot:
                     raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
@@ -254,7 +255,7 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
             if not user_is_admin(user, update):
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_ADMIN_ERROR)
 
-        if inbound_keyboard is None:
+        if not is_callback:
             # Can only be used in reply to a message from a Crew Member
             if command.only_in_reply_to_crew_member:
                 # AttributeError not managed because it's already managed by only_in_reply
