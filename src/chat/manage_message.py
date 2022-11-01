@@ -25,6 +25,7 @@ from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
     full_message_or_media_send_or_edit
+from src.service.user_service import user_is_admin, user_is_muted
 
 
 def init() -> MySQLDatabase:
@@ -149,7 +150,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             case MessageSource.PRIVATE:
                 manage_private_chat(update, context, command, user, keyboard)
             case MessageSource.GROUP:
-                manage_group_chat(update, context, command, user, keyboard, target_user)
+                manage_group_chat(update, context, command, user, keyboard, target_user, is_callback)
             case MessageSource.ADMIN:
                 manage_admin_chat(update, context, command)
             case MessageSource.TG_REST:
@@ -248,6 +249,11 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
             if not user.is_crew_captain():
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR)
 
+        # Can only be used by an Admin
+        if command.only_by_admin:
+            if not user_is_admin(user, update):
+                raise CommandValidationException(phrases.COMMAND_ONLY_BY_ADMIN_ERROR)
+
         if inbound_keyboard is None:
             # Can only be used in reply to a message from a Crew Member
             if command.only_in_reply_to_crew_member:
@@ -256,7 +262,10 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
 
     except CommandValidationException as cve:
-        full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True)
+        if user_is_muted(user, update):
+            delete_message(update)
+        else:
+            full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True)
         return False
 
     return True

@@ -16,6 +16,9 @@ from src.chat.group.screens.screen_game_selection import manage as manage_screen
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_prediction_bet_remove import manage as manage_screen_prediction_bet_remove
 from src.chat.group.screens.screen_prediction_bet_status import manage as manage_screen_prediction_bet_status
+from src.chat.group.screens.screen_silence import manage as manage_screen_silence
+from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
+from src.chat.group.screens.screen_speak import manage as manage_screen_speak
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.User import User
 from src.model.enums.Screen import Screen
@@ -25,6 +28,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
 from src.service.message_service import delete_message
+from src.service.user_service import user_is_muted
 
 
 def update_user_bounty(update: Update, context: CallbackContext, user: User) -> None:
@@ -41,7 +45,7 @@ def update_user_bounty(update: Update, context: CallbackContext, user: User) -> 
 
 
 def manage(update: Update, context: CallbackContext, command: Command.Command, user: User, keyboard: Keyboard,
-           target_user: User) -> None:
+           target_user: User, is_callback: bool) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update
@@ -50,6 +54,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     :param user: User object
     :param keyboard: Keyboard
     :param target_user: The target user in case of a reply
+    :param is_callback: True if the message is a callback, False otherwise
     :return: None
     """
 
@@ -61,7 +66,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     except AttributeError:
         pass
 
-    if not validate(update, user):
+    if not validate(update, user, is_callback):
         return
 
     update_user_bounty(update, context, user)
@@ -126,18 +131,32 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, inbou
             case Screen.GRP_CREW_INVITE:  # Crew invite
                 manage_screen_crew_invite(update, context, user, inbound_keyboard, target_user)
 
+            case Screen.GRP_SILENCE:  # Silence
+                manage_screen_silence(update, context, user)
+
+            case Screen.GRP_SILENCE_END:  # Silence end
+                manage_screen_silence_end(update, context, user)
+
+            case Screen.GRP_SPEAK:  # Speak
+                manage_screen_speak(update, context, target_user)
+
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
 
-def validate(update: Update, user: User) -> bool:
+def validate(update: Update, user: User, is_callback: bool) -> bool:
     """
     Validates the message, deleting it if it's not valid
     :param update: Telegram update
     :param user: User object
+    :param is_callback: True if the message is a callback, False otherwise
     :return: True if valid, False otherwise
     """
+    # Regular message
+    if not is_callback:
+        if not validate_location_level(update, user, 1):
+            return False
 
     # Stickers
     try:
@@ -205,7 +224,10 @@ def validate_location_level(update: Update, user: User, location_level: int, ide
         if identifier is not None and identifier in allowed_identifiers:
             return True
 
-        if user.is_arrested():
+        if user.is_arrested() and location_level > 1:
+            raise GroupMessageValidationException()
+
+        if user_is_muted(user, update):
             raise GroupMessageValidationException()
 
         if user.location_level < location_level:

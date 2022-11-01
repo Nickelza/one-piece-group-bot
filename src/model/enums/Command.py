@@ -20,7 +20,8 @@ class Command:
                  only_in_reply: bool = False, allow_self_reply: bool = False, allow_reply_to_bot: bool = False,
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
                  parameters: list = None, message_source: MessageSource = MessageSource.ND,
-                 only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False):
+                 only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
+                 only_by_admin: bool = False):
         """
         Constructor
         :param name: The name of the command
@@ -37,6 +38,7 @@ class Command:
         :param only_by_crew_captain: True if the command can only be used by a Crew Captain
         :param only_in_reply_to_crew_member: True if the command can only be used in reply to a Crew Member.
                                              Automatically sets only_in_reply to True if True
+        :param only_by_admin: True if the command can only be used by an admin
         """
         self.name = name
         self.active = active
@@ -51,6 +53,7 @@ class Command:
         self.message_source: MessageSource = message_source
         self.only_by_crew_captain = only_by_crew_captain
         self.only_in_reply_to_crew_member = only_in_reply_to_crew_member
+        self.only_by_admin = only_by_admin
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True
@@ -112,6 +115,9 @@ GRP_PREDICTION_BET_STATUS = Command('bstatus', Screen.GRP_PREDICTION_BET_STATUS,
                                     allow_reply_to_bot=True)
 GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True)
 GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True)
+GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_admin=True)
+GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_admin=True)
+GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_admin=True, only_in_reply=True)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
@@ -119,7 +125,7 @@ COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NE
             GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
             GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE,
             PVT_SETTINGS, PVT_SETTINGS_LOCATION_UPDATE, PVT_SETTINGS_NOTIFICATIONS, PVT_SETTINGS_NOTIFICATIONS_TYPE,
-            PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT]
+            PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, GRP_SILENCE, GRP_SILENCE_END, GRP_SPEAK]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):

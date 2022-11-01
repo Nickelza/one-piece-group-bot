@@ -6,3 +6,4 @@ class SavedMediaName(str, Enum):
     FIGHT = 'fight'
     JOIN_CREW = 'join_crew'
     INVITE_TO_CREW = 'invite_to_crew'
+    SILENCE = 'silence'
