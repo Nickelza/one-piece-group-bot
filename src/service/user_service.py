@@ -43,3 +43,14 @@ def user_is_admin(user: User, update: Update) -> bool:
         return True
 
     return False
+
+
+def user_is_muted(user: User, update: Update) -> bool:
+    """
+    Returns True if the user is muted
+    :param user: The user
+    :param update: The update
+    :return: True if the user is muted
+    """
+
+    return user.is_muted and not user_is_admin(user, update)
