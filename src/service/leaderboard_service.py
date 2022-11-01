@@ -4,7 +4,8 @@ import resources.Environment as Env
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, get_rank_by_leaderboard_position
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, get_rank_by_leaderboard_position, \
+    get_rank_by_leaderboard_user
 
 
 def create_leaderboard() -> Leaderboard:
@@ -113,3 +114,14 @@ def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
     """
 
     return get_leaderboard_user(user, index=0)
+
+
+def get_current_leaderboard_rank(user: User) -> LeaderboardRank:
+    """
+    Gets the current leaderboard rank for the user
+    :param user: The user to get the leaderboard rank for
+    :return: The leaderboard rank
+    """
+
+    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user)
+    return get_rank_by_leaderboard_user(leaderboard_user)

@@ -97,7 +97,7 @@ def get_rank_by_leaderboard_user(leaderboard_user: LeaderboardUser | None) -> Le
     if leaderboard_user is None:
         return ROOKIE
 
-    return get_rank_by_leaderboard_position(leaderboard_user.position)
+    return get_rank_by_index(leaderboard_user.rank_index)
 
 
 def get_rank_by_leaderboard_position(leaderboard_position: int) -> LeaderboardRank:

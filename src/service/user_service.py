@@ -1,7 +1,11 @@
 from telegram import Update, PhotoSize
+from telegram.constants import CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR
 
 import constants as c
+from src.model.User import User
+from src.model.enums.LeaderboardRank import PIRATE_KING
 from src.service.download_service import generate_temp_file_path
+from src.service.leaderboard_service import get_current_leaderboard_rank
 
 
 def get_user_profile_photo(update: Update) -> str | None:
@@ -20,3 +24,22 @@ def get_user_profile_photo(update: Update) -> str | None:
         pass
 
     return photo_path
+
+
+def user_is_admin(user: User, update: Update) -> bool:
+    """
+    Returns True if the user is an admin
+    :param user: The user
+    :param update: The update
+    :return: True if the user is an admin
+    """
+
+    # User is chat admin
+    if update.effective_chat.get_member(user.tg_user_id).status in [CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR]:
+        return True
+
+    # User is Pirate King
+    if get_current_leaderboard_rank(user) == PIRATE_KING:
+        return True
+
+    return False
