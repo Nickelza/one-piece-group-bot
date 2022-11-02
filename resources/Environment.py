@@ -402,3 +402,8 @@ CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_MAINTAIN_MIN_LATES
 CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
 # Maximum number of Crew members. Default: 10
 CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')
+
+# Minimum amount for Bounty Gift. Default: 10.000.000
+BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')
+# Tax percentage increase after each Bounty Gift. Default: 1%
+BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value='1')

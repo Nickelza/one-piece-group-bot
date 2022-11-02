@@ -41,6 +41,7 @@ class User(BaseModel):
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
     is_muted = IntegerField(default=0)
+    bounty_gift_tax = IntegerField(default=0)
 
     # Transient fields
 
@@ -168,6 +169,15 @@ class User(BaseModel):
         """
 
         return self.crew is not None
+
+    def in_same_crew(self, user: 'User') -> bool:
+        """
+        Returns True if the user is in the same crew as the given user
+        :param user: The user
+        :return: True if the user is in the same crew as the given user
+        """
+
+        return self.crew is not None and self.crew == user.crew
 
     def get_markdown_mention(self) -> str:
         """

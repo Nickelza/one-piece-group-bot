@@ -147,6 +147,9 @@ def reset_bounty(context: CallbackContext) -> None:
     # Reset can create crew flag
     User.update(can_create_crew=True).execute()
 
+    # Reset bounty gift tax
+    User.update(bounty_gift_tax=0).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
@@ -226,7 +229,7 @@ def add_crew_mvp_bounty_bonus() -> None:
     User.update(bounty=case_stmt).execute()
 
 
-def get_wager_amount(amount_str: str) -> int:
+def get_amount_from_command(amount_str: str) -> int:
     """
     Get the wager amount
     :param amount_str: The wager amount
@@ -236,7 +239,7 @@ def get_wager_amount(amount_str: str) -> int:
     return int(amount_str)
 
 
-def validate_wager(update: Update, context: CallbackContext, user: User, wager_str: str, required_belly: int) -> bool:
+def validate_amount(update: Update, context: CallbackContext, user: User, wager_str: str, required_belly: int) -> bool:
     """
     Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if the wager is
     higher than the required belly
@@ -249,7 +252,7 @@ def validate_wager(update: Update, context: CallbackContext, user: User, wager_s
     """
 
     try:
-        wager: int = get_wager_amount(wager_str)
+        wager: int = get_amount_from_command(wager_str)
     except ValueError:
         full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update, add_delete_button=True)
         return False

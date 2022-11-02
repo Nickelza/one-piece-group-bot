@@ -245,6 +245,14 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
             except AttributeError:
                 pass
 
+        # Cannot be in reply to an arrested user
+        if not command.allow_reply_to_arrested:
+            try:
+                if target_user.is_arrested():
+                    raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ARRESTED_ERROR)
+            except AttributeError:
+                pass
+
         # Can only be used by a Crew Captain
         if command.only_by_crew_captain:
             if not user.is_crew_captain():

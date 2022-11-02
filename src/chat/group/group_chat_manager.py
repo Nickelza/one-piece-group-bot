@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 import resources.Environment as Env
 import src.model.enums.Command as Command
+from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
@@ -142,6 +143,9 @@ def dispatch_screens(update: Update, context: CallbackContext, user: User, inbou
 
             case Screen.GRP_SPEAK:  # Speak
                 manage_screen_speak(update, context, target_user)
+
+            case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
+                manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

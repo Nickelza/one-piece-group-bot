@@ -10,7 +10,6 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.Location import Location, get_by_level as get_location_by_level
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
@@ -28,6 +27,7 @@ class NotificationCategory(IntEnum):
     IMPEL_DOWN = 4
     PREDICTION = 5
     DELETED_MESSAGE = 6
+    BOUNTY_GIFT = 7
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -36,7 +36,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.GAME: phrases.NOTIFICATION_CATEGORY_GAME,
     NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN,
     NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION,
-    NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE
+    NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE,
+    NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT
 }
 
 
@@ -56,6 +57,7 @@ class NotificationType(IntEnum):
     DELETED_MESSAGE_ARREST = 11
     DELETED_MESSAGE_MUTE = 12
     DELETED_MESSAGE_LOCATION = 13
+    BOUNTY_GIFT_RECEIVED = 14
 
 
 class Notification:
@@ -461,17 +463,43 @@ class DeletedMessageLocationNotification(Notification):
                          disable_notification=False)
 
     def build(self) -> str:
-        current_location: Location = get_location_by_level(self.user.location_level)
-        required_location: Location = get_location_by_level(self.required_location_level)
+        current_location: Location = Location.get_by_level(self.user.location_level)
+        required_location: Location = Location.get_by_level(self.required_location_level)
         return self.text.format(escape_valid_markdown_chars(current_location.name),
                                 escape_valid_markdown_chars(required_location.name), )
+
+
+class BountyGiftReceivedNotification(Notification):
+    """Class for bounty gift received notifications."""
+
+    def __init__(self, giver: User = None, amount: int = None):
+        """
+        Constructor
+
+        :param giver: The giver
+        :param amount: The amount
+        """
+
+        self.giver = giver
+        self.amount = amount
+
+        super().__init__(NotificationCategory.BOUNTY_GIFT, NotificationType.BOUNTY_GIFT_RECEIVED,
+                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION,
+                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION,
+                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        return self.text.format(get_belly_formatted(self.amount), self.giver.get_markdown_mention())
 
 
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
                  PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
-                 DeletedMessageMuteNotification(), DeletedMessageLocationNotification()]
+                 DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
+                 BountyGiftReceivedNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

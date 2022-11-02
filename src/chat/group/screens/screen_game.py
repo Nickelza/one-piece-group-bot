@@ -13,7 +13,7 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_wager_amount, validate_wager
+from src.service.bounty_service import get_amount_from_command, validate_amount
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
 
@@ -45,7 +45,7 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
         return False
 
     # Wager basic validation, error message is sent by validate_wager
-    if not validate_wager(update, context, challenger, command.parameters[0], Env.GAME_MIN_WAGER.get_int()):
+    if not validate_amount(update, context, challenger, command.parameters[0], Env.GAME_MIN_WAGER.get_int()):
         return False
 
     # Challenger cannot initiate a game
@@ -104,7 +104,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     game: Game = Game()
     game.challenger = user
     game.opponent = opponent
-    game.wager = get_wager_amount(command.parameters[0])
+    game.wager = get_amount_from_command(command.parameters[0])
     game.save()
 
     user.bounty -= game.wager

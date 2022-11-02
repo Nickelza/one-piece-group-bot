@@ -24,7 +24,7 @@ def send_notification(context: CallbackContext, user: User, notification: Notifi
     :return: None
     """
 
-    if should_forward_message is not None and update is None:
+    if should_forward_message and update is None:
         raise ValueError("If should_forward_message is not None, update must be not None")
 
     if is_enabled(user, notification):

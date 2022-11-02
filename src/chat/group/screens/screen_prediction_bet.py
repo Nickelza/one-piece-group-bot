@@ -11,7 +11,7 @@ from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.PredictionStatus import PredictionStatus
-from src.service.bounty_service import get_wager_amount, validate_wager
+from src.service.bounty_service import get_amount_from_command, validate_amount
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.prediction_service import refresh, get_prediction_options_user
 
@@ -36,7 +36,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
         return error_tuple
 
     # Wager basic validation, error message is sent by validate_wager
-    if not validate_wager(update, context, user, command.parameters[0], Env.PREDICTION_BET_MIN_WAGER.get_int()):
+    if not validate_amount(update, context, user, command.parameters[0], Env.PREDICTION_BET_MIN_WAGER.get_int()):
         return error_tuple
 
     # Get prediction from message id
@@ -66,7 +66,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
             escape_valid_markdown_chars(command.parameters[1])), update=update)
         return error_tuple
 
-    return prediction, prediction_option[0], get_wager_amount(command.parameters[0]), int(command.parameters[1])
+    return prediction, prediction_option[0], get_amount_from_command(command.parameters[0]), int(command.parameters[1])
 
 
 def manage(update: Update, context: CallbackContext, user: User, command: Command) -> None:

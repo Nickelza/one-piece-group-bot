@@ -15,6 +15,7 @@ COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arre
 COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
 COMMAND_ONLY_BY_ADMIN_ERROR = 'This command can only be used by an Admin or the Pirate King'
+COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a message from an arrested user"
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
@@ -160,8 +161,8 @@ PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
-ACTION_WAGER_LESS_THAN_MIN = "The minimum wager is ฿*{}*"
-ACTION_INVALID_WAGER_AMOUNT = "Invalid wager amount. Make sure it is a number with only '.' or ',' as decimal separator"
+ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
+ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. Make sure it is a number with only '.' or ',' as decimal separator"
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
@@ -348,12 +349,13 @@ CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the C
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
 
 # Notification - Categories
+NOTIFICATION_CATEGORY_BOUNTY_GIFT = 'Bounty Gift'
 NOTIFICATION_CATEGORY_CREW = 'Crew'
-NOTIFICATION_CATEGORY_GAME = 'Game'
-NOTIFICATION_CATEGORY_LOCATION = 'Location'
-NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
-NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
 NOTIFICATION_CATEGORY_DELETED_MESSAGE = 'Deleted Message'
+NOTIFICATION_CATEGORY_GAME = 'Game'
+NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
+NOTIFICATION_CATEGORY_LOCATION = 'Location'
+NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
 
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
@@ -460,6 +462,10 @@ DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION = f'If to be notified when a m
                                                     f'{CHAT_GROUP_MENTION} was deleted because you have not reached ' \
                                                     f'the required location to send that type of message'
 DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY = 'Deleted message location'
+# Notification - Bounty Gift
+BOUNTY_GIFT_RECEIVED_NOTIFICATION = 'You have been gifted ฿{} by {}'
+BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are gifted bounties'
+BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
@@ -504,3 +510,18 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
 SPEAK = '{} has been granted permission to speak'
+
+BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
+                        f'\n\nExample: {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000'
+BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
+                      '\n\nTax: ฿{} \\({}%\\)' \
+                      '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
+                        '\n\nTax: ฿{} \\({}%\\)' \
+                        '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
+BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
+                                '\n\nAvailable belly: ฿{}' \
+                                '\nGift amount: ฿*{}*' \
+                                '\nTax: ฿{} \\({}%\\)' \
+                                '\nTotal: ฿*{}*'
