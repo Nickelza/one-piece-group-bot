@@ -11,7 +11,7 @@ import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
-from src.model.enums.Location import get_last_paradise, get_first_new_world
+from src.model.enums.Location import get_last_paradise, get_first_new_world, get_last_new_world
 from src.service.cron_service import get_next_run
 from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
@@ -68,6 +68,10 @@ def get_message_belly(update: Update, user: User) -> int:
             return 0
     except AttributeError:
         pass
+
+    # User on final location - No belly
+    if user.location_level == get_last_new_world().level:
+        return 0
 
     # Forwarded message - Base belly
     try:
@@ -203,7 +207,8 @@ def add_region_bounty_bonus() -> None:
                                            User.bounty +
                                            ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
                                           ((User.location_level >= get_first_new_world().level)
-                                           & (User.get_is_not_arrested_statement_condition()),
+                                           & (User.get_is_not_arrested_statement_condition())
+                                           & (User.location_level < get_last_new_world().level),
                                            User.bounty +
                                            ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
     case_stmt = Case(None, conditions, User.bounty)
@@ -216,7 +221,8 @@ def add_crew_bounty_bonus() -> None:
     """
 
     (User.update(bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
-     .where(User.crew.is_null(False))
+     .where((User.crew.is_null(False))
+            & (User.location_level < get_last_new_world().level))
      .execute())
 
 
@@ -226,8 +232,9 @@ def add_crew_mvp_bounty_bonus() -> None:
     """
 
     condition: tuple[bool, int] = (
-        (User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar())
-         & (User.get_is_not_arrested_statement_condition())),
+        ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
+         & (User.get_is_not_arrested_statement_condition())
+         & (User.location_level < get_last_new_world().level)),
         User.bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
 
     case_stmt = Case(None, [condition], User.bounty)

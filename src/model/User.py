@@ -7,6 +7,7 @@ import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.CrewRole import CrewRole
+from src.model.enums.Location import get_last_new_world
 from src.model.enums.Screen import Screen
 
 
@@ -234,7 +235,7 @@ class User(BaseModel):
         :return: True if the user has the New World bonus
         """
 
-        return self.in_new_world()
+        return self.in_new_world() and self.location_level < get_last_new_world().level
 
     def has_crew_bonus(self) -> bool:
         """
@@ -242,7 +243,7 @@ class User(BaseModel):
         :return: True if the user has the Crew bonus
         """
 
-        return self.is_crew_member()
+        return self.is_crew_member() and self.location_level < get_last_new_world().level
 
     def has_crew_mvp_bonus(self) -> bool:
         """
@@ -250,7 +251,7 @@ class User(BaseModel):
         :return: True if the user has the Crew MVP bonus
         """
 
-        return self.has_higher_bounty_than_crew_average()
+        return self.has_higher_bounty_than_crew_average() and self.location_level < get_last_new_world().level
 
 
 User.create_table()

@@ -58,10 +58,12 @@ TIMERS.append(ADD_REGION_BOUNTY_BONUS)
 ADD_CREW_BOUNTY_BONUS = Timer('add_crew_bounty_bonus', Env.CRON_ADD_CREW_BOUNTY_BONUS.get(),
                               Env.ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS.get_bool(),
                               Env.SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS.get_bool())
+TIMERS.append(ADD_CREW_BOUNTY_BONUS)
+
 ADD_CREW_MVP_BOUNTY_BONUS = Timer('add_crew_mvp_bounty_bonus', Env.CRON_ADD_CREW_MVP_BOUNTY_BONUS.get(),
                                   Env.ENABLE_TIMER_ADD_CREW_MVP_BOUNTY_BONUS.get_bool(),
                                   Env.SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS.get_bool())
-TIMERS.append(ADD_CREW_BOUNTY_BONUS)
+TIMERS.append(ADD_CREW_MVP_BOUNTY_BONUS)
 
 RESET_CAN_INITIATE_GAME = Timer('reset_can_initiate_game', Env.CRON_RESET_CAN_INITIATE_GAME.get(),
                                 Env.ENABLE_TIMER_RESET_CAN_INITIATE_GAME.get_bool(),

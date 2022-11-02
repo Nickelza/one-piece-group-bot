@@ -145,6 +145,17 @@ def get_first_new_world() -> Location:
     raise ValueError('No new world location found')
 
 
+def get_last_new_world() -> Location:
+    """
+    Get the last new world location
+    """
+    for location in reversed(LOCATIONS):
+        if location.region == Region.NEW_WORLD:
+            return location
+
+    raise ValueError('No new world location found')
+
+
 def get_last_paradise() -> Location:
     """
     Get the last paradise location
