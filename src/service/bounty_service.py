@@ -8,7 +8,9 @@ from telegram.ext import CallbackContext
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.model.BountyGift import BountyGift
 from src.model.User import User
+from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.service.cron_service import get_next_run
 from src.service.location_service import reset_location
@@ -149,6 +151,9 @@ def reset_bounty(context: CallbackContext) -> None:
 
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
+
+    # Delete all pending bounty gifts
+    BountyGift.delete().where(BountyGift.status == BountyGiftStatus.AWAITING_CONFIRMATION).execute()
 
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
