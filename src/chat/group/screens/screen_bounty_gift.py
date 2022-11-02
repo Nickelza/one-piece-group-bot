@@ -181,6 +181,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, sender: User,
 
     receiver: User = bounty_gift.receiver
     if not validate(update, context, sender, receiver, bounty_gift=bounty_gift):
+        bounty_gift.delete_instance()
         return
 
     # Get the amounts
