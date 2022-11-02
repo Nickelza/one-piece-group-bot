@@ -98,6 +98,8 @@ TEXT_WON = 'won'
 TEXT_LOST = 'lost'
 TEXT_IT_WAS = 'it was'
 TEXT_THEY_WERE = 'they were'
+TEXT_FROM = 'from'
+TEXT_TO = 'to'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -115,6 +117,8 @@ LOCATION_INVALID_CHANGE_REGION_REQUEST = 'Invalid region'
 
 CHALLENGER = 'Challenger'
 OPPONENT = 'Opponent'
+SENDER = 'Sender'
+RECEIVER = 'Receiver'
 
 FIGHT_NOT_FOUND = 'Fight not found'
 FIGHT_OPPONENT_NOT_FOUND = 'Opponent not found'
@@ -506,6 +510,16 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Wager*: ฿{}' \
                             '\n\n{}' \
                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+# Logs - Bounty Gift
+BOUNTY_GIFT_LOG_KEY = 'Bounty Gifts'
+BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Bounty Gift'
+BOUNTY_GIFT_LOG_ITEM_TEXT = '{} ฿{} {} {}'
+BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT = '\n*Tax*: ฿{} \\({}%\\)' \
+                                       '\n*Total*: ฿{}'
+BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
+                                   '\n*Date*: {}' \
+                                   '\n*Amount*: ฿{}{}' \
+                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'

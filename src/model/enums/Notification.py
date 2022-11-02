@@ -472,15 +472,15 @@ class DeletedMessageLocationNotification(Notification):
 class BountyGiftReceivedNotification(Notification):
     """Class for bounty gift received notifications."""
 
-    def __init__(self, giver: User = None, amount: int = None):
+    def __init__(self, sender: User = None, amount: int = None):
         """
         Constructor
 
-        :param giver: The giver
+        :param sender: The sender
         :param amount: The amount
         """
 
-        self.giver = giver
+        self.sender = sender
         self.amount = amount
 
         super().__init__(NotificationCategory.BOUNTY_GIFT, NotificationType.BOUNTY_GIFT_RECEIVED,
@@ -491,7 +491,7 @@ class BountyGiftReceivedNotification(Notification):
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
 
-        return self.text.format(get_belly_formatted(self.amount), self.giver.get_markdown_mention())
+        return self.text.format(get_belly_formatted(self.amount), self.sender.get_markdown_mention())
 
 
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),

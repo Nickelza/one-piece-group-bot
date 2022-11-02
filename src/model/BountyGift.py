@@ -12,7 +12,7 @@ class BountyGift(BaseModel):
     BountyGift class
     """
     id = PrimaryKeyField()
-    giver = ForeignKeyField(User, backref='bounty_gift_givers', on_delete='CASCADE', on_update='CASCADE')
+    sender = ForeignKeyField(User, backref='bounty_gift_senders', on_delete='CASCADE', on_update='CASCADE')
     receiver = ForeignKeyField(User, backref='bounty_gift_receivers', on_delete='CASCADE', on_update='CASCADE')
     amount = BigIntegerField()
     tax_percentage = IntegerField()

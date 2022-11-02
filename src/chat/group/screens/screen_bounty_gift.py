@@ -39,13 +39,13 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     keyboard_interaction(update, context, user, inbound_keyboard)
 
 
-def validate(update: Update, context: CallbackContext, giver: User, receiver: User, command: Command = None,
+def validate(update: Update, context: CallbackContext, sender: User, receiver: User, command: Command = None,
              bounty_gift: BountyGift = None) -> bool:
     """
     Validate the fight request
     :param update: The update object
     :param context: The context object
-    :param giver: The user that wants to send a bounty gift
+    :param sender: The user that wants to send a bounty gift
     :param receiver: The user that wants to receive a bounty gift
     :param command: The command
     :param bounty_gift: The bounty gift object
@@ -59,15 +59,15 @@ def validate(update: Update, context: CallbackContext, giver: User, receiver: Us
             return False
 
         # Wager basic validation, error message is sent by validate_wager
-        if not validate_amount(update, context, giver, command.parameters[0], Env.BOUNTY_GIFT_MIN_AMOUNT.get_int()):
+        if not validate_amount(update, context, sender, command.parameters[0], Env.BOUNTY_GIFT_MIN_AMOUNT.get_int()):
             return False
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, giver, receiver, command, bounty_gift)
+    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, sender, receiver, command, bounty_gift)
 
-    # Giver does not have enough bounty
-    if giver.bounty < total_amount:
-        ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(giver.bounty),
+    # Sender does not have enough bounty
+    if sender.bounty < total_amount:
+        ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(sender.bounty),
                                                                get_belly_formatted(amount),
                                                                get_belly_formatted(tax_amount),
                                                                tax_percentage,
@@ -78,22 +78,22 @@ def validate(update: Update, context: CallbackContext, giver: User, receiver: Us
     return True
 
 
-def send_request(update: Update, context: CallbackContext, giver: User, receiver: User, command: Command) -> None:
+def send_request(update: Update, context: CallbackContext, sender: User, receiver: User, command: Command) -> None:
     """
     Send request to send a bounty gift
     :param update: The update object
     :param context: The context object
-    :param giver: The user that wants to send a bounty gift
+    :param sender: The user that wants to send a bounty gift
     :param receiver: The user to send the bounty gift to
     :param command: The command
     :return: None
     """
 
-    if not validate(update, context, giver, receiver, command):
+    if not validate(update, context, sender, receiver, command):
         return
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, giver, receiver, command)
+    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, sender, receiver, command)
 
     ot_text = phrases.BOUNTY_GIFT_REQUEST.format(get_belly_formatted(amount), receiver.get_markdown_mention(),
                                                  get_belly_formatted(tax_amount), tax_percentage,
@@ -101,7 +101,7 @@ def send_request(update: Update, context: CallbackContext, giver: User, receiver
 
     # Save
     bounty_gift: BountyGift = BountyGift()
-    bounty_gift.giver = giver
+    bounty_gift.sender = sender
     bounty_gift.receiver = receiver
     bounty_gift.amount = amount
     bounty_gift.tax_percentage = tax_percentage
@@ -109,7 +109,7 @@ def send_request(update: Update, context: CallbackContext, giver: User, receiver
 
     # Keyboard
     # Delete button can't be replaced by add_delete_button because bounty_gift have to be deleted
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(giver, screen=Screen.GRP_BOUNTY_GIFT,
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(sender, screen=Screen.GRP_BOUNTY_GIFT,
                                                                  primary_key=bounty_gift.id)]
 
     message: Message = full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
@@ -117,24 +117,24 @@ def send_request(update: Update, context: CallbackContext, giver: User, receiver
     bounty_gift.save()
 
 
-def get_tax_percentage(giver: User, receiver: User, update: Update) -> int:
+def get_tax_percentage(sender: User, receiver: User, update: Update) -> int:
     """
     Get the tax to pay for a bounty gift
-    :param giver: The giver
+    :param sender: The sender
     :param receiver: The receiver
     :param update: The update object
     :return: The tax
     """
 
-    # Giver and receiver are in the same crew, no tax
-    if giver.in_same_crew(receiver):
+    # Sender and receiver are in the same crew, no tax
+    if sender.in_same_crew(receiver):
         return 0
 
-    # Giver is an Admin, no tax
-    if user_is_admin(giver, update):
+    # Sender is an Admin, no tax
+    if user_is_admin(sender, update):
         return 0
 
-    return giver.bounty_gift_tax
+    return sender.bounty_gift_tax
 
 
 def get_amounts(update: Update, user: User, target_user: User, command: Command = None, bounty_gift: BountyGift = None
@@ -161,12 +161,12 @@ def get_amounts(update: Update, user: User, target_user: User, command: Command 
     return amount, tax_percentage, tax_amount, total_amount
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, giver: User, inbound_keyboard: Keyboard) -> None:
+def keyboard_interaction(update: Update, context: CallbackContext, sender: User, inbound_keyboard: Keyboard) -> None:
     """
     Keyboard interaction
     :param update: The update object
     :param context: The context object
-    :param giver: The user that wants to send a bounty gift
+    :param sender: The user that wants to send a bounty gift
     :param inbound_keyboard: The inbound keyboard
     :return: None
     """
@@ -180,22 +180,22 @@ def keyboard_interaction(update: Update, context: CallbackContext, giver: User, 
         return
 
     receiver: User = bounty_gift.receiver
-    if not validate(update, context, giver, receiver, bounty_gift=bounty_gift):
+    if not validate(update, context, sender, receiver, bounty_gift=bounty_gift):
         return
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, giver, receiver, bounty_gift=bounty_gift)
+    amount, tax_percentage, tax_amount, total_amount = get_amounts(update, sender, receiver, bounty_gift=bounty_gift)
 
     bounty_gift.amount = amount
     bounty_gift.tax_percentage = tax_percentage
     bounty_gift.status = BountyGiftStatus.CONFIRMED
     bounty_gift.save()
 
-    # Update giver
-    giver.bounty -= total_amount
+    # Update sender
+    sender.bounty -= total_amount
 
     if tax_percentage > 0:
-        giver.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
+        sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
     receiver.bounty += amount
@@ -208,5 +208,5 @@ def keyboard_interaction(update: Update, context: CallbackContext, giver: User, 
     full_message_send(context, ot_text, update=update, add_delete_button=True)
 
     # Send notification to receiver
-    notification = BountyGiftReceivedNotification(giver, amount)
+    notification = BountyGiftReceivedNotification(sender, amount)
     send_notification(context, receiver, notification)

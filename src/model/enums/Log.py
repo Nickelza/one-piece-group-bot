@@ -4,14 +4,17 @@ from enum import IntEnum
 import constants as c
 import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
+from src.model.BountyGift import BountyGift
 from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.Game import Game
 from src.model.User import User
+from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
+from src.service.math_service import get_value_from_percentage
 
 
 class LogType(IntEnum):
@@ -20,18 +23,21 @@ class LogType(IntEnum):
     FIGHT = 1
     DOC_Q_GAME = 2
     GAME = 3
+    BOUNTY_GIFT = 4
 
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,
     LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_KEY,
-    LogType.GAME: phrases.GAME_LOG_KEY
+    LogType.GAME: phrases.GAME_LOG_KEY,
+    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.FIGHT: phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
-    LogType.GAME: phrases.GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN
+    LogType.GAME: phrases.GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN
 }
 
 
@@ -266,7 +272,66 @@ class GameLog(Log):
                                                         outcome_text, self.object.message_id)
 
 
-LOGS = [FightLog(), DocQGameLog(), GameLog()]
+class BountyGiftLog(Log):
+    """Class for bounty gift logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.BOUNTY_GIFT)
+
+        self.object: BountyGift = BountyGift()
+        self.other_user: User = User()
+        self.user_is_sender: bool = False
+        self.log_emoji: Emoji = Emoji.LOG_NEUTRAL
+
+    def set_object(self, object_id: int) -> None:
+        self.object: BountyGift = BountyGift.get(BountyGift.id == object_id)
+        self.user_is_sender = self.object.sender == self.user
+        self.other_user = self.object.receiver if self.user_is_sender else self.object.sender
+        self.log_emoji = Emoji.LOG_NEGATIVE if self.user_is_sender else Emoji.LOG_POSITIVE
+
+    def get_items(self, page) -> list[BountyGift]:
+        return (self.object
+                .select()
+                .where(((BountyGift.sender == self.user) | (BountyGift.receiver == self.user)) &
+                       (BountyGift.status == BountyGiftStatus.CONFIRMED))
+                .order_by(BountyGift.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where(((BountyGift.sender == self.user) | (BountyGift.receiver == self.user)) &
+                       (BountyGift.status == BountyGiftStatus.CONFIRMED))
+                .count())
+
+    def get_item_text(self) -> str:
+        to_text = phrases.TEXT_TO if self.user_is_sender else phrases.TEXT_FROM
+        return phrases.BOUNTY_GIFT_LOG_ITEM_TEXT.format(self.log_emoji, get_belly_formatted(self.object.amount),
+                                                        to_text, self.other_user.get_markdown_mention())
+
+    def get_item_detail_text(self) -> str:
+        sender_text = phrases.RECEIVER if self.user_is_sender else phrases.SENDER
+        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+
+        tax_text = ''
+        if self.user_is_sender:
+            tax_amount = int(get_value_from_percentage(self.object.amount, self.object.tax_percentage))
+            total_amount = self.object.amount + tax_amount
+            tax_text = phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT.format(get_belly_formatted(tax_amount),
+                                                                           self.object.tax_percentage,
+                                                                           get_belly_formatted(total_amount))
+
+        return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(sender_text, self.other_user.get_markdown_mention(),
+                                                               date, get_belly_formatted(self.object.amount), tax_text,
+                                                               self.object.message_id)
+
+
+LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:
