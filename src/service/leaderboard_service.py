@@ -1,11 +1,10 @@
 import datetime
 
-import resources.Environment as Env
+import src.model.enums.LeaderboardRank as LeaderboardRank
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, get_rank_by_leaderboard_position, \
-    get_rank_by_leaderboard_user
+from src.model.enums.Location import get_first_new_world, get_last_paradise
 
 
 def create_leaderboard() -> Leaderboard:
@@ -38,7 +37,7 @@ def get_leaderboard_rank_message(index: int) -> str:
     :param index: The leaderboard rank index
     :return: The leaderboard rank message
     """
-    leaderboard_rank: LeaderboardRank = get_rank_by_index(index)
+    leaderboard_rank: LeaderboardRank = LeaderboardRank.get_rank_by_index(index)
     return leaderboard_rank.get_emoji_and_rank_message()
 
 
@@ -48,28 +47,87 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     :param leaderboard: The leaderboard to create the users for
     :return: The leaderboard users
     """
-    # Get the leaderboard users
-    users: list[User] = User.select().order_by(User.bounty.desc()).limit(Env.LEADERBOARD_LIMIT.get_int())
 
-    # Create a list of LeaderboardUsers
-    leaderboard_users = []
-    for index, user in enumerate(users):
+    leaderboard_users: list[LeaderboardUser] = []
+    position = 1
 
-        # Arrested user
-        if user.is_arrested():
-            continue
+    # Get previous leaderboard users who were Emperors or higher
+    previous_leaderboard_users: list[LeaderboardUser] = get_leaderboard(1).leaderboard_users
 
-        leaderboard_user = LeaderboardUser()
-        leaderboard_user.leaderboard = leaderboard
-        leaderboard_user.user = user
-        leaderboard_user.position = index + 1
-        leaderboard_user.bounty = user.bounty
-        leaderboard_user.rank_index = get_rank_by_leaderboard_position(index + 1).index
-        leaderboard_user.save()
+    # Eligible users for Pirate King position - Those who were Emperor or higher in the previous leaderboard
+    eligible_pk_users: list[User] = [leaderboard_user.user for leaderboard_user in previous_leaderboard_users
+                                     if leaderboard_user.rank_index <= LeaderboardRank.EMPEROR.index]
 
-        leaderboard_users.append(leaderboard_user)
+    # Get current New World users
+    new_world_users: list[User] = list(User.select()
+                                       .where((User.location_level >= get_first_new_world().level)
+                                              & (User.get_is_not_arrested_statement_condition()))
+                                       .order_by(User.bounty.desc()))
+
+    # Save Pirate King, if available
+    for user in new_world_users:
+        if user in eligible_pk_users:
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
+                                                                      LeaderboardRank.PIRATE_KING)
+            leaderboard_users.append(leaderboard_user)
+            break
+
+    # Save Emperors, next 4 users
+    for index, user in enumerate(new_world_users):
+        if not any(lu for lu in leaderboard_users if lu.user == user):
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
+                                                                      LeaderboardRank.EMPEROR)
+            leaderboard_users.append(leaderboard_user)
+            position += 1
+            if index == 3:
+                break
+
+    # Save First Mates, next 4 users
+    for index, user in enumerate(new_world_users):
+        if not any(lu for lu in leaderboard_users if lu.user == user):
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
+                                                                      LeaderboardRank.FIRST_MATE)
+            leaderboard_users.append(leaderboard_user)
+            position += 1
+            if index == 3:
+                break
+
+    # Get current Paradise users
+    paradise_users: list[User] = list(User.select()
+                                      .where((User.location_level <= get_last_paradise().level)
+                                             & (User.get_is_not_arrested_statement_condition()))
+                                      .order_by(User.bounty.desc()))
+
+    # Save Supernovas, next 11 users
+    for index, user in enumerate(paradise_users):
+        if not any(lu for lu in leaderboard_users if lu.user == user):
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
+                                                                      LeaderboardRank.SUPERNOVA)
+            leaderboard_users.append(leaderboard_user)
+            position += 1
+            if index == 10:
+                break
 
     return leaderboard_users
+
+
+def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, rank: LeaderboardRank.LeaderboardRank
+                          ) -> LeaderboardUser:
+    """
+    Saves a leaderboard user
+    :param leaderboard: The leaderboard
+    :param user: The user
+    :param position: The position
+    :param rank: The rank
+    """
+    leaderboard_user = LeaderboardUser()
+    leaderboard_user.leaderboard = leaderboard
+    leaderboard_user.user = user
+    leaderboard_user.position = position
+    leaderboard_user.rank_index = rank.index
+    leaderboard_user.save()
+
+    return leaderboard_user
 
 
 def get_leaderboard(index: int = 0) -> Leaderboard | None:
@@ -116,7 +174,7 @@ def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
     return get_leaderboard_user(user, index=0)
 
 
-def get_current_leaderboard_rank(user: User) -> LeaderboardRank:
+def get_current_leaderboard_rank(user: User) -> LeaderboardRank.LeaderboardRank:
     """
     Gets the current leaderboard rank for the user
     :param user: The user to get the leaderboard rank for
@@ -124,4 +182,4 @@ def get_current_leaderboard_rank(user: User) -> LeaderboardRank:
     """
 
     leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user)
-    return get_rank_by_leaderboard_user(leaderboard_user)
+    return LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_user)
