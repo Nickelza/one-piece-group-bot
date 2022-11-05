@@ -15,7 +15,7 @@ from src.service.bounty_service import get_amount_from_command, validate_amount,
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
-from src.service.user_service import user_is_admin
+from src.service.user_service import user_is_boss
 
 
 def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User,
@@ -130,8 +130,8 @@ def get_tax_percentage(sender: User, receiver: User, update: Update) -> int:
     if sender.in_same_crew(receiver):
         return 0
 
-    # Sender is an Admin, no tax
-    if user_is_admin(sender, update):
+    # Sender is a boss, no tax
+    if user_is_boss(sender, update):
         return 0
 
     return sender.bounty_gift_tax

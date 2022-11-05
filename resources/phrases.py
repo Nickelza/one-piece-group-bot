@@ -14,7 +14,7 @@ COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for use
 COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
 COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
-COMMAND_ONLY_BY_ADMIN_ERROR = 'This command can only be used by an Admin or the Pirate King'
+COMMAND_ONLY_BY_BOSS_ERROR = 'This command can only be used by an Admin, the Pirate King or a Legendary Pirate'
 COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a message from an arrested user"
 
 SHOW_USER_STATUS = 'User: {}' \

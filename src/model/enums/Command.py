@@ -21,7 +21,7 @@ class Command:
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
                  parameters: list = None, message_source: MessageSource = MessageSource.ND,
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
-                 only_by_admin: bool = False, allow_reply_to_arrested: bool = False):
+                 only_by_boss: bool = False, allow_reply_to_arrested: bool = False):
         """
         Constructor
         :param name: The name of the command
@@ -38,7 +38,7 @@ class Command:
         :param only_by_crew_captain: True if the command can only be used by a Crew Captain
         :param only_in_reply_to_crew_member: True if the command can only be used in reply to a Crew Member.
                                              Automatically sets only_in_reply to True if True
-        :param only_by_admin: True if the command can only be used by an admin
+        :param only_by_boss: True if the command can only be used by a boss
         :param allow_reply_to_arrested: True if the command can be used in reply to a message sent by an arrested
                                         user
         """
@@ -55,7 +55,7 @@ class Command:
         self.message_source: MessageSource = message_source
         self.only_by_crew_captain = only_by_crew_captain
         self.only_in_reply_to_crew_member = only_in_reply_to_crew_member
-        self.only_by_admin = only_by_admin
+        self.only_by_boss = only_by_boss
         self.allow_reply_to_arrested = allow_reply_to_arrested
 
         if only_in_reply_to_crew_member and not only_in_reply:
@@ -118,9 +118,9 @@ GRP_PREDICTION_BET_STATUS = Command('bstatus', Screen.GRP_PREDICTION_BET_STATUS,
                                     allow_reply_to_bot=True)
 GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True)
 GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True)
-GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_admin=True)
-GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_admin=True)
-GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_admin=True, only_in_reply=True)
+GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True)
+GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_boss=True)
+GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)

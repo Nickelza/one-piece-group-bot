@@ -25,7 +25,7 @@ from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
     full_message_or_media_send_or_edit
-from src.service.user_service import user_is_admin, user_is_muted
+from src.service.user_service import user_is_boss, user_is_muted
 
 
 def init() -> MySQLDatabase:
@@ -258,10 +258,10 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
             if not user.is_crew_captain():
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR)
 
-        # Can only be used by an Admin
-        if command.only_by_admin:
-            if not user_is_admin(user, update):
-                raise CommandValidationException(phrases.COMMAND_ONLY_BY_ADMIN_ERROR)
+        # Can only be used by a boss
+        if command.only_by_boss:
+            if not user_is_boss(user, update):
+                raise CommandValidationException(phrases.COMMAND_ONLY_BY_BOSS_ERROR)
 
         if not is_callback:
             # Can only be used in reply to a message from a Crew Member
