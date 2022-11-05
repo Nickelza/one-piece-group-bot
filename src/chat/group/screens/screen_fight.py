@@ -123,13 +123,17 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     # Probability of winning - How much percent more is the challenger bounty compared to the opponent
     win_probability = (challenger.bounty / opponent.get_max_bounty()) * 50
 
-    # Cap probability
+    # Cap max probability
     leaderboard_user = get_current_leaderboard_user(challenger)
     leaderboard_rank = get_rank_by_leaderboard_user(leaderboard_user)
     # Use minimum probability if the probability is too low
     win_probability = round(max(win_probability, leaderboard_rank.min_win_probability), 2)
     # Use maximum probability if the probability is too high
     win_probability = round(min(win_probability, leaderboard_rank.max_win_probability), 2)
+    # Final location cap
+    if challenger.is_on_final_location():
+        win_probability = round(min(win_probability, Env.FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION.get_float()), 2)
+
     lose_probability = 100 - win_probability
 
     # Win amount is the amount from opponent bounty corresponding to lose probability
@@ -188,7 +192,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     fight.belly = win_amount
     fight.save()
 
-    if win_probability > 50:
+    if win_probability >= 50:
         outcome = phrases.FIGHT_CONFIRMATION_OUTCOME_VICTORY
         outcome_probability = win_probability
     else:

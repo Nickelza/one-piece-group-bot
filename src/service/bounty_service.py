@@ -70,7 +70,7 @@ def get_message_belly(update: Update, user: User) -> int:
         pass
 
     # User on final location - No belly
-    if user.location_level == get_last_new_world().level:
+    if user.is_on_final_location():
         return 0
 
     # Forwarded message - Base belly

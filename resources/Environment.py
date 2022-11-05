@@ -339,6 +339,8 @@ FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE = Environment('FIGHT_MAX_WIN_PROBABILITY_FI
 FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA', default_value='85')
 # Maximum win probability for Rookie. Default: 80%
 FIGHT_MAX_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MAX_WIN_PROBABILITY_ROOKIE', default_value='80')
+# Maximum win probability when on final location. Default: 50%
+FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION = Environment('FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION', default_value='50')
 # Minimum win probability for Pirate King. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING', default_value='1')
 # Minimum win probability for Emperor. Default: 1%

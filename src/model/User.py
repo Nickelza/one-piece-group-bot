@@ -235,7 +235,7 @@ class User(BaseModel):
         :return: True if the user has the New World bonus
         """
 
-        return self.in_new_world() and self.location_level < get_last_new_world().level
+        return self.in_new_world() and not self.is_on_final_location()
 
     def has_crew_bonus(self) -> bool:
         """
@@ -243,7 +243,7 @@ class User(BaseModel):
         :return: True if the user has the Crew bonus
         """
 
-        return self.is_crew_member() and self.location_level < get_last_new_world().level
+        return self.is_crew_member() and not self.is_on_final_location()
 
     def has_crew_mvp_bonus(self) -> bool:
         """
@@ -251,7 +251,15 @@ class User(BaseModel):
         :return: True if the user has the Crew MVP bonus
         """
 
-        return self.has_higher_bounty_than_crew_average() and self.location_level < get_last_new_world().level
+        return self.has_higher_bounty_than_crew_average() and not self.is_on_final_location()
+
+    def is_on_final_location(self) -> bool:
+        """
+        Returns True if the user is on the final location
+        :return: True if the user is on the final location
+        """
+
+        return self.location_level == get_last_new_world().level
 
 
 User.create_table()
