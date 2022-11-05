@@ -520,6 +520,13 @@ BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                                    '\n*Date*: {}' \
                                    '\n*Amount*: ฿{}{}' \
                                    f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+# Logs - Legendary Pirate
+LEGENDARY_PIRATE_LOG_KEY = 'Legendary Pirates'
+LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Legendary Pirate'
+LEGENDARY_PIRATE_LOG_ITEM_TEXT = '{}'
+LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
+                                        '\nEpithet: {}' \
+                                        '\n\n*Reason*: {}'
 
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'

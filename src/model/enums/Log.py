@@ -8,6 +8,7 @@ from src.model.BountyGift import BountyGift
 from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.Game import Game
+from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
@@ -15,6 +16,7 @@ from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
 from src.service.math_service import get_value_from_percentage
+from src.service.message_service import mention_markdown_v2
 
 
 class LogType(IntEnum):
@@ -24,20 +26,23 @@ class LogType(IntEnum):
     DOC_Q_GAME = 2
     GAME = 3
     BOUNTY_GIFT = 4
+    LEGENDARY_PIRATE = 5
 
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,
     LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_KEY,
     LogType.GAME: phrases.GAME_LOG_KEY,
-    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY
+    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY,
+    LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_KEY
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.FIGHT: phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.DOC_Q_GAME: phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.GAME: phrases.GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
-    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN
+    LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN
 }
 
 
@@ -331,7 +336,46 @@ class BountyGiftLog(Log):
                                                                self.object.message_id)
 
 
-LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog()]
+class LegendaryPirateLog(Log):
+    """Class for legendary pirate logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.LEGENDARY_PIRATE)
+
+        self.object: LegendaryPirate = LegendaryPirate()
+        self.user: User = User()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: LegendaryPirate = LegendaryPirate.get(LegendaryPirate.id == object_id)
+        self.user: User = self.object.user
+
+    def get_items(self, page) -> list[LegendaryPirate]:
+        return (self.object
+                .select()
+                .order_by(LegendaryPirate.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.LEGENDARY_PIRATE_LOG_ITEM_TEXT.format(mention_markdown_v2(self.user.tg_user_id,
+                                                                                 self.object.epithet))
+
+    def get_item_detail_text(self) -> str:
+        return phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT.format(self.user.get_markdown_mention(),
+                                                                    self.object.epithet,
+                                                                    self.object.reason)
+
+
+LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:
