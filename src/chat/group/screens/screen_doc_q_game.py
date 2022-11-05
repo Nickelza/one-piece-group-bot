@@ -40,10 +40,23 @@ def get_play_amounts(current_bounty: int, win_odds) -> tuple[int, int, int, int]
     :return: list -  [0] - Win amount, [1] - Lose amount, [2] - Final bounty if won, [3] - Final bounty if lost
     """
 
-    final_bounty_if_win = int(current_bounty / win_odds)
+    # Win amount always takes in consideration standard odd
+    final_bounty_if_win = int(current_bounty / Env.DOC_Q_GAME_WIN_ODD.get_float())
+
     final_bounty_if_lose = int(current_bounty * win_odds)
     return (final_bounty_if_win - current_bounty, current_bounty - final_bounty_if_lose, final_bounty_if_win,
             final_bounty_if_lose)
+
+
+def get_win_odd(user: User) -> float:
+    """
+    Get win odd
+    :param user: The user
+    :return: The win odd
+    """
+
+    return (Env.DOC_Q_GAME_WIN_ODD_FINAL_LOCATION.get_float() if user.is_on_final_location()
+            else Env.DOC_Q_GAME_WIN_ODD.get_float())
 
 
 def validate_play(update: Update, context: CallbackContext, user: User, doc_q_game: DocQGame = None) -> bool:
@@ -76,8 +89,8 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
         return False
 
     # Delete all previous pending games
-    previous_games: list[DocQGame] = DocQGame.select().where(DocQGame.user == user &
-                                                             DocQGame.status == GameStatus.IN_PROGRESS)
+    previous_games: list[DocQGame] = DocQGame.select().where((DocQGame.user == user) &
+                                                             (DocQGame.status == GameStatus.IN_PROGRESS))
     for previous_game in previous_games:
         if previous_game != doc_q_game:
             delete_game(update, context, previous_game)
@@ -116,26 +129,32 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.user = user
         doc_q_game.save()
 
+        if user.is_on_final_location():
+            options_count = Env.DOC_Q_GAME_OPTIONS_COUNT_FINAL_LOCATION.get_int()
+        else:
+            options_count = Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()
+
+        win_odd = get_win_odd(user)
         # Number of possible correct choices is determined by number of options * success rate
-        possible_correct_choices = int(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() * Env.DOC_Q_GAME_WIN_ODD.get_float())
+        possible_correct_choices = int(options_count * win_odd)
 
         correct_choices_index = []
         # Generate correct choices
         for i in range(possible_correct_choices):
-            index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
+            index = random.randint(0, options_count - 1)
             while index in correct_choices_index:
-                index = random.randint(0, Env.DOC_Q_GAME_OPTIONS_COUNT.get_int() - 1)
+                index = random.randint(0, options_count - 1)
             correct_choices_index.append(index)
 
         # Add correct choices to game
         doc_q_game.correct_choices_index = c.STANDARD_SPLIT_CHAR.join(str(i) for i in correct_choices_index)
 
-        # Create Keyboard with 5 apple buttons
-        keyboard_data: dict = {DocQReservedKeys.DOC_Q_ID: doc_q_game.id}
+        # Create Keyboard with n apple buttons
+        keyboard_data_template: dict = {DocQReservedKeys.DOC_Q_ID: doc_q_game.id}
         inline_keyboard = []
         apples_keyboard: list[Keyboard] = []
-        for i in range(Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()):
-            keyboard_data[DocQReservedKeys.CHOICE_INDEX] = i
+        for i in range(options_count):
+            keyboard_data = keyboard_data_template | {DocQReservedKeys.CHOICE_INDEX: i}
             option_emoji = Emoji.DOC_Q_GAME_OPTION
 
             # should show correct answer
@@ -144,13 +163,17 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
 
             apples_keyboard.append(Keyboard(option_emoji, keyboard_data, Screen.GRP_DOC_Q_GAME))
 
+            # Add new keyboard line if needed
+            if (i + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and i != 0:
+                inline_keyboard.append(apples_keyboard)
+                apples_keyboard = []
+
         inline_keyboard.append(apples_keyboard)
 
         # Get SavedMedia
         doc_q_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.DOC_Q)
 
-        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
-            user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
+        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(user.bounty, win_odd)
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                   get_belly_formatted(win_amount),
@@ -188,8 +211,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
             delete_game(update, context, doc_q_game)
             return
 
-        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(
-            user.bounty, Env.DOC_Q_GAME_WIN_ODD.get_float())
+        win_odd = get_win_odd(user)
+        win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(user.bounty, win_odd)
         # User chose correct option
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
         if str(keyboard.info[DocQReservedKeys.CHOICE_INDEX]) in correct_choices_index:

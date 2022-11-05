@@ -256,6 +256,10 @@ DOC_Q_GAME_REQUIRED_BOUNTY = Environment('DOC_Q_GAME_REQUIRED_BOUNTY', default_v
 DOC_Q_GAME_OPTIONS_COUNT = Environment('DOC_Q_GAME_OPTIONS_COUNT', default_value='5')
 # Chance of winning the game. Default: 0.2
 DOC_Q_GAME_WIN_ODD = Environment('DOC_Q_GAME_WIN_ODD', default_value='0.2')
+# How many options should be shown in the Doc Q game if on final location. Default: 10
+DOC_Q_GAME_OPTIONS_COUNT_FINAL_LOCATION = Environment('DOC_Q_GAME_OPTIONS_COUNT_FINAL_LOCATION', default_value='10')
+# Chance of winning the game if on final location. Default: 0.1
+DOC_Q_GAME_WIN_ODD_FINAL_LOCATION = Environment('DOC_Q_GAME_WIN_ODD_FINAL_LOCATION', default_value='0.1')
 # Show correct option. Default: False
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
 
