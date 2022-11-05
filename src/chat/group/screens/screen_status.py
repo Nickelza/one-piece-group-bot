@@ -21,15 +21,17 @@ from src.service.cron_service import get_remaining_time
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
     get_start_with_command_url, escape_valid_markdown_chars
+from src.service.user_service import user_is_boss
 
 
-def manage(update: Update, context: CallbackContext, command: Command.Command, inbound_keyboard: Keyboard = None
-           ) -> None:
+def manage(update: Update, context: CallbackContext, command: Command.Command, original_user: User,
+           inbound_keyboard: Keyboard = None) -> None:
     """
     Displays a user's status
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command
+    :param original_user: The original user
     :param inbound_keyboard: Inbound keyboard
     :return: None
     """
@@ -184,13 +186,16 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, i
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
-    if (not in_reply_to_message and (target_user.bounty_poster_limit == -1 or target_user.bounty_poster_limit > 0) and
+    if (not in_reply_to_message and (user_is_boss(target_user, update) or target_user.bounty_poster_limit > 0) and
             not target_user.is_arrested()):
         send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
-        if target_user.bounty_poster_limit != -1:
+        if not user_is_boss(target_user, update):
             target_user.bounty_poster_limit -= 1
+            target_user.save()
+            original_user.should_update_model = False
+
     else:  # Send regular message
         full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
                           add_delete_button=(inbound_keyboard is None), authorized_users=can_delete_users,

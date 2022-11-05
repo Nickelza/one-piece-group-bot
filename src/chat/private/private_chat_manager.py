@@ -98,7 +98,7 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
                 manage_screen_settings(update, context, inbound_keyboard)
 
             case Screen.PVT_USER_STATUS:  # Status
-                manage_screen_status(update, context, command, inbound_keyboard)
+                manage_screen_status(update, context, command, user, inbound_keyboard)
 
             case Screen.PVT_CREW:  # Crew
                 manage_screen_crew(update, context, inbound_keyboard, user)
