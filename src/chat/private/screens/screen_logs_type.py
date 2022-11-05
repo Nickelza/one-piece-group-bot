@@ -13,6 +13,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_page, get_navigation_buttons
 from src.service.message_service import full_message_send
+from src.service.user_service import user_is_boss
 
 
 class LogTypeReservedKeys(StrEnum):
@@ -34,14 +35,15 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     """
 
     log: Log = get_log_by_type(LogType(inbound_keyboard.info[LogTypeReservedKeys.TYPE]))
-    log.user = user
-    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log)
+    if validate(update, context, log, user):
+        log.user = user
+        items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log)
 
-    log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
-    ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
+        log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
+        ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 
-    full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
-                      excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+        full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
+                          excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
 
 
 def get_items_text_keyboard(inbound_keyboard: Keyboard, log: Log) -> tuple[str, list[list[Keyboard]]]:
@@ -116,3 +118,21 @@ def get_items_paginate(inbound_keyboard: Keyboard, log: Log) -> [list[Log], int,
     total_items: int = log.get_total_items_count()
 
     return items, page, start_number, end_number, total_items
+
+
+def validate(update: Update, context: CallbackContext, log: Log, user: User) -> bool:
+    """
+    Validate the log type screen
+
+    :param context: The context
+    :param update: The update
+    :param log: The log
+    :param user: The user
+    :return: True if the validation is successful, False otherwise
+    """
+
+    if log.only_by_boss and not user_is_boss(user, update):
+        full_message_send(context, phrases.COMMAND_ONLY_BY_BOSS_ERROR, update=update)
+        return False
+
+    return True

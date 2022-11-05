@@ -34,6 +34,10 @@ def user_is_boss(user: User, update: Update) -> bool:
     :return: True if the user is a boss
     """
 
+    # Is admin field
+    if user.is_admin:
+        return True
+
     # User is chat admin
     if update.effective_chat.get_member(user.tg_user_id).status in [CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR]:
         return True

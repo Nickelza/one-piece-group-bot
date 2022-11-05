@@ -128,7 +128,7 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
                 manage_screen_settings_notifications_type_edit(update, context, inbound_keyboard, user)
 
             case Screen.PVT_LOGS:  # Logs
-                manage_screen_logs(update, context, inbound_keyboard)
+                manage_screen_logs(update, context, inbound_keyboard, user)
 
             case Screen.PVT_LOGS_TYPE:  # Logs Type
                 manage_screen_logs_type(update, context, inbound_keyboard, user)

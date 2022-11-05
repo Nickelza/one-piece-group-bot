@@ -2,6 +2,7 @@ from strenum import StrEnum
 from telegram import Update
 from telegram.ext import CallbackContext
 
+from src.chat.private.screens.screen_logs_type import validate
 from src.model.User import User
 from src.model.enums.Log import Log, LogType, get_log_by_type
 from src.model.pojo.Keyboard import Keyboard
@@ -27,7 +28,9 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     """
 
     log: Log = get_log_by_type(LogType(inbound_keyboard.get(LogTypeReservedKeys.TYPE)))
-    log.user = user
-    log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
 
-    full_message_send(context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard)
+    if validate(update, context, log, user):
+        log.user = user
+        log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
+
+        full_message_send(context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard)

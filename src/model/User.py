@@ -7,7 +7,7 @@ import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.CrewRole import CrewRole
-from src.model.enums.Location import get_last_new_world
+from src.model.enums.Location import get_last_new_world, get_by_level, Location
 from src.model.enums.Screen import Screen
 
 
@@ -43,6 +43,7 @@ class User(BaseModel):
     private_screen_in_edit_id = IntegerField(null=True)
     is_muted = IntegerField(default=0)
     bounty_gift_tax = IntegerField(default=0)
+    is_admin = BooleanField(default=False)
 
     # Transient fields
 
@@ -260,6 +261,14 @@ class User(BaseModel):
         """
 
         return self.location_level == get_last_new_world().level
+
+    def get_location(self) -> Location:
+        """
+        Returns the location of the user
+        :return: The location of the user
+        """
+
+        return get_by_level(int(str(self.location_level)))
 
 
 User.create_table()

@@ -527,6 +527,14 @@ LEGENDARY_PIRATE_LOG_ITEM_TEXT = '{}'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\nEpithet: {}' \
                                         '\n\n*Reason*: {}'
+# Logs - New World Pirate
+NEW_WORLD_PIRATE_LOG_KEY = 'New World Pirates'
+NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'New World Pirate'
+NEW_WORLD_PIRATE_LOG_ITEM_TEXT = '{} \\(฿{}\\)'
+NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_CREW_TEXT = '\n*Crew*: {}'
+NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
+                                        '\n\n*Bounty*: ฿{}' \
+                                        '\n*Location*: {}{}'
 
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
