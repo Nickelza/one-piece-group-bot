@@ -2,6 +2,7 @@ from telegram import Update, PhotoSize
 from telegram.constants import CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR
 
 import constants as c
+from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
 from src.model.enums.LeaderboardRank import PIRATE_KING
 from src.service.download_service import generate_temp_file_path
@@ -44,6 +45,10 @@ def user_is_boss(user: User, update: Update) -> bool:
 
     # User is Pirate King
     if get_current_leaderboard_rank(user) == PIRATE_KING:
+        return True
+
+    # User is a Legendary Pirate
+    if LegendaryPirate.get_or_none(LegendaryPirate.user == user) is not None:
         return True
 
     return False
