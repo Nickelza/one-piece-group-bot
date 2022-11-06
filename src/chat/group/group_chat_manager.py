@@ -3,6 +3,7 @@ from telegram.ext import CallbackContext
 
 import resources.Environment as Env
 import src.model.enums.Command as Command
+import src.model.enums.Location as Location
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
@@ -163,7 +164,7 @@ def validate(update: Update, context: CallbackContext, user: User, is_callback: 
     """
     # Regular message
     if not is_callback:
-        if not validate_location_level(update, context, user, 1):
+        if not validate_location_level(update, context, user, Location.ND.level):
             return False
 
     # Stickers
