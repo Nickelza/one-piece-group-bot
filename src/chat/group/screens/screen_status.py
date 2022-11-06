@@ -74,9 +74,9 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
 
         requesting_user_leaderboard_user = get_current_leaderboard_user(user)
 
-        if requesting_user_leaderboard_user is None or (
+        if not user_is_boss(user, update) and (requesting_user_leaderboard_user is None or (
                 leaderboard_target_user is not None
-                and requesting_user_leaderboard_user.position >= leaderboard_target_user.position):
+                and requesting_user_leaderboard_user.position >= leaderboard_target_user.position)):
             requesting_user_leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
                 requesting_user_leaderboard_user)
 
