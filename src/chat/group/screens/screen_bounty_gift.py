@@ -117,33 +117,33 @@ def send_request(update: Update, context: CallbackContext, sender: User, receive
     bounty_gift.save()
 
 
-def get_tax_percentage(sender: User, receiver: User, update: Update) -> int:
+def transaction_is_tax_free(sender: User, receiver: User, update: Update) -> bool:
     """
-    Get the tax to pay for a bounty gift
+    Check if the transaction is tax-free
     :param sender: The sender
     :param receiver: The receiver
     :param update: The update object
-    :return: The tax
+    :return: True if the transaction is tax-free, False otherwise
     """
 
     # Sender and receiver are in the same crew, no tax
     if sender.in_same_crew(receiver):
-        return 0
+        return True
 
     # Sender is a boss, no tax
     if user_is_boss(sender, update):
-        return 0
+        return True
 
-    return sender.bounty_gift_tax
+    return False
 
 
-def get_amounts(update: Update, user: User, target_user: User, command: Command = None, bounty_gift: BountyGift = None
+def get_amounts(update: Update, sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
                 ) -> tuple[int, int, int, int]:
     """
     Get the amounts for a bounty gift
     :param update: The update object
-    :param user: The user object
-    :param target_user: The target user
+    :param sender: The sender
+    :param receiver: The receiver
     :param command: The command
     :param bounty_gift: The bounty gift object
     :return: The amount, tax percentage, tax amount, total amount
@@ -154,7 +154,7 @@ def get_amounts(update: Update, user: User, target_user: User, command: Command 
     else:
         amount = bounty_gift.amount
 
-    tax_percentage = get_tax_percentage(user, target_user, update)
+    tax_percentage = 0 if transaction_is_tax_free(sender, receiver, update) else sender.bounty_gift_tax
     tax_amount = int(get_value_from_percentage(amount, tax_percentage))
     total_amount = amount + tax_amount
 
@@ -195,7 +195,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, sender: User,
     # Update sender
     sender.bounty -= total_amount
 
-    if tax_percentage > 0:
+    if not transaction_is_tax_free(sender, receiver, update):
         sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
