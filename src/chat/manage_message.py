@@ -100,7 +100,11 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
 
     # Recast necessary for match case to work, don't ask me why
     message_source: MessageSource = MessageSource(get_message_source(update))
+
+    # Leave chat if not recognized
     if message_source is MessageSource.ND:
+        logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
+        update.effective_chat.leave()
         return
 
     command: Command.Command = Command.ND

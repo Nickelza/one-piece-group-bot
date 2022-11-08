@@ -643,7 +643,6 @@ def get_message_source(update: Update) -> MessageSource:
     if update.effective_chat.id == Env.TG_REST_CHANNEL_ID.get_int():
         return MessageSource.TG_REST
 
-    logging.error(f'Unknown message source for {update.effective_chat.id}')
     return MessageSource.ND
 
 
