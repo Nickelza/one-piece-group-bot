@@ -426,7 +426,7 @@ class NewWorldPirateLog(Log):
             crew_text = ''
 
         return phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT.format(
-            self.user.get_markdown_mention(), get_belly_formatted(self.object.bounty),
+            self.object.get_markdown_mention(), get_belly_formatted(self.object.bounty),
             escape_valid_markdown_chars(self.object.get_location().name), crew_text)
 
 
