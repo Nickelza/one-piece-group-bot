@@ -47,7 +47,6 @@ def cleanup_temp_dir() -> None:
             try:
                 pathinfo = os.stat(file_path)
                 if pathinfo.st_ctime < current_time - time_limit or True:  # File is older than x time
-                    logging.info("Removing temp file: %s", file_path)
                     if os.path.isfile(file_path):  # Is a file
                         os.unlink(file_path)
                     else:
