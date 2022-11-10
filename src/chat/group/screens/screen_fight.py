@@ -76,7 +76,7 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
             raise OpponentValidationException(GroupChatError.FIGHT_OPPONENT_NOT_FOUND.build())
 
         # Opponent is not in the minimum required location
-        if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int():
+        if opponent.location_level < Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int():
             raise OpponentValidationException()
 
         # Opponent has fight immunity
@@ -131,7 +131,7 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     # Use maximum probability if the probability is too high
     win_probability = round(min(win_probability, leaderboard_rank.max_win_probability), 2)
     # Final location cap
-    if challenger.is_on_final_location():
+    if challenger.has_final_location_limitations():
         win_probability = round(min(win_probability, Env.FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION.get_float()), 2)
 
     lose_probability = 100 - win_probability

@@ -236,7 +236,7 @@ class User(BaseModel):
         :return: True if the user has the New World bonus
         """
 
-        return self.in_new_world() and not self.is_on_final_location()
+        return self.in_new_world() and not self.has_final_location_limitations()
 
     def has_crew_bonus(self) -> bool:
         """
@@ -244,7 +244,7 @@ class User(BaseModel):
         :return: True if the user has the Crew bonus
         """
 
-        return self.is_crew_member() and not self.is_on_final_location()
+        return self.is_crew_member() and not self.has_final_location_limitations()
 
     def has_crew_mvp_bonus(self) -> bool:
         """
@@ -252,7 +252,7 @@ class User(BaseModel):
         :return: True if the user has the Crew MVP bonus
         """
 
-        return self.has_higher_bounty_than_crew_average() and not self.is_on_final_location()
+        return self.has_higher_bounty_than_crew_average() and not self.has_final_location_limitations()
 
     def is_on_final_location(self) -> bool:
         """
@@ -269,6 +269,24 @@ class User(BaseModel):
         """
 
         return get_by_level(int(str(self.location_level)))
+
+    def has_final_location_limitations(self) -> bool:
+        """
+        Returns True if the user has the final location limitations
+        :return: True if the user has the final location limitations
+        """
+
+        return self.is_on_final_location() and self.bounty >= get_last_new_world().required_bounty
+
+    @staticmethod
+    def get_not_has_final_location_limitations_statement_condition() -> Any:
+        """
+        Returns the not has final location limitations statement condition
+        :return: The not has final location limitations statement condition
+        """
+
+        return ((User.bounty < get_last_new_world().required_bounty)
+                | (User.location_level < get_last_new_world().level))
 
 
 User.create_table()
