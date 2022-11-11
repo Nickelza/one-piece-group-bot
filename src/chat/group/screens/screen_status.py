@@ -151,7 +151,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
     bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE
 
     # Crew Bounty Bonus
-    if user.has_crew_bonus():
+    if target_user.has_crew_bonus():
         bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
             Emoji.LOG_POSITIVE if Env.CREW_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
             phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
@@ -159,7 +159,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
         has_bounty_bonus = True
 
     # Crew MVP Bounty Bonus
-    if user.has_crew_mvp_bonus():
+    if target_user.has_crew_mvp_bonus():
         bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
             Emoji.LOG_POSITIVE if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
             phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
