@@ -69,6 +69,13 @@ def get_message_belly(update: Update, user: User) -> int:
     except AttributeError:
         pass
 
+    # Edited message - No belly
+    try:
+        if update.effective_message.edit_date is not None:
+            return 0
+    except AttributeError:
+        pass
+
     # User on final location - No belly
     if user.has_final_location_limitations():
         return 0
