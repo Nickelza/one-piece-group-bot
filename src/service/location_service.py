@@ -37,12 +37,13 @@ def update_location(user: User, context: CallbackContext = None, update: Update 
         effective_location: Location = new_location
 
         # Cap the location level to Paradise max
-        if region == Region.PARADISE or (Location.is_paradise_by_level(user.location_level)
+        if region is Region.PARADISE or (Location.is_paradise_by_level(user.location_level)
                                          and Location.is_new_world_by_level(new_location.level) and cap_to_paradise):
             effective_location: Location = Location.get_last_paradise()
 
         if user.location_level != effective_location.level and not should_passive_update:
-            location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user, new_location)
+            location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user,
+                                                                                                  effective_location)
             if requested_by_user:  # Update after region change, edit group message
                 full_message_send(context, location_update_notification.build(), update=update,
                                   disable_web_page_preview=False, add_delete_button=True)
