@@ -71,26 +71,31 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
             leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
                                                                       LeaderboardRank.PIRATE_KING)
             leaderboard_users.append(leaderboard_user)
+            position += 1
             break
 
     # Save Emperors, next 4 users
-    for index, user in enumerate(new_world_users):
+    added_users_count = 0
+    for user in new_world_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
             leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
                                                                       LeaderboardRank.EMPEROR)
             leaderboard_users.append(leaderboard_user)
             position += 1
-            if index == 3:
+            added_users_count += 1
+            if added_users_count == 4:
                 break
 
     # Save First Mates, next 4 users
-    for index, user in enumerate(new_world_users):
+    added_users_count = 0
+    for user in new_world_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
             leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
                                                                       LeaderboardRank.FIRST_MATE)
             leaderboard_users.append(leaderboard_user)
             position += 1
-            if index == 3:
+            added_users_count += 1
+            if added_users_count == 4:
                 break
 
     # Get current Paradise users, excluding arrested users and Admins
@@ -101,13 +106,15 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
                                       .order_by(User.bounty.desc()))
 
     # Save Supernovas, next 11 users
-    for index, user in enumerate(paradise_users):
+    added_users_count = 0
+    for user in paradise_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
             leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
                                                                       LeaderboardRank.SUPERNOVA)
             leaderboard_users.append(leaderboard_user)
             position += 1
-            if index == 10:
+            added_users_count += 1
+            if added_users_count == 11:
                 break
 
     return leaderboard_users
