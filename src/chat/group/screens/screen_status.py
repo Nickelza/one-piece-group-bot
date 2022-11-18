@@ -90,7 +90,8 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
             return
 
     # Allowed only in private chat (Rookie or Prisoner)
-    if (command.message_source is not MessageSource.PRIVATE and (leaderboard_user_rank is LeaderboardRank.ROOKIE
+    if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
+                                                                  and not user_is_boss(user, update))
                                                                  or user.is_arrested())):
         outbound_keyboard: list[list[Keyboard]] = [[
             Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY, url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
