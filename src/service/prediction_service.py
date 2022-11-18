@@ -93,10 +93,14 @@ def get_prediction_text(prediction: Prediction) -> str:
                      else Emoji.PREDICTION_FEATURE_DISABLED)
     optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS.format(enabled_emoji)
 
-    # Add command to place bets if prediction is open
+    # Add command to place and remove bets if prediction is open
     how_to_bet_command_text = ""
+    how_to_remove_bet_command_text = ""
     if PredictionStatus(prediction.status) is PredictionStatus.SENT:
         how_to_bet_command_text = phrases.PREDICTION_BET_HOW_TO_PLACE_BET
+
+        if prediction.can_withdraw_bet:
+            how_to_remove_bet_command_text = phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
 
     # Append \n if not empty
     optional_text = "\n" + optional_text if optional_text != "" else ""
@@ -109,7 +113,8 @@ def get_prediction_text(prediction: Prediction) -> str:
         get_belly_formatted(total_wager),
         get_prediction_status_name_by_key(PredictionStatus(prediction.status)),
         added_text,
-        how_to_bet_command_text)
+        how_to_bet_command_text,
+        how_to_remove_bet_command_text)
 
     return prediction_text
 

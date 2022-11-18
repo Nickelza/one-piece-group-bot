@@ -231,7 +231,7 @@ PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Total wager*: ฿{}' \
                   '\n*Status*: {}' \
-                  '{}{}'
+                  '{}{}{}'
 PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
