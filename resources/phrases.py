@@ -263,7 +263,7 @@ PREDICTION_BET_REMOVE_INVALID_FORMAT = 'Make sure your command is in the followi
                                        f'\n\nExample: {Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} 1'
 PREDICTION_BET_REMOVE_SUCCESS = 'Bet removed successfully'
 PREDICTION_BET_USER_HAS_NOT_BET = 'You have not bet on this prediction'
-PREDICTION_BET_REMOVE_ALL_SUCCESS = 'All bets removed successfully for this prediction'
+PREDICTION_BET_REMOVE_ALL_SUCCESS = 'All your bets on this prediction have been removed successfully'
 PREDICTION_CLOSED_FOR_BETS_REMOVAL = 'You can no longer withdraw bets from this prediction'
 PREDICTION_DOES_NOT_ACCEPT_BETS_WITHDRAWAL = 'This prediction does not accept bets withdrawal'
 PREDICTION_OPTION_NOT_BET_ON = 'You have not bet on this option'

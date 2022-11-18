@@ -12,9 +12,8 @@ from src.service.message_service import full_message_send
 from src.service.prediction_service import refresh, get_prediction_options_user
 
 
-def validate(update: Update, context: CallbackContext, user: User, command: Command) -> tuple[Prediction,
-                                                                                              PredictionOption] | tuple[
-                                                                                            None, None]:
+def validate(update: Update, context: CallbackContext, user: User, command: Command
+             ) -> tuple[Prediction, PredictionOption, list[PredictionOptionUser]] | tuple[None, None, None]:
     """
     Validate the prediction bet
     :param update: The update object
@@ -24,7 +23,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     :return: None if validation failed or (prediction, prediction_option) if validation succeeded
     """
 
-    error_tuple = None, None
+    error_tuple = None, None, None
 
     if len(command.parameters) > 1:
         full_message_send(context, phrases.PREDICTION_BET_REMOVE_INVALID_FORMAT, update=update, add_delete_button=True)
@@ -72,7 +71,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
             full_message_send(context, phrases.PREDICTION_OPTION_NOT_BET_ON, update=update)
             return error_tuple
 
-    return prediction, prediction_option
+    return prediction, prediction_option, prediction_options_user
 
 
 def manage(update: Update, context: CallbackContext, user: User, command: Command) -> None:
@@ -89,20 +88,40 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     # Need single assignment to enable IDE type detection
     prediction: Prediction = validation_tuple[0]
     prediction_option: PredictionOption = validation_tuple[1]
+    prediction_options_user: list[PredictionOptionUser] = validation_tuple[2]
 
     if prediction is None:
         return
 
     if prediction_option is None:
         # Remove all bets on this prediction
-        PredictionOptionUser.delete().where((PredictionOptionUser.prediction == prediction) &
-                                            (PredictionOptionUser.user == user)).execute()
+        for prediction_option_user in prediction_options_user:
+            delete_prediction_option_user(user, prediction_option_user)
+
         full_message_send(context, phrases.PREDICTION_BET_REMOVE_ALL_SUCCESS, update=update)
     else:
         # Remove bet on this prediction option
-        PredictionOptionUser.delete().where((PredictionOptionUser.prediction_option == prediction_option) &
-                                            (PredictionOptionUser.user == user)).execute()
+        prediction_option_user: PredictionOptionUser = [
+            prediction_option_user for prediction_option_user in prediction_options_user
+            if prediction_option_user.prediction_option == prediction_option][0]
+        delete_prediction_option_user(user, prediction_option_user)
+
         full_message_send(context, phrases.PREDICTION_BET_REMOVE_SUCCESS, update=update)
 
     # Update prediction text
     refresh(context, prediction)
+
+
+def delete_prediction_option_user(user: User, prediction_option_user: PredictionOptionUser) -> None:
+    """
+    Delete a prediction option user
+    :param user: The user object
+    :param prediction_option_user: The prediction option user
+    :return: None
+    """
+    # Return wager
+    user.pending_bounty -= prediction_option_user.wager
+    user.bounty += prediction_option_user.wager
+
+    # Delete prediction option user
+    prediction_option_user.delete_instance()
