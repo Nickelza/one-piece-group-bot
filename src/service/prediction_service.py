@@ -16,7 +16,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.error.CustomException import PredictionException
-from src.service.bounty_service import round_belly_up, add_bounty
+from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 from src.service.notification_service import send_notification
@@ -106,6 +106,7 @@ def get_prediction_text(prediction: Prediction) -> str:
     prediction_text = phrases.PREDICTION_TEXT.format(
         escape_valid_markdown_chars(prediction.question),
         options_text,
+        get_belly_formatted(total_wager),
         get_prediction_status_name_by_key(PredictionStatus(prediction.status)),
         added_text,
         how_to_bet_command_text)

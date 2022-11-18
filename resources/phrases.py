@@ -229,7 +229,8 @@ PREDICTION_NOT_IN_BETS_CLOSED_STATUS = 'Prediction not in BETS\\_CLOSED status'
 UNKNOWN_PREDICTION_ACTION = 'Unknown prediction action'
 PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
-                  '\n\n*Status*: {}' \
+                  '\n\n*Total wager*: ฿{}' \
+                  '\n*Status*: {}' \
                   '{}{}'
 PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
