@@ -42,12 +42,12 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     # Get prediction from message id
     prediction: Prediction = Prediction.get_or_none(Prediction.message_id == update.message.reply_to_message.message_id)
     if prediction is None:
-        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update)
+        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
         return error_tuple
 
     # Prediction is not open
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
-        full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, update=update)
+        full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, update=update, add_delete_button=True)
         return error_tuple
 
     prediction_options: list[PredictionOption] = prediction.prediction_options
@@ -55,7 +55,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     # User has already bet and prediction does not allow multiple bets
     prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
     if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
-        full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update)
+        full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update, add_delete_button=True)
         return error_tuple
 
     # Option is not valid
@@ -63,7 +63,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
                          str(prediction_option.number) == command.parameters[1]]
     if len(prediction_option) == 0:
         full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(
-            escape_valid_markdown_chars(command.parameters[1])), update=update)
+            escape_valid_markdown_chars(command.parameters[1])), update=update, add_delete_button=True)
         return error_tuple
 
     return prediction, prediction_option[0], get_amount_from_command(command.parameters[0]), int(command.parameters[1])

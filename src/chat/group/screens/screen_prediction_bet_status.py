@@ -27,14 +27,14 @@ def validate(update: Update, context: CallbackContext, user: User) -> tuple[Pred
     # Get prediction from message id
     prediction: Prediction = Prediction.get_or_none(Prediction.message_id == update.message.reply_to_message.message_id)
     if prediction is None:
-        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update)
+        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
         return error_tuple
 
     prediction_options_user: list[PredictionOptionUser] = prediction_service.get_prediction_options_user(prediction,
                                                                                                          user)
     # User has not bet on this prediction
     if len(prediction_options_user) == 0:
-        full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update)
+        full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update, add_delete_button=True)
         return error_tuple
 
     return prediction, prediction_options_user
