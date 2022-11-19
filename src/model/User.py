@@ -7,7 +7,8 @@ import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.CrewRole import CrewRole
-from src.model.enums.Location import get_last_new_world, get_by_level, Location
+from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
+    is_paradise_by_level
 from src.model.enums.Screen import Screen
 
 
@@ -236,7 +237,7 @@ class User(BaseModel):
         :return: True if the user has the New World bonus
         """
 
-        return self.in_new_world() and not self.has_final_location_limitations()
+        return self.in_new_world() and not self.has_bounty_gain_limitations()
 
     def has_crew_bonus(self) -> bool:
         """
@@ -244,7 +245,7 @@ class User(BaseModel):
         :return: True if the user has the Crew bonus
         """
 
-        return self.is_crew_member() and not self.has_final_location_limitations()
+        return self.is_crew_member() and not self.has_bounty_gain_limitations()
 
     def has_crew_mvp_bonus(self) -> bool:
         """
@@ -252,15 +253,15 @@ class User(BaseModel):
         :return: True if the user has the Crew MVP bonus
         """
 
-        return self.has_higher_bounty_than_crew_average() and not self.has_final_location_limitations()
+        return self.has_higher_bounty_than_crew_average() and not self.has_bounty_gain_limitations()
 
-    def is_on_final_location(self) -> bool:
+    def is_in_paradise(self) -> bool:
         """
-        Returns True if the user is on the final location
-        :return: True if the user is on the final location
+        Returns True if the user is in Paradise
+        :return: True if the user is in Paradise
         """
 
-        return self.location_level == get_last_new_world().level
+        return is_paradise_by_level(int(str(self.location_level)))
 
     def get_location(self) -> Location:
         """
@@ -270,23 +271,27 @@ class User(BaseModel):
 
         return get_by_level(int(str(self.location_level)))
 
-    def has_final_location_limitations(self) -> bool:
+    def has_bounty_gain_limitations(self) -> bool:
         """
-        Returns True if the user has the final location limitations
-        :return: True if the user has the final location limitations
+        Returns True if the user has bounty gain limitations
+        This occurs when the user is in Paradise but has enough bounty to be in the New World, or their bounty is
+        higher than that required to reach the final location
+        :return: True if the user has bounty gain limitations
         """
 
-        return self.is_on_final_location() and self.bounty >= get_last_new_world().required_bounty
+        return ((self.is_in_paradise() and self.bounty >= get_first_new_world().required_bounty)
+                or (self.bounty >= get_last_new_world().required_bounty))
 
     @staticmethod
-    def get_not_has_final_location_limitations_statement_condition() -> Any:
+    def get_has_bounty_gain_limitations_statement_condition() -> Any:
         """
-        Returns the not has final location limitations statement condition
-        :return: The not has final location limitations statement condition
+        Returns the has bounty gain limitations statement condition
+        :return: The has bounty gain limitations statement condition
         """
 
-        return ((User.bounty < get_last_new_world().required_bounty)
-                | (User.location_level < get_last_new_world().level))
+        return (((User.location_level < get_first_new_world().level) &
+                 (User.bounty >= get_first_new_world().required_bounty)) |
+                (User.bounty >= get_last_new_world().required_bounty))
 
 
 User.create_table()

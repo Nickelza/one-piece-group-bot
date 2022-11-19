@@ -77,7 +77,7 @@ def get_message_belly(update: Update, user: User) -> int:
         pass
 
     # User on final location - No belly
-    if user.has_final_location_limitations():
+    if user.has_bounty_gain_limitations():
         return 0
 
     # Forwarded message - Base belly
@@ -207,12 +207,13 @@ def add_region_bounty_bonus() -> None:
     """
 
     conditions: list[tuple[bool, int]] = [((User.location_level <= get_last_paradise().level)
-                                           & (User.get_is_not_arrested_statement_condition()),
+                                           & (User.get_is_not_arrested_statement_condition())
+                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
                                            User.bounty +
                                            ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
                                           ((User.location_level >= get_first_new_world().level)
                                            & (User.get_is_not_arrested_statement_condition())
-                                           & (User.get_not_has_final_location_limitations_statement_condition()),
+                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
                                            User.bounty +
                                            ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
     case_stmt = Case(None, conditions, User.bounty)
@@ -226,7 +227,7 @@ def add_crew_bounty_bonus() -> None:
 
     (User.update(bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
      .where((User.crew.is_null(False))
-            & (User.get_not_has_final_location_limitations_statement_condition()))
+            & ~(User.get_has_bounty_gain_limitations_statement_condition()))
      .execute())
 
 
@@ -238,7 +239,7 @@ def add_crew_mvp_bounty_bonus() -> None:
     condition: tuple[bool, int] = (
         ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
          & (User.get_is_not_arrested_statement_condition())
-         & (User.get_not_has_final_location_limitations_statement_condition())),
+         & ~(User.get_has_bounty_gain_limitations_statement_condition())),
         User.bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
 
     case_stmt = Case(None, [condition], User.bounty)

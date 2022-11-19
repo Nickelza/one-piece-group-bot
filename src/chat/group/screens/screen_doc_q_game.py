@@ -55,7 +55,7 @@ def get_win_odd(user: User) -> float:
     :return: The win odd
     """
 
-    return (Env.DOC_Q_GAME_WIN_ODD_FINAL_LOCATION.get_float() if user.has_final_location_limitations()
+    return (Env.DOC_Q_GAME_WIN_ODD_FINAL_LOCATION.get_float() if user.has_bounty_gain_limitations()
             else Env.DOC_Q_GAME_WIN_ODD.get_float())
 
 
@@ -129,7 +129,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
         doc_q_game.user = user
         doc_q_game.save()
 
-        if user.has_final_location_limitations():
+        if user.has_bounty_gain_limitations():
             options_count = Env.DOC_Q_GAME_OPTIONS_COUNT_FINAL_LOCATION.get_int()
         else:
             options_count = Env.DOC_Q_GAME_OPTIONS_COUNT.get_int()
