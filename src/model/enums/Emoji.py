@@ -62,7 +62,7 @@ class Emoji(StrEnum):
     CENTER_CHAMBER = '⚪'
 
     # Crew
-    CREW = '‍☠'
+    CREW = '🏴‍☠'
 
     # Logs
     LOGS = '📋'
