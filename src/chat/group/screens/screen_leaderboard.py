@@ -73,3 +73,6 @@ def manage(context: CallbackContext) -> None:
 
     # Warn captains about inactive crews
     warn_inactive_captains(context)
+
+    # Reset bounty gift tax
+    User.update(bounty_gift_tax=0).execute()

@@ -160,9 +160,6 @@ def reset_bounty(context: CallbackContext) -> None:
     # Reset can create crew flag
     User.update(can_create_crew=True).execute()
 
-    # Reset bounty gift tax
-    User.update(bounty_gift_tax=0).execute()
-
     # Delete all pending bounty gifts
     BountyGift.delete().where(BountyGift.status == BountyGiftStatus.AWAITING_CONFIRMATION).execute()
 
