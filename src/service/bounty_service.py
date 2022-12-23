@@ -183,7 +183,7 @@ def add_bounty(user: User, amount: float, context: CallbackContext = None, updat
     """
     from src.service.location_service import update_location
 
-    if amount <= 0:
+    if amount <= 0 and not should_update_location:
         return
 
     # User is arrested, no bounty is gained
