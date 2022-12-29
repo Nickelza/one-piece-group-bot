@@ -200,8 +200,10 @@ def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
     # Inactive captains
     # Have to first get inactive ones else, by using "not in", it will return records for previous leaderboards too
     # since the user might have been in a leaderboard before N, so it will not be in the latest N leaderboards
+    # Exclude admins
     inactive_captains = (User.select()
                          .where((User.crew_role == CrewRole.CAPTAIN) &
-                                (User.id.not_in([captain.id for captain in active_captains]))))
+                                (User.id.not_in([captain.id for captain in active_captains]))
+                                & (User.is_admin == False)))
 
     return inactive_captains
