@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -18,7 +18,7 @@ from src.service.location_service import update_location
 from src.service.notification_service import send_notification
 
 
-def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
+async def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
     """
     Adds a member to a crew
 
@@ -31,14 +31,15 @@ def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
     crew_member.crew_role = role
     crew_member.crew_join_date = datetime.now()
 
-    update_location(crew_member, should_passive_update=True)
+    await update_location(crew_member, should_passive_update=True)
 
     crew_member.save()
 
 
-def remove_member(crew_member, context: CallbackContext = None, send_notification_to_captain: bool = False,
-                  send_notification_to_member: bool = False, disable_user_can_join_crew: bool = False,
-                  disable_crew_can_accept_new_members: bool = False) -> None:
+async def remove_member(crew_member, context: ContextTypes.DEFAULT_TYPE = None,
+                        send_notification_to_captain: bool = False, send_notification_to_member: bool = False,
+                        disable_user_can_join_crew: bool = False, disable_crew_can_accept_new_members: bool = False
+                        ) -> None:
     """
     Removes a member from a crew
 
@@ -60,7 +61,7 @@ def remove_member(crew_member, context: CallbackContext = None, send_notificatio
     if disable_user_can_join_crew:
         crew_member.can_join_crew = False
 
-    update_location(crew_member, should_passive_update=True, can_scale_down=True)
+    await update_location(crew_member, should_passive_update=True, can_scale_down=True)
 
     crew_member.save()
 
@@ -70,11 +71,11 @@ def remove_member(crew_member, context: CallbackContext = None, send_notificatio
 
     # User left
     if send_notification_to_captain:
-        send_notification(context, crew.get_captain(), CrewLeaveNotification(crew_member))
+        await send_notification(context, crew.get_captain(), CrewLeaveNotification(crew_member))
 
     # User was removed
     if send_notification_to_member:
-        send_notification(context, crew_member, CrewMemberRemoveNotification(crew_member))
+        await send_notification(context, crew_member, CrewMemberRemoveNotification(crew_member))
 
 
 def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard = None, crew_id_key: str = None,
@@ -113,7 +114,7 @@ def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard 
     return crew
 
 
-def disband_crew(context: CallbackContext, captain: User, should_notify_captain: bool = False) -> None:
+async def disband_crew(context: ContextTypes.DEFAULT_TYPE, captain: User, should_notify_captain: bool = False) -> None:
     """
     Disbands a crew
 
@@ -130,18 +131,18 @@ def disband_crew(context: CallbackContext, captain: User, should_notify_captain:
 
         if is_captain:
             captain.can_create_crew = False
-            remove_member(captain)  # Else user will not be updated
+            await remove_member(captain)  # Else user will not be updated
         else:
-            remove_member(member)
+            await remove_member(member)
 
         if not is_captain or should_notify_captain:
-            send_notification(context, member, CrewDisbandNotification())
+            await send_notification(context, member, CrewDisbandNotification())
 
     crew.is_active = False
     crew.save()
 
 
-def disband_inactive_crews(context: CallbackContext) -> None:
+async def disband_inactive_crews(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Disbands inactive crews
 
@@ -154,10 +155,10 @@ def disband_inactive_crews(context: CallbackContext) -> None:
 
     # Disband inactive crews
     for captain in inactive_crew_captains:
-        disband_crew(context, captain, should_notify_captain=True)
+        await disband_crew(context, captain, should_notify_captain=True)
 
 
-def warn_inactive_captains(context: CallbackContext) -> None:
+async def warn_inactive_captains(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Warns inactive captains which Crew will be disbanded in the next leaderboard
 
@@ -168,7 +169,7 @@ def warn_inactive_captains(context: CallbackContext) -> None:
     inactive_captains = get_inactive_captains(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
     for captain in inactive_captains:
-        send_notification(context, captain, CrewDisbandWarningNotification())
+        await send_notification(context, captain, CrewDisbandWarningNotification())
 
 
 def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:

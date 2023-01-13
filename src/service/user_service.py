@@ -1,5 +1,8 @@
-from telegram import Update, PhotoSize
-from telegram.constants import CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR
+from pathlib import Path
+from typing import Sequence, Optional
+
+from telegram import Update, PhotoSize, UserProfilePhotos, File, ChatMember
+from telegram.constants import ChatMemberStatus
 
 import constants as c
 from src.model.LegendaryPirate import LegendaryPirate
@@ -9,7 +12,7 @@ from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_current_leaderboard_rank
 
 
-def get_user_profile_photo(update: Update) -> str | None:
+async def get_user_profile_photo(update: Update) -> str | None:
     """
     Gets the user's profile photo
     :param update: Telegram update
@@ -17,17 +20,21 @@ def get_user_profile_photo(update: Update) -> str | None:
     """
 
     # Get users last photo
-    photo_path = None
+    photo_path: Optional[Path] = None
     try:
-        photo: PhotoSize = update.effective_user.get_profile_photos(limit=1).photos[0][-1]
-        photo_path = photo.get_file().download(generate_temp_file_path(c.TG_PROFILE_PHOTO_EXTENSION))
+        # More verbose to get IDE hints
+        user_profile_photos: UserProfilePhotos = await update.effective_user.get_profile_photos(limit=1)
+        last_set_photos: Sequence[PhotoSize] = user_profile_photos.photos[0]
+        last_set_photo: PhotoSize = last_set_photos[-1]
+        file: File = await last_set_photo.get_file()
+        photo_path: Path = await file.download_to_drive(generate_temp_file_path(c.TG_PROFILE_PHOTO_EXTENSION))
     except (AttributeError, IndexError):
         pass
 
     return photo_path
 
 
-def user_is_boss(user: User, update: Update) -> bool:
+async def user_is_boss(user: User, update: Update) -> bool:
     """
     Returns True if the user is a boss
     :param user: The user
@@ -40,7 +47,8 @@ def user_is_boss(user: User, update: Update) -> bool:
         return True
 
     # User is chat admin
-    if update.effective_chat.get_member(user.tg_user_id).status in [CHATMEMBER_CREATOR, CHATMEMBER_ADMINISTRATOR]:
+    chat_member: ChatMember = await update.effective_chat.get_member(user.tg_user_id)
+    if chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR):
         return True
 
     # User is Pirate King
@@ -54,7 +62,7 @@ def user_is_boss(user: User, update: Update) -> bool:
     return False
 
 
-def user_is_muted(user: User, update: Update) -> bool:
+async def user_is_muted(user: User, update: Update) -> bool:
     """
     Returns True if the user is muted
     :param user: The user
@@ -62,4 +70,4 @@ def user_is_muted(user: User, update: Update) -> bool:
     :return: True if the user is muted
     """
 
-    return user.is_muted and not user_is_boss(user, update)
+    return user.is_muted and not await user_is_boss(user, update)

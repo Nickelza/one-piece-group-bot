@@ -2,7 +2,7 @@ import datetime
 from enum import IntEnum
 
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -24,7 +24,7 @@ class Step(IntEnum):
     END = 1
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the crew create screen
     :param update: The update
@@ -39,7 +39,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     if not should_ignore_input:
         # Validate that the user can create a crew
         if should_create_item:
-            if not validate(update, context, inbound_keyboard, user):
+            if not await validate(update, context, inbound_keyboard, user):
                 return
             crew = Crew()
         else:
@@ -92,11 +92,11 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
             ot_text = str(e)
 
         # Send message
-        full_message_send(context, str(ot_text), update=update, inbound_keyboard=inbound_keyboard,
-                          previous_screens=user.get_private_screen_list()[:-1])
+        await full_message_send(context, str(ot_text), update=update, inbound_keyboard=inbound_keyboard,
+                                previous_screens=user.get_private_screen_list()[:-1])
 
 
-def validate(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> bool:
     """
     Validate the crew create screen
     :param update: The update
@@ -126,8 +126,8 @@ def validate(update: Update, context: CallbackContext, inbound_keyboard: Keyboar
 
     except CrewValidationException as e:
         # Show alert if callback else send a message
-        full_message_send(context, str(e), update=update, inbound_keyboard=inbound_keyboard, answer_callback=True,
-                          show_alert=True)
+        await full_message_send(context, str(e), update=update, inbound_keyboard=inbound_keyboard, answer_callback=True,
+                                show_alert=True)
         return False
 
     return True

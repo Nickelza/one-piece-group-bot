@@ -1,12 +1,12 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.User import User
 from src.service.message_service import full_message_send
 
 
-def manage(update: Update, context: CallbackContext, target_user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, target_user: User) -> None:
     """
     Manage the speak screen
     :param update: The update object
@@ -21,4 +21,4 @@ def manage(update: Update, context: CallbackContext, target_user: User) -> None:
 
     # Confirmation message
     ot_text = phrases.SPEAK.format(target_user.get_markdown_mention())
-    full_message_send(context, ot_text, update=update)
+    await full_message_send(context, ot_text, update=update)

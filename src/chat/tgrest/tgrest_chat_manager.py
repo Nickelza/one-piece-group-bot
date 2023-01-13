@@ -1,7 +1,7 @@
 import json
 
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.tgrest.screens.screen_send_private_message import manage as manage_screen_send_private_message
@@ -16,7 +16,7 @@ from src.service.message_service import full_message_send, escape_valid_markdown
 from src.service.notification_service import send_notification
 
 
-def manage(update: Update, context: CallbackContext) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update
@@ -42,17 +42,17 @@ def manage(update: Update, context: CallbackContext) -> None:
             raise TgRestException(str(tgre))
 
         # If not intended recipient, ignore
-        if int(tg_rest.bot_id) != int(update.effective_message.bot.id):
+        if int(tg_rest.bot_id) != int(update.effective_message.get_bot().id):
             return
 
         match tg_rest.object_type:
             case TgRestObjectType.PREDICTION:
                 tg_rest_prediction = TgRestPrediction(**tg_rest_dict)
-                manage_screen_prediction(context, tg_rest_prediction)
+                await manage_screen_prediction(context, tg_rest_prediction)
 
             case TgRestObjectType.PRIVATE_MESSAGE:
                 tg_rest_private_message = TgRestPrivateMessage(**tg_rest_dict)
-                manage_screen_send_private_message(context, tg_rest_private_message)
+                await manage_screen_send_private_message(context, tg_rest_private_message)
 
             case TgRestObjectType.IMPEL_DOWN_NOTIFICATION:
                 tg_rest_impel_down_notification = TgRestImpelDownNotification(**tg_rest_dict)
@@ -65,11 +65,11 @@ def manage(update: Update, context: CallbackContext) -> None:
                         tg_rest_impel_down_notification.bounty_action,
                         tg_rest_impel_down_notification.reason)
 
-                send_notification(context, tg_rest_impel_down_notification.user, notification)
+                await send_notification(context, tg_rest_impel_down_notification.user, notification)
 
             case _:
                 raise TgRestException("Unknown object type")
-        full_message_send(context, "Request received", update=update, quote=True)
+        await full_message_send(context, "Request received", update=update, quote=True)
     except TgRestException as e:
-        full_message_send(context, "Error: " + escape_valid_markdown_chars(e.message), update=update, quote=True)
+        await full_message_send(context, "Error: " + escape_valid_markdown_chars(e.message), update=update, quote=True)
         return

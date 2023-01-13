@@ -1,11 +1,12 @@
 import datetime
 
 from strenum import StrEnum
-from telegram import Update, TelegramError, Message
-from telegram.ext import CallbackContext
+from telegram import Update, Message
+from telegram.error import TelegramError
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
-import resources.phrases as phrases
+from resources import phrases
 from src.model.Fight import Fight
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
@@ -50,7 +51,7 @@ def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | Non
     return fight.opponent
 
 
-def validate(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None) -> bool:
     """
     Validate the fight request
     :param update: The update object
@@ -94,10 +95,10 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
 
     except OpponentValidationException as ove:
         if ove.message is not None:
-            full_message_or_media_send_or_edit(context, ove.message, update)
+            await full_message_or_media_send_or_edit(context, ove.message, update)
         else:
-            full_message_or_media_send_or_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update=update,
-                                               add_delete_button=True)
+            await full_message_or_media_send_or_edit(context, phrases.FIGHT_CANNOT_FIGHT_USER, update=update,
+                                                     add_delete_button=True)
         return False
 
     # User is in fight cooldown
@@ -106,7 +107,7 @@ def validate(update: Update, context: CallbackContext, user: User, keyboard: Key
         remaining_time = convert_seconds_to_time((user.fight_cooldown_end_date - datetime.datetime.now())
                                                  .total_seconds())
         ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
-        full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
+        await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False
 
     return True
@@ -147,7 +148,7 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     return win_probability, win_amount, lose_amount, final_bounty_if_won, final_bounty_if_lose
 
 
-def delete_fight(update: Update, context: CallbackContext, fight: Fight) -> None:
+async def delete_fight(update: Update, context: ContextTypes.DEFAULT_TYPE, fight: Fight) -> None:
     """
     Delete fight
     :param update: The update
@@ -157,7 +158,7 @@ def delete_fight(update: Update, context: CallbackContext, fight: Fight) -> None
     """
     # Try to delete message
     try:
-        context.bot.delete_message(update.effective_chat.id, fight.message_id)
+        await context.bot.delete_message(update.effective_chat.id, fight.message_id)
     except TelegramError:
         pass
 
@@ -165,7 +166,7 @@ def delete_fight(update: Update, context: CallbackContext, fight: Fight) -> None
     fight.delete_instance()
 
 
-def send_request(update: Update, context: CallbackContext, user: User) -> None:
+async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
     """
     Send request to confirm fight
     :param update: The update object
@@ -178,7 +179,7 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
     previous_fights: list[Fight] = Fight.select().where((Fight.challenger == user) &
                                                         (Fight.status == GameStatus.IN_PROGRESS))
     for previous_fight in previous_fights:
-        delete_fight(update, context, previous_fight)
+        await delete_fight(update, context, previous_fight)
 
     # Get opponent
     opponent: User = get_opponent(update)
@@ -218,12 +219,14 @@ def send_request(update: Update, context: CallbackContext, user: User) -> None:
                                                                  no_text=phrases.KEYBOARD_OPTION_RETREAT,
                                                                  primary_key=fight.id)]
 
-    message: Message = full_media_send(context, fight_media, update=update, caption=caption, keyboard=inline_keyboard)
+    message: Message = await full_media_send(context, fight_media, update=update, caption=caption,
+                                             keyboard=inline_keyboard)
     fight.message_id = message.message_id
     fight.save()
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, user: User, keyboard: Keyboard) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard
+                               ) -> None:
     """
     Keyboard interaction
     :param update: The update
@@ -239,8 +242,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     # User clicked on retreat button
     if not keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         # Answer callback with retreat message
-        full_message_send(context, phrases.FIGHT_CONFIRMATION_RETREAT, update, answer_callback=True)
-        delete_fight(update, context, fight)
+        await full_message_send(context, phrases.FIGHT_CONFIRMATION_RETREAT, update, answer_callback=True)
+        await delete_fight(update, context, fight)
         return
 
     opponent: User = fight.opponent
@@ -254,7 +257,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
-        add_bounty(user, win_amount)
+        await add_bounty(user, win_amount)
         # Remove bounty from opponent
         opponent.bounty -= win_amount
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
@@ -266,7 +269,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         # Remove bounty from challenger
         user.bounty -= lose_amount
         # Add bounty to opponent
-        add_bounty(opponent, lose_amount)
+        await add_bounty(opponent, lose_amount)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())
@@ -284,15 +287,15 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     opponent.fight_cooldown_end_date = None
 
     # Send message
-    full_media_send(context, caption=caption, update=update, add_delete_button=True,
-                    edit_only_caption_and_keyboard=True)
+    await full_media_send(context, caption=caption, update=update, add_delete_button=True,
+                          edit_only_caption_and_keyboard=True)
 
     # Save info
     opponent.save()
     fight.save()
 
 
-def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None) -> None:
     """
     Manage the fight request
     :param update: The update object
@@ -303,12 +306,12 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
 
     # Validate the request
-    if not validate(update, context, user, keyboard):
+    if not await validate(update, context, user, keyboard):
         return
 
     # Request to fight
     if keyboard is None:
-        send_request(update, context, user)
+        await send_request(update, context, user)
         return
 
-    keyboard_interaction(update, context, user, keyboard)
+    await keyboard_interaction(update, context, user, keyboard)

@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -15,8 +15,8 @@ from src.model.error.CustomException import CrewValidationException, CrewJoinVal
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member, get_crew
 from src.service.cron_service import get_remaining_time_from_next_cron
-from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, \
-    full_media_send, full_message_or_media_send_or_edit, escape_valid_markdown_chars
+from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send, \
+    full_message_or_media_send_or_edit, escape_valid_markdown_chars
 
 
 class CrewReservedKeys(StrEnum):
@@ -28,7 +28,8 @@ class CrewReservedKeys(StrEnum):
     CAPTAIN_USER_ID = 'c'
 
 
-def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
+                 target_user: User) -> None:
     """
     Manage the Crew join screen
     :param update: The update object
@@ -44,12 +45,12 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
 
         # Request to join a Crew
         if inbound_keyboard is None:
-            send_request(update, context, user, crew)
+            await send_request(update, context, user, crew)
             return
 
-        keyboard_interaction(update, context, user, crew, inbound_keyboard)
+        await keyboard_interaction(update, context, user, crew, inbound_keyboard)
     except CrewValidationException as cve:
-        full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
+        await full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
 
 
 def validate(user: User, crew: Crew, specific_user_error: bool = False, specific_crew_error: bool = False) -> None:
@@ -91,7 +92,7 @@ def validate(user: User, crew: Crew, specific_user_error: bool = False, specific
             e.message if e.message is not None else phrases.CREW_JOIN_REQUEST_USER_CANNOT_JOIN_CREW)
 
 
-def send_request(update: Update, context: CallbackContext, user: User, crew: Crew) -> None:
+async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, crew: Crew) -> None:
     """
     Send request to join a Crew
     :param update: The update object
@@ -117,12 +118,13 @@ def send_request(update: Update, context: CallbackContext, user: User, crew: Cre
 
     # Get SavedMedia
     join_crew_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.JOIN_CREW)
-    full_media_send(context, join_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
-                    add_delete_button=True)
+    await full_media_send(context, join_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
+                          add_delete_button=True)
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, captain: User, crew: Crew, inbound_keyboard: Keyboard
-                         ) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, captain: User, crew: Crew,
+                               inbound_keyboard: Keyboard
+                               ) -> None:
     """
     Keyboard interaction
     :param update: The update object
@@ -139,19 +141,19 @@ def keyboard_interaction(update: Update, context: CallbackContext, captain: User
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_JOIN_REQUEST_REJECTED.format(requesting_user.tg_user_id,
                                                             escape_valid_markdown_chars(crew.name))
-        full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                        authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
-                        edit_only_caption_and_keyboard=True)
+        await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
+                              authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
+                              edit_only_caption_and_keyboard=True)
         return
 
     validate(requesting_user, crew, specific_crew_error=True)
 
     # Add requesting user to crew
-    add_member(requesting_user, crew)
+    await add_member(requesting_user, crew)
 
     # Accepted message
     ot_text = phrases.CREW_JOIN_REQUEST_ACCEPTED.format(mention_markdown_user(requesting_user),
                                                         escape_valid_markdown_chars(crew.name))
-    full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                    authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
-                    edit_only_caption_and_keyboard=True)
+    await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
+                          authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
+                          edit_only_caption_and_keyboard=True)

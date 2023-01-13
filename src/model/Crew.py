@@ -92,7 +92,7 @@ class Crew(BaseModel):
         from src.model.User import User
         return self.crew_members.select().where(User.crew_role == CrewRole.CAPTAIN).get()
 
-    def get_members_count(self) -> int:
+    def get_member_count(self) -> int:
         """
         Returns the number of crew members
         :return: The number of crew members

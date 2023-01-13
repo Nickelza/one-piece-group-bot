@@ -4,7 +4,7 @@ from datetime import datetime
 
 from telegram import Message
 from telegram.error import BadRequest
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -22,7 +22,7 @@ from src.service.message_service import escape_valid_markdown_chars, full_messag
 from src.service.notification_service import send_notification
 
 
-def send(context: CallbackContext, prediction: Prediction, is_resent: bool = False) -> None:
+async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_resent: bool = False) -> None:
     """
     Send prediction
     :param context: Telegram context
@@ -38,8 +38,8 @@ def send(context: CallbackContext, prediction: Prediction, is_resent: bool = Fal
         prediction.status = PredictionStatus.SENT
         prediction.send_date = datetime.now()
 
-    message: Message = full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
-    message.pin(disable_notification=True)
+    message: Message = await full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
+    await message.pin(disable_notification=True)
 
     prediction.message_id = message.message_id
     prediction.save()
@@ -128,7 +128,7 @@ def get_prediction_text(prediction: Prediction) -> str:
     return prediction_text
 
 
-def close_bets(context: CallbackContext, prediction: Prediction) -> None:
+async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
     """
     Close bets
     :param context: Telegram context
@@ -167,11 +167,11 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
     prediction.save()
 
     # Update prediction message
-    refresh(context, prediction)
+    await refresh(context, prediction)
 
     # Send message in reply notifying users that bets are closed
-    full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, chat_id=Env.OPD_GROUP_ID.get(),
-                      reply_to_message_id=prediction.message_id)
+    await full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, chat_id=Env.OPD_GROUP_ID.get(),
+                            reply_to_message_id=prediction.message_id)
 
     # Send notification to users
     for user_id, value in users_invalid_prediction_options.items():
@@ -182,10 +182,10 @@ def close_bets(context: CallbackContext, prediction: Prediction) -> None:
         notification: PredictionBetInvalidNotification = PredictionBetInvalidNotification(
             prediction, prediction_options_user, total_refund)
 
-        send_notification(context, user, notification)
+        await send_notification(context, user, notification)
 
 
-def set_results(context: CallbackContext, prediction: Prediction) -> None:
+async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
     """
     Set results
     :param context: Telegram context
@@ -218,7 +218,7 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
-            add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
 
             # Add to total win
             users_total_win[user.id][1] += win_amount
@@ -246,11 +246,11 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
     prediction.save()
 
     # Refresh prediction
-    refresh(context, prediction)
+    await refresh(context, prediction)
 
     # Send message in reply notifying users that results are set
-    full_message_send(context, phrases.PREDICTION_RESULTS_SET, chat_id=Env.OPD_GROUP_ID.get(),
-                      reply_to_message_id=prediction.message_id)
+    await full_message_send(context, phrases.PREDICTION_RESULTS_SET, chat_id=Env.OPD_GROUP_ID.get(),
+                            reply_to_message_id=prediction.message_id)
 
     # Send notification to users
     for user_id, value in users_total_win.items():
@@ -261,10 +261,10 @@ def set_results(context: CallbackContext, prediction: Prediction) -> None:
         notification: PredictionResultNotification = PredictionResultNotification(
             prediction, user_prediction_options, prediction_options_correct, total_win)
 
-        send_notification(context, user, notification)
+        await send_notification(context, user, notification)
 
 
-def refresh(context: CallbackContext, prediction: Prediction) -> None:
+async def refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
     """
     Refresh prediction
     :param context: Telegram context
@@ -274,8 +274,8 @@ def refresh(context: CallbackContext, prediction: Prediction) -> None:
         raise PredictionException(phrases.PREDICTION_NOT_SENT)
 
     try:
-        full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get(),
-                          edit_message_id=prediction.message_id)
+        await full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get(),
+                                edit_message_id=prediction.message_id)
     except BadRequest as br:  # Tolerate if message text is the same
         if br.message != "Message is not modified: specified new message content and reply markup are exactly the " \
                          "same as a current content and reply markup of the message":
@@ -338,7 +338,7 @@ def get_prediction_option_user_win(prediction_option_user: PredictionOptionUser,
     return value_from_total_wager
 
 
-def send_scheduled_predictions(context: CallbackContext) -> None:
+async def send_scheduled_predictions(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send scheduled predictions
     :param context: Telegram context
@@ -350,10 +350,10 @@ def send_scheduled_predictions(context: CallbackContext) -> None:
                                                               & (Prediction.status == PredictionStatus.NEW))
 
     for prediction in predictions:
-        send(context, prediction)
+        await send(context, prediction)
 
 
-def close_scheduled_predictions(context: CallbackContext) -> None:
+async def close_scheduled_predictions(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Close scheduled predictions
     :param context: Telegram context
@@ -365,10 +365,10 @@ def close_scheduled_predictions(context: CallbackContext) -> None:
                                                               & (Prediction.status == PredictionStatus.SENT))
 
     for prediction in predictions:
-        close_bets(context, prediction)
+        await close_bets(context, prediction)
 
 
-def remove_all_bets_from_active_predictions(context: CallbackContext) -> None:
+async def remove_all_bets_from_active_predictions(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Remove all bets from active predictions due to bounty reset
     :param context: Telegram context
@@ -382,9 +382,9 @@ def remove_all_bets_from_active_predictions(context: CallbackContext) -> None:
         PredictionOptionUser.delete().where(PredictionOptionUser.prediction == prediction).execute()
         if prediction.message_id is not None:  # Should always be true
             try:
-                full_message_send(context, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET,
-                                  chat_id=Env.OPD_GROUP_ID.get(), reply_to_message_id=prediction.message_id,
-                                  allow_sending_without_reply=False)
+                await full_message_send(context, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET,
+                                        chat_id=Env.OPD_GROUP_ID.get(), reply_to_message_id=prediction.message_id,
+                                        allow_sending_without_reply=False)
             except BadRequest as br:  # Log error if reply message is not found
                 if 'Replied message not found' in br.message:
                     logging.error(f"Replied message not found for prediction {prediction.id}")

@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.User import User
@@ -18,7 +18,7 @@ class LogReservedKeys(StrEnum):
     TYPE = 'a'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the logs screen
     :param update: The update
@@ -33,9 +33,9 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     logs_sorted = dict(sorted(LOG_TYPE_BUTTON_TEXTS.items(), key=lambda x: x[1]))
     for log_type, button_text in logs_sorted.items():
         log: Log = get_log_by_type(log_type)
-        if not log.only_by_boss or user_is_boss(user, update):
+        if not log.only_by_boss or await user_is_boss(user, update):
             inline_keyboard.append([Keyboard(button_text, screen=Screen.PVT_LOGS_TYPE,
                                              info={LogReservedKeys.TYPE: log_type})])
 
-    full_message_send(context, phrases.PVT_TXT_LOGS, update=update, keyboard=inline_keyboard,
-                      inbound_keyboard=inbound_keyboard)
+    await full_message_send(context, phrases.PVT_TXT_LOGS, update=update, keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard)

@@ -1,9 +1,8 @@
 import asyncio
-import threading
 
 from telegram import Update
 from telegram.error import TelegramError
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -36,7 +35,7 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
         raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
 
 
-def end_game(game: Game, game_outcome: GameOutcome) -> Game:
+async def end_game(game: Game, game_outcome: GameOutcome) -> Game:
     """
     End the game, set the status and return the game
     :param game: The game
@@ -50,14 +49,14 @@ def end_game(game: Game, game_outcome: GameOutcome) -> Game:
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
         game.status = GameStatus.WON
-        add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
+        await add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
     elif game_outcome == GameOutcome.OPPONENT_WON:
         game.status = GameStatus.LOST
-        add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
+        await add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
     else:
         game.status = GameStatus.DRAW
-        add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
-        add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
+        await add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
+        await add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
 
     challenger.pending_bounty -= half_wager
     opponent.pending_bounty -= half_wager
@@ -115,7 +114,8 @@ def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOu
                                     added_ot_text)
 
 
-def delete_game(update: Update, context: CallbackContext, game: Game, delete_message: bool = True) -> None:
+async def delete_game(update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, delete_message: bool = True
+                      ) -> None:
     """
     Delete game
     :param update: The update
@@ -127,7 +127,7 @@ def delete_game(update: Update, context: CallbackContext, game: Game, delete_mes
     # Try to delete message
     if delete_message:
         try:
-            context.bot.delete_message(update.effective_chat.id, game.message_id)
+            await context.bot.delete_message(update.effective_chat.id, game.message_id)
         except TelegramError:
             pass
 
@@ -152,8 +152,8 @@ def reset_can_initiate_game() -> None:
     User.update(can_initiate_game=True).where(User.can_initiate_game is True).execute()
 
 
-def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, game: Game = None
-                  ) -> Game | None:
+async def validate_game(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard,
+                        game: Game = None) -> Game | None:
     """
     Validate the game
     :param update: The update
@@ -168,11 +168,11 @@ def validate_game(update: Update, context: CallbackContext, inbound_keyboard: Ke
         game = get_game_from_keyboard(inbound_keyboard)
 
     if game.status == GameStatus.FORCED_END:
-        full_message_send(context, phrases.GAME_FORCED_END, update=update)
+        await full_message_send(context, phrases.GAME_FORCED_END, update=update)
         return None
 
     if GameStatus(game.status).is_finished():
-        full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
+        await full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
         return None
 
     return game
@@ -192,7 +192,7 @@ def force_end_all_active() -> None:
         game.save()
 
 
-def notify_game_turn(context: CallbackContext, game: Game, game_turn: GameTurn):
+async def notify_game_turn(context: ContextTypes.DEFAULT_TYPE, game: Game, game_turn: GameTurn):
     """
     Notify a user that it's their turn
 
@@ -210,26 +210,12 @@ def notify_game_turn(context: CallbackContext, game: Game, game_turn: GameTurn):
         opponent: User = game.challenger
 
     # Fire and forget
-    t = threading.Thread(target=run_async_loop_in_thread, args=(context, user_turn, opponent, game))
-    t.start()
+    context.application.create_task(enqueue_game_turn_notification(context, user_turn, opponent, game))
 
 
-def run_async_loop_in_thread(context: CallbackContext, user: User, opponent: User, game: Game):
+async def enqueue_game_turn_notification(context: ContextTypes.DEFAULT_TYPE, user: User, opponent: User, game: Game):
     """
-    Run the async loop in a thread
-
-    :param context: The context
-    :param user: The user
-    :param opponent: The opponent
-    :param game: The game
-    :return: None
-    """
-    asyncio.run(enqueue_game_turn_notification(context, user, opponent, game))
-
-
-async def enqueue_game_turn_notification(context: CallbackContext, user: User, opponent: User, game: Game):
-    """
-    Enqueue a game turn notification. Waits for N time and if the game board is still the same, sends the notification
+    Enqueue a game turn notification. Waits for N time and if the game board stays unchanged, sends the notification
 
     :param context: The context
     :param user: The user
@@ -245,7 +231,7 @@ async def enqueue_game_turn_notification(context: CallbackContext, user: User, o
 
     # Check if the game board is still the same
     if updated_game.board == game.board:
-        send_notification(context, user, GameTurnNotification(game, opponent))
+        await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
 def get_game_name(game_type: GameType) -> str:

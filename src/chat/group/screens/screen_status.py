@@ -1,7 +1,7 @@
 import datetime
 
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -24,8 +24,8 @@ from src.service.message_service import full_message_send, full_media_send, ment
 from src.service.user_service import user_is_boss
 
 
-def manage(update: Update, context: CallbackContext, command: Command.Command, original_user: User,
-           inbound_keyboard: Keyboard = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, original_user: User,
+                 inbound_keyboard: Keyboard = None) -> None:
     """
     Displays a user's status
     :param update: Telegram update
@@ -48,7 +48,8 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
     if in_reply_to_message:
         # Used in reply to a bot
         if update.effective_message.reply_to_message.from_user.is_bot:
-            full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update, add_delete_button=True)
+            await full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update,
+                                    add_delete_button=True)
             return
 
         target_user: User = User.get_or_none(User.tg_user_id == update.effective_message.reply_to_message.from_user.id)
@@ -74,7 +75,7 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
 
         requesting_user_leaderboard_user = get_current_leaderboard_user(user)
 
-        if not user_is_boss(user, update) and (requesting_user_leaderboard_user is None or (
+        if not await user_is_boss(user, update) and (requesting_user_leaderboard_user is None or (
                 leaderboard_target_user is not None
                 and requesting_user_leaderboard_user.position >= leaderboard_target_user.position)):
             requesting_user_leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
@@ -86,19 +87,19 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
                 mention_markdown_v2(target_user.tg_user_id, target_user.tg_first_name),
                 leaderboard_target_user_rank.get_emoji_and_rank_message())
 
-            full_message_send(context, ot_text, update, add_delete_button=True, authorized_users=can_delete_users)
+            await full_message_send(context, ot_text, update, add_delete_button=True, authorized_users=can_delete_users)
             return
 
     # Allowed only in private chat (Rookie or Prisoner)
     if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
-                                                                  and not user_is_boss(user, update))
+                                                                  and not await user_is_boss(user, update))
                                                                  or user.is_arrested())):
         outbound_keyboard: list[list[Keyboard]] = [[
             Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY, url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
 
         ot_text = (phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY if user.is_arrested()
                    else phrases.ROOKIE_STATUS_PRIVATE_CHAT_ONLY)
-        full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+        await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return
 
     pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
@@ -187,29 +188,29 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, o
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
-    if (not in_reply_to_message and (user_is_boss(target_user, update) or target_user.bounty_poster_limit > 0) and
+    if (not in_reply_to_message and (await user_is_boss(target_user, update) or target_user.bounty_poster_limit > 0) and
             not target_user.is_arrested()):
-        send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
+        await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
-        if not user_is_boss(target_user, update):
+        if not await user_is_boss(target_user, update):
             target_user.bounty_poster_limit -= 1
             target_user.save()
             original_user.should_update_model = False
 
     else:  # Send regular message
-        full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
-                          add_delete_button=(inbound_keyboard is None), authorized_users=can_delete_users,
-                          inbound_keyboard=inbound_keyboard)
+        await full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
+                                add_delete_button=(inbound_keyboard is None), authorized_users=can_delete_users,
+                                inbound_keyboard=inbound_keyboard)
 
 
-def send_bounty_poster(context: CallbackContext, update: Update, user: User, caption: str = None,
-                       reply_to_message_id: int = None, send_in_private_chat=False) -> None:
-    poster_path = get_bounty_poster(update, user)
+async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update, user: User, caption: str = None,
+                             reply_to_message_id: int = None, send_in_private_chat=False) -> None:
+    poster_path = await get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia()
     poster.media_id = open(poster_path, 'rb')
     poster.type = SavedMediaType.PHOTO
 
-    full_media_send(context, saved_media=poster, update=update, caption=caption,
-                    reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,
-                    send_in_private_chat=send_in_private_chat)
+    await full_media_send(context, saved_media=poster, update=update, caption=caption,
+                          reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,
+                          send_in_private_chat=send_in_private_chat)

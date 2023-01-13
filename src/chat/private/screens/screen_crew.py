@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import constants as c
 import resources.phrases as phrases
@@ -24,7 +24,7 @@ class CrewReservedKeys(StrEnum):
     MEMBER_ID = 'a'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the crew screen
     :param update: The update
@@ -62,8 +62,9 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
             # Leave crew button
             inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)])
 
-    full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard,
-                      excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard,
+                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
 
 
 def get_crew_members_paginate(inbound_keyboard: Keyboard, crew: Crew) -> [list[User], int, int, int, int]:
@@ -98,7 +99,7 @@ def get_crew_members_paginate(inbound_keyboard: Keyboard, crew: Crew) -> [list[U
     end_number: int = start_number + len(crew_members) - 1
 
     # Get the total number of crew members
-    total_crew_members: int = crew.get_members_count()
+    total_crew_members: int = crew.get_member_count()
 
     return crew_members, page, start_number, end_number, total_crew_members
 

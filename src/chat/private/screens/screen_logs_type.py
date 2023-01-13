@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import constants as c
 import resources.phrases as phrases
@@ -24,7 +24,7 @@ class LogTypeReservedKeys(StrEnum):
     ITEM_ID = 'b'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the log type screen
     :param update: The update
@@ -35,15 +35,16 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     """
 
     log: Log = get_log_by_type(LogType(inbound_keyboard.info[LogTypeReservedKeys.TYPE]))
-    if validate(update, context, log, user):
+    if await validate(update, context, log, user):
         log.user = user
         items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log)
 
         log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
         ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 
-        full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
-                          excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+        await full_message_send(context, ot_text, update=update, keyboard=items_keyboard,
+                                inbound_keyboard=inbound_keyboard,
+                                excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
 
 
 def get_items_text_keyboard(inbound_keyboard: Keyboard, log: Log) -> tuple[str, list[list[Keyboard]]]:
@@ -120,7 +121,7 @@ def get_items_paginate(inbound_keyboard: Keyboard, log: Log) -> [list[Log], int,
     return items, page, start_number, end_number, total_items
 
 
-def validate(update: Update, context: CallbackContext, log: Log, user: User) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, log: Log, user: User) -> bool:
     """
     Validate the log type screen
 
@@ -131,8 +132,8 @@ def validate(update: Update, context: CallbackContext, log: Log, user: User) -> 
     :return: True if the validation is successful, False otherwise
     """
 
-    if log.only_by_boss and not user_is_boss(user, update):
-        full_message_send(context, phrases.COMMAND_ONLY_BY_BOSS_ERROR, update=update)
+    if log.only_by_boss and not await user_is_boss(user, update):
+        await full_message_send(context, phrases.COMMAND_ONLY_BY_BOSS_ERROR, update=update)
         return False
 
     return True

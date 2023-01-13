@@ -1,9 +1,9 @@
 import random
 
 from strenum import StrEnum
-from telegram import Update, Message, TelegramError
-from telegram.error import BadRequest
-from telegram.ext import CallbackContext
+from telegram import Update, Message
+from telegram.error import BadRequest, TelegramError
+from telegram.ext import ContextTypes
 
 import constants as c
 import resources.Environment as Env
@@ -59,7 +59,8 @@ def get_win_odd(user: User) -> float:
             else Env.DOC_Q_GAME_WIN_ODD.get_float())
 
 
-def validate_play(update: Update, context: CallbackContext, user: User, doc_q_game: DocQGame = None) -> bool:
+async def validate_play(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
+                        doc_q_game: DocQGame = None) -> bool:
     """
     Validate play request
     :param update: The update
@@ -74,18 +75,18 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
         ot_text = phrases.DOC_Q_GAME_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(
             Env.DOC_Q_GAME_REQUIRED_BOUNTY.get_int()), user.get_bounty_formatted())
         try:
-            full_message_send(context, ot_text, update=update, add_delete_button=True)
+            await full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:
-            full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
+            await full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
         return False
 
     if not user.can_play_doc_q:
         ot_text = phrases.DOC_Q_GAME_LIMIT_REACHED.format(
             cron_datetime_difference(Env.CRON_RESET_DOC_Q_GAME.get()))
         try:
-            full_message_send(context, ot_text, update=update, add_delete_button=True)
+            await full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:
-            full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
+            await full_message_or_media_send_or_edit(context, ot_text, update=update, add_delete_button=True)
         return False
 
     # Delete all previous pending games
@@ -93,12 +94,12 @@ def validate_play(update: Update, context: CallbackContext, user: User, doc_q_ga
                                                              (DocQGame.status == GameStatus.IN_PROGRESS))
     for previous_game in previous_games:
         if previous_game != doc_q_game:
-            delete_game(update, context, previous_game)
+            await delete_game(update, context, previous_game)
 
     return True
 
 
-def delete_game(update: Update, context: CallbackContext, doc_q_game: DocQGame) -> None:
+async def delete_game(update: Update, context: ContextTypes.DEFAULT_TYPE, doc_q_game: DocQGame) -> None:
     """
     Delete game
     :param update: The update
@@ -108,7 +109,7 @@ def delete_game(update: Update, context: CallbackContext, doc_q_game: DocQGame) 
     """
     # Try to delete message
     try:
-        context.bot.delete_message(update.effective_chat.id, doc_q_game.message_id)
+        await context.bot.delete_message(update.effective_chat.id, doc_q_game.message_id)
     except TelegramError:
         pass
 
@@ -116,7 +117,7 @@ def delete_game(update: Update, context: CallbackContext, doc_q_game: DocQGame) 
     doc_q_game.delete_instance()
 
 
-def play_request(update: Update, context: CallbackContext, user: User) -> None:
+async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
     """
     User request to play Doc Q Game
     :param update: The update
@@ -124,7 +125,7 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
     :param user: The user
     :return: None
     """
-    if validate_play(update, context, user):
+    if await validate_play(update, context, user):
         doc_q_game = DocQGame()
         doc_q_game.user = user
         doc_q_game.save()
@@ -182,13 +183,14 @@ def play_request(update: Update, context: CallbackContext, user: User) -> None:
                                                   get_belly_formatted(final_bounty_if_win),
                                                   get_belly_formatted(final_bounty_if_lose))
 
-        message: Message = full_media_send(context, doc_q_media, update, caption=caption, keyboard=inline_keyboard,
-                                           add_delete_button=True)
+        message: Message = await full_media_send(context, doc_q_media, update, caption=caption,
+                                                 keyboard=inline_keyboard, add_delete_button=True)
         doc_q_game.message_id = message.message_id
         doc_q_game.save()
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, user: User, keyboard: Keyboard) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
+                               keyboard: Keyboard) -> None:
     """
     Keyboard interaction
     :param update: The update
@@ -203,12 +205,12 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
     if doc_q_game is None:
         raise GroupChatException(GroupChatError.DOC_Q_GAME_NOT_FOUND)
 
-    if validate_play(update, context, user, doc_q_game):
+    if await validate_play(update, context, user, doc_q_game):
         # User clicked on cancel button
         if DocQReservedKeys.CANCEL in keyboard.info:
             # Answer callback with goodbye message
-            full_message_send(context, phrases.DOC_Q_GAME_CANCEL, update, answer_callback=True)
-            delete_game(update, context, doc_q_game)
+            await full_message_send(context, phrases.DOC_Q_GAME_CANCEL, update, answer_callback=True)
+            await delete_game(update, context, doc_q_game)
             return
 
         win_odd = get_win_odd(user)
@@ -217,7 +219,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
         if str(keyboard.info[DocQReservedKeys.CHOICE_INDEX]) in correct_choices_index:
             # Increase user's bounty
-            add_bounty(user, win_amount)
+            await add_bounty(user, win_amount)
 
             # Update game status
             doc_q_game.status = GameStatus.WON
@@ -241,8 +243,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, user: User, k
                                                      user.get_bounty_formatted())
 
         # Send outcome text
-        full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,
-                        add_delete_button=True)
+        await full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,
+                              add_delete_button=True)
 
         # Save updates
         user.can_play_doc_q = False
@@ -258,7 +260,7 @@ def reset_playability() -> None:
     User.update(can_play_doc_q=1).execute()
 
 
-def manage(update: Update, context: CallbackContext, user: User, keyboard: Keyboard = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None) -> None:
     """
     Manage Doc Q Game screen
     :param update: The update
@@ -269,7 +271,7 @@ def manage(update: Update, context: CallbackContext, user: User, keyboard: Keybo
     """
     # Request to play
     if keyboard is None:
-        play_request(update, context, user)
+        await play_request(update, context, user)
         return
 
-    keyboard_interaction(update, context, user, keyboard)
+    await keyboard_interaction(update, context, user, keyboard)

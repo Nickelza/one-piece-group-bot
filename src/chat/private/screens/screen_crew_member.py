@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import constants as c
 import resources.phrases as phrases
@@ -19,7 +19,7 @@ class CrewMemberReservedKeys(StrEnum):
     MEMBER_ID = 'a'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the Crew member screen
     :param update: The update object
@@ -35,7 +35,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     try:
         get_crew(user=member, validate_against_crew=user.crew)
     except CrewValidationException as cve:
-        full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
     # Get crew member text
@@ -50,4 +50,5 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
                                          info={CrewMemberReservedKeys.MEMBER_ID: member.id},
                                          inbound_info=inbound_keyboard.info)])
 
-    full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard, keyboard=inline_keyboard)
+    await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard,
+                            keyboard=inline_keyboard)

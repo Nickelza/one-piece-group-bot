@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
@@ -7,7 +7,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
-def manage(update: Update, context: CallbackContext) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Manage the save media screen
     :param update: The update
@@ -17,14 +17,14 @@ def manage(update: Update, context: CallbackContext) -> None:
 
     message_parts = update.message.text.split(' ')
     if len(message_parts) != 2:
-        update.message.reply_text(phrases.SAVE_MEDIA_INVALID_FORMAT)
+        await update.message.reply_text(phrases.SAVE_MEDIA_INVALID_FORMAT)
         return
 
     name = message_parts[1]
 
     # Is in reply to a message
     if update.message.reply_to_message is None:
-        full_message_send(context, phrases.COMMAND_NOT_IN_REPLY_ERROR, update)
+        await full_message_send(context, phrases.COMMAND_NOT_IN_REPLY_ERROR, update)
         return
 
     # Is in reply to a media message
@@ -32,7 +32,7 @@ def manage(update: Update, context: CallbackContext) -> None:
             or (update.message.reply_to_message.photo is not None
                 and len(update.message.reply_to_message.photo) > 0)
             or update.message.reply_to_message.sticker is not None):
-        full_message_send(context, phrases.SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA, update)
+        await full_message_send(context, phrases.SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA, update)
         return
 
     # Save the media
@@ -54,11 +54,11 @@ def manage(update: Update, context: CallbackContext) -> None:
     else:  # Not supported
         accepted_types = [e.name for e in SavedMediaType]
         ot_text = phrases.SAVED_MEDIA_UNKNOWN_TYPE.format(str(accepted_types))
-        full_message_send(context, ot_text, update)
+        await full_message_send(context, ot_text, update)
         return
 
     saved_media.save()
 
     # Send the response
     ot_text = phrases.SAVE_MEDIA_SUCCESS.format(escape_valid_markdown_chars(name))
-    full_message_send(context, ot_text, update)
+    await full_message_send(context, ot_text, update)

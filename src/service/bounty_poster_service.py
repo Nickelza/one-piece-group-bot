@@ -146,7 +146,7 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
     return texture_background
 
 
-def get_bounty_poster(update: Update, user: User) -> str:
+async def get_bounty_poster(update: Update, user: User) -> str:
     """
     Gets the bounty poster of a user
     :param update: Telegram update
@@ -163,7 +163,7 @@ def get_bounty_poster(update: Update, user: User) -> str:
     new_image = Image.new("RGB", poster_template.size)
 
     # Get profile photo of user
-    profile_photo_path = get_user_profile_photo(update)
+    profile_photo_path = await get_user_profile_photo(update)
     if profile_photo_path is None:
         profile_photo_path = c.BOUNTY_POSTER_NO_PHOTO_PATH
 
