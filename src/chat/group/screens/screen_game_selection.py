@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.User import User
@@ -24,7 +24,7 @@ class GameSelectionReservedKeys(StrEnum):
     CANCEL = 'c'
 
 
-def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard) -> None:
     """
     Manage the game screen
     :param update: The update object
@@ -35,13 +35,13 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     """
 
     # Get the game from validation, will handle error messages
-    game = validate_game(update, context, inbound_keyboard)
+    game = await validate_game(update, context, inbound_keyboard)
     if game is None:
         return
 
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
-        delete_game(update, context, game)
+        await delete_game(update, context, game)
         user.should_update_model = False
         return
 
@@ -65,4 +65,4 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
-    full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard)
+    await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard)

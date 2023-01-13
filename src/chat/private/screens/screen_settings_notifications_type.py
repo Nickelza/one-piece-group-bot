@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.enums.Notification import get_notifications_by_category, NotificationCategory
@@ -14,7 +14,7 @@ class NotificationTypeReservedKeys(StrEnum):
     TYPE = 'b'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard) -> None:
     """
     Manage the settings screen
     :param update: The update
@@ -31,6 +31,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard)
                                          info={NotificationTypeReservedKeys.TYPE: notification.type},
                                          inbound_info=inbound_keyboard.info)])
 
-    full_message_send(context, phrases.PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE, update=update, keyboard=inline_keyboard,
-                      inbound_keyboard=inbound_keyboard,
-                      excluded_keys_from_back_button=[NotificationTypeReservedKeys.CATEGORY])
+    await full_message_send(context, phrases.PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE, update=update,
+                            keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard,
+                            excluded_keys_from_back_button=[NotificationTypeReservedKeys.CATEGORY])

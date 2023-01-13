@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -22,7 +22,7 @@ class CrewLeaveReservedKeys(StrEnum):
     CREW_ID = 'a'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the Crew leave screen
     :param update: The update object
@@ -35,7 +35,7 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     try:
         get_crew(user=user)
     except CrewValidationException as cve:
-        full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
@@ -56,7 +56,8 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
                                                                      inbound_keyboard=inbound_keyboard,
                                                                      no_is_back_button=True)]
 
-        full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
+        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
+                                inbound_keyboard=inbound_keyboard)
         return
 
     # Leave crew
@@ -64,5 +65,4 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
 
     # Send success message
     ot_text = phrases.CREW_LEAVE_SUCCESS
-    full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)
-
+    await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)

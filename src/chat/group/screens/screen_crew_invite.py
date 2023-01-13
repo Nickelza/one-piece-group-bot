@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.chat.group.screens.screen_crew_join import CrewReservedKeys, validate
@@ -12,11 +12,12 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member, get_crew
-from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, \
-    full_media_send, full_message_or_media_send_or_edit, escape_valid_markdown_chars
+from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send, \
+    full_message_or_media_send_or_edit, escape_valid_markdown_chars
 
 
-def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
+                 target_user: User) -> None:
     """
     Manage the Crew invite screen
     :param update: The update object
@@ -32,15 +33,16 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
 
         # Invite to a Crew
         if inbound_keyboard is None:
-            send_request(update, context, user, target_user, crew)
+            await send_request(update, context, user, target_user, crew)
             return
 
-        keyboard_interaction(update, context, user, crew, inbound_keyboard)
+        await keyboard_interaction(update, context, user, crew, inbound_keyboard)
     except CrewValidationException as cve:
-        full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
+        await full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
 
 
-def send_request(update: Update, context: CallbackContext, captain: User, target_user: User, crew: Crew) -> None:
+async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, captain: User, target_user: User,
+                       crew: Crew) -> None:
     """
     Send request to invite a user to a Crew
     :param update: The update object
@@ -65,12 +67,12 @@ def send_request(update: Update, context: CallbackContext, captain: User, target
 
     # Get SavedMedia
     invite_to_crew_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.INVITE_TO_CREW)
-    full_media_send(context, invite_to_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
-                    add_delete_button=True)
+    await full_media_send(context, invite_to_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
+                          add_delete_button=True)
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, invited_user: User, crew: Crew,
-                         inbound_keyboard: Keyboard) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, invited_user: User, crew: Crew,
+                               inbound_keyboard: Keyboard) -> None:
     """
     Keyboard interaction
     :param update: The update object
@@ -87,9 +89,9 @@ def keyboard_interaction(update: Update, context: CallbackContext, invited_user:
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_INVITE_REQUEST_REJECTED.format(escape_valid_markdown_chars(crew.name),
                                                               mention_markdown_user(invited_user))
-        full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                        authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
-                        edit_only_caption_and_keyboard=True)
+        await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
+                              authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+                              edit_only_caption_and_keyboard=True)
         return
 
     validate(invited_user, crew, specific_user_error=True)
@@ -100,6 +102,6 @@ def keyboard_interaction(update: Update, context: CallbackContext, invited_user:
     # Accepted message
     ot_text = phrases.CREW_INVITE_REQUEST_ACCEPTED.format(mention_markdown_user(invited_user),
                                                           escape_valid_markdown_chars(crew.name))
-    full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                    authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
-                    edit_only_caption_and_keyboard=True)
+    await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
+                          authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+                          edit_only_caption_and_keyboard=True)

@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 import src.service.prediction_service as prediction_service
@@ -12,8 +12,9 @@ from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
-def validate(update: Update, context: CallbackContext, user: User) -> tuple[Prediction, list[PredictionOptionUser]] \
-                                                                      | tuple[None, None]:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> tuple[Prediction, list[
+    PredictionOptionUser]] \
+                                                                                      | tuple[None, None]:
     """
     Validate the prediction bet
     :param update: The update object
@@ -27,20 +28,20 @@ def validate(update: Update, context: CallbackContext, user: User) -> tuple[Pred
     # Get prediction from message id
     prediction: Prediction = Prediction.get_or_none(Prediction.message_id == update.message.reply_to_message.message_id)
     if prediction is None:
-        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
         return error_tuple
 
     prediction_options_user: list[PredictionOptionUser] = prediction_service.get_prediction_options_user(prediction,
                                                                                                          user)
     # User has not bet on this prediction
     if len(prediction_options_user) == 0:
-        full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update, add_delete_button=True)
         return error_tuple
 
     return prediction, prediction_options_user
 
 
-def manage(update: Update, context: CallbackContext, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -48,7 +49,7 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
     :param user: The user object
     :return: None
     """
-    validation_tuple = validate(update, context, user)
+    validation_tuple = await validate(update, context, user)
 
     # Need single assignment to enable IDE type detection
     prediction: Prediction = validation_tuple[0]
@@ -120,4 +121,4 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
     if prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
         ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
 
-    full_message_send(context, ot_text, update=update, add_delete_button=True)
+    await full_message_send(context, ot_text, update=update, add_delete_button=True)

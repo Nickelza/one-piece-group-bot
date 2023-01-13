@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update, Message
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -28,7 +28,8 @@ class GameReservedKeys(StrEnum):
     CANCEL = 'c'
 
 
-def validate(update: Update, context: CallbackContext, challenger: User, opponent: User, command: Command) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenger: User, opponent: User,
+                   command: Command) -> bool:
     """
     Validate the fight request
     :param update: The update object
@@ -41,7 +42,7 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
 
     # Command does not have wager amount
     if len(command.parameters) == 0:
-        full_message_send(context, phrases.GAME_NO_WAGER_AMOUNT, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.GAME_NO_WAGER_AMOUNT, update=update, add_delete_button=True)
         return False
 
     # Wager basic validation, error message is sent by validate_wager
@@ -59,7 +60,7 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
                                                url=get_message_url(Env.OPD_GROUP_ID.get_int(), game.message_id))])
 
-        full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+        await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False
 
     # Opponent validation
@@ -74,15 +75,15 @@ def validate(update: Update, context: CallbackContext, challenger: User, opponen
 
     except OpponentValidationException as ove:
         if ove.message is not None:
-            full_message_send(context, ove.message, update)
+            await full_message_send(context, ove.message, update)
         else:
-            full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update, add_delete_button=True)
+            await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update, add_delete_button=True)
         return False
 
     return True
 
 
-def manage(update: Update, context: CallbackContext, user: User, command: Command) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command) -> None:
     """
     Manage the game screen
     :param update: The update object
@@ -112,11 +113,11 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     user.can_initiate_game = False
 
     # Display available games
-    display_games(game, update, context, opponent)
+    await display_games(game, update, context, opponent)
     return
 
 
-def display_games(game: Game, update: Update, context: CallbackContext, opponent: User) -> None:
+async def display_games(game: Game, update: Update, context: ContextTypes.DEFAULT_TYPE, opponent: User) -> None:
     """
     Display the available games
     :param game: The game object
@@ -145,6 +146,6 @@ def display_games(game: Game, update: Update, context: CallbackContext, opponent
                                      screen=Screen.GRP_GAME_SELECTION)])
 
     ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
-    message: Message = full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+    message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
     game.message_id = message.message_id
     game.save()

@@ -1,6 +1,6 @@
 from peewee import Case
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from src.model.User import User
@@ -11,9 +11,9 @@ from src.service.message_service import full_message_send
 from src.service.notification_service import send_notification
 
 
-def update_location(user: User, context: CallbackContext = None, update: Update = None, cap_to_paradise: bool = True,
-                    region: Region = None, requested_by_user=False, can_scale_down: bool = False,
-                    should_passive_update: bool = False) -> None:
+async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None, update: Update = None,
+                          cap_to_paradise: bool = True, region: Region = None, requested_by_user: bool = False,
+                          can_scale_down: bool = False, should_passive_update: bool = False) -> None:
     """
     Refresh the location of the user
     :param user: The user object
@@ -45,10 +45,10 @@ def update_location(user: User, context: CallbackContext = None, update: Update 
             location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user,
                                                                                                   effective_location)
             if requested_by_user:  # Update after region change, edit group message
-                full_message_send(context, location_update_notification.build(), update=update,
-                                  disable_web_page_preview=False, add_delete_button=True)
+                await full_message_send(context, location_update_notification.build(), update=update,
+                                        disable_web_page_preview=False, add_delete_button=True)
             elif Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool():  # Update after bounty change, send notification
-                send_notification(context, user, location_update_notification)
+                await send_notification(context, user, location_update_notification)
 
         # Update user location
         user.location_level = effective_location.level
@@ -60,7 +60,7 @@ def update_location(user: User, context: CallbackContext = None, update: Update 
             and user.should_propose_new_world  # User has not been proposed to move to New World yet
             and (requested_by_user  # User requested the update
                  or Env.SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL.get_bool())):  # Auto proposal enabled
-        send_new_world_proposal(update, context, user, Region.NEW_WORLD)
+        await send_new_world_proposal(update, context, user, Region.NEW_WORLD)
         user.should_propose_new_world = False
 
 

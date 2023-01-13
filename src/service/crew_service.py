@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -36,7 +36,7 @@ def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
     crew_member.save()
 
 
-def remove_member(crew_member, context: CallbackContext = None, send_notification_to_captain: bool = False,
+def remove_member(crew_member, context: ContextTypes.DEFAULT_TYPE = None, send_notification_to_captain: bool = False,
                   send_notification_to_member: bool = False, disable_user_can_join_crew: bool = False,
                   disable_crew_can_accept_new_members: bool = False) -> None:
     """
@@ -113,7 +113,7 @@ def get_crew(user: User = None, crew_id: int = None, inbound_keyboard: Keyboard 
     return crew
 
 
-def disband_crew(context: CallbackContext, captain: User, should_notify_captain: bool = False) -> None:
+def disband_crew(context: ContextTypes.DEFAULT_TYPE, captain: User, should_notify_captain: bool = False) -> None:
     """
     Disbands a crew
 
@@ -141,7 +141,7 @@ def disband_crew(context: CallbackContext, captain: User, should_notify_captain:
     crew.save()
 
 
-def disband_inactive_crews(context: CallbackContext) -> None:
+async def disband_inactive_crews(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Disbands inactive crews
 
@@ -157,7 +157,7 @@ def disband_inactive_crews(context: CallbackContext) -> None:
         disband_crew(context, captain, should_notify_captain=True)
 
 
-def warn_inactive_captains(context: CallbackContext) -> None:
+async def warn_inactive_captains(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Warns inactive captains which Crew will be disbanded in the next leaderboard
 
@@ -168,7 +168,7 @@ def warn_inactive_captains(context: CallbackContext) -> None:
     inactive_captains = get_inactive_captains(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
     for captain in inactive_captains:
-        send_notification(context, captain, CrewDisbandWarningNotification())
+        await send_notification(context, captain, CrewDisbandWarningNotification())
 
 
 def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:

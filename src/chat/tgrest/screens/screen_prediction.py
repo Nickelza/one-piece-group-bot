@@ -1,4 +1,4 @@
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 from resources import phrases
 from src.model.Prediction import Prediction
@@ -9,7 +9,7 @@ from src.model.tgrest.TgRestPrediction import TgRestPrediction, TgRestPrediction
 from src.service.prediction_service import send, close_bets, set_results, refresh
 
 
-def manage(context: CallbackContext, tg_rest_prediction: TgRestPrediction):
+async def manage(context: ContextTypes.DEFAULT_TYPE, tg_rest_prediction: TgRestPrediction):
     """
     Main function for the TG Rest chat manage
     :param context: Telegram context
@@ -25,19 +25,19 @@ def manage(context: CallbackContext, tg_rest_prediction: TgRestPrediction):
     try:
         match tg_rest_prediction.action:
             case TgRestPredictionAction.SEND:
-                send(context, prediction)
+                await send(context, prediction)
 
             case TgRestPredictionAction.CLOSE_BETS:
-                close_bets(context, prediction)
+                await close_bets(context, prediction)
 
             case TgRestPredictionAction.SET_RESULTS:
-                set_results(context, prediction)
+                await set_results(context, prediction)
 
             case TgRestPredictionAction.REFRESH:
-                refresh(context, prediction)
+                await refresh(context, prediction)
 
             case TgRestPredictionAction.RESEND:
-                send(context, prediction, is_resent=True)
+                await send(context, prediction, is_resent=True)
 
             case _:
                 raise TgRestException(TgRestChatError.UNKNOWN_PREDICTION_ACTION.build())

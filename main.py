@@ -1,37 +1,33 @@
 import logging
-import sys
-import time
 
 import pytz
+import sys
+import time
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, Defaults, \
-    CallbackQueryHandler
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
+    ContextTypes
 
 import constants as c
 import resources.Environment as Env
-from src.chat.manage_message import manage as manage_message, manage_callback as manage_callback_message
+from src.chat.manage_message import manage_regular as manage_regular_message, manage_callback as manage_callback_message
 from src.service.message_service import full_message_send
 from src.service.timer_service import set_timers
 
 
-def chat_id(update: Update, context: CallbackContext) -> None:
+async def chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Send chat id of current chat
     :param update: Telegram update
-    :type update: Update
     :param context: Telegram context
-    :type context: CallbackContext
     :return: None
-    :rtype: None
     """
-    full_message_send(context, str(update.effective_chat.id), update)
+    await full_message_send(context, str(update.effective_chat.id), update)
 
 
 def main() -> None:
     """
     Main function. Starts the bot
     :return: None
-    :rtype: None
     """
     # Set timezone: Only on linux
     try:
@@ -48,32 +44,28 @@ def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO, stream=sys.stdout)
 
-    """Instantiate a Defaults object"""
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
-    updater = Updater(Env.BOT_TOKEN.get(), defaults=defaults)
-    dispatcher = updater.dispatcher
+    application = (Application
+                   .builder()
+                   .token(Env.BOT_TOKEN.get())
+                   .defaults(defaults)
+                   .build())
 
-    # Add handlers
     # Chat id handler
-    chat_id_handler = CommandHandler('chatid', chat_id)
-    dispatcher.add_handler(chat_id_handler)
+    application.add_handler(CommandHandler('chatid', chat_id))
 
     # Regular message handler
-    message_handler = MessageHandler(Filters.all, manage_message)
-    dispatcher.add_handler(message_handler)
+    application.add_handler(MessageHandler(filters.ALL, manage_regular_message))
 
     # Callback query handler
-    callback_handler = CallbackQueryHandler(manage_callback_message)
-    dispatcher.add_handler(callback_handler)
-
-    updater.start_polling(drop_pending_updates=Env.BOT_DROP_PENDING_UPDATES.get_bool())
+    application.add_handler(CallbackQueryHandler(manage_callback_message))
 
     # Activate timers
-    set_timers(dispatcher)
+    set_timers(application)
     logging.getLogger('apscheduler.executors.default').propagate = False
 
-    updater.idle()
+    application.run_polling(drop_pending_updates=Env.BOT_DROP_PENDING_UPDATES.get_bool())
 
 
 if __name__ == '__main__':

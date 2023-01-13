@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.SavedMedia import SavedMedia
@@ -8,7 +8,7 @@ from src.model.enums.SavedMediaName import SavedMediaName
 from src.service.message_service import full_media_send
 
 
-def manage(update: Update, context: CallbackContext, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
     """
     Manage the silence screen
     :param update: The update object
@@ -23,4 +23,4 @@ def manage(update: Update, context: CallbackContext, user: User) -> None:
 
     # Confirmation message
     silence_media = SavedMedia.logical_get(SavedMediaName.SILENCE)
-    full_media_send(context, silence_media, update=update, caption=phrases.SILENCE_ACTIVE)
+    await full_media_send(context, silence_media, update=update, caption=phrases.SILENCE_ACTIVE)

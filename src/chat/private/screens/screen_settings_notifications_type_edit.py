@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 from src.model.DisabledNotification import DisabledNotification
 from src.model.User import User
@@ -17,7 +17,7 @@ class NotificationTypeEditReservedKeys(StrEnum):
     TYPE = 'b'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the notification type edit screen
     :param update: The update
@@ -49,5 +49,6 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
     inline_keyboard: list[list[Keyboard]] = [[get_toggle_keyboard(enabled, inbound_keyboard.screen, inbound_keyboard)]]
 
     ot_text = get_current_setting_text(enabled, notification.description)
-    full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard,
-                      excluded_keys_from_back_button=[NotificationTypeEditReservedKeys.TYPE])
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard,
+                            excluded_keys_from_back_button=[NotificationTypeEditReservedKeys.TYPE])

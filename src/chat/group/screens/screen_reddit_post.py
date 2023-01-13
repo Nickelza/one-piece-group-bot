@@ -2,9 +2,9 @@ import logging
 import os
 
 from praw.models import Submission
+from telegram import Message
 from telegram.error import BadRequest
-from telegram.ext import CallbackContext
-from telegram.message import Message
+from telegram.ext import ContextTypes
 
 import constants as c
 import resources.Environment as Env
@@ -17,7 +17,7 @@ from src.service.image_service import compress_image
 from src.service.message_service import full_media_send, escape_valid_markdown_chars
 
 
-def manage(context: CallbackContext, subreddit_name: str) -> None:
+async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> None:
     """
     Send a reddit post to the chat group
     :param context: Context of callback
@@ -74,8 +74,8 @@ def manage(context: CallbackContext, subreddit_name: str) -> None:
                                     continue
 
                             # Send media
-                            message: Message = full_media_send(context, saved_media, caption=caption,
-                                                               chat_id=Env.OPD_GROUP_ID.get_int())
+                            message: Message = await full_media_send(context, saved_media, caption=caption,
+                                                                     chat_id=Env.OPD_GROUP_ID.get_int())
                         except BadRequest as exceptionBadRequest:
                             # Resize if type is image
                             if saved_media.type == SavedMediaType.PHOTO:
@@ -84,8 +84,8 @@ def manage(context: CallbackContext, subreddit_name: str) -> None:
                                 # Try resending with a smaller image
                                 image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
                                 saved_media.media_id = open(image_path, 'rb')
-                                message: Message = full_media_send(context, saved_media, caption=caption,
-                                                                   chat_id=Env.OPD_GROUP_ID.get_int())
+                                message: Message = await full_media_send(context, saved_media, caption=caption,
+                                                                         chat_id=Env.OPD_GROUP_ID.get_int())
 
                                 try:
                                     # Delete the temporary image

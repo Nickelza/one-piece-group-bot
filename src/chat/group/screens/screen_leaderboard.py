@@ -1,5 +1,5 @@
 from telegram import Message
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -37,7 +37,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
     return ot_text
 
 
-def manage(context: CallbackContext) -> None:
+async def manage(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Sends the weekly leaderboard to the group
     :param context: Context of callback
@@ -48,8 +48,8 @@ def manage(context: CallbackContext) -> None:
     # Send the leaderboard to the group
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
         ot_text = get_leaderboard_message(leaderboard)
-        message: Message = full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
-        message.pin(disable_notification=True)
+        message: Message = await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
+        await message.pin(disable_notification=True)
 
         # Save the message id
         leaderboard.message_id = message.message_id
@@ -66,13 +66,13 @@ def manage(context: CallbackContext) -> None:
 
     # Reset bounty if last leaderboard of the month
     if should_reset_bounty():
-        reset_bounty(context)
+        await reset_bounty(context)
 
     # Disband inactive crews
-    disband_inactive_crews(context)
+    await disband_inactive_crews(context)
 
     # Warn captains about inactive crews
-    warn_inactive_captains(context)
+    await warn_inactive_captains(context)
 
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()

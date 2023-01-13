@@ -4,7 +4,7 @@ from datetime import datetime
 from peewee import MySQLDatabase, DoesNotExist
 from telegram import Update, User as TelegramUser
 from telegram.error import BadRequest
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -51,7 +51,7 @@ def end(db: MySQLDatabase) -> None:
     db.close()
 
 
-def manage_callback(update: Update, context: CallbackContext) -> None:
+async def manage_regular(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Manage a regular message
     :param update: The update
@@ -59,11 +59,22 @@ def manage_callback(update: Update, context: CallbackContext) -> None:
     :return: None
     """
 
-    manage(update, context, True)
-    update.callback_query.answer()
+    await manage(update, context, False)
 
 
-def manage(update: Update, context: CallbackContext, is_callback: bool = False) -> None:
+async def manage_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Manage a callback message
+    :param update: The update
+    :param context: The context
+    :return: None
+    """
+
+    await manage(update, context, True)
+    await update.callback_query.answer()
+
+
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool) -> None:
     """
     Manage a regular message
     :param update: The update
@@ -73,7 +84,7 @@ def manage(update: Update, context: CallbackContext, is_callback: bool = False) 
     """
     db = init()
     try:
-        manage_after_db(update, context, is_callback)
+        await manage_after_db(update, context, is_callback)
     except Exception as e:
         logging.error(update)
         logging.error(e, exc_info=True)
@@ -81,7 +92,7 @@ def manage(update: Update, context: CallbackContext, is_callback: bool = False) 
         end(db)
 
 
-def manage_after_db(update: Update, context: CallbackContext, is_callback: bool = False) -> None:
+async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> None:
     """
     Manage a regular message after the database is initialized
     :param update: The update
@@ -104,7 +115,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
         logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
-        update.effective_chat.leave()
+        await update.effective_chat.leave()
         return
 
     command: Command.Command = Command.ND
@@ -143,7 +154,7 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
             pass
 
     if command != Command.ND or is_callback:
-        if not validate(update, context, command, user, keyboard, target_user, is_callback):
+        if not await validate(update, context, command, user, keyboard, target_user, is_callback):
             return
 
     if command is not None:
@@ -152,33 +163,34 @@ def manage_after_db(update: Update, context: CallbackContext, is_callback: bool 
     try:
         match message_source:
             case MessageSource.PRIVATE:
-                manage_private_chat(update, context, command, user, keyboard)
+                await manage_private_chat(update, context, command, user, keyboard)
             case MessageSource.GROUP:
-                manage_group_chat(update, context, command, user, keyboard, target_user, is_callback)
+                await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback)
             case MessageSource.ADMIN:
-                manage_admin_chat(update, context, command)
+                await manage_admin_chat(update, context, command)
             case MessageSource.TG_REST:
-                manage_tgrest_chat(update, context)
+                await manage_tgrest_chat(update, context)
             case _:
                 raise ValueError('Invalid message source')
     except DoesNotExist:
-        full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
+        await full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
     except (PrivateChatException, GroupChatException, AdminChatException, CommonChatException) as ce:
         # Manages system errors
         try:
-            full_message_send(context, str(ce), update=update)
+            await full_message_send(context, str(ce), update=update)
         except BadRequest:
-            full_message_or_media_send_or_edit(context, str(ce), update=update)
+            await full_message_or_media_send_or_edit(context, str(ce), update=update)
     except NavigationLimitReachedException:
-        full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
-                          show_alert=True)
+        await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
+                                show_alert=True)
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()
 
 
-def validate(update: Update, context: CallbackContext, command: Command.Command, user: User, inbound_keyboard: Keyboard,
-             target_user: User, is_callback: bool) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
+                   inbound_keyboard: Keyboard,
+                   target_user: User, is_callback: bool) -> bool:
     """
     Validate the command
     :param update: Telegram update
@@ -194,12 +206,13 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
     # Validate keyboard interaction
     if is_callback and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
         if int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]:  # Unauthorized
-            full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True, show_alert=True)
+            await full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True,
+                                    show_alert=True)
             return False
 
         # Delete request, best effort
         if ReservedKeyboardKeys.DELETE in inbound_keyboard.info:
-            delete_message(update)
+            await delete_message(update)
             return False
 
     # Is active
@@ -276,9 +289,9 @@ def validate(update: Update, context: CallbackContext, command: Command.Command,
 
     except CommandValidationException as cve:
         if user_is_muted(user, update):
-            delete_message(update)
+            await delete_message(update)
         else:
-            full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True)
+            await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True)
         return False
 
     return True

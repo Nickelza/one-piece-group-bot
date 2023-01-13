@@ -4,7 +4,7 @@ from typing import Tuple
 from strenum import StrEnum
 from telegram import Update
 from telegram.error import BadRequest
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 import src.service.game_service as game_service
@@ -29,7 +29,8 @@ class GameRPSReservedKeys(StrEnum):
     CHOICE = 'b'
 
 
-def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, game: Game = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
+                 game: Game = None) -> None:
     """
     Manage the Rock Paper Scissors game screen
     :param update: The update object
@@ -41,7 +42,7 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
     """
 
     # Get the game from validation, will handle error messages
-    game = game_service.validate_game(update, context, inbound_keyboard, game)
+    game = await game_service.validate_game(update, context, inbound_keyboard, game)
     if game is None:
         return
 
@@ -59,8 +60,8 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         game.save()
 
         # Alert showing choice
-        full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
-                          show_alert=True)
+        await full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
+                                show_alert=True)
 
         # Update turn
         rock_paper_scissors.set_turn()
@@ -72,16 +73,16 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
         user.should_update_model = False
 
         # Send result
-        full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                          keyboard=get_outbound_keyboard(game),
-                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_message_send(context, get_text(game, rock_paper_scissors), update=update,
+                                keyboard=get_outbound_keyboard(game),
+                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
         return
 
     # Send message
     try:
-        full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                          keyboard=get_outbound_keyboard(game),
-                          authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_message_send(context, get_text(game, rock_paper_scissors), update=update,
+                                keyboard=get_outbound_keyboard(game),
+                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
 
         pass
         # Notify user turn. After message send to avoid double notification in case user changes choice

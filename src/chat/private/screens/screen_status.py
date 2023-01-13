@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 from src.chat.group.screens.screen_status import manage as group_manage_status
 from src.model.User import User
@@ -7,7 +7,8 @@ from src.model.enums.Command import Command
 from src.model.pojo.Keyboard import Keyboard
 
 
-def manage(update: Update, context: CallbackContext, command: Command, user: User, inbound_keyboard: Keyboard) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command, user: User,
+                 inbound_keyboard: Keyboard) -> None:
     """
     Manage the start screen
     :param update: The update
@@ -18,4 +19,4 @@ def manage(update: Update, context: CallbackContext, command: Command, user: Use
     :return: None
     """
 
-    group_manage_status(update, context, command, user, inbound_keyboard)
+    await group_manage_status(update, context, command, user, inbound_keyboard)

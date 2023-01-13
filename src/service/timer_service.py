@@ -1,7 +1,7 @@
 import logging
 
 from apscheduler.triggers.cron import CronTrigger
-from telegram.ext import CallbackContext, Dispatcher, Job
+from telegram.ext import ContextTypes, Application, Job
 
 import src.model.enums.Timer as Timer
 from src.chat.group.screens.screen_doc_q_game import reset_playability as reset_doc_q_game
@@ -16,42 +16,41 @@ from src.service.location_service import reset_can_change_region
 from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions
 
 
-def add_to_context(context: CallbackContext, timer: Timer.Timer) -> Job:
+def add_to_queue(application: Application, timer: Timer.Timer) -> Job:
     """
     Add a job to the context
-    :param context: The context
+    :param application: The application
     :param timer: The timer
     :rtype: Job
     """
-    job = context.job_queue.run_custom(
+    job = application.job_queue.run_custom(
         callback=run,
         job_kwargs={"trigger": CronTrigger.from_crontab(timer.cron_expression)},
         name=timer.name,
-        context=timer
+        data=timer
     )
-    logging.info(f'Next run of "{timer.name}" is {job.next_run_time}')
+    logging.info(f'Added timer "{timer.name}"')
+    # logging.info(f'Next run of "{timer.name}" is {job.next_t}')  # FIXME Show next run time once it works
     return job
 
 
-def set_timers(dispatcher: Dispatcher) -> None:
+def set_timers(application: Application) -> None:
     """
     Set the timers
-    :param dispatcher: The dispatcher
-    :type dispatcher: Dispatcher
+    :param application: The application
+    :type application: Dispatcher
     :return: None
     :rtype: None
     """
 
-    context = CallbackContext(dispatcher)
-
     for timer in Timer.TIMERS:
         if timer.is_enabled:
-            add_to_context(context, timer)
+            add_to_queue(application, timer)
         else:
             logging.info(f'Timer {timer.name} is disabled')
 
 
-def run(context: CallbackContext) -> None:
+async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Run the timers
     :param context: The context
@@ -59,24 +58,24 @@ def run(context: CallbackContext) -> None:
     """
 
     job = context.job
-    if not isinstance(job.context, Timer.Timer):
+    if not isinstance(job.data, Timer.Timer):
         logging.error(f'Job {job.name} context is not a Timer')
         return
 
-    timer: Timer.Timer = job.context
+    timer: Timer.Timer = job.data
 
     db = init()
 
     if timer.should_log:
-        logging.info(f'Running timer {context.job.name}')
+        logging.info(f'Running timer {job.name}')
 
     match timer:
         case Timer.REDDIT_POST_ONE_PIECE | Timer.REDDIT_POST_MEME_PIECE:
-            send_reddit_post(context, timer.info)
+            await send_reddit_post(context, timer.info)
         case Timer.TEMP_DIR_CLEANUP:
             cleanup_temp_dir()
         case Timer.TIMER_SEND_LEADERBOARD:
-            send_leaderboard(context)
+            await send_leaderboard(context)
         case Timer.RESET_DOC_Q_GAME:
             reset_doc_q_game()
         case Timer.RESET_BOUNTY_POSTER_LIMIT:
@@ -92,9 +91,9 @@ def run(context: CallbackContext) -> None:
         case Timer.RESET_CAN_INITIATE_GAME:
             reset_can_initiate_game()
         case Timer.SEND_SCHEDULED_PREDICTIONS:
-            send_scheduled_predictions(context)
+            await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:
-            close_scheduled_predictions(context)
+            await close_scheduled_predictions(context)
         case _:
             logging.error(f'Unknown timer {job.name}')
 

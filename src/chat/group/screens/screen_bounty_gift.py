@@ -1,5 +1,5 @@
 from telegram import Update, Message
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -18,8 +18,8 @@ from src.service.notification_service import send_notification
 from src.service.user_service import user_is_boss
 
 
-def manage(update: Update, context: CallbackContext, user: User, inbound_keyboard: Keyboard, target_user: User,
-           command: Command) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
+                 target_user: User, command: Command) -> None:
     """
     Manage the Bounty gift screen
     :param update: The update object
@@ -33,14 +33,15 @@ def manage(update: Update, context: CallbackContext, user: User, inbound_keyboar
 
     # Request send a gift
     if inbound_keyboard is None:
-        send_request(update, context, user, target_user, command)
+        await send_request(update, context, user, target_user, command)
         return
 
-    keyboard_interaction(update, context, user, inbound_keyboard)
+    await keyboard_interaction(update, context, user, inbound_keyboard)
 
 
-def validate(update: Update, context: CallbackContext, sender: User, receiver: User, command: Command = None,
-             bounty_gift: BountyGift = None) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
+                   command: Command = None,
+                   bounty_gift: BountyGift = None) -> bool:
     """
     Validate the fight request
     :param update: The update object
@@ -55,7 +56,7 @@ def validate(update: Update, context: CallbackContext, sender: User, receiver: U
     # Command does not have wager amount
     if bounty_gift is None:
         if len(command.parameters) == 0:
-            full_message_send(context, phrases.BOUNTY_GIFT_NO_AMOUNT, update=update, add_delete_button=True)
+            await full_message_send(context, phrases.BOUNTY_GIFT_NO_AMOUNT, update=update, add_delete_button=True)
             return False
 
         # Wager basic validation, error message is sent by validate_wager
@@ -72,13 +73,14 @@ def validate(update: Update, context: CallbackContext, sender: User, receiver: U
                                                                get_belly_formatted(tax_amount),
                                                                tax_percentage,
                                                                get_belly_formatted(total_amount))
-        full_message_send(context, ot_text, update=update, add_delete_button=True)
+        await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
     return True
 
 
-def send_request(update: Update, context: CallbackContext, sender: User, receiver: User, command: Command) -> None:
+async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
+                       command: Command) -> None:
     """
     Send request to send a bounty gift
     :param update: The update object
@@ -112,7 +114,7 @@ def send_request(update: Update, context: CallbackContext, sender: User, receive
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(sender, screen=Screen.GRP_BOUNTY_GIFT,
                                                                  primary_key=bounty_gift.id)]
 
-    message: Message = full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+    message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
     bounty_gift.message_id = message.message_id
     bounty_gift.save()
 
@@ -161,7 +163,8 @@ def get_amounts(update: Update, sender: User, receiver: User, command: Command =
     return amount, tax_percentage, tax_amount, total_amount
 
 
-def keyboard_interaction(update: Update, context: CallbackContext, sender: User, inbound_keyboard: Keyboard) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User,
+                               inbound_keyboard: Keyboard) -> None:
     """
     Keyboard interaction
     :param update: The update object
@@ -176,7 +179,7 @@ def keyboard_interaction(update: Update, context: CallbackContext, sender: User,
     # User cancelled the request
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         bounty_gift.delete_instance()
-        full_message_send(context, phrases.BOUNTY_GIFT_CANCELLED, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.BOUNTY_GIFT_CANCELLED, update=update, add_delete_button=True)
         return
 
     receiver: User = bounty_gift.receiver
@@ -206,8 +209,8 @@ def keyboard_interaction(update: Update, context: CallbackContext, sender: User,
     ot_text = phrases.BOUNTY_GIFT_CONFIRMED.format(get_belly_formatted(amount), receiver.get_markdown_mention(),
                                                    get_belly_formatted(tax_amount), tax_percentage,
                                                    get_belly_formatted(total_amount))
-    full_message_send(context, ot_text, update=update, add_delete_button=True)
+    await full_message_send(context, ot_text, update=update, add_delete_button=True)
 
     # Send notification to receiver
     notification = BountyGiftReceivedNotification(sender, amount)
-    send_notification(context, receiver, notification)
+    await send_notification(context, receiver, notification)

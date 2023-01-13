@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 from src.chat.private.screens.screen_logs_type import validate
 from src.model.User import User
@@ -17,7 +17,7 @@ class LogTypeReservedKeys(StrEnum):
     ITEM_ID = 'b'
 
 
-def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
     Manage the log type detail screen
     :param update: The update
@@ -33,4 +33,4 @@ def manage(update: Update, context: CallbackContext, inbound_keyboard: Keyboard,
         log.user = user
         log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
 
-        full_message_send(context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard)

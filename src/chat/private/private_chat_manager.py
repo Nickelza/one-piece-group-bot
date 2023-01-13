@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
 from src.chat.private.screens.screen_crew import manage as manage_screen_crew
@@ -26,8 +26,8 @@ from src.model.error.PrivateChatError import PrivateChatError, PrivateChatExcept
 from src.model.pojo.Keyboard import Keyboard
 
 
-def manage(update: Update, context: CallbackContext, command: Command.Command, user: User,
-           inbound_keyboard: Keyboard) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
+                 inbound_keyboard: Keyboard) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update
@@ -38,11 +38,11 @@ def manage(update: Update, context: CallbackContext, command: Command.Command, u
     :return: None
     """
 
-    dispatch_screens(update, context, command, user, inbound_keyboard)
+    await dispatch_screens(update, context, command, user, inbound_keyboard)
 
 
-def dispatch_screens(update: Update, context: CallbackContext, command: Command.Command, user: User,
-                     inbound_keyboard: Keyboard) -> None:
+async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
+                           inbound_keyboard: Keyboard) -> None:
     """
     Dispatches the different screens
     :param update: Telegram update
@@ -92,49 +92,49 @@ def dispatch_screens(update: Update, context: CallbackContext, command: Command.
 
         match screen:
             case Screen.PVT_START:  # Start
-                manage_screen_start(update, context)
+                await manage_screen_start(update, context)
 
             case Screen.PVT_SETTINGS:  # Settings
-                manage_screen_settings(update, context, inbound_keyboard)
+                await manage_screen_settings(update, context, inbound_keyboard)
 
             case Screen.PVT_USER_STATUS:  # Status
-                manage_screen_status(update, context, command, user, inbound_keyboard)
+                await manage_screen_status(update, context, command, user, inbound_keyboard)
 
             case Screen.PVT_CREW:  # Crew
-                manage_screen_crew(update, context, inbound_keyboard, user)
+                await manage_screen_crew(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
-                manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
+                await manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_LEAVE:  # Crew Leave
-                manage_screen_crew_leave(update, context, inbound_keyboard, user)
+                await manage_screen_crew_leave(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_DISBAND:  # Crew Disband
-                manage_screen_crew_disband(update, context, inbound_keyboard, user)
+                await manage_screen_crew_disband(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_MEMBER:  # Crew Member
-                manage_screen_crew_member(update, context, inbound_keyboard, user)
+                await manage_screen_crew_member(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_MEMBER_REMOVE:  # Crew Member Remove
-                manage_screen_crew_member_remove(update, context, inbound_keyboard, user)
+                await manage_screen_crew_member_remove(update, context, inbound_keyboard, user)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
-                manage_screen_settings_notifications(update, context, inbound_keyboard)
+                await manage_screen_settings_notifications(update, context, inbound_keyboard)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE:  # Notifications Type
-                manage_screen_settings_notifications_type(update, context, inbound_keyboard)
+                await manage_screen_settings_notifications_type(update, context, inbound_keyboard)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT:  # Notifications Type Edit
-                manage_screen_settings_notifications_type_edit(update, context, inbound_keyboard, user)
+                await manage_screen_settings_notifications_type_edit(update, context, inbound_keyboard, user)
 
             case Screen.PVT_LOGS:  # Logs
-                manage_screen_logs(update, context, inbound_keyboard, user)
+                await manage_screen_logs(update, context, inbound_keyboard, user)
 
             case Screen.PVT_LOGS_TYPE:  # Logs Type
-                manage_screen_logs_type(update, context, inbound_keyboard, user)
+                await manage_screen_logs_type(update, context, inbound_keyboard, user)
 
             case Screen.PVT_LOGS_TYPE_DETAIL:  # Logs Type Detail
-                manage_screen_logs_type_detail(update, context, inbound_keyboard, user)
+                await manage_screen_logs_type_detail(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

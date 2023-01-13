@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from telegram import Update
-from telegram.ext import CallbackContext
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
@@ -16,10 +16,8 @@ from src.service.message_service import full_message_send, escape_valid_markdown
 from src.service.prediction_service import refresh, get_prediction_options_user
 
 
-def validate(update: Update, context: CallbackContext, user: User, command: Command) -> tuple[Prediction,
-                                                                                              PredictionOption, int,
-                                                                                              int] | tuple[None, None,
-                                                                                                           None, None]:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command
+                   ) -> tuple[Prediction, PredictionOption, int, int] | tuple[None, None, None, None]:
     """
     Validate the prediction bet
     :param update: The update object
@@ -32,7 +30,7 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     error_tuple = None, None, None, None
 
     if len(command.parameters) != 2:
-        full_message_send(context, phrases.PREDICTION_BET_INVALID_FORMAT, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_BET_INVALID_FORMAT, update=update, add_delete_button=True)
         return error_tuple
 
     # Wager basic validation, error message is sent by validate_wager
@@ -42,12 +40,12 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     # Get prediction from message id
     prediction: Prediction = Prediction.get_or_none(Prediction.message_id == update.message.reply_to_message.message_id)
     if prediction is None:
-        full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
         return error_tuple
 
     # Prediction is not open
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
-        full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, update=update, add_delete_button=True)
         return error_tuple
 
     prediction_options: list[PredictionOption] = prediction.prediction_options
@@ -55,21 +53,21 @@ def validate(update: Update, context: CallbackContext, user: User, command: Comm
     # User has already bet and prediction does not allow multiple bets
     prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
     if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
-        full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update, add_delete_button=True)
         return error_tuple
 
     # Option is not valid
     prediction_option = [prediction_option for prediction_option in prediction_options if
                          str(prediction_option.number) == command.parameters[1]]
     if len(prediction_option) == 0:
-        full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(
+        await full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(
             escape_valid_markdown_chars(command.parameters[1])), update=update, add_delete_button=True)
         return error_tuple
 
     return prediction, prediction_option[0], get_amount_from_command(command.parameters[0]), int(command.parameters[1])
 
 
-def manage(update: Update, context: CallbackContext, user: User, command: Command) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -78,7 +76,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     :param command: The command
     :return: None
     """
-    validation_tuple = validate(update, context, user, command)
+    validation_tuple = await validate(update, context, user, command)
 
     # Need single assignment to enable IDE type detection
     prediction: Prediction = validation_tuple[0]
@@ -113,7 +111,7 @@ def manage(update: Update, context: CallbackContext, user: User, command: Comman
     user.pending_bounty += wager
 
     # Send success message
-    full_message_send(context, phrases.PREDICTION_BET_SUCCESS, update=update, add_delete_button=True)
+    await full_message_send(context, phrases.PREDICTION_BET_SUCCESS, update=update, add_delete_button=True)
 
     # Update prediction text
-    refresh(context, prediction)
+    await refresh(context, prediction)

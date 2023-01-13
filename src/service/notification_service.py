@@ -1,6 +1,6 @@
 from telegram import Update, Message
-from telegram.error import Unauthorized
-from telegram.ext import CallbackContext
+from telegram.error import Forbidden
+from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.chat.private.screens.screen_settings_notifications_type import NotificationTypeReservedKeys
@@ -12,8 +12,8 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
 
-def send_notification(context: CallbackContext, user: User, notification: Notification,
-                      should_forward_message: bool = False, update: Update = None) -> None:
+async def send_notification(context: ContextTypes.DEFAULT_TYPE, user: User, notification: Notification,
+                            should_forward_message: bool = False, update: Update = None) -> None:
     """
     Sends a notification to the user
     :param context: The context object
@@ -42,14 +42,14 @@ def send_notification(context: CallbackContext, user: User, notification: Notifi
         try:
             quote_message_id = None
             if should_forward_message:
-                message: Message = update.message.forward(user.tg_user_id, disable_notification=True)
+                message: Message = await update.message.forward(user.tg_user_id, disable_notification=True)
                 quote_message_id = message.message_id
 
-            full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
-                              disable_web_page_preview=notification.disable_web_page_preview,
-                              disable_notification=notification.disable_notification,
-                              reply_to_message_id=quote_message_id)
-        except Unauthorized:  # User has blocked the bot
+            await full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
+                                    disable_web_page_preview=notification.disable_web_page_preview,
+                                    disable_notification=notification.disable_notification,
+                                    reply_to_message_id=quote_message_id)
+        except Forbidden:  # User has blocked the bot
             pass
 
 

@@ -5,8 +5,8 @@ import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation, Chat
 from telegram.error import BadRequest, TelegramError
-from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_markdown
+from telegram.ext import ContextTypes
+from telegram.helpers import mention_markdown
 
 import constants as c
 import resources.Environment as Env
@@ -197,21 +197,22 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
         return update.effective_message.message_id
 
 
-def full_message_send(context: CallbackContext, text: str, update: Update = None, chat_id: int | str = None,
-                      keyboard: list[list[Keyboard]] = None, answer_callback: bool = False, show_alert: bool = False,
-                      new_message: bool = False, disable_notification: bool = True, reply_to_message_id: int = None,
-                      parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
-                      protect_content: bool = False, disable_web_page_preview: bool = True,
-                      allow_sending_without_reply: bool = True, add_delete_button: bool = False,
-                      authorized_users: list = None, inbound_keyboard: Keyboard = None,
-                      send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
-                      edit_message_id: int = None, previous_screens: list[Screen] = None,
-                      excluded_keys_from_back_button: list[str] = None,
-                      back_screen_index: int = 0) -> Message:
+async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None,
+                            chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
+                            answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
+                            disable_notification: bool = True, reply_to_message_id: int = None,
+                            parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
+                            protect_content: bool = False, disable_web_page_preview: bool = True,
+                            allow_sending_without_reply: bool = True, add_delete_button: bool = False,
+                            authorized_users: list = None, inbound_keyboard: Keyboard = None,
+                            send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
+                            edit_message_id: int = None, previous_screens: list[Screen] = None,
+                            excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0
+                            ) -> Message | bool:
     """
     Send a message
 
-    :param context: CallbackContext object
+    :param context: ContextTypes.DEFAULT_TYPE object
     :param text: Text to send
     :param update: Update object. Required if chat_id is None
     :param chat_id: Chat id. Required if update is None
@@ -262,15 +263,15 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
                                                       reply_to_message_id=reply_to_message_id,
                                                       quote_if_group=quote_if_group)
 
-        return context.bot.send_message(text=text,
-                                        chat_id=chat_id,
-                                        reply_markup=keyboard_markup,
-                                        disable_web_page_preview=disable_web_page_preview,
-                                        parse_mode=parse_mode,
-                                        disable_notification=disable_notification,
-                                        reply_to_message_id=reply_to_message_id,
-                                        allow_sending_without_reply=allow_sending_without_reply,
-                                        protect_content=protect_content)
+        return await context.bot.send_message(text=text,
+                                              chat_id=chat_id,
+                                              reply_markup=keyboard_markup,
+                                              disable_web_page_preview=disable_web_page_preview,
+                                              parse_mode=parse_mode,
+                                              disable_notification=disable_notification,
+                                              reply_to_message_id=reply_to_message_id,
+                                              allow_sending_without_reply=allow_sending_without_reply,
+                                              protect_content=protect_content)
 
     # No message to edit or answer callback
     if (update is None or update.callback_query is None) and edit_message_id is None:
@@ -278,16 +279,16 @@ def full_message_send(context: CallbackContext, text: str, update: Update = None
 
     # Answer callback
     if answer_callback:
-        return context.bot.answer_callback_query(update.callback_query.id, text=text, show_alert=show_alert)
+        return await context.bot.answer_callback_query(update.callback_query.id, text=text, show_alert=show_alert)
 
     # Edit message
     edit_message_id = edit_message_id if edit_message_id is not None else update.callback_query.message.message_id
-    return context.bot.edit_message_text(text=text,
-                                         chat_id=chat_id,
-                                         reply_markup=keyboard_markup,
-                                         parse_mode=parse_mode,
-                                         disable_web_page_preview=disable_web_page_preview,
-                                         message_id=edit_message_id)
+    return await context.bot.edit_message_text(text=text,
+                                               chat_id=chat_id,
+                                               reply_markup=keyboard_markup,
+                                               parse_mode=parse_mode,
+                                               disable_web_page_preview=disable_web_page_preview,
+                                               message_id=edit_message_id)
 
 
 def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = None,
@@ -311,18 +312,19 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
             raise Exception(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE)
 
 
-def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, update: Update = None,
-                    chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
-                    answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
-                    disable_notification: bool = True, reply_to_message_id: int = None, protect_content: bool = False,
-                    parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
-                    allow_sending_without_reply: bool = True, edit_only_keyboard: bool = False,
-                    edit_only_caption_and_keyboard: bool = False, add_delete_button: bool = False,
-                    authorized_users: list = None, inbound_keyboard: Keyboard = None,
-                    send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True) -> Message:
+async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: SavedMedia = None, update: Update = None,
+                          chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
+                          answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
+                          disable_notification: bool = True, reply_to_message_id: int = None,
+                          protect_content: bool = False, parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False,
+                          quote_if_group: bool = True, allow_sending_without_reply: bool = True,
+                          edit_only_keyboard: bool = False, edit_only_caption_and_keyboard: bool = False,
+                          add_delete_button: bool = False, authorized_users: list = None,
+                          inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
+                          only_authorized_users_can_interact: bool = True) -> Message | bool:
     """
     Send a media
-    :param context: CallbackContext object
+    :param context: ContextTypes.DEFAULT_TYPE object
     :param saved_media: SavedMedia object
     :param update: Update object. Required if chat_id is None
     :param chat_id: Chat id. Required if update is None
@@ -366,35 +368,35 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
         match saved_media.type:
             # Photo
             case SavedMediaType.PHOTO:  # Photo
-                return context.bot.send_photo(chat_id=chat_id,
-                                              photo=saved_media.media_id,
-                                              caption=caption,
-                                              reply_markup=keyboard_markup,
-                                              parse_mode=parse_mode,
-                                              disable_notification=disable_notification,
-                                              reply_to_message_id=reply_to_message_id,
-                                              allow_sending_without_reply=allow_sending_without_reply,
-                                              protect_content=protect_content)
+                return await context.bot.send_photo(chat_id=chat_id,
+                                                    photo=saved_media.media_id,
+                                                    caption=caption,
+                                                    reply_markup=keyboard_markup,
+                                                    parse_mode=parse_mode,
+                                                    disable_notification=disable_notification,
+                                                    reply_to_message_id=reply_to_message_id,
+                                                    allow_sending_without_reply=allow_sending_without_reply,
+                                                    protect_content=protect_content)
             case SavedMediaType.VIDEO:  # Video
-                return context.bot.send_video(chat_id=chat_id,
-                                              video=saved_media.media_id,
-                                              caption=caption,
-                                              reply_markup=keyboard_markup,
-                                              parse_mode=parse_mode,
-                                              disable_notification=disable_notification,
-                                              reply_to_message_id=reply_to_message_id,
-                                              allow_sending_without_reply=allow_sending_without_reply,
-                                              protect_content=protect_content)
+                return await context.bot.send_video(chat_id=chat_id,
+                                                    video=saved_media.media_id,
+                                                    caption=caption,
+                                                    reply_markup=keyboard_markup,
+                                                    parse_mode=parse_mode,
+                                                    disable_notification=disable_notification,
+                                                    reply_to_message_id=reply_to_message_id,
+                                                    allow_sending_without_reply=allow_sending_without_reply,
+                                                    protect_content=protect_content)
             case SavedMediaType.ANIMATION:  # Animation
-                return context.bot.send_animation(chat_id=chat_id,
-                                                  animation=saved_media.media_id,
-                                                  caption=caption,
-                                                  reply_markup=keyboard_markup,
-                                                  parse_mode=parse_mode,
-                                                  disable_notification=disable_notification,
-                                                  reply_to_message_id=reply_to_message_id,
-                                                  allow_sending_without_reply=allow_sending_without_reply,
-                                                  protect_content=protect_content)
+                return await context.bot.send_animation(chat_id=chat_id,
+                                                        animation=saved_media.media_id,
+                                                        caption=caption,
+                                                        reply_markup=keyboard_markup,
+                                                        parse_mode=parse_mode,
+                                                        disable_notification=disable_notification,
+                                                        reply_to_message_id=reply_to_message_id,
+                                                        allow_sending_without_reply=allow_sending_without_reply,
+                                                        protect_content=protect_content)
             case _:
                 raise ValueError(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE.format(saved_media.type.name))
 
@@ -404,38 +406,39 @@ def full_media_send(context: CallbackContext, saved_media: SavedMedia = None, up
 
     # Answer callback
     if answer_callback:
-        return context.bot.answer_callback_query(update.callback_query.id, text=caption, show_alert=show_alert)
+        return await context.bot.answer_callback_query(update.callback_query.id, text=caption, show_alert=show_alert)
 
     # Edit only keyboard
     if edit_only_keyboard:
-        return context.bot.edit_message_reply_markup(chat_id=chat_id,
-                                                     message_id=update.callback_query.message.message_id,
-                                                     reply_markup=keyboard_markup)
+        return await context.bot.edit_message_reply_markup(chat_id=chat_id,
+                                                           message_id=update.callback_query.message.message_id,
+                                                           reply_markup=keyboard_markup)
 
     # Edit only caption and keyboard
     if edit_only_caption_and_keyboard:
-        return context.bot.edit_message_caption(chat_id=chat_id,
-                                                message_id=update.callback_query.message.message_id,
-                                                caption=caption,
-                                                reply_markup=keyboard_markup)
+        return await context.bot.edit_message_caption(chat_id=chat_id,
+                                                      message_id=update.callback_query.message.message_id,
+                                                      caption=caption,
+                                                      reply_markup=keyboard_markup)
 
     # Edit full media
     input_media: InputMedia = get_input_media_from_saved_media(saved_media=saved_media, caption=caption)
-    return context.bot.edit_message_media(chat_id=chat_id,
-                                          message_id=update.callback_query.message.message_id,
-                                          media=input_media,
-                                          reply_markup=keyboard_markup)
+    return await context.bot.edit_message_media(chat_id=chat_id,
+                                                message_id=update.callback_query.message.message_id,
+                                                media=input_media,
+                                                reply_markup=keyboard_markup)
 
 
-def full_message_or_media_send_or_edit(context: CallbackContext, text: str, update: Update = None,
-                                       chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
-                                       parse_mode: str = c.TG_DEFAULT_PARSE_MODE, protect_content: bool = False,
-                                       disable_web_page_preview: bool = True, edit_only_keyboard: bool = False,
-                                       edit_only_caption_and_keyboard: bool = True, add_delete_button: bool = False,
-                                       authorized_users: list = None) -> Message:
+async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None,
+                                             chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
+                                             parse_mode: str = c.TG_DEFAULT_PARSE_MODE, protect_content: bool = False,
+                                             disable_web_page_preview: bool = True, edit_only_keyboard: bool = False,
+                                             edit_only_caption_and_keyboard: bool = True,
+                                             add_delete_button: bool = False, authorized_users: list = None
+                                             ) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
-    :param context: CallbackContext object
+    :param context: ContextTypes.DEFAULT_TYPE object
     :param text: Text to send
     :param update: Update object. Required if chat_id is None
     :param chat_id: Chat id. Required if update is None
@@ -452,16 +455,16 @@ def full_message_or_media_send_or_edit(context: CallbackContext, text: str, upda
     """
 
     try:
-        return full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
-                                 parse_mode=parse_mode, disable_web_page_preview=disable_web_page_preview,
-                                 add_delete_button=add_delete_button, authorized_users=authorized_users,
-                                 protect_content=protect_content)
+        return await full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
+                                       parse_mode=parse_mode, disable_web_page_preview=disable_web_page_preview,
+                                       add_delete_button=add_delete_button, authorized_users=authorized_users,
+                                       protect_content=protect_content)
     except BadRequest:
-        return full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
-                               parse_mode=parse_mode, add_delete_button=add_delete_button,
-                               edit_only_keyboard=edit_only_keyboard,
-                               edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
-                               authorized_users=authorized_users, protect_content=protect_content)
+        return await full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
+                                     parse_mode=parse_mode, add_delete_button=add_delete_button,
+                                     edit_only_keyboard=edit_only_keyboard,
+                                     edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
+                                     authorized_users=authorized_users, protect_content=protect_content)
 
 
 def is_command(text: str) -> bool:
@@ -524,7 +527,7 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     :param no_screen: Screen to call when the user clicks on the no button. If None, the default screen will be called
     :param yes_extra_keys: List of extra keys for the yes button, in a dict of key and value
     :param no_extra_keys: List of extra keys for the no button, in a dict of key and value
-    :param confirm_key: Yes or no key. If None, default valu will be used
+    :param confirm_key: Yes or no key. If None, default value will be used
     :param inbound_keyboard: The inbound keyboard
     :param yes_is_back_button: True if the yes button should be a back button
     :param no_is_back_button: True if the no button should be a back button
@@ -613,13 +616,13 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
                     inbound_info=info_copy)
 
 
-def delete_message(update: Update):
+async def delete_message(update: Update):
     """
     Delete a message with best effort
     :param update: Update object
     """
     try:
-        update.effective_message.delete()
+        await update.effective_message.delete()
     except TelegramError:
         pass
 
