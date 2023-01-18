@@ -16,6 +16,7 @@ class Prediction(BaseModel):
     end_date = DateTimeField(null=True)
     cut_off_date = DateTimeField(null=True)
     refund_wager = BooleanField()
+    max_refund_wager = IntegerField(null=True)
     allow_multiple_choices = BooleanField()
     can_withdraw_bet = BooleanField()
     message_id = IntegerField(null=True)

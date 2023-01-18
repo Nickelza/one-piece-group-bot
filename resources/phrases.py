@@ -427,6 +427,7 @@ PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
 PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}' + \
                                  PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = '_\n\n\\(Your wager was refunded\\)_'
+PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL = '_\n\n\\(You have been refunded ฿{}\\)_'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS = '_\n\n\\(Your wager was refunded because there' \
                                                                    ' were no correct options\\)_'
 PREDICTION_RESULT_NOTIFICATION_OPTION = '\n{}{}'

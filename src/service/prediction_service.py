@@ -86,7 +86,7 @@ def get_prediction_text(prediction: Prediction) -> str:
     if prediction.refund_wager:
         enabled_emoji = Emoji.PREDICTION_FEATURE_ENABLED
         max_refund_text = phrases.PREDICTION_WAGERS_REFUNDED_MAX.format(
-            get_belly_formatted(Env.PREDICTION_BET_MAX_REFUNDABLE_WAGER.get_int()))
+            get_belly_formatted(prediction.max_refund_wager))
     else:
         enabled_emoji = Emoji.PREDICTION_FEATURE_DISABLED
         max_refund_text = ""
@@ -236,7 +236,7 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
                 user.bounty += prediction_option_user.wager
             else:
                 # Cap refund
-                user.bounty += min(prediction_option_user.wager, Env.PREDICTION_BET_MAX_REFUNDABLE_WAGER.get_int())
+                user.bounty += min(prediction_option_user.wager, prediction.max_refund_wager)
 
         user.save()
 

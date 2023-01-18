@@ -1,7 +1,7 @@
 import os
-import sys
 from distutils.util import strtobool
 
+import sys
 from dotenv import load_dotenv
 
 import constants as c
@@ -358,8 +358,6 @@ FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE
 
 # Minimum wager for prediction bets. Default: 10 million
 PREDICTION_BET_MIN_WAGER = Environment('PREDICTION_BET_MIN_WAGER', default_value='10000000')
-# Maximum refundable wager for prediction bets. Default: 100 million
-PREDICTION_BET_MAX_REFUNDABLE_WAGER = Environment('PREDICTION_BET_MAX_REFUNDABLE_WAGER', default_value='100000000')
 
 # Send leaderboard message. Default: True
 SEND_MESSAGE_LEADERBOARD = Environment('SEND_MESSAGE_LEADERBOARD', default_value='True')

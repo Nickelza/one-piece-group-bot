@@ -365,7 +365,12 @@ class PredictionResultNotification(Notification):
         if not prediction_has_correct_options:
             wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS
         elif self.prediction.refund_wager:
-            wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED
+            # User lost more than the refundable amount
+            if self.total_win < 0 and abs(self.total_win) > self.prediction.max_refund_wager:
+                wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL.format(
+                    get_belly_formatted(self.prediction.max_refund_wager))
+            else:
+                wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED
 
         return self.text.format(result_text, get_belly_formatted(abs(self.total_win)),
                                 escape_valid_markdown_chars(self.prediction.question), user_prediction_options_text,
