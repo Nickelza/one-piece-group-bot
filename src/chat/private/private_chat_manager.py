@@ -11,6 +11,8 @@ from src.chat.private.screens.screen_crew_member_remove import manage as manage_
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
+from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
+from src.chat.private.screens.screen_prediction_detail import manage as manage_screen_prediction_detail
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import manage as \
@@ -135,6 +137,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_LOGS_TYPE_DETAIL:  # Logs Type Detail
                 await manage_screen_logs_type_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION:  # Prediction
+                await manage_screen_prediction(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL:  # Prediction Detail
+                await manage_screen_prediction_detail(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

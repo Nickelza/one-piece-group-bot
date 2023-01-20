@@ -42,5 +42,7 @@ class Screen(StrEnum):
     PVT_LOGS = 'P14'
     PVT_LOGS_TYPE = 'P15'
     PVT_LOGS_TYPE_DETAIL = 'P16'
+    PVT_PREDICTION = 'P17'
+    PVT_PREDICTION_DETAIL = 'P18'
 
     ADM_SAVE_MEDIA = 'A1'

@@ -27,6 +27,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_CREW, screen=Screen.PVT_CREW,
                                        previous_screen_list=[Screen.PVT_START])])
 
+    # Prediction button
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_PREDICTION, screen=Screen.PVT_PREDICTION,
+                                       previous_screen_list=[Screen.PVT_START])])
+
     # Logs
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_LOGS, screen=Screen.PVT_LOGS,
                                        previous_screen_list=[Screen.PVT_START])])

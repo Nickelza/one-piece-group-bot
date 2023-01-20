@@ -45,10 +45,11 @@ async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_re
     prediction.save()
 
 
-def get_prediction_text(prediction: Prediction) -> str:
+def get_prediction_text(prediction: Prediction, add_bets_command: bool = True) -> str:
     """
     Get prediction text
     :param prediction: Prediction
+    :param add_bets_command: If to add commands on how to place and remove bets
     :return: Prediction text
     """
 
@@ -105,11 +106,12 @@ def get_prediction_text(prediction: Prediction) -> str:
     # Add command to place and remove bets if prediction is open
     how_to_bet_command_text = ""
     how_to_remove_bet_command_text = ""
-    if PredictionStatus(prediction.status) is PredictionStatus.SENT:
-        how_to_bet_command_text = phrases.PREDICTION_BET_HOW_TO_PLACE_BET
+    if add_bets_command:
+        if PredictionStatus(prediction.status) is PredictionStatus.SENT:
+            how_to_bet_command_text = phrases.PREDICTION_BET_HOW_TO_PLACE_BET
 
-        if prediction.can_withdraw_bet:
-            how_to_remove_bet_command_text = phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
+            if prediction.can_withdraw_bet:
+                how_to_remove_bet_command_text = phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
 
     # Append \n if not empty
     optional_text = "\n" + optional_text if optional_text != "" else ""
@@ -126,6 +128,90 @@ def get_prediction_text(prediction: Prediction) -> str:
         how_to_remove_bet_command_text)
 
     return prediction_text
+
+
+def get_user_prediction_status_text(prediction: Prediction, user: User,
+                                    prediction_options_user: list[PredictionOptionUser] = None, add_header: bool = True
+                                    ) -> str:
+    """
+    Get the prediction status text
+    :param prediction: The prediction
+    :param user: The user
+    :param prediction_options_user: The options the user has bet on
+    :param add_header: Whether to add the "Bets" header
+    :return: The prediction status text
+    """
+
+    if prediction_options_user is None:
+        prediction_options_user = get_prediction_options_user(prediction, user)
+
+    if len(prediction_options_user) == 0:
+        return phrases.PREDICTION_BET_USER_HAS_NOT_BET
+
+    total_win_amount = 0
+    total_win_count = 0
+    total_loss_count = 0
+    prediction_status: PredictionStatus = PredictionStatus(prediction.status)
+    ot_text = phrases.PREDICTION_STATUS_BETS_HEADER if add_header else ""
+
+    for prediction_option_user in prediction_options_user:
+        prediction_option: PredictionOption = prediction_option_user.prediction_option
+
+        # Option
+        ot_text += phrases.PREDICTION_STATUS_OPTION.format(prediction_option.number,
+                                                           escape_valid_markdown_chars(prediction_option.option),
+                                                           get_belly_formatted(prediction_option_user.wager))
+
+        # If the prediction results are not set, assume the option is correct
+        is_potential = prediction_status is not PredictionStatus.RESULT_SET
+
+        potential_win_amount = get_prediction_option_user_win(prediction_option_user,
+                                                              is_potential=is_potential)
+
+        potential_win_amount_formatted = get_belly_formatted(potential_win_amount)
+
+        # Result not set, add potential win
+        if prediction_status is not PredictionStatus.RESULT_SET:
+            ot_text += phrases.PREDICTION_STATUS_POTENTIAL_WIN.format(potential_win_amount_formatted)
+        else:
+            # Result set, add win or loss amount
+            if prediction_option.is_correct:
+                ot_text += phrases.PREDICTION_STATUS_RESULT_WIN.format(potential_win_amount_formatted)
+                total_win_amount += potential_win_amount
+                total_win_count += 1
+            else:
+                ot_text += phrases.PREDICTION_STATUS_RESULT_LOST
+                total_win_amount -= prediction_option_user.wager if not prediction.refund_wager else 0
+                total_loss_count += 1
+
+                # Wagers are refunded
+                if prediction.refund_wager:
+                    ot_text += phrases.PREDICTION_STATUS_RESULT_LOSS_REFUNDED
+
+    # Multiple bet options
+    if len(prediction_options_user) > 1:
+        # Result set, show net win or loss amount
+        if prediction_status is PredictionStatus.RESULT_SET:
+            if total_win_amount >= 0:  # Won
+                if total_loss_count > 0:  # At least one option was wrong, show net win
+                    ot_text += phrases.PREDICTION_STATUS_NET_WIN.format(get_belly_formatted(total_win_amount))
+                else:  # All options were correct, show total win
+                    ot_text += phrases.PREDICTION_STATUS_TOTAL_WIN.format(get_belly_formatted(total_win_amount))
+            else:
+                total_loss_amount = abs(total_win_amount)
+                if total_win_count > 0:  # At least one option was correct, show net loss
+                    ot_text += phrases.PREDICTION_STATUS_NET_LOSS.format(get_belly_formatted(total_loss_amount))
+                else:  # All options were wrong, show total loss
+                    ot_text += phrases.PREDICTION_STATUS_TOTAL_LOSS.format(get_belly_formatted(total_loss_amount))
+        # Open prediction, show command to remove single bet
+        elif prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
+            ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_BET
+
+    # Open prediction, show command to remove all bets
+    if prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
+        ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
+
+    return ot_text
 
 
 async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
@@ -390,3 +476,62 @@ async def remove_all_bets_from_active_predictions(context: ContextTypes.DEFAULT_
                     logging.error(f"Replied message not found for prediction {prediction.id}")
         else:
             logging.error(f"Prediction {prediction.id} has no message_id")
+
+
+def user_bet_on_prediction(prediction: Prediction, user: User) -> bool:
+    """
+    Check if user bet on prediction
+    :param prediction: Prediction
+    :param user: User
+    :return: True if user bet on prediction
+    """
+
+    return len(get_prediction_options_user(prediction, user)) > 0
+
+
+def get_user_prediction_status_emoji(prediction: Prediction, user: User) -> Emoji:
+    """
+    Get user prediction status emoji for a user
+    :param prediction: Prediction
+    :param user: User
+    :return: User prediction status emoji
+    """
+
+    prediction_status = PredictionStatus(prediction.status)
+    if user_bet_on_prediction(prediction, user):
+        if prediction_status is PredictionStatus.SENT:
+            return Emoji.PREDICTION_OPEN
+        elif prediction_status is PredictionStatus.BETS_CLOSED:
+            return Emoji.PREDICTION_CLOSED
+        else:  # Result is set
+            net_win = get_prediction_net_win(prediction, user)
+            if net_win > 0:
+                return Emoji.LOG_POSITIVE
+            else:
+                return Emoji.LOG_NEGATIVE
+    else:  # If user didn't bet on prediction, and it's not open, it won't show up in the list
+        return Emoji.PREDICTION_NEW
+
+
+def get_prediction_net_win(prediction: Prediction, user: User) -> int:
+    """
+    Get net win for a user, without considering refunds, only for predictions with result set
+    :param prediction: Prediction
+    :param user: User
+    :return: Net win
+    """
+
+    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
+
+    if PredictionStatus(prediction.status) is not PredictionStatus.RESULT_SET:
+        raise ValueError(f"Prediction {prediction.id} results are not set, so net win can't be calculated")
+
+    net_win = 0
+    for pou in prediction_options_user:
+        prediction_option: PredictionOption = pou.prediction_option
+        if prediction_option.is_correct:
+            net_win += get_prediction_option_user_win(pou)
+        else:
+            net_win -= pou.wager
+
+    return net_win

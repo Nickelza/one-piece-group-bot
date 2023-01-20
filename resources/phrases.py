@@ -163,6 +163,7 @@ PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
 PVT_TXT_LOGS = 'Which log would you like to view?'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
+PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -281,6 +282,10 @@ PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN + '฿{
 PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
+# Prediction Private Chat
+PREDICTION_ITEM_TEXT = '{} {}'
+PREDICTION_ITEM_TEXT_FILL_IN = 'Prediction'
+PREDICTION_ITEM_DETAIL_TEXT = '{}\n\n{}'
 
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 CHAT_GROUP_MESSAGE_URL = f'https://t.me/{Env.OPD_GROUP_USERNAME.get()}/' + '{}'

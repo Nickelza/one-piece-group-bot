@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from enum import IntEnum
 
 import constants as c
@@ -14,6 +14,7 @@ from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
+from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
@@ -51,7 +52,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
 }
 
 
-class Log(ABC):
+class Log(ListPage):
     """Abstract class for logs."""
 
     def __init__(self, log_type: LogType, only_by_boss: bool = False):
@@ -66,6 +67,8 @@ class Log(ABC):
         self.only_by_boss: bool = only_by_boss
         self.user: User = User()
         self.object: BaseModel = BaseModel()
+
+        super().__init__()
 
     @abstractmethod
     def set_object(self, object_id: int) -> None:
