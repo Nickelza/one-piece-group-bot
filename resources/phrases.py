@@ -164,6 +164,7 @@ PVT_TXT_LOGS = 'Which log would you like to view?'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
+PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -259,7 +260,7 @@ PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
 PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_OPTION_NOT_FOUND = 'Option *{}* not found in prediction'
-PREDICTION_BET_SUCCESS = 'Bet placed successfully' + PREDICTION_BET_HOW_TO_VIEW_BET_STATUS
+PREDICTION_BET_SUCCESS = 'Bet placed successfully'
 PREDICTION_RESULTS_SET = 'The results of this prediction have been set'
 PREDICTION_BET_REMOVE_INVALID_FORMAT = 'Make sure your command is in the following format:' \
                                        f'\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} ]<option number>' \
@@ -286,6 +287,11 @@ PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for t
 PREDICTION_ITEM_TEXT = '{} {}'
 PREDICTION_ITEM_TEXT_FILL_IN = 'Prediction'
 PREDICTION_ITEM_DETAIL_TEXT = '{}\n\n{}'
+PREDICTION_PLACE_BET_TEXT = '{}'
+PREDICTION_PLACE_BET_DETAIL_TEXT = '*Question*: {}' \
+                                   '\n\n*Option*: {}' \
+                                   '\n\n_Please send the amount you want to bet_'
+PREDICTION_PLACE_BET_LIST_OVERVIEW = 'On which option do you want to place a bet?\n{}'
 
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 CHAT_GROUP_MESSAGE_URL = f'https://t.me/{Env.OPD_GROUP_USERNAME.get()}/' + '{}'

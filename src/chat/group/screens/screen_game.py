@@ -13,7 +13,7 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_command, validate_amount
+from src.service.bounty_service import get_amount_from_string, validate_amount
 from src.service.cron_service import cron_datetime_difference
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
 
@@ -105,7 +105,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game: Game = Game()
     game.challenger = user
     game.opponent = opponent
-    game.wager = get_amount_from_command(command.parameters[0])
+    game.wager = get_amount_from_string(command.parameters[0])
     game.save()
 
     user.bounty -= game.wager

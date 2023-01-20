@@ -207,8 +207,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             authorized_users: list = None, inbound_keyboard: Keyboard = None,
                             send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
-                            excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0
-                            ) -> Message | bool:
+                            excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
+                            previous_screen_list_keyboard_info: dict = None) -> Message | bool:
     """
     Send a message
 
@@ -237,6 +237,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
+    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
+            keyboard info to add to the back button
     :return: Message
     """
 
@@ -247,7 +249,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
         new_message = True
 
     if previous_screens is not None and inbound_keyboard is None:
-        inbound_keyboard = Keyboard('', previous_screen_list=previous_screens, screen=previous_screens[-1])
+        inbound_keyboard = Keyboard('', previous_screen_list=previous_screens, screen=previous_screens[-1],
+                                    info=previous_screen_list_keyboard_info)
 
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,

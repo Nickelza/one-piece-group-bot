@@ -44,7 +44,7 @@ class PredictionListPage(ListPage):
 
         return (self.object
                 .select()
-                .where((Prediction.status == self.object.status == PredictionStatus.SENT) |
+                .where((Prediction.status == PredictionStatus.SENT) |
                        (Prediction.status.in_([PredictionStatus.BETS_CLOSED, PredictionStatus.RESULT_SET]) &
                         (Prediction.id.in_(PredictionOptionUser.select(PredictionOptionUser.prediction)
                                            .where(PredictionOptionUser.user == self.user)
@@ -55,7 +55,7 @@ class PredictionListPage(ListPage):
     def get_total_items_count(self) -> int:
         return (self.object
                 .select()
-                .where((Prediction.status == self.object.status == PredictionStatus.SENT) |
+                .where((Prediction.status == PredictionStatus.SENT) |
                        (Prediction.status.in_([PredictionStatus.BETS_CLOSED, PredictionStatus.RESULT_SET]) &
                         (Prediction.id.in_(PredictionOptionUser.select(PredictionOptionUser.prediction)
                                            .where(PredictionOptionUser.user == self.user)
@@ -67,8 +67,9 @@ class PredictionListPage(ListPage):
                                                    escape_valid_markdown_chars(self.object.question))
 
     def get_item_detail_text(self) -> str:
-        return phrases.PREDICTION_ITEM_DETAIL_TEXT.format(get_prediction_text(self.object),
-                                                          get_user_prediction_status_text(self.object, self.user))
+        return phrases.PREDICTION_ITEM_DETAIL_TEXT.format(get_prediction_text(self.object, add_bets_command=False),
+                                                          get_user_prediction_status_text(self.object, self.user,
+                                                                                          add_bets_command=False))
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:

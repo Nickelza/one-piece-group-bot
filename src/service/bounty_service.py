@@ -12,6 +12,8 @@ from src.model.BountyGift import BountyGift
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
+from src.model.enums.Screen import Screen
+from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_next_run
 from src.service.location_service import reset_location
 from src.service.message_service import full_message_send
@@ -248,7 +250,7 @@ def add_crew_mvp_bounty_bonus() -> None:
     User.update(bounty=case_stmt).execute()
 
 
-def get_amount_from_command(amount_str: str) -> int:
+def get_amount_from_string(amount_str: str) -> int:
     """
     Get the wager amount
     :param amount_str: The wager amount
@@ -259,7 +261,9 @@ def get_amount_from_command(amount_str: str) -> int:
 
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
-                          required_belly: int) -> bool:
+                          required_belly: int, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
+                          previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None
+                          ) -> bool:
     """
     Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if the wager is
     higher than the required belly
@@ -268,24 +272,37 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     :param user: The user to validate the wager for
     :param wager_str: The wager string
     :param required_belly: The required belly
+    :param add_delete_button: Whether to add a delete button to the keyboard
+    :param inbound_keyboard: The inbound keyboard
+    :param previous_screens: The previous screens, for the back button if in private chat
+    :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back button if in private
     :return: Whether the wager is valid
     """
 
     try:
-        wager: int = get_amount_from_command(wager_str)
+        wager: int = get_amount_from_string(wager_str)
     except ValueError:
-        await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
+                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                previous_screens=previous_screens,
+                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 
     # User does not have enough bounty
     if user.bounty < wager:
-        await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
+        await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
+                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                previous_screens=previous_screens,
+                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 
     # Wager less than minimum required
     if wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
-        await full_message_send(context, ot_text, update=update, add_delete_button=True)
+        await full_message_send(context, ot_text, update=update, add_delete_button=add_delete_button,
+                                inbound_keyboard=inbound_keyboard,
+                                previous_screens=previous_screens,
+                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 
     return True

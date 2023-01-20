@@ -13,12 +13,16 @@ from src.chat.private.screens.screen_logs_type import manage as manage_screen_lo
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.private.screens.screen_prediction_detail import manage as manage_screen_prediction_detail
+from src.chat.private.screens.screen_prediction_detail_place_bet import \
+    manage as manage_screen_prediction_detail_place_bet
+from src.chat.private.screens.screen_prediction_detail_place_bet_send_amount import \
+    manage as manage_screen_prediction_detail_place_bet_send_amount
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
-from src.chat.private.screens.screen_settings_notifications_type import manage as \
-    manage_screen_settings_notifications_type
-from src.chat.private.screens.screen_settings_notifications_type_edit import manage as \
-    manage_screen_settings_notifications_type_edit
+from src.chat.private.screens.screen_settings_notifications_type import \
+    manage as manage_screen_settings_notifications_type
+from src.chat.private.screens.screen_settings_notifications_type_edit import \
+    manage as manage_screen_settings_notifications_type_edit
 from src.chat.private.screens.screen_start import manage as manage_screen_start
 from src.chat.private.screens.screen_status import manage as manage_screen_status
 from src.model.User import User
@@ -143,6 +147,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_PREDICTION_DETAIL:  # Prediction Detail
                 await manage_screen_prediction_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_PLACE_BET:  # Prediction Detail Place Bet
+                await manage_screen_prediction_detail_place_bet(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_PLACE_BET_SEND_AMOUNT:  # Prediction Detail Place Bet Send Amount
+                await manage_screen_prediction_detail_place_bet_send_amount(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

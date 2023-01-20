@@ -11,7 +11,7 @@ from src.model.enums.Notification import BountyGiftReceivedNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_command, validate_amount, get_belly_formatted
+from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
@@ -153,7 +153,7 @@ async def get_amounts(update: Update, sender: User, receiver: User, command: Com
     """
 
     if bounty_gift is None:
-        amount = get_amount_from_command(command.parameters[0])
+        amount = get_amount_from_string(command.parameters[0])
     else:
         amount = bounty_gift.amount
 

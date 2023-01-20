@@ -131,14 +131,15 @@ def get_prediction_text(prediction: Prediction, add_bets_command: bool = True) -
 
 
 def get_user_prediction_status_text(prediction: Prediction, user: User,
-                                    prediction_options_user: list[PredictionOptionUser] = None, add_header: bool = True
-                                    ) -> str:
+                                    prediction_options_user: list[PredictionOptionUser] = None, add_header: bool = True,
+                                    add_bets_command: bool = True) -> str:
     """
     Get the prediction status text
     :param prediction: The prediction
     :param user: The user
     :param prediction_options_user: The options the user has bet on
     :param add_header: Whether to add the "Bets" header
+    :param add_bets_command: Whether to add the command to remove all bets
     :return: The prediction status text
     """
 
@@ -204,11 +205,11 @@ def get_user_prediction_status_text(prediction: Prediction, user: User,
                 else:  # All options were wrong, show total loss
                     ot_text += phrases.PREDICTION_STATUS_TOTAL_LOSS.format(get_belly_formatted(total_loss_amount))
         # Open prediction, show command to remove single bet
-        elif prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
+        elif add_bets_command and prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
             ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_BET
 
     # Open prediction, show command to remove all bets
-    if prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
+    if add_bets_command and prediction_status is PredictionStatus.SENT and prediction.can_withdraw_bet:
         ot_text += phrases.PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS
 
     return ot_text
@@ -478,7 +479,7 @@ async def remove_all_bets_from_active_predictions(context: ContextTypes.DEFAULT_
             logging.error(f"Prediction {prediction.id} has no message_id")
 
 
-def user_bet_on_prediction(prediction: Prediction, user: User) -> bool:
+def user_has_bet_on_prediction(prediction: Prediction, user: User) -> bool:
     """
     Check if user bet on prediction
     :param prediction: Prediction
@@ -498,7 +499,7 @@ def get_user_prediction_status_emoji(prediction: Prediction, user: User) -> Emoj
     """
 
     prediction_status = PredictionStatus(prediction.status)
-    if user_bet_on_prediction(prediction, user):
+    if user_has_bet_on_prediction(prediction, user):
         if prediction_status is PredictionStatus.SENT:
             return Emoji.PREDICTION_OPEN
         elif prediction_status is PredictionStatus.BETS_CLOSED:
@@ -535,3 +536,31 @@ def get_prediction_net_win(prediction: Prediction, user: User) -> int:
             net_win -= pou.wager
 
     return net_win
+
+
+def save_prediction_option_user(prediction_option: PredictionOption, user: User, wager: int) -> PredictionOptionUser:
+    """
+    Save the prediction option user
+    :param prediction_option: The prediction option
+    :param user: The user
+    :param wager: The wager
+    :return: The prediction option user
+    """
+    # Find existing prediction option user if it exists
+    prediction_option_user: PredictionOptionUser = PredictionOptionUser.get_or_none(
+        (PredictionOptionUser.user == user)
+        & (PredictionOptionUser.prediction_option == prediction_option))
+    # User has already bet on this option, add the wager to the existing bet
+    if prediction_option_user is not None:
+        prediction_option_user.wager += wager
+    else:
+        # Create prediction option user
+        prediction_option_user = PredictionOptionUser()
+        prediction_option_user.prediction = prediction_option.prediction
+        prediction_option_user.prediction_option = prediction_option
+        prediction_option_user.user = user
+        prediction_option_user.wager = wager
+    prediction_option_user.date = datetime.now()
+    prediction_option_user.save()
+
+    return prediction_option_user
