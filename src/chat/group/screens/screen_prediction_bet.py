@@ -100,6 +100,18 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
         prediction_option = prediction_options[0]
 
+    # Prediction does not allow bets withdrawal and user has already bet on this option. This is to avoid a loophole
+    # where a user could bet on an option, then add more wager to the same option, updating the wager datetime
+    # and triggering his bet to be removed if after the cutoff datetime
+    if not prediction.can_withdraw_bet:
+        if any(prediction_option_user.prediction_option == prediction_option for prediction_option_user in
+               prediction_options_user):
+            await full_message_send(context, phrases.PREDICTION_ALREADY_BET_ON_OPTION, update=update,
+                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                    previous_screens=previous_screens,
+                                    previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+            return error_tuple
+
     amount_parsed = get_amount_from_string(amount) if amount is not None else 0  # Using 0 to pass validation in PC
 
     return prediction, prediction_option, amount_parsed, prediction_option.number

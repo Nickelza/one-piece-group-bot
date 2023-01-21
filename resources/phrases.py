@@ -260,6 +260,7 @@ PREDICTION_BET_HOW_TO_VIEW_BET_STATUS = '\n\n_To view your bet status, reply to 
 PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
 PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
+PREDICTION_ALREADY_BET_ON_OPTION = 'You have already bet on this option'
 PREDICTION_OPTION_NOT_FOUND = 'Option *{}* not found in prediction'
 PREDICTION_BET_SUCCESS = 'Bet placed successfully'
 PREDICTION_RESULTS_SET = 'The results of this prediction have been set'
