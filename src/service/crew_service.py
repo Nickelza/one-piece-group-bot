@@ -139,6 +139,7 @@ async def disband_crew(context: ContextTypes.DEFAULT_TYPE, captain: User, should
             await send_notification(context, member, CrewDisbandNotification())
 
     crew.is_active = False
+    crew.disband_date = datetime.now()
     crew.save()
 
 
