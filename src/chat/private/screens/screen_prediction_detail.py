@@ -37,11 +37,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     prediction: Prediction = prediction_list_page.object
     inline_keyboard: list[list[Keyboard]] = []
 
-    if should_show_place_bet_button(prediction, user):
-        button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_PREDICTION_DETAIL_PLACE_BET,
-                                         screen=Screen.PVT_PREDICTION_DETAIL_PLACE_BET,
-                                         info=button_info)])
+    if prediction.is_open():
+        if should_show_place_bet_button(prediction, user):
+            button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
+            inline_keyboard.append([Keyboard(phrases.PVT_KEY_PREDICTION_DETAIL_PLACE_BET,
+                                             screen=Screen.PVT_PREDICTION_DETAIL_PLACE_BET,
+                                             info=button_info)])
+
+        if should_show_remove_bet_button(prediction, user):
+            button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
+            inline_keyboard.append([Keyboard(phrases.PVT_KEY_PREDICTION_DETAIL_REMOVE_BET,
+                                             screen=Screen.PVT_PREDICTION_DETAIL_REMOVE_BET,
+                                             info=button_info)])
 
     await full_message_send(context, prediction_list_page.get_item_detail_text(), update=update,
                             keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
@@ -55,13 +62,25 @@ def should_show_place_bet_button(prediction: Prediction, user: User) -> bool:
     :return: True if the user should see the place bet button
     """
 
-    # Is not open
-    if not prediction.is_open():
-        return False
-
     # Accepts multiple bets
     if prediction.allow_multiple_choices:
         return True
 
     # Prediction does not accept multiple bets, show button if user has not bet
-    return not user_has_bet_on_prediction(user, prediction)
+    return not user_has_bet_on_prediction(prediction, user)
+
+
+def should_show_remove_bet_button(prediction: Prediction, user: User) -> bool:
+    """
+    Check if the user should see the remove bet button.
+    :param prediction: The prediction
+    :param user: The user
+    :return: True if the user should see the remove bet button
+    """
+
+    # Does not accept bet withdrawal
+    if not prediction.can_withdraw_bet:
+        return False
+
+    # Prediction accepts bet withdrawal, show button if user has bet
+    return user_has_bet_on_prediction(prediction, user)

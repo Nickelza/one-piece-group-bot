@@ -8,74 +8,71 @@ from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.PredictionStatus import PredictionStatus
+from src.model.error.CustomException import PredictionException
 from src.service.message_service import full_message_send
-from src.service.prediction_service import refresh, get_prediction_options_user
+from src.service.prediction_service import refresh, get_prediction_options_user, delete_prediction_option_user, \
+    delete_prediction_option_for_user
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command
-                   ) -> tuple[Prediction, PredictionOption, list[PredictionOptionUser]] | tuple[None, None, None]:
+async def validate(update: Update, user: User, command: Command = None, prediction_option: PredictionOption = None,
+                   ) -> tuple[Prediction, PredictionOption, list[PredictionOptionUser]]:
     """
     Validate the prediction bet
     :param update: The update object
-    :param context: The context object
     :param user: The user object
-    :param command: The command
-    :return: None if validation failed or (prediction, prediction_option) if validation succeeded
+    :param command: The command. Required if prediction_option is None
+    :param prediction_option: The prediction option. Required if command is None
+    :return: Raises an exception if the validation fails. Otherwise, returns the prediction, prediction option and
+                prediction options the user has bet on
     """
 
-    error_tuple = None, None, None
+    if prediction_option is None and command is None:
+        raise ValueError("Either prediction_option or command must be provided")
 
-    if len(command.parameters) > 1:
-        await full_message_send(context, phrases.PREDICTION_BET_REMOVE_INVALID_FORMAT, update=update,
-                                add_delete_button=True)
-        return error_tuple
+    if command is not None:
+        if len(command.parameters) > 1:
+            raise PredictionException(phrases.PREDICTION_BET_REMOVE_INVALID_FORMAT)
 
-    # Get prediction from message id
-    prediction: Prediction = Prediction.get_or_none(Prediction.message_id == update.message.reply_to_message.message_id)
-    if prediction is None:
-        await full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
-        return error_tuple
+        # Get prediction from message id
+        prediction: Prediction = Prediction.get_or_none(
+            Prediction.message_id == update.message.reply_to_message.message_id)
+        if prediction is None:
+            raise PredictionException(phrases.PREDICTION_NOT_FOUND_IN_REPLY)
+    else:
+        prediction: Prediction = prediction_option.prediction
 
     # Prediction does not accept bets withdrawals
     if not prediction.can_withdraw_bet:
-        await full_message_send(context, phrases.PREDICTION_DOES_NOT_ACCEPT_BETS_WITHDRAWAL, update=update,
-                                add_delete_button=True)
-        return error_tuple
+        raise PredictionException(phrases.PREDICTION_DOES_NOT_ACCEPT_BETS_WITHDRAWAL)
 
     # Prediction is not open
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
-        await full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS_REMOVAL, update=update,
-                                add_delete_button=True)
-        return error_tuple
+        raise PredictionException(phrases.PREDICTION_CLOSED_FOR_BETS_REMOVAL)
 
     prediction_options: list[PredictionOption] = prediction.prediction_options
     prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
 
     # User has not bet on this prediction
     if len(prediction_options_user) == 0:
-        await full_message_send(context, phrases.PREDICTION_BET_USER_HAS_NOT_BET, update=update, add_delete_button=True)
-        return error_tuple
+        raise PredictionException(phrases.PREDICTION_BET_USER_HAS_NOT_BET)
 
-    prediction_option = None
-    # Option specified
-    if len(command.parameters) == 1:
-        # Option is not valid
-        prediction_option = [prediction_option for prediction_option in prediction_options if
-                             str(prediction_option.number) == command.parameters[0]]
-        if len(prediction_option) == 0:
-            await full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(command.parameters[0]),
-                                    update=update,
-                                    add_delete_button=True)
-            return error_tuple
+    if command is not None:
+        prediction_option = None
+        # Option specified
+        if len(command.parameters) == 1:
+            # Option is not valid
+            prediction_option = [prediction_option for prediction_option in prediction_options if
+                                 str(prediction_option.number) == command.parameters[0]]
+            if len(prediction_option) == 0:
+                raise PredictionException(phrases.PREDICTION_OPTION_NOT_FOUND.format(command.parameters[0]))
 
-        prediction_option = prediction_option[0]
+            prediction_option = prediction_option[0]
 
+    if prediction_option is not None:
         # User did not bet on this option
         if len([prediction_option_user for prediction_option_user in prediction_options_user if
                 prediction_option_user.prediction_option == prediction_option]) == 0:
-            await full_message_send(context, phrases.PREDICTION_OPTION_NOT_BET_ON, update=update,
-                                    add_delete_button=True)
-            return error_tuple
+            raise PredictionException(phrases.PREDICTION_OPTION_NOT_BET_ON)
 
     return prediction, prediction_option, prediction_options_user
 
@@ -89,14 +86,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :param command: The command
     :return: None
     """
-    validation_tuple = await validate(update, context, user, command)
 
-    # Need single assignment to enable IDE type detection
-    prediction: Prediction = validation_tuple[0]
-    prediction_option: PredictionOption = validation_tuple[1]
-    prediction_options_user: list[PredictionOptionUser] = validation_tuple[2]
+    try:
+        validation_tuple = await validate(update, user, command)
 
-    if prediction is None:
+        # Need single assignment to enable IDE type detection
+        prediction: Prediction = validation_tuple[0]
+        prediction_option: PredictionOption = validation_tuple[1]
+        prediction_options_user: list[PredictionOptionUser] = validation_tuple[2]
+    except PredictionException as pe:
+        await full_message_send(context, pe.message, update=update, add_delete_button=True)
         return
 
     if prediction_option is None:
@@ -108,27 +107,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
                                 add_delete_button=True)
     else:
         # Remove bet on this prediction option
-        prediction_option_user: PredictionOptionUser = [
-            prediction_option_user for prediction_option_user in prediction_options_user
-            if prediction_option_user.prediction_option == prediction_option][0]
-        delete_prediction_option_user(user, prediction_option_user)
+        delete_prediction_option_for_user(user, prediction_option)
 
         await full_message_send(context, phrases.PREDICTION_BET_REMOVE_SUCCESS, update=update, add_delete_button=True)
 
     # Update prediction text
     await refresh(context, prediction)
 
-
-def delete_prediction_option_user(user: User, prediction_option_user: PredictionOptionUser) -> None:
-    """
-    Delete a prediction option user
-    :param user: The user object
-    :param prediction_option_user: The prediction option user
-    :return: None
-    """
-    # Return wager
-    user.pending_bounty -= prediction_option_user.wager
-    user.bounty += prediction_option_user.wager
-
-    # Delete prediction option user
-    prediction_option_user.delete_instance()

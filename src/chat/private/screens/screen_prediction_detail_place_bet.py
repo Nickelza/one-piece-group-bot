@@ -43,7 +43,7 @@ class PredictionPlaceBetListPage(ListPage):
         return (self.object
                 .select()
                 .where(PredictionOption.prediction == self.prediction)
-                .order_by(PredictionOption.id)
+                .order_by(PredictionOption.number)
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
     def get_total_items_count(self) -> int:

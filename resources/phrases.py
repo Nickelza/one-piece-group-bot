@@ -165,6 +165,7 @@ PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
 PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
+PVT_KEY_PREDICTION_DETAIL_REMOVE_BET = 'Remove bet'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -292,6 +293,8 @@ PREDICTION_PLACE_BET_DETAIL_TEXT = '*Question*: {}' \
                                    '\n\n*Option*: {}' \
                                    '\n\n_Please send the amount you want to bet_'
 PREDICTION_PLACE_BET_LIST_OVERVIEW = 'On which option do you want to place a bet?\n{}'
+PREDICTION_REMOVE_BET_TEXT = '{}'
+PREDICTION_REMOVE_BET_LIST_OVERVIEW = 'From which option do you want to remove your bet?\n{}'
 
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 CHAT_GROUP_MESSAGE_URL = f'https://t.me/{Env.OPD_GROUP_USERNAME.get()}/' + '{}'

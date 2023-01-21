@@ -564,3 +564,32 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
     prediction_option_user.save()
 
     return prediction_option_user
+
+
+def delete_prediction_option_user(user: User, prediction_option_user: PredictionOptionUser) -> None:
+    """
+    Delete a prediction option user
+    :param user: The user object
+    :param prediction_option_user: The prediction option user
+    :return: None
+    """
+    # Return wager
+    user.pending_bounty -= prediction_option_user.wager
+    user.bounty += prediction_option_user.wager
+
+    # Delete prediction option user
+    prediction_option_user.delete_instance()
+
+
+def delete_prediction_option_for_user(user: User, prediction_option: PredictionOption) -> None:
+    """
+    Delete a prediction option for a user
+    :param user: The user object
+    :param prediction_option: The prediction option
+    :return: None
+    """
+    prediction_option_user: PredictionOptionUser = PredictionOptionUser.get_or_none(
+        (PredictionOptionUser.user == user) & (PredictionOptionUser.prediction_option == prediction_option))
+
+    if prediction_option_user is not None:  # Should always be true
+        delete_prediction_option_user(user, prediction_option_user)

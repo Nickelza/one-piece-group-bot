@@ -17,6 +17,10 @@ from src.chat.private.screens.screen_prediction_detail_place_bet import \
     manage as manage_screen_prediction_detail_place_bet
 from src.chat.private.screens.screen_prediction_detail_place_bet_send_amount import \
     manage as manage_screen_prediction_detail_place_bet_send_amount
+from src.chat.private.screens.screen_prediction_detail_remove_bet import \
+    manage as manage_screen_prediction_detail_remove_bet
+from src.chat.private.screens.screen_prediction_detail_remove_bet_confirm import \
+    manage as manage_screen_prediction_detail_remove_bet_confirm
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import \
@@ -153,6 +157,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_PREDICTION_DETAIL_PLACE_BET_SEND_AMOUNT:  # Prediction Detail Place Bet Send Amount
                 await manage_screen_prediction_detail_place_bet_send_amount(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_REMOVE_BET:  # Prediction Detail Remove Bet
+                await manage_screen_prediction_detail_remove_bet(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM:  # Prediction Detail Remove Bet Confirm
+                await manage_screen_prediction_detail_remove_bet_confirm(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
