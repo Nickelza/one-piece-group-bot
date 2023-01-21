@@ -1,5 +1,5 @@
 from telegram import Update
-from wantedposter.wantedposter import WantedPoster, VerticalAlignment
+from wantedposter.wantedposter import WantedPoster, VerticalAlignment, CaptureCondition
 
 import constants as c
 from src.model.Leaderboard import Leaderboard
@@ -8,7 +8,7 @@ from src.model.User import User
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_leaderboard
-from src.service.user_service import get_user_profile_photo
+from src.service.user_service import get_user_profile_photo, user_is_boss
 
 
 async def get_bounty_poster(update: Update, user: User) -> str:
@@ -24,8 +24,13 @@ async def get_bounty_poster(update: Update, user: User) -> str:
                                  last_name=user.tg_last_name,
                                  bounty=user.bounty)
 
+    capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE
+
+    if await user_is_boss(user, update):
+        capture_condition = CaptureCondition.ONLY_DEAD
+
     return wanted_poster.generate(output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),
-                                  portrait_vertical_align=VerticalAlignment.TOP)
+                                  portrait_vertical_align=VerticalAlignment.TOP, capture_condition=capture_condition)
 
 
 def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
