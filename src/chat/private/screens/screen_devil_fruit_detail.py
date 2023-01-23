@@ -38,28 +38,24 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     inline_keyboard: list[list[Keyboard]] = []
 
     devil_fruit_status: DevilFruitStatus = DevilFruitStatus(devil_fruit.status)
+    button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
 
     # Show eat and trade buttons if the user have not eaten the Devil Fruit
     if devil_fruit_status is DevilFruitStatus.COLLECTED:
-        button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
-
         # Eat button
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
-                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_EAT,
+                                         screen=Screen.PVT_DEVIL_FRUIT_DETAIL_EAT,
                                          info=button_info)])
 
         # Trade button
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
-                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_TRADE,
+                                         screen=Screen.PVT_DEVIL_FRUIT_DETAIL_TRADE,
                                          info=button_info)])
-    # Show discard button if the user have eaten the Devil Fruit, should always fall back to this
-    elif devil_fruit_status is DevilFruitStatus.EATEN:
-        button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
 
-        # Discard button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
-                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_DISCARD,
-                                         info=button_info)])
+    # Discard button
+    inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
+                                     screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
+                                     info=button_info)])
 
     await full_message_send(context, devil_fruit_list_page.get_item_detail_text(), update=update,
                             keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)

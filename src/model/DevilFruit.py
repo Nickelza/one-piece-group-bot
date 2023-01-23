@@ -18,6 +18,7 @@ class DevilFruit(BaseModel):
     status = SmallIntegerField(default=DevilFruitStatus.NEW)
     owner = ForeignKeyField(User, null=True, backref='devil_fruit_owners', on_delete='RESTRICT', on_update='CASCADE')
     collection_date = DateTimeField(null=True)
+    eaten_date = DateTimeField(null=True)
     expiration_date = DateTimeField(null=True)
     appearance_date = DateTimeField(null=True)
     appearance_message_id = IntegerField(null=True)

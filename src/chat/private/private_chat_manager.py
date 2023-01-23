@@ -10,6 +10,9 @@ from src.chat.private.screens.screen_crew_member import manage as manage_screen_
 from src.chat.private.screens.screen_crew_member_remove import manage as manage_screen_crew_member_remove
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
+from src.chat.private.screens.screen_devil_fruit_detail_discard \
+    import manage as manage_screen_devil_fruit_detail_discard
+from src.chat.private.screens.screen_devil_fruit_detail_eat import manage as manage_screen_devil_fruit_detail_eat
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
@@ -171,6 +174,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_DEVIL_FRUIT_DETAIL:  # Devil Fruit Detail
                 await manage_screen_devil_fruit_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_DEVIL_FRUIT_DETAIL_EAT:  # Devil Fruit Detail Eat
+                await manage_screen_devil_fruit_detail_eat(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD:  # Devil Fruit Detail Discard
+                await manage_screen_devil_fruit_detail_discard(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

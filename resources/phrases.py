@@ -594,4 +594,14 @@ DEVIL_FRUIT_ITEM_TEXT_FILL_IN = 'Devil Fruit'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = '*{}*' \
                                '{}{}'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = '\n\nExpiring in: {}'
-DEVIL_FRUIT_LIST_NO_ITEMS = 'You do not have any devil fruits'
+DEVIL_FRUIT_LIST_NO_ITEMS = 'You do not have any Devil Fruits'
+DEVIL_FRUIT_NOT_OWNER = 'You do not own this Devil Fruit'
+DEVIL_FRUIT_EAT_USER_ALREADY_ATE = 'You have already eaten a Devil Fruit'
+DEVIL_FRUIT_EAT_CONFIRMATION_REQUEST = 'Are you sure you want to eat the {}?{}' \
+                                       '\n\nYou will not be able to eat another Devil Fruit until you discard it'
+DEVIL_FRUIT_EAT_CONFIRMATION_REQUEST_ABILITIES = '\nYou will gain the following abilities:\n{}'
+DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED = 'You have eaten the {} and gained the following abilities:\n{}'
+DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the {}?' \
+                                           "\n\nYou will lose it and can regain it by finding or trading for it again"
+DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
+DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
