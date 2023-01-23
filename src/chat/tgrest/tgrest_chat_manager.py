@@ -5,13 +5,16 @@ from telegram.ext import ContextTypes
 
 from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.tgrest.screens.screen_send_private_message import manage as manage_screen_send_private_message
-from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced
+from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced, DevilFruitAwardedNotification
 from src.model.enums.Notification import ImpelDownNotificationRestrictionRemoved
+from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.tgrest.TgRest import TgRest, TgRestException
+from src.model.tgrest.TgRestDevilFruitAward import TgRestDevilFruitAward
 from src.model.tgrest.TgRestImpelDownNotification import TgRestImpelDownNotification
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
 from src.model.tgrest.TgRestPrediction import TgRestPrediction
 from src.model.tgrest.TgRestPrivateMessage import TgRestPrivateMessage
+from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.notification_service import send_notification
 
@@ -66,6 +69,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         tg_rest_impel_down_notification.reason)
 
                 await send_notification(context, tg_rest_impel_down_notification.user, notification)
+
+            case TgRestObjectType.DEVIL_FRUIT_AWARD:
+                tg_rest_dfa = TgRestDevilFruitAward(**tg_rest_dict)
+
+                # Give devil fruit to user
+                give_devil_fruit_to_user(tg_rest_dfa.devil_fruit, tg_rest_dfa.user, DevilFruitSource.ADMIN,
+                                         reason=tg_rest_dfa.reason)
+
+                # Send notification
+                notification = DevilFruitAwardedNotification(tg_rest_dfa.devil_fruit, tg_rest_dfa.reason)
+                await send_notification(context, tg_rest_dfa.user, notification)
 
             case _:
                 raise TgRestException("Unknown object type")

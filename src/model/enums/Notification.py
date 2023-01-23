@@ -4,6 +4,7 @@ from enum import IntEnum
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
+from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
@@ -28,6 +29,7 @@ class NotificationCategory(IntEnum):
     PREDICTION = 5
     DELETED_MESSAGE = 6
     BOUNTY_GIFT = 7
+    DEVIL_FRUIT = 8
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -37,7 +39,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.IMPEL_DOWN: phrases.NOTIFICATION_CATEGORY_IMPEL_DOWN,
     NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION,
     NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE,
-    NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT
+    NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT,
+    NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT
 }
 
 
@@ -58,6 +61,7 @@ class NotificationType(IntEnum):
     DELETED_MESSAGE_MUTE = 12
     DELETED_MESSAGE_LOCATION = 13
     BOUNTY_GIFT_RECEIVED = 14
+    DEVIL_FRUIT_AWARDED = 15
 
 
 class Notification:
@@ -499,12 +503,36 @@ class BountyGiftReceivedNotification(Notification):
         return self.text.format(get_belly_formatted(self.amount), self.sender.get_markdown_mention())
 
 
+class DevilFruitAwardedNotification(Notification):
+    """Class for Devil Fruit awarded notifications."""
+
+    def __init__(self, devil_fruit: DevilFruit = None, reason: str = None):
+        """
+        Constructor
+
+        :param devil_fruit: The Devil Fruit
+        :param reason: The reason
+        """
+
+        self.devil_fruit = devil_fruit
+        self.reason = reason
+
+        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_AWARDED,
+                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION,
+                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION,
+                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()),
+                                escape_valid_markdown_chars(self.reason))
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
                  PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
                  DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
-                 BountyGiftReceivedNotification()]
+                 BountyGiftReceivedNotification(), DevilFruitAwardedNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

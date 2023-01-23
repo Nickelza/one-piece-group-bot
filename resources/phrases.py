@@ -284,7 +284,7 @@ PREDICTION_STATUS_TOTAL_WIN = '\n\n*Total win*: ' + Emoji.PREDICTION_BET_WIN + '
 PREDICTION_STATUS_NET_WIN = '\n\n*Net win*: ' + Emoji.PREDICTION_BET_WIN + '฿{}'
 PREDICTION_STATUS_TOTAL_LOSS = '\n\n*Total loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
 PREDICTION_STATUS_NET_LOSS = '\n\n*Net loss*: ' + Emoji.PREDICTION_BET_LOSE + '฿{}'
-PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed for this prediction due to bounty reset'
+PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET = 'All bets have been removed from this prediction due to bounty reset'
 # Prediction Private Chat
 PREDICTION_ITEM_TEXT = '{} {}'
 PREDICTION_ITEM_TEXT_FILL_IN = 'Prediction'
@@ -377,6 +377,7 @@ NOTIFICATION_CATEGORY_GAME = 'Game'
 NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
+NOTIFICATION_CATEGORY_DEVIL_FRUIT = 'Devil Fruit'
 
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
@@ -488,6 +489,13 @@ DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY = 'Deleted message location'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION = 'You have been gifted ฿{} by {}'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are gifted bounties'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
+# Notification - Devil Fruit Awarded
+DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fruit:' \
+                                   '\n\n*{}*' \
+                                   '\nReason: {}' \
+                                   "\n\n_Go to start->Devil Fruit to eat or trade it_"
+DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
+DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
@@ -572,3 +580,6 @@ BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
                                 '\nGift amount: ฿*{}*' \
                                 '\nTax: ฿{} \\({}%\\)' \
                                 '\nTotal: ฿*{}*'
+
+DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
+DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}: {}{}%'
