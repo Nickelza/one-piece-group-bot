@@ -413,3 +413,6 @@ CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')
 # Tax percentage increase after each Bounty Gift. Default: 1%
 BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value='1')
+
+# How many days a user can hold a devil fruit before it expires. Default: 7
+DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='7')

@@ -8,6 +8,7 @@ import resources.phrases as phrases
 import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
 import src.service.bounty_service as bounty_service
+from src.model.DevilFruit import DevilFruit
 from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums import Location
@@ -18,6 +19,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
 from src.service.cron_service import get_remaining_time
+from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
     get_start_with_command_url, escape_valid_markdown_chars
@@ -178,6 +180,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 
     if has_bounty_bonus:
         message_text += bounty_bonus_text
+
+    # Devil Fruit
+    eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)
+    if eaten_devil_fruit is not None:
+        message_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
+            eaten_devil_fruit.get_full_name(),
+            get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False))
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

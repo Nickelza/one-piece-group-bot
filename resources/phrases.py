@@ -30,12 +30,13 @@ SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
 SHOW_USER_STATUS_CREW = '\nCrew: {}'
-SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE = '\n\n*Bounty bonuses*:'
+SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE = '\n\n*Bounty bonuses*'
 SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = '\n{}{} \\({}%\\)'
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW = 'Crew'
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP = 'Crew MVP'
 SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD = 'New World'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
+SHOW_USER_STATUS_DEVIL_FRUIT = '\n\n*Devil Fruit*\n_{}_{}'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
@@ -166,6 +167,10 @@ PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
 PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
 PVT_KEY_PREDICTION_DETAIL_REMOVE_BET = 'Remove bet'
+PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + ' Devil Fruit'
+PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
+PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
+PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -580,6 +585,13 @@ BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
                                 '\nGift amount: ฿*{}*' \
                                 '\nTax: ฿{} \\({}%\\)' \
                                 '\nTotal: ฿*{}*'
-
+# Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
-DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}: {}{}%'
+DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
+# Devil Fruit - Private Chat
+DEVIL_FRUIT_ITEM_TEXT = '{}'
+DEVIL_FRUIT_ITEM_TEXT_FILL_IN = 'Devil Fruit'
+DEVIL_FRUIT_ITEM_DETAIL_TEXT = '*{}*' \
+                               '{}{}'
+DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = '\n\nExpiring in: {}'
+DEVIL_FRUIT_LIST_NO_ITEMS = 'You do not have any devil fruits'

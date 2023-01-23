@@ -23,6 +23,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_STATUS, screen=Screen.PVT_USER_STATUS,
                                        previous_screen_list=[Screen.PVT_START])])
 
+    # Devil Fruit button
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT, screen=Screen.PVT_DEVIL_FRUIT,
+                                       previous_screen_list=[Screen.PVT_START])])
+
     # Crew button
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_CREW, screen=Screen.PVT_CREW,
                                        previous_screen_list=[Screen.PVT_START])])

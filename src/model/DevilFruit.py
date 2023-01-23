@@ -1,3 +1,5 @@
+from typing import Optional
+
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -15,6 +17,8 @@ class DevilFruit(BaseModel):
     model = CharField(max_length=50, null=True, unique=True)
     status = SmallIntegerField(default=DevilFruitStatus.NEW)
     owner = ForeignKeyField(User, null=True, backref='devil_fruit_owners', on_delete='RESTRICT', on_update='CASCADE')
+    collection_date = DateTimeField(null=True)
+    expiration_date = DateTimeField(null=True)
     appearance_date = DateTimeField(null=True)
     appearance_message_id = IntegerField(null=True)
     should_show_abilities = BooleanField(default=False)
@@ -32,6 +36,16 @@ class DevilFruit(BaseModel):
             return f"{self.name}, Model: {self.model}"
         else:
             return str(self.name)
+
+    @staticmethod
+    def get_by_owner_if_eaten(user: User) -> Optional['DevilFruit']:
+        """
+        Get the devil fruit eaten by the user
+        :param user: The user
+        :return: The devil fruit
+        """
+
+        return DevilFruit.get_or_none(DevilFruit.owner == user, DevilFruit.status == DevilFruitStatus.EATEN)
 
 
 DevilFruit.create_table()

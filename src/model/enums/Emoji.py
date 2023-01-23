@@ -78,3 +78,6 @@ class Emoji(StrEnum):
 
     # Impel Down
     DISCIPLINARY_ACTION = '⛔'
+
+    # Devil Fruit
+    DEVIL_FRUIT = '🍎'

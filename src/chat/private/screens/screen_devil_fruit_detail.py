@@ -1,0 +1,65 @@
+from strenum import StrEnum
+from telegram import Update
+from telegram.ext import ContextTypes
+
+from resources import phrases
+from src.chat.private.screens.screen_devil_fruit import DevilFruitListPage
+from src.model.DevilFruit import DevilFruit
+from src.model.User import User
+from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.pojo.Keyboard import Keyboard
+from src.service.message_service import full_message_send
+
+
+class DevilFruitDetailReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+    DEVIL_FRUIT_ID = 'a'
+
+
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+    """
+    Manage the devil_fruit detail screen
+    :param update: The update
+    :param context: The context
+    :param inbound_keyboard: The inbound keyboard
+    :param user: The user
+    :return: None
+    """
+
+    devil_fruit_list_page = DevilFruitListPage()
+
+    devil_fruit_list_page.user = user
+    devil_fruit_list_page.set_object(inbound_keyboard.get_int(DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID))
+
+    devil_fruit: DevilFruit = devil_fruit_list_page.object
+    inline_keyboard: list[list[Keyboard]] = []
+
+    devil_fruit_status: DevilFruitStatus = DevilFruitStatus(devil_fruit.status)
+
+    # Show eat and trade buttons if the user have not eaten the Devil Fruit
+    if devil_fruit_status is DevilFruitStatus.COLLECTED:
+        button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
+
+        # Eat button
+        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
+                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_EAT,
+                                         info=button_info)])
+
+        # Trade button
+        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
+                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_TRADE,
+                                         info=button_info)])
+    # Show discard button if the user have eaten the Devil Fruit, should always fall back to this
+    elif devil_fruit_status is DevilFruitStatus.EATEN:
+        button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
+
+        # Discard button
+        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
+                                         screen=Screen.DEVIL_FRUIT_DETAIL_BUTTON_DISCARD,
+                                         info=button_info)])
+
+    await full_message_send(context, devil_fruit_list_page.get_item_detail_text(), update=update,
+                            keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)

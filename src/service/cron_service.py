@@ -95,3 +95,13 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
 
     next_run = get_next_run(cron_expression, start_datetime)
     return get_remaining_time(next_run)
+
+
+def get_datetime_in_future_days(days: int) -> datetime:
+    """
+    Get the datetime in the future
+    :param days: The number of days in the future
+    :return: The datetime in the future
+    """
+
+    return datetime.datetime.now() + datetime.timedelta(days=days)

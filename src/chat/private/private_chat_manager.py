@@ -8,6 +8,8 @@ from src.chat.private.screens.screen_crew_disband import manage as manage_screen
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
 from src.chat.private.screens.screen_crew_member_remove import manage as manage_screen_crew_member_remove
+from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
+from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
@@ -163,6 +165,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM:  # Prediction Detail Remove Bet Confirm
                 await manage_screen_prediction_detail_remove_bet_confirm(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_DEVIL_FRUIT:  # Devil Fruit
+                await manage_screen_devil_fruit(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_DEVIL_FRUIT_DETAIL:  # Devil Fruit Detail
+                await manage_screen_devil_fruit_detail(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
