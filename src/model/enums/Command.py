@@ -21,7 +21,8 @@ class Command:
                  allow_while_arrested: bool = False, required_location: Location.Location = None,
                  parameters: list = None, message_source: MessageSource = MessageSource.ND,
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
-                 only_by_boss: bool = False, allow_reply_to_arrested: bool = False):
+                 only_by_boss: bool = False, allow_reply_to_arrested: bool = False, answer_callback: bool = False,
+                 show_alert: bool = True):
         """
         Constructor
         :param name: The name of the command
@@ -41,6 +42,9 @@ class Command:
         :param only_by_boss: True if the command can only be used by a boss
         :param allow_reply_to_arrested: True if the command can be used in reply to a message sent by an arrested
                                         user
+        :param answer_callback: True if the command should answer the callback query in case of error instead of
+                                editing the message
+        :param show_alert: True if the command should show an alert when answering the callback query in case of error
         """
         self.name = name
         self.active = active
@@ -57,6 +61,8 @@ class Command:
         self.only_in_reply_to_crew_member = only_in_reply_to_crew_member
         self.only_by_boss = only_by_boss
         self.allow_reply_to_arrested = allow_reply_to_arrested
+        self.answer_callback = answer_callback
+        self.show_alert = show_alert
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True
@@ -94,7 +100,7 @@ PVT_SETTINGS_LOCATION_UPDATE = Command('', Screen.PVT_SETTINGS_LOCATION_UPDATE, 
 PVT_SETTINGS = Command('', Screen.PVT_SETTINGS, allow_while_arrested=True)
 PVT_SETTINGS_NOTIFICATIONS = Command('', Screen.PVT_SETTINGS_NOTIFICATIONS, allow_while_arrested=True)
 PVT_SETTINGS_NOTIFICATIONS_TYPE = Command('', Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE, allow_while_arrested=True)
-PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT = Command('edit', Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
+PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT = Command('', Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
                                                allow_while_arrested=True)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
@@ -122,6 +128,10 @@ GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True)
 GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_boss=True)
 GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True)
+# To define limitations
+GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),
+                                  answer_callback=True)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
@@ -129,7 +139,8 @@ COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NE
             GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
             GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE,
             PVT_SETTINGS, PVT_SETTINGS_LOCATION_UPDATE, PVT_SETTINGS_NOTIFICATIONS, PVT_SETTINGS_NOTIFICATIONS_TYPE,
-            PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, GRP_SILENCE, GRP_SILENCE_END, GRP_SPEAK, GRP_BOUNTY_GIFT]
+            PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, GRP_SILENCE, GRP_SILENCE_END, GRP_SPEAK, GRP_BOUNTY_GIFT,
+            GRP_DEVIL_FRUIT_COLLECT]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):
@@ -152,7 +163,7 @@ def get_by_screen(screen: Screen):
     Returns the Command object with the given screen.
     """
     for command in COMMANDS:
-        if command is not None and command.screen == screen:
+        if command is not None and command.screen is screen:
             return command
 
     raise ValueError('Command not found: {}'.format(screen))

@@ -144,6 +144,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
                 try:
                     command = Command.get_by_screen(keyboard.screen)
                 except ValueError:
+                    # For commands without screen, example "delete"
                     command = Command.Command(None, keyboard.screen)
 
     target_user: User | None = None
@@ -289,10 +290,12 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
 
     except CommandValidationException as cve:
-        if await user_is_muted(user, update):
+        if not command.answer_callback and await user_is_muted(user, update):
             await delete_message(update)
         else:
-            await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True)
+            await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True,
+                                                     answer_callback=command.answer_callback,
+                                                     show_alert=command.show_alert)
         return False
 
     return True

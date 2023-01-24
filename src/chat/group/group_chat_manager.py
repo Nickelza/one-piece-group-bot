@@ -8,6 +8,7 @@ from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bo
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
+from src.chat.group.screens.screen_devil_fruit_collect import manage as manage_screen_devil_fruit_collect
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
@@ -148,6 +149,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
             case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
                 await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command)
+
+            case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
+                await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

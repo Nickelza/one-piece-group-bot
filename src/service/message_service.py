@@ -437,8 +437,8 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
                                              parse_mode: str = c.TG_DEFAULT_PARSE_MODE, protect_content: bool = False,
                                              disable_web_page_preview: bool = True, edit_only_keyboard: bool = False,
                                              edit_only_caption_and_keyboard: bool = True,
-                                             add_delete_button: bool = False, authorized_users: list = None
-                                             ) -> Message:
+                                             add_delete_button: bool = False, authorized_users: list = None,
+                                             answer_callback: bool = False, show_alert: bool = False) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -454,6 +454,8 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
             If keyboard is None, it will be removed
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
+    :param answer_callback: True if the callback should be answered
+    :param show_alert: True if the callback should be answered with an alert
     :return: Message
     """
 
@@ -461,13 +463,15 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
         return await full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
                                        parse_mode=parse_mode, disable_web_page_preview=disable_web_page_preview,
                                        add_delete_button=add_delete_button, authorized_users=authorized_users,
-                                       protect_content=protect_content)
+                                       protect_content=protect_content, answer_callback=answer_callback,
+                                       show_alert=show_alert)
     except BadRequest:
         return await full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
                                      parse_mode=parse_mode, add_delete_button=add_delete_button,
                                      edit_only_keyboard=edit_only_keyboard,
                                      edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
-                                     authorized_users=authorized_users, protect_content=protect_content)
+                                     authorized_users=authorized_users, protect_content=protect_content,
+                                     answer_callback=answer_callback, show_alert=show_alert)
 
 
 def is_command(text: str) -> bool:

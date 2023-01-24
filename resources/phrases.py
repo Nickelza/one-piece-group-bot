@@ -10,7 +10,7 @@ COMMAND_IN_REPLY_TO_ERROR = "This command can't be used in a reply to your own m
 COMMAND_NOT_ACTIVE_ERROR = "This command is no longer available"
 COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR = COMMAND_NOT_ACTIVE_ERROR + '. ' + 'Please Use {} instead'
 COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in the New World'
-COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*'
+COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached {}'
 COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
 COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
@@ -613,9 +613,12 @@ DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the
                                            "\n\nYou will lose it and can regain it by finding or trading for it again"
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
 DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
-DEVIL_FRUIT_RELEASED = "A Devil Fruit has appeared!" \
-                       "\n\nName: *{}*" \
-                       "{}"
+DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
+                                   "{}"
+DEVIL_FRUIT_RELEASED = "A Devil Fruit has appeared!" + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
+
+DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
+DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
 
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'
