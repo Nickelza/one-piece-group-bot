@@ -48,9 +48,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                                          info=button_info)])
 
         # Trade button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
-                                         screen=Screen.PVT_DEVIL_FRUIT_DETAIL_TRADE,
-                                         info=button_info)])
+        # inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
+        #                                  screen=Screen.PVT_DEVIL_FRUIT_DETAIL_TRADE,
+        #                                  info=button_info)])
 
     # Discard button
     inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
