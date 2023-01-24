@@ -22,6 +22,7 @@ class Screen(StrEnum):
     GRP_SILENCE_END = 'G16'
     GRP_SPEAK = 'G17'
     GRP_BOUNTY_GIFT = 'G18'
+    GRP_DEVIL_FRUIT_COLLECT = 'G19'
 
     # Deprecated
     GRP_SHOW_BOUNTY = 'G-1'

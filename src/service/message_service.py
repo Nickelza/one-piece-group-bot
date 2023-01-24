@@ -619,13 +619,24 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
                     inbound_info=info_copy)
 
 
-async def delete_message(update: Update):
+async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: int = None,
+                         message_id: int = None):
     """
     Delete a message with best effort
     :param update: Update object
+    :param context: Context object
+    :param chat_id: Chat id
+    :param message_id: Message id
     """
+
+    if update is None and (context is None or chat_id is None or message_id is None):
+        raise ValueError('update or context and chat_id and message_id must be specified')
+
     try:
-        await update.effective_message.delete()
+        if update is not None:
+            await update.effective_message.delete()
+        else:
+            await context.bot.delete_message(chat_id, message_id)
     except TelegramError:
         pass
 
@@ -694,3 +705,15 @@ def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[b
                 should_validate_input = False
 
     return should_ignore_input, should_create_item, should_validate_input
+
+
+async def send_admin_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None) -> Message:
+    """
+    Send an error to the admin chat
+    :param context: Context object
+    :param text: Text to send
+    :param update: Update object
+    """
+
+    text = f'Error: {text}'.upper()
+    return await full_message_send(context, text, update=update, chat_id=Env.ADMIN_GROUP_ID.get_int())

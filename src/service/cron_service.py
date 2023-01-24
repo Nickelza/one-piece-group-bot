@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from apscheduler.triggers.cron import CronTrigger
 
@@ -97,6 +98,16 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
     return get_remaining_time(next_run)
 
 
+def get_datetime_in_future_hours(hours: int) -> datetime:
+    """
+    Get the datetime in the future
+    :param hours: The number of hours in the future
+    :return: The datetime in the future
+    """
+
+    return datetime.datetime.now() + datetime.timedelta(hours=hours)
+
+
 def get_datetime_in_future_days(days: int) -> datetime:
     """
     Get the datetime in the future
@@ -104,4 +115,36 @@ def get_datetime_in_future_days(days: int) -> datetime:
     :return: The datetime in the future
     """
 
-    return datetime.datetime.now() + datetime.timedelta(days=days)
+    return get_datetime_in_future_hours(days * 24)
+
+
+def get_random_time_between(start_datetime: datetime, end_datetime: datetime) -> datetime:
+    """
+    Get a random time between the start and end datetime
+    :param start_datetime: The start datetime
+    :param end_datetime: The end datetime
+    :return: The random datetime
+    """
+
+    return start_datetime + datetime.timedelta(
+        seconds=random.randint(0, int((end_datetime - start_datetime).total_seconds())))
+
+
+def get_random_time_between_by_cron(cron_expression: str) -> datetime:
+    """
+    Get a random time between now and the next cron run
+    :param cron_expression: The cron expression
+    :return: The random datetime
+    """
+
+    return get_random_time_between(datetime.datetime.now(datetime.timezone.utc), get_next_run(cron_expression))
+
+
+def get_random_time_between_by_hours(hours: int) -> datetime:
+    """
+    Get a random time between now and next n hours
+    :param hours: The number of hours
+    :return: The random datetime
+    """
+
+    return get_random_time_between(datetime.datetime.now(), get_datetime_in_future_hours(hours))

@@ -7,10 +7,9 @@ from src.model.DevilFruit import DevilFruit
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.devil_fruit_service import get_devil_fruit_abilities_text, set_devil_fruit_release_date
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 
 
@@ -52,10 +51,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         return
 
     # Discard Devil Fruit
-    devil_fruit.owner = None
-    devil_fruit.status = DevilFruitStatus.ENQUEUED
-    devil_fruit.save()
-    # TODO: Re-queue function that resets status and enqueue. Param is_requeue, if true it will appear in next n days
+    set_devil_fruit_release_date(devil_fruit)
 
     # Send success message
     ot_text = phrases.DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED.format(

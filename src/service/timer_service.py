@@ -10,6 +10,8 @@ from src.chat.group.screens.screen_reddit_post import manage as send_reddit_post
 from src.chat.manage_message import init, end
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus
+from src.service.devil_fruit_service import schedule_devil_fruit_release, release_scheduled_devil_fruit, \
+    respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import reset_can_initiate_game
 from src.service.location_service import reset_can_change_region
@@ -21,7 +23,7 @@ def add_to_queue(application: Application, timer: Timer.Timer) -> Job:
     Add a job to the context
     :param application: The application
     :param timer: The timer
-    :rtype: Job
+    :return: The job
     """
     job = application.job_queue.run_custom(
         callback=run,
@@ -37,13 +39,13 @@ async def set_timers(application: Application) -> None:
     """
     Set the timers
     :param application: The application
-    :type application: Dispatcher
     :return: None
-    :rtype: None
     """
     for timer in Timer.TIMERS:
         if timer.is_enabled:
-            add_to_queue(application, timer)
+            job = add_to_queue(application, timer)
+            if timer.should_run_on_startup:
+                await job.run(application)
         else:
             logging.info(f'Timer {timer.name} is disabled')
 
@@ -92,6 +94,12 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:
             await close_scheduled_predictions(context)
+        case Timer.SCHEDULE_DEVIL_FRUIT_RELEASE:
+            await schedule_devil_fruit_release(context)
+        case Timer.RELEASE_SCHEDULED_DEVIL_FRUIT:
+            await release_scheduled_devil_fruit(context)
+        case Timer.RESPAWN_DEVIL_FRUIT:
+            await respawn_devil_fruit(context)
         case _:
             logging.error(f'Unknown timer {job.name}')
 

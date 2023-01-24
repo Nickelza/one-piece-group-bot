@@ -15,6 +15,22 @@ from src.service.message_service import full_message_send
 async def send_notification(context: ContextTypes.DEFAULT_TYPE, user: User, notification: Notification,
                             should_forward_message: bool = False, update: Update = None) -> None:
     """
+    Sends a notification to the user, fire and forget
+    :param context: The context object
+    :param user: User
+    :param notification: Notification
+    :param should_forward_message: If the message of the update should be forwarded
+    :param update: The update object
+    :return: None
+    """
+
+    context.application.create_task(send_notification_execute(
+        context, user, notification, should_forward_message, update))
+
+
+async def send_notification_execute(context: ContextTypes.DEFAULT_TYPE, user: User, notification: Notification,
+                                    should_forward_message: bool = False, update: Update = None) -> None:
+    """
     Sends a notification to the user
     :param context: The context object
     :param user: User

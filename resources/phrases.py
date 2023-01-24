@@ -172,6 +172,8 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 
+GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
+
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
 ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. Make sure it is a number with only '.' or ',' as decimal separator"
@@ -501,6 +503,11 @@ DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fr
                                    "\n\n_Go to start->Devil Fruit to eat or trade it_"
 DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
 DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
+# Notification - Devil Fruit Expired
+DEVIL_FRUIT_EXPIRED_NOTIFICATION = 'Your Devil Fruit *{}* has expired and has been released. ' \
+                                   '\nIt will appear sometime in the next {} hours.'
+DEVIL_FRUIT_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your Devil Fruit expires'
+DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY = 'Devil Fruit expired'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
@@ -588,6 +595,7 @@ BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
 # Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
 DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
+DEVIL_FRUIT_ABILITY_UNKNOWN = '\nUnknown'
 # Devil Fruit - Private Chat
 DEVIL_FRUIT_ITEM_TEXT = '{}'
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = 'Devil Fruit'
@@ -605,3 +613,9 @@ DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the
                                            "\n\nYou will lose it and can regain it by finding or trading for it again"
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
 DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
+DEVIL_FRUIT_RELEASED = "A Devil Fruit has appeared!" \
+                       "\n\nName: *{}*" \
+                       "{}"
+
+# Admin chat error messages
+NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'

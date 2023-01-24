@@ -138,69 +138,118 @@ REDDIT_MEME_PIECE_SUBREDDIT = Environment('REDDIT_MEME_PIECE_SUBREDDIT', default
 CRON_TEMP_DIR_CLEANUP = Environment('CRON_TEMP_DIR_CLEANUP', default_value='0 */12 * * *')
 ENABLE_TIMER_TEMP_DIR_CLEANUP = Environment('ENABLE_TIMER_TEMP_DIR_CLEANUP', default_value='True')
 SHOULD_LOG_TIMER_TEMP_DIR_CLEANUP = Environment('SHOULD_LOG_TIMER_TEMP_DIR_CLEANUP', default_value='False')
+SHOULD_RUN_ON_STARTUP_TEMP_DIR_CLEANUP = Environment('SHOULD_RUN_ON_STARTUP_TEMP_DIR_CLEANUP', default_value='False')
 
 # Create and send the leaderboard. Default: Every sunday at midnight
 CRON_SEND_LEADERBOARD = Environment('CRON_SEND_LEADERBOARD', default_value='0 0 * * Sun')
 ENABLE_TIMER_SEND_LEADERBOARD = Environment('ENABLE_TIMER_SEND_LEADERBOARD', default_value='True')
 SHOULD_LOG_TIMER_SEND_LEADERBOARD = Environment('SHOULD_LOG_TIMER_SEND_LEADERBOARD', default_value='False')
+SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD = Environment('SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD', default_value='False')
 
 # Reset Doc Q game playability. Default: Every day at midnight
 CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
 ENABLE_TIMER_RESET_DOC_Q_GAME = Environment('ENABLE_TIMER_RESET_DOC_Q_GAME', default_value='True')
 SHOULD_LOG_TIMER_RESET_DOC_Q_GAME = Environment('SHOULD_LOG_TIMER_RESET_DOC_Q_GAME', default_value='False')
+SHOULD_RUN_ON_STARTUP_RESET_DOC_Q_GAME = Environment('SHOULD_RUN_ON_STARTUP_RESET_DOC_Q_GAME', default_value='False')
 
 # Reset bounty poster limit. Default: Every day at 00:10
 CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT = Environment('ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT', default_value='True')
 SHOULD_LOG_TIMER_RESET_BOUNTY_POSTER_LIMIT = Environment('SHOULD_LOG_TIMER_RESET_BOUNTY_POSTER_LIMIT',
                                                          default_value='False')
+SHOULD_RUN_ON_STARTUP_RESET_BOUNTY_POSTER_LIMIT = Environment('SHOULD_RUN_ON_STARTUP_RESET_BOUNTY_POSTER_LIMIT',
+                                                              default_value='False')
+
 # Reset can change region. Default: Every sunday at midnight
 CRON_RESET_CAN_CHANGE_REGION = Environment('CRON_RESET_CAN_CHANGE_REGION', default_value='0 0 * * Sun')
 ENABLE_TIMER_RESET_CAN_CHANGE_REGION = Environment('ENABLE_TIMER_RESET_CAN_CHANGE_REGION', default_value='True')
 SHOULD_LOG_TIMER_RESET_CAN_CHANGE_REGION = Environment('SHOULD_LOG_TIMER_RESET_CAN_CHANGE_REGION',
                                                        default_value='False')
+SHOULD_RUN_ON_STARTUP_RESET_CAN_CHANGE_REGION = Environment('SHOULD_RUN_ON_STARTUP_RESET_CAN_CHANGE_REGION',
+                                                            default_value='False')
 
 # Bounty bonus for users in region. Default: Every day at 00:10
 CRON_ADD_REGION_BOUNTY_BONUS = Environment('CRON_ADD_REGION_BOUNTY_BONUS', default_value='10 0 * * *')
 ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_REGION_BOUNTY_BONUS', default_value='True')
 SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_REGION_BOUNTY_BONUS',
                                                        default_value='False')
+SHOULD_RUN_ON_STARTUP_ADD_REGION_BOUNTY_BONUS = Environment('SHOULD_RUN_ON_STARTUP_ADD_REGION_BOUNTY_BONUS',
+                                                            default_value='False')
 # Bounty bonus for Crew members. Default: Every day at 00:10
 CRON_ADD_CREW_BOUNTY_BONUS = Environment('CRON_ADD_CREW_BOUNTY_BONUS', default_value='10 0 * * *')
 ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='True')
 SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_CREW_BOUNTY_BONUS', default_value='False')
+SHOULD_RUN_ON_STARTUP_ADD_CREW_BOUNTY_BONUS = Environment('SHOULD_RUN_ON_STARTUP_ADD_CREW_BOUNTY_BONUS',
+                                                          default_value='False')
 # Bounty bonus for Crew members with bounty higher than crew average. Default: Every day at 00:10
 CRON_ADD_CREW_MVP_BOUNTY_BONUS = Environment('CRON_ADD_CREW_MVP_BOUNTY_BONUS', default_value='10 0 * * *')
 ENABLE_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment('ENABLE_TIMER_ADD_CREW_MVP_BOUNTY_BONUS', default_value='True')
 SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS',
                                                          default_value='False')
+SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS = Environment('SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS',
+                                                              default_value='False')
 
 # Reddit post One Piece. Default: Every day at 00:00 and 12:00
 CRON_REDDIT_POST_ONE_PIECE = Environment('CRON_REDDIT_POST_ONE_PIECE', default_value='0 0,12 * * *')
 ENABLE_TIMER_REDDIT_POST_ONE_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_ONE_PIECE', default_value='True')
 SHOULD_LOG_TIMER_REDDIT_POST_ONE_PIECE = Environment('SHOULD_LOG_TIMER_REDDIT_POST_ONE_PIECE', default_value='False')
+SHOULD_RUN_ON_STARTUP_REDDIT_POST_ONE_PIECE = Environment('SHOULD_RUN_ON_STARTUP_REDDIT_POST_ONE_PIECE',
+                                                          default_value='False')
 # Reddit Meme post Piece. Default: Every day at 06:00 and 18:00
 CRON_REDDIT_POST_MEME_PIECE = Environment('CRON_REDDIT_POST_MEME_PIECE', default_value='0 6,18 * * *')
 ENABLE_TIMER_REDDIT_POST_MEME_PIECE = Environment('ENABLE_TIMER_REDDIT_POST_MEME_PIECE', default_value='True')
 SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE = Environment('SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE', default_value='False')
+SHOULD_RUN_ON_STARTUP_REDDIT_POST_MEME_PIECE = Environment('SHOULD_RUN_ON_STARTUP_REDDIT_POST_MEME_PIECE',
+                                                           default_value='False')
 
 # Reset can initiate game. Default: Every 8 hours
 CRON_RESET_CAN_INITIATE_GAME = Environment('CRON_RESET_CAN_INITIATE_GAME', default_value='0 */8 * * *')
 ENABLE_TIMER_RESET_CAN_INITIATE_GAME = Environment('ENABLE_TIMER_RESET_CAN_INITIATE_GAME', default_value='True')
 SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME = Environment('SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME',
                                                        default_value='False')
+SHOULD_RUN_ON_STARTUP_RESET_CAN_INITIATE_GAME = Environment('SHOULD_RUN_ON_STARTUP_RESET_CAN_INITIATE_GAME',
+                                                            default_value='False')
 
 # Send scheduled predictions. Default: Every 1 minute
 CRON_SEND_SCHEDULED_PREDICTIONS = Environment('CRON_SEND_SCHEDULED_PREDICTIONS', default_value='*/1 * * * *')
 ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS = Environment('ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS', default_value='True')
 SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS = Environment('SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS',
                                                           default_value='False')
+SHOULD_RUN_ON_STARTUP_SEND_SCHEDULED_PREDICTIONS = Environment('SHOULD_RUN_ON_STARTUP_SEND_SCHEDULED_PREDICTIONS',
+                                                               default_value='False')
 
 # Close scheduled predictions. Default: Every 1 minute
 CRON_CLOSE_SCHEDULED_PREDICTIONS = Environment('CRON_CLOSE_SCHEDULED_PREDICTIONS', default_value='*/1 * * * *')
 ENABLE_TIMER_CLOSE_SCHEDULED_PREDICTIONS = Environment('ENABLE_TIMER_CLOSE_SCHEDULED_PREDICTIONS', default_value='True')
 SHOULD_LOG_TIMER_CLOSE_SCHEDULED_PREDICTIONS = Environment('SHOULD_LOG_TIMER_CLOSE_SCHEDULED_PREDICTIONS',
                                                            default_value='False')
+SHOULD_RUN_ON_STARTUP_CLOSE_SCHEDULED_PREDICTIONS = Environment('SHOULD_RUN_ON_STARTUP_CLOSE_SCHEDULED_PREDICTIONS',
+                                                                default_value='False')
+
+# Schedule Devil Fruit release. Default: Every sunday at midnight
+CRON_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('CRON_SCHEDULE_DEVIL_FRUIT_RELEASE', default_value='0 0 * * Sun')
+ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE',
+                                                        default_value='True')
+SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE',
+                                                            default_value='False')
+SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_RELEASE',
+                                                                 default_value='False')
+
+# Release scheduled Devil Fruit. Default: Every 1 minute
+CRON_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('CRON_RELEASE_SCHEDULED_DEVIL_FRUIT', default_value='*/1 * * * *')
+ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
+                                                         default_value='True')
+SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
+                                                             default_value='False')
+SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT',
+                                                                  default_value='False')
+
+# Respawn Devil Fruit. Default: Every 1 minute
+CRON_RESPAWN_DEVIL_FRUIT = Environment('CRON_RESPAWN_DEVIL_FRUIT', default_value='*/1 * * * *')
+ENABLE_TIMER_RESPAWN_DEVIL_FRUIT = Environment('ENABLE_TIMER_RESPAWN_DEVIL_FRUIT', default_value='True')
+SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT', default_value='False')
+SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT',
+                                                        default_value='False')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -416,3 +465,5 @@ BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value
 
 # How many days a user can hold a devil fruit before it expires. Default: 7
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='7')
+# After how many hours does a Devil Fruit respawn. Default: 24
+DEVIL_FRUIT_RESPAWN_HOURS = Environment('DEVIL_FRUIT_RESPAWN_HOURS', default_value='24')
