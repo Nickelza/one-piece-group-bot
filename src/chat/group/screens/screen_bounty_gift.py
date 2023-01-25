@@ -10,8 +10,10 @@ from src.model.enums.Command import Command
 from src.model.enums.Notification import BountyGiftReceivedNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted
+from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
@@ -158,6 +160,15 @@ async def get_amounts(update: Update, sender: User, receiver: User, command: Com
         amount = bounty_gift.amount
 
     tax_percentage = 0 if await transaction_is_tax_free(sender, receiver, update) else sender.bounty_gift_tax
+
+    # Apply Devil Fruit ability
+    if tax_percentage > 0:
+        tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_TAX, tax_percentage)
+
+    # Parse to int if tax does not have a decimal
+    if tax_percentage.is_integer():
+        tax_percentage = int(tax_percentage)
+
     tax_amount = int(get_value_from_percentage(amount, tax_percentage))
     total_amount = amount + tax_amount
 
