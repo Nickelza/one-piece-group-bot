@@ -20,8 +20,8 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
-from src.service.cron_service import get_remaining_time, get_datetime_in_future_hours
-from src.service.devil_fruit_service import get_value
+from src.service.cron_service import get_remaining_time
+from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_send_or_edit, \
     mention_markdown_v2
 
@@ -248,10 +248,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         await full_media_send(context, update=update, caption=ot_text, edit_only_caption_and_keyboard=True,
                               add_delete_button=True)
 
-        # Save updates
-        hours = get_value(user, DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION,
-                          Env.DOC_Q_GAME_COOLDOWN_DURATION.get_int())
-        user.doc_q_cooldown_end_date = get_datetime_in_future_hours(hours)
+        # Save update
+        user.doc_q_cooldown_end_date = get_datetime(
+            user, DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION, Env.DOC_Q_GAME_COOLDOWN_DURATION.get_int())
         doc_q_game.save()
 
 

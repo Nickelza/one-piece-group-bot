@@ -18,7 +18,7 @@ from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
-    get_random_time_between_by_hours
+    get_random_time_between_by_hours, get_datetime_in_future_hours
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
 from src.service.message_service import send_admin_error, escape_valid_markdown_chars, full_message_send, delete_message
 from src.service.notification_service import send_notification
@@ -217,7 +217,7 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
         await send_notification(context, owner, notification)
 
 
-def get_value(user: User, ability_type: DevilFruitAbilityType, value: int, add_to_value: bool = False) -> int:
+def get_value(user: User, ability_type: DevilFruitAbilityType, value: int, add_to_value: bool = False) -> float:
     """
     Given a value, gets the updated value if user has eaten a Devil Fruit that modifies it
     :param user: The user
@@ -252,10 +252,23 @@ def get_value(user: User, ability_type: DevilFruitAbilityType, value: int, add_t
         if add_to_value:
             return value + ability.value
         else:
-            return int(add_percentage_to_value(value, ability.value))
+            return add_percentage_to_value(value, ability.value)
 
     # Negative sign
     if add_to_value:
         return value - ability.value
 
-    return int(subtract_percentage_from_value(value, ability.value))
+    return subtract_percentage_from_value(value, ability.value)
+
+
+def get_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) -> int:
+    """
+    Given a value, get the updated datetime if user has eaten a Devil Fruit that modifies it
+    :param user: The user
+    :param ability_type: The ability type
+    :param hours: The hours
+    :return: The value
+    """
+
+    new_hours: float = get_value(user, ability_type, hours)
+    return get_datetime_in_future_hours(new_hours)

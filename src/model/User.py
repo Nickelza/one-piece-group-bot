@@ -24,7 +24,7 @@ class User(BaseModel):
     bounty = BigIntegerField(default=0)
     pending_bounty = BigIntegerField(default=0)
     doc_q_cooldown_end_date = DateTimeField(null=True)
-    can_initiate_game = BooleanField(default=True)
+    game_cooldown_end_date = DateTimeField(null=True)
     bounty_poster_limit = SmallIntegerField(default=0)
     location_level = SmallIntegerField(default=0)
     should_propose_new_world = BooleanField(default=True)

@@ -133,23 +133,13 @@ async def delete_game(update: Update, context: ContextTypes.DEFAULT_TYPE, game: 
 
     # Return wager to challenger
     challenger: User = game.challenger
-    challenger.can_initiate_game = True
+    challenger.game_cooldown_end_date = None
     challenger.bounty += game.wager
     challenger.pending_bounty -= game.wager
     challenger.save()
 
     # Delete game
     game.delete_instance()
-
-
-def reset_can_initiate_game() -> None:
-    """
-    Reset the user's can_change_region flag
-
-    :return: None
-    """
-
-    User.update(can_initiate_game=True).where(User.can_initiate_game is True).execute()
 
 
 async def validate_game(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard,

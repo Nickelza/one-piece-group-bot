@@ -12,7 +12,6 @@ from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_
 from src.service.devil_fruit_service import schedule_devil_fruit_release, release_scheduled_devil_fruit, \
     respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
-from src.service.game_service import reset_can_initiate_game
 from src.service.location_service import reset_can_change_region
 from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions
 
@@ -85,8 +84,6 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             add_crew_bounty_bonus()
         case Timer.ADD_CREW_MVP_BOUNTY_BONUS:
             add_crew_mvp_bounty_bonus()
-        case Timer.RESET_CAN_INITIATE_GAME:
-            reset_can_initiate_game()
         case Timer.SEND_SCHEDULED_PREDICTIONS:
             await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:

@@ -80,12 +80,6 @@ ADD_CREW_MVP_BOUNTY_BONUS = Timer('add_crew_mvp_bounty_bonus', Env.CRON_ADD_CREW
                                   Env.SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS.get_bool())
 TIMERS.append(ADD_CREW_MVP_BOUNTY_BONUS)
 
-RESET_CAN_INITIATE_GAME = Timer('reset_can_initiate_game', Env.CRON_RESET_CAN_INITIATE_GAME.get(),
-                                Env.ENABLE_TIMER_RESET_CAN_INITIATE_GAME.get_bool(),
-                                Env.SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME.get_bool(),
-                                Env.SHOULD_RUN_ON_STARTUP_RESET_CAN_INITIATE_GAME.get_bool())
-TIMERS.append(RESET_CAN_INITIATE_GAME)
-
 SEND_SCHEDULED_PREDICTIONS = Timer('send_scheduled_predictions', Env.CRON_SEND_SCHEDULED_PREDICTIONS.get(),
                                    Env.ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS.get_bool(),
                                    Env.SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS.get_bool(),

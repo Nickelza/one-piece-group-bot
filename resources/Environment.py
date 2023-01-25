@@ -196,14 +196,6 @@ SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE = Environment('SHOULD_LOG_TIMER_REDDIT_P
 SHOULD_RUN_ON_STARTUP_REDDIT_POST_MEME_PIECE = Environment('SHOULD_RUN_ON_STARTUP_REDDIT_POST_MEME_PIECE',
                                                            default_value='False')
 
-# Reset can initiate game. Default: Every 8 hours
-CRON_RESET_CAN_INITIATE_GAME = Environment('CRON_RESET_CAN_INITIATE_GAME', default_value='0 */8 * * *')
-ENABLE_TIMER_RESET_CAN_INITIATE_GAME = Environment('ENABLE_TIMER_RESET_CAN_INITIATE_GAME', default_value='True')
-SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME = Environment('SHOULD_LOG_TIMER_RESET_CAN_INITIATE_GAME',
-                                                       default_value='False')
-SHOULD_RUN_ON_STARTUP_RESET_CAN_INITIATE_GAME = Environment('SHOULD_RUN_ON_STARTUP_RESET_CAN_INITIATE_GAME',
-                                                            default_value='False')
-
 # Send scheduled predictions. Default: Every 1 minute
 CRON_SEND_SCHEDULED_PREDICTIONS = Environment('CRON_SEND_SCHEDULED_PREDICTIONS', default_value='*/1 * * * *')
 ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS = Environment('ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS', default_value='True')
@@ -312,6 +304,8 @@ DOC_Q_GAME_COOLDOWN_DURATION = Environment('DOC_Q_GAME_COOLDOWN_DURATION', defau
 GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
 # After how much time in seconds without action should a user be notified about their turn. Default: 60 seconds
 GAME_TURN_NOTIFICATION_TIME = Environment('GAME_TURN_NOTIFICATION_TIME', default_value='60')
+# Game cooldown duration in hours. Default: 8
+GAME_COOLDOWN_DURATION = Environment('GAME_COOLDOWN_DURATION', default_value='8')
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
 

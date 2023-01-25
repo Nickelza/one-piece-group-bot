@@ -98,14 +98,15 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
     return get_remaining_time(next_run)
 
 
-def get_datetime_in_future_hours(hours: int) -> datetime:
+def get_datetime_in_future_hours(hours: float) -> datetime:
     """
     Get the datetime in the future
     :param hours: The number of hours in the future
     :return: The datetime in the future
     """
 
-    return datetime.datetime.now() + datetime.timedelta(hours=hours)
+    seconds: int = int(hours * 3600)
+    return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
 
 
 def get_datetime_in_future_days(days: int) -> datetime:

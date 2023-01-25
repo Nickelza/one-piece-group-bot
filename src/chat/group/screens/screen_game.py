@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from strenum import StrEnum
 from telegram import Update, Message
 from telegram.ext import ContextTypes
@@ -9,12 +11,14 @@ from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount
-from src.service.cron_service import cron_datetime_difference
+from src.service.cron_service import get_remaining_time
+from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
 
 
@@ -50,8 +54,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
         return False
 
     # Challenger cannot initiate a game
-    if not challenger.can_initiate_game:
-        ot_text = phrases.GAME_CANNOT_INITIATE.format(cron_datetime_difference(Env.CRON_RESET_CAN_INITIATE_GAME.get()))
+    if challenger.game_cooldown_end_date and challenger.game_cooldown_end_date > datetime.now():
+        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_time(challenger.game_cooldown_end_date))
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where(Game.challenger == challenger,
@@ -110,7 +114,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     user.bounty -= game.wager
     user.pending_bounty += game.wager
-    user.can_initiate_game = False
+    user.game_cooldown_end_date = get_datetime(
+        user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
 
     # Display available games
     await display_games(game, update, context, opponent)
