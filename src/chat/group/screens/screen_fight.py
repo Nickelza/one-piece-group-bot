@@ -277,8 +277,8 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
                                             user.get_bounty_formatted())
 
     # Add fight immunity to opponent
-    opponent.fight_immunity_end_date = datetime.datetime.now() + datetime.timedelta(
-        hours=Env.FIGHT_IMMUNITY_DURATION.get_int())
+    opponent.fight_immunity_end_date = get_datetime(
+        opponent, DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION, Env.FIGHT_IMMUNITY_DURATION.get_int())
     # Remove fight immunity from user
     user.fight_immunity_end_date = None
 
