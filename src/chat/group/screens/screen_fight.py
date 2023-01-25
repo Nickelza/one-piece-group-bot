@@ -22,6 +22,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
 from src.service.devil_fruit_service import get_datetime
+from src.service.devil_fruit_service import get_value
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
@@ -130,14 +131,22 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     leaderboard_user = get_current_leaderboard_user(challenger)
     leaderboard_rank = get_rank_by_leaderboard_user(leaderboard_user)
     # Use minimum probability if the probability is too low
-    win_probability = round(max(win_probability, leaderboard_rank.min_win_probability), 2)
+    win_probability = max(win_probability, leaderboard_rank.min_win_probability)
     # Use maximum probability if the probability is too high
-    win_probability = round(min(win_probability, leaderboard_rank.max_win_probability), 2)
+    win_probability = min(win_probability, leaderboard_rank.max_win_probability)
     # Final location cap
     if challenger.has_bounty_gain_limitations():
-        win_probability = round(min(win_probability, Env.FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION.get_float()), 2)
+        win_probability = min(win_probability, Env.FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION.get_float())
 
     lose_probability = 100 - win_probability
+
+    # Recalculate opponent win probability with Devil Fruit ability
+    opponent_win_probability = get_value(
+        opponent, DevilFruitAbilityType.FIGHT_DEFENSE_BOOST, lose_probability, add_to_value=True)
+    # Cap opponent win probability to max allowed for Devil Fruit boost
+    opponent_win_probability = round(
+        min(opponent_win_probability, Env.FIGHT_MAX_WIN_PROBABILITY_DEVIL_FRUIT_DEFENSE_BOOST.get_float()), 2)
+    win_probability, lose_probability = 100 - opponent_win_probability, opponent_win_probability
 
     # Win amount is the amount from opponent bounty corresponding to lose probability
     win_amount = int(get_value_from_percentage(opponent.bounty, lose_probability))

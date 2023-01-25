@@ -384,6 +384,9 @@ FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MAX_WIN_PROBABILITY_SUP
 FIGHT_MAX_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MAX_WIN_PROBABILITY_ROOKIE', default_value='80')
 # Maximum win probability when on final location. Default: 50%
 FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION = Environment('FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION', default_value='50')
+# Maximum win probability when on Devil Fruit defense boost. Default: 99%
+FIGHT_MAX_WIN_PROBABILITY_DEVIL_FRUIT_DEFENSE_BOOST = Environment('FIGHT_MAX_WIN_PROBABILITY_DEVIL_FRUIT_DEFENSE_BOOST',
+                                                                  default_value='99')
 # Minimum win probability for Pirate King. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING', default_value='1')
 # Minimum win probability for Emperor. Default: 1%
