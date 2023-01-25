@@ -6,6 +6,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
+from src.service.devil_fruit_service import user_has_eaten_devil_fruit
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_leaderboard
 from src.service.user_service import get_user_profile_photo, user_is_boss
@@ -25,6 +26,9 @@ async def get_bounty_poster(update: Update, user: User) -> str:
                                  bounty=user.bounty)
 
     capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE
+
+    if user_has_eaten_devil_fruit(user):
+        capture_condition = CaptureCondition.ONLY_ALIVE
 
     if await user_is_boss(user, update):
         capture_condition = CaptureCondition.ONLY_DEAD

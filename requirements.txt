@@ -1,4 +1,4 @@
-python-dotenv==0.21.0
+python-dotenv==0.21.1
 python-telegram-bot==20.0
 peewee==3.15.4
 praw~=7.6.0
@@ -10,4 +10,4 @@ pytz==2022.7.1
 cryptography==39.0.0
 StrEnum==0.4.9
 requests==2.28.2
-one-piece-wanted-poster==0.0.7
+one-piece-wanted-poster==0.0.9

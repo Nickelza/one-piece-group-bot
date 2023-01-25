@@ -270,7 +270,7 @@ CREW_BOUNTY_BONUS = Environment('CREW_BOUNTY_BONUS', default_value='2')
 CREW_MVP_BOUNTY_BONUS = Environment('CREW_MVP_BOUNTY_BONUS', default_value='1')
 
 # BOUNTY POSTER
-# How many times Pirate King can display bounty poster before it is reset. Default: -1 (unlimited)
+# How many times Pirate King can display bounty poster before it is reset. Default: 0 (is boss)
 BOUNTY_POSTER_LIMIT_PIRATE_KING = Environment('BOUNTY_POSTER_LIMIT_PIRATE_KING', default_value='-1')
 # How many times Emperors can display bounty poster before it is reset. Default: 1
 BOUNTY_POSTER_LIMIT_EMPEROR = Environment('BOUNTY_POSTER_LIMIT_EMPEROR', default_value='1')

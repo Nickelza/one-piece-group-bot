@@ -272,3 +272,15 @@ def get_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) ->
 
     new_hours: float = get_value(user, ability_type, hours)
     return get_datetime_in_future_hours(new_hours)
+
+
+def user_has_eaten_devil_fruit(user: User) -> bool:
+    """
+    Check if user has eaten a Devil Fruit
+    :param user: The user
+    :return: Whether user has eaten a Devil Fruit
+    """
+
+    return (DevilFruit.select()
+            .where((DevilFruit.owner == user) & (DevilFruit.status == DevilFruitStatus.EATEN))
+            .exists())
