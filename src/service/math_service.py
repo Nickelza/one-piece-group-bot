@@ -38,3 +38,25 @@ def get_percentage_from_value(value: float, total: float, add_decimal=True) -> f
         return result
     except ZeroDivisionError:
         return 0
+
+
+def add_percentage_to_value(value: float, percentage: float) -> float:
+    """
+    Adds a percentage to a value
+    :param value: The value to add the percentage to
+    :param percentage: The percentage to add to the value
+    :return: The value with the percentage added
+    """
+
+    return value + get_value_from_percentage(value, percentage)
+
+
+def subtract_percentage_from_value(value: float, percentage: float) -> float:
+    """
+    Subtracts a percentage from a value
+    :param value: The value to subtract the percentage from
+    :param percentage: The percentage to subtract from the value
+    :return: The value with the percentage subtracted
+    """
+
+    return value - get_value_from_percentage(value, percentage)

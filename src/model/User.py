@@ -23,7 +23,7 @@ class User(BaseModel):
     tg_username = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
     pending_bounty = BigIntegerField(default=0)
-    can_play_doc_q = BooleanField(default=True)
+    doc_q_cooldown_end_date = DateTimeField(null=True)
     can_initiate_game = BooleanField(default=True)
     bounty_poster_limit = SmallIntegerField(default=0)
     location_level = SmallIntegerField(default=0)

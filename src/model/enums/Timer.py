@@ -50,12 +50,6 @@ TIMER_SEND_LEADERBOARD = Timer('timer_send_leaderboard', Env.CRON_SEND_LEADERBOA
                                Env.SHOULD_LOG_TIMER_SEND_LEADERBOARD.get_bool())
 TIMERS.append(TIMER_SEND_LEADERBOARD)
 
-RESET_DOC_Q_GAME = Timer('reset_doc_q_game', Env.CRON_RESET_DOC_Q_GAME.get(),
-                         Env.ENABLE_TIMER_RESET_DOC_Q_GAME.get_bool(),
-                         Env.SHOULD_LOG_TIMER_RESET_DOC_Q_GAME.get_bool(),
-                         Env.SHOULD_RUN_ON_STARTUP_RESET_DOC_Q_GAME.get_bool())
-TIMERS.append(RESET_DOC_Q_GAME)
-
 RESET_BOUNTY_POSTER_LIMIT = Timer('reset_bounty_poster_limit', Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get(),
                                   Env.ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT.get_bool(),
                                   Env.SHOULD_LOG_TIMER_RESET_BOUNTY_POSTER_LIMIT.get_bool(),

@@ -13,12 +13,13 @@ from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import DevilFruitExpiredNotification
 from src.model.enums.Screen import Screen
-from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours
+from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
 from src.service.message_service import send_admin_error, escape_valid_markdown_chars, full_message_send, delete_message
 from src.service.notification_service import send_notification
 
@@ -214,3 +215,47 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
         # Send notification to owner
         notification = DevilFruitExpiredNotification(devil_fruit)
         await send_notification(context, owner, notification)
+
+
+def get_value(user: User, ability_type: DevilFruitAbilityType, value: int, add_to_value: bool = False) -> int:
+    """
+    Given a value, gets the updated value if user has eaten a Devil Fruit that modifies it
+    :param user: The user
+    :param ability_type: The ability type
+    :param value: The value
+    :param add_to_value: Whether to add to the value
+    :return: The value
+    """
+
+    # Get Devil Fruit eaten by user that has the ability
+    devil_fruit: DevilFruit = (DevilFruit.select()
+                               .join(DevilFruitAbility)
+                               .where((DevilFruit.owner == user)
+                                      & (DevilFruit.status == DevilFruitStatus.EATEN)
+                                      & (DevilFruitAbility.ability_type == ability_type))
+                               .get_or_none())
+
+    # User has no Devil Fruit with the ability
+    if not devil_fruit:
+        return value
+
+    # Get ability
+    ability: DevilFruitAbility = (DevilFruitAbility.select()
+                                  .where((DevilFruitAbility.devil_fruit == devil_fruit)
+                                         & (DevilFruitAbility.ability_type == ability_type))
+                                  .get_or_none())
+
+    ability_type_sign: DevilFruitAbilityTypeSign = ability_type.get_sign()
+
+    # Positive sign
+    if ability_type_sign == DevilFruitAbilityTypeSign.POSITIVE:
+        if add_to_value:
+            return value + ability.value
+        else:
+            return int(add_percentage_to_value(value, ability.value))
+
+    # Negative sign
+    if add_to_value:
+        return value - ability.value
+
+    return int(subtract_percentage_from_value(value, ability.value))

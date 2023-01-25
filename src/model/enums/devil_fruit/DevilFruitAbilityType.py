@@ -3,6 +3,15 @@ from enum import IntEnum
 from strenum import StrEnum
 
 
+class Sign(StrEnum):
+    """
+    Enum for the sign of an ability.
+    """
+
+    POSITIVE = '+'
+    NEGATIVE = '-'
+
+
 class DevilFruitAbilityType(IntEnum):
     """
     Enum for the type of Devil Fruit ability type.
@@ -24,22 +33,13 @@ class DevilFruitAbilityType(IntEnum):
 
         return DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP[self]
 
-    def get_sign(self) -> str:
+    def get_sign(self) -> Sign:
         """
         Get the sign of the devil fruit ability type
         :return: The sign of the devil fruit ability type
         """
 
         return DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP[self]
-
-
-class Sign(StrEnum):
-    """
-    Enum for the sign of an ability.
-    """
-
-    POSITIVE = '+'
-    NEGATIVE = '-'
 
 
 DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {

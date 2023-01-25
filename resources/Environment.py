@@ -146,12 +146,6 @@ ENABLE_TIMER_SEND_LEADERBOARD = Environment('ENABLE_TIMER_SEND_LEADERBOARD', def
 SHOULD_LOG_TIMER_SEND_LEADERBOARD = Environment('SHOULD_LOG_TIMER_SEND_LEADERBOARD', default_value='False')
 SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD = Environment('SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD', default_value='False')
 
-# Reset Doc Q game playability. Default: Every day at midnight
-CRON_RESET_DOC_Q_GAME = Environment('CRON_RESET_DOC_Q_GAME', default_value='0 0 * * *')  # Every day at midnight
-ENABLE_TIMER_RESET_DOC_Q_GAME = Environment('ENABLE_TIMER_RESET_DOC_Q_GAME', default_value='True')
-SHOULD_LOG_TIMER_RESET_DOC_Q_GAME = Environment('SHOULD_LOG_TIMER_RESET_DOC_Q_GAME', default_value='False')
-SHOULD_RUN_ON_STARTUP_RESET_DOC_Q_GAME = Environment('SHOULD_RUN_ON_STARTUP_RESET_DOC_Q_GAME', default_value='False')
-
 # Reset bounty poster limit. Default: Every day at 00:10
 CRON_RESET_BOUNTY_POSTER_LIMIT = Environment('CRON_RESET_BOUNTY_POSTER_LIMIT', default_value='10 0 * * *')
 ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT = Environment('ENABLE_TIMER_RESET_BOUNTY_POSTER_LIMIT', default_value='True')
@@ -311,6 +305,8 @@ DOC_Q_GAME_OPTIONS_COUNT_FINAL_LOCATION = Environment('DOC_Q_GAME_OPTIONS_COUNT_
 DOC_Q_GAME_WIN_ODD_FINAL_LOCATION = Environment('DOC_Q_GAME_WIN_ODD_FINAL_LOCATION', default_value='0.1')
 # Show correct option. Default: False
 DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment('DOC_Q_GAME_SHOW_CORRECT_OPTION', default_value='False')
+# How long a user has to wait before playing the game again in hours. Default: 24
+DOC_Q_GAME_COOLDOWN_DURATION = Environment('DOC_Q_GAME_COOLDOWN_DURATION', default_value='24')
 
 # Minimum wager for games. Default: 10 million
 GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
