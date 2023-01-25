@@ -15,11 +15,13 @@ from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
+from src.service.devil_fruit_service import get_datetime
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
@@ -281,8 +283,8 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     user.fight_immunity_end_date = None
 
     # Add fight cooldown to user
-    user.fight_cooldown_end_date = datetime.datetime.now() + datetime.timedelta(
-        hours=Env.FIGHT_COOLDOWN_DURATION.get_int())
+    user.fight_cooldown_end_date = get_datetime(
+        user, DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION, Env.FIGHT_COOLDOWN_DURATION.get_int())
     # Remove fight cooldown from opponent
     opponent.fight_cooldown_end_date = None
 
