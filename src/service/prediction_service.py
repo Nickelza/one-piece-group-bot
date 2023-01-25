@@ -15,9 +15,11 @@ from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import PredictionException
 from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
-from src.service.math_service import get_percentage_from_value, get_value_from_percentage
+from src.service.devil_fruit_service import get_value
+from src.service.math_service import get_percentage_from_value, get_value_from_percentage, add_percentage_to_value
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 from src.service.notification_service import send_notification
 
@@ -45,11 +47,12 @@ async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_re
     prediction.save()
 
 
-def get_prediction_text(prediction: Prediction, add_bets_command: bool = True) -> str:
+def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, user: User = None) -> str:
     """
     Get prediction text
     :param prediction: Prediction
     :param add_bets_command: If to add commands on how to place and remove bets
+    :param user: User, if called from private chat and prediction max refund should be customized by DF ability
     :return: Prediction text
     """
 
@@ -86,8 +89,12 @@ def get_prediction_text(prediction: Prediction, add_bets_command: bool = True) -
     # Wagers refunded
     if prediction.refund_wager:
         enabled_emoji = Emoji.PREDICTION_FEATURE_ENABLED
+        if user is not None:
+            max_refund_wager = get_max_wager_refund(prediction=prediction, user=user)
+        else:
+            max_refund_wager = prediction.max_refund_wager
         max_refund_text = phrases.PREDICTION_WAGERS_REFUNDED_MAX.format(
-            get_belly_formatted(prediction.max_refund_wager))
+            get_belly_formatted(max_refund_wager))  # Get from get_value, if user param is not None
     else:
         enabled_emoji = Emoji.PREDICTION_FEATURE_DISABLED
         max_refund_text = ""
@@ -323,7 +330,8 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
                 user.bounty += prediction_option_user.wager
             else:
                 # Cap refund
-                user.bounty += min(prediction_option_user.wager, prediction.max_refund_wager)
+                user.bounty += min(prediction_option_user.wager,
+                                   get_max_wager_refund(prediction_option_user=prediction_option_user))
 
         user.save()
 
@@ -346,7 +354,7 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
         user_prediction_options: list[PredictionOption] = value[2]
 
         notification: PredictionResultNotification = PredictionResultNotification(
-            prediction, user_prediction_options, prediction_options_correct, total_win)
+            prediction, user_prediction_options, prediction_options_correct, total_win, user)
 
         await send_notification(context, user, notification)
 
@@ -560,6 +568,9 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
         prediction_option_user.prediction_option = prediction_option
         prediction_option_user.user = user
         prediction_option_user.wager = wager
+        max_refund_wager_boost = get_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, 0, add_to_value=True)
+        prediction_option_user.max_refund_wager_boost = max_refund_wager_boost if max_refund_wager_boost > 0 else None
+
     prediction_option_user.date = datetime.now()
     prediction_option_user.save()
 
@@ -593,3 +604,32 @@ def delete_prediction_option_for_user(user: User, prediction_option: PredictionO
 
     if prediction_option_user is not None:  # Should always be true
         delete_prediction_option_user(user, prediction_option_user)
+
+
+def get_max_wager_refund(prediction_option_user: PredictionOptionUser = None, prediction: Prediction = None,
+                         user: User = None) -> int:
+    """
+    Get the maximum wager refund for a prediction option user, considering the Devil Fruit ability boost
+    :param prediction_option_user: The prediction option user
+    :param prediction: The prediction
+    :param user: The user
+    :return: The maximum wager refund
+    """
+
+    # If prediction option user is not provided, prediction and user must be provided
+    if prediction_option_user is None and (prediction is None or user is None):
+        if prediction is None or user is None:
+            raise ValueError("Prediction option user or prediction and user must be provided")
+
+        prediction_option_user: PredictionOptionUser = PredictionOptionUser.get_or_none(
+            (PredictionOptionUser.user == user) & (PredictionOptionUser.prediction == prediction))
+
+    if prediction_option_user is None:  # user has not yet placed a bet
+        return int(get_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, prediction.max_refund_wager))
+
+    if prediction is None:
+        prediction: Prediction = prediction_option_user.prediction
+
+    max_refund_boosted = int(add_percentage_to_value(
+        prediction.max_refund_wager, prediction_option_user.max_refund_wager_boost))
+    return max(prediction.max_refund_wager, max_refund_boosted)

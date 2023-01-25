@@ -307,7 +307,7 @@ class PredictionResultNotification(Notification):
     """Class for prediction result notifications."""
 
     def __init__(self, prediction: Prediction = None, prediction_options: list[PredictionOption] = None,
-                 correct_prediction_options: list[PredictionOption] = None, total_win: int = None):
+                 correct_prediction_options: list[PredictionOption] = None, total_win: int = None, user: User = None):
         """
         Constructor
 
@@ -315,12 +315,14 @@ class PredictionResultNotification(Notification):
         :param prediction_options: The prediction options that were chosen by the user
         :param correct_prediction_options: The correct prediction options
         :param total_win: The total win
+        :param user: The user
         """
 
         self.prediction = prediction
         self.prediction_options = prediction_options
         self.correct_prediction_options = correct_prediction_options
         self.total_win = total_win
+        self.user = user
 
         super().__init__(NotificationCategory.PREDICTION, NotificationType.PREDICTION_RESULT,
                          phrases.PREDICTION_RESULT_NOTIFICATION,
@@ -331,6 +333,7 @@ class PredictionResultNotification(Notification):
         """Builds the notification"""
 
         from src.service.bounty_service import get_belly_formatted
+        from src.service.prediction_service import get_max_wager_refund
 
         # Result text
         result_text = phrases.TEXT_WON if self.total_win >= 0 else phrases.TEXT_LOST
@@ -370,10 +373,11 @@ class PredictionResultNotification(Notification):
         if not prediction_has_correct_options:
             wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS
         elif self.prediction.refund_wager:
+            max_refund_wager = get_max_wager_refund(prediction=self.prediction, user=self.user)
             # User lost more than the refundable amount
-            if self.total_win < 0 and abs(self.total_win) > self.prediction.max_refund_wager:
+            if self.total_win < 0 and abs(self.total_win) > max_refund_wager:  #
                 wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL.format(
-                    get_belly_formatted(self.prediction.max_refund_wager))
+                    get_belly_formatted(max_refund_wager))
             else:
                 wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED
 

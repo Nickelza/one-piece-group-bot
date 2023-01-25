@@ -67,9 +67,9 @@ class PredictionListPage(ListPage):
                                                    escape_valid_markdown_chars(self.object.question))
 
     def get_item_detail_text(self) -> str:
-        return phrases.PREDICTION_ITEM_DETAIL_TEXT.format(get_prediction_text(self.object, add_bets_command=False),
-                                                          get_user_prediction_status_text(self.object, self.user,
-                                                                                          add_bets_command=False))
+        return phrases.PREDICTION_ITEM_DETAIL_TEXT.format(
+            get_prediction_text(self.object, add_bets_command=False, user=self.user),
+            get_user_prediction_status_text(self.object, self.user, add_bets_command=False))
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:

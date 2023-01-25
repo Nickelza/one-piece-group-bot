@@ -19,6 +19,7 @@ class PredictionOptionUser(BaseModel):
                                         on_update='RESTRICT')
     user = ForeignKeyField(User, backref='prediction_options_users', on_delete='CASCADE', on_update='CASCADE')
     wager = IntegerField()
+    max_refund_wager_boost = IntegerField(default=0)
     date = DateTimeField(default=datetime.now)
 
     class Meta:

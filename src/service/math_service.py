@@ -48,6 +48,9 @@ def add_percentage_to_value(value: float, percentage: float) -> float:
     :return: The value with the percentage added
     """
 
+    if percentage is None or percentage == 0:
+        return value
+
     return value + get_value_from_percentage(value, percentage)
 
 
