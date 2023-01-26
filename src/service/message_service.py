@@ -73,7 +73,7 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
                  authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
                  only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None,
-                 back_screen_index: int = 0) -> InlineKeyboardMarkup | None:
+                 back_screen_index: int = 0, use_close_delete: bool = False) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
 
@@ -85,6 +85,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     :param only_authorized_users_can_interact: True if only authorized users can interact with the keyboard
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
+    :param use_close_delete: True if the close button should be used instead of the delete button
     :return: Keyboard markup
     """
 
@@ -152,7 +153,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
             if not len(authorized_users_ids) > 0:
                 raise Exception("No authorized users provided for delete button")
 
-            delete_button = get_delete_button(authorized_users_ids)
+            delete_button = get_delete_button(authorized_users_ids, use_close_delete=use_close_delete)
             keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
 
         if inbound_keyboard is not None:
@@ -208,7 +209,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
                             excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
-                            previous_screen_list_keyboard_info: dict = None) -> Message | bool:
+                            previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False
+                            ) -> Message | bool:
     """
     Send a message
 
@@ -239,6 +241,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
     :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
             keyboard info to add to the back button
+    :param use_close_delete: True if the close button should be used instead of the delete button
     :return: Message
     """
 
@@ -257,7 +260,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                                    authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
                                    only_authorized_users_can_interact=only_authorized_users_can_interact,
                                    excluded_keys_from_back_button=excluded_keys_from_back_button,
-                                   back_screen_index=back_screen_index)
+                                   back_screen_index=back_screen_index, use_close_delete=use_close_delete)
 
     # New message
     if (new_message or update is None or update.callback_query is None) and edit_message_id is None:
@@ -278,7 +281,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
 
     # No message to edit or answer callback
     if (update is None or update.callback_query is None) and edit_message_id is None:
-        raise Exception(phrases.EXCEPTION_NO_EDIT_MESSAGE)
+        raise AttributeError(phrases.EXCEPTION_NO_EDIT_MESSAGE)
 
     # Answer callback
     if answer_callback:
@@ -505,14 +508,16 @@ def get_image_preview(image_url: str) -> str:
     return f'[​]({image_url})'
 
 
-def get_delete_button(user_ids: list[int]) -> Keyboard:
+def get_delete_button(user_ids: list[int], use_close_delete=False) -> Keyboard:
     """
     Create a delete button
     :param user_ids: List of users ids that can operate the delete button
+    :param use_close_delete: True if the close button should be used instead of the delete button
     """
     keyboard_data: dict = {ReservedKeyboardKeys.AUTHORIZED_USER: user_ids, ReservedKeyboardKeys.DELETE: True}
 
-    return Keyboard(phrases.KEYBOARD_OPTION_DELETE, keyboard_data)
+    text = phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
+    return Keyboard(text, keyboard_data)
 
 
 def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
@@ -523,7 +528,7 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
                         yes_is_back_button: bool = False, no_is_back_button: bool = False) -> list[Keyboard]:
     """
     Create a yes/no keyboard
-    
+
     :param user: User that can operate the keyboard
     :param primary_key: Primary key
     :param yes_text: Text for the yes button
@@ -655,11 +660,11 @@ def get_message_source(update: Update) -> MessageSource:
     if update.effective_chat.type == Chat.PRIVATE:
         return MessageSource.PRIVATE
 
-    if update.effective_chat.id == Env.OPD_GROUP_ID.get_int():
-        return MessageSource.GROUP
-
     if update.effective_chat.id == Env.ADMIN_GROUP_ID.get_int():
         return MessageSource.ADMIN
+
+    if update.effective_chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
+        return MessageSource.GROUP
 
     if update.effective_chat.id == Env.TG_REST_CHANNEL_ID.get_int():
         return MessageSource.TG_REST
@@ -721,3 +726,18 @@ async def send_admin_error(context: ContextTypes.DEFAULT_TYPE, text: str, update
 
     text = f'Error: {text}'.upper()
     return await full_message_send(context, text, update=update, chat_id=Env.ADMIN_GROUP_ID.get_int())
+
+
+def message_is_reply(update: Update) -> bool:
+    """
+    Check if the message is a reply. Necessary because, due to a Telegram bug, the reply_to_message field is set
+    for every message sent in not general topics
+    :param update: Update object
+    :return: True if the message is a reply
+    """
+
+    try:
+        return (update.effective_message.reply_to_message is not None
+                and update.effective_message.reply_to_message.forum_topic_created is None)
+    except AttributeError:
+        return False

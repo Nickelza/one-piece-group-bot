@@ -22,7 +22,7 @@ from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
-    get_start_with_command_url, escape_valid_markdown_chars
+    get_start_with_command_url, escape_valid_markdown_chars, message_is_reply
 from src.service.user_service import user_is_boss
 
 
@@ -39,7 +39,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     """
 
     try:
-        in_reply_to_message = update.message.reply_to_message is not None
+        in_reply_to_message = message_is_reply(update)  # REPLY_TO_MESSAGE_BUG_FIX
     except AttributeError:  # In case of a callback in private chat
         in_reply_to_message = False
 

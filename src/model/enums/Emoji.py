@@ -30,6 +30,8 @@ class Emoji(StrEnum):
     CANCEL = '❌'
     DELETE = '🗑'
     DISABLED = '❌'
+    DISABLED_EMPTY = '☑'
+    CLOSE = '❌'
     REJECT = '❌'
     SETTINGS = '⚙'
     BACK = '🔙'

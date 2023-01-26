@@ -16,6 +16,7 @@ COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Cap
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
 COMMAND_ONLY_BY_BOSS_ERROR = 'This command can only be used by an Admin, the Pirate King or a Legendary Pirate'
 COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a message from an arrested user"
+COMMAND_ONLY_BY_CHAT_ADMIN_ERROR = 'This command can only be used by a chat admin'
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
@@ -85,6 +86,7 @@ PRIVATE_STEP_NOT_SET = 'Private step not set'
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
 KEYBOARD_OPTION_DELETE = Emoji.DELETE + ' Delete'
+KEYBOARD_OPTION_CLOSE = Emoji.CLOSE + ' Close'
 KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT + ' Accept'
 KEYBOARD_OPTION_REJECT = Emoji.REJECT + ' Reject'
 KEYBOARD_OPTION_FIGHT = Emoji.FIGHT + ' Fight'
@@ -101,6 +103,8 @@ TEXT_IT_WAS = 'it was'
 TEXT_THEY_WERE = 'they were'
 TEXT_FROM = 'from'
 TEXT_TO = 'to'
+TEXT_TOPIC = 'Topic'
+TEXT_GROUP = 'Group'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -173,6 +177,7 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
+GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -636,3 +641,5 @@ DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_
 
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'
+
+THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your group!\n'

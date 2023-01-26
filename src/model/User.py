@@ -295,15 +295,19 @@ class User(BaseModel):
                  (User.bounty >= get_first_new_world().required_bounty)) |
                 (User.bounty >= get_last_new_world().required_bounty))
 
-    def is_chat_admin(self, update: Update):
+    async def is_chat_admin(self, update: Update):
         """
         Returns True if the user is an admin of the chat
         :param update: The update
         :return: True if the user is an admin of the chat
         """
 
-        chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
-        return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
+        from telegram.error import Forbidden
+        try:
+            chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
+            return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
+        except Forbidden:  # Bot kicked from the group
+            pass
 
 
 User.create_table()

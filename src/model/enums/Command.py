@@ -22,7 +22,7 @@ class Command:
                  parameters: list = None, message_source: MessageSource = MessageSource.ND,
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
                  only_by_boss: bool = False, allow_reply_to_arrested: bool = False, answer_callback: bool = False,
-                 show_alert: bool = True):
+                 show_alert: bool = True, only_by_chat_admin: bool = False, send_message_if_error: bool = True):
         """
         Constructor
         :param name: The name of the command
@@ -45,6 +45,8 @@ class Command:
         :param answer_callback: True if the command should answer the callback query in case of error instead of
                                 editing the message
         :param show_alert: True if the command should show an alert when answering the callback query in case of error
+        :param only_by_chat_admin: True if the command can only be used by a chat admin
+        :param send_message_if_error: True if a message should be sent if the command isn't authorized
         """
         self.name = name
         self.active = active
@@ -63,6 +65,8 @@ class Command:
         self.allow_reply_to_arrested = allow_reply_to_arrested
         self.answer_callback = answer_callback
         self.show_alert = show_alert
+        self.only_by_chat_admin = only_by_chat_admin
+        self.send_message_if_error = send_message_if_error
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True
@@ -132,6 +136,8 @@ GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True)
 GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),
                                   answer_callback=True)
+GRP_SETTINGS = Command('settings', Screen.GRP_SETTINGS, allow_while_arrested=True, only_by_chat_admin=True,
+                       answer_callback=True, send_message_if_error=False)
 
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
@@ -140,7 +146,7 @@ COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NE
             GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE,
             PVT_SETTINGS, PVT_SETTINGS_LOCATION_UPDATE, PVT_SETTINGS_NOTIFICATIONS, PVT_SETTINGS_NOTIFICATIONS_TYPE,
             PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, GRP_SILENCE, GRP_SILENCE_END, GRP_SPEAK, GRP_BOUNTY_GIFT,
-            GRP_DEVIL_FRUIT_COLLECT]
+            GRP_DEVIL_FRUIT_COLLECT, GRP_SETTINGS]
 
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):

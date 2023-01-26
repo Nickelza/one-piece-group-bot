@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Tuple
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -19,10 +22,13 @@ from src.chat.group.screens.screen_game_selection import manage as manage_screen
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_prediction_bet_remove import manage as manage_screen_prediction_bet_remove
 from src.chat.group.screens.screen_prediction_bet_status import manage as manage_screen_prediction_bet_status
+from src.chat.group.screens.screen_settings import manage as manage_screen_settings
 from src.chat.group.screens.screen_silence import manage as manage_screen_silence
 from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
 from src.chat.group.screens.screen_speak import manage as manage_screen_speak
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
+from src.model.Group import Group
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Notification import DeletedMessageArrestNotification, DeletedMessageMuteNotification, \
     DeletedMessageLocationNotification
@@ -51,8 +57,7 @@ async def update_user_bounty(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                 keyboard: Keyboard,
-                 target_user: User, is_callback: bool) -> None:
+                 keyboard: Keyboard, target_user: User, is_callback: bool) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update
@@ -64,6 +69,24 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     :param is_callback: True if the message is a callback, False otherwise
     :return: None
     """
+
+    # Add or update group
+    group: Group = add_or_update_group(update)
+
+    # Get added or removed from group
+    added_to_group, removed_from_group = get_added_or_removed_from_group_event(update)
+    if removed_from_group:
+        group.is_active = False
+        group.save()
+        return
+
+    if added_to_group:
+        group.is_active = True
+        group.save()
+        command = Command.GRP_SETTINGS
+
+    # Add or update topic
+    topic: Topic = add_or_update_topic(update, group)
 
     # Insert or update user, with message count
     try:
@@ -78,19 +101,24 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 
     await update_user_bounty(update, context, user)
 
-    await dispatch_screens(update, context, user, keyboard, command, target_user)
+    await dispatch_screens(update, context, user, keyboard, command, target_user, group, topic, added_to_group)
 
 
 async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                           command: Command.Command, target_user: User) -> None:
+                           command: Command.Command, target_user: User, group: Group, topic: Topic,
+                           added_to_group: bool) -> None:
     """
     Dispatches the different screens
+
     :param update: Telegram update
     :param context: Telegram context
     :param user: User object
     :param inbound_keyboard: Keyboard to send
     :param command: Command to execute
     :param target_user: The target user in case of a reply
+    :param group: The group
+    :param topic: The topic
+    :param added_to_group: If the Bot was just added to the group
     :return: None
     """
 
@@ -152,6 +180,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
             case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
                 await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)
+
+            case Screen.GRP_SETTINGS:  # Settings
+                await manage_screen_settings(update, context, inbound_keyboard, group, topic, added_to_group)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
@@ -259,3 +290,79 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
         return False
 
     return True
+
+
+def add_or_update_group(update) -> Group:
+    """
+    Adds or updates a group
+    :param update: Telegram update
+    :return: Group object
+    """
+    group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
+
+    if group is None:
+        group = Group()
+        group.tg_group_id = update.effective_chat.id
+
+    # If the group has been migrated, update the ID
+    try:
+        if update.message.migrate_to_chat_id is not None:
+            group.tg_group_id = update.message.migrate_to_chat_id
+    except AttributeError:
+        pass
+
+    group.tg_group_name = update.effective_chat.title
+    group.tg_group_username = update.effective_chat.username
+    group.last_message_date = datetime.now()
+    group.save()
+
+    return group
+
+
+def add_or_update_topic(update, group: Group) -> Topic | None:
+    """
+    Adds or updates a topic
+    :param update: Telegram update
+    :param group: Group object
+    :return: Topic object
+    """
+    if not update.effective_chat.is_forum:
+        return None
+
+    topic = Topic.get_or_none(Topic.tg_topic_id == update.effective_message.message_thread_id)
+
+    if topic is None:
+        topic = Topic()
+        topic.group = group
+        topic.tg_topic_id = update.effective_message.message_thread_id
+
+    topic.last_message_date = datetime.now()
+    topic.save()
+
+    return topic
+
+
+def get_added_or_removed_from_group_event(update) -> Tuple[bool, bool]:
+    """
+    Gets the added or removed from group event
+
+    :param update: Telegram update
+    :return: Tuple of added and removed
+    """
+
+    added_to_chat = False
+    removed_from_chat = False
+
+    try:
+        if update.message.left_chat_member.id == Env.BOT_ID.get_int():
+            removed_from_chat = True
+    except AttributeError:
+        pass
+
+    try:
+        if update.message.new_chat_members[0].id == Env.BOT_ID.get_int():
+            added_to_chat = True
+    except (AttributeError, IndexError):
+        pass
+
+    return added_to_chat, removed_from_chat

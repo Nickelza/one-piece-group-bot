@@ -24,7 +24,7 @@ from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
-    full_message_or_media_send_or_edit
+    full_message_or_media_send_or_edit, message_is_reply
 from src.service.user_service import user_is_boss, user_is_muted
 
 
@@ -150,7 +150,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     target_user: User | None = None
     if keyboard is None:
         try:
-            target_user: User = get_user(update.effective_message.reply_to_message.from_user)
+            if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
+                target_user: User = get_user(update.effective_message.reply_to_message.from_user)
         except AttributeError:
             pass
 
@@ -243,24 +244,27 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         # Can only be used in reply to a message
         if command.only_in_reply:
             try:
-                if update.message.reply_to_message is None:
-                    raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_ERROR)
+                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
+                    if update.message.reply_to_message is None:
+                        raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_ERROR)
             except AttributeError:
                 pass
 
         # Cannot be in reply to yourself
         if not command.allow_self_reply:
             try:
-                if update.message.reply_to_message.from_user.id == update.message.from_user.id:
-                    raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ERROR)
+                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
+                    if update.message.reply_to_message.from_user.id == update.message.from_user.id:
+                        raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ERROR)
             except AttributeError:
                 pass
 
         # Cannot be in reply to a Bot
         if not command.allow_reply_to_bot and not is_callback:
             try:
-                if update.effective_message.reply_to_message.from_user.is_bot:
-                    raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
+                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
+                    if update.effective_message.reply_to_message.from_user.is_bot:
+                        raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
             except AttributeError:
                 pass
 
@@ -282,6 +286,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             if not await user_is_boss(user, update):
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_BOSS_ERROR)
 
+        # Can only be used by a chat admin
+        if command.only_by_chat_admin:
+            if not await user.is_chat_admin(update):
+                raise CommandValidationException(phrases.COMMAND_ONLY_BY_CHAT_ADMIN_ERROR)
+
         if not is_callback:
             # Can only be used in reply to a message from a Crew Member
             if command.only_in_reply_to_crew_member:
@@ -293,9 +302,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         if not command.answer_callback and await user_is_muted(user, update):
             await delete_message(update)
         else:
-            await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True,
-                                                     answer_callback=command.answer_callback,
-                                                     show_alert=command.show_alert)
+            if (command.answer_callback and is_callback) or command.send_message_if_error:
+                await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True,
+                                                         answer_callback=command.answer_callback,
+                                                         show_alert=command.show_alert)
         return False
 
     return True
