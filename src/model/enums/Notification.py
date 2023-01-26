@@ -63,6 +63,8 @@ class NotificationType(IntEnum):
     BOUNTY_GIFT_RECEIVED = 14
     DEVIL_FRUIT_AWARDED = 15
     DEVIL_FRUIT_EXPIRED = 16
+    DEVIL_FRUIT_REVOKE_WARNING = 17
+    DEVIL_FRUIT_REVOKE = 18
 
 
 class Notification:
@@ -554,12 +556,59 @@ class DevilFruitExpiredNotification(Notification):
                                 Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
 
 
+class DevilFruitRevokeNotification(Notification):
+    """Class for crew disband warning notifications."""
+
+    def __init__(self, devil_fruit: DevilFruit = None):
+        """
+        Constructor
+
+        :param devil_fruit: The Devil Fruit
+        """
+
+        self.devil_fruit = devil_fruit
+
+        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_REVOKE,
+                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION,
+                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_DESCRIPTION,
+                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()))
+
+
+class DevilFruitRevokeWarningNotification(Notification):
+    """Class for crew disband warning notifications."""
+
+    def __init__(self, devil_fruit: DevilFruit = None):
+        """
+        Constructor
+
+        :param devil_fruit: The Devil Fruit
+        """
+
+        self.devil_fruit = devil_fruit
+
+        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_REVOKE_WARNING,
+                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION,
+                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION,
+                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        """Builds the notification."""
+
+        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()))
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
                  PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
                  DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
-                 BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification()]
+                 BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification(),
+                 DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

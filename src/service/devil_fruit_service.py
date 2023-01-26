@@ -9,9 +9,12 @@ from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
+from src.model.Leaderboard import Leaderboard
+from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.Notification import DevilFruitExpiredNotification
+from src.model.enums.Notification import DevilFruitExpiredNotification, DevilFruitRevokeWarningNotification, \
+    DevilFruitRevokeNotification
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
@@ -179,6 +182,7 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     devil_fruit.expiration_date = None
     devil_fruit.collection_date = None
     devil_fruit.release_date = release_date
+    devil_fruit.release_message_id = None
     devil_fruit.status = DevilFruitStatus.SCHEDULED
     devil_fruit.save()
 
@@ -284,3 +288,79 @@ def user_has_eaten_devil_fruit(user: User) -> bool:
     return (DevilFruit.select()
             .where((DevilFruit.owner == user) & (DevilFruit.status == DevilFruitStatus.EATEN))
             .exists())
+
+
+async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Warn inactive users with eaten Devil Fruits
+
+    :param context: The context object
+    :return: None
+    """
+
+    inactive_users_devil_fruits = get_inactive_users_with_eaten_devil_fruits(
+        Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
+
+    for devil_fruit in inactive_users_devil_fruits:
+        await send_notification(
+            context, devil_fruit.owner, DevilFruitRevokeWarningNotification(devil_fruit=devil_fruit))
+
+
+def get_inactive_users_with_eaten_devil_fruits(latest_leaderboard_appearance: int) -> list[DevilFruit]:
+    """
+    Find Devil Fruits eaten by users that have not appeared in the latest N leaderboards
+
+    :param latest_leaderboard_appearance: The latest leaderboard appearance
+    :return: The inactive captains
+    """
+
+    # Latest N leaderboards
+    query: list[Leaderboard] = (Leaderboard.select()
+                                .order_by(Leaderboard.year.desc(), Leaderboard.week.desc())
+                                .limit(latest_leaderboard_appearance)
+                                .execute())
+    latest_leaderboards: list[Leaderboard] = list(query)
+
+    # Eaten Devil Fruits with owners that have appeared in the latest N leaderboards
+    query: list[DevilFruit] = (DevilFruit.select().distinct()
+                               .join(User)
+                               .join(LeaderboardUser)
+                               .join(Leaderboard)
+                               .where((DevilFruit.status == DevilFruitStatus.EATEN)
+                                      & (Leaderboard.id.in_(latest_leaderboards)))
+                               .execute())
+    eaten_active_devil_fruits: list[DevilFruit] = list(query)
+
+    # Inactive Devil Fruits
+    # Have to first get inactive ones else, by using "not in", it will return records for previous leaderboards too
+    # since the user might have been in a leaderboard before N, so it will not be in the latest N leaderboards
+    # Exclude admins
+    inactive_devil_fruits: list[DevilFruit] = (
+        DevilFruit.select().distinct()
+        .join(User)
+        .where((DevilFruit.status == DevilFruitStatus.EATEN)
+               & (User.is_admin == 0)
+               & (DevilFruit.id.not_in([df.id for df in eaten_active_devil_fruits])))
+        .execute())
+
+    return list(inactive_devil_fruits)
+
+
+async def revoke_devil_fruit_from_inactive_users(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Revoke Devil Fruits from inactive users
+
+    :param context: The context object
+    :return: None
+    """
+
+    inactive_users_devil_fruits = get_inactive_users_with_eaten_devil_fruits(
+        Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int())
+
+    for devil_fruit in inactive_users_devil_fruits:
+        owner: User = devil_fruit.owner
+        # Revoke
+        set_devil_fruit_release_date(devil_fruit)
+
+        # Send notification to owner
+        await send_notification(context, owner, DevilFruitRevokeNotification(devil_fruit=devil_fruit))

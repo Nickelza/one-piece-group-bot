@@ -463,3 +463,6 @@ BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='7')
 # After how many hours does a Devil Fruit respawn. Default: 24
 DEVIL_FRUIT_RESPAWN_HOURS = Environment('DEVIL_FRUIT_RESPAWN_HOURS', default_value='24')
+# How many leaderboards back a user has to appear in at least once to maintain an eaten Devil Fruit. Default: 4
+DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
+    'DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')

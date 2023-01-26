@@ -48,7 +48,7 @@ def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
     return leaderboard_rank.bounty_poster_limit
 
 
-def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) -> None:
+async def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) -> None:
     """
     Resets the bounty poster limit
 

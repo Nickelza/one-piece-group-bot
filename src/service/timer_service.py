@@ -75,7 +75,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.TIMER_SEND_LEADERBOARD:
             await send_leaderboard(context)
         case Timer.RESET_BOUNTY_POSTER_LIMIT:
-            reset_bounty_poster_limit()
+            await reset_bounty_poster_limit()
         case Timer.RESET_CAN_CHANGE_REGION:
             reset_can_change_region()
         case Timer.ADD_REGION_BOUNTY_BONUS:

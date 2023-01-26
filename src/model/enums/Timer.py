@@ -33,21 +33,21 @@ TIMERS.append(TEMP_DIR_CLEANUP)
 REDDIT_POST_ONE_PIECE = Timer('reddit_post_one_piece', Env.CRON_REDDIT_POST_ONE_PIECE.get(),
                               Env.ENABLE_TIMER_REDDIT_POST_ONE_PIECE.get_bool(),
                               Env.SHOULD_LOG_TIMER_REDDIT_POST_ONE_PIECE.get_bool(),
-                              Env.SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD.get_bool(),
+                              Env.SHOULD_RUN_ON_STARTUP_REDDIT_POST_ONE_PIECE.get_bool(),
                               info=Env.REDDIT_ONE_PIECE_SUBREDDIT.get())
 TIMERS.append(REDDIT_POST_ONE_PIECE)
 
 REDDIT_POST_MEME_PIECE = Timer('reddit_post_meme_piece', Env.CRON_REDDIT_POST_MEME_PIECE.get(),
                                Env.ENABLE_TIMER_REDDIT_POST_MEME_PIECE.get_bool(),
                                Env.SHOULD_LOG_TIMER_REDDIT_POST_MEME_PIECE.get_bool(),
-                               Env.SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD.get_bool(),
+                               Env.SHOULD_RUN_ON_STARTUP_REDDIT_POST_MEME_PIECE.get_bool(),
                                info=Env.REDDIT_MEME_PIECE_SUBREDDIT.get())
 TIMERS.append(REDDIT_POST_MEME_PIECE)
 
 TIMER_SEND_LEADERBOARD = Timer('timer_send_leaderboard', Env.CRON_SEND_LEADERBOARD.get(),
                                Env.ENABLE_TIMER_SEND_LEADERBOARD.get_bool(),
                                Env.SHOULD_LOG_TIMER_SEND_LEADERBOARD.get_bool(),
-                               Env.SHOULD_LOG_TIMER_SEND_LEADERBOARD.get_bool())
+                               Env.SHOULD_RUN_ON_STARTUP_SEND_LEADERBOARD.get_bool())
 TIMERS.append(TIMER_SEND_LEADERBOARD)
 
 RESET_BOUNTY_POSTER_LIMIT = Timer('reset_bounty_poster_limit', Env.CRON_RESET_BOUNTY_POSTER_LIMIT.get(),
