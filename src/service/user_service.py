@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Sequence, Optional
 
-from telegram import Update, PhotoSize, UserProfilePhotos, File, ChatMember
-from telegram.constants import ChatMemberStatus
+from telegram import Update, PhotoSize, UserProfilePhotos, File
 
 import constants as c
 from src.model.LegendaryPirate import LegendaryPirate
@@ -44,11 +43,6 @@ async def user_is_boss(user: User, update: Update) -> bool:
 
     # Is admin field
     if user.is_admin:
-        return True
-
-    # User is chat admin
-    chat_member: ChatMember = await update.effective_chat.get_member(user.tg_user_id)
-    if chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR):
         return True
 
     # User is Pirate King

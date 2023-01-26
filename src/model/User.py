@@ -2,6 +2,8 @@ import datetime
 from typing import Any
 
 from peewee import *
+from telegram import ChatMember, Update
+from telegram.constants import ChatMemberStatus
 
 import constants as c
 from src.model.BaseModel import BaseModel
@@ -292,6 +294,16 @@ class User(BaseModel):
         return (((User.location_level < get_first_new_world().level) &
                  (User.bounty >= get_first_new_world().required_bounty)) |
                 (User.bounty >= get_last_new_world().required_bounty))
+
+    def is_chat_admin(self, update: Update):
+        """
+        Returns True if the user is an admin of the chat
+        :param update: The update
+        :return: True if the user is an admin of the chat
+        """
+
+        chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
+        return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
 
 
 User.create_table()
