@@ -25,9 +25,6 @@ class Screen(StrEnum):
     GRP_DEVIL_FRUIT_COLLECT = 'G19'
     GRP_SETTINGS = 'G20'
 
-    # Deprecated
-    GRP_SHOW_BOUNTY = 'G-1'
-
     PVT_START = 'P1'
     PVT_SETTINGS = 'P2'
     PVT_SETTINGS_LOCATION_UPDATE = 'P3'  # Deprecated

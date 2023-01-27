@@ -121,7 +121,6 @@ GRP_CHANGE_REGION_PARADISE = Command('paradise', Screen.GRP_CHANGE_REGION,
                                      required_location=Location.get_last_paradise())
 GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True, feature=Feature.FIGHT,
                     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()))
-GRP_SHOW_BOUNTY = Command('bounty', Screen.GRP_SHOW_BOUNTY, active=False, replaced_by='status')
 GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True, feature=Feature.CHALLENGE,
                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 GRP_PREDICTION_BET = Command('bet', Screen.GRP_PREDICTION_BET, only_in_reply=True,
@@ -147,9 +146,9 @@ GRP_SETTINGS = Command('settings', Screen.GRP_SETTINGS, allow_while_arrested=Tru
 ADM_SAVE_MEDIA = Command('savemedia', Screen.ADM_SAVE_MEDIA, allow_self_reply=True, allow_reply_to_bot=True)
 
 COMMANDS = [ND, PVT_START, GRP_DOC_Q_GAME, GRP_USER_STATUS, GRP_CHANGE_REGION_NEW_WORLD,
-            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, GRP_SHOW_BOUNTY, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME,
-            GRP_PREDICTION_BET, GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE,
-            PVT_SETTINGS, PVT_SETTINGS_LOCATION_UPDATE, PVT_SETTINGS_NOTIFICATIONS, PVT_SETTINGS_NOTIFICATIONS_TYPE,
+            GRP_CHANGE_REGION_PARADISE, GRP_FIGHT, ADM_SAVE_MEDIA, PVT_USER_STATUS, GRP_GAME, GRP_PREDICTION_BET,
+            GRP_PREDICTION_BET_REMOVE, GRP_PREDICTION_BET_STATUS, GRP_CREW_JOIN, GRP_CREW_INVITE, PVT_SETTINGS,
+            PVT_SETTINGS_LOCATION_UPDATE, PVT_SETTINGS_NOTIFICATIONS, PVT_SETTINGS_NOTIFICATIONS_TYPE,
             PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, GRP_SILENCE, GRP_SILENCE_END, GRP_SPEAK, GRP_BOUNTY_GIFT,
             GRP_DEVIL_FRUIT_COLLECT, GRP_SETTINGS]
 
