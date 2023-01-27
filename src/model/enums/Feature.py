@@ -43,20 +43,34 @@ class Feature(IntEnum):
                 Feature.STATUS]
 
     @staticmethod
+    def get_restricted() -> list['Feature']:
+        """
+        Get all the features that are restricted to the main group
+
+        :return: All the features that are restricted
+        """
+        return [Feature.BOUNTY_MESSAGES_GAIN,
+                Feature.DEVIL_FRUIT_APPEARANCE,
+                Feature.SILENCE]
+
+    @staticmethod
     def get_non_restricted() -> list['Feature']:
         """
         Get all the features that are not restricted to the main group
 
         :return: All the features that are not restricted
         """
-        return [Feature.BOUNTY_GIFT,
-                Feature.CHALLENGE,
-                Feature.CREW,
-                Feature.DOC_Q,
-                Feature.FIGHT,
-                Feature.LEADERBOARD,
-                Feature.PREDICTION,
-                Feature.STATUS]
+
+        return list(set(Feature.get_all()) - set(Feature.get_restricted()))
+
+    def is_restricted(self) -> bool:
+        """
+        Checks if the feature is restricted to the main group
+
+        :return: True if the feature is restricted, False otherwise
+        """
+
+        return self in Feature.get_restricted()
 
 
 FEATURE_DESCRIPTION_MAP = {

@@ -17,6 +17,7 @@ from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.Group import Group
 from src.model.Topic import Topic
 from src.model.User import User
+from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.AdminChatError import AdminChatException
@@ -25,7 +26,7 @@ from src.model.error.CustomException import CommandValidationException, Navigati
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.group_service import feature_is_enabled, get_group_or_topic_text
+from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
     full_message_or_media_send_or_edit, message_is_reply
 from src.service.user_service import user_is_boss, user_is_muted
@@ -234,6 +235,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             return False
 
     _message_is_reply = message_is_reply(update)
+    _is_main_group = group is not None and is_main_group(group)
+    is_restricted_feature_error = False
+
     # Is active
     try:
         if not command.active:
@@ -319,7 +323,16 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
                 if not target_user.is_crew_member():
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
 
+        # Can only be used in main group
+        if command.feature is not None and message_source is MessageSource.GROUP:
+            feature: Feature = command.feature
+            if feature.is_restricted() and not _is_main_group:
+                is_restricted_feature_error = True
+                raise CommandValidationException("")
+
     except CommandValidationException as cve:
+        if is_restricted_feature_error:  # Restricted feature in group, no error message
+            return False
         if not command.answer_callback and await user_is_muted(user, update):
             await delete_message(update)
         else:

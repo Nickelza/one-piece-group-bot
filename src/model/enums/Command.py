@@ -133,9 +133,9 @@ GRP_PREDICTION_BET_STATUS = Command('bstatus', Screen.GRP_PREDICTION_BET_STATUS,
                                     allow_reply_to_bot=True)
 GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True, feature=Feature.CREW)
 GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True, feature=Feature.CREW)
-GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True)
-GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_boss=True)
-GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True)
+GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True, feature=Feature.SILENCE)
+GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_boss=True, feature=Feature.SILENCE)
+GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True, feature=Feature.SILENCE)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT)
 # To define limitations
 GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
