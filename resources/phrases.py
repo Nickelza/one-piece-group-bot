@@ -559,7 +559,7 @@ DOC_Q_GAME_LOG_ITEM_TEXT = '{} ฿{}'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
                                   '\n\n{}' \
-                                  f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+                                  f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
 # Logs - Game
 GAME_LOG_KEY = 'Challenges'
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'

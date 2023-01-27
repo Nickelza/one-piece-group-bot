@@ -220,7 +220,9 @@ class DocQGameLog(Log):
             (phrases.TEXT_WON if won else phrases.TEXT_LOST),
             get_belly_formatted(self.object.belly))
 
-        return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(date, correct_apple, outcome_text, self.object.message_id)
+        return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
+            date, correct_apple, outcome_text,
+            get_message_url(self.object.group, self.object.topic, self.object.message_id))
 
 
 class GameLog(Log):

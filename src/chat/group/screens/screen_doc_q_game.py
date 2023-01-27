@@ -3,14 +3,16 @@ from datetime import datetime
 
 from strenum import StrEnum
 from telegram import Update, Message
-from telegram.error import BadRequest, TelegramError
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
+from src.model.Group import Group
 from src.model.SavedMedia import SavedMedia
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
@@ -23,7 +25,7 @@ from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_send_or_edit, \
-    mention_markdown_v2
+    mention_markdown_v2, delete_message
 
 
 class DocQReservedKeys(StrEnum):
@@ -96,35 +98,34 @@ async def validate_play(update: Update, context: ContextTypes.DEFAULT_TYPE, user
                                                              (DocQGame.status == GameStatus.IN_PROGRESS))
     for previous_game in previous_games:
         if previous_game != doc_q_game:
-            await delete_game(update, context, previous_game)
+            await delete_game(context, previous_game)
 
     return True
 
 
-async def delete_game(update: Update, context: ContextTypes.DEFAULT_TYPE, doc_q_game: DocQGame) -> None:
+async def delete_game(context: ContextTypes.DEFAULT_TYPE, doc_q_game: DocQGame) -> None:
     """
     Delete game
-    :param update: The update
     :param context: The context
     :param doc_q_game: The doc q game
     :return: None
     """
     # Try to delete message
-    try:
-        await context.bot.delete_message(update.effective_chat.id, doc_q_game.message_id)
-    except TelegramError:
-        pass
+    await delete_message(context=context, group=doc_q_game.group, message_id=doc_q_game.message_id)
 
     # Delete game
     doc_q_game.delete_instance()
 
 
-async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
+async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group: Group, topic: Topic
+                       ) -> None:
     """
     User request to play Doc Q Game
     :param update: The update
     :param context: The context
     :param user: The user
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
     if await validate_play(update, context, user):
@@ -185,8 +186,17 @@ async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
                                                   get_belly_formatted(final_bounty_if_win),
                                                   get_belly_formatted(final_bounty_if_lose))
 
+        # Delete button, can't be replaced by add_delete_button because wagers have to be returned
+        inline_keyboard.append(
+            [Keyboard(phrases.KEYBOARD_OPTION_CANCEL,
+                      info={DocQReservedKeys.DOC_Q_ID: doc_q_game.id, DocQReservedKeys.CANCEL: True},
+                      screen=Screen.GRP_DOC_Q_GAME)])
+
         message: Message = await full_media_send(context, doc_q_media, update, caption=caption,
-                                                 keyboard=inline_keyboard, add_delete_button=True)
+                                                 keyboard=inline_keyboard)
+
+        doc_q_game.group = group
+        doc_q_game.topic = topic
         doc_q_game.message_id = message.message_id
         doc_q_game.save()
 
@@ -212,7 +222,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         if DocQReservedKeys.CANCEL in keyboard.info:
             # Answer callback with goodbye message
             await full_message_send(context, phrases.DOC_Q_GAME_CANCEL, update, answer_callback=True)
-            await delete_game(update, context, doc_q_game)
+            await delete_game(context, doc_q_game)
             return
 
         win_odd = get_win_odd(user)
@@ -254,18 +264,21 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         doc_q_game.save()
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard, group: Group,
+                 topic: Topic) -> None:
     """
     Manage Doc Q Game screen
     :param update: The update
     :param context: The context
     :param user: The user
     :param keyboard: The keyboard
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
     # Request to play
     if keyboard is None:
-        await play_request(update, context, user)
+        await play_request(update, context, user, group, topic)
         return
 
     await keyboard_interaction(update, context, user, keyboard)

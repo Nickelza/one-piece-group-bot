@@ -126,7 +126,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_show_status(update, context, command, user)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
-                await manage_screen_doc_q_game(update, context, user, keyboard=inbound_keyboard)
+                await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group, topic)
 
             case Screen.GRP_CHANGE_REGION:  # Change region
                 await manage_screen_change_region(update, context, user, keyboard=inbound_keyboard, command=command)
