@@ -14,6 +14,8 @@ from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
+from src.model.Group import Group
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -23,6 +25,7 @@ from src.model.error.CustomException import CommandValidationException, Navigati
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.group_service import feature_is_enabled, get_group_or_topic_text
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
     full_message_or_media_send_or_edit, message_is_reply
 from src.service.user_service import user_is_boss, user_is_muted
@@ -118,6 +121,13 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         await update.effective_chat.leave()
         return
 
+    # Group
+    # noinspection PyTypeChecker
+    group = topic = None
+    if message_source is MessageSource.GROUP:
+        group: Group = add_or_update_group(update)
+        topic: Topic = add_or_update_topic(update, group)
+
     command: Command.Command = Command.ND
     keyboard = None
     try:
@@ -156,7 +166,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             pass
 
     if command != Command.ND or is_callback:
-        if not await validate(update, context, command, user, keyboard, target_user, is_callback):
+        if not await validate(update, context, command, user, keyboard, target_user, is_callback, message_source,
+                              group, topic):
             return
 
     if command is not None:
@@ -167,7 +178,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             case MessageSource.PRIVATE:
                 await manage_private_chat(update, context, command, user, keyboard)
             case MessageSource.GROUP:
-                await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback)
+                await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback, group,
+                                        topic)
             case MessageSource.ADMIN:
                 await manage_admin_chat(update, context, command)
             case MessageSource.TG_REST:
@@ -192,8 +204,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                   inbound_keyboard: Keyboard,
-                   target_user: User, is_callback: bool) -> bool:
+                   inbound_keyboard: Keyboard, target_user: User, is_callback: bool, message_source: MessageSource,
+                   group: Group, topic: Topic) -> bool:
     """
     Validate the command
     :param update: Telegram update
@@ -203,6 +215,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
     :param inbound_keyboard: The keyboard
     :param target_user: The target user in case of a reply
     :param is_callback: True if the message is a callback
+    :param message_source: The message source
+    :param group: The group
+    :param topic: The topic
     :return: True if the command is valid
     """
 
@@ -298,6 +313,12 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
                 if not target_user.is_crew_member():
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
 
+        if command.feature is not None and message_source is MessageSource.GROUP:
+            if not feature_is_enabled(group, topic, command.feature):
+                raise CommandValidationException(phrases.COMMAND_FEATURE_DISABLED_ERROR.format(
+                    get_group_or_topic_text(topic)
+                ))
+
     except CommandValidationException as cve:
         if not command.answer_callback and await user_is_muted(user, update):
             await delete_message(update)
@@ -332,3 +353,53 @@ def get_user(effective_user: TelegramUser) -> User:
     user.save()
 
     return user
+
+
+def add_or_update_group(update) -> Group:
+    """
+    Adds or updates a group
+    :param update: Telegram update
+    :return: Group object
+    """
+    group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
+
+    if group is None:
+        group = Group()
+        group.tg_group_id = update.effective_chat.id
+
+    # If the group has been migrated, update the ID
+    try:
+        if update.message.migrate_to_chat_id is not None:
+            group.tg_group_id = update.message.migrate_to_chat_id
+    except AttributeError:
+        pass
+
+    group.tg_group_name = update.effective_chat.title
+    group.tg_group_username = update.effective_chat.username
+    group.last_message_date = datetime.now()
+    group.save()
+
+    return group
+
+
+def add_or_update_topic(update, group: Group) -> Topic | None:
+    """
+    Adds or updates a topic
+    :param update: Telegram update
+    :param group: Group object
+    :return: Topic object
+    """
+    if not update.effective_chat.is_forum:
+        return None
+
+    topic = Topic.get_or_none(Topic.tg_topic_id == update.effective_message.message_thread_id)
+
+    if topic is None:
+        topic = Topic()
+        topic.group = group
+        topic.tg_topic_id = update.effective_message.message_thread_id
+
+    topic.last_message_date = datetime.now()
+    topic.save()
+
+    return topic

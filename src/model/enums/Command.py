@@ -1,5 +1,6 @@
 import resources.Environment as Env
 import src.model.enums.Location as Location
+from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.Screen import Screen
 
@@ -22,7 +23,8 @@ class Command:
                  parameters: list = None, message_source: MessageSource = MessageSource.ND,
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
                  only_by_boss: bool = False, allow_reply_to_arrested: bool = False, answer_callback: bool = False,
-                 show_alert: bool = True, only_by_chat_admin: bool = False, send_message_if_error: bool = True):
+                 show_alert: bool = True, only_by_chat_admin: bool = False, send_message_if_error: bool = True,
+                 feature: Feature = None):
         """
         Constructor
         :param name: The name of the command
@@ -47,6 +49,8 @@ class Command:
         :param show_alert: True if the command should show an alert when answering the callback query in case of error
         :param only_by_chat_admin: True if the command can only be used by a chat admin
         :param send_message_if_error: True if a message should be sent if the command isn't authorized
+        :param feature: The feature the command belongs to. If provided, the command will only be allowed in chats
+                        that have the feature enabled
         """
         self.name = name
         self.active = active
@@ -67,6 +71,7 @@ class Command:
         self.show_alert = show_alert
         self.only_by_chat_admin = only_by_chat_admin
         self.send_message_if_error = send_message_if_error
+        self.feature = feature
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True

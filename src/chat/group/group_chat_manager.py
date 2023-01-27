@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Tuple
 
 from telegram import Update
@@ -57,7 +56,7 @@ async def update_user_bounty(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                 keyboard: Keyboard, target_user: User, is_callback: bool) -> None:
+                 keyboard: Keyboard, target_user: User, is_callback: bool, group: Group, topic: Topic) -> None:
     """
     Main function for the group chat manager
     :param update: Telegram update
@@ -67,11 +66,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     :param keyboard: Keyboard
     :param target_user: The target user in case of a reply
     :param is_callback: True if the message is a callback, False otherwise
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
-
-    # Add or update group
-    group: Group = add_or_update_group(update)
 
     # Get added or removed from group
     added_to_group, removed_from_group = get_added_or_removed_from_group_event(update)
@@ -84,9 +82,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         group.is_active = True
         group.save()
         command = Command.GRP_SETTINGS
-
-    # Add or update topic
-    topic: Topic = add_or_update_topic(update, group)
 
     # Insert or update user, with message count
     try:
@@ -290,56 +285,6 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
         return False
 
     return True
-
-
-def add_or_update_group(update) -> Group:
-    """
-    Adds or updates a group
-    :param update: Telegram update
-    :return: Group object
-    """
-    group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
-
-    if group is None:
-        group = Group()
-        group.tg_group_id = update.effective_chat.id
-
-    # If the group has been migrated, update the ID
-    try:
-        if update.message.migrate_to_chat_id is not None:
-            group.tg_group_id = update.message.migrate_to_chat_id
-    except AttributeError:
-        pass
-
-    group.tg_group_name = update.effective_chat.title
-    group.tg_group_username = update.effective_chat.username
-    group.last_message_date = datetime.now()
-    group.save()
-
-    return group
-
-
-def add_or_update_topic(update, group: Group) -> Topic | None:
-    """
-    Adds or updates a topic
-    :param update: Telegram update
-    :param group: Group object
-    :return: Topic object
-    """
-    if not update.effective_chat.is_forum:
-        return None
-
-    topic = Topic.get_or_none(Topic.tg_topic_id == update.effective_message.message_thread_id)
-
-    if topic is None:
-        topic = Topic()
-        topic.group = group
-        topic.tg_topic_id = update.effective_message.message_thread_id
-
-    topic.last_message_date = datetime.now()
-    topic.save()
-
-    return topic
 
 
 def get_added_or_removed_from_group_event(update) -> Tuple[bool, bool]:

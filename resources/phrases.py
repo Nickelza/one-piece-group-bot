@@ -17,6 +17,8 @@ COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in re
 COMMAND_ONLY_BY_BOSS_ERROR = 'This command can only be used by an Admin, the Pirate King or a Legendary Pirate'
 COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a message from an arrested user"
 COMMAND_ONLY_BY_CHAT_ADMIN_ERROR = 'This command can only be used by a chat admin'
+COMMAND_FEATURE_DISABLED_ERROR = 'This feature is currently disabled in this {}.' \
+                                 f'\nYou can ask an Admin to enable via {Command.GRP_SETTINGS.get_formatted()}'
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
