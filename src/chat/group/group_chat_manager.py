@@ -171,7 +171,8 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_speak(update, context, target_user)
 
             case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
-                await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command)
+                await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command, group,
+                                                topic)
 
             case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
                 await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)

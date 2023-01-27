@@ -136,7 +136,7 @@ GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True)
 GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True)
 GRP_SILENCE_END = Command('silenceend', Screen.GRP_SILENCE_END, only_by_boss=True)
 GRP_SPEAK = Command('speak', Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True)
-GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True)
+GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT)
 # To define limitations
 GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),

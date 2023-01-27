@@ -18,6 +18,7 @@ from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
+from src.service.group_service import get_message_url
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars
 
@@ -341,9 +342,10 @@ class BountyGiftLog(Log):
                                                                            self.object.tax_percentage,
                                                                            get_belly_formatted(total_amount))
 
-        return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(sender_text, self.other_user.get_markdown_mention(),
-                                                               date, get_belly_formatted(self.object.amount), tax_text,
-                                                               self.object.message_id)
+        return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(
+            sender_text, self.other_user.get_markdown_mention(),
+            date, get_belly_formatted(self.object.amount), tax_text,
+            get_message_url(self.object.group, self.object.topic, self.object.message_id))
 
 
 class LegendaryPirateLog(Log):

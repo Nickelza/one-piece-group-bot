@@ -4,6 +4,8 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
+from src.model.Group import Group
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Command import Command
@@ -21,7 +23,7 @@ from src.service.user_service import user_is_boss
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 target_user: User, command: Command) -> None:
+                 target_user: User, command: Command, group: Group, topic: Topic) -> None:
     """
     Manage the Bounty gift screen
     :param update: The update object
@@ -30,12 +32,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :param inbound_keyboard: The keyboard object
     :param target_user: The target user in case of a reply
     :param command: The command
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
 
     # Request send a gift
     if inbound_keyboard is None:
-        await send_request(update, context, user, target_user, command)
+        await send_request(update, context, user, target_user, command, group, topic)
         return
 
     await keyboard_interaction(update, context, user, inbound_keyboard)
@@ -83,7 +87,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
 
 
 async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
-                       command: Command) -> None:
+                       command: Command, group: Group, topic: Topic) -> None:
     """
     Send request to send a bounty gift
     :param update: The update object
@@ -91,6 +95,8 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     :param sender: The user that wants to send a bounty gift
     :param receiver: The user to send the bounty gift to
     :param command: The command
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
 
@@ -118,6 +124,8 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
                                                                  primary_key=bounty_gift.id)]
 
     message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+    bounty_gift.group = group
+    bounty_gift.topic = topic
     bounty_gift.message_id = message.message_id
     bounty_gift.save()
 
@@ -166,7 +174,7 @@ async def get_amounts(update: Update, sender: User, receiver: User, command: Com
         tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_TAX, tax_percentage)
 
     # Parse to int if tax does not have a decimal
-    if tax_percentage.is_integer():
+    if float(tax_percentage).is_integer():
         tax_percentage = int(tax_percentage)
 
     tax_amount = int(get_value_from_percentage(amount, tax_percentage))

@@ -542,6 +542,8 @@ LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
                                 '\n_\\(The message may no longer be available\\)_'
+LOG_ITEM_DETAIL_GO_TO_MESSAGE2 = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
+                                  '\n_\\(The message may no longer be available\\)_')
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
@@ -578,7 +580,7 @@ BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT = '\n*Tax*: ฿{} \\({}%\\)' \
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                                    '\n*Date*: {}' \
                                    '\n*Amount*: ฿{}{}' \
-                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
 # Logs - Legendary Pirate
 LEGENDARY_PIRATE_LOG_KEY = 'Legendary Pirates'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Legendary Pirate'
