@@ -242,6 +242,13 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
 
             raise CommandValidationException(phrases.COMMAND_NOT_ACTIVE_ERROR)
 
+        # Feature not allowed in group
+        if command.feature is not None and message_source is MessageSource.GROUP:
+            if not feature_is_enabled(group, topic, command.feature):
+                raise CommandValidationException(phrases.COMMAND_FEATURE_DISABLED_ERROR.format(
+                    get_group_or_topic_text(topic)
+                ))
+
         # Cannot be used while arrested
         if not command.allow_while_arrested:
             if user.is_arrested():
@@ -313,12 +320,6 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
                 if not target_user.is_crew_member():
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
 
-        if command.feature is not None and message_source is MessageSource.GROUP:
-            if not feature_is_enabled(group, topic, command.feature):
-                raise CommandValidationException(phrases.COMMAND_FEATURE_DISABLED_ERROR.format(
-                    get_group_or_topic_text(topic)
-                ))
-
     except CommandValidationException as cve:
         if not command.answer_callback and await user_is_muted(user, update):
             await delete_message(update)
@@ -389,7 +390,7 @@ def add_or_update_topic(update, group: Group) -> Topic | None:
     :param group: Group object
     :return: Topic object
     """
-    if not update.effective_chat.is_forum or update.effective_message.message_thread_id is None:
+    if not update.effective_chat.is_forum or not update.effective_message.is_topic_message:
         return None
 
     topic = Topic.get_or_none((Topic.group == group) &
