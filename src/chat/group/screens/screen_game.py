@@ -7,6 +7,8 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Game import Game
+from src.model.Group import Group
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
@@ -58,11 +60,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
         ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_time(challenger.game_cooldown_end_date))
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
-        pending_games: list[Game] = Game.select().where(Game.challenger == challenger,
-                                                        Game.status not in GameStatus.get_finished())
+        pending_games: list[Game] = Game.select().where((Game.challenger == challenger) &
+                                                        (Game.status.not_in(GameStatus.get_finished())))
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
-                                               url=get_message_url(Env.OPD_GROUP_ID.get_int(), game.message_id))])
+                                               url=get_message_url(game.group, game.topic, game.message_id))])
 
         await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False
@@ -87,13 +89,16 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
     return True
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command, group: Group,
+                 topic: Topic) -> None:
     """
     Manage the game screen
     :param update: The update object
     :param context: The context object
     :param user: The user object
     :param command: The command
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
     opponent: User = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
@@ -110,6 +115,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game.challenger = user
     game.opponent = opponent
     game.wager = get_amount_from_string(command.parameters[0])
+    game.group = group
+    game.topic = topic
     game.save()
 
     user.bounty -= game.wager

@@ -43,21 +43,21 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     # User clicked on cancel button or opponent rejected
     if (GameOpponentConfirmationReservedKeys.CANCEL in inbound_keyboard.info
             or not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]):
-        delete_message = True
+        should_delete_message = True
 
         if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:  # Opponent rejected
-            delete_message = False
+            should_delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
             await full_message_send(context, ot_text, update=update, authorized_users=[game.challenger, game.opponent],
                                     add_delete_button=True)
 
-        await delete_game(update, context, game, delete_message=delete_message)
+        await delete_game(context, game, should_delete_message=should_delete_message)
         user.should_update_model = False
         return
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
-        await delete_game(update, context, game, delete_message=False)
+        await delete_game(context, game, should_delete_message=False)
         await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
         user.should_update_model = False
         return

@@ -135,7 +135,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_fight(update, context, user, keyboard=inbound_keyboard)
 
             case Screen.GRP_GAME:  # Game
-                await manage_screen_game(update, context, user, command)
+                await manage_screen_game(update, context, user, command, group, topic)
 
             case Screen.GRP_GAME_SELECTION:  # Game selection
                 await manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)

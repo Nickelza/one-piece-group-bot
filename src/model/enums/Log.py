@@ -18,9 +18,8 @@ from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
-from src.service.group_service import get_message_url
 from src.service.math_service import get_value_from_percentage
-from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars
+from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url
 
 
 class LogType(IntEnum):
@@ -283,9 +282,10 @@ class GameLog(Log):
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
                 GAME_STATUS_DESCRIPTIONS[self.effective_status])
 
-        return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(challenger_text, self.opponent.get_markdown_mention(),
-                                                        game_name, date, get_belly_formatted(self.object.wager),
-                                                        outcome_text, self.object.message_id)
+        return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
+            challenger_text, self.opponent.get_markdown_mention(), game_name, date,
+            get_belly_formatted(self.object.wager), outcome_text,
+            get_message_url(self.object.group, self.object.topic, self.object.message_id))
 
 
 class BountyGiftLog(Log):

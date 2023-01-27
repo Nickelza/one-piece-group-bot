@@ -11,7 +11,9 @@ from telegram.helpers import mention_markdown
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.model.Group import Group
 from src.model.SavedMedia import SavedMedia
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -629,14 +631,18 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
 
 
 async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: int = None,
-                         message_id: int = None):
+                         message_id: int = None, group: Group = None):
     """
     Delete a message with best effort
     :param update: Update object
     :param context: Context object
     :param chat_id: Chat id
     :param message_id: Message id
+    :param group: The group
     """
+
+    if group is not None:
+        chat_id = group.tg_group_id
 
     if update is None and (context is None or chat_id is None or message_id is None):
         raise ValueError('update or context and chat_id and message_id must be specified')
@@ -647,6 +653,7 @@ async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TY
         else:
             await context.bot.delete_message(chat_id, message_id)
     except TelegramError:
+        logging.error(f'Failed to delete message {message_id} in chat {chat_id}')
         pass
 
 
@@ -670,18 +677,6 @@ def get_message_source(update: Update) -> MessageSource:
         return MessageSource.TG_REST
 
     return MessageSource.ND
-
-
-def get_message_url(chat_id: int, message_id: int) -> str:
-    """
-    Get the message url
-    :param chat_id: Chat id
-    :param message_id: Message id
-    :return: Message url
-    """
-
-    chat_id_cleaned = str(chat_id).replace('-100', '')
-    return f'https://t.me/c/{chat_id_cleaned}/{message_id}'
 
 
 def get_start_with_command_url(command: str) -> str:
@@ -741,3 +736,19 @@ def message_is_reply(update: Update) -> bool:
                 and update.effective_message.reply_to_message.forum_topic_created is None)
     except AttributeError:
         return False
+
+
+def get_message_url(group: Group, topic: Topic, message_id: int) -> str:
+    """
+    Gets the message url
+    :param group: The group
+    :param topic: The topic
+    :param message_id: The message id
+    :return: The message url
+    """
+
+    tg_group_id = str(group.tg_group_id).replace('-100', '')
+    if topic is not None:
+        return f"https://t.me/c/{tg_group_id}/{topic.tg_topic_id}/{message_id}"
+    else:
+        return f"https://t.me/c/{tg_group_id}/{message_id}"

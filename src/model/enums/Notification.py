@@ -16,7 +16,8 @@ from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceTy
 from src.model.game.GameType import GameType
 from src.service.cron_service import get_remaining_time
 from src.service.date_service import default_datetime_format
-from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user
+from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
+    get_message_url
 
 
 class NotificationCategory(IntEnum):
@@ -222,7 +223,7 @@ class GameTurnNotification(Notification):
 
         return self.text.format(get_game_name(GameType(self.game.type)),
                                 mention_markdown_user(self.opponent),
-                                self.game.message_id)
+                                get_message_url(self.game.group, self.game.topic, self.game.message_id))
 
 
 class CrewMemberRemoveNotification(Notification):

@@ -418,8 +418,7 @@ CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = \
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
-                         f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' \
-                         f'\\({CHAT_GROUP_MESSAGE_URL}\\)'
+                         f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' + '({})'
 GAME_TURN_NOTIFICATION_DESCRIPTION = 'If to be notified when it is your turn to play in a game if no action is taken ' \
                                      f'for {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds'
 GAME_TURN_NOTIFICATION_KEY = 'Game turn'
@@ -570,7 +569,7 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Date*: {}' \
                             '\n*Wager*: ฿{}' \
                             '\n\n{}' \
-                            f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+                            f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
 # Logs - Bounty Gift
 BOUNTY_GIFT_LOG_KEY = 'Bounty Gifts'
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Bounty Gift'

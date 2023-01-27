@@ -47,22 +47,6 @@ def get_group_or_topic_text(topic: Topic) -> str:
         return phrases.TEXT_GROUP
 
 
-def get_message_url(group: Group, topic: Topic, message_id: int) -> str:
-    """
-    Gets the message url
-    :param group: The group
-    :param topic: The topic
-    :param message_id: The message id
-    :return: The message url
-    """
-
-    tg_group_id = str(group.tg_group_id).replace('-100', '')
-    if topic is not None:
-        return f"https://t.me/c/{tg_group_id}/{topic.tg_topic_id}/{message_id}"
-    else:
-        return f"https://t.me/c/{tg_group_id}/{message_id}"
-
-
 def allow_bounty_from_messages(group: Group, topic: Topic) -> bool:
     """
     Checks if the group/topic allows bounty from messages

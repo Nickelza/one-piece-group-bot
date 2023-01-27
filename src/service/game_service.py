@@ -1,7 +1,6 @@
 import asyncio
 
 from telegram import Update
-from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -17,7 +16,7 @@ from src.model.game.GameTurn import GameTurn
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
-from src.service.message_service import full_message_send, mention_markdown_user
+from src.service.message_service import full_message_send, mention_markdown_user, delete_message
 from src.service.notification_service import send_notification
 
 
@@ -114,22 +113,17 @@ def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOu
                                     added_ot_text)
 
 
-async def delete_game(update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, delete_message: bool = True
-                      ) -> None:
+async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_delete_message: bool = True) -> None:
     """
     Delete game
-    :param update: The update
     :param context: The context
     :param game: The game
-    :param delete_message: If the message should be deleted
+    :param should_delete_message: If the message should be deleted
     :return: None
     """
     # Try to delete message
-    if delete_message:
-        try:
-            await context.bot.delete_message(update.effective_chat.id, game.message_id)
-        except TelegramError:
-            pass
+    if should_delete_message:
+        await delete_message(context=context, group=game.group, message_id=game.message_id)
 
     # Return wager to challenger
     challenger: User = game.challenger

@@ -122,7 +122,7 @@ GRP_CHANGE_REGION_PARADISE = Command('paradise', Screen.GRP_CHANGE_REGION,
 GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True,
                     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()))
 GRP_SHOW_BOUNTY = Command('bounty', Screen.GRP_SHOW_BOUNTY, active=False, replaced_by='status')
-GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True,
+GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True, feature=Feature.CHALLENGE,
                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 GRP_PREDICTION_BET = Command('bet', Screen.GRP_PREDICTION_BET, only_in_reply=True,
                              required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_PREDICTION_BET
