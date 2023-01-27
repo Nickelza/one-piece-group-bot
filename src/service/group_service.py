@@ -1,5 +1,3 @@
-from telegram import Update
-
 import resources.Environment as Env
 from resources import phrases
 from src.model.Group import Group
@@ -9,14 +7,14 @@ from src.model.TopicDisableFeature import TopicDisabledFeature
 from src.model.enums.Feature import Feature
 
 
-def is_main_group(update: Update) -> bool:
+def is_main_group(group: Group) -> bool:
     """
     Checks if the update is from the main group
-    :param update: The update
-    :return: True if the update is from the main group, False otherwise
+    :param group: The group
+    :return: True if the message is from the main group, False otherwise
     """
 
-    return update.effective_chat.id == Env.OPD_GROUP_ID.get_int()
+    return int(group.tg_group_id) == Env.OPD_GROUP_ID.get_int()
 
 
 def feature_is_enabled(group: Group, topic: Topic, feature: Feature) -> bool:
@@ -63,3 +61,17 @@ def get_message_url(group: Group, topic: Topic, message_id: int) -> str:
         return f"https://t.me/c/{tg_group_id}/{topic.tg_topic_id}/{message_id}"
     else:
         return f"https://t.me/c/{tg_group_id}/{message_id}"
+
+
+def allow_bounty_from_messages(group: Group, topic: Topic) -> bool:
+    """
+    Checks if the group/topic allows bounty from messages
+    :param group: The group
+    :param topic: The topic
+    :return: True if the group/topic allows bounty from messages, False otherwise
+    """
+
+    if not is_main_group(group):
+        return False
+
+    return feature_is_enabled(group, topic, Feature.BOUNTY_MESSAGES_GAIN)

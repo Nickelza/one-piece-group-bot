@@ -68,7 +68,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         else:
             group = Group.get_by_id(group.id)
 
-    outbound_keyboard = get_settings_keyboard(update, group, topic, is_topic)
+    outbound_keyboard = get_settings_keyboard(group, topic, is_topic)
 
     thanks_text = phrases.THANKS_FOR_ADDING_TO_GROUP if added_to_group else ''
     chat_type_text = phrases.TEXT_GROUP if not is_topic else phrases.TEXT_TOPIC
@@ -78,10 +78,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                             use_close_delete=True)
 
 
-def get_settings_keyboard(update: Update, group: Group, topic: Topic, is_topic: bool) -> list[list[Keyboard]]:
+def get_settings_keyboard(group: Group, topic: Topic, is_topic: bool) -> list[list[Keyboard]]:
     """
     Get the settings keyboard
-    :param update: The update object
     :param group: The group
     :param topic: The topic
     :param is_topic: Whether the settings are for a topic
@@ -89,7 +88,7 @@ def get_settings_keyboard(update: Update, group: Group, topic: Topic, is_topic: 
     """
 
     # Get all features
-    if is_main_group(update):
+    if is_main_group(group):
         features: list[Feature] = Feature.get_all()
     else:
         features: list[Feature] = Feature.get_non_restricted()

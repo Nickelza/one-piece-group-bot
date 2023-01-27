@@ -37,6 +37,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
+from src.service.group_service import allow_bounty_from_messages
 from src.service.message_service import delete_message
 from src.service.notification_service import send_notification
 from src.service.user_service import user_is_muted
@@ -94,7 +95,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if not await validate(update, context, user, is_callback):
         return
 
-    await update_user_bounty(update, context, user)
+    # Update bounty from message gain
+    if allow_bounty_from_messages(group, topic):
+        await update_user_bounty(update, context, user)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group, topic, added_to_group)
 

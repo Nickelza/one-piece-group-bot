@@ -389,10 +389,11 @@ def add_or_update_topic(update, group: Group) -> Topic | None:
     :param group: Group object
     :return: Topic object
     """
-    if not update.effective_chat.is_forum:
+    if not update.effective_chat.is_forum or update.effective_message.message_thread_id is None:
         return None
 
-    topic = Topic.get_or_none(Topic.tg_topic_id == update.effective_message.message_thread_id)
+    topic = Topic.get_or_none((Topic.group == group) &
+                              (Topic.tg_topic_id == update.effective_message.message_thread_id))
 
     if topic is None:
         topic = Topic()
