@@ -2,13 +2,14 @@ import datetime
 
 from strenum import StrEnum
 from telegram import Update, Message
-from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
 from src.model.Fight import Fight
+from src.model.Group import Group
 from src.model.SavedMedia import SavedMedia
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
@@ -26,7 +27,7 @@ from src.service.devil_fruit_service import get_value
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
-    mention_markdown_v2, full_media_send, full_message_or_media_send_or_edit
+    mention_markdown_v2, full_media_send, full_message_or_media_send_or_edit, delete_message
 
 
 class FightReservedKeys(StrEnum):
@@ -159,30 +160,30 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     return win_probability, win_amount, lose_amount, final_bounty_if_won, final_bounty_if_lose
 
 
-async def delete_fight(update: Update, context: ContextTypes.DEFAULT_TYPE, fight: Fight) -> None:
+async def delete_fight(context: ContextTypes.DEFAULT_TYPE, fight: Fight, group: Group) -> None:
     """
     Delete fight
-    :param update: The update
     :param context: The context
     :param fight: The fight
+    :param group: The group
     :return: None
     """
     # Try to delete message
-    try:
-        await context.bot.delete_message(update.effective_chat.id, fight.message_id)
-    except TelegramError:
-        pass
+    await delete_message(context=context, group=group, message_id=fight.message_id)
 
     # Delete fight
     fight.delete_instance()
 
 
-async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
+async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group: Group, topic: Topic
+                       ) -> None:
     """
     Send request to confirm fight
-    :param update: The update object
-    :param context: The context object
-    :param user: The user object
+    :param update: The update
+    :param context: The context
+    :param user: The user
+    :param group: The group
+    :param topic: The topic
     :return: None
     """
 
@@ -190,7 +191,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
     previous_fights: list[Fight] = Fight.select().where((Fight.challenger == user) &
                                                         (Fight.status == GameStatus.IN_PROGRESS))
     for previous_fight in previous_fights:
-        await delete_fight(update, context, previous_fight)
+        await delete_fight(context, previous_fight, group)
 
     # Get opponent
     opponent: User = get_opponent(update)
@@ -232,18 +233,22 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
 
     message: Message = await full_media_send(context, fight_media, update=update, caption=caption,
                                              keyboard=inline_keyboard)
+
+    fight.group = group
+    fight.topic = topic
     fight.message_id = message.message_id
     fight.save()
 
 
-async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard
-                               ) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard,
+                               group: Group) -> None:
     """
     Keyboard interaction
     :param update: The update
     :param context: The context
     :param user: The user
     :param keyboard: The keyboard
+    :param group: The group
     :return: None
     """
 
@@ -254,7 +259,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     if not keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         # Answer callback with retreat message
         await full_message_send(context, phrases.FIGHT_CONFIRMATION_RETREAT, update, answer_callback=True)
-        await delete_fight(update, context, fight)
+        await delete_fight(context, fight, group)
         return
 
     opponent: User = fight.opponent
@@ -306,13 +311,16 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     fight.save()
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard, group: Group,
+                 topic: Topic) -> None:
     """
     Manage the fight request
     :param update: The update object
     :param context: The context object
     :param user: The user object
     :param keyboard: The keyboard object
+    :param group: The group object
+    :param topic: The topic object
     :return: None
     """
 
@@ -322,7 +330,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     # Request to fight
     if keyboard is None:
-        await send_request(update, context, user)
+        await send_request(update, context, user, group, topic)
         return
 
-    await keyboard_interaction(update, context, user, keyboard)
+    await keyboard_interaction(update, context, user, keyboard, group)

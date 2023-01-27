@@ -173,9 +173,9 @@ class FightLog(Log):
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
                 GAME_STATUS_DESCRIPTIONS[self.effective_status])
 
-        return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(challenger_text, self.opponent.get_markdown_mention(),
-                                                         date, self.object.get_win_probability(self.user),
-                                                         outcome_text, self.object.message_id)
+        return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
+            challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
+            outcome_text, get_message_url(self.object.group, self.object.topic, self.object.message_id))
 
 
 class DocQGameLog(Log):

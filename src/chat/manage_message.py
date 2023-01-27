@@ -233,6 +233,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             await delete_message(update)
             return False
 
+    _message_is_reply = message_is_reply(update)
     # Is active
     try:
         if not command.active:
@@ -266,27 +267,25 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         # Can only be used in reply to a message
         if command.only_in_reply:
             try:
-                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
-                    if update.message.reply_to_message is None:
-                        raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_ERROR)
+                if not _message_is_reply or update.message.reply_to_message is None:  # REPLY_TO_MESSAGE_BUG_FIX
+                    raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_ERROR)
             except AttributeError:
                 pass
 
         # Cannot be in reply to yourself
         if not command.allow_self_reply:
             try:
-                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
-                    if update.message.reply_to_message.from_user.id == update.message.from_user.id:
-                        raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ERROR)
+                if _message_is_reply and update.message.reply_to_message.from_user.id == update.message.from_user.id:
+                    raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ERROR)
             except AttributeError:
                 pass
 
         # Cannot be in reply to a Bot
         if not command.allow_reply_to_bot and not is_callback:
             try:
-                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
-                    if update.effective_message.reply_to_message.from_user.is_bot:
-                        raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
+                # REPLY_TO_MESSAGE_BUG_FIX
+                if _message_is_reply and update.effective_message.reply_to_message.from_user.is_bot:
+                    raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
             except AttributeError:
                 pass
 

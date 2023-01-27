@@ -551,7 +551,7 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Date*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
-                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Doc Q Game'
