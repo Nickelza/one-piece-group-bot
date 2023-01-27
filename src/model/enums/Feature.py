@@ -11,6 +11,8 @@ class Feature(IntEnum):
     FIGHT = 7
     LEADERBOARD = 8
     PREDICTION = 9
+    SILENCE = 10
+    STATUS = 11
 
     def get_description(self) -> str:
         """
@@ -20,23 +22,6 @@ class Feature(IntEnum):
         """
 
         return FEATURE_DESCRIPTION_MAP[self]
-
-    @staticmethod
-    def get_all_description() -> list[str]:
-        """
-        Get all the descriptions of the features
-
-        :return: All the descriptions of the features
-        """
-        return [Feature.BOUNTY_GIFT.get_description(),
-                Feature.BOUNTY_MESSAGES_GAIN.get_description(),
-                Feature.CHALLENGE.get_description(),
-                Feature.CREW.get_description(),
-                Feature.DEVIL_FRUIT_APPEARANCE.get_description(),
-                Feature.DOC_Q.get_description(),
-                Feature.FIGHT.get_description(),
-                Feature.LEADERBOARD.get_description(),
-                Feature.PREDICTION.get_description()]
 
     @staticmethod
     def get_all() -> list['Feature']:
@@ -53,7 +38,9 @@ class Feature(IntEnum):
                 Feature.DOC_Q,
                 Feature.FIGHT,
                 Feature.LEADERBOARD,
-                Feature.PREDICTION]
+                Feature.PREDICTION,
+                Feature.SILENCE,
+                Feature.STATUS]
 
     @staticmethod
     def get_non_restricted() -> list['Feature']:
@@ -68,7 +55,8 @@ class Feature(IntEnum):
                 Feature.DOC_Q,
                 Feature.FIGHT,
                 Feature.LEADERBOARD,
-                Feature.PREDICTION]
+                Feature.PREDICTION,
+                Feature.STATUS]
 
 
 FEATURE_DESCRIPTION_MAP = {
@@ -80,5 +68,7 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.DOC_Q: "Doc Q",
     Feature.FIGHT: "Fight",
     Feature.LEADERBOARD: "Leaderboard",
-    Feature.PREDICTION: "Prediction"
+    Feature.PREDICTION: "Prediction",
+    Feature.SILENCE: "Silence",
+    Feature.STATUS: "Status"
 }
