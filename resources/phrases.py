@@ -507,7 +507,7 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
 DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fruit:' \
                                    '\n\n*{}*' \
                                    '\nReason: {}' \
-                                   "\n\n_Go to start->Devil Fruit to eat or trade it_"
+                                   "\n\n_Go to start->Devil Fruit to eat it_"
 DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
 DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
 # Notification - Devil Fruit Expired
