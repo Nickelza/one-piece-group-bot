@@ -466,3 +466,7 @@ DEVIL_FRUIT_RESPAWN_HOURS = Environment('DEVIL_FRUIT_RESPAWN_HOURS', default_val
 # How many leaderboards back a user has to appear in at least once to maintain an eaten Devil Fruit. Default: 4
 DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
     'DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')
+
+# If rookies or arrested users can view their status in groups. Default: True
+ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment('ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP',
+                                                           default_value='True')

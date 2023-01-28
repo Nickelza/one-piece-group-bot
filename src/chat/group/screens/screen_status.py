@@ -65,11 +65,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     leaderboard_target_user = get_current_leaderboard_user(target_user)
     leaderboard_target_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_target_user)
 
-    if user == target_user:
-        leaderboard_user_rank = leaderboard_target_user_rank
-    else:
-        leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(get_current_leaderboard_user(user))
-
     # If used in reply to a message, verify that requesting user ranks above the user being replied to
     if in_reply_to_message and not target_user.is_arrested():  # Arrested users are always viewable
         # Add the requested user to the list of users that can delete the message
@@ -93,16 +88,22 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             return
 
     # Allowed only in private chat (Rookie or Prisoner)
-    if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
-                                                                  and not await user_is_boss(user))
-                                                                 or user.is_arrested())):
-        outbound_keyboard: list[list[Keyboard]] = [[
-            Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY, url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
+    if not Env.ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP.get_bool():
+        if user == target_user:
+            leaderboard_user_rank = leaderboard_target_user_rank
+        else:
+            leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(get_current_leaderboard_user(user))
+        if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
+                                                                      and not await user_is_boss(user))
+                                                                     or user.is_arrested())):
+            outbound_keyboard: list[list[Keyboard]] = [[
+                Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY,
+                         url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
 
-        ot_text = (phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY if user.is_arrested()
-                   else phrases.ROOKIE_STATUS_PRIVATE_CHAT_ONLY)
-        await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
-        return
+            ot_text = (phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY if user.is_arrested()
+                       else phrases.ROOKIE_STATUS_PRIVATE_CHAT_ONLY)
+            await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+            return
 
     pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
         bounty_service.get_belly_formatted(target_user.pending_bounty))
