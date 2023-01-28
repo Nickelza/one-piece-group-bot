@@ -211,8 +211,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
                             excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
-                            previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False
-                            ) -> Message | bool:
+                            previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False,
+                            topic_id: int = None) -> Message | bool:
     """
     Send a message
 
@@ -244,6 +244,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
             keyboard info to add to the back button
     :param use_close_delete: True if the close button should be used instead of the delete button
+    :param topic_id: Topic id
     :return: Message
     """
 
@@ -279,7 +280,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                                               disable_notification=disable_notification,
                                               reply_to_message_id=reply_to_message_id,
                                               allow_sending_without_reply=allow_sending_without_reply,
-                                              protect_content=protect_content)
+                                              protect_content=protect_content,
+                                              message_thread_id=topic_id)
 
     # No message to edit or answer callback
     if (update is None or update.callback_query is None) and edit_message_id is None:

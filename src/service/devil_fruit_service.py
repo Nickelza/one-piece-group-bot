@@ -1,4 +1,5 @@
 import logging
+import random
 from datetime import datetime, timedelta
 
 from telegram import Message
@@ -9,10 +10,13 @@ from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
+from src.model.Group import Group
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
+from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.Feature import Feature
 from src.model.enums.Notification import DevilFruitExpiredNotification, DevilFruitRevokeWarningNotification, \
     DevilFruitRevokeNotification
 from src.model.enums.Screen import Screen
@@ -22,6 +26,7 @@ from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours
+from src.service.group_service import get_main_group, get_topics_with_feature_enabled
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
 from src.service.message_service import send_admin_error, escape_valid_markdown_chars, full_message_send, delete_message
 from src.service.notification_service import send_notification
@@ -154,8 +159,11 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         inline_keyboard: list[list[Keyboard]] = [
             [Keyboard(phrases.GRP_KEY_DEVIL_FRUIT_COLLECT, screen=Screen.GRP_DEVIL_FRUIT_COLLECT, info=button_info)]]
 
+        release_group: Group = devil_fruit.release_group
+        release_topic: Topic = devil_fruit.release_topic
         message: Message = await full_message_send(
-            context, ot_text, keyboard=inline_keyboard, chat_id=Env.OPD_GROUP_ID.get_int())
+            context, ot_text, keyboard=inline_keyboard, chat_id=release_group.tg_group_id,
+            topic_id=release_topic.tg_topic_id)
 
         devil_fruit.release_date = datetime.now()
         devil_fruit.release_message_id = message.message_id
@@ -181,6 +189,7 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     devil_fruit.eaten_date = None
     devil_fruit.expiration_date = None
     devil_fruit.collection_date = None
+    set_devil_fruit_release_chat(devil_fruit)
     devil_fruit.release_date = release_date
     devil_fruit.release_message_id = None
     devil_fruit.status = DevilFruitStatus.SCHEDULED
@@ -205,6 +214,7 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
             context=context, chat_id=Env.OPD_GROUP_ID.get_int(), message_id=devil_fruit.release_message_id)
 
         # Release
+        set_devil_fruit_release_chat(devil_fruit)
         await release_scheduled_devil_fruit(context, devil_fruit=devil_fruit)
 
     # Get all Devil Fruits that have expired and have not been eaten yet
@@ -364,3 +374,24 @@ async def revoke_devil_fruit_from_inactive_users(context: ContextTypes.DEFAULT_T
 
         # Send notification to owner
         await send_notification(context, owner, DevilFruitRevokeNotification(devil_fruit=devil_fruit))
+
+
+def set_devil_fruit_release_chat(devil_fruit: DevilFruit) -> None:
+    """
+    Set Devil Fruit release group and topic
+
+    :param devil_fruit: The Devil Fruit
+    :return: None
+    """
+
+    # Get main group
+    main_group: Group = get_main_group()
+    devil_fruit.release_group = main_group
+
+    # If is forum, get all topics where Devil Fruit feature is enabled
+    if main_group.is_forum:
+        enabled_topics: list[Topic] = get_topics_with_feature_enabled(Feature.DEVIL_FRUIT_APPEARANCE, main_group)
+        if len(enabled_topics) > 0:
+            devil_fruit.release_topic = random.choice(enabled_topics)
+
+    # Object passed by reference, no need to return

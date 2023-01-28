@@ -389,6 +389,7 @@ def add_or_update_group(update) -> Group:
 
     group.tg_group_name = update.effective_chat.title
     group.tg_group_username = update.effective_chat.username
+    group.is_forum = update.effective_chat.is_forum
     group.last_message_date = datetime.now()
     group.save()
 

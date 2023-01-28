@@ -1,3 +1,5 @@
+from peewee import JOIN
+
 import resources.Environment as Env
 from resources import phrases
 from src.model.Group import Group
@@ -15,6 +17,15 @@ def is_main_group(group: Group) -> bool:
     """
 
     return int(group.tg_group_id) == Env.OPD_GROUP_ID.get_int()
+
+
+def get_main_group() -> Group:
+    """
+    Gets the main group
+    :return: The main group
+    """
+
+    return Group.get(Group.tg_group_id == str(Env.OPD_GROUP_ID.get_int()))
 
 
 def feature_is_enabled(group: Group, topic: Topic, feature: Feature) -> bool:
@@ -59,3 +70,24 @@ def allow_bounty_from_messages(group: Group, topic: Topic) -> bool:
         return False
 
     return feature_is_enabled(group, topic, Feature.BOUNTY_MESSAGES_GAIN)
+
+
+def get_topics_with_feature_enabled(feature: Feature, group: Group = None) -> list:
+    """
+    Gets the topics with a feature enabled
+    :param feature: The feature
+    :param group: The group to filter by (optional)
+    :return: The list of topics
+    """
+
+    if group is None:
+        return Topic.select().join(TopicDisabledFeature, JOIN.LEFT_OUTER).where(
+            (TopicDisabledFeature.feature != feature) |
+            (TopicDisabledFeature.feature.is_null())
+        )
+    else:
+        return Topic.select().join(TopicDisabledFeature, JOIN.LEFT_OUTER).where(
+            (TopicDisabledFeature.feature != feature) |
+            (TopicDisabledFeature.feature.is_null()),
+            (Topic.group == group)
+        )
