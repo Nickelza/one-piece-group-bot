@@ -24,8 +24,11 @@ async def send_notification(context: ContextTypes.DEFAULT_TYPE, user: User, noti
     :return: None
     """
 
-    context.application.create_task(send_notification_execute(
-        context, user, notification, should_forward_message, update))
+    if should_forward_message:  # Sync since it's for deleted messages, else no message is forwarded before the deletion
+        await send_notification_execute(context, user, notification, should_forward_message, update)
+    else:
+        context.application.create_task(send_notification_execute(context, user, notification, should_forward_message,
+                                                                  update))
 
 
 async def send_notification_execute(context: ContextTypes.DEFAULT_TYPE, user: User, notification: Notification,

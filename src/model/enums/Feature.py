@@ -10,9 +10,10 @@ class Feature(IntEnum):
     DOC_Q = 6
     FIGHT = 7
     LEADERBOARD = 8
-    PREDICTION = 9
-    SILENCE = 10
-    STATUS = 11
+    MESSAGE_FILTER = 9
+    PREDICTION = 10
+    SILENCE = 11
+    STATUS = 12
 
     def get_description(self) -> str:
         """
@@ -38,6 +39,7 @@ class Feature(IntEnum):
                 Feature.DOC_Q,
                 Feature.FIGHT,
                 Feature.LEADERBOARD,
+                Feature.MESSAGE_FILTER,
                 Feature.PREDICTION,
                 Feature.SILENCE,
                 Feature.STATUS]
@@ -49,8 +51,7 @@ class Feature(IntEnum):
 
         :return: All the features that are restricted
         """
-        return [Feature.BOUNTY_MESSAGES_GAIN,
-                Feature.SILENCE]
+        return [Feature.BOUNTY_MESSAGES_GAIN, Feature.MESSAGE_FILTER, Feature.SILENCE]
 
     @staticmethod
     def get_non_restricted() -> list['Feature']:
@@ -81,6 +82,7 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.DOC_Q: "Doc Q",
     Feature.FIGHT: "Fight",
     Feature.LEADERBOARD: "Leaderboard",
+    Feature.MESSAGE_FILTER: "Message Filter",
     Feature.PREDICTION: "Prediction",
     Feature.SILENCE: "Silence",
     Feature.STATUS: "Status"
