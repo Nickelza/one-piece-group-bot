@@ -33,11 +33,10 @@ async def get_user_profile_photo(update: Update) -> str | None:
     return photo_path
 
 
-async def user_is_boss(user: User, update: Update) -> bool:
+async def user_is_boss(user: User) -> bool:
     """
     Returns True if the user is a boss
     :param user: The user
-    :param update: The update
     :return: True if the user is a boss
     """
 
@@ -56,12 +55,11 @@ async def user_is_boss(user: User, update: Update) -> bool:
     return False
 
 
-async def user_is_muted(user: User, update: Update) -> bool:
+async def user_is_muted(user: User) -> bool:
     """
     Returns True if the user is muted
     :param user: The user
-    :param update: The update
     :return: True if the user is muted
     """
 
-    return user.is_muted and not await user_is_boss(user, update)
+    return user.is_muted and not await user_is_boss(user)

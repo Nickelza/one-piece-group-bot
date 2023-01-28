@@ -308,7 +308,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
 
         # Can only be used by a boss
         if command.only_by_boss:
-            if not await user_is_boss(user, update):
+            if not await user_is_boss(user):
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_BOSS_ERROR)
 
         # Can only be used by a chat admin
@@ -333,7 +333,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
     except CommandValidationException as cve:
         if is_restricted_feature_error:  # Restricted feature in group, no error message
             return False
-        if not command.answer_callback and await user_is_muted(user, update):
+        if not command.answer_callback and await user_is_muted(user):
             await delete_message(update)
         else:
             if (command.answer_callback and is_callback) or command.send_message_if_error:

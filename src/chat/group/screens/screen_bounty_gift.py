@@ -71,7 +71,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
             return False
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(update, sender, receiver, command, bounty_gift)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver, command, bounty_gift)
 
     # Sender does not have enough bounty
     if sender.bounty < total_amount:
@@ -104,7 +104,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
         return
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(update, sender, receiver, command)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver, command)
 
     ot_text = phrases.BOUNTY_GIFT_REQUEST.format(get_belly_formatted(amount), receiver.get_markdown_mention(),
                                                  get_belly_formatted(tax_amount), tax_percentage,
@@ -130,12 +130,11 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     bounty_gift.save()
 
 
-async def transaction_is_tax_free(sender: User, receiver: User, update: Update) -> bool:
+async def transaction_is_tax_free(sender: User, receiver: User) -> bool:
     """
     Check if the transaction is tax-free
     :param sender: The sender
     :param receiver: The receiver
-    :param update: The update object
     :return: True if the transaction is tax-free, False otherwise
     """
 
@@ -144,17 +143,16 @@ async def transaction_is_tax_free(sender: User, receiver: User, update: Update) 
         return True
 
     # Sender is a boss, no tax
-    if await user_is_boss(sender, update):
+    if await user_is_boss(sender):
         return True
 
     return False
 
 
-async def get_amounts(update: Update, sender: User, receiver: User, command: Command = None,
-                      bounty_gift: BountyGift = None) -> tuple[int, int, int, int]:
+async def get_amounts(sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
+                      ) -> tuple[int, int, int, int]:
     """
     Get the amounts for a bounty gift
-    :param update: The update object
     :param sender: The sender
     :param receiver: The receiver
     :param command: The command
@@ -167,7 +165,7 @@ async def get_amounts(update: Update, sender: User, receiver: User, command: Com
     else:
         amount = bounty_gift.amount
 
-    tax_percentage = 0 if await transaction_is_tax_free(sender, receiver, update) else sender.bounty_gift_tax
+    tax_percentage = 0 if await transaction_is_tax_free(sender, receiver) else sender.bounty_gift_tax
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
@@ -208,7 +206,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(update, sender, receiver,
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver,
                                                                          bounty_gift=bounty_gift)
 
     bounty_gift.amount = amount
@@ -219,7 +217,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     # Update sender
     sender.bounty -= total_amount
 
-    if not await transaction_is_tax_free(sender, receiver, update):
+    if not await transaction_is_tax_free(sender, receiver):
         sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver

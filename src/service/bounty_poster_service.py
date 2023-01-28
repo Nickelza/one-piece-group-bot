@@ -30,7 +30,7 @@ async def get_bounty_poster(update: Update, user: User) -> str:
     if user_has_eaten_devil_fruit(user):
         capture_condition = CaptureCondition.ONLY_ALIVE
 
-    if await user_is_boss(user, update):
+    if await user_is_boss(user):
         capture_condition = CaptureCondition.ONLY_DEAD
 
     return wanted_poster.generate(output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),

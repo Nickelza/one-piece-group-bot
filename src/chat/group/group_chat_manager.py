@@ -280,7 +280,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
         if user.is_arrested() and location_level > 1:
             raise GroupMessageValidationException(notification=DeletedMessageArrestNotification())
 
-        if await user_is_muted(user, update):
+        if await user_is_muted(user):
             raise GroupMessageValidationException(notification=DeletedMessageMuteNotification())
 
         if user.location_level < location_level:
