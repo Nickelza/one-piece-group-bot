@@ -212,7 +212,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
                             excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
                             previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False,
-                            topic_id: int = None) -> Message | bool:
+                            topic_id: int = None, topic: Topic = None, group: Group = None,
+                            ignore_exception: bool = False) -> Message | bool:
     """
     Send a message
 
@@ -245,6 +246,9 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
             keyboard info to add to the back button
     :param use_close_delete: True if the close button should be used instead of the delete button
     :param topic_id: Topic id
+    :param topic: The topic, used to get the topic id if topic_id is None
+    :param group: The group, used to get the chat id if topic_id is None
+    :param ignore_exception: True if the TelegramError should be ignored
     :return: Message
     """
 
@@ -253,6 +257,12 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
 
     if send_in_private_chat:
         new_message = True
+
+    if topic is not None:
+        topic_id = topic.tg_topic_id
+
+    if group is not None:
+        chat_id = group.tg_group_id
 
     if previous_screens is not None and inbound_keyboard is None:
         inbound_keyboard = Keyboard('', previous_screen_list=previous_screens, screen=previous_screens[-1],
@@ -272,16 +282,23 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                                                       reply_to_message_id=reply_to_message_id,
                                                       quote_if_group=quote_if_group)
 
-        return await context.bot.send_message(text=text,
-                                              chat_id=chat_id,
-                                              reply_markup=keyboard_markup,
-                                              disable_web_page_preview=disable_web_page_preview,
-                                              parse_mode=parse_mode,
-                                              disable_notification=disable_notification,
-                                              reply_to_message_id=reply_to_message_id,
-                                              allow_sending_without_reply=allow_sending_without_reply,
-                                              protect_content=protect_content,
-                                              message_thread_id=topic_id)
+        try:
+            message: Message = await context.bot.send_message(text=text,
+                                                              chat_id=chat_id,
+                                                              reply_markup=keyboard_markup,
+                                                              disable_web_page_preview=disable_web_page_preview,
+                                                              parse_mode=parse_mode,
+                                                              disable_notification=disable_notification,
+                                                              reply_to_message_id=reply_to_message_id,
+                                                              allow_sending_without_reply=allow_sending_without_reply,
+                                                              protect_content=protect_content,
+                                                              message_thread_id=topic_id)
+            return message
+        except TelegramError as e:
+            if ignore_exception:
+                logging.error(f'Error while sending message: {e}')
+                return False
+            raise e
 
     # No message to edit or answer callback
     if (update is None or update.callback_query is None) and edit_message_id is None:

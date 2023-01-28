@@ -81,13 +81,50 @@ def get_topics_with_feature_enabled(feature: Feature, group: Group = None) -> li
     """
 
     if group is None:
-        return Topic.select().join(TopicDisabledFeature, JOIN.LEFT_OUTER).where(
-            (TopicDisabledFeature.feature != feature) |
-            (TopicDisabledFeature.feature.is_null())
-        )
+        return (
+            Topic.select().distinct()
+            .join(TopicDisabledFeature, JOIN.LEFT_OUTER)
+            .join(Group, on=(Group.id == Topic.group))
+            .where(((Group.is_active == True) & (Group.is_forum == True))
+                   & ((TopicDisabledFeature.feature != feature) | (TopicDisabledFeature.feature.is_null()))))
     else:
-        return Topic.select().join(TopicDisabledFeature, JOIN.LEFT_OUTER).where(
-            (TopicDisabledFeature.feature != feature) |
-            (TopicDisabledFeature.feature.is_null()),
-            (Topic.group == group)
-        )
+        return (
+            Topic.select().distinct()
+            .join(TopicDisabledFeature, JOIN.LEFT_OUTER)
+            .join(Group, on=(Group.id == Topic.group))
+            .where((Topic.group == group)
+                   & ((TopicDisabledFeature.feature != feature) | (TopicDisabledFeature.feature.is_null()))))
+
+
+def get_groups_with_feature_enabled(feature: Feature) -> list:
+    """
+    Gets the groups with a feature enabled, if they are not topics
+    :param feature: The feature
+    :return: The list of groups
+    """
+
+    return (
+        Group.select().distinct()
+        .join(GroupDisabledFeature, JOIN.LEFT_OUTER)
+        .where((Group.is_active == True)  # Not filtering by is_forum to include general forum
+               & ((GroupDisabledFeature.feature != feature) | (GroupDisabledFeature.feature.is_null()))))
+
+
+def get_chats_with_feature_enabled_dict(feature: Feature) -> list[dict[str, Group or Topic]]:
+    """
+    Gets the chats with a feature enabled, if they are not topics
+    :param feature: The feature
+    :return: The dict of chats
+    """
+
+    groups = get_groups_with_feature_enabled(feature)
+    topics = get_topics_with_feature_enabled(feature)
+
+    result = []
+    for group in groups:
+        result.append({"group": group, "topic": None})
+
+    for topic in topics:
+        result.append({"group": topic.group, "topic": topic})
+
+    return result

@@ -180,6 +180,7 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
+GRP_KEY_GO_TO_MESSAGE = 'Go to message'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -637,7 +638,8 @@ DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
 DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
 DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
                                    "{}"
-DEVIL_FRUIT_RELEASED = "A Devil Fruit has appeared!" + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
+DEVIL_FRUIT_APPEARED = 'A Devil Fruit has appeared!'
+DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_APPEARED}{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
 
 DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
 DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO

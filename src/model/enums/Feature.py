@@ -50,7 +50,6 @@ class Feature(IntEnum):
         :return: All the features that are restricted
         """
         return [Feature.BOUNTY_MESSAGES_GAIN,
-                Feature.DEVIL_FRUIT_APPEARANCE,
                 Feature.SILENCE]
 
     @staticmethod
