@@ -141,7 +141,7 @@ def validate_crew_name(crew_name: str) -> None:
     """
 
     # Crew name already exists, case-insensitive
-    if Crew.get_by_name(crew_name) is not None:
+    if Crew.get_by_name_if_active(crew_name) is not None:
         raise CrewValidationException(phrases.CREW_CREATE_NAME_ALREADY_EXISTS)
 
     # Name is too long

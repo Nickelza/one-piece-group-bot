@@ -13,7 +13,7 @@ class Crew(BaseModel):
     Crew class
     """
     id = PrimaryKeyField()
-    name = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int(), unique=True)
+    name = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int())
     creation_date = DateTimeField(default=datetime.datetime.now)
     can_accept_new_members = BooleanField(default=True)
     is_active = BooleanField(default=True)
@@ -57,14 +57,14 @@ class Crew(BaseModel):
         return self.crew_members.select().order_by(User.crew_join_date.asc())
 
     @staticmethod
-    def get_by_name(name: str) -> 'Crew':
+    def get_by_name_if_active(name: str) -> 'Crew':
         """
         Returns the crew by name, case-insensitive
         :param name: The name
         :return: The crew
         """
 
-        return Crew.get_or_none(Crew.name ** name)
+        return Crew.get_or_none((Crew.name ** name) & (Crew.is_active == True))
 
     def is_full(self) -> bool:
         """
