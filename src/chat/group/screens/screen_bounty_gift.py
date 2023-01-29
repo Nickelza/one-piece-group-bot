@@ -116,6 +116,8 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     bounty_gift.receiver = receiver
     bounty_gift.amount = amount
     bounty_gift.tax_percentage = tax_percentage
+    bounty_gift.group = group
+    bounty_gift.topic = topic
     bounty_gift.save()
 
     # Keyboard
@@ -124,8 +126,6 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
                                                                  primary_key=bounty_gift.id)]
 
     message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
-    bounty_gift.group = group
-    bounty_gift.topic = topic
     bounty_gift.message_id = message.message_id
     bounty_gift.save()
 
