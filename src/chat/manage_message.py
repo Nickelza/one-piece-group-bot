@@ -138,7 +138,10 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             else:
                 command_name = (update.message.text.split(' ')[0])[1:].lower()
                 command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
-            command = Command.get_by_name(command_name, message_source)
+
+            if command_name.strip() != '':
+                command = Command.get_by_name(command_name, message_source)
+
             try:
                 command.parameters = update.message.text.split(' ')[1:]
             except IndexError:
