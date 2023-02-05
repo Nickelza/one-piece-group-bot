@@ -113,6 +113,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
             return
 
+    user.previous_pending_bounty = user.pending_bounty
+
     # Recast necessary for match case to work, don't ask me why
     message_source: MessageSource = MessageSource(get_message_source(update))
 
@@ -205,6 +207,12 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()
+
+    # Negative pending bounty, log it
+    if user.pending_bounty != user.previous_pending_bounty and user.pending_bounty < 0:
+        logging.error(f'Negative pending bounty for user {user.tg_user_id}: '
+                      f'{user.previous_pending_bounty} -> {user.pending_bounty}'
+                      f'\n{update.to_dict()}')
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
