@@ -713,9 +713,6 @@ def get_message_source(update: Update) -> MessageSource:
     if update.effective_chat.type == Chat.PRIVATE:
         return MessageSource.PRIVATE
 
-    if update.effective_chat.id == Env.ADMIN_GROUP_ID.get_int():
-        return MessageSource.ADMIN
-
     if update.effective_chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
         return MessageSource.GROUP
 
@@ -757,16 +754,16 @@ def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[b
     return should_ignore_input, should_create_item, should_validate_input
 
 
-async def send_admin_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None) -> Message:
+async def log_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None) -> Message:
     """
-    Send an error to the admin chat
+    Send an error to the error log chat
     :param context: Context object
     :param text: Text to send
     :param update: Update object
     """
 
     text = f'Error: {text}'.upper()
-    return await full_message_send(context, text, update=update, chat_id=Env.ADMIN_GROUP_ID.get_int())
+    return await full_message_send(context, text, update=update, chat_id=Env.ERROR_LOG_CHAT_ID.get_int())
 
 
 def message_is_reply(update: Update) -> bool:

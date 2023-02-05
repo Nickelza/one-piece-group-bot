@@ -30,7 +30,7 @@ from src.service.cron_service import get_datetime_in_future_days, get_random_tim
 from src.service.group_service import get_main_group, get_topics_with_feature_enabled, \
     get_chats_with_feature_enabled_dict
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
-from src.service.message_service import send_admin_error, escape_valid_markdown_chars, full_message_send, \
+from src.service.message_service import log_error, escape_valid_markdown_chars, full_message_send, \
     delete_message, get_message_url
 from src.service.notification_service import send_notification
 
@@ -126,7 +126,7 @@ async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE) -> No
 
     # If there are no devil fruits to release, send error message to admin chat
     if not devil_fruit:
-        await send_admin_error(context, phrases.NO_DEVIL_FRUIT_TO_SCHEDULE)
+        await log_error(context, phrases.NO_DEVIL_FRUIT_TO_SCHEDULE)
         logging.error(phrases.NO_DEVIL_FRUIT_TO_SCHEDULE)
         return
 

@@ -1,7 +1,7 @@
 import os
+import sys
 from distutils.util import strtobool
 
-import sys
 from dotenv import load_dotenv
 
 import constants as c
@@ -113,8 +113,8 @@ OPD_GROUP_ID = Environment('OPD_GROUP_ID')
 OPD_GROUP_USERNAME = Environment('OPD_GROUP_USERNAME')
 # Main channel id
 OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
-# ChatID for admin commands
-ADMIN_GROUP_ID = Environment('ADMIN_GROUP_ID')
+# Chat ID for error logs
+ERROR_LOG_CHAT_ID = Environment('ERROR_LOG_CHAT_ID')
 # OPMA bot id
 OPMA_BOT_ID = Environment('OPMA_BOT_ID', default_value='921260484')
 

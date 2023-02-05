@@ -10,7 +10,6 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
 from resources.Database import Database
-from src.chat.admin.admin_chat_manager import manage as manage_admin_chat
 from src.chat.group.group_chat_manager import manage as manage_group_chat
 from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
@@ -20,7 +19,6 @@ from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
-from src.model.error.AdminChatError import AdminChatException
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import CommandValidationException, NavigationLimitReachedException
 from src.model.error.GroupChatError import GroupChatException
@@ -186,8 +184,6 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             case MessageSource.GROUP:
                 await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback, group,
                                         topic)
-            case MessageSource.ADMIN:
-                await manage_admin_chat(update, context, command)
             case MessageSource.TG_REST:
                 await manage_tgrest_chat(update, context)
             case _:
@@ -195,7 +191,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     except DoesNotExist:
         await full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
         raise ValueError('Item not found')
-    except (PrivateChatException, GroupChatException, AdminChatException, CommonChatException) as ce:
+    except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         try:
             await full_message_send(context, str(ce), update=update)

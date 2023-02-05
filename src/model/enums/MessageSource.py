@@ -8,5 +8,4 @@ class MessageSource(StrEnum):
     ND = 'ND'
     PRIVATE = 'P'
     GROUP = 'G'
-    ADMIN = 'A'
     TG_REST = 'T'
