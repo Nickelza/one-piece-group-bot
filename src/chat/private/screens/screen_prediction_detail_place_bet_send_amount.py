@@ -48,7 +48,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         prediction: Prediction = prediction_option.prediction
         previous_screens = user.get_private_screen_list()[:-1]
         previous_screen_list_keyboard_info = (
-            {PredictionPlaceBetReservedKeys.PREDICTION_ID: prediction_option.prediction.id})
+            {PredictionPlaceBetReservedKeys.PREDICTION_ID: prediction.id})
 
         validation_tuple = await validate(update, context, user, amount=amount, inbound_keyboard=inbound_keyboard,
                                           prediction_option=prediction_option, previous_screens=previous_screens,

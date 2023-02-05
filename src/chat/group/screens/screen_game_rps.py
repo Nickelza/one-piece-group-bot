@@ -92,7 +92,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         pass
 
 
-def get_outbound_keyboard(game) -> list[list[Keyboard]]:
+def get_outbound_keyboard(game: Game) -> list[list[Keyboard]]:
     """
     Get the outbound keyboard
     :param game: The game object

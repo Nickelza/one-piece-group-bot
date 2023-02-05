@@ -107,7 +107,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
 
     authorized_users_ids: list[int] = []
     for tg_user_id in authorized_users_tg_ids:
-        user = User.get_or_none(User.tg_user_id == tg_user_id)
+        user: User = User.get_or_none(User.tg_user_id == tg_user_id)
         if user is not None:
             authorized_users_ids.append(user.id)
 

@@ -27,7 +27,7 @@ class Fight(BaseModel):
     class Meta:
         db_table = 'fight'
 
-    def get_win_probability(self, user) -> float:
+    def get_win_probability(self, user: User) -> float:
         """
         Get the win probability given a user
 

@@ -141,26 +141,27 @@ class LocationUpdateNotification(Notification):
 
         from src.service.bounty_service import get_belly_formatted
 
+        location: Location = self.location
         # Determine preposition to use for the location
-        if 'island' in self.location.name.lower() or 'archipelago' in self.location.name.lower():
+        if 'island' in location.name.lower() or 'archipelago' in location.name.lower():
             preposition = 'on'
-            if self.location.name.lower().startswith('island'):
+            if location.name.lower().startswith('island'):
                 preposition += ' the'
         else:
             preposition = 'in'
 
         # Determine text suffix
         try:
-            next_location = Location.get_by_level(self.location.level + 1)
+            next_location = Location.get_by_level(location.level + 1)
             text_suffix = phrases.LOCATION_NEXT_LEVEL_REQUIREMENT.format(
                 get_belly_formatted(next_location.required_bounty))
         except ValueError:
             text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
 
-        return self.text.format(get_image_preview(self.location.image_url),
+        return self.text.format(get_image_preview(location.image_url),
                                 mention_markdown_user(self.user),
                                 preposition,
-                                escape_valid_markdown_chars(self.location.name),
+                                escape_valid_markdown_chars(location.name),
                                 text_suffix)
 
 

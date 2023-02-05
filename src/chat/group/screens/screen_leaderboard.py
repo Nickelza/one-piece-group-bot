@@ -27,7 +27,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
 
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
         leaderboard_user: LeaderboardUser = leaderboard_user
-        user: User = User.get_by_id(leaderboard_user.user.id)
+        user: User = leaderboard_user.user
 
         ot_text += '\n'
         ot_text += '\n' if index > 0 else ''

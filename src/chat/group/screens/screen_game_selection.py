@@ -49,11 +49,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game.status = GameStatus.AWAITING_OPPONENT_CONFIRMATION
     game.save()
 
-    ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(game.opponent),
-                                          mention_markdown_user(game.challenger),
+    challenger: User = game.challenger
+    opponent: User = game.opponent
+
+    ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
+                                          mention_markdown_user(challenger),
                                           (GameType(game.type)),
                                           get_belly_formatted(game.wager))
-    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(game.opponent,
+    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
                                                                    screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
                                                                    yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
                                                                    no_text=phrases.KEYBOARD_OPTION_REJECT,
@@ -61,7 +64,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     button_delete_info = {GameSelectionReservedKeys.GAME_ID: game.id,
                           ReservedKeyboardKeys.AUTHORIZED_USER: [
-                              game.challenger.id, game.opponent.id], GameSelectionReservedKeys.CANCEL: True}
+                              challenger, opponent], GameSelectionReservedKeys.CANCEL: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
