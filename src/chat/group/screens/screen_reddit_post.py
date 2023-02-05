@@ -9,7 +9,7 @@ from telegram.ext import ContextTypes
 import constants as c
 import resources.Environment as Env
 from src.model.RedditGroupPost import RedditGroupPost
-from src.model.SavedMedia import SavedMedia
+from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.pojo.Reddit import Reddit
 from src.service.download_service import download_temp_file

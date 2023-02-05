@@ -9,11 +9,11 @@ import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
 import src.service.bounty_service as bounty_service
 from src.model.DevilFruit import DevilFruit
-from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums import Location
 from src.model.enums.Emoji import Emoji
 from src.model.enums.MessageSource import MessageSource
+from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -217,9 +217,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update, user: User, caption: str = None,
                              reply_to_message_id: int = None, send_in_private_chat=False) -> None:
     poster_path = await get_bounty_poster(update, user)
-    poster: SavedMedia = SavedMedia()
+    poster: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO)
     poster.media_id = open(poster_path, 'rb')
-    poster.type = SavedMediaType.PHOTO
 
     await full_media_send(context, saved_media=poster, update=update, caption=caption,
                           reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,

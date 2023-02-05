@@ -12,11 +12,13 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Group import Group
-from src.model.SavedMedia import SavedMedia
 from src.model.Topic import Topic
 from src.model.User import User
+from src.model.enums.ContextBotDataKey import ContextBotDataKey
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.SavedMedia import SavedMedia
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
@@ -336,7 +338,7 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
         case SavedMediaType.ANIMATION:
             return InputMediaAnimation(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
         case _:
-            raise Exception(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE)
+            raise ValueError(f'Invalid media type: {saved_media.type}')
 
 
 async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: SavedMedia = None, update: Update = None,
@@ -348,7 +350,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                           edit_only_keyboard: bool = False, edit_only_caption_and_keyboard: bool = False,
                           add_delete_button: bool = False, authorized_users: list = None,
                           inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
-                          only_authorized_users_can_interact: bool = True) -> Message | bool:
+                          only_authorized_users_can_interact: bool = True,
+                          saved_media_name: SavedMediaName = None) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -375,11 +378,26 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
         :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
+    :param saved_media_name: Saved media name
     :return: Message
     """
 
     if caption is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         caption = escape_invalid_markdown_chars(caption)
+
+    if saved_media is None and saved_media_name is not None:
+        saved_media: SavedMedia = SavedMedia.get_by_name(saved_media_name)
+
+    # Media id should be saved to avoid re-uploading each time
+    should_save_media_id = False
+    if saved_media is not None and saved_media.file_name is not None and saved_media.media_id is None:
+        # Try to load media id from context bot data
+        try:
+            saved_media.media_id = context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name]
+        except KeyError:
+            # Load media id from file
+            saved_media.media_id = open(saved_media.file_name, 'rb')
+            should_save_media_id = True
 
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
@@ -395,37 +413,46 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
         match saved_media.type:
             # Photo
             case SavedMediaType.PHOTO:  # Photo
-                return await context.bot.send_photo(chat_id=chat_id,
-                                                    photo=saved_media.media_id,
-                                                    caption=caption,
-                                                    reply_markup=keyboard_markup,
-                                                    parse_mode=parse_mode,
-                                                    disable_notification=disable_notification,
-                                                    reply_to_message_id=reply_to_message_id,
-                                                    allow_sending_without_reply=allow_sending_without_reply,
-                                                    protect_content=protect_content)
+                message: Message = await context.bot.send_photo(chat_id=chat_id,
+                                                                photo=saved_media.media_id,
+                                                                caption=caption,
+                                                                reply_markup=keyboard_markup,
+                                                                parse_mode=parse_mode,
+                                                                disable_notification=disable_notification,
+                                                                reply_to_message_id=reply_to_message_id,
+                                                                allow_sending_without_reply=allow_sending_without_reply,
+                                                                protect_content=protect_content)
             case SavedMediaType.VIDEO:  # Video
-                return await context.bot.send_video(chat_id=chat_id,
-                                                    video=saved_media.media_id,
-                                                    caption=caption,
-                                                    reply_markup=keyboard_markup,
-                                                    parse_mode=parse_mode,
-                                                    disable_notification=disable_notification,
-                                                    reply_to_message_id=reply_to_message_id,
-                                                    allow_sending_without_reply=allow_sending_without_reply,
-                                                    protect_content=protect_content)
+                message: Message = await context.bot.send_video(chat_id=chat_id,
+                                                                video=saved_media.media_id,
+                                                                caption=caption,
+                                                                reply_markup=keyboard_markup,
+                                                                parse_mode=parse_mode,
+                                                                disable_notification=disable_notification,
+                                                                reply_to_message_id=reply_to_message_id,
+                                                                allow_sending_without_reply=allow_sending_without_reply,
+                                                                protect_content=protect_content)
             case SavedMediaType.ANIMATION:  # Animation
-                return await context.bot.send_animation(chat_id=chat_id,
-                                                        animation=saved_media.media_id,
-                                                        caption=caption,
-                                                        reply_markup=keyboard_markup,
-                                                        parse_mode=parse_mode,
-                                                        disable_notification=disable_notification,
-                                                        reply_to_message_id=reply_to_message_id,
-                                                        allow_sending_without_reply=allow_sending_without_reply,
-                                                        protect_content=protect_content)
+                message: Message = await context.bot.send_animation(chat_id=chat_id,
+                                                                    animation=saved_media.media_id,
+                                                                    caption=caption,
+                                                                    reply_markup=keyboard_markup,
+                                                                    parse_mode=parse_mode,
+                                                                    disable_notification=disable_notification,
+                                                                    reply_to_message_id=reply_to_message_id,
+                                                                    allow_sending_without_reply=(
+                                                                        allow_sending_without_reply),
+                                                                    protect_content=protect_content)
             case _:
-                raise ValueError(phrases.EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE.format(saved_media.type.name))
+                raise ValueError(f'Invalid saved media type: {saved_media.type}')
+
+        if should_save_media_id:
+            if ContextBotDataKey.SAVED_MEDIA not in context.bot_data:
+                context.bot_data[ContextBotDataKey.SAVED_MEDIA] = {}
+                saved_media.media_id = message.photo[-1].file_id
+            context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name] = saved_media.media_id
+
+        return message
 
     # No message to edit or answer callback
     if update.callback_query is None:
@@ -652,7 +679,7 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
 async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: int = None,
                          message_id: int = None, group: Group = None):
     """
-    Delete a message with best effort
+    Delete a message with the best effort method
     :param update: Update object
     :param context: Context object
     :param chat_id: Chat id

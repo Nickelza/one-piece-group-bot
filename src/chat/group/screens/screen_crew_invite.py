@@ -4,7 +4,6 @@ from telegram.ext import ContextTypes
 import resources.phrases as phrases
 from src.chat.group.screens.screen_crew_join import CrewReservedKeys, validate
 from src.model.Crew import Crew
-from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
@@ -66,9 +65,8 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, capta
                                                                  primary_key=crew.id, extra_keys=extra_keys)]
 
     # Get SavedMedia
-    invite_to_crew_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.INVITE_TO_CREW)
-    await full_media_send(context, invite_to_crew_media, update=update, caption=caption, keyboard=inline_keyboard,
-                          add_delete_button=True)
+    await full_media_send(context, saved_media_name=SavedMediaName.CREW_INVITE, update=update, caption=caption,
+                          keyboard=inline_keyboard, add_delete_button=True)
 
 
 async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, invited_user: User, crew: Crew,

@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SavedMediaName(str, Enum):
+class SavedMediaName(StrEnum):
+    CREW_JOIN = 'join_crew'
+    CREW_INVITE = 'invite_to_crew'
     DOC_Q = 'docq'
     FIGHT = 'fight'
-    JOIN_CREW = 'join_crew'
-    INVITE_TO_CREW = 'invite_to_crew'
     SILENCE = 'silence'

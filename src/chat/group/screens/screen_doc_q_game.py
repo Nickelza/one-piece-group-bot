@@ -11,7 +11,6 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
 from src.model.Group import Group
-from src.model.SavedMedia import SavedMedia
 from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
@@ -174,9 +173,6 @@ async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
 
         inline_keyboard.append(apples_keyboard)
 
-        # Get SavedMedia
-        doc_q_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.DOC_Q)
-
         win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = get_play_amounts(user.bounty, win_odd)
         # Send media
         caption = phrases.DOC_Q_GAME_START.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
@@ -192,8 +188,8 @@ async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
                       info={DocQReservedKeys.DOC_Q_ID: doc_q_game.id, DocQReservedKeys.CANCEL: True},
                       screen=Screen.GRP_DOC_Q_GAME)])
 
-        message: Message = await full_media_send(context, doc_q_media, update, caption=caption,
-                                                 keyboard=inline_keyboard)
+        message: Message = await full_media_send(context, saved_media_name=SavedMediaName.DOC_Q, update=update,
+                                                 caption=caption, keyboard=inline_keyboard)
 
         doc_q_game.group = group
         doc_q_game.topic = topic

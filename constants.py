@@ -11,6 +11,8 @@ TG_DEFAULT_IMAGE_COMPRESSION_QUALITY = 80
 TG_PROFILE_PHOTO_EXTENSION = 'jpg'
 
 TEMP_DIR = os.path.join(ROOT_DIR, 'temp')
+ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
+SAVED_MEDIA_DIR = os.path.join(ASSETS_DIR, 'saved_media')
 
 # Command
 STANDARD_SPLIT_CHAR = "|"

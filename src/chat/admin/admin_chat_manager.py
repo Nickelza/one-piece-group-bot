@@ -2,8 +2,6 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
-from src.chat.admin.screens.screen_save_media import manage as manage_screen_save_media
-from src.model.enums.Screen import Screen
 from src.model.error.AdminChatError import AdminChatError, AdminChatException
 
 
@@ -30,9 +28,6 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
     if command is not Command.ND:
         match command.screen:
-            case Screen.ADM_SAVE_MEDIA:  # User status
-                await manage_screen_save_media(update, context)
-
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     raise AdminChatException(AdminChatError.UNRECOGNIZED_SCREEN)

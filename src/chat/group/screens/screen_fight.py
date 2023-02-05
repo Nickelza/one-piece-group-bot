@@ -8,7 +8,6 @@ import resources.Environment as Env
 from resources import phrases
 from src.model.Fight import Fight
 from src.model.Group import Group
-from src.model.SavedMedia import SavedMedia
 from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -212,9 +211,6 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
         outcome = phrases.FIGHT_CONFIRMATION_OUTCOME_DEFEAT
         outcome_probability = 100 - win_probability
 
-    # Get SavedMedia
-    fight_media: SavedMedia = SavedMedia.logical_get(SavedMediaName.FIGHT)
-
     odds_recalculated_text = (phrases.FIGHT_CONFIRMATION_ODDS_RECALCULATED
                               if opponent.is_crew_member() and not opponent.has_higher_bounty_than_crew_average()
                               else "")
@@ -231,8 +227,8 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
                                                                  no_text=phrases.KEYBOARD_OPTION_RETREAT,
                                                                  primary_key=fight.id)]
 
-    message: Message = await full_media_send(context, fight_media, update=update, caption=caption,
-                                             keyboard=inline_keyboard)
+    message: Message = await full_media_send(context, saved_media_name=SavedMediaName.FIGHT, update=update,
+                                             caption=caption, keyboard=inline_keyboard)
 
     fight.group = group
     fight.topic = topic

@@ -2,7 +2,6 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.model.SavedMedia import SavedMedia
 from src.model.User import User
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.service.message_service import full_media_send
@@ -22,5 +21,5 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User)
     user.should_update_model = False
 
     # Confirmation message
-    silence_media = SavedMedia.logical_get(SavedMediaName.SILENCE)
-    await full_media_send(context, silence_media, update=update, caption=phrases.SILENCE_ACTIVE)
+    await full_media_send(
+        context, saved_media_name=SavedMediaName.SILENCE, update=update, caption=phrases.SILENCE_ACTIVE)

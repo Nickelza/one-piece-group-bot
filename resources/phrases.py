@@ -53,7 +53,6 @@ LEADERBOARD_ROW = '{}°: {}\n{} - ฿*{}*'
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
 SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
-SAVE_MEDIA_INVALID_FORMAT = 'Invalid format.\n\nCommand: ' + Command.ADM_SAVE_MEDIA.get_formatted() + ' <name>'
 SAVE_MEDIA_SUCCESS = 'Media saved as *{}*'
 
 GAME_WIN_LOSE_STATUS = '_Current bounty: ฿*{}*_' \
@@ -110,7 +109,6 @@ TEXT_GROUP = 'Group'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
-EXCEPTION_SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type: {}'
 
 KEYBOARD_NOT_FOUND = 'Keyboard not found'
 KEYBOARD_USE_UNAUTHORIZED = 'You are not authorized to use this keyboard'
