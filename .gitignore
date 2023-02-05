@@ -4,6 +4,7 @@
 !/environment/env.example
 /one-piece-group-bot.iml
 *.pyc
+venv
 
 # Production server
 /howtorun.sh
