@@ -1,6 +1,6 @@
 from datetime import datetime
+from enum import StrEnum
 
-from strenum import StrEnum
 from telegram import Update, Message
 from telegram.ext import ContextTypes
 

@@ -1,4 +1,5 @@
-from strenum import StrEnum
+from enum import StrEnum
+
 from telegram import Update
 from telegram.ext import ContextTypes
 

@@ -1,7 +1,7 @@
 import json
+from enum import StrEnum
 from typing import Tuple
 
-from strenum import StrEnum
 from telegram import Update
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes

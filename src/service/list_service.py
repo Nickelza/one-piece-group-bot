@@ -1,4 +1,4 @@
-from strenum import StrEnum
+from enum import StrEnum
 
 import constants as c
 import resources.phrases as phrases

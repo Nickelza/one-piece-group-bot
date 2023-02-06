@@ -1,4 +1,4 @@
-from strenum import StrEnum
+from enum import StrEnum
 
 from src.model.tgrest.TgRest import TgRest
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
