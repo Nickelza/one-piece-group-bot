@@ -372,7 +372,7 @@ LOCATION_EGGHEAD_IMAGE_URL = Environment('LOCATION_EGGHEAD_IMAGE_URL',
 FIGHT_IMMUNITY_DURATION = Environment('FIGHT_IMMUNITY_DURATION', default_value='24')
 # How long a user has to wait before fighting another user in hours. Default: 1 hour
 FIGHT_COOLDOWN_DURATION = Environment('FIGHT_COOLDOWN_DURATION', default_value='1')
-# Maximum win probability for Pirate King. Default: 99%
+# Maximum win probability for Pirate King. Default: 99.99%
 FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING', default_value='99')
 # Maximum win probability for Emperor. Default: 95%
 FIGHT_MAX_WIN_PROBABILITY_EMPEROR = Environment('FIGHT_MAX_WIN_PROBABILITY_EMPEROR', default_value='95')
@@ -384,9 +384,9 @@ FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA = Environment('FIGHT_MAX_WIN_PROBABILITY_SUP
 FIGHT_MAX_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MAX_WIN_PROBABILITY_ROOKIE', default_value='80')
 # Maximum win probability when on final location. Default: 50%
 FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION = Environment('FIGHT_MAX_WIN_PROBABILITY_FINAL_LOCATION', default_value='50')
-# Maximum win probability when on Devil Fruit defense boost. Default: 99%
+# Maximum win probability when on Devil Fruit defense boost. Default: 99.99%
 FIGHT_MAX_WIN_PROBABILITY_DEVIL_FRUIT_DEFENSE_BOOST = Environment('FIGHT_MAX_WIN_PROBABILITY_DEVIL_FRUIT_DEFENSE_BOOST',
-                                                                  default_value='99')
+                                                                  default_value='99.99')
 # Minimum win probability for Pirate King. Default: 1%
 FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING = Environment('FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING', default_value='1')
 # Minimum win probability for Emperor. Default: 1%
