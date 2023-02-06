@@ -175,7 +175,7 @@ class FightLog(Log):
 
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
-            outcome_text, get_message_url(self.object.group, self.object.topic, self.object.message_id))
+            outcome_text, get_message_url(self.object.group, self.object.message_id))
 
 
 class DocQGameLog(Log):
@@ -222,7 +222,7 @@ class DocQGameLog(Log):
 
         return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
             date, correct_apple, outcome_text,
-            get_message_url(self.object.group, self.object.topic, self.object.message_id))
+            get_message_url(self.object.group, self.object.message_id))
 
 
 class GameLog(Log):
@@ -287,7 +287,7 @@ class GameLog(Log):
         return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), game_name, date,
             get_belly_formatted(self.object.wager), outcome_text,
-            get_message_url(self.object.group, self.object.topic, self.object.message_id))
+            get_message_url(self.object.group, self.object.message_id))
 
 
 class BountyGiftLog(Log):
@@ -347,7 +347,7 @@ class BountyGiftLog(Log):
         return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(
             sender_text, self.other_user.get_markdown_mention(),
             date, get_belly_formatted(self.object.amount), tax_text,
-            get_message_url(self.object.group, self.object.topic, self.object.message_id))
+            get_message_url(self.object.group, self.object.message_id))
 
 
 class LegendaryPirateLog(Log):

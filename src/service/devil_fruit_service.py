@@ -194,11 +194,10 @@ async def send_devil_fruit_release_message_notification(context: ContextTypes.DE
 
     chats: list[dict[str, Group or Topic]] = get_chats_with_feature_enabled_dict(Feature.DEVIL_FRUIT_APPEARANCE)
     release_group: Group = devil_fruit.release_group
-    release_topic: Topic = devil_fruit.release_topic
 
     ot_text = phrases.DEVIL_FRUIT_APPEARED
     # Add "Go to message" button
-    message_url = get_message_url(release_group, release_topic, devil_fruit.release_message_id)
+    message_url = get_message_url(release_group, devil_fruit.release_message_id)
     inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
 
     for chat in chats:

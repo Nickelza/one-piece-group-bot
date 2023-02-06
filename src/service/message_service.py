@@ -781,17 +781,14 @@ def message_is_reply(update: Update) -> bool:
         return False
 
 
-def get_message_url(group: Group, topic: Topic, message_id: int) -> str:
+def get_message_url(group: Group, message_id: int) -> str:
     """
     Gets the message url
     :param group: The group
-    :param topic: The topic
     :param message_id: The message id
     :return: The message url
     """
 
     tg_group_id = str(group.tg_group_id).replace('-100', '')
-    if topic is not None:
-        return f"https://t.me/c/{tg_group_id}/{topic.tg_topic_id}/{message_id}"
-    else:
-        return f"https://t.me/c/{tg_group_id}/{message_id}"
+
+    return f"https://t.me/c/{tg_group_id}/{message_id}"
