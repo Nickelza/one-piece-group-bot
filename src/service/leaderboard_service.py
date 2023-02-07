@@ -1,10 +1,91 @@
 import datetime
 
+from telegram import Message
+from telegram.ext import ContextTypes
+
 import src.model.enums.LeaderboardRank as LeaderboardRank
+from resources import phrases as phrases, Environment as Env
+from src.model.Crew import Crew
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Location import get_first_new_world, get_last_paradise
+from src.service.bounty_poster_service import reset_bounty_poster_limit
+from src.service.bounty_service import should_reset_bounty, reset_bounty
+from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
+from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
+    warn_inactive_users_with_eaten_devil_fruit
+from src.service.message_service import mention_markdown_v2, full_message_send
+
+
+def get_leaderboard_message(leaderboard: Leaderboard) -> str:
+    """
+    Gets the leaderboard message
+    :param leaderboard: The leaderboard
+    :return: The leaderboard message
+    """
+    ot_text = phrases.LEADERBOARD_HEADER.format(leaderboard.week, leaderboard.year,
+                                                leaderboard.leaderboard_users.count())
+
+    for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
+        leaderboard_user: LeaderboardUser = leaderboard_user
+        user: User = leaderboard_user.user
+
+        ot_text += '\n'
+        ot_text += '\n' if index > 0 else ''
+        ot_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
+                                                  get_leaderboard_rank_message(leaderboard_user.rank_index),
+                                                  mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                                                  user.get_bounty_formatted())
+
+    return ot_text
+
+
+async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Sends the weekly leaderboard to the group
+    :param context: Context of callback
+    """
+
+    leaderboard = create_leaderboard()
+
+    # Send the leaderboard to the group
+    if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
+        ot_text = get_leaderboard_message(leaderboard)
+        message: Message = await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
+        await message.pin(disable_notification=True)
+
+        # Save the message id
+        leaderboard.message_id = message.message_id
+        leaderboard.save()
+
+    # Reset bounty poster limit
+    context.application.create_task(reset_bounty_poster_limit(reset_previous_leaderboard=True))
+
+    # Reset can join crew flag
+    User.update(can_join_crew=True).execute()
+
+    # Rest crew can accept new members flag
+    Crew.update(can_accept_new_members=True).execute()
+
+    # Reset bounty if last leaderboard of the month
+    if should_reset_bounty():
+        context.application.create_task(reset_bounty(context))
+
+    # Disband inactive crews
+    context.application.create_task(disband_inactive_crews(context))
+
+    # Warn captains about inactive crews
+    context.application.create_task(warn_inactive_captains(context))
+
+    # Revoke eaten Devil Fruits from inactive users
+    context.application.create_task(revoke_devil_fruit_from_inactive_users(context))
+
+    # Warn inactive users with eaten Devil Fruits
+    context.application.create_task(warn_inactive_users_with_eaten_devil_fruit(context))
+
+    # Reset bounty gift tax
+    User.update(bounty_gift_tax=0).execute()
 
 
 def create_leaderboard() -> Leaderboard:

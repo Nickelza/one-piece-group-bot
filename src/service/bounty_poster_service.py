@@ -8,8 +8,6 @@ from src.model.User import User
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
 from src.service.devil_fruit_service import user_has_eaten_devil_fruit
 from src.service.download_service import generate_temp_file_path
-from src.service.leaderboard_service import get_leaderboard
-from src.service.user_service import get_user_profile_photo, user_is_boss
 
 
 async def get_bounty_poster(update: Update, user: User) -> str:
@@ -19,6 +17,8 @@ async def get_bounty_poster(update: Update, user: User) -> str:
     :param user: The user to get the poster of
     :return: The path to the poster
     """
+
+    from src.service.user_service import get_user_profile_photo, user_is_boss
 
     wanted_poster = WantedPoster(portrait=await get_user_profile_photo(update),
                                  first_name=user.tg_first_name,
@@ -54,6 +54,8 @@ async def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) ->
 
     :param reset_previous_leaderboard: If to reset the limit for users if the previous leaderboard
     """
+
+    from src.service.leaderboard_service import get_leaderboard
 
     if reset_previous_leaderboard:
         # Reset the limit for users
