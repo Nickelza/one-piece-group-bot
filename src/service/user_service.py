@@ -4,7 +4,10 @@ from typing import Sequence, Optional
 from telegram import Update, PhotoSize, UserProfilePhotos, File
 
 import constants as c
+from src.model.Group import Group
 from src.model.LegendaryPirate import LegendaryPirate
+from src.model.Topic import Topic
+from src.model.UnmutedUser import UnmutedUser
 from src.model.User import User
 from src.model.enums.LeaderboardRank import PIRATE_KING
 from src.service.download_service import generate_temp_file_path
@@ -55,11 +58,23 @@ async def user_is_boss(user: User) -> bool:
     return False
 
 
-async def user_is_muted(user: User) -> bool:
+async def user_is_muted(user: User, group: Group, topic: Topic) -> bool:
     """
     Returns True if the user is muted
     :param user: The user
+    :param group: The group
+    :param topic: The topic
     :return: True if the user is muted
     """
 
-    return user.is_muted and not await user_is_boss(user)
+    if topic:
+        if not topic.is_muted:
+            return False
+    elif not group.is_muted:  # Don't check if group is muted if in a topic
+        return False
+
+    if await user_is_boss(user):
+        return False
+
+    return (UnmutedUser
+            .get_or_none(UnmutedUser.user == user, UnmutedUser.group == group, UnmutedUser.topic == topic) is None)

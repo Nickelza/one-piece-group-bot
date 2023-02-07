@@ -19,6 +19,7 @@ class Group(BaseModel):
     last_error_date = DateTimeField(null=True)
     last_error_message = CharField(null=True)
     is_active = BooleanField(default=True)
+    is_muted = BooleanField(default=False)
 
     class Meta:
         db_table = 'group'

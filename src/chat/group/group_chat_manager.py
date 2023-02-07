@@ -94,9 +94,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         pass
 
     # Validate messages only in main group
-    if is_main_group(group) and feature_is_enabled(group, topic, Feature.MESSAGE_FILTER):
-        if not await validate(update, context, user, is_callback):
-            return
+    if is_main_group(group):
+        if feature_is_enabled(group, topic, Feature.MESSAGE_FILTER):
+            if not await validate(update, context, user, is_callback, group, topic):
+                return
+        elif feature_is_enabled(group, topic, Feature.SILENCE):
+            if not await validate(update, context, user, is_callback, group, topic, check_only_muted=True):
+                return
 
     # Update bounty from message gain
     if allow_bounty_from_messages(group, topic):
@@ -168,13 +172,13 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_crew_invite(update, context, user, inbound_keyboard, target_user)
 
             case Screen.GRP_SILENCE:  # Silence
-                await manage_screen_silence(update, context, user)
+                await manage_screen_silence(update, context, group, topic)
 
             case Screen.GRP_SILENCE_END:  # Silence end
-                await manage_screen_silence_end(update, context, user)
+                await manage_screen_silence_end(update, context, group, topic)
 
             case Screen.GRP_SPEAK:  # Speak
-                await manage_screen_speak(update, context, target_user)
+                await manage_screen_speak(update, context, target_user, group, topic)
 
             case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
                 await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command, group,
@@ -191,25 +195,32 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool, group: Group,
+                   topic: Topic, check_only_muted: bool = False) -> bool:
     """
     Validates the message, deleting it if it's not valid
     :param update: Telegram update
     :param context: Telegram context
     :param user: User object
     :param is_callback: True if the message is a callback, False otherwise
+    :param group: The group
+    :param topic: The topic
+    :param check_only_muted: True if should validate only if the user is muted, False otherwise
     :return: True if valid, False otherwise
     """
     # Regular message
     if not is_callback:
-        if not await validate_location_level(update, context, user, Location.ND.level):
+        if not await validate_location_level(update, context, user, Location.ND.level, group, topic):
             return False
+
+        if check_only_muted:
+            return True
 
     # Stickers
     try:
         if (update.message.sticker is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int())):
+                and not await validate_location_level(
+                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int(), group, topic)):
             return False
     except AttributeError:
         pass
@@ -217,8 +228,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # Animations
     try:
         if (update.message.animation is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int())):
+                and not await validate_location_level(
+                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int(), group, topic)):
             return False
     except AttributeError:
         pass
@@ -227,8 +238,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.forward_from is not None
                 and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
-                                                      identifier=str(update.message.forward_from.id),
+                                                      Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(), group,
+                                                      topic, identifier=str(update.message.forward_from.id),
                                                       allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list())):
             return False
     except AttributeError:
@@ -237,8 +248,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # Dice emoji
     try:
         if (update.message.dice is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int())):
+                and not await validate_location_level(
+                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int(), group, topic)):
             return False
     except AttributeError:
         pass
@@ -247,8 +258,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.via_bot is not None
                 and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
-                                                      identifier=str(update.message.via_bot.id),
+                                                      Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(), group,
+                                                      topic, identifier=str(update.message.via_bot.id),
                                                       allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list())):
             return False
     except AttributeError:
@@ -258,13 +269,16 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
 
 async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, location_level: int,
-                                  identifier: str = None, allowed_identifiers: list[str] = None) -> bool:
+                                  group: Group, topic: Topic, identifier: str = None,
+                                  allowed_identifiers: list[str] = None) -> bool:
     """
     Validates the location level of the user
     :param update: Telegram update
     :param context: Telegram context
     :param user: User object
     :param location_level: Location level to validate
+    :param group: The group
+    :param topic: The topic
     :param identifier: If not None, check if is in the list of allowed identifiers
     :param allowed_identifiers: Identifiers to allow. If not None, identifier must be not None
     :return: True if valid, False otherwise
@@ -280,7 +294,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
         if user.is_arrested() and location_level > 1:
             raise GroupMessageValidationException(notification=DeletedMessageArrestNotification())
 
-        if await user_is_muted(user):
+        if await user_is_muted(user, group, topic):
             raise GroupMessageValidationException(notification=DeletedMessageMuteNotification())
 
         if user.location_level < location_level:

@@ -340,7 +340,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
     except CommandValidationException as cve:
         if is_restricted_feature_error:  # Restricted feature in group, no error message
             return False
-        if not command.answer_callback and await user_is_muted(user):
+        if not command.answer_callback and await user_is_muted(user, group, topic):
             await delete_message(update)
         else:
             if (command.answer_callback and is_callback) or command.send_message_if_error:

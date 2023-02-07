@@ -44,7 +44,6 @@ class User(BaseModel):
     private_screen_list = CharField(max_length=99)
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
-    is_muted = IntegerField(default=0)
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
 
