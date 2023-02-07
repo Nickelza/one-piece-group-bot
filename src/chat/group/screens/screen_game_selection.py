@@ -65,7 +65,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     button_delete_info = {GameSelectionReservedKeys.GAME_ID: game.id,
                           ReservedKeyboardKeys.AUTHORIZED_USER: [
-                              challenger, opponent], GameSelectionReservedKeys.CANCEL: True}
+                              challenger.id, opponent.id], GameSelectionReservedKeys.CANCEL: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
