@@ -105,9 +105,10 @@ def get_groups_with_feature_enabled(feature: Feature) -> list:
 
     return (
         Group.select().distinct()
-        .join(GroupDisabledFeature, JOIN.LEFT_OUTER)
+        .join(GroupDisabledFeature, JOIN.LEFT_OUTER,
+              on=((GroupDisabledFeature.group == Group.id) & (GroupDisabledFeature.feature == feature)))
         .where((Group.is_active == True)  # Not filtering by is_forum to include general forum
-               & ((GroupDisabledFeature.feature != feature) | (GroupDisabledFeature.feature.is_null()))))
+               & (GroupDisabledFeature.feature.is_null())))
 
 
 def get_chats_with_feature_enabled_dict(feature: Feature) -> list[dict[str, Group or Topic]]:
