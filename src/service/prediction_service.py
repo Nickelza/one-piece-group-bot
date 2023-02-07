@@ -574,6 +574,10 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
     prediction_option_user.date = datetime.now()
     prediction_option_user.save()
 
+    # Remove wager from user balance
+    user.bounty -= wager
+    user.pending_bounty += wager
+
     return prediction_option_user
 
 

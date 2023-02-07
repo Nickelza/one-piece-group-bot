@@ -139,10 +139,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     save_prediction_option_user(prediction_option, user, wager)
 
-    # Remove wager from user balance
-    user.bounty -= wager
-    user.pending_bounty += wager
-
     # Send success message
     ot_text = phrases.PREDICTION_BET_SUCCESS + phrases.PREDICTION_BET_HOW_TO_VIEW_BET_STATUS
     await full_message_send(context, ot_text, update=update, add_delete_button=True)
