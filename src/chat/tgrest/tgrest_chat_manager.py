@@ -8,6 +8,7 @@ from src.chat.tgrest.screens.screen_send_private_message import manage as manage
 from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced, DevilFruitAwardedNotification
 from src.model.enums.Notification import ImpelDownNotificationRestrictionRemoved
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
+from src.model.error.CustomException import DevilFruitValidationException
 from src.model.tgrest.TgRest import TgRest, TgRestException
 from src.model.tgrest.TgRestDevilFruitAward import TgRestDevilFruitAward
 from src.model.tgrest.TgRestImpelDownNotification import TgRestImpelDownNotification
@@ -74,8 +75,11 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 tg_rest_dfa = TgRestDevilFruitAward(**tg_rest_dict)
 
                 # Give devil fruit to user
-                give_devil_fruit_to_user(tg_rest_dfa.devil_fruit, tg_rest_dfa.user, DevilFruitSource.ADMIN,
-                                         reason=tg_rest_dfa.reason)
+                try:
+                    give_devil_fruit_to_user(tg_rest_dfa.devil_fruit, tg_rest_dfa.user, DevilFruitSource.ADMIN,
+                                             reason=tg_rest_dfa.reason)
+                except DevilFruitValidationException as e:
+                    raise TgRestException(str(e))
 
                 # Send notification
                 notification = DevilFruitAwardedNotification(tg_rest_dfa.devil_fruit, tg_rest_dfa.reason)

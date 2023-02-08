@@ -24,6 +24,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours
@@ -50,11 +51,12 @@ def give_devil_fruit_to_user(devil_fruit: DevilFruit, receiver: User, source: De
     # Make sure the devil fruit is not already owned by someone
     if devil_fruit.owner:
         owner: User = devil_fruit.owner
-        raise Exception(f"Devil fruit {devil_fruit.get_full_name()} is already owned by {owner.tg_user_id}")
+        raise DevilFruitValidationException(
+            f"Devil fruit {devil_fruit.get_full_name()} is already owned by {owner.tg_user_id}")
 
     # If source is ADMIN, a reason must be provided
     if source is DevilFruitSource.ADMIN and not reason:
-        raise Exception("A reason must be provided when giving a devil fruit to a user via ADMIN")
+        raise DevilFruitValidationException("A reason must be provided when giving a devil fruit to a user via ADMIN")
 
     # Save new owner
     devil_fruit.owner = receiver

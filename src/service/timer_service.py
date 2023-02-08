@@ -40,12 +40,13 @@ async def set_timers(application: Application) -> None:
     :return: None
     """
     for timer in Timer.TIMERS:
-        if timer.is_enabled:
-            job = add_to_queue(application, timer)
-            if timer.should_run_on_startup:
-                await job.run(application)
-        else:
+        if not timer.is_enabled:
             logging.info(f'Timer {timer.name} is disabled')
+            continue
+
+        job = add_to_queue(application, timer)
+        if timer.should_run_on_startup:
+            await job.run(application)
 
 
 async def run(context: ContextTypes.DEFAULT_TYPE) -> None:

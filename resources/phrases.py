@@ -641,6 +641,7 @@ DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_APPEARED}{DEVIL_FRUIT_RELEASE_ME
 
 DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
 DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
+DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'

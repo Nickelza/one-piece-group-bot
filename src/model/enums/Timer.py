@@ -23,6 +23,9 @@ class Timer:
         self.should_run_on_startup = should_run_on_startup
         self.info = info
 
+        if self.should_run_on_startup and not self.is_enabled:
+            self.is_enabled = True
+
 
 TIMERS: list[Timer] = []
 TEMP_DIR_CLEANUP = Timer('temp_dir_cleanup', Env.CRON_TEMP_DIR_CLEANUP.get(),

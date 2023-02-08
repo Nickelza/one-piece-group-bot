@@ -46,6 +46,7 @@ class User(BaseModel):
     private_screen_in_edit_id = IntegerField(null=True)
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
+    can_collect_devil_fruit = BooleanField(default=True)
 
     # Transient fields
 
