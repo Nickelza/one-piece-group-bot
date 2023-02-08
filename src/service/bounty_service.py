@@ -1,6 +1,6 @@
 import datetime
-
 from math import ceil
+
 from peewee import Case, fn
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -164,6 +164,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Delete all pending bounty gifts
     BountyGift.delete().where(BountyGift.status == BountyGiftStatus.AWAITING_CONFIRMATION).execute()
+
+    # Reset bounty gift tax
+    User.update(bounty_gift_tax=0).execute()
 
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET

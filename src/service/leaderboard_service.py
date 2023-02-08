@@ -84,9 +84,6 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Warn inactive users with eaten Devil Fruits
     context.application.create_task(warn_inactive_users_with_eaten_devil_fruit(context))
 
-    # Reset bounty gift tax
-    User.update(bounty_gift_tax=0).execute()
-
 
 def create_leaderboard() -> Leaderboard:
     """
