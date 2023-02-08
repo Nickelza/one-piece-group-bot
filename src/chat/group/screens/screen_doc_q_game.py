@@ -130,6 +130,8 @@ async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
     if await validate_play(update, context, user):
         doc_q_game = DocQGame()
         doc_q_game.user = user
+        doc_q_game.group = group
+        doc_q_game.topic = topic
         doc_q_game.save()
 
         if user.has_bounty_gain_limitations():
@@ -191,8 +193,6 @@ async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
         message: Message = await full_media_send(context, saved_media_name=SavedMediaName.DOC_Q, update=update,
                                                  caption=caption, keyboard=inline_keyboard)
 
-        doc_q_game.group = group
-        doc_q_game.topic = topic
         doc_q_game.message_id = message.message_id
         doc_q_game.save()
 
