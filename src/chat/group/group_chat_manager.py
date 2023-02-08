@@ -103,7 +103,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 return
 
     # Update bounty from message gain
-    if allow_bounty_from_messages(group, topic):
+    if allow_bounty_from_messages(group, topic) or command is not Command.ND:
         await update_user_bounty(update, context, user)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group, topic, added_to_group)
