@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from peewee import JOIN
+from telegram.error import TelegramError
+from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
@@ -7,6 +11,8 @@ from src.model.GroupDisableFeature import GroupDisabledFeature
 from src.model.Topic import Topic
 from src.model.TopicDisableFeature import TopicDisabledFeature
 from src.model.enums.Feature import Feature
+from src.model.pojo.Keyboard import Keyboard
+from src.service.message_service import full_message_send
 
 
 def is_main_group(group: Group) -> bool:
@@ -111,21 +117,90 @@ def get_groups_with_feature_enabled(feature: Feature) -> list:
                & (GroupDisabledFeature.feature.is_null())))
 
 
-def get_chats_with_feature_enabled_dict(feature: Feature) -> list[dict[str, Group or Topic]]:
+def get_chats_with_feature_enabled_dict(feature: Feature, excluded_chats: dict[Group, list[Topic]] = None
+                                        ) -> dict[Group, list[Topic]]:
     """
-    Gets the chats with a feature enabled, if they are not topics
+    Gets the chats with a feature enabled
     :param feature: The feature
+    :param excluded_chats: The chats to exclude from the result
     :return: The dict of chats
     """
+
+    if excluded_chats is None:
+        excluded_chats = {}
 
     groups = get_groups_with_feature_enabled(feature)
     topics = get_topics_with_feature_enabled(feature)
 
-    result = []
+    result = {}
     for group in groups:
-        result.append({"group": group, "topic": None})
+        if group in excluded_chats and None in excluded_chats[group]:
+            continue
+
+        result[group] = [None]
 
     for topic in topics:
-        result.append({"group": topic.group, "topic": topic})
+        if topic.group in excluded_chats and topic in excluded_chats[topic.group]:
+            continue
+
+        if topic.group not in result:
+            result[topic.group] = [topic]
+        else:
+            result[topic.group].append(topic)
 
     return result
+
+
+async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
+                                                           text: str,
+                                                           inline_keyboard: list[list[Keyboard]] = None,
+                                                           excluded_chats: dict[Group, list[Topic]] = None) -> None:
+    """
+    Broadcasts a message to all the chats with a feature enabled
+    :param context: The context
+    :param feature: The feature
+    :param text: The message
+    :param inline_keyboard: The outbound keyboard
+    :param excluded_chats: The chats to exclude from the broadcast
+    """
+
+    context.application.create_task(broadcast_to_chats_with_feature_enabled(
+        context, feature, text, inline_keyboard=inline_keyboard, excluded_chats=excluded_chats))
+
+
+async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
+                                                  text: str, inline_keyboard: list[list[Keyboard]] = None,
+                                                  excluded_chats: dict[Group, list[Topic]] = None) -> None:
+    """
+    Broadcasts a message to all the chats with a feature enabled
+    :param context: The context
+    :param feature: The feature
+    :param text: The message
+    :param inline_keyboard: The outbound keyboard
+    :param excluded_chats: The chats to exclude from the broadcast
+    """
+
+    """
+    Broadcasts a message to all the chats with a feature enabled
+    :param context: The context
+    :param feature: The feature
+    :param text: The message
+    :param inline_keyboard: The outbound keyboard
+    :param excluded_chats: The chats to exclude from the broadcast
+    """
+
+    chats: dict[Group, list[Topic]] = get_chats_with_feature_enabled_dict(feature, excluded_chats=excluded_chats)
+
+    for group, topics in chats.items():
+        for topic in topics:
+            try:
+                await full_message_send(context, text, group=group, topic=topic, keyboard=inline_keyboard)
+            except TelegramError as te:
+                if topic is not None:
+                    topic.last_error_date = datetime.now()
+                    topic.last_error_message = str(te)
+                    topic.save()
+
+                group.last_error_date = datetime.now()
+                group.last_error_message = str(te)
+                group.save()

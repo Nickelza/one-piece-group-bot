@@ -3,7 +3,6 @@ import random
 from datetime import datetime, timedelta
 
 from telegram import Message
-from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -29,10 +28,10 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours
 from src.service.group_service import get_main_group, get_topics_with_feature_enabled, \
-    get_chats_with_feature_enabled_dict
+    broadcast_to_chats_with_feature_enabled_dispatch
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
-from src.service.message_service import log_error, escape_valid_markdown_chars, full_message_send, \
-    delete_message, get_message_url
+from src.service.message_service import log_error, escape_valid_markdown_chars, full_message_send, delete_message, \
+    get_message_url
 from src.service.notification_service import send_notification
 
 
@@ -155,7 +154,7 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
 
     for devil_fruit in devil_fruits:
         # Send to chat
-        ot_text = phrases.DEVIL_FRUIT_APPEARED_WITH_INFO.format(
+        text = phrases.DEVIL_FRUIT_APPEARED_WITH_INFO.format(
             escape_valid_markdown_chars(devil_fruit.get_full_name()),
             get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False))
 
@@ -173,7 +172,7 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
 
         # Send release message
         message: Message = await full_message_send(
-            context, ot_text, keyboard=inline_keyboard, chat_id=release_group.tg_group_id,
+            context, text, keyboard=inline_keyboard, chat_id=release_group.tg_group_id,
             topic_id=release_topic.tg_topic_id)
 
         devil_fruit.release_date = datetime.now()
@@ -181,43 +180,15 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         devil_fruit.status = DevilFruitStatus.RELEASED
         devil_fruit.save()
 
-        # Send notification to other chats -
-        context.application.create_task(send_devil_fruit_release_message_notification(context, devil_fruit))
+        # Send notification to other chats
+        excluded_chats = {release_group: [release_topic]}
+        text = phrases.DEVIL_FRUIT_APPEARED
+        message_url = get_message_url(release_group, devil_fruit.release_message_id)
+        inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
 
-
-async def send_devil_fruit_release_message_notification(context: ContextTypes.DEFAULT_TYPE, devil_fruit: DevilFruit
-                                                        ) -> None:
-    """
-    Notify all other chats about the devil fruit release, if enabled
-    :param context: The context
-    :param devil_fruit: The devil fruit
-    :return: None
-    """
-
-    chats: list[dict[str, Group or Topic]] = get_chats_with_feature_enabled_dict(Feature.DEVIL_FRUIT_APPEARANCE)
-    release_group: Group = devil_fruit.release_group
-
-    ot_text = phrases.DEVIL_FRUIT_APPEARED
-    # Add "Go to message" button
-    message_url = get_message_url(release_group, devil_fruit.release_message_id)
-    inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
-
-    for chat in chats:
-        target_group: Group = chat["group"]
-        target_topic: Topic = chat["topic"]
-        if target_group != devil_fruit.release_group or target_topic != devil_fruit.release_topic:
-            try:
-                await full_message_send(
-                    context, ot_text, group=target_group, topic=target_topic, keyboard=inline_keyboard)
-            except TelegramError as te:
-                if target_topic is not None:
-                    target_topic.last_error_date = datetime.now()
-                    target_topic.last_error_message = str(te)
-                    target_topic.save()
-
-                target_group.last_error_date = datetime.now()
-                target_group.last_error_message = str(te)
-                target_group.save()
+        await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.DEVIL_FRUIT_APPEARANCE, text,
+                                                               inline_keyboard=inline_keyboard,
+                                                               excluded_chats=excluded_chats)
 
 
 def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool = False) -> None:
