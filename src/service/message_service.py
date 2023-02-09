@@ -691,7 +691,8 @@ async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TY
         chat_id = group.tg_group_id
 
     if update is None and (context is None or chat_id is None or message_id is None):
-        raise ValueError('update or context and chat_id and message_id must be specified')
+        logging.error('update or context and chat_id and message_id must be specified to delete message')
+        return
 
     try:
         if update is not None:
