@@ -51,5 +51,5 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                                          info={CrewMemberReservedKeys.MEMBER_ID: member.id},
                                          inbound_info=inbound_keyboard.info)])
 
-    await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard,
-                            keyboard=inline_keyboard)
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard)

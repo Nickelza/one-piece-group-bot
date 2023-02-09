@@ -126,8 +126,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
 
     except CrewValidationException as e:
         # Show alert if callback else send a message
-        await full_message_send(context, str(e), update=update, inbound_keyboard=inbound_keyboard, answer_callback=True,
-                                show_alert=True)
+        await full_message_send(context, str(e), update=update, answer_callback=True, show_alert=True,
+                                inbound_keyboard=inbound_keyboard)
         return False
 
     return True

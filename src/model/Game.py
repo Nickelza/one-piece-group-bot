@@ -3,8 +3,7 @@ import datetime
 from peewee import *
 
 from src.model.BaseModel import BaseModel
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 
@@ -21,8 +20,8 @@ class Game(BaseModel):
     board = CharField(max_length=999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION)
-    group = ForeignKeyField(Group, backref='game_groups', on_delete='RESTRICT', on_update='CASCADE')
-    topic = ForeignKeyField(Topic, null=True, backref='game_topics', on_delete='RESTRICT', on_update='CASCADE')
+    group_chat = ForeignKeyField(GroupChat, null=True, backref='game_groups_chats', on_delete='RESTRICT',
+                                 on_update='CASCADE')
     message_id = IntegerField(null=True)
     wager = IntegerField(null=True)
 

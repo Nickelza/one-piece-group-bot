@@ -646,4 +646,4 @@ DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'
 
-THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your group!\n'
+THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your group_chat!\n'

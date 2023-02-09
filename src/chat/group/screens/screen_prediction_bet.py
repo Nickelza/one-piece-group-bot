@@ -35,7 +35,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     """
 
     error_tuple = None, None, None, None
-    add_delete_button = command is not None  # Add delete button if coming from group
+    add_delete_button = command is not None  # Add delete button if coming from group_chat
 
     if amount is not None or command is not None:
         if command is not None:
@@ -92,9 +92,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
                               str(prediction_option.number) == command.parameters[1]]
         if len(prediction_options) == 0:
             await full_message_send(context, phrases.PREDICTION_OPTION_NOT_FOUND.format(
-                escape_valid_markdown_chars(command.parameters[1])), update=update,
-                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                    previous_screens=previous_screens,
+                escape_valid_markdown_chars(command.parameters[1])), update=update, add_delete_button=add_delete_button,
+                                    inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
                                     previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
             return error_tuple
 

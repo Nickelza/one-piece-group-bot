@@ -123,7 +123,7 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
     """
     # Try to delete message
     if should_delete_message:
-        await delete_message(context=context, group=game.group, message_id=game.message_id)
+        await delete_message(context=context, group_chat=game.group_chat, message_id=game.message_id)
 
     # Return wager to challenger
     challenger: User = game.challenger

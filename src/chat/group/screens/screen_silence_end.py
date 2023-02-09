@@ -2,30 +2,24 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.UnmutedUser import UnmutedUser
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, group: Group, topic: Topic) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat: GroupChat) -> None:
     """
     Manage the silence end screen
     :param update: The update object
     :param context: The context object
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
 
-    if topic:
-        topic.is_muted = False
-        topic.save()
-    else:
-        group.is_muted = False
-        group.save()
+    group_chat.is_muted = False
+    group_chat.save()
 
-    UnmutedUser.delete().where(UnmutedUser.group == group, UnmutedUser.topic == topic).execute()
+    UnmutedUser.delete().where(UnmutedUser.group_chat == group_chat).execute()
 
     # Confirmation message
     await full_message_send(context, phrases.SILENCE_END, update=update)

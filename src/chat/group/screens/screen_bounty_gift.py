@@ -4,8 +4,7 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Command import Command
@@ -23,7 +22,7 @@ from src.service.user_service import user_is_boss
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 target_user: User, command: Command, group: Group, topic: Topic) -> None:
+                 target_user: User, command: Command, group_chat: GroupChat) -> None:
     """
     Manage the Bounty gift screen
     :param update: The update object
@@ -32,14 +31,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :param inbound_keyboard: The keyboard object
     :param target_user: The target user in case of a reply
     :param command: The command
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
 
     # Request send a gift
     if inbound_keyboard is None:
-        await send_request(update, context, user, target_user, command, group, topic)
+        await send_request(update, context, user, target_user, command, group_chat)
         return
 
     await keyboard_interaction(update, context, user, inbound_keyboard)
@@ -87,7 +85,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
 
 
 async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
-                       command: Command, group: Group, topic: Topic) -> None:
+                       command: Command, group_chat: GroupChat) -> None:
     """
     Send request to send a bounty gift
     :param update: The update object
@@ -95,8 +93,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     :param sender: The user that wants to send a bounty gift
     :param receiver: The user to send the bounty gift to
     :param command: The command
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
 
@@ -116,8 +113,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     bounty_gift.receiver = receiver
     bounty_gift.amount = amount
     bounty_gift.tax_percentage = tax_percentage
-    bounty_gift.group = group
-    bounty_gift.topic = topic
+    bounty_gift.group_chat = group_chat
     bounty_gift.save()
 
     # Keyboard

@@ -3,8 +3,7 @@ from typing import Optional
 from peewee import *
 
 from src.model.BaseModel import BaseModel
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 
@@ -22,10 +21,8 @@ class DevilFruit(BaseModel):
     collection_date = DateTimeField(null=True)
     eaten_date = DateTimeField(null=True)
     expiration_date = DateTimeField(null=True)
-    release_group = ForeignKeyField(Group, null=True, backref='devil_fruit_release_groups', on_delete='RESTRICT',
-                                    on_update='CASCADE')
-    release_topic = ForeignKeyField(Topic, null=True, backref='devil_fruit_release_topics', on_delete='RESTRICT',
-                                    on_update='CASCADE')
+    release_group_chat = ForeignKeyField(GroupChat, null=True, backref='devil_fruit_release_groups_chats',
+                                         on_delete='RESTRICT', on_update='CASCADE')
     release_date = DateTimeField(null=True)
     release_message_id = IntegerField(null=True)
     should_show_abilities = BooleanField(default=False)

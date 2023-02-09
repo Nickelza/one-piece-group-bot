@@ -47,7 +47,7 @@ class Feature(IntEnum):
     @staticmethod
     def get_restricted() -> list['Feature']:
         """
-        Get all the features that are restricted to the main group
+        Get all the features that are restricted to the main group_chat
 
         :return: All the features that are restricted
         """
@@ -56,7 +56,7 @@ class Feature(IntEnum):
     @staticmethod
     def get_non_restricted() -> list['Feature']:
         """
-        Get all the features that are not restricted to the main group
+        Get all the features that are not restricted to the main group_chat
 
         :return: All the features that are not restricted
         """
@@ -65,7 +65,7 @@ class Feature(IntEnum):
 
     def is_restricted(self) -> bool:
         """
-        Checks if the feature is restricted to the main group
+        Checks if the feature is restricted to the main group_chat
 
         :return: True if the feature is restricted, False otherwise
         """

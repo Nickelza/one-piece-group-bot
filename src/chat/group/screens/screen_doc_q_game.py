@@ -10,8 +10,7 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.DocQGame import DocQGame
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
@@ -110,28 +109,25 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, doc_q_game: DocQGame) 
     :return: None
     """
     # Try to delete message
-    await delete_message(context=context, group=doc_q_game.group, message_id=doc_q_game.message_id)
+    await delete_message(context=context, group_chat=doc_q_game.group_chat, message_id=doc_q_game.message_id)
 
     # Delete game
     doc_q_game.delete_instance()
 
 
-async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group: Group, topic: Topic
-                       ) -> None:
+async def play_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat) -> None:
     """
     User request to play Doc Q Game
     :param update: The update
     :param context: The context
     :param user: The user
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
     if await validate_play(update, context, user):
         doc_q_game = DocQGame()
         doc_q_game.user = user
-        doc_q_game.group = group
-        doc_q_game.topic = topic
+        doc_q_game.group_chat = group_chat
         doc_q_game.save()
 
         if user.has_bounty_gain_limitations():
@@ -260,21 +256,20 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         doc_q_game.save()
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard, group: Group,
-                 topic: Topic) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard,
+                 group_chat: GroupChat) -> None:
     """
     Manage Doc Q Game screen
     :param update: The update
     :param context: The context
     :param user: The user
     :param keyboard: The keyboard
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
     # Request to play
     if keyboard is None:
-        await play_request(update, context, user, group, topic)
+        await play_request(update, context, user, group_chat)
         return
 
     await keyboard_interaction(update, context, user, keyboard)

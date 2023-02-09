@@ -3,8 +3,7 @@ import datetime
 from peewee import *
 
 from src.model.BaseModel import BaseModel
-from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 
@@ -18,8 +17,8 @@ class DocQGame(BaseModel):
     datetime = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.IN_PROGRESS)
     correct_choices_index = CharField(max_length=99, null=True)
-    group = ForeignKeyField(Group, backref='doc_q_game_groups', on_delete='RESTRICT', on_update='CASCADE')
-    topic = ForeignKeyField(Topic, null=True, backref='doc_q_game_topics', on_delete='RESTRICT', on_update='CASCADE')
+    group_chat = ForeignKeyField(GroupChat, null=True, backref='doc_q_game_groups_chats', on_delete='RESTRICT',
+                                 on_update='CASCADE')
     message_id = IntegerField(null=True)
     belly = BigIntegerField(null=True)
 

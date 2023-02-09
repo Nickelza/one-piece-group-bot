@@ -303,8 +303,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     if wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
         await full_message_send(context, ot_text, update=update, add_delete_button=add_delete_button,
-                                inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
+                                inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
                                 previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 

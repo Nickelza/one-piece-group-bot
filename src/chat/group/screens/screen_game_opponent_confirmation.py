@@ -49,8 +49,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:  # Opponent rejected
             should_delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
-            await full_message_send(context, ot_text, update=update, authorized_users=[game.challenger, game.opponent],
-                                    add_delete_button=True)
+            await full_message_send(context, ot_text, update=update, add_delete_button=True,
+                                    authorized_users=[game.challenger, game.opponent])
 
         await delete_game(context, game, should_delete_message=should_delete_message)
         user.should_update_model = False

@@ -65,9 +65,9 @@ async def send_notification_execute(context: ContextTypes.DEFAULT_TYPE, user: Us
                 quote_message_id = message.message_id
 
             await full_message_send(context, notification.build(), chat_id=user.tg_user_id, keyboard=inline_keyboard,
-                                    disable_web_page_preview=notification.disable_web_page_preview,
                                     disable_notification=notification.disable_notification,
-                                    reply_to_message_id=quote_message_id)
+                                    reply_to_message_id=quote_message_id,
+                                    disable_web_page_preview=notification.disable_web_page_preview)
         except Forbidden:  # User has blocked the bot
             pass
 

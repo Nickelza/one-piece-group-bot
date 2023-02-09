@@ -27,7 +27,7 @@ from src.chat.group.screens.screen_silence_end import manage as manage_screen_si
 from src.chat.group.screens.screen_speak import manage as manage_screen_speak
 from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.enums.Notification import DeletedMessageArrestNotification, DeletedMessageMuteNotification, \
@@ -58,9 +58,9 @@ async def update_user_bounty(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                 keyboard: Keyboard, target_user: User, is_callback: bool, group: Group, topic: Topic) -> None:
+                 keyboard: Keyboard, target_user: User, is_callback: bool, group_chat: GroupChat) -> None:
     """
-    Main function for the group chat manager
+    Main function for the group chat chat manager
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command to execute
@@ -68,12 +68,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     :param keyboard: Keyboard
     :param target_user: The target user in case of a reply
     :param is_callback: True if the message is a callback, False otherwise
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :return: None
     """
 
-    # Get added or removed from group
+    group: Group = group_chat.group
+
+    # Get added or removed from group_chat
     added_to_group, removed_from_group = get_added_or_removed_from_group_event(update)
     if removed_from_group:
         group.is_active = False
@@ -93,25 +94,25 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     except AttributeError:
         pass
 
-    # Validate messages only in main group
-    if is_main_group(group):
-        if feature_is_enabled(group, topic, Feature.MESSAGE_FILTER):
-            if not await validate(update, context, user, is_callback, group, topic):
+    # Validate messages only in main group_chat
+    if is_main_group(group_chat):
+        if feature_is_enabled(group_chat, Feature.MESSAGE_FILTER):
+            if not await validate(update, context, user, is_callback, group_chat):
                 return
-        elif feature_is_enabled(group, topic, Feature.SILENCE):
-            if not await validate(update, context, user, is_callback, group, topic, check_only_muted=True):
+        elif feature_is_enabled(group_chat, Feature.SILENCE):
+            if not await validate(update, context, user, is_callback, group_chat, check_only_muted=True):
                 return
 
     # Update bounty from message gain
-    if allow_bounty_from_messages(group, topic) or command is not Command.ND:
+    if allow_bounty_from_messages(group_chat) or command is not Command.ND:
         await update_user_bounty(update, context, user)
 
-    await dispatch_screens(update, context, user, keyboard, command, target_user, group, topic, added_to_group)
+    await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 
 
 async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                           command: Command.Command, target_user: User, group: Group, topic: Topic,
-                           added_to_group: bool) -> None:
+                           command: Command.Command, target_user: User, group_chat: GroupChat, added_to_group: bool
+                           ) -> None:
     """
     Dispatches the different screens
 
@@ -121,9 +122,8 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
     :param inbound_keyboard: Keyboard to send
     :param command: Command to execute
     :param target_user: The target user in case of a reply
-    :param group: The group
-    :param topic: The topic
-    :param added_to_group: If the Bot was just added to the group
+    :param group_chat: The group chat
+    :param added_to_group: If the Bot was just added to the group chat
     :return: None
     """
 
@@ -133,16 +133,16 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_show_status(update, context, command, user)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
-                await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group, topic)
+                await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)
 
             case Screen.GRP_CHANGE_REGION:  # Change region
                 await manage_screen_change_region(update, context, user, keyboard=inbound_keyboard, command=command)
 
             case Screen.GRP_FIGHT:  # Fight
-                await manage_screen_fight(update, context, user, inbound_keyboard, group, topic)
+                await manage_screen_fight(update, context, user, inbound_keyboard, group_chat)
 
             case Screen.GRP_GAME:  # Game
-                await manage_screen_game(update, context, user, command, group, topic)
+                await manage_screen_game(update, context, user, command, group_chat)
 
             case Screen.GRP_GAME_SELECTION:  # Game selection
                 await manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)
@@ -172,45 +172,44 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_crew_invite(update, context, user, inbound_keyboard, target_user)
 
             case Screen.GRP_SILENCE:  # Silence
-                await manage_screen_silence(update, context, group, topic)
+                await manage_screen_silence(update, context, group_chat)
 
             case Screen.GRP_SILENCE_END:  # Silence end
-                await manage_screen_silence_end(update, context, group, topic)
+                await manage_screen_silence_end(update, context, group_chat)
 
             case Screen.GRP_SPEAK:  # Speak
-                await manage_screen_speak(update, context, target_user, group, topic)
+                await manage_screen_speak(update, context, target_user, group_chat)
 
             case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
-                await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command, group,
-                                                topic)
+                await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
+                                                group_chat)
 
             case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
                 await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)
 
             case Screen.GRP_SETTINGS:  # Settings
-                await manage_screen_settings(update, context, inbound_keyboard, group, topic, added_to_group)
+                await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool, group: Group,
-                   topic: Topic, check_only_muted: bool = False) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,
+                   group_chat: GroupChat, check_only_muted: bool = False) -> bool:
     """
     Validates the message, deleting it if it's not valid
     :param update: Telegram update
     :param context: Telegram context
     :param user: User object
     :param is_callback: True if the message is a callback, False otherwise
-    :param group: The group
-    :param topic: The topic
-    :param check_only_muted: True if should validate only if the user is muted, False otherwise
+    :param group_chat: The group chat
+    :param check_only_muted: True if it should validate only if the user is muted, False otherwise
     :return: True if valid, False otherwise
     """
     # Regular message
     if not is_callback:
-        if not await validate_location_level(update, context, user, Location.ND.level, group, topic):
+        if not await validate_location_level(update, context, user, Location.ND.level, group_chat):
             return False
 
         if check_only_muted:
@@ -219,8 +218,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # Stickers
     try:
         if (update.message.sticker is not None
-                and not await validate_location_level(
-                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int(), group, topic)):
+                and not await validate_location_level(update, context, user,
+                                                      Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int(), group_chat)):
             return False
     except AttributeError:
         pass
@@ -229,7 +228,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.animation is not None
                 and not await validate_location_level(
-                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int(), group, topic)):
+                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int(), group_chat)):
             return False
     except AttributeError:
         pass
@@ -238,8 +237,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.forward_from is not None
                 and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(), group,
-                                                      topic, identifier=str(update.message.forward_from.id),
+                                                      Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(), group_chat,
+                                                      identifier=str(update.message.forward_from.id),
                                                       allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list())):
             return False
     except AttributeError:
@@ -249,7 +248,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.dice is not None
                 and not await validate_location_level(
-                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int(), group, topic)):
+                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int(), group_chat)):
             return False
     except AttributeError:
         pass
@@ -258,8 +257,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     try:
         if (update.message.via_bot is not None
                 and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(), group,
-                                                      topic, identifier=str(update.message.via_bot.id),
+                                                      Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(), group_chat,
+                                                      identifier=str(update.message.via_bot.id),
                                                       allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list())):
             return False
     except AttributeError:
@@ -269,7 +268,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
 
 async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, location_level: int,
-                                  group: Group, topic: Topic, identifier: str = None,
+                                  group_chat: GroupChat, identifier: str = None,
                                   allowed_identifiers: list[str] = None) -> bool:
     """
     Validates the location level of the user
@@ -277,8 +276,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
     :param context: Telegram context
     :param user: User object
     :param location_level: Location level to validate
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat
     :param identifier: If not None, check if is in the list of allowed identifiers
     :param allowed_identifiers: Identifiers to allow. If not None, identifier must be not None
     :return: True if valid, False otherwise
@@ -294,7 +292,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
         if user.is_arrested() and location_level > 1:
             raise GroupMessageValidationException(notification=DeletedMessageArrestNotification())
 
-        if await user_is_muted(user, group, topic):
+        if await user_is_muted(user, group_chat):
             raise GroupMessageValidationException(notification=DeletedMessageMuteNotification())
 
         if user.location_level < location_level:
@@ -310,7 +308,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
 
 def get_added_or_removed_from_group_event(update) -> Tuple[bool, bool]:
     """
-    Gets the added or removed from group event
+    Gets the added or removed from group_chat event
 
     :param update: Telegram update
     :return: Tuple of added and removed

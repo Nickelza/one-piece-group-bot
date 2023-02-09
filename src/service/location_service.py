@@ -44,7 +44,7 @@ async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None,
         if user.location_level != effective_location.level and not should_passive_update:
             location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user,
                                                                                                   effective_location)
-            if requested_by_user:  # Update after region change, edit group message
+            if requested_by_user:  # Update after region change, edit group_chat message
                 await full_message_send(context, location_update_notification.build(), update=update,
                                         disable_web_page_preview=False, add_delete_button=True)
             elif Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool():  # Update after bounty change, send notification
@@ -54,7 +54,7 @@ async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None,
         user.location_level = effective_location.level
 
     # Move to New World proposal
-    if (not should_passive_update  # Update not from user interaction in group
+    if (not should_passive_update  # Update not from user interaction in group_chat
             and new_location.region == Region.NEW_WORLD  # Location relative to bounty is in New World
             and user.location_level == Location.get_last_paradise().level  # Capped location is last of Paradise
             and user.should_propose_new_world  # User has not been proposed to move to New World yet

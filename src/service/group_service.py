@@ -7,177 +7,128 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 from resources import phrases
 from src.model.Group import Group
-from src.model.GroupDisableFeature import GroupDisabledFeature
-from src.model.Topic import Topic
-from src.model.TopicDisableFeature import TopicDisabledFeature
+from src.model.GroupChat import GroupChat
+from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.enums.Feature import Feature
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
 
-def is_main_group(group: Group) -> bool:
+def is_main_group(group_chat: GroupChat) -> bool:
     """
-    Checks if the update is from the main group
-    :param group: The group
-    :return: True if the message is from the main group, False otherwise
+    Checks if the update is from the main group_chat
+    :param group_chat: The group chat
+    :return: True if the message is from the main group_chat, False otherwise
     """
 
+    group: Group = group_chat.group
     return int(group.tg_group_id) == Env.OPD_GROUP_ID.get_int()
 
 
 def get_main_group() -> Group:
     """
-    Gets the main group
-    :return: The main group
+    Gets the main group_chat
+    :return: The main group_chat
     """
 
     return Group.get(Group.tg_group_id == str(Env.OPD_GROUP_ID.get_int()))
 
 
-def feature_is_enabled(group: Group, topic: Topic, feature: Feature) -> bool:
+def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:
     """
     Checks if a feature is enabled
-    :param group: The group
-    :param topic: The topic
+    :param group_chat: The group chat chat
     :param feature: The feature
     :return: True if the feature is enabled, False otherwise
     """
 
-    if topic is not None:
-        return TopicDisabledFeature.get_or_none((TopicDisabledFeature.topic == topic) &
-                                                (TopicDisabledFeature.feature == feature)) is None
-    else:
-        return GroupDisabledFeature.get_or_none((GroupDisabledFeature.group == group) &
-                                                (GroupDisabledFeature.feature == feature)) is None
+    return GroupChatDisabledFeature.get_or_none((GroupChatDisabledFeature.group_chat == group_chat) &
+                                                (GroupChatDisabledFeature.feature == feature)) is None
 
 
-def get_group_or_topic_text(topic: Topic) -> str:
+def get_group_or_topic_text(group_chat: GroupChat) -> str:
     """
-    Gets the group or topic text
-    :param topic: The topic
-    :return: The group or topic text
+    Gets the group chat or group_chat text
+    :param group_chat: The group chat
+    :return: The group chat or group_chat text
     """
 
-    if topic is not None:
+    if group_chat.tg_topic_id is not None:
         return phrases.TEXT_TOPIC
     else:
         return phrases.TEXT_GROUP
 
 
-def allow_bounty_from_messages(group: Group, topic: Topic) -> bool:
+def allow_bounty_from_messages(group_chat: GroupChat) -> bool:
     """
-    Checks if the group/topic allows bounty from messages
-    :param group: The group
-    :param topic: The topic
-    :return: True if the group/topic allows bounty from messages, False otherwise
+    Checks if the group chat/group_chat allows bounty from messages
+    :param group_chat: The group chat
+    :return: True if the group chat/group_chat allows bounty from messages, False otherwise
     """
 
-    if not is_main_group(group):
+    if not is_main_group(group_chat):
         return False
 
-    return feature_is_enabled(group, topic, Feature.BOUNTY_MESSAGES_GAIN)
+    return feature_is_enabled(group_chat, Feature.BOUNTY_MESSAGES_GAIN)
 
 
-def get_topics_with_feature_enabled(feature: Feature, group: Group = None) -> list:
+def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: list[Group] = None,
+                                         excluded_group_chats: list[GroupChat] = None) -> list[GroupChat]:
     """
-    Gets the topics with a feature enabled
+    Gets the group chats with a feature enabled
     :param feature: The feature
-    :param group: The group to filter by (optional)
-    :return: The list of topics
+    :param filter_by_groups: The groups to filter by
+    :param excluded_group_chats: The group chat chats to exclude from the result
+    :return: The list of group chats with the feature enabled
     """
 
-    if group is None:
-        return (
-            Topic.select().distinct()
-            .join(TopicDisabledFeature, JOIN.LEFT_OUTER)
-            .join(Group, on=(Group.id == Topic.group))
-            .where(((Group.is_active == True) & (Group.is_forum == True))
-                   & ((TopicDisabledFeature.feature != feature) | (TopicDisabledFeature.feature.is_null()))))
+    if filter_by_groups is None:
+        filter_by_groups = []
+
+    if len(filter_by_groups) > 0:
+        group_filter = GroupChat.group.in_(filter_by_groups)
     else:
-        return (
-            Topic.select().distinct()
-            .join(TopicDisabledFeature, JOIN.LEFT_OUTER)
-            .join(Group, on=(Group.id == Topic.group))
-            .where((Topic.group == group)
-                   & ((TopicDisabledFeature.feature != feature) | (TopicDisabledFeature.feature.is_null()))))
+        group_filter = True
 
-
-def get_groups_with_feature_enabled(feature: Feature) -> list:
-    """
-    Gets the groups with a feature enabled, if they are not topics
-    :param feature: The feature
-    :return: The list of groups
-    """
+    if excluded_group_chats is None:
+        excluded_group_chats = []
 
     return (
-        Group.select().distinct()
-        .join(GroupDisabledFeature, JOIN.LEFT_OUTER,
-              on=((GroupDisabledFeature.group == Group.id) & (GroupDisabledFeature.feature == feature)))
-        .where((Group.is_active == True)  # Not filtering by is_forum to include general forum
-               & (GroupDisabledFeature.feature.is_null())))
-
-
-def get_chats_with_feature_enabled_dict(feature: Feature, excluded_chats: dict[Group, list[Topic]] = None
-                                        ) -> dict[Group, list[Topic]]:
-    """
-    Gets the chats with a feature enabled
-    :param feature: The feature
-    :param excluded_chats: The chats to exclude from the result
-    :return: The dict of chats
-    """
-
-    if excluded_chats is None:
-        excluded_chats = {}
-
-    groups = get_groups_with_feature_enabled(feature)
-    topics = get_topics_with_feature_enabled(feature)
-
-    result = {}
-    for group in groups:
-        if group in excluded_chats and None in excluded_chats[group]:
-            continue
-
-        result[group] = [None]
-
-    for topic in topics:
-        if topic.group in excluded_chats and topic in excluded_chats[topic.group]:
-            continue
-
-        if topic.group not in result:
-            result[topic.group] = [topic]
-        else:
-            result[topic.group].append(topic)
-
-    return result
+        GroupChat.select().distinct()
+        .join(GroupChatDisabledFeature, JOIN.LEFT_OUTER)
+        .join(Group, on=(Group.id == GroupChat.group))
+        .where((Group.is_active == True)
+               & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
+               & group_filter
+               & ((GroupChatDisabledFeature.feature != feature) | (GroupChatDisabledFeature.feature.is_null()))))
 
 
 async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
-                                                           text: str,
-                                                           inline_keyboard: list[list[Keyboard]] = None,
-                                                           excluded_chats: dict[Group, list[Topic]] = None) -> None:
+                                                           text: str, inline_keyboard: list[list[Keyboard]] = None,
+                                                           excluded_group_chats: list[GroupChat] = None) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
     :param feature: The feature
     :param text: The message
     :param inline_keyboard: The outbound keyboard
-    :param excluded_chats: The chats to exclude from the broadcast
+    :param excluded_group_chats: The chats to exclude from the broadcast
     """
 
     context.application.create_task(broadcast_to_chats_with_feature_enabled(
-        context, feature, text, inline_keyboard=inline_keyboard, excluded_chats=excluded_chats))
+        context, feature, text, inline_keyboard=inline_keyboard, excluded_group_chats=excluded_group_chats))
 
 
 async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
                                                   text: str, inline_keyboard: list[list[Keyboard]] = None,
-                                                  excluded_chats: dict[Group, list[Topic]] = None) -> None:
+                                                  excluded_group_chats: list[GroupChat] = None) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
     :param feature: The feature
     :param text: The message
     :param inline_keyboard: The outbound keyboard
-    :param excluded_chats: The chats to exclude from the broadcast
+    :param excluded_group_chats: The chats to exclude from the broadcast
     """
 
     """
@@ -186,21 +137,21 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
     :param feature: The feature
     :param text: The message
     :param inline_keyboard: The outbound keyboard
-    :param excluded_chats: The chats to exclude from the broadcast
+    :param excluded_group_chats: The chats to exclude from the broadcast
     """
 
-    chats: dict[Group, list[Topic]] = get_chats_with_feature_enabled_dict(feature, excluded_chats=excluded_chats)
+    group_chats: list[GroupChat] = get_group_chats_with_feature_enabled(feature,
+                                                                        excluded_group_chats=excluded_group_chats)
 
-    for group, topics in chats.items():
-        for topic in topics:
-            try:
-                await full_message_send(context, text, group=group, topic=topic, keyboard=inline_keyboard)
-            except TelegramError as te:
-                if topic is not None:
-                    topic.last_error_date = datetime.now()
-                    topic.last_error_message = str(te)
-                    topic.save()
+    for group_chat in group_chats:
+        group: Group = group_chat.group
+        try:
+            await full_message_send(context, text, keyboard=inline_keyboard, group_chat=group_chat)
+        except TelegramError as te:
+            group_chat.last_error_date = datetime.now()
+            group_chat.last_error_message = str(te)
+            group_chat.save()
 
-                group.last_error_date = datetime.now()
-                group.last_error_message = str(te)
-                group.save()
+            group.last_error_date = datetime.now()
+            group.last_error_message = str(te)
+            group.save()

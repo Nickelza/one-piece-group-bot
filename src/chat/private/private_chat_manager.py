@@ -44,7 +44,7 @@ from src.model.pojo.Keyboard import Keyboard
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
                  inbound_keyboard: Keyboard) -> None:
     """
-    Main function for the group chat manager
+    Main function for the group chat chat manager
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command to execute

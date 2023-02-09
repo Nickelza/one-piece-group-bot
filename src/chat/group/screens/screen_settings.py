@@ -5,16 +5,14 @@ from telegram.ext import ContextTypes
 
 import constants as c
 import resources.phrases as phrases
-from src.model.Group import Group
-from src.model.GroupDisableFeature import GroupDisabledFeature
-from src.model.Topic import Topic
-from src.model.TopicDisableFeature import TopicDisabledFeature
+from src.model.GroupChat import GroupChat
+from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.group_service import is_main_group
+from src.service.group_service import is_main_group, get_group_or_topic_text
 from src.service.message_service import full_message_send
 
 
@@ -25,80 +23,58 @@ class SettingsReservedKeys(StrEnum):
     FEATURE = 'a'
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, group: Group,
-                 topic: Topic, added_to_group: bool = False) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, group_chat: GroupChat,
+                 added_to_group: bool = False) -> None:
     """
     Manage the settings screen
     :param update: The update object
     :param context: The context object
     :param inbound_keyboard: The inbound keyboard
-    :param group: The group
-    :param topic: The topic
-    :param added_to_group: If the Bot was just added to the group
+    :param group_chat: The group chat
+    :param added_to_group: If the Bot was just added to the group chat
     :return: None
     """
-
-    is_topic = topic is not None
 
     if inbound_keyboard is not None:
         feature: Feature = Feature(inbound_keyboard.info[SettingsReservedKeys.FEATURE])
         if inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]:
             #  Enable feature - Remove from disabled features
-            if is_topic:
-                TopicDisabledFeature.delete().where((TopicDisabledFeature.topic == topic) &
-                                                    (TopicDisabledFeature.feature == feature)).execute()
-            else:
-                GroupDisabledFeature.delete().where((GroupDisabledFeature.group == group) &
-                                                    (GroupDisabledFeature.feature == feature)).execute()
+            GroupChatDisabledFeature.delete().where((GroupChatDisabledFeature.group_chat == group_chat) &
+                                                    (GroupChatDisabledFeature.feature == feature)).execute()
         else:
             # Disable feature - Add to disabled features
-            if is_topic:
-                disabled_feature = TopicDisabledFeature()
-                disabled_feature.topic = topic
-                disabled_feature.feature = feature
-                disabled_feature.save()
-            else:
-                disabled_feature = GroupDisabledFeature()
-                disabled_feature.group = group
-                disabled_feature.feature = feature
-                disabled_feature.save()
+            disabled_feature = GroupChatDisabledFeature()
+            disabled_feature.group_chat = group_chat
+            disabled_feature.feature = feature
+            disabled_feature.save()
 
         # Refresh backlinks
-        if is_topic:
-            topic = Topic.get_by_id(topic.id)
-        else:
-            group = Group.get_by_id(group.id)
+        group_chat = GroupChat.get_by_id(group_chat.id)
 
-    outbound_keyboard = get_settings_keyboard(group, topic, is_topic)
+    outbound_keyboard = get_settings_keyboard(group_chat)
 
     thanks_text = phrases.THANKS_FOR_ADDING_TO_GROUP if added_to_group else ''
-    chat_type_text = phrases.TEXT_GROUP if not is_topic else phrases.TEXT_TOPIC
-    ot_text = phrases.GRP_TXT_SETTINGS.format(thanks_text, chat_type_text)
+    ot_text = phrases.GRP_TXT_SETTINGS.format(thanks_text, get_group_or_topic_text(group_chat))
 
     await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True,
                             use_close_delete=True)
 
 
-def get_settings_keyboard(group: Group, topic: Topic, is_topic: bool) -> list[list[Keyboard]]:
+def get_settings_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
     """
     Get the settings keyboard
-    :param group: The group
-    :param topic: The topic
-    :param is_topic: Whether the settings are for a topic
+    :param group_chat: The group chat
     :return: The settings keyboard
     """
 
     # Get all features
-    if is_main_group(group):
+    if is_main_group(group_chat):
         features: list[Feature] = Feature.get_all()
     else:
         features: list[Feature] = Feature.get_non_restricted()
 
     # Get all disabled features, avoids multiple queries
-    if is_topic:
-        disabled_features: list[Feature] = [disabled_feature.feature for disabled_feature in topic.disabled_features]
-    else:
-        disabled_features: list[Feature] = [disabled_feature.feature for disabled_feature in group.disabled_features]
+    disabled_features: list[Feature] = [disabled_feature.feature for disabled_feature in group_chat.disabled_features]
 
     keyboard: list[list[Keyboard]] = [[]]
     keyboard_row: list[Keyboard] = []

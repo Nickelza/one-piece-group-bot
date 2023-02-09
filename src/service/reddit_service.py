@@ -22,7 +22,7 @@ from src.service.message_service import full_media_send, escape_valid_markdown_c
 
 async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> None:
     """
-    Send a reddit post to the chat group
+    Send a reddit post to the chat group_chat
     :param context: Context of callback
     :param subreddit_name: Name of the subreddit
     """
@@ -65,7 +65,7 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
             .format(escape_valid_markdown_chars(author_name), author_url,
                     escape_valid_markdown_chars(post.subreddit.display_name), subreddit_url)
 
-        # Send in group
+        # Send in group_chat
         try:
             # Send only media
             if post.url.startswith('https://i.redd.it') or post.url.startswith('https://v.redd.it'):

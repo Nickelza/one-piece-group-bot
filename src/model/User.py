@@ -310,7 +310,7 @@ class User(BaseModel):
         try:
             chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
             return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
-        except Forbidden:  # Bot kicked from the group
+        except Forbidden:  # Bot kicked from the group chat
             pass
 
 

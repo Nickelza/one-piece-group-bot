@@ -10,10 +10,9 @@ from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
-from src.model.Group import Group
+from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
-from src.model.Topic import Topic
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
@@ -27,7 +26,7 @@ from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours
-from src.service.group_service import get_main_group, get_topics_with_feature_enabled, \
+from src.service.group_service import get_main_group, get_group_chats_with_feature_enabled, \
     broadcast_to_chats_with_feature_enabled_dispatch
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
 from src.service.message_service import log_error, escape_valid_markdown_chars, full_message_send, delete_message, \
@@ -164,16 +163,14 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
             [Keyboard(phrases.GRP_KEY_DEVIL_FRUIT_COLLECT, screen=Screen.GRP_DEVIL_FRUIT_COLLECT, info=button_info)]]
 
         # For some reason it wasn't set, should never happen (added for testing)
-        if devil_fruit.release_group is None:
+        if devil_fruit.release_group_chat is None:
             set_devil_fruit_release_chat(devil_fruit)
 
-        release_group: Group = devil_fruit.release_group
-        release_topic: Topic = devil_fruit.release_topic
+        release_group_chat: GroupChat = devil_fruit.release_group_chat
 
         # Send release message
-        message: Message = await full_message_send(
-            context, text, keyboard=inline_keyboard, chat_id=release_group.tg_group_id,
-            topic_id=release_topic.tg_topic_id)
+        message: Message = await full_message_send(context, text, keyboard=inline_keyboard,
+                                                   group_chat=release_group_chat)
 
         devil_fruit.release_date = datetime.now()
         devil_fruit.release_message_id = message.message_id
@@ -181,14 +178,13 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         devil_fruit.save()
 
         # Send notification to other chats
-        excluded_chats = {release_group: [release_topic]}
         text = phrases.DEVIL_FRUIT_APPEARED
-        message_url = get_message_url(release_group, devil_fruit.release_message_id)
+        message_url = get_message_url(release_group_chat, devil_fruit.release_message_id)
         inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
 
         await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.DEVIL_FRUIT_APPEARANCE, text,
                                                                inline_keyboard=inline_keyboard,
-                                                               excluded_chats=excluded_chats)
+                                                               excluded_group_chats=[release_group_chat])
 
 
 def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool = False) -> None:
@@ -398,20 +394,16 @@ async def revoke_devil_fruit_from_inactive_users(context: ContextTypes.DEFAULT_T
 
 def set_devil_fruit_release_chat(devil_fruit: DevilFruit) -> None:
     """
-    Set Devil Fruit release group and topic
+    Set Devil Fruit release group_chat and group_chat
 
     :param devil_fruit: The Devil Fruit
     :return: None
     """
 
-    # Get main group
-    main_group: Group = get_main_group()
-    devil_fruit.release_group = main_group
+    enabled_group_chats: list[GroupChat] = list(get_group_chats_with_feature_enabled(
+        Feature.DEVIL_FRUIT_APPEARANCE, filter_by_groups=[get_main_group()]))
 
-    # If is forum, get all topics where Devil Fruit feature is enabled
-    if main_group.is_forum:
-        enabled_topics: list[Topic] = list(get_topics_with_feature_enabled(Feature.DEVIL_FRUIT_APPEARANCE, main_group))
-        if len(enabled_topics) > 0:
-            devil_fruit.release_topic = random.choice(enabled_topics)
+    if len(enabled_group_chats) == 0:
+        raise Exception("No group_chat chats with Devil Fruit appearance feature enabled")
 
-    # Object passed by reference, no need to return
+    devil_fruit.release_group_chat = random.choice(enabled_group_chats)

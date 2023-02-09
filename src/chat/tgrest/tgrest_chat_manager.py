@@ -22,7 +22,7 @@ from src.service.notification_service import send_notification
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Main function for the group chat manager
+    Main function for the group chat chat manager
     :param update: Telegram update
     :param context: Telegram context
     :return: None

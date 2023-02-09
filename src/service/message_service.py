@@ -12,7 +12,7 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Group import Group
-from src.model.Topic import Topic
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.ContextBotDataKey import ContextBotDataKey
 from src.model.enums.MessageSource import MessageSource
@@ -178,7 +178,8 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
     :param update: Update object. Required if reply_to_message_id is None
     :param quote: Quote message. Default: False
     :param reply_to_message_id: Reply message id. Default: None
-    :param quote_if_group: If the message should be quoted if it is in a group and update is not None. Default: True
+    :param quote_if_group: If the message should be quoted if it is in a filter_by_groups and update is not None. 
+                           Default: True
     :return: Reply message id
     """
 
@@ -214,8 +215,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
                             excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
                             previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False,
-                            topic_id: int = None, topic: Topic = None, group: Group = None,
-                            ignore_exception: bool = False) -> Message | bool:
+                            group_chat: GroupChat = None, ignore_exception: bool = False) -> Message | bool:
     """
     Send a message
 
@@ -231,7 +231,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param reply_to_message_id: Message ID to reply to
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
-    :param quote_if_group: True if the message should be quoted if it is in a group and update is not None
+    :param quote_if_group: True if the message should be quoted if it is in a filter_by_groups and update is not None
     :param protect_content: True if the message should be protected from saving and forwarding
     :param disable_web_page_preview: True if the web page preview should be disabled
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
@@ -247,9 +247,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
             keyboard info to add to the back button
     :param use_close_delete: True if the close button should be used instead of the delete button
-    :param topic_id: Topic id
-    :param topic: The topic, used to get the topic id if topic_id is None
-    :param group: The group, used to get the chat id if topic_id is None
+    :param group_chat: The group chat, used to get the group chat id if tg_topic_id is None
     :param ignore_exception: True if the TelegramError should be ignored
     :return: Message
     """
@@ -260,10 +258,11 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     if send_in_private_chat:
         new_message = True
 
-    if topic is not None:
-        topic_id = topic.tg_topic_id
+    topic_id = None
 
-    if group is not None:
+    if group_chat is not None:
+        topic_id = group_chat.tg_topic_id
+        group: Group = group_chat.group
         chat_id = group.tg_group_id
 
     if previous_screens is not None and inbound_keyboard is None:
@@ -368,7 +367,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     :param protect_content: True if the message should be protected from saving and forwarding
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
-    :param quote_if_group: True if the message should be quoted if it is a group message
+    :param quote_if_group: True if the message should be quoted if it is a group_chat message
     :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
     :param edit_only_keyboard: If only the keyboard should be edited
     :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If keyboard is None,
@@ -512,10 +511,10 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
 
     try:
         return await full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
-                                       parse_mode=parse_mode, disable_web_page_preview=disable_web_page_preview,
-                                       add_delete_button=add_delete_button, authorized_users=authorized_users,
-                                       protect_content=protect_content, answer_callback=answer_callback,
-                                       show_alert=show_alert)
+                                       answer_callback=answer_callback, show_alert=show_alert, parse_mode=parse_mode,
+                                       protect_content=protect_content,
+                                       disable_web_page_preview=disable_web_page_preview,
+                                       add_delete_button=add_delete_button, authorized_users=authorized_users)
     except BadRequest:
         return await full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
                                      parse_mode=parse_mode, add_delete_button=add_delete_button,
@@ -677,17 +676,18 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
 
 
 async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: int = None,
-                         message_id: int = None, group: Group = None):
+                         message_id: int = None, group_chat: GroupChat = None):
     """
     Delete a message with the best effort method
     :param update: Update object
     :param context: Context object
     :param chat_id: Chat id
     :param message_id: Message id
-    :param group: The group
+    :param group_chat: The group chat
     """
 
-    if group is not None:
+    if group_chat is not None:
+        group: Group = group_chat.group
         chat_id = group.tg_group_id
 
     if update is None and (context is None or chat_id is None or message_id is None):
@@ -781,14 +781,15 @@ def message_is_reply(update: Update) -> bool:
         return False
 
 
-def get_message_url(group: Group, message_id: int) -> str:
+def get_message_url(group_chat: GroupChat, message_id: int) -> str:
     """
     Gets the message url
-    :param group: The group
+    :param group_chat: The group chat
     :param message_id: The message id
     :return: The message url
     """
 
+    group: Group = group_chat.group
     tg_group_id = str(group.tg_group_id).replace('-100', '')
 
     return f"https://t.me/c/{tg_group_id}/{message_id}"

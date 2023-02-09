@@ -81,6 +81,5 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     ot_text = phrases.PREDICTION_PLACE_BET_LIST_OVERVIEW.format(items_text)
 
-    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard,
-                            inbound_keyboard=inbound_keyboard,
+    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
                             excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])

@@ -43,13 +43,13 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Sends the weekly leaderboard to the group
+    Sends the weekly leaderboard to the group chat
     :param context: Context of callback
     """
 
     leaderboard = create_leaderboard()
 
-    # Send the leaderboard to the group
+    # Send the leaderboard to the group chat
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
         ot_text = get_leaderboard_message(leaderboard)
         message: Message = await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
