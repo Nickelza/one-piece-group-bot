@@ -10,7 +10,6 @@ class Leaderboard(BaseModel):
     id = PrimaryKeyField()
     year = SmallIntegerField()
     week = SmallIntegerField()
-    message_id = IntegerField()
 
     class Meta:
         db_table = 'leaderboard'

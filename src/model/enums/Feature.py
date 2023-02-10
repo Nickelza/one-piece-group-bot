@@ -29,7 +29,7 @@ class Feature(IntEnum):
         """
         Get all the features
 
-        :return: All the features
+        :return: All the features, pinnable features are at the end
         """
         return [Feature.BOUNTY_GIFT,
                 Feature.BOUNTY_MESSAGES_GAIN,
@@ -71,6 +71,25 @@ class Feature(IntEnum):
         """
 
         return self in Feature.get_restricted()
+
+    @staticmethod
+    def get_pinnable() -> list['Feature']:
+        """
+        Get all the features that can be pinned
+
+        :return: All the features that can be pinned
+        """
+
+        return [Feature.LEADERBOARD, Feature.PREDICTION]
+
+    def is_pinnable(self) -> bool:
+        """
+        Checks if the feature can be pinned
+
+        :return: True if the feature can be pinned, False otherwise
+        """
+
+        return self in Feature.get_pinnable()
 
 
 FEATURE_DESCRIPTION_MAP = {

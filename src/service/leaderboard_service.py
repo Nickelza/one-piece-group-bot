@@ -1,6 +1,5 @@
 import datetime
 
-from telegram import Message
 from telegram.ext import ContextTypes
 
 import src.model.enums.LeaderboardRank as LeaderboardRank
@@ -9,13 +8,15 @@ from src.model.Crew import Crew
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
+from src.model.enums.Feature import Feature
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import should_reset_bounty, reset_bounty
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
-from src.service.message_service import mention_markdown_v2, full_message_send
+from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
+from src.service.message_service import mention_markdown_v2
 
 
 def get_leaderboard_message(leaderboard: Leaderboard) -> str:
@@ -52,12 +53,7 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Send the leaderboard to the group chat
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
         ot_text = get_leaderboard_message(leaderboard)
-        message: Message = await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
-        await message.pin(disable_notification=True)
-
-        # Save the message id
-        leaderboard.message_id = message.message_id
-        leaderboard.save()
+        await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.LEADERBOARD, ot_text)
 
     # Reset bounty poster limit
     context.application.create_task(reset_bounty_poster_limit(reset_previous_leaderboard=True))

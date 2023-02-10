@@ -41,6 +41,8 @@ class Emoji(StrEnum):
     NO = '❌'
     LEFT_ARROW = '⬅'
     RIGHT_ARROW = '➡'
+    PIN = '📌'
+    RADIO_BUTTON = '🔘'
 
     # Game
     WINNER = '🏆'

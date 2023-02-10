@@ -7,6 +7,7 @@ import constants as c
 import resources.phrases as phrases
 from src.model.GroupChat import GroupChat
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
+from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -21,6 +22,7 @@ class SettingsReservedKeys(StrEnum):
     The reserved keys for this screen
     """
     FEATURE = 'a'
+    PIN_TOGGLE = 'b'
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, group_chat: GroupChat,
@@ -37,16 +39,35 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     if inbound_keyboard is not None:
         feature: Feature = Feature(inbound_keyboard.info[SettingsReservedKeys.FEATURE])
-        if inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]:
-            #  Enable feature - Remove from disabled features
-            GroupChatDisabledFeature.delete().where((GroupChatDisabledFeature.group_chat == group_chat) &
-                                                    (GroupChatDisabledFeature.feature == feature)).execute()
+
+        # Pin toggle
+        if SettingsReservedKeys.PIN_TOGGLE in inbound_keyboard.info:
+            # Pin toggle
+            if inbound_keyboard.info[SettingsReservedKeys.PIN_TOGGLE]:
+                # Pin feature
+                feature_pin = GroupChatEnabledFeaturePin()
+                feature_pin.group_chat = group_chat
+                feature_pin.feature = feature
+                feature_pin.save()
+            else:
+                # Unpin feature
+                GroupChatEnabledFeaturePin.delete().where((GroupChatEnabledFeaturePin.group_chat == group_chat) &
+                                                          (GroupChatEnabledFeaturePin.feature == feature)).execute()
         else:
-            # Disable feature - Add to disabled features
-            disabled_feature = GroupChatDisabledFeature()
-            disabled_feature.group_chat = group_chat
-            disabled_feature.feature = feature
-            disabled_feature.save()
+            if inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]:
+                #  Enable feature - Remove from disabled features
+                GroupChatDisabledFeature.delete().where((GroupChatDisabledFeature.group_chat == group_chat) &
+                                                        (GroupChatDisabledFeature.feature == feature)).execute()
+            else:
+                # Disable feature - Add to disabled features
+                disabled_feature = GroupChatDisabledFeature()
+                disabled_feature.group_chat = group_chat
+                disabled_feature.feature = feature
+                disabled_feature.save()
+
+                # Delete the feature pin
+                GroupChatEnabledFeaturePin.delete().where((GroupChatEnabledFeaturePin.group_chat == group_chat) &
+                                                          (GroupChatEnabledFeaturePin.feature == feature)).execute()
 
         # Refresh backlinks
         group_chat = GroupChat.get_by_id(group_chat.id)
@@ -73,19 +94,45 @@ def get_settings_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
     else:
         features: list[Feature] = Feature.get_non_restricted()
 
-    # Get all disabled features, avoids multiple queries
+    # Move pinnable features to the end
+    pinnable_features = Feature.get_pinnable()
+    for pinnable_feature in pinnable_features:
+        features.remove(pinnable_feature)
+        features.append(pinnable_feature)
+
+    # Get all disabled features, avoids multiple queries, Backref
     disabled_features: list[Feature] = [disabled_feature.feature for disabled_feature in group_chat.disabled_features]
 
     keyboard: list[list[Keyboard]] = [[]]
     keyboard_row: list[Keyboard] = []
 
     for feature in features:
-        is_enabled = feature not in disabled_features
-        emoji = Emoji.ENABLED if is_enabled else Emoji.DISABLED_EMPTY
-        button_info: dict = {SettingsReservedKeys.FEATURE: feature.value, ReservedKeyboardKeys.TOGGLE: not is_enabled}
-        button: Keyboard = Keyboard(f'{emoji.value} {feature.get_description()}', info=button_info,
+        is_enabled_feature = feature not in disabled_features
+        emoji = Emoji.ENABLED if is_enabled_feature else Emoji.DISABLED_EMPTY
+        button_info: dict = {SettingsReservedKeys.FEATURE: feature.value,
+                             ReservedKeyboardKeys.TOGGLE: not is_enabled_feature}
+        button: Keyboard = Keyboard(f'{emoji} {feature.get_description()}', info=button_info,
                                     screen=Screen.GRP_SETTINGS)
-        keyboard_row.append(button)
+
+        # If feature is pinnable, add button in a new row with the pin toggle button
+        if feature.is_pinnable() and is_enabled_feature:
+            # Backref
+            is_enabled_pin = feature in [enabled_feature.feature for enabled_feature in group_chat.enabled_features_pin]
+            is_enabled_emoji = Emoji.RADIO_BUTTON if is_enabled_pin else ''
+            pin_button_info = {SettingsReservedKeys.FEATURE: feature.value,
+                               SettingsReservedKeys.PIN_TOGGLE: not is_enabled_pin}
+            pin_toggle: Keyboard = Keyboard(f'{is_enabled_emoji} {Emoji.PIN}', info=pin_button_info,
+                                            screen=Screen.GRP_SETTINGS)
+
+            # Relative feature button and pin button in the same new row
+            if len(keyboard_row) > 0:
+                keyboard.append(keyboard_row)
+                keyboard_row = []
+
+            keyboard_row.append(button)
+            keyboard_row.append(pin_toggle)
+        else:
+            keyboard_row.append(button)
 
         if len(keyboard_row) == c.FEATURE_KEYBOARD_ROW_SIZE:
             keyboard.append(keyboard_row)
