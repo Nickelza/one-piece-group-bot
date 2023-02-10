@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from peewee import JOIN
 from telegram import Message
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
@@ -12,6 +11,8 @@ from src.model.GroupChat import GroupChat
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
+from src.model.Prediction import Prediction
+from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.enums.Feature import Feature
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
@@ -96,20 +97,29 @@ def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: lis
     if excluded_group_chats is None:
         excluded_group_chats = []
 
+    # Would be better to use some join, couldn't get it to work though
+    group_chats_disabled_feature: list[GroupChatDisabledFeature] = (
+        GroupChatDisabledFeature
+        .select()
+        .where(GroupChatDisabledFeature.feature == feature))
+
+    group_chats_with_feature_disabled: list[GroupChat] = [gcf.group_chat for gcf in group_chats_disabled_feature]
+
     return (
         GroupChat.select().distinct()
-        .join(GroupChatDisabledFeature, JOIN.LEFT_OUTER)
         .join(Group, on=(Group.id == GroupChat.group))
         .where((Group.is_active == True)
                & (GroupChat.is_active == True)
-               & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
                & group_filter
-               & ((GroupChatDisabledFeature.feature != feature) | (GroupChatDisabledFeature.feature.is_null()))))
+               & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
+               & (GroupChat.id.not_in([c.id for c in group_chats_with_feature_disabled]))
+               ))
 
 
 async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
                                                            text: str, inline_keyboard: list[list[Keyboard]] = None,
-                                                           excluded_group_chats: list[GroupChat] = None) -> None:
+                                                           excluded_group_chats: list[GroupChat] = None,
+                                                           prediction: Prediction = None) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -117,15 +127,18 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes
     :param text: The message
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
+    :param prediction: The prediction, to save the group chat message
     """
 
     context.application.create_task(broadcast_to_chats_with_feature_enabled(
-        context, feature, text, inline_keyboard=inline_keyboard, excluded_group_chats=excluded_group_chats))
+        context, feature, text, inline_keyboard=inline_keyboard, excluded_group_chats=excluded_group_chats,
+        prediction=prediction))
 
 
 async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
                                                   text: str, inline_keyboard: list[list[Keyboard]] = None,
-                                                  excluded_group_chats: list[GroupChat] = None) -> None:
+                                                  excluded_group_chats: list[GroupChat] = None,
+                                                  prediction: Prediction = None) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -133,16 +146,11 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
     :param text: The message
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
+    :param prediction: The prediction, to save the group chat message
     """
 
-    """
-    Broadcasts a message to all the chats with a feature enabled
-    :param context: The context
-    :param feature: The feature
-    :param text: The message
-    :param inline_keyboard: The outbound keyboard
-    :param excluded_group_chats: The chats to exclude from the broadcast
-    """
+    if feature is Feature.PREDICTION and prediction is None:
+        raise ValueError("Prediction cannot be None if the feature is PREDICTION")
 
     group_chats: list[GroupChat] = get_group_chats_with_feature_enabled(feature,
                                                                         excluded_group_chats=excluded_group_chats)
@@ -160,6 +168,13 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
         try:
             message: Message = await full_message_send(context, text, keyboard=inline_keyboard, group_chat=group_chat)
 
+            if feature is Feature.PREDICTION:  # Save Prediction Group Chat Message
+                prediction_group_chat_message: PredictionGroupChatMessage = PredictionGroupChatMessage()
+                prediction_group_chat_message.prediction = prediction
+                prediction_group_chat_message.group_chat = group_chat
+                prediction_group_chat_message.message_id = message.message_id
+                prediction_group_chat_message.save()
+
             if feature_is_pinnable:
                 should_pin = GroupChatEnabledFeaturePin.get_or_none(
                     (GroupChatEnabledFeaturePin.group_chat == group_chat) &
@@ -170,7 +185,7 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
                     pin_message: GroupChatFeaturePinMessage = GroupChatFeaturePinMessage()
                     pin_message.group_chat = group_chat
                     pin_message.feature = feature
-                    pin_message.message = message
+                    pin_message.message_id = message.message_id
                     pin_message.save()
 
         except TelegramError as te:

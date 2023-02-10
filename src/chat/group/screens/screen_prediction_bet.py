@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.model.GroupChat import GroupChat
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
@@ -13,12 +14,14 @@ from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
-from src.service.prediction_service import refresh, get_prediction_options_user, save_prediction_option_user
+from src.service.prediction_service import refresh, get_prediction_options_user, save_prediction_option_user, \
+    get_prediction_from_message_id
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command = None,
                    amount: str = None, inbound_keyboard: Keyboard = None, prediction_option: PredictionOption = None,
-                   previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None
+                   previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None,
+                   group_chat: GroupChat = None
                    ) -> tuple[Prediction, PredictionOption, int, int] | tuple[None, None, None, None]:
     """
     Validate the prediction bet
@@ -31,6 +34,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     :param prediction_option: The prediction option
     :param previous_screens: The previous screens, for the back button if in private chat
     :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back button if in private
+    :param group_chat: The group chat from which to get the prediction if getting from message id
     :return: None if validation failed or (prediction, prediction_option, wager, option number) if validation succeeded
     """
 
@@ -56,8 +60,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
     # Get prediction from message id
     if prediction_option is None:
-        prediction: Prediction = Prediction.get_or_none(
-            Prediction.message_id == update.message.reply_to_message.message_id)
+        prediction: Prediction = get_prediction_from_message_id(group_chat, update.message.reply_to_message.message_id)
         if prediction is None:
             await full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update,
                                     add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
@@ -77,15 +80,6 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
     prediction_options: list[PredictionOption] = prediction.prediction_options
 
-    # User has already bet and prediction does not allow multiple bets
-    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
-    if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
-        await full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update,
-                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
-        return error_tuple
-
     # Option is not valid
     if command is not None:
         prediction_options = [prediction_option for prediction_option in prediction_options if
@@ -98,6 +92,16 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
             return error_tuple
 
         prediction_option = prediction_options[0]
+
+    # User has already bet and prediction does not allow multiple bets, unless the user is betting on the same option
+    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
+    if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
+        if prediction_option in prediction_options_user:
+            await full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update,
+                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                    previous_screens=previous_screens,
+                                    previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+            return error_tuple
 
     # Prediction does not allow bets withdrawal and user has already bet on this option. This is to avoid a loophole
     # where a user could bet on an option, then add more wager to the same option, updating the wager datetime
@@ -116,16 +120,18 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     return prediction, prediction_option, amount_parsed, prediction_option.number
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command,
+                 group_chat: GroupChat) -> None:
     """
     Manage the change region request
     :param update: The update object
     :param context: The context object
     :param user: The user object
     :param command: The command
+    :param group_chat: The group chat
     :return: None
     """
-    validation_tuple = await validate(update, context, user, command)
+    validation_tuple = await validate(update, context, user, command, group_chat=group_chat)
 
     # Need single assignment to enable IDE type detection
     prediction: Prediction = validation_tuple[0]
@@ -143,4 +149,4 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     await full_message_send(context, ot_text, update=update, add_delete_button=True)
 
     # Update prediction text
-    await refresh(context, prediction)
+    await refresh(context, prediction, group_chat=group_chat)

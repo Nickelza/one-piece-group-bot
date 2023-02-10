@@ -1,24 +1,25 @@
 import datetime
-import logging
 from datetime import datetime
 
-from telegram import Message
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError
 from telegram.ext import ContextTypes
 
-import resources.Environment as Env
 import resources.phrases as phrases
+from src.model.GroupChat import GroupChat
 from src.model.Prediction import Prediction
+from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.Feature import Feature
 from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import PredictionException
 from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
 from src.service.devil_fruit_service import get_value
+from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage, add_percentage_to_value
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 from src.service.notification_service import send_notification
@@ -40,11 +41,10 @@ async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_re
         prediction.status = PredictionStatus.SENT
         prediction.send_date = datetime.now()
 
-    message: Message = await full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get())
-    await message.pin(disable_notification=True)
-
-    prediction.message_id = message.message_id
     prediction.save()
+
+    text = get_prediction_text(prediction)
+    await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.PREDICTION, text, prediction=prediction)
 
 
 def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, user: User = None) -> str:
@@ -264,8 +264,8 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
     await refresh(context, prediction)
 
     # Send message in reply notifying users that bets are closed
-    await full_message_send(context, phrases.PREDICTION_CLOSED_FOR_BETS, chat_id=Env.OPD_GROUP_ID.get(),
-                            reply_to_message_id=prediction.message_id)
+    await send_prediction_status_change_message_or_refresh_dispatch(context, prediction,
+                                                                    phrases.PREDICTION_CLOSED_FOR_BETS)
 
     # Send notification to users
     for user_id, value in users_invalid_prediction_options.items():
@@ -344,8 +344,7 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
     await refresh(context, prediction)
 
     # Send message in reply notifying users that results are set
-    await full_message_send(context, phrases.PREDICTION_RESULTS_SET, chat_id=Env.OPD_GROUP_ID.get(),
-                            reply_to_message_id=prediction.message_id)
+    await send_prediction_status_change_message_or_refresh_dispatch(context, prediction, phrases.PREDICTION_RESULTS_SET)
 
     # Send notification to users
     for user_id, value in users_total_win.items():
@@ -359,22 +358,18 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
         await send_notification(context, user, notification)
 
 
-async def refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
+async def refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, group_chat: GroupChat = None) -> None:
     """
     Refresh prediction
     :param context: Telegram context
     :param prediction: Prediction
+    :param group_chat: Group chat, refresh only for this group chat
     """
     if PredictionStatus(prediction.status) is PredictionStatus.NEW:
         raise PredictionException(phrases.PREDICTION_NOT_SENT)
 
-    try:
-        await full_message_send(context, get_prediction_text(prediction), chat_id=Env.OPD_GROUP_ID.get(),
-                                edit_message_id=prediction.message_id)
-    except BadRequest as br:  # Tolerate if message text is the same
-        if br.message != "Message is not modified: specified new message content and reply markup are exactly the " \
-                         "same as a current content and reply markup of the message":
-            raise br
+    await send_prediction_status_change_message_or_refresh_dispatch(
+        context, prediction, get_prediction_text(prediction), should_refresh=True, group_chat=group_chat)
 
 
 def get_prediction_options_user(prediction: Prediction, user: User) -> list[PredictionOptionUser]:
@@ -475,16 +470,8 @@ async def remove_all_bets_from_active_predictions(context: ContextTypes.DEFAULT_
 
     for prediction in predictions:
         PredictionOptionUser.delete().where(PredictionOptionUser.prediction == prediction).execute()
-        if prediction.message_id is not None:  # Should always be true
-            try:
-                await full_message_send(context, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET,
-                                        chat_id=Env.OPD_GROUP_ID.get(), reply_to_message_id=prediction.message_id,
-                                        allow_sending_without_reply=False)
-            except BadRequest as br:  # Log error if reply message is not found
-                if 'Replied message not found' in br.message:
-                    logging.error(f"Replied message not found for prediction {prediction.id}")
-        else:
-            logging.error(f"Prediction {prediction.id} has no message_id")
+        await send_prediction_status_change_message_or_refresh_dispatch(
+            context, prediction, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET)
 
 
 def user_has_bet_on_prediction(prediction: Prediction, user: User) -> bool:
@@ -546,12 +533,15 @@ def get_prediction_net_win(prediction: Prediction, user: User) -> int:
     return net_win
 
 
-def save_prediction_option_user(prediction_option: PredictionOption, user: User, wager: int) -> PredictionOptionUser:
+def save_prediction_option_user(prediction_option: PredictionOption, user: User, wager: int,
+                                prediction_group_chat_message: PredictionGroupChatMessage = None
+                                ) -> PredictionOptionUser:
     """
     Save the prediction option user
     :param prediction_option: The prediction option
     :param user: The user
     :param wager: The wager
+    :param prediction_group_chat_message: The prediction group chat message
     :return: The prediction option user
     """
     # Find existing prediction option user if it exists
@@ -571,6 +561,8 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
         max_refund_wager_boost = get_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, 0, add_to_value=True)
         prediction_option_user.max_refund_wager_boost = max_refund_wager_boost if max_refund_wager_boost > 0 else None
 
+    prediction_option_user.prediction_group_chat_message = (prediction_group_chat_message
+                                                            if prediction_group_chat_message is not None else None)
     prediction_option_user.date = datetime.now()
     prediction_option_user.save()
 
@@ -637,3 +629,74 @@ def get_max_wager_refund(prediction_option_user: PredictionOptionUser = None, pr
     max_refund_boosted = int(add_percentage_to_value(
         prediction.max_refund_wager, prediction_option_user.max_refund_wager_boost))
     return max(prediction.max_refund_wager, max_refund_boosted)
+
+
+def get_prediction_from_message_id(group_chat: GroupChat, message_id: int) -> Prediction | None:
+    """
+    Gets the prediction from the message id
+    :param group_chat: The group chat
+    :param message_id: The message id
+    :return: The prediction
+    """
+
+    prediction_group_chat_message: PredictionGroupChatMessage = PredictionGroupChatMessage.get_or_none(
+        (PredictionGroupChatMessage.group_chat == group_chat) &
+        (PredictionGroupChatMessage.message_id == message_id))
+
+    if prediction_group_chat_message is None:
+        return None
+
+    return prediction_group_chat_message.prediction
+
+
+async def send_prediction_status_change_message_or_refresh_dispatch(context: ContextTypes.DEFAULT_TYPE,
+                                                                    prediction: Prediction, text: str,
+                                                                    should_refresh: bool = False,
+                                                                    group_chat: GroupChat = None):
+    """
+    Dispatch a prediction status change message
+    :param context: The context
+    :param prediction: The prediction
+    :param text: The text
+    :param should_refresh: Whether to should_refresh the message instead of sending a new one
+    :param group_chat: The group chat for which to refresh the message
+    :return: None
+    """
+
+    context.application.create_task(
+        send_prediction_status_change_message_or_refresh(context, prediction, text, should_refresh, group_chat))
+
+
+async def send_prediction_status_change_message_or_refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction,
+                                                           text: str, should_refresh: bool = False,
+                                                           group_chat: GroupChat = None):
+    """
+    Send a prediction status change message to all group chats in which the prediction was sent or refresh the message
+    :param context: The context
+    :param prediction: The prediction
+    :param text: The text
+    :param should_refresh: Whether to should_refresh the message instead of sending a new one
+    :param group_chat: The group chat for which to refresh the message
+    :return: None
+    """
+
+    group_chat_filter = True
+    if group_chat is not None:
+        group_chat_filter = (PredictionGroupChatMessage.group_chat == group_chat)
+
+    messages: list[PredictionGroupChatMessage] = (PredictionGroupChatMessage.select()
+                                                  .where((PredictionGroupChatMessage.prediction == prediction)
+                                                         & group_chat_filter))
+
+    for message in messages:
+        group_chat: GroupChat = message.group_chat
+        try:
+            if should_refresh:  # Edit original message
+                await full_message_send(context, text, group_chat=group_chat, edit_message_id=message.message_id)
+            else:  # Send new message in reply
+                await full_message_send(context, text, group_chat=group_chat, reply_to_message_id=message.message_id,
+                                        allow_sending_without_reply=False)
+        except (TelegramError, BadRequest) as e:
+            # New text same as old one, ignore
+            if not (should_refresh and isinstance(e, BadRequest) and "Message is not modified" in str(e)):
+                save_group_chat_error(group_chat, str(e))

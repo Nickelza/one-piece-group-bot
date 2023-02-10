@@ -19,7 +19,6 @@ class Prediction(BaseModel):
     max_refund_wager = IntegerField(null=True)
     allow_multiple_choices = BooleanField()
     can_withdraw_bet = BooleanField()
-    message_id = IntegerField(null=True)
     result_set_date = DateTimeField(null=True)
 
     class Meta:

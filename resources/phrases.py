@@ -452,8 +452,7 @@ IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
 PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
     f'\n\n{Emoji.RIGHT_ARROW}[Go to prediction message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
     '\n_\\(The message may no longer be available\\)_'
-PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}' + \
-                                 PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
+PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = '_\n\n\\(Your wager was refunded\\)_'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL = '_\n\n\\(You have been refunded ฿{}\\)_'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS = '_\n\n\\(Your wager was refunded because there' \
@@ -471,8 +470,7 @@ PREDICTION_BET_INVALID_BET_HAS = 'bet has'
 PREDICTION_BET_INVALID_BETS_HAVE = 'bets have'
 PREDICTION_BET_INVALID_NOTIFICATION = 'The following {} been removed from the prediction "*{}*"' + \
                                       ' because {} placed after the cut off time \\({}\\):\n{}' + \
-                                      '\n\n_You have been refunded ฿{}_' + \
-                                      PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE
+                                      '\n\n_You have been refunded ฿{}_'
 PREDICTION_BET_INVALID_NOTIFICATION_OPTION = '\n- {} \\({}\\)'
 PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION = 'If to be notified when a bet you placed is removed from a ' \
                                                   'because it was placed after the cut off time'

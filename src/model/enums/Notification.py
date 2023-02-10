@@ -387,7 +387,7 @@ class PredictionResultNotification(Notification):
 
         return self.text.format(result_text, get_belly_formatted(abs(self.total_win)),
                                 escape_valid_markdown_chars(self.prediction.question), user_prediction_options_text,
-                                correct_prediction_options_text, wager_refunded_text, self.prediction.message_id)
+                                correct_prediction_options_text, wager_refunded_text)
 
 
 class PredictionBetInvalidNotification(Notification):
@@ -431,7 +431,7 @@ class PredictionBetInvalidNotification(Notification):
 
         return self.text.format(bet_has, it_was, escape_valid_markdown_chars(self.prediction.question),
                                 default_datetime_format(self.prediction.cut_off_date), invalid_prediction_options_list,
-                                get_belly_formatted(self.total_refund), self.prediction.message_id)
+                                get_belly_formatted(self.total_refund))
 
 
 class DeletedMessageArrestNotification(Notification):

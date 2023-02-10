@@ -4,6 +4,7 @@ from peewee import *
 
 from src.model.BaseModel import BaseModel
 from src.model.Prediction import Prediction
+from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.PredictionOption import PredictionOption
 from src.model.User import User
 
@@ -21,6 +22,9 @@ class PredictionOptionUser(BaseModel):
     wager = IntegerField()
     max_refund_wager_boost = IntegerField(default=0)
     date = DateTimeField(default=datetime.now)
+    prediction_group_chat_message = ForeignKeyField(PredictionGroupChatMessage, null=True,
+                                                    backref='prediction_options_users', on_delete='RESTRICT',
+                                                    on_update='RESTRICT')
 
     class Meta:
         db_table = 'prediction_option_user'

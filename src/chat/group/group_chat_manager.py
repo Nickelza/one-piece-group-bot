@@ -157,13 +157,13 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_game_rr(update, context, user, inbound_keyboard=inbound_keyboard)
 
             case Screen.GRP_PREDICTION_BET:  # Prediction bet
-                await manage_screen_prediction_bet(update, context, user, command)
+                await manage_screen_prediction_bet(update, context, user, command, group_chat)
 
             case Screen.GRP_PREDICTION_BET_REMOVE:  # Prediction bet remove
-                await manage_screen_prediction_bet_remove(update, context, user, command)
+                await manage_screen_prediction_bet_remove(update, context, user, command, group_chat)
 
             case Screen.GRP_PREDICTION_BET_STATUS:  # Prediction bet status
-                await manage_screen_prediction_bet_status(update, context, user)
+                await manage_screen_prediction_bet_status(update, context, user, group_chat)
 
             case Screen.GRP_CREW_JOIN:  # Crew join
                 await manage_screen_crew_join(update, context, user, inbound_keyboard, target_user)
