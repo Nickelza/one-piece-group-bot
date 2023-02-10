@@ -162,11 +162,15 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         inline_keyboard: list[list[Keyboard]] = [
             [Keyboard(phrases.GRP_KEY_DEVIL_FRUIT_COLLECT, screen=Screen.GRP_DEVIL_FRUIT_COLLECT, info=button_info)]]
 
-        # For some reason it wasn't set, should never happen (added for testing)
-        if devil_fruit.release_group_chat is None:
-            set_devil_fruit_release_chat(devil_fruit)
+        # Get release group chat
+        enabled_group_chats: list[GroupChat] = list(get_group_chats_with_feature_enabled(
+            Feature.DEVIL_FRUIT_APPEARANCE, filter_by_groups=[get_main_group()]))
 
-        release_group_chat: GroupChat = devil_fruit.release_group_chat
+        if len(enabled_group_chats) == 0:
+            raise Exception("No group_chat chats with Devil Fruit appearance feature enabled")
+
+        release_group_chat: GroupChat = random.choice(enabled_group_chats)
+        devil_fruit.release_group_chat = release_group_chat
 
         # Send release message
         message: Message = await full_message_send(context, text, keyboard=inline_keyboard,
@@ -205,7 +209,6 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     devil_fruit.eaten_date = None
     devil_fruit.expiration_date = None
     devil_fruit.collection_date = None
-    set_devil_fruit_release_chat(devil_fruit)
     devil_fruit.release_date = release_date
     devil_fruit.release_message_id = None
     devil_fruit.status = DevilFruitStatus.SCHEDULED
@@ -230,7 +233,6 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
             context=context, chat_id=Env.OPD_GROUP_ID.get_int(), message_id=devil_fruit.release_message_id)
 
         # Release
-        set_devil_fruit_release_chat(devil_fruit)
         await release_scheduled_devil_fruit(context, devil_fruit=devil_fruit)
 
     # Get all Devil Fruits that have expired and have not been eaten yet
@@ -390,20 +392,3 @@ async def revoke_devil_fruit_from_inactive_users(context: ContextTypes.DEFAULT_T
 
         # Send notification to owner
         await send_notification(context, owner, DevilFruitRevokeNotification(devil_fruit=devil_fruit))
-
-
-def set_devil_fruit_release_chat(devil_fruit: DevilFruit) -> None:
-    """
-    Set Devil Fruit release group_chat and group_chat
-
-    :param devil_fruit: The Devil Fruit
-    :return: None
-    """
-
-    enabled_group_chats: list[GroupChat] = list(get_group_chats_with_feature_enabled(
-        Feature.DEVIL_FRUIT_APPEARANCE, filter_by_groups=[get_main_group()]))
-
-    if len(enabled_group_chats) == 0:
-        raise Exception("No group_chat chats with Devil Fruit appearance feature enabled")
-
-    devil_fruit.release_group_chat = random.choice(enabled_group_chats)
