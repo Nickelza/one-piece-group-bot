@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peewee import JOIN
 from telegram.error import TelegramError
@@ -98,6 +98,7 @@ def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: lis
         .join(GroupChatDisabledFeature, JOIN.LEFT_OUTER)
         .join(Group, on=(Group.id == GroupChat.group))
         .where((Group.is_active == True)
+               & (GroupChat.is_active == True)
                & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
                & group_filter
                & ((GroupChatDisabledFeature.feature != feature) | (GroupChatDisabledFeature.feature.is_null()))))
@@ -155,3 +156,19 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
             group.last_error_date = datetime.now()
             group.last_error_message = str(te)
             group.save()
+
+
+def deactivate_inactive_group_chats() -> None:
+    """
+    Deactivates the inactive groups and group chats
+    """
+
+    inactive_days = Env.INACTIVE_GROUP_DAYS.get_int()
+
+    (Group.update(is_active=False)
+     .where(Group.last_message_date < datetime.now() - timedelta(days=inactive_days))
+     .execute())
+
+    (GroupChat.update(is_active=False)
+     .where(GroupChat.last_message_date < datetime.now() - timedelta(days=inactive_days))
+     .execute())

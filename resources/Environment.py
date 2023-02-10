@@ -237,6 +237,16 @@ SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RESPAWN_DEV
 SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT',
                                                         default_value='False')
 
+# Deactivate inactive groups and group chats. Default: Every day at midnight
+CRON_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('CRON_DEACTIVATE_INACTIVE_GROUP_CHATS',
+                                                   default_value='0 0 * * *')
+ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS',
+                                                           default_value='True')
+SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS',
+                                                               default_value='False')
+SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment(
+    'SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS', default_value='False')
+
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
 
@@ -257,6 +267,9 @@ BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_v
 BELLY_LOCATION_LEVEL_MULTIPLIER = Environment('BELLY_LOCATION_LEVEL_MULTIPLIER', default_value='10')
 # How much should belly be upper rounded. Default: 1000
 BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value='1000')
+
+# After how many days from the last message should a group or group chat be considered inactive. Default: 14
+INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='14')
 
 # BOUNTY BONUS
 # LOCATION

@@ -396,6 +396,7 @@ def add_or_update_group(update) -> Group:
     group.tg_group_username = update.effective_chat.username
     group.is_forum = update.effective_chat.is_forum is not None and update.effective_chat.is_forum
     group.last_message_date = datetime.now()
+    group.is_active = True
     group.save()
 
     return group
@@ -422,6 +423,7 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
         group_chat.tg_topic_id = tg_topic_id
 
     group_chat.last_message_date = datetime.now()
+    group_chat.is_active = True
     group_chat.save()
 
     return group_chat

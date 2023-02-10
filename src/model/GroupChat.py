@@ -16,6 +16,7 @@ class GroupChat(BaseModel):
     last_message_date = DateTimeField(default=datetime.datetime.now)
     last_error_date = DateTimeField(null=True)
     last_error_message = CharField(null=True)
+    is_active = BooleanField(default=True)
     is_muted = BooleanField(default=False)
 
     class Meta:

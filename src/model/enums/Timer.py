@@ -112,3 +112,10 @@ RESPAWN_DEVIL_FRUIT = Timer('respawn_devil_fruit', Env.CRON_RESPAWN_DEVIL_FRUIT.
                             Env.SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT.get_bool(),
                             Env.SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT.get_bool())
 TIMERS.append(RESPAWN_DEVIL_FRUIT)
+
+DEACTIVATE_INACTIVE_GROUP_CHATS = Timer('deactivate_inactive_group_chats',
+                                        Env.CRON_DEACTIVATE_INACTIVE_GROUP_CHATS.get(),
+                                        Env.ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool(),
+                                        Env.SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool(),
+                                        Env.SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool())
+TIMERS.append(DEACTIVATE_INACTIVE_GROUP_CHATS)
