@@ -264,8 +264,8 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
     await refresh(context, prediction)
 
     # Send message in reply notifying users that bets are closed
-    await send_prediction_status_change_message_or_refresh_dispatch(context, prediction,
-                                                                    phrases.PREDICTION_CLOSED_FOR_BETS)
+    await send_prediction_status_change_message_or_refresh_dispatch(context, phrases.PREDICTION_CLOSED_FOR_BETS,
+                                                                    prediction)
 
     # Send notification to users
     for user_id, value in users_invalid_prediction_options.items():
@@ -344,7 +344,7 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
     await refresh(context, prediction)
 
     # Send message in reply notifying users that results are set
-    await send_prediction_status_change_message_or_refresh_dispatch(context, prediction, phrases.PREDICTION_RESULTS_SET)
+    await send_prediction_status_change_message_or_refresh_dispatch(context, phrases.PREDICTION_RESULTS_SET, prediction)
 
     # Send notification to users
     for user_id, value in users_total_win.items():
@@ -368,8 +368,8 @@ async def refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, gr
     if PredictionStatus(prediction.status) is PredictionStatus.NEW:
         raise PredictionException(phrases.PREDICTION_NOT_SENT)
 
-    await send_prediction_status_change_message_or_refresh_dispatch(
-        context, prediction, get_prediction_text(prediction), should_refresh=True, group_chat=group_chat)
+    await send_prediction_status_change_message_or_refresh_dispatch(context, prediction=prediction, should_refresh=True,
+                                                                    group_chat=group_chat)
 
 
 def get_prediction_options_user(prediction: Prediction, user: User) -> list[PredictionOptionUser]:
@@ -471,7 +471,7 @@ async def remove_all_bets_from_active_predictions(context: ContextTypes.DEFAULT_
     for prediction in predictions:
         PredictionOptionUser.delete().where(PredictionOptionUser.prediction == prediction).execute()
         await send_prediction_status_change_message_or_refresh_dispatch(
-            context, prediction, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET)
+            context, phrases.PREDICTION_ALL_BETS_REMOVED_FOR_BOUNTY_RESET, prediction)
 
 
 def user_has_bet_on_prediction(prediction: Prediction, user: User) -> bool:
@@ -650,7 +650,7 @@ def get_prediction_from_message_id(group_chat: GroupChat, message_id: int) -> Pr
 
 
 async def send_prediction_status_change_message_or_refresh_dispatch(context: ContextTypes.DEFAULT_TYPE,
-                                                                    prediction: Prediction, text: str,
+                                                                    text: str = None, prediction: Prediction = None,
                                                                     should_refresh: bool = False,
                                                                     group_chat: GroupChat = None):
     """
@@ -663,8 +663,19 @@ async def send_prediction_status_change_message_or_refresh_dispatch(context: Con
     :return: None
     """
 
-    context.application.create_task(
-        send_prediction_status_change_message_or_refresh(context, prediction, text, should_refresh, group_chat))
+    if prediction is not None:
+        predictions: list[Prediction] = [prediction]
+    elif should_refresh:
+        predictions: list[Prediction] = list(Prediction.select().where(Prediction.status == PredictionStatus.SENT))
+    else:
+        raise ValueError("Either prediction or should_refresh must be provided")
+
+    for prediction in predictions:
+        if should_refresh:
+            text = get_prediction_text(prediction)
+
+        context.application.create_task(
+            send_prediction_status_change_message_or_refresh(context, prediction, text, should_refresh, group_chat))
 
 
 async def send_prediction_status_change_message_or_refresh(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction,

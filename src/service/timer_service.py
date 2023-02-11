@@ -13,7 +13,8 @@ from src.service.download_service import cleanup_temp_dir
 from src.service.group_service import deactivate_inactive_group_chats
 from src.service.leaderboard_service import send_leaderboard
 from src.service.location_service import reset_can_change_region
-from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions
+from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions, \
+    send_prediction_status_change_message_or_refresh_dispatch
 from src.service.reddit_service import manage as send_reddit_post
 
 
@@ -90,6 +91,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:
             await close_scheduled_predictions(context)
+        case Timer.REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE:
+            await send_prediction_status_change_message_or_refresh_dispatch(context, should_refresh=True)
         case Timer.SCHEDULE_DEVIL_FRUIT_RELEASE:
             await schedule_devil_fruit_release(context)
         case Timer.RELEASE_SCHEDULED_DEVIL_FRUIT:
