@@ -18,6 +18,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
 from src.model.enums.Notification import DevilFruitExpiredNotification, DevilFruitRevokeWarningNotification, \
     DevilFruitRevokeNotification
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
@@ -30,8 +31,8 @@ from src.service.cron_service import get_datetime_in_future_days, get_random_tim
 from src.service.group_service import get_main_group, get_group_chats_with_feature_enabled, \
     broadcast_to_chats_with_feature_enabled_dispatch
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
-from src.service.message_service import log_error, escape_valid_markdown_chars, full_message_send, delete_message, \
-    get_message_url
+from src.service.message_service import log_error, escape_valid_markdown_chars, delete_message, get_message_url, \
+    full_media_send
 from src.service.notification_service import send_notification
 
 
@@ -178,8 +179,9 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         devil_fruit.release_group_chat = release_group_chat
 
         # Send release message
-        message: Message = await full_message_send(context, text, keyboard=inline_keyboard,
-                                                   group_chat=release_group_chat)
+        message: Message = await full_media_send(
+            context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text, keyboard=inline_keyboard,
+            group_chat=release_group_chat)
 
         devil_fruit.release_date = datetime.now()
         devil_fruit.release_message_id = message.message_id

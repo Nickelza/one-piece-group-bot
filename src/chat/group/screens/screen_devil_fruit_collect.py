@@ -13,7 +13,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
 from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import give_devil_fruit_to_user, get_devil_fruit_abilities_text
-from src.service.message_service import escape_valid_markdown_chars, full_message_send
+from src.service.message_service import escape_valid_markdown_chars, full_message_send, full_media_send
 
 
 class DevilFruitCollectReservedKeys(StrEnum):
@@ -50,7 +50,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
             DevilFruitCategory(devil_fruit.category).get_description(),
             get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False))
 
-        await full_message_send(context, ot_text, update=update)
+        await full_media_send(context, caption=ot_text, update=update, edit_only_caption_and_keyboard=True)
 
     except DevilFruitValidationException as e:
         await full_message_send(context, e.message, update=update, answer_callback=True, show_alert=True)

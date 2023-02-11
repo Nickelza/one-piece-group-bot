@@ -634,7 +634,7 @@ DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
                                    "\nCategory: {}" \
                                    "{}"
 DEVIL_FRUIT_APPEARED = 'A Devil Fruit has appeared!'
-DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_APPEARED}{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
+DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
 
 DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
 DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO

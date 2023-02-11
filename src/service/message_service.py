@@ -247,7 +247,7 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
     :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
             keyboard info to add to the back button
     :param use_close_delete: True if the close button should be used instead of the delete button
-    :param group_chat: The group chat, used to get the group chat id if tg_topic_id is None
+    :param group_chat: The group chat, used to get the group chat id
     :param ignore_exception: True if the TelegramError should be ignored
     :return: Message
     """
@@ -259,7 +259,6 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
         new_message = True
 
     topic_id = None
-
     if group_chat is not None:
         topic_id = group_chat.tg_topic_id
         group: Group = group_chat.group
@@ -350,7 +349,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                           add_delete_button: bool = False, authorized_users: list = None,
                           inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
                           only_authorized_users_can_interact: bool = True,
-                          saved_media_name: SavedMediaName = None) -> Message | bool:
+                          saved_media_name: SavedMediaName = None, group_chat: GroupChat = None) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -378,6 +377,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     :param send_in_private_chat: True if the message should be sent in private chat
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :param saved_media_name: Saved media name
+    :param group_chat: The group chat, used to get the group chat id
     :return: Message
     """
 
@@ -397,6 +397,12 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
             # Load media id from file
             saved_media.media_id = open(saved_media.file_name, 'rb')
             should_save_media_id = True
+
+    topic_id = None
+    if group_chat is not None:
+        topic_id = group_chat.tg_topic_id
+        group: Group = group_chat.group
+        chat_id = group.tg_group_id
 
     chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
     keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
@@ -420,7 +426,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                                                                 disable_notification=disable_notification,
                                                                 reply_to_message_id=reply_to_message_id,
                                                                 allow_sending_without_reply=allow_sending_without_reply,
-                                                                protect_content=protect_content)
+                                                                protect_content=protect_content,
+                                                                message_thread_id=topic_id)
             case SavedMediaType.VIDEO:  # Video
                 message: Message = await context.bot.send_video(chat_id=chat_id,
                                                                 video=saved_media.media_id,
@@ -430,7 +437,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                                                                 disable_notification=disable_notification,
                                                                 reply_to_message_id=reply_to_message_id,
                                                                 allow_sending_without_reply=allow_sending_without_reply,
-                                                                protect_content=protect_content)
+                                                                protect_content=protect_content,
+                                                                message_thread_id=topic_id)
             case SavedMediaType.ANIMATION:  # Animation
                 message: Message = await context.bot.send_animation(chat_id=chat_id,
                                                                     animation=saved_media.media_id,
@@ -441,7 +449,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                                                                     reply_to_message_id=reply_to_message_id,
                                                                     allow_sending_without_reply=(
                                                                         allow_sending_without_reply),
-                                                                    protect_content=protect_content)
+                                                                    protect_content=protect_content,
+                                                                    message_thread_id=topic_id)
             case _:
                 raise ValueError(f'Invalid saved media type: {saved_media.type}')
 

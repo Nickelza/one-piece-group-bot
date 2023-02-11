@@ -44,6 +44,10 @@ CREW_JOIN = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.CREW_JOIN, file_name='join_crew.jpg')
 SAVED_MEDIA_DICT[SavedMediaName.CREW_JOIN] = CREW_JOIN
 
+DEVIL_FRUIT_NEW = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.DEVIL_FRUIT_NEW, file_name='devil_fruit_new.jpg')
+SAVED_MEDIA_DICT[SavedMediaName.DEVIL_FRUIT_NEW] = DEVIL_FRUIT_NEW
+
 DOC_Q = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.DOC_Q, file_name='docq.jpg')
 SAVED_MEDIA_DICT[SavedMediaName.DOC_Q] = DOC_Q
