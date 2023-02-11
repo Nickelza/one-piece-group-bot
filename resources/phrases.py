@@ -19,6 +19,7 @@ COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a m
 COMMAND_ONLY_BY_CHAT_ADMIN_ERROR = 'This command can only be used by a chat admin'
 COMMAND_FEATURE_DISABLED_ERROR = 'This feature is currently disabled in this {}.' \
                                  f'\nYou can ask an Admin to enable via {Command.GRP_SETTINGS.get_formatted()}'
+COMMAND_NOT_ALLOWED_FROM_DEEPLINK_ERROR = 'This command is not allowed from a deeplink'
 
 SHOW_USER_STATUS = 'User: {}' \
                    '\nBounty: ฿*{}*{}' \
@@ -179,6 +180,8 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
 GRP_KEY_GO_TO_MESSAGE = 'Go to message'
+GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = 'Bet in private chat'
+GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = 'View in private chat'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"

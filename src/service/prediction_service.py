@@ -15,8 +15,10 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
 from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
+from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import PredictionException
+from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
@@ -44,7 +46,9 @@ async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_re
     prediction.save()
 
     text = get_prediction_text(prediction)
-    await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.PREDICTION, text, prediction=prediction)
+    await broadcast_to_chats_with_feature_enabled_dispatch(
+        context, Feature.PREDICTION, text, prediction=prediction,
+        inline_keyboard=[[get_prediction_deeplink_button(prediction)]])
 
 
 def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, user: User = None) -> str:
@@ -703,7 +707,8 @@ async def send_prediction_status_change_message_or_refresh(context: ContextTypes
         group_chat: GroupChat = message.group_chat
         try:
             if should_refresh:  # Edit original message
-                await full_message_send(context, text, group_chat=group_chat, edit_message_id=message.message_id)
+                await full_message_send(context, text, group_chat=group_chat, edit_message_id=message.message_id,
+                                        keyboard=[[get_prediction_deeplink_button(prediction)]])
             else:  # Send new message in reply
                 await full_message_send(context, text, group_chat=group_chat, reply_to_message_id=message.message_id,
                                         allow_sending_without_reply=False)
@@ -711,3 +716,21 @@ async def send_prediction_status_change_message_or_refresh(context: ContextTypes
             # New text same as old one, ignore
             if not (should_refresh and isinstance(e, BadRequest) and "Message is not modified" in str(e)):
                 save_group_chat_error(group_chat, str(e))
+
+
+def get_prediction_deeplink_button(prediction: Prediction) -> Keyboard:
+    """
+    Get the prediction deeplink button
+    :param prediction: The prediction
+    :return: The keyboard
+    """
+
+    from src.chat.private.screens.screen_prediction_detail import PredictionDetailReservedKeys
+
+    info: dict = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
+
+    status: PredictionStatus = PredictionStatus(prediction.status)
+    keyboard_text = (phrases.GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT if status is PredictionStatus.SENT
+                     else phrases.GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT)
+    return Keyboard(keyboard_text, info, screen=Screen.PVT_PREDICTION_DETAIL,
+                    previous_screen_list=[Screen.PVT_PREDICTION], is_deeplink=True)

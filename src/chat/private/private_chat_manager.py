@@ -67,7 +67,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
     :param inbound_keyboard: Keyboard
     :return: None
     """
-
+    from_deeplink = inbound_keyboard is not None and inbound_keyboard.from_deeplink
     screen: Screen = Screen.UNKNOWN
     if command is not Command.ND:
         screen = command.screen
@@ -82,7 +82,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             user.private_screen_step = None
 
         # Update the user's screen
-        if inbound_keyboard is not None:
+        if inbound_keyboard is not None and not from_deeplink:
             user.update_private_screen_list(screen, previous_screen_list=inbound_keyboard.previous_screen_list)
 
             # Screen step
@@ -98,12 +98,19 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
                 user.private_screen_in_edit_id = inbound_keyboard.info[ReservedKeyboardKeys.IN_EDIT_ID]
 
         else:
-            user.update_private_screen_list(screen)
+            # Back to start, IDE non recognizing from_deeplink means inbound_keyboard is not None so have to check
+            if inbound_keyboard is not None and from_deeplink:
+                if Screen.PVT_START not in inbound_keyboard.previous_screen_list:  # Add start screen
+                    inbound_keyboard.previous_screen_list.insert(0, Screen.PVT_START)
 
-            if command is Command.ND or command.name == "":
-                # Text message but not in edit mode and screen is not start, return
-                if not user.in_edit_mode():
-                    return
+                user.update_private_screen_list(screen, previous_screen_list=inbound_keyboard.previous_screen_list)
+            else:
+                user.update_private_screen_list(screen)
+
+                if command is Command.ND or command.name == "":
+                    # Text message but not in edit mode and screen is not start, return
+                    if not user.in_edit_mode():
+                        return
 
         match screen:
             case Screen.PVT_START:  # Start

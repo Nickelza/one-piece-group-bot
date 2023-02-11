@@ -1,3 +1,4 @@
+import base64
 import logging
 from datetime import datetime
 
@@ -134,21 +135,31 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     try:
         if is_command(update.message.text):
             if '/start ' in update.message.text:  # Start with parameter
-                command_name = update.message.text.replace('/start ', '').lower()
+                start_parameter = update.message.text.replace('/start ', '')
+                try:
+                    parameter_decoded = base64.b64decode(start_parameter).decode('utf-8')
+                    keyboard = Keyboard.get_from_callback_query_or_info(message_source, info_str=str(parameter_decoded),
+                                                                        from_deeplink=True)
+                    command = Command.get_by_screen(keyboard.screen)
+                    command_name = command.name
+                except (UnicodeDecodeError, ValueError):
+                    command_name = start_parameter
             else:
                 command_name = (update.message.text.split(' ')[0])[1:].lower()
                 command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
 
-            if command_name.strip() != '':
-                command = Command.get_by_name(command_name, message_source)
+            if keyboard is None:
+                if command_name.strip() != '':
+                    command = Command.get_by_name(command_name, message_source)
 
-            try:
-                command.parameters = update.message.text.split(' ')[1:]
-            except IndexError:
-                pass
+                try:
+                    command.parameters = update.message.text.split(' ')[1:]
+                except IndexError:
+                    pass
+
     except (AttributeError, ValueError):
         if is_callback:
-            keyboard = Keyboard.get_from_callback_query(update.callback_query, message_source)
+            keyboard = Keyboard.get_from_callback_query_or_info(message_source, update.callback_query)
 
             if not keyboard.info:
                 # No provided info, do nothing
@@ -334,6 +345,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             if feature.is_restricted() and not _is_main_group:
                 is_restricted_feature_error = True
                 raise CommandValidationException("")
+
+        # Keyboard from deep link to a screen that doesn't allow it
+        if inbound_keyboard is not None and inbound_keyboard.from_deeplink:
+            if not command.allow_deeplink:
+                raise CommandValidationException(phrases.COMMAND_NOT_ALLOWED_FROM_DEEPLINK_ERROR)
 
     except CommandValidationException as cve:
         if is_restricted_feature_error:  # Restricted feature in group_chat, no error message

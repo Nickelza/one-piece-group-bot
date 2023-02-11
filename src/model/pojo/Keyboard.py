@@ -1,7 +1,9 @@
+import base64
 import json
 
 from telegram import CallbackQuery
 
+import resources.Environment as Env
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -11,7 +13,7 @@ from src.model.enums.Screen import Screen
 class Keyboard:
     def __init__(self, text: str, info: dict = None, screen: Screen = None, previous_screen_list: list[Screen] = None,
                  url: str = None, inherit_authorized_users: bool = True, authorized_users: list[User] = None,
-                 inbound_info: dict = None):
+                 inbound_info: dict = None, from_deeplink: bool = False, is_deeplink: bool = False):
         """
         Creates a keyboard object
         :param text: The text to be displayed on the keyboard
@@ -22,6 +24,8 @@ class Keyboard:
         :param inherit_authorized_users: If the authorized users list should be inherited from the default value
         :param authorized_users: The authorized users list
         :param inbound_info: The inbound info to be added to the keyboard info
+        :param from_deeplink: If the keyboard is being created from a deeplink
+        :param is_deeplink: If the keyboard is a deeplink, generate the deeplink url
         """
         self.text = text
         self.info: dict = info if info is not None else {}
@@ -31,9 +35,14 @@ class Keyboard:
         self.callback_data: str = self.create_callback_data()
         self.inherit_authorized_users: bool = inherit_authorized_users
         self.authorized_users: list[User] = authorized_users if authorized_users is not None else []
+        self.from_deeplink: bool = from_deeplink
+        self.is_deeplink: bool = is_deeplink
 
         if inbound_info is not None:
             self.info = inbound_info | self.info
+
+        if self.is_deeplink:
+            self.set_deeplink_url(self.screen)
 
     def create_callback_data(self) -> str:
         """
@@ -68,14 +77,24 @@ class Keyboard:
         self.callback_data = self.create_callback_data()
 
     @staticmethod
-    def get_from_callback_query(callback_query: CallbackQuery, message_source: MessageSource):
+    def get_from_callback_query_or_info(message_source: MessageSource, callback_query: CallbackQuery = None,
+                                        info_str: str = None, from_deeplink: bool = False) -> 'Keyboard':
         """
         Create a Keyboard object from a CallbackQuery object
         :param callback_query: CallbackQuery object
         :param message_source: Source of the message
+        :param info_str: The info to be added to the keyboard info
+        :param from_deeplink: If the keyboard is being created from a deeplink
         :return: Keyboard object
         """
-        info: dict = json.loads(callback_query.data)
+
+        if callback_query is None and info_str is None:
+            raise ValueError('Either callback_query or info must be provided')
+
+        if info_str is not None:
+            info: dict = json.loads(info_str)
+        else:
+            info: dict = json.loads(callback_query.data)
 
         try:
             if ReservedKeyboardKeys.SCREEN in info:
@@ -93,7 +112,8 @@ class Keyboard:
 
         text: str = ''
 
-        return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list)
+        return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list,
+                        from_deeplink=from_deeplink)
 
     def get(self, key: str):
         """
@@ -121,3 +141,13 @@ class Keyboard:
         """
 
         return bool(self.info.get(key))
+
+    def set_deeplink_url(self, screen):
+        """
+        Set the deeplink url for the keyboard
+        """
+
+        encoded_bytes = self.callback_data.encode('utf-8')
+        encoded_string = base64.b64encode(encoded_bytes).decode('utf-8')
+
+        self.url = f'https://t.me/{Env.BOT_USERNAME.get()}?start={encoded_string}'
