@@ -314,7 +314,6 @@ PREDICTION_REMOVE_BET_TEXT = '{}'
 PREDICTION_REMOVE_BET_LIST_OVERVIEW = 'From which option do you want to remove your bet?\n{}'
 
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
-CHAT_GROUP_MESSAGE_URL = f'https://t.me/{Env.OPD_GROUP_USERNAME.get()}/' + '{}'
 
 # Crew - Private
 CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = \
@@ -452,9 +451,6 @@ IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION = 'All restrictions have been remove
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION = 'If to be notified when all restrictions are removed'
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = 'Restriction removed'
 # Notification - Prediction result
-PREDICTION_NOTIFICATION_GO_TO_PREDICTION_MESSAGE = \
-    f'\n\n{Emoji.RIGHT_ARROW}[Go to prediction message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
-    '\n_\\(The message may no longer be available\\)_'
 PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = '_\n\n\\(Your wager was refunded\\)_'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL = '_\n\n\\(You have been refunded ฿{}\\)_'
@@ -539,10 +535,8 @@ NAVIGATION_LIMIT_REACHED = 'Limit reached'
 LOG_ITEM_DETAIL_OUTCOME_TEXT = '{}You *{}*'
 LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
-LOG_ITEM_DETAIL_GO_TO_MESSAGE = f'\n\n{Emoji.RIGHT_ARROW}[Go to message]({CHAT_GROUP_MESSAGE_URL}){Emoji.LEFT_ARROW}' \
-                                '\n_\\(The message may no longer be available\\)_'
-LOG_ITEM_DETAIL_GO_TO_MESSAGE2 = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
-                                  '\n_\\(The message may no longer be available\\)_')
+LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
+                                 '\n_\\(The message may no longer be available\\)_')
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
@@ -551,7 +545,7 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Date*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
-                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
+                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Doc Q Game'
@@ -559,7 +553,7 @@ DOC_Q_GAME_LOG_ITEM_TEXT = '{} ฿{}'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
                                   '\n\n{}' \
-                                  f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
+                                  f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - Game
 GAME_LOG_KEY = 'Challenges'
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'
@@ -569,7 +563,7 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Date*: {}' \
                             '\n*Wager*: ฿{}' \
                             '\n\n{}' \
-                            f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
+                            f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - Bounty Gift
 BOUNTY_GIFT_LOG_KEY = 'Bounty Gifts'
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Bounty Gift'
@@ -579,7 +573,7 @@ BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT = '\n*Tax*: ฿{} \\({}%\\)' \
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                                    '\n*Date*: {}' \
                                    '\n*Amount*: ฿{}{}' \
-                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE2}'
+                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
 # Logs - Legendary Pirate
 LEGENDARY_PIRATE_LOG_KEY = 'Legendary Pirates'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Legendary Pirate'
