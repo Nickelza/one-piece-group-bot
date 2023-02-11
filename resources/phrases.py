@@ -475,24 +475,24 @@ PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION = 'If to be notified when a bet 
                                                   'because it was placed after the cut off time'
 PREDICTION_BET_INVALID_NOTIFICATION_KEY = 'Prediction bet removed'
 # Notification - Deleted message because of arrest
-ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP = f'The above message was deleted from the {CHAT_GROUP_MENTION} because you '
+ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP = f'The above message was deleted from the Group Chat because you '
 DELETED_MESSAGE_ARREST_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} are arrested'
-DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
-                                                  f'{CHAT_GROUP_MENTION} was deleted because you are arrested'
+DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION = 'If to be notified when a message you sent in the ' \
+                                                  'Group Chat was deleted because you are arrested'
 DELETED_MESSAGE_ARREST_NOTIFICATION_KEY = 'Deleted message arrest'
 # Notification - Deleted message because of user is muted
 DELETED_MESSAGE_MUTE_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} are muted'
-DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
-                                                f'{CHAT_GROUP_MENTION} was deleted because you are muted'
+DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION = 'If to be notified when a message you sent in the ' \
+                                                'Group Chat was deleted because you are muted'
 DELETED_MESSAGE_MUTE_NOTIFICATION_KEY = 'Deleted message mute'
 # Notification - Deleted message because of user has not reached the required location
 DELETED_MESSAGE_LOCATION_NOTIFICATION = f'{ABOVE_MESSAGE_DELETED_FROM_CHAT_GROUP} have not reached the required ' \
                                         'location to send this type of message.' \
                                         '\n\n*Your location*: {}' \
                                         '\n*Required location*: {}'
-DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION = f'If to be notified when a message you sent in the ' \
-                                                    f'{CHAT_GROUP_MENTION} was deleted because you have not reached ' \
-                                                    f'the required location to send that type of message'
+DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION = 'If to be notified when a message you sent in the ' \
+                                                    'Group Chat was deleted because you have not reached ' \
+                                                    'the required location to send that type of message'
 DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY = 'Deleted message location'
 # Notification - Bounty Gift
 BOUNTY_GIFT_RECEIVED_NOTIFICATION = 'You have been gifted ฿{} by {}'
