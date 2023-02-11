@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.User import User
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
@@ -46,6 +47,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         # Send to chat
         ot_text = phrases.DEVIL_FRUIT_COLLECT_SUCCESS.format(
             user.get_markdown_mention(), escape_valid_markdown_chars(devil_fruit.get_full_name()),
+            DevilFruitCategory(devil_fruit.category).get_description(),
             get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False))
 
         await full_message_send(context, ot_text, update=update)

@@ -20,6 +20,7 @@ from src.model.enums.Notification import DevilFruitExpiredNotification, DevilFru
     DevilFruitRevokeNotification
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import DevilFruitValidationException
@@ -112,22 +113,25 @@ def get_devil_fruit_abilities_text(devil_fruit: DevilFruit, add_header: bool = T
     return abilities_text
 
 
-async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE, category: DevilFruitCategory) -> None:
     """
     Schedule devil fruit release
     :param context: The context
+    :param category: The category
     """
 
     # Get all devil fruits that are not released yet
     devil_fruit: DevilFruit = (DevilFruit.select()
-                               .where(DevilFruit.status == DevilFruitStatus.ENABLED)
+                               .where((DevilFruit.status == DevilFruitStatus.ENABLED)
+                                      & (DevilFruit.category == category))
                                .order_by(DevilFruit.id.asc())
                                .get_or_none())
 
     # If there are no devil fruits to release, send error message to admin chat
     if not devil_fruit:
-        await log_error(context, phrases.NO_DEVIL_FRUIT_TO_SCHEDULE)
-        logging.error(phrases.NO_DEVIL_FRUIT_TO_SCHEDULE)
+        ot_text = phrases.NO_DEVIL_FRUIT_TO_SCHEDULE.format(category.get_description())
+        await log_error(context, ot_text)
+        logging.error(ot_text)
         return
 
     set_devil_fruit_release_date(devil_fruit, is_new_release=True)
@@ -155,6 +159,7 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
         # Send to chat
         text = phrases.DEVIL_FRUIT_APPEARED_WITH_INFO.format(
             escape_valid_markdown_chars(devil_fruit.get_full_name()),
+            DevilFruitCategory(devil_fruit.category).get_description(),
             get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False))
 
         # Add collect button
@@ -201,7 +206,7 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
 
     # If it's a new release, set the release date to random time between now and next release
     if is_new_release:
-        release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_RELEASE.get())
+        release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
     else:  # If it's a re-release, set the release date to random time between now and next n hours
         release_date = get_random_time_between_by_hours(Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
 

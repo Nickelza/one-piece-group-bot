@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes, Application, Job
 
 import src.model.enums.Timer as Timer
 from src.chat.manage_message import init, end
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus
 from src.service.devil_fruit_service import schedule_devil_fruit_release, release_scheduled_devil_fruit, \
@@ -93,8 +94,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await close_scheduled_predictions(context)
         case Timer.REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE:
             await send_prediction_status_change_message_or_refresh_dispatch(context, should_refresh=True)
-        case Timer.SCHEDULE_DEVIL_FRUIT_RELEASE:
-            await schedule_devil_fruit_release(context)
+        case Timer.SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE | Timer.SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE:
+            await schedule_devil_fruit_release(context, DevilFruitCategory(int(timer.info)))
         case Timer.RELEASE_SCHEDULED_DEVIL_FRUIT:
             await release_scheduled_devil_fruit(context)
         case Timer.RESPAWN_DEVIL_FRUIT:
@@ -102,7 +103,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.DEACTIVATE_INACTIVE_GROUP_CHATS:
             deactivate_inactive_group_chats()
         case _:
-            logging.error(f'Unknown timer {job.name}')
+            raise ValueError(f'Unknown timer {timer.name}')
 
     if timer.should_log:
         logging.info(f'Finished timer {context.job.name}')

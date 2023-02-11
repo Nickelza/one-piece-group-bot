@@ -10,6 +10,7 @@ from src.model.User import User
 from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
@@ -63,7 +64,8 @@ class DevilFruitListPage(ListPage):
 
         abilities_text = get_devil_fruit_abilities_text(self.object) if self.object.should_show_abilities else ''
         return phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT.format(
-            self.object.get_full_name(), abilities_text, expiring_date_text)
+            self.object.get_full_name(), DevilFruitCategory(self.object.category).get_description(), abilities_text,
+            expiring_date_text)
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:

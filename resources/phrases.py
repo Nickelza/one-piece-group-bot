@@ -616,6 +616,7 @@ DEVIL_FRUIT_ABILITY_UNKNOWN = '\nUnknown'
 DEVIL_FRUIT_ITEM_TEXT = '{}'
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = 'Devil Fruit'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = '*{}*' \
+                               '\nCategory: {}' \
                                '{}{}'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = '\n\nExpiring in: {}'
 DEVIL_FRUIT_LIST_NO_ITEMS = 'You do not have any Devil Fruits'
@@ -630,6 +631,7 @@ DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
 DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
 DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
+                                   "\nCategory: {}" \
                                    "{}"
 DEVIL_FRUIT_APPEARED = 'A Devil Fruit has appeared!'
 DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_APPEARED}{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
@@ -639,6 +641,6 @@ DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_
 DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 
 # Admin chat error messages
-NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no Devil Fruits to schedule for release'
+NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
 THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your group_chat!\n'

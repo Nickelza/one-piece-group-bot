@@ -222,14 +222,25 @@ SHOULD_LOG_TIMER_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
 SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
     'SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE', default_value='False')
 
-# Schedule Devil Fruit release. Default: Every sunday at midnight
-CRON_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('CRON_SCHEDULE_DEVIL_FRUIT_RELEASE', default_value='0 0 * * Sun')
-ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE',
-                                                        default_value='True')
-SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_RELEASE',
-                                                            default_value='False')
-SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_RELEASE = Environment('SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_RELEASE',
-                                                                 default_value='False')
+# Schedule Devil Fruit Zoan release. Default: Every sunday at midnight
+CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
+    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='0 0 * * Sun')
+ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
+    'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='True')
+SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
+    'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
+SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
+    'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
+
+# Schedule Devil Fruit Ancient Zoan release. Default: Every first day of the month at midnight
+CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
+    'CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='0 0 1 * *')
+ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
+    'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='True')
+SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
+    'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
+SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
+    'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
 
 # Release scheduled Devil Fruit. Default: Every 1 minute
 CRON_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('CRON_RELEASE_SCHEDULED_DEVIL_FRUIT', default_value='*/1 * * * *')
