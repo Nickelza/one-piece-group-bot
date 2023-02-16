@@ -457,7 +457,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
         if should_save_media_id:
             if ContextBotDataKey.SAVED_MEDIA not in context.bot_data:
                 context.bot_data[ContextBotDataKey.SAVED_MEDIA] = {}
-                saved_media.media_id = message.photo[-1].file_id
+
+            saved_media.media_id = message.photo[-1].file_id
             context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name] = saved_media.media_id
 
         return message
