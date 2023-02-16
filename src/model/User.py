@@ -285,8 +285,8 @@ class User(BaseModel):
         :return: True if the user has bounty gain limitations
         """
 
-        return ((self.is_in_paradise() and self.bounty >= get_first_new_world().required_bounty)
-                or (self.bounty >= get_last_new_world().required_bounty))
+        return ((self.is_in_paradise() and (self.bounty + self.pending_bounty) >= get_first_new_world().required_bounty)
+                or ((self.bounty + self.pending_bounty) >= get_last_new_world().required_bounty))
 
     @staticmethod
     def get_has_bounty_gain_limitations_statement_condition() -> Any:
@@ -296,8 +296,8 @@ class User(BaseModel):
         """
 
         return (((User.location_level < get_first_new_world().level) &
-                 (User.bounty >= get_first_new_world().required_bounty)) |
-                (User.bounty >= get_last_new_world().required_bounty))
+                 ((User.bounty + User.pending_bounty) >= get_first_new_world().required_bounty)) |
+                ((User.bounty + User.pending_bounty) >= get_last_new_world().required_bounty))
 
     async def is_chat_admin(self, update: Update):
         """
