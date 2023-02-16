@@ -24,6 +24,7 @@ class Screen(StrEnum):
     GRP_BOUNTY_GIFT = 'G18'
     GRP_DEVIL_FRUIT_COLLECT = 'G19'
     GRP_SETTINGS = 'G20'
+    GRP_DEVIL_FRUIT_SELL = 'G21'
 
     PVT_START = 'P1'
     PVT_SETTINGS = 'P2'

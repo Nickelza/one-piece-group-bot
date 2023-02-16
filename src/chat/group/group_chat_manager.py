@@ -11,6 +11,7 @@ from src.chat.group.screens.screen_change_region import manage as manage_screen_
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
 from src.chat.group.screens.screen_devil_fruit_collect import manage as manage_screen_devil_fruit_collect
+from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
@@ -189,6 +190,10 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
             case Screen.GRP_SETTINGS:  # Settings
                 await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
+
+            case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
+                await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
+                                                     group_chat)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

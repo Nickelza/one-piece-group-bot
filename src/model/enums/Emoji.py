@@ -43,6 +43,7 @@ class Emoji(StrEnum):
     RIGHT_ARROW = '➡'
     PIN = '📌'
     RADIO_BUTTON = '🔘'
+    MONEY = '💰'
 
     # Game
     WINNER = '🏆'

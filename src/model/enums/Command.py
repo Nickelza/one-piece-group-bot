@@ -189,6 +189,9 @@ COMMANDS.append(GRP_SPEAK)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT)
 COMMANDS.append(GRP_BOUNTY_GIFT)
 
+GRP_DEVIL_FRUIT_SELL = Command('dfsell', Screen.GRP_DEVIL_FRUIT_SELL, feature=Feature.DEVIL_FRUIT_SELL)
+COMMANDS.append(GRP_DEVIL_FRUIT_SELL)
+
 # To define limitations
 GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),

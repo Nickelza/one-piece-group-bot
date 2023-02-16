@@ -178,6 +178,7 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
+GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + ' Buy'
 GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
 GRP_KEY_GO_TO_MESSAGE = 'Go to message'
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = 'Bet in private chat'
@@ -502,7 +503,7 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
 DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fruit:' \
                                    '\n\n*{}*' \
                                    '\nReason: {}' \
-                                   "\n\n_Go to start->Devil Fruit to eat it_"
+                                   "\n\n_Go to start->Devil Fruit to eat it or trade it_"
 DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
 DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
 # Notification - Devil Fruit Expired
@@ -617,8 +618,10 @@ DEVIL_FRUIT_ITEM_TEXT = '{}'
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = 'Devil Fruit'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = '*{}*' \
                                '\nCategory: {}' \
-                               '{}{}'
+                               '{}{}{}'
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = '\n\nExpiring in: {}'
+DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = f'\n\nYou can sell this Devil Fruit in the Chat Group with' \
+                                            f' {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} <price> command'
 DEVIL_FRUIT_LIST_NO_ITEMS = 'You do not have any Devil Fruits'
 DEVIL_FRUIT_NOT_OWNER = 'You do not own this Devil Fruit'
 DEVIL_FRUIT_EAT_USER_ALREADY_ATE = 'You have already eaten a Devil Fruit'
@@ -639,6 +642,29 @@ DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
 DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
 DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
 DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
+DEVIL_FRUIT_SELL_NO_AMOUNT = 'You need to specify the amount of belly you want to sell the Devil Fruit for' \
+                             f'\n\nExample: {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} 10.000.000'
+DEVIL_FRUIT_SELL_NO_FRUITS = 'You do not have any Devil Fruits that can be sold ' \
+                             '(only collected and non-eaten Devil Fruits can be sold)'
+DEVIL_FRUIT_SELL_SELECT_FRUIT = 'Select the Devil Fruit you want to sell' \
+                                '\n\n_Tip: When using this command in response to a user, ' \
+                                'only they will have the ability to purchase the Devil Fruit_'
+DEVIL_FRUIT_SELL_NO_LONGER_OWN = '{} no longer owns this Devil Fruit'
+DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = 'This Devil Fruit is no longer sellable'
+DEVIL_FRUIT_SELL_BUY = '{} has put up the following Devil Fruit for sale:' \
+                       '\n\n{}' \
+                       '\n\nPrice: ฿{}' \
+                       '\nTax: ฿{} \\({}%\\)' \
+                       '\nTotal Price: ฿*{}*' \
+                       '{}'
+DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM = '\n\n_Only {} can buy this Devil Fruit_'
+DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = 'You do not have enough belly to buy this Devil Fruit'
+DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = 'You cannot buy your own Devil Fruit'
+DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}' \
+                               '\n\n{}' \
+                               '\n\nPrice: ฿{}' \
+                               '\nTax: ฿{} \\({}%\\)' \
+                               '\nTotal Price: ฿*{}*'
 
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'

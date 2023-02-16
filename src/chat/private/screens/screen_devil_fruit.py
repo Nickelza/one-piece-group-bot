@@ -1,3 +1,4 @@
+import logging
 from enum import StrEnum
 
 from telegram import Update
@@ -11,6 +12,7 @@ from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
+from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
@@ -58,14 +60,28 @@ class DevilFruitListPage(ListPage):
     def get_item_text(self) -> str:
         return phrases.DEVIL_FRUIT_ITEM_TEXT.format(escape_valid_markdown_chars(self.object.get_full_name()))
 
-    def get_item_detail_text(self) -> str:
-        expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-            get_remaining_time(self.object.expiration_date)) if self.object.expiration_date else ''
+    def get_item_detail_text(self, from_private_chat: bool = True) -> str:
+        """
+        Get the item detail text
+        :param from_private_chat: If it was called from a private chat
+        :return:
+        """
+        expiring_date_text = ''
+        sell_command_text = ''
+        if from_private_chat:
+            if DevilFruitStatus(self.object.status) is DevilFruitStatus.COLLECTED:
+                if self.object.expiration_date is not None:  # Should always be the case
+                    expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
+                        get_remaining_time(self.object.expiration_date))
+                else:
+                    logging.error('Devil Fruit %s in collected status has no expiration date', self.object.id)
 
-        abilities_text = get_devil_fruit_abilities_text(self.object) if self.object.should_show_abilities else ''
+                sell_command_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND
+
+        abilities_text = get_devil_fruit_abilities_text(self.object, always_show_abilities=False)
         return phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT.format(
             self.object.get_full_name(), DevilFruitCategory(self.object.category).get_description(), abilities_text,
-            expiring_date_text)
+            expiring_date_text, sell_command_text)
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:

@@ -265,8 +265,8 @@ def get_amount_from_string(amount_str: str) -> int:
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
                           required_belly: int, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
-                          previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None
-                          ) -> bool:
+                          previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None,
+                          should_validate_user_has_amount: bool = True) -> bool:
     """
     Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if the wager is
     higher than the required belly
@@ -279,6 +279,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     :param inbound_keyboard: The inbound keyboard
     :param previous_screens: The previous screens, for the back button if in private chat
     :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back button if in private
+    :param should_validate_user_has_amount: Whether to validate that the user has the amount
     :return: Whether the wager is valid
     """
 
@@ -292,7 +293,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
         return False
 
     # User does not have enough bounty
-    if user.bounty < wager:
+    if should_validate_user_has_amount and user.bounty < wager:
         await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
                                 add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
                                 previous_screens=previous_screens,

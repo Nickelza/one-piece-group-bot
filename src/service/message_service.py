@@ -77,7 +77,8 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
 def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
                  authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
                  only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None,
-                 back_screen_index: int = 0, use_close_delete: bool = False) -> InlineKeyboardMarkup | None:
+                 back_screen_index: int = 0, use_close_delete: bool = False,
+                 should_add_current_user_to_authorized: bool = True) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
 
@@ -90,6 +91,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
     :param use_close_delete: True if the close button should be used instead of the delete button
+    :param should_add_current_user_to_authorized: True if the current user should be added to the authorized users list
     :return: Keyboard markup
     """
 
@@ -102,7 +104,7 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     if authorized_users_tg_ids is None:
         authorized_users_tg_ids = []
     try:
-        if update.effective_user.id not in authorized_users_tg_ids:
+        if update.effective_user.id not in authorized_users_tg_ids and should_add_current_user_to_authorized:
             authorized_users_tg_ids.append(update.effective_user.id)
     except AttributeError:
         pass
@@ -136,12 +138,13 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                                         button.previous_screen_list.append(inbound_keyboard.screen)
 
                             # Add list of authorized users
-                            if only_authorized_users_can_interact and button.inherit_authorized_users:
-                                if update is not None and update.effective_chat.type != Chat.PRIVATE:
-                                    button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = authorized_users_ids
-                            elif not button.inherit_authorized_users:
-                                button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
-                                    u.id for u in button.authorized_users]
+                            if button.only_authorized_users_can_interact:
+                                if only_authorized_users_can_interact and button.inherit_authorized_users:
+                                    if update is not None and update.effective_chat.type != Chat.PRIVATE:
+                                        button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = authorized_users_ids
+                                elif not button.inherit_authorized_users and len(button.authorized_users) > 0:
+                                    button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
+                                        u.id for u in button.authorized_users]
 
                             button.refresh_callback_data()
 
@@ -215,7 +218,8 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
                             edit_message_id: int = None, previous_screens: list[Screen] = None,
                             excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
                             previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False,
-                            group_chat: GroupChat = None, ignore_exception: bool = False) -> Message | bool:
+                            group_chat: GroupChat = None, ignore_exception: bool = False,
+                            ) -> Message | bool:
     """
     Send a message
 
@@ -565,16 +569,19 @@ def get_image_preview(image_url: str) -> str:
     return f'[​]({image_url})'
 
 
-def get_delete_button(user_ids: list[int], use_close_delete=False) -> Keyboard:
+def get_delete_button(user_ids: list[int], use_close_delete=False, button_text: str = None) -> Keyboard:
     """
     Create a delete button
     :param user_ids: List of users ids that can operate the delete button
     :param use_close_delete: True if the close button should be used instead of the delete button
+    :param button_text: Text of the button
     """
     keyboard_data: dict = {ReservedKeyboardKeys.AUTHORIZED_USER: user_ids, ReservedKeyboardKeys.DELETE: True}
 
-    text = phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
-    return Keyboard(text, keyboard_data)
+    if button_text is None:
+        button_text = phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
+
+    return Keyboard(button_text, keyboard_data)
 
 
 def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
@@ -582,7 +589,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
                         extra_keys: list[dict] = None, yes_screen: Screen = None, no_screen: Screen = None,
                         yes_extra_keys: list[dict] = None, no_extra_keys: list[dict] = None,
                         confirm_key: str = ReservedKeyboardKeys.CONFIRM, inbound_keyboard: Keyboard = None,
-                        yes_is_back_button: bool = False, no_is_back_button: bool = False) -> list[Keyboard]:
+                        yes_is_back_button: bool = False, no_is_back_button: bool = False,
+                        yes_is_delete_button: bool = False, no_is_delete_button: bool = False) -> list[Keyboard]:
     """
     Create a yes/no keyboard
 
@@ -600,6 +608,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     :param inbound_keyboard: The inbound keyboard
     :param yes_is_back_button: True if the yes button should be a back button
     :param no_is_back_button: True if the no button should be a back button
+    :param yes_is_delete_button: True if the yes button should be a delete button
+    :param no_is_delete_button: True if the no button should be a delete button
     :return: The yes and no keyboard
     """
 
@@ -626,6 +636,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     # Yes
     if yes_is_back_button:
         keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text))
+    elif yes_is_delete_button:
+        keyboard_line.append(get_delete_button([user.tg_user_id], button_text=yes_text))
     else:
         # If screen is being changed, discard yes key value
         keyboard_data_yes: dict = default_keyboard_data | (
@@ -642,6 +654,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     # No
     if no_is_back_button:
         keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text))
+    elif no_is_delete_button:
+        keyboard_line.append(get_delete_button([user.tg_user_id], button_text=no_text))
     else:
         # If screen is being changed, discard no key value
         keyboard_data_no: dict = default_keyboard_data | (

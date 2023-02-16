@@ -165,7 +165,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
-        tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_TAX, tax_percentage)
+        tax_percentage = get_value(sender, DevilFruitAbilityType.TAX, tax_percentage)
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():

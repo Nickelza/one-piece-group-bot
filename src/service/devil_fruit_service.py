@@ -24,6 +24,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeStatus
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
@@ -36,20 +37,19 @@ from src.service.message_service import log_error, escape_valid_markdown_chars, 
 from src.service.notification_service import send_notification
 
 
-def give_devil_fruit_to_user(devil_fruit: DevilFruit, receiver: User, source: DevilFruitSource, giver: User = None,
-                             reason: str = None, price: int = None) -> None:
+def give_devil_fruit_to_user(devil_fruit: DevilFruit, receiver: User, source: DevilFruitSource, reason: str = None,
+                             devil_fruit_trade: DevilFruitTrade = None) -> None:
     """
     Give a devil fruit to a user
     :param devil_fruit: The devil fruit
     :param receiver: The receiver
     :param source: The source
-    :param giver: The giver
     :param reason: The reason
-    :param price: The price, in case of trade between users
+    :param devil_fruit_trade: The devil fruit trade already created
     """
 
     # Make sure the devil fruit is not already owned by someone
-    if devil_fruit.owner:
+    if devil_fruit.owner and source is not DevilFruitSource.USER:
         owner: User = devil_fruit.owner
         raise DevilFruitValidationException(
             f"Devil fruit {devil_fruit.get_full_name()} is already owned by {owner.tg_user_id}")
@@ -70,14 +70,19 @@ def give_devil_fruit_to_user(devil_fruit: DevilFruit, receiver: User, source: De
     devil_fruit.save()
 
     # Save trade
-    devil_fruit_trade: DevilFruitTrade = DevilFruitTrade()
+    if devil_fruit_trade is None:
+        devil_fruit_trade: DevilFruitTrade = DevilFruitTrade()
+
     devil_fruit_trade.devil_fruit = devil_fruit
-    devil_fruit_trade.giver = giver
     devil_fruit_trade.receiver = receiver
-    devil_fruit_trade.price = price
     devil_fruit_trade.source = source
     devil_fruit_trade.reason = reason
+    devil_fruit_trade.status = DevilFruitTradeStatus.COMPLETED
     devil_fruit_trade.save()
+
+    # Delete all pending trades
+    DevilFruitTrade.delete().where(DevilFruitTrade.devil_fruit == devil_fruit,
+                                   DevilFruitTrade.status == DevilFruitTradeStatus.PENDING).execute()
 
 
 def get_devil_fruit_abilities(devil_fruit: DevilFruit) -> list[DevilFruitAbility]:

@@ -14,6 +14,7 @@ class Feature(IntEnum):
     PREDICTION = 10
     SILENCE = 11
     STATUS = 12
+    DEVIL_FRUIT_SELL = 13
 
     def get_description(self) -> str:
         """
@@ -29,7 +30,7 @@ class Feature(IntEnum):
         """
         Get all the features
 
-        :return: All the features, pinnable features are at the end
+        :return: All the features
         """
         return [Feature.BOUNTY_GIFT,
                 Feature.BOUNTY_MESSAGES_GAIN,
@@ -42,7 +43,8 @@ class Feature(IntEnum):
                 Feature.MESSAGE_FILTER,
                 Feature.PREDICTION,
                 Feature.SILENCE,
-                Feature.STATUS]
+                Feature.STATUS,
+                Feature.DEVIL_FRUIT_SELL]
 
     @staticmethod
     def get_restricted() -> list['Feature']:
@@ -104,5 +106,6 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.MESSAGE_FILTER: "Message Filter",
     Feature.PREDICTION: "Prediction",
     Feature.SILENCE: "Silence",
-    Feature.STATUS: "Status"
+    Feature.STATUS: "Status",
+    Feature.DEVIL_FRUIT_SELL: "Devil Fruit Sell"
 }

@@ -16,7 +16,7 @@ class BountyGift(BaseModel):
     sender = ForeignKeyField(User, backref='bounty_gift_senders', on_delete='CASCADE', on_update='CASCADE')
     receiver = ForeignKeyField(User, backref='bounty_gift_receivers', on_delete='CASCADE', on_update='CASCADE')
     amount = BigIntegerField()
-    tax_percentage = IntegerField()
+    tax_percentage = FloatField()
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=BountyGiftStatus.AWAITING_CONFIRMATION)
     group_chat = ForeignKeyField(GroupChat, null=True, backref='bounty_gift_groups_chats', on_delete='RESTRICT',

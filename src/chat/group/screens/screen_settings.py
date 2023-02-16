@@ -94,6 +94,9 @@ def get_settings_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
     else:
         features: list[Feature] = Feature.get_non_restricted()
 
+    # Order alphabetically
+    features.sort(key=lambda x: x.get_description())
+
     # Move pinnable features to the end
     pinnable_features = Feature.get_pinnable()
     for pinnable_feature in pinnable_features:

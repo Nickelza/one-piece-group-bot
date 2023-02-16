@@ -487,6 +487,8 @@ CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_MAINTAIN_MIN_LATES
 CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
 # Maximum number of Crew members. Default: 10
 CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')
+# How much percent should be removed from taxes for exchanges between Crew members. Default: 50%
+CREW_TAX_EXCHANGE_DEDUCTION_PERCENTAGE = Environment('CREW_TAX_EXCHANGE_DEDUCTION_PERCENTAGE', default_value='50')
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')
@@ -500,6 +502,10 @@ DEVIL_FRUIT_RESPAWN_HOURS = Environment('DEVIL_FRUIT_RESPAWN_HOURS', default_val
 # How many leaderboards back a user has to appear in at least once to maintain an eaten Devil Fruit. Default: 4
 DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
     'DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE', default_value='4')
+# Minimum amount a Devil Fruit can be sold for. Default: 100.000.000
+DEVIL_FRUIT_SELL_MIN_AMOUNT = Environment('DEVIL_FRUIT_SELL_MIN_AMOUNT', default_value='100000000')
+# Tax applied when selling a Devil Fruit. Default: 50%
+DEVIL_FRUIT_SELL_TAX = Environment('DEVIL_FRUIT_SELL_TAX', default_value='50')
 
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment('ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP',
