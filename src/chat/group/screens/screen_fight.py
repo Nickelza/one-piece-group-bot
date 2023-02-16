@@ -199,6 +199,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
     fight.opponent = opponent
     fight.win_probability = win_probability
     fight.belly = win_amount
+    fight.group_chat = group_chat
     fight.save()
 
     if win_probability >= 50:
@@ -227,7 +228,6 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
     message: Message = await full_media_send(context, saved_media_name=SavedMediaName.FIGHT, update=update,
                                              caption=caption, keyboard=inline_keyboard)
 
-    fight.group_chat = group_chat
     fight.message_id = message.message_id
     fight.save()
 
