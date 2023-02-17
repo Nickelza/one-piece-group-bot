@@ -35,7 +35,7 @@ async def get_user_profile_photo(update: Update) -> str | None:
     return photo_path
 
 
-async def user_is_boss(user: User) -> bool:
+def user_is_boss(user: User) -> bool:
     """
     Returns True if the user is a boss
     :param user: The user
@@ -57,7 +57,7 @@ async def user_is_boss(user: User) -> bool:
     return False
 
 
-async def user_is_muted(user: User, group_chat: GroupChat) -> bool:
+def user_is_muted(user: User, group_chat: GroupChat) -> bool:
     """
     Returns True if the user is muted
     :param user: The user
@@ -65,7 +65,7 @@ async def user_is_muted(user: User, group_chat: GroupChat) -> bool:
     :return: True if the user is muted
     """
 
-    if await user_is_boss(user):
+    if user_is_boss(user):
         return False
 
     if not group_chat.is_muted:

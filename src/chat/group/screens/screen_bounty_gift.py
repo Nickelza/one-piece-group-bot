@@ -139,7 +139,7 @@ async def transaction_is_tax_free(sender: User, receiver: User) -> bool:
         return True
 
     # Sender is a boss, no tax
-    if await user_is_boss(sender):
+    if user_is_boss(sender):
         return True
 
     return False

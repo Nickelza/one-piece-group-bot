@@ -34,7 +34,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     logs_sorted = dict(sorted(LOG_TYPE_BUTTON_TEXTS.items(), key=lambda x: x[1]))
     for log_type, button_text in logs_sorted.items():
         log: Log = get_log_by_type(log_type)
-        if not log.only_by_boss or await user_is_boss(user):
+        if not log.only_by_boss or user_is_boss(user):
             inline_keyboard.append([Keyboard(button_text, screen=Screen.PVT_LOGS_TYPE,
                                              info={LogReservedKeys.TYPE: log_type})])
 

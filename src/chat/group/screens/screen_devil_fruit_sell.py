@@ -124,7 +124,7 @@ async def get_trade_tax(seller: User, buyer: User) -> float:
     :return: The tax
     """
 
-    if await user_is_boss(seller):
+    if user_is_boss(seller):
         return 0
 
     tax_percentage = Env.DEVIL_FRUIT_SELL_TAX.get_float()

@@ -58,7 +58,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, log: Log,
     :return: True if the validation is successful, False otherwise
     """
 
-    if log.only_by_boss and not await user_is_boss(user):
+    if log.only_by_boss and not user_is_boss(user):
         await full_message_send(context, phrases.COMMAND_ONLY_BY_BOSS_ERROR, update=update)
         return False
 

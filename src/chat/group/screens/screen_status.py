@@ -72,7 +72,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 
         requesting_user_leaderboard_user = get_current_leaderboard_user(user)
 
-        if not await user_is_boss(user) and (requesting_user_leaderboard_user is None or (
+        if not user_is_boss(user) and (requesting_user_leaderboard_user is None or (
                 leaderboard_target_user is not None
                 and requesting_user_leaderboard_user.position >= leaderboard_target_user.position)):
             requesting_user_leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
@@ -94,7 +94,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         else:
             leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(get_current_leaderboard_user(user))
         if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
-                                                                      and not await user_is_boss(user))
+                                                                      and not user_is_boss(user))
                                                                      or user.is_arrested())):
             outbound_keyboard: list[list[Keyboard]] = [[
                 Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY,
@@ -198,12 +198,12 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
-    if (not in_reply_to_message and (await user_is_boss(target_user) or target_user.bounty_poster_limit > 0) and
+    if (not in_reply_to_message and (user_is_boss(target_user) or target_user.bounty_poster_limit > 0) and
             not target_user.is_arrested()):
         await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
-        if not await user_is_boss(target_user):
+        if not user_is_boss(target_user):
             target_user.bounty_poster_limit -= 1
             target_user.save()
             original_user.should_update_model = False
