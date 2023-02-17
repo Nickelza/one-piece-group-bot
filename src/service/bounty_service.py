@@ -13,10 +13,14 @@ from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_next_run
+from src.service.devil_fruit_service import get_value
 from src.service.location_service import reset_location
+from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
+from src.service.user_service import user_is_boss
 
 
 def get_belly_formatted(belly: int) -> str:
@@ -351,3 +355,28 @@ def should_reset_bounty(run_time: datetime = None) -> bool:
 
     # Reset if this is the last leaderboard of the month
     return datetime.datetime.now().month != run_time.month
+
+
+def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
+    """
+    Get the transaction tax
+    :param base_tax: The base tax
+    :param sender: The sender
+    :param receiver: The receiver
+    :return: The transaction tax
+    """
+
+    # Sender or receiver is boss, no tax
+    if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
+        return 0
+
+    tax = base_tax
+
+    # Send and receiver in same crew, percentage deduction
+    if receiver is not None and sender.in_same_crew(receiver):
+        tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
+
+    # Apply Devil Fruit ability
+    tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
+
+    return tax

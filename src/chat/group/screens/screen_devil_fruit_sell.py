@@ -12,17 +12,15 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.Screen import Screen
-from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import DevilFruitTradeValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted
-from src.service.devil_fruit_service import give_devil_fruit_to_user, get_value
-from src.service.math_service import get_value_from_percentage, subtract_percentage_from_value
+from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, get_transaction_tax
+from src.service.devil_fruit_service import give_devil_fruit_to_user
+from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
-from src.service.user_service import user_is_boss
 
 
 class DevilFruitSellReservedKeys(StrEnum):
@@ -103,7 +101,7 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     else:
         amount = devil_fruit_trade.price
 
-    tax_percentage = (await get_trade_tax(seller, buyer)
+    tax_percentage = (get_transaction_tax(seller, buyer, Env.DEVIL_FRUIT_SELL_TAX.get_float())
                       if devil_fruit_trade is None else devil_fruit_trade.tax_percentage)
 
     # Parse to int if tax does not have a decimal
@@ -114,31 +112,6 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     total_amount = amount + tax_amount
 
     return amount, tax_percentage, tax_amount, total_amount
-
-
-async def get_trade_tax(seller: User, buyer: User) -> float:
-    """
-    Get the tax for the trade
-    :param seller: The seller
-    :param buyer: The buyer
-    :return: The tax
-    """
-
-    if user_is_boss(seller):
-        return 0
-
-    tax_percentage = Env.DEVIL_FRUIT_SELL_TAX.get_float()
-
-    # Seller and buyer in same Crew, percentage deduction
-    if buyer is not None and seller.in_same_crew(buyer):
-        tax_percentage = subtract_percentage_from_value(tax_percentage,
-                                                        Env.CREW_TAX_EXCHANGE_DEDUCTION_PERCENTAGE.get_float())
-
-    # Apply Devil Fruit ability
-    if tax_percentage > 0:
-        tax_percentage = get_value(seller, DevilFruitAbilityType.TAX, tax_percentage)
-
-    return tax_percentage
 
 
 async def validate_new_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command

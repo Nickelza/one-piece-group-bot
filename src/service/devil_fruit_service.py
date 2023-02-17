@@ -261,7 +261,7 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
         await send_notification(context, owner, notification)
 
 
-def get_value(user: User, ability_type: DevilFruitAbilityType, value: int, add_to_value: bool = False) -> float:
+def get_value(user: User, ability_type: DevilFruitAbilityType, value: float, add_to_value: bool = False) -> float:
     """
     Given a value, gets the updated value if user has eaten a Devil Fruit that modifies it
     :param user: The user

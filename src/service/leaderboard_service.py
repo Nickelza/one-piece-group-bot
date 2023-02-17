@@ -11,7 +11,6 @@ from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import should_reset_bounty, reset_bounty
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
@@ -47,6 +46,7 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     Sends the weekly leaderboard to the group chat
     :param context: Context of callback
     """
+    from src.service.bounty_service import should_reset_bounty, reset_bounty
 
     leaderboard = create_leaderboard()
 

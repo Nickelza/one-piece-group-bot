@@ -13,7 +13,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted
+from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, get_transaction_tax
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -161,7 +161,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
     else:
         amount = bounty_gift.amount
 
-    tax_percentage = 0 if await transaction_is_tax_free(sender, receiver) else sender.bounty_gift_tax
+    tax_percentage = get_transaction_tax(sender, receiver, sender.bounty_gift_tax)
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
@@ -213,8 +213,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     # Update sender
     sender.bounty -= total_amount
 
-    if not await transaction_is_tax_free(sender, receiver):
-        sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
+    sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
     receiver.bounty += amount

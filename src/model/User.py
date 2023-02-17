@@ -186,7 +186,7 @@ class User(BaseModel):
         :return: True if the user is in the same crew as the given user
         """
 
-        return self.crew is not None and self.crew == user.crew
+        return self.crew is not None and user is not None and self.crew == user.crew
 
     def get_markdown_mention(self) -> str:
         """
