@@ -11,11 +11,11 @@ import constants as c
 import resources.Environment as Env
 
 
-def download_temp_file(url: str) -> str:
+def download_temp_file(url: str, extension: str = None) -> str:
     """
     Download file to temp folder
     :param url: url of file
-    :type url: str
+    :param extension: File extension
     :return: path of downloaded file
     """
 
@@ -24,7 +24,8 @@ def download_temp_file(url: str) -> str:
         os.makedirs(c.TEMP_DIR)
 
     # File name
-    file_path = generate_temp_file_path(pathlib.Path(url).suffix)
+    extension = pathlib.Path(url).suffix if extension is None else extension
+    file_path = generate_temp_file_path(extension)
 
     # Download file
     urllib.request.urlretrieve(url, file_path)

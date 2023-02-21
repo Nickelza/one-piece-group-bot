@@ -28,5 +28,14 @@ class Game(BaseModel):
     class Meta:
         db_table = 'game'
 
+    def is_participant(self, user: User) -> bool:
+        """
+        Check if the user is a participant of the game
+        :param user: The user
+        :return: True if the user is a participant, False otherwise
+        """
+
+        return self.challenger == user or self.opponent == user
+
 
 Game.create_table()

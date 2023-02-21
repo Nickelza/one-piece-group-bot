@@ -176,6 +176,7 @@ PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + ' Devil Fruit'
 PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
+PVT_KEY_GO_TO_MESSAGE = 'Go to message'
 
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + ' Buy'
@@ -183,6 +184,7 @@ GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in t
 GRP_KEY_GO_TO_MESSAGE = 'Go to message'
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = 'Bet in private chat'
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = 'View in private chat'
+GRP_KEY_GAME_PLAY = 'Play'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -195,26 +197,13 @@ GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
 
 GAME_NOT_FOUND = 'Game not found'
 GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
-               '\nWould you like to accept?'
+               '\nWould you like to accept?' \
+               f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
+               f'it will be automatically rejected.'
 GAME_CANCELED = 'Game cancelled'
 GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
 GAME_INVALID = 'Invalid game'
 GAME_UNKNOWN_NAME = 'Unknown'
-
-ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
-
-ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
-ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + ' Rock'
-ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + ' Paper'
-ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS + ' Scissors'
-ROCK_PAPER_SCISSORS_CHOICES = '{} chose {} ' \
-                              '\n{} chose {}\n\n'
-
-RUSSIAN_ROULETTE_GAME_NAME = 'Russian Roulette'
-RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fired. Choose another one.'
-RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
-RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
-
 GAME_TEXT = '*{}*' \
             '\n\n{} vs {}' \
             '\n*Wager:* ฿*{}*' \
@@ -240,6 +229,39 @@ GAME_STATUS_DRAW = 'Draw'
 GAME_STATUS_AWAITING_SELECTION = 'Awaiting game selection'
 GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION = 'Awaiting opponent confirmation'
 GAME_STATUS_FORCED_END = 'Forced end due to bounty reset'
+GAME_STATUS_COUNTDOWN_TO_START = 'Countdown to start'
+GAME_COUNTDOWN = 'The game will start in *{}*'
+GAME_STARTED = 'Game in progress'
+GAME_TIMEOUT = 'This game was canceled due to timeout while awaiting opponent confirmation.' \
+               '\n\nThe wager has been returned to the challenger.'
+GAME_INPUT_NOT_PARTICIPANT = 'You are not a participant of this game'
+GAME_INPUT_GAME_FINISHED = 'This game has ended'
+GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
+GAME_RESULT_CHARACTER = '\n\nCharacter: {}'
+
+ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
+ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
+ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + ' Rock'
+ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + ' Paper'
+ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS + ' Scissors'
+ROCK_PAPER_SCISSORS_CHOICES = '{} chose {} ' \
+                              '\n{} chose {}\n\n'
+
+RUSSIAN_ROULETTE_GAME_NAME = 'Russian Roulette'
+RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fired. Choose another one.'
+RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
+RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
+
+WHOS_WHO_GAME_NAME = "Who's Who"
+WHOS_WHO_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
+                              f'\nThe name must be the same as the one used on ' \
+                              f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
+WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '.\n\nIn *{}* seconds, a less blurred image will be sent'
+WHOS_WHO_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
+                               f'{GAME_RESULT_CHARACTER}'
+WHOS_WHO_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
+                                        f'\nBetter luck next time!' \
+                                        f'{GAME_RESULT_CHARACTER}'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'

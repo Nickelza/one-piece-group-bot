@@ -121,7 +121,7 @@ class User(BaseModel):
         :return: True if the user is in edit mode
         """
 
-        return self.private_screen_step is not None
+        return self.private_screen_in_edit_id is not None
 
     def get_private_screen_list(self) -> list[Screen]:
         """

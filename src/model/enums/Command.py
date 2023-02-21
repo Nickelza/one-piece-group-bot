@@ -133,6 +133,8 @@ COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT)
 # To allow deeplink
 PVT_PREDICTION_DETAIL = Command('', Screen.PVT_PREDICTION_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_PREDICTION_DETAIL)
+PVT_GAME_WW_INPUT = Command('', Screen.PVT_GAME_WW_INPUT, allow_deeplink=True)
+COMMANDS.append(PVT_GAME_WW_INPUT)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)

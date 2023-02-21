@@ -49,11 +49,20 @@ def convert_seconds_to_time(seconds: int) -> str:
     if hours <= 1:  # Show minutes only in last hour
         if len(result) > 0:
             result += ' '
-        if minutes > 0:
+        if minutes > 0 and seconds > 60:
             if minutes == 1:
                 result += f'{minutes} minute'
             else:
                 result += f'{minutes} minutes'
+
+    if minutes == 0 or seconds <= 60:  # Show seconds only in last minute
+        if len(result) > 0:
+            result += ' '
+        if seconds > 0:
+            if seconds == 1:
+                result += f'{seconds} second'
+            else:
+                result += f'{seconds} seconds'
 
     return result
 

@@ -11,7 +11,7 @@ from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.game_service import delete_game, validate_game
+from src.service.game_service import delete_game, validate_game, enqueue_game_timeout, get_game_name
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard
 
 
@@ -55,7 +55,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
                                           mention_markdown_user(challenger),
-                                          (GameType(game.type)),
+                                          (get_game_name(GameType(game.type))),
                                           get_belly_formatted(game.wager))
     outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
                                                                    screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
@@ -70,3 +70,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
     await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard)
+
+    # Enqueue the game for timeout
+    context.application.create_task(enqueue_game_timeout(context, game))

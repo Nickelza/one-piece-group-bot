@@ -4,7 +4,7 @@ import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
     InputMediaVideo, InputMediaAnimation, Chat
-from telegram.error import BadRequest, TelegramError
+from telegram.error import BadRequest, TelegramError, Forbidden
 from telegram.ext import ContextTypes
 from telegram.helpers import mention_markdown
 
@@ -353,7 +353,9 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                           add_delete_button: bool = False, authorized_users: list = None,
                           inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
                           only_authorized_users_can_interact: bool = True,
-                          saved_media_name: SavedMediaName = None, group_chat: GroupChat = None) -> Message | bool:
+                          saved_media_name: SavedMediaName = None, group_chat: GroupChat = None,
+                          exceptions_to_ignore: list[Exception] = None, ignore_forbidden_exception: bool = False
+                          ) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -382,8 +384,16 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
     :param saved_media_name: Saved media name
     :param group_chat: The group chat, used to get the group chat id
+    :param exceptions_to_ignore: List of exceptions to ignore
+    :param ignore_forbidden_exception: True if the forbidden exception should be ignored
     :return: Message
     """
+
+    if exceptions_to_ignore is None:
+        exceptions_to_ignore = []
+
+    if ignore_forbidden_exception:
+        exceptions_to_ignore.append(Forbidden)
 
     if caption is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         caption = escape_invalid_markdown_chars(caption)
@@ -393,14 +403,14 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
 
     # Media id should be saved to avoid re-uploading each time
     should_save_media_id = False
-    if saved_media is not None and saved_media.file_name is not None and saved_media.media_id is None:
+    if saved_media is not None and saved_media.file_name is not None and not isinstance(saved_media.media_id, str):
         # Try to load media id from context bot data
-        try:
+        if saved_media.name is not None and saved_media.name in context.bot_data[ContextBotDataKey.SAVED_MEDIA]:
             saved_media.media_id = context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name]
-        except KeyError:
+        else:
             # Load media id from file
             saved_media.media_id = open(saved_media.file_name, 'rb')
-            should_save_media_id = True
+            should_save_media_id = saved_media.name is not None
 
     topic_id = None
     if group_chat is not None:
@@ -413,87 +423,100 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                                    authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
                                    only_authorized_users_can_interact=only_authorized_users_can_interact)
 
-    # New message
-    if new_message or update is None or update.callback_query is None:
-        reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
-                                                      reply_to_message_id=reply_to_message_id,
-                                                      quote_if_group=quote_if_group)
+    try:
+        # New message
+        if new_message or update is None or update.callback_query is None:
+            reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
+                                                          reply_to_message_id=reply_to_message_id,
+                                                          quote_if_group=quote_if_group)
 
-        match saved_media.type:
-            # Photo
-            case SavedMediaType.PHOTO:  # Photo
-                message: Message = await context.bot.send_photo(chat_id=chat_id,
-                                                                photo=saved_media.media_id,
-                                                                caption=caption,
-                                                                reply_markup=keyboard_markup,
-                                                                parse_mode=parse_mode,
-                                                                disable_notification=disable_notification,
-                                                                reply_to_message_id=reply_to_message_id,
-                                                                allow_sending_without_reply=allow_sending_without_reply,
-                                                                protect_content=protect_content,
-                                                                message_thread_id=topic_id)
-            case SavedMediaType.VIDEO:  # Video
-                message: Message = await context.bot.send_video(chat_id=chat_id,
-                                                                video=saved_media.media_id,
-                                                                caption=caption,
-                                                                reply_markup=keyboard_markup,
-                                                                parse_mode=parse_mode,
-                                                                disable_notification=disable_notification,
-                                                                reply_to_message_id=reply_to_message_id,
-                                                                allow_sending_without_reply=allow_sending_without_reply,
-                                                                protect_content=protect_content,
-                                                                message_thread_id=topic_id)
-            case SavedMediaType.ANIMATION:  # Animation
-                message: Message = await context.bot.send_animation(chat_id=chat_id,
-                                                                    animation=saved_media.media_id,
-                                                                    caption=caption,
-                                                                    reply_markup=keyboard_markup,
-                                                                    parse_mode=parse_mode,
-                                                                    disable_notification=disable_notification,
-                                                                    reply_to_message_id=reply_to_message_id,
-                                                                    allow_sending_without_reply=(
-                                                                        allow_sending_without_reply),
-                                                                    protect_content=protect_content,
-                                                                    message_thread_id=topic_id)
-            case _:
-                raise ValueError(f'Invalid saved media type: {saved_media.type}')
+            match saved_media.type:
+                # Photo
+                case SavedMediaType.PHOTO:  # Photo
+                    message: Message = await context.bot.send_photo(
+                        chat_id=chat_id,
+                        photo=saved_media.media_id,
+                        caption=caption,
+                        reply_markup=keyboard_markup,
+                        parse_mode=parse_mode,
+                        disable_notification=disable_notification,
+                        reply_to_message_id=reply_to_message_id,
+                        allow_sending_without_reply=allow_sending_without_reply,
+                        protect_content=protect_content,
+                        message_thread_id=topic_id)
 
-        if should_save_media_id:
-            if ContextBotDataKey.SAVED_MEDIA not in context.bot_data:
-                context.bot_data[ContextBotDataKey.SAVED_MEDIA] = {}
+                case SavedMediaType.VIDEO:  # Video
+                    message: Message = await context.bot.send_video(
+                        chat_id=chat_id,
+                        video=saved_media.media_id,
+                        caption=caption,
+                        reply_markup=keyboard_markup,
+                        parse_mode=parse_mode,
+                        disable_notification=disable_notification,
+                        reply_to_message_id=reply_to_message_id,
+                        allow_sending_without_reply=allow_sending_without_reply,
+                        protect_content=protect_content,
+                        message_thread_id=topic_id)
 
-            saved_media.media_id = message.photo[-1].file_id
-            context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name] = saved_media.media_id
+                case SavedMediaType.ANIMATION:  # Animation
+                    message: Message = await context.bot.send_animation(
+                        chat_id=chat_id,
+                        animation=saved_media.media_id,
+                        caption=caption,
+                        reply_markup=keyboard_markup,
+                        parse_mode=parse_mode,
+                        disable_notification=disable_notification,
+                        reply_to_message_id=reply_to_message_id,
+                        allow_sending_without_reply=allow_sending_without_reply,
+                        protect_content=protect_content,
+                        message_thread_id=topic_id)
+                case _:
+                    raise ValueError(f'Invalid saved media type: {saved_media.type}')
 
-        return message
+            if should_save_media_id:
+                if ContextBotDataKey.SAVED_MEDIA not in context.bot_data:
+                    context.bot_data[ContextBotDataKey.SAVED_MEDIA] = {}
 
-    # No message to edit or answer callback
-    if update.callback_query is None:
-        raise Exception(phrases.EXCEPTION_NO_EDIT_MESSAGE)
+                saved_media.media_id = message.photo[-1].file_id
+                context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name] = saved_media.media_id
 
-    # Answer callback
-    if answer_callback:
-        return await context.bot.answer_callback_query(update.callback_query.id, text=caption, show_alert=show_alert)
+            return message
 
-    # Edit only keyboard
-    if edit_only_keyboard:
-        return await context.bot.edit_message_reply_markup(chat_id=chat_id,
-                                                           message_id=update.callback_query.message.message_id,
-                                                           reply_markup=keyboard_markup)
+        # No message to edit or answer callback
+        if update.callback_query is None:
+            raise Exception(phrases.EXCEPTION_NO_EDIT_MESSAGE)
 
-    # Edit only caption and keyboard
-    if edit_only_caption_and_keyboard:
-        return await context.bot.edit_message_caption(chat_id=chat_id,
-                                                      message_id=update.callback_query.message.message_id,
-                                                      caption=caption,
-                                                      reply_markup=keyboard_markup)
+        # Answer callback
+        if answer_callback:
+            return await context.bot.answer_callback_query(update.callback_query.id, text=caption,
+                                                           show_alert=show_alert)
 
-    # Edit full media
-    input_media: InputMedia = get_input_media_from_saved_media(saved_media=saved_media, caption=caption)
-    return await context.bot.edit_message_media(chat_id=chat_id,
-                                                message_id=update.callback_query.message.message_id,
-                                                media=input_media,
-                                                reply_markup=keyboard_markup)
+        # Edit only keyboard
+        if edit_only_keyboard:
+            return await context.bot.edit_message_reply_markup(chat_id=chat_id,
+                                                               message_id=update.callback_query.message.message_id,
+                                                               reply_markup=keyboard_markup)
+
+        # Edit only caption and keyboard
+        if edit_only_caption_and_keyboard:
+            return await context.bot.edit_message_caption(chat_id=chat_id,
+                                                          message_id=update.callback_query.message.message_id,
+                                                          caption=caption,
+                                                          reply_markup=keyboard_markup)
+
+        # Edit full media
+        input_media: InputMedia = get_input_media_from_saved_media(saved_media=saved_media, caption=caption)
+        return await context.bot.edit_message_media(chat_id=chat_id,
+                                                    message_id=update.callback_query.message.message_id,
+                                                    media=input_media,
+                                                    reply_markup=keyboard_markup)
+    except Exception as e:
+        for e_to_ignore in exceptions_to_ignore:
+            if isinstance(e, e_to_ignore):
+                logging.error(f'Error while sending message: {e}')
+                return False
+
+        raise e
 
 
 async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None,

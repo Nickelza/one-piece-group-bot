@@ -13,6 +13,7 @@ from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_
 from src.chat.private.screens.screen_devil_fruit_detail_discard \
     import manage as manage_screen_devil_fruit_detail_discard
 from src.chat.private.screens.screen_devil_fruit_detail_eat import manage as manage_screen_devil_fruit_detail_eat
+from src.chat.private.screens.screen_game_ww_input import manage as manage_screen_game_ww_input
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
@@ -188,6 +189,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD:  # Devil Fruit Detail Discard
                 await manage_screen_devil_fruit_detail_discard(update, context, inbound_keyboard, user)
 
+            case Screen.PVT_GAME_WW_INPUT:  # Game Who's Who Input
+                await manage_screen_game_ww_input(update, context, inbound_keyboard, user)
+
             case _:  # Unknown screen
-                if update.callback_query is not None:
+                if update.callback_query is not None or screen is not None:
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)

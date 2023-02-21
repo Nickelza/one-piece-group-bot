@@ -22,7 +22,7 @@ class SavedMedia:
         self.type: SavedMediaType = media_type
         self.media_id: str = media_id
         self.name: SavedMediaName = name
-        self.file_name: str = os.path.join(c.SAVED_MEDIA_DIR, file_name) if file_name else None
+        self.file_name: str = os.path.join(c.SAVED_MEDIA_DIR, file_name) if file_name and name else file_name
 
     @staticmethod
     def get_by_name(name: SavedMediaName) -> 'SavedMedia':

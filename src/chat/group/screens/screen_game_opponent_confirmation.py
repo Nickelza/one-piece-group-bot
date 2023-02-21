@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 import resources.phrases as phrases
 from src.chat.group.screens.screen_game_rps import manage as manage_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_rr
+from src.chat.group.screens.screen_game_ww import manage as manage_ww
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -91,5 +92,9 @@ async def dispatch_game(update: Update, context: ContextTypes.DEFAULT_TYPE, user
 
         case GameType.RUSSIAN_ROULETTE:
             await manage_rr(update, context, user, inbound_keyboard, game)
+
+        case GameType.WHOS_WHO:
+            await manage_ww(update, context, inbound_keyboard, game)
+
         case _:
             raise GroupChatException(GroupChatError.INVALID_GAME)

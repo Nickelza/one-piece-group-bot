@@ -44,10 +44,12 @@ class Emoji(StrEnum):
     PIN = '📌'
     RADIO_BUTTON = '🔘'
     MONEY = '💰'
+    SAD = '😢'
 
     # Game
     WINNER = '🏆'
     LOSER = '💥'
+    CONFETTI = '🎉'
 
     # Prediction
     PREDICTION_BET_WIN = '🏆'

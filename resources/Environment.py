@@ -133,6 +133,12 @@ REDDIT_ONE_PIECE_SUBREDDIT = Environment('REDDIT_ONE_PIECE_SUBREDDIT', default_v
 # Reddit Meme Piece Subreddit
 REDDIT_MEME_PIECE_SUBREDDIT = Environment('REDDIT_MEME_PIECE_SUBREDDIT', default_value='memepiece')
 
+# SUPABASE
+# Supabase rest url
+SUPABASE_REST_URL = Environment('SUPABASE_REST_URL')
+# Supabase API key
+SUPABASE_API_KEY = Environment('SUPABASE_API_KEY')
+
 # TIMERS
 # Check for files to clean up. Default: 12 hours
 CRON_TEMP_DIR_CLEANUP = Environment('CRON_TEMP_DIR_CLEANUP', default_value='0 */12 * * *')
@@ -340,8 +346,17 @@ GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
 GAME_TURN_NOTIFICATION_TIME = Environment('GAME_TURN_NOTIFICATION_TIME', default_value='60')
 # Game cooldown duration in hours. Default: 8
 GAME_COOLDOWN_DURATION = Environment('GAME_COOLDOWN_DURATION', default_value='8')
+# How much time to wait for opponent confirmation before timing out. Default: 120 seconds
+GAME_CONFIRMATION_TIMEOUT = Environment('GAME_CONFIRMATION_TIMEOUT', default_value='120')
+# How much time to wait after user has confirmed the game before starting the game. Default: 60 seconds
+GAME_START_WAIT_TIME = Environment('GAME_START_WAIT_TIME', default_value='60')
+# One Piece Wiki URL
+ONE_PIECE_WIKI_URL = Environment('ONE_PIECE_WIKI_URL', default_value='https://onepiece.fandom.com/wiki/')
+
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
+# How much time to wait before sending the next level in Who's Who game. Default: 90 seconds
+WHOS_WHO_NEXT_LEVEL_WAIT_TIME = Environment('WHOS_WHO_NEXT_LEVEL_WAIT_TIME', default_value='90')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')

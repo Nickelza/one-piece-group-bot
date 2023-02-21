@@ -7,3 +7,4 @@ class GameType(IntEnum):
     """
     ROCK_PAPER_SCISSORS = 1
     RUSSIAN_ROULETTE = 2
+    WHOS_WHO = 3
