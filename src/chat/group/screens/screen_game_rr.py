@@ -11,12 +11,13 @@ import src.service.game_service as game_service
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.russianroulette.RussianRoulette import RussianRoulette
 from src.model.game.russianroulette.RussianRouletteChamberStatus import RussianRouletteChamberStatus as RRChamberStatus
 from src.model.pojo.Keyboard import Keyboard
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, full_media_send
 
 
 class GameRRReservedKeys(StrEnum):
@@ -75,18 +76,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         user.should_update_model = False
 
         # Send result
-        await full_message_send(context, get_text(game, russian_roulette), update=update,
-                                keyboard=get_outbound_keyboard(game, russian_roulette),
-                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_media_send(context, caption=get_text(game, russian_roulette), update=update,
+                              keyboard=get_outbound_keyboard(game, russian_roulette),
+                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+                              edit_only_caption_and_keyboard=True)
     else:
         if inbound_keyboard.screen == Screen.GRP_RUSSIAN_ROULETTE_GAME:
             # Update turn only on regular interaction
             russian_roulette.set_turn()
 
         # Send message
-        await full_message_send(context, get_text(game, russian_roulette), update=update,
-                                keyboard=get_outbound_keyboard(game, russian_roulette),
-                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_media_send(context, caption=get_text(game, russian_roulette), update=update,
+                              keyboard=get_outbound_keyboard(game, russian_roulette),
+                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+                              saved_media_name=SavedMediaName.GAME_RUSSIAN_ROULETTE)
         should_notify_of_turn = True
 
     game.board = russian_roulette.get_board_json()

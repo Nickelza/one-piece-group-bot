@@ -14,6 +14,7 @@ from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMedia import SavedMedia
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
@@ -24,7 +25,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.model.pojo.SupabaseRest import SupabaseRest
 from src.service.download_service import download_temp_file
 from src.service.game_service import get_participants, end_game, get_text, get_game_name
-from src.service.message_service import full_message_send, full_media_send, get_message_url
+from src.service.message_service import full_media_send, get_message_url
 
 
 class GameWWReservedKeys(StrEnum):
@@ -106,7 +107,8 @@ async def countdown_to_start(update: Update, context: ContextTypes.DEFAULT_TYPE,
         # Edit group message
         ot_text = get_text(game, get_game_name(GameType.WHOS_WHO), False, is_turn_based=False,
                            is_played_in_private_chat=True)
-        await full_message_send(context, ot_text, update=update, keyboard=[[play_deeplink_button]])
+        await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
+                              edit_only_caption_and_keyboard=True)
 
         # Send the blurred image
         await send_blurred_image(context, game)
@@ -115,7 +117,8 @@ async def countdown_to_start(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # Update message
     ot_text = get_text(game, get_game_name(GameType.WHOS_WHO), False, is_turn_based=False,
                        remaining_seconds_to_start=remaining_seconds)
-    await full_message_send(context, ot_text, update=update, keyboard=[[play_deeplink_button]])
+    await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
+                          saved_media_name=SavedMediaName.GAME_WHOS_WHO)
 
     # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every second
     if remaining_seconds > 10:
@@ -251,7 +254,8 @@ async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ga
         ot_text = get_text(game, get_game_name(GameType.WHOS_WHO), True, is_turn_based=False,
                            character=whos_who.character, game_outcome=outcome)
         group_chat: GroupChat = game.group_chat
-        await full_message_send(context, ot_text, group_chat=group_chat, edit_message_id=game.message_id)
+        await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,
+                              edit_only_caption_and_keyboard=True)
 
     except AttributeError:
         pass

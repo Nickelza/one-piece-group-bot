@@ -15,7 +15,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import delete_game, validate_game
-from src.service.message_service import full_message_send, mention_markdown_user
+from src.service.message_service import mention_markdown_user, full_media_send
 
 
 class GameOpponentConfirmationReservedKeys(StrEnum):
@@ -50,8 +50,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:  # Opponent rejected
             should_delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
-            await full_message_send(context, ot_text, update=update, add_delete_button=True,
-                                    authorized_users=[game.challenger, game.opponent])
+            await full_media_send(
+                context, caption=ot_text, update=update, add_delete_button=True,
+                authorized_users=[game.challenger, game.opponent], edit_only_caption_and_keyboard=True)
 
         await delete_game(context, game, should_delete_message=should_delete_message)
         user.should_update_model = False
@@ -60,7 +61,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
         await delete_game(context, game, should_delete_message=False)
-        await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=True)
+        await full_media_send(context, caption=phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
+                              add_delete_button=True, edit_only_caption_and_keyboard=True)
         user.should_update_model = False
         return
 

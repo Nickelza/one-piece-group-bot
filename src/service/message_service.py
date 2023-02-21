@@ -354,8 +354,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                           inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
                           only_authorized_users_can_interact: bool = True,
                           saved_media_name: SavedMediaName = None, group_chat: GroupChat = None,
-                          exceptions_to_ignore: list[Exception] = None, ignore_forbidden_exception: bool = False
-                          ) -> Message | bool:
+                          exceptions_to_ignore: list[Exception] = None, ignore_forbidden_exception: bool = False,
+                          edit_message_id: int = None) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -386,6 +386,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     :param group_chat: The group chat, used to get the group chat id
     :param exceptions_to_ignore: List of exceptions to ignore
     :param ignore_forbidden_exception: True if the forbidden exception should be ignored
+    :param edit_message_id: Message id to edit
     :return: Message
     """
 
@@ -405,9 +406,12 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     should_save_media_id = False
     if saved_media is not None and saved_media.file_name is not None and not isinstance(saved_media.media_id, str):
         # Try to load media id from context bot data
-        if saved_media.name is not None and saved_media.name in context.bot_data[ContextBotDataKey.SAVED_MEDIA]:
-            saved_media.media_id = context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name]
-        else:
+        try:
+            if saved_media.name is not None:
+                saved_media.media_id = context.bot_data[ContextBotDataKey.SAVED_MEDIA][saved_media.name]
+            else:
+                raise KeyError
+        except KeyError:
             # Load media id from file
             saved_media.media_id = open(saved_media.file_name, 'rb')
             should_save_media_id = saved_media.name is not None
@@ -423,9 +427,10 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                                    authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
                                    only_authorized_users_can_interact=only_authorized_users_can_interact)
 
+    is_edit = edit_message_id is not None or edit_only_keyboard or edit_only_caption_and_keyboard
     try:
         # New message
-        if new_message or update is None or update.callback_query is None:
+        if (new_message or update is None or update.callback_query is None) and not is_edit:
             reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
                                                           reply_to_message_id=reply_to_message_id,
                                                           quote_if_group=quote_if_group)
@@ -483,7 +488,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
             return message
 
         # No message to edit or answer callback
-        if update.callback_query is None:
+        if (update is None or update.callback_query is None) and edit_message_id is None:
             raise Exception(phrases.EXCEPTION_NO_EDIT_MESSAGE)
 
         # Answer callback
@@ -491,23 +496,25 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
             return await context.bot.answer_callback_query(update.callback_query.id, text=caption,
                                                            show_alert=show_alert)
 
+        edit_message_id = edit_message_id if edit_message_id is not None else update.callback_query.message.message_id
+
         # Edit only keyboard
         if edit_only_keyboard:
             return await context.bot.edit_message_reply_markup(chat_id=chat_id,
-                                                               message_id=update.callback_query.message.message_id,
+                                                               message_id=edit_message_id,
                                                                reply_markup=keyboard_markup)
 
         # Edit only caption and keyboard
         if edit_only_caption_and_keyboard:
             return await context.bot.edit_message_caption(chat_id=chat_id,
-                                                          message_id=update.callback_query.message.message_id,
+                                                          message_id=edit_message_id,
                                                           caption=caption,
                                                           reply_markup=keyboard_markup)
 
         # Edit full media
         input_media: InputMedia = get_input_media_from_saved_media(saved_media=saved_media, caption=caption)
         return await context.bot.edit_message_media(chat_id=chat_id,
-                                                    message_id=update.callback_query.message.message_id,
+                                                    message_id=edit_message_id,
                                                     media=input_media,
                                                     reply_markup=keyboard_markup)
     except Exception as e:

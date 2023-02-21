@@ -56,6 +56,24 @@ FIGHT = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.FIGHT, file_name='fight.jpg')
 SAVED_MEDIA_DICT[SavedMediaName.FIGHT] = FIGHT
 
+GAME = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME, file_name='game.jpg')
+SAVED_MEDIA_DICT[SavedMediaName.GAME] = GAME
+
+GAME_ROCK_PAPER_SCISSORS = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
+    file_name='game_rock_paper_scissors.jpg')
+SAVED_MEDIA_DICT[SavedMediaName.GAME_ROCK_PAPER_SCISSORS] = GAME_ROCK_PAPER_SCISSORS
+
+GAME_RUSSIAN_ROULETTE = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_RUSSIAN_ROULETTE, file_name='game_russian_roulette.jpg')
+
+SAVED_MEDIA_DICT[SavedMediaName.GAME_RUSSIAN_ROULETTE] = GAME_RUSSIAN_ROULETTE
+
+GAME_WHOS_WHO = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_WHOS_WHO, file_name='game_whos_who.jpg')
+SAVED_MEDIA_DICT[SavedMediaName.GAME_WHOS_WHO] = GAME_WHOS_WHO
+
 SILENCE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name='silence.jpg')
 SAVED_MEDIA_DICT[SavedMediaName.SILENCE] = SILENCE

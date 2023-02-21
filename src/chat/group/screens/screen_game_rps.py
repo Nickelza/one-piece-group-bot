@@ -11,13 +11,14 @@ import src.service.game_service as game_service
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.rps.RockPaperScissors import RockPaperScissors
 from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.message_service import full_message_send, mention_markdown_user
+from src.service.message_service import full_message_send, mention_markdown_user, full_media_send
 
 
 class GameRPSReservedKeys(StrEnum):
@@ -73,16 +74,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         user.should_update_model = False
 
         # Send result
-        await full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                                keyboard=get_outbound_keyboard(game),
-                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_media_send(context, caption=get_text(game, rock_paper_scissors), update=update,
+                              keyboard=get_outbound_keyboard(game),
+                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+                              edit_only_caption_and_keyboard=True)
         return
 
     # Send message
     try:
-        await full_message_send(context, get_text(game, rock_paper_scissors), update=update,
-                                keyboard=get_outbound_keyboard(game),
-                                authorized_users=game_service.get_game_authorized_tg_user_ids(game))
+        await full_media_send(context, caption=get_text(game, rock_paper_scissors), update=update,
+                              keyboard=get_outbound_keyboard(game),
+                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+                              saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS)
 
         pass
         # Notify user turn. After message send to avoid double notification in case user changes choice

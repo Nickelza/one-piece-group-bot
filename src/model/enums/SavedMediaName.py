@@ -7,4 +7,8 @@ class SavedMediaName(StrEnum):
     DEVIL_FRUIT_NEW = 'devil_fruit_new'
     DOC_Q = 'docq'
     FIGHT = 'fight'
+    GAME = 'game'
+    GAME_ROCK_PAPER_SCISSORS = 'game_rock_paper_scissors'
+    GAME_RUSSIAN_ROULETTE = 'game_russian_roulette'
+    GAME_WHOS_WHO = 'game_whos_who'
     SILENCE = 'silence'

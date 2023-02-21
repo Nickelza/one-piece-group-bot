@@ -19,7 +19,7 @@ from src.model.game.whoswho.Character import Character
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
-from src.service.message_service import full_message_send, mention_markdown_user, delete_message
+from src.service.message_service import mention_markdown_user, delete_message, full_media_send
 from src.service.notification_service import send_notification
 
 
@@ -146,8 +146,8 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
         raise ValueError("should_delete_message and show_timeout_message cannot be both True")
 
     if show_timeout_message:
-        await full_message_send(context=context, group_chat=game.group_chat, text=phrases.GAME_TIMEOUT,
-                                edit_message_id=game.message_id)
+        await full_media_send(context=context, group_chat=game.group_chat, caption=phrases.GAME_TIMEOUT,
+                              edit_message_id=game.message_id)
     elif should_delete_message:
         # Try to delete message
         if should_delete_message:
@@ -180,11 +180,13 @@ async def validate_game(update: Update, context: ContextTypes.DEFAULT_TYPE, inbo
         game = get_game_from_keyboard(inbound_keyboard)
 
     if game.status == GameStatus.FORCED_END:
-        await full_message_send(context, phrases.GAME_FORCED_END, update=update)
+        await full_media_send(context, caption=phrases.GAME_FORCED_END, update=update,
+                              edit_only_caption_and_keyboard=True)
         return None
 
     if GameStatus(game.status).is_finished():
-        await full_message_send(context, phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True)
+        await full_media_send(context, caption=phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True,
+                              edit_only_caption_and_keyboard=True)
         return None
 
     return game

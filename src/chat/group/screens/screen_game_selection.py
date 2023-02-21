@@ -12,7 +12,7 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.game_service import delete_game, validate_game, enqueue_game_timeout, get_game_name
-from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard
+from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send
 
 
 class GameSelectionReservedKeys(StrEnum):
@@ -69,7 +69,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
-    await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard)
+    await full_media_send(context, caption=ot_text, update=update, keyboard=outbound_keyboard,
+                          edit_only_caption_and_keyboard=True)
 
     # Enqueue the game for timeout
     context.application.create_task(enqueue_game_timeout(context, game))

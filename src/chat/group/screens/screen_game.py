@@ -11,6 +11,7 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Command import Command
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import OpponentValidationException
@@ -21,7 +22,7 @@ from src.service.bounty_service import get_amount_from_string, validate_amount
 from src.service.cron_service import get_remaining_time
 from src.service.devil_fruit_service import get_datetime
 from src.service.game_service import get_game_name
-from src.service.message_service import full_message_send, mention_markdown_user, get_message_url
+from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
 
 
 class GameReservedKeys(StrEnum):
@@ -162,6 +163,7 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
                                      screen=Screen.GRP_GAME_SELECTION)])
 
     ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
-    message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+    message: Message = await full_media_send(context, saved_media_name=SavedMediaName.GAME, caption=ot_text,
+                                             update=update, keyboard=inline_keyboard)
     game.message_id = message.message_id
     game.save()
