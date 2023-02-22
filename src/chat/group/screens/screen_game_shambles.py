@@ -13,18 +13,19 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
-from src.model.game.whoswho.WhosWho import WhosWho
+from src.model.game.shambles.Shambles import Shambles
 from src.model.pojo.Keyboard import Keyboard
-from src.model.wiki.Character import Character
 from src.model.wiki.SupabaseRest import SupabaseRest
-from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game
+from src.model.wiki.Terminology import Terminology
+from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game, \
+    get_guess_game_users_to_send_image_to
 from src.service.message_service import full_media_send
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
                  ) -> None:
     """
-    Manage the Who's Who screen
+    Manage the Russian Roulette screen
     :param update: The update object
     :param context: The context object
     :param inbound_keyboard: The inbound keyboard
@@ -50,7 +51,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         return
 
 
-def get_board(game: Game) -> WhosWho:
+def get_board(game: Game) -> Shambles:
     """
     Get the board
     :param game: The game object
@@ -59,18 +60,19 @@ def get_board(game: Game) -> WhosWho:
 
     # Create board
     if game.board is None:
-        random_character: Character = SupabaseRest.get_random_character()
-        whos_who = WhosWho(random_character)
-        save_game(game, whos_who.get_board_json())
-        return whos_who
+        random_terminology: Terminology = SupabaseRest.get_random_terminology(
+            max_len=Env.SHAMBLES_GRID_SIZE.get_int(), only_letters=True)
+        shambles = Shambles(random_terminology)
+        save_game(game, shambles.get_board_json())
+        return shambles
 
-    # Parse the JSON string and create a Character object
+    # Parse the JSON string and create a Terminology object
     json_dict = json.loads(game.board)
-    char_dict = json_dict.pop("character")
-    char: Character = Character(**char_dict)
+    term_dict = json_dict.pop("terminology")
+    char: Terminology = Terminology(**term_dict)
 
-    # Create a WhosWho object with attribute unpacking
-    return WhosWho(character=char, **json_dict)
+    # Create a Shambles object with attribute unpacking
+    return Shambles(terminology=char, **json_dict)
 
 
 async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
@@ -85,37 +87,27 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     :return: None
     """
 
-    if send_to_user is not None and should_send_to_all_participants:
-        raise ValueError('Cannot send to user and all participants')
-
-    if not should_send_to_all_participants and schedule_next_send:
-        raise ValueError('Cannot schedule next send if not sending to all participants')
-
-    if send_to_user is not None:
-        users: list[User] = [send_to_user]
-    else:
-        challenger: User = game.challenger
-        opponent: User = game.opponent
-        users: list[User] = [challenger, opponent]
+    users = await get_guess_game_users_to_send_image_to(game, send_to_user, should_send_to_all_participants,
+                                                        schedule_next_send)
 
     # Get the board
-    whos_who = get_board(game)
+    shambles = get_board(game)
 
     # Send the image
-    saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=whos_who.latest_blurred_image)
-    caption = phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION
+    saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=shambles.image_path)
+    caption = phrases.GUESS_TERM_GAME_INPUT_CAPTION
     if should_send_to_all_participants:
-        if whos_who.level > 1:
+        if shambles.can_reduce_level():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
-                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
-        elif whos_who.revealed_letters_count >= 1:
+                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())
+        elif shambles.revealed_letters_count >= 1:
             # Add hint
-            hint = whos_who.character.name[:whos_who.revealed_letters_count]
+            hint = shambles.terminology.name[:shambles.revealed_letters_count]
             caption += phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
 
-        if whos_who.level == 1 and not whos_who.have_revealed_all_letters():
+        if shambles.get_excludable_letters_count() == 0 and not shambles.have_revealed_all_letters():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
-                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())
 
     for user in users:
         context.application.create_task(
@@ -128,7 +120,7 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     if not schedule_next_send:
         return
 
-    await asyncio.sleep(Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+    await asyncio.sleep(Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())
 
     # Refresh game, resend only if it's still ongoing
     game = Game.get_by_id(game.id)
@@ -136,17 +128,17 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
         return
 
     # Reduce level
-    whos_who = get_board(game)
+    shambles = get_board(game)
 
     # Already at level 1
-    if whos_who.level == 1 and whos_who.have_revealed_all_letters():
+    if not shambles.can_reduce_level() and shambles.have_revealed_all_letters():
         return
 
-    if whos_who.level > 1:
-        whos_who.reduce_level()
+    if shambles.can_reduce_level():
+        shambles.reduce_level()
     else:
-        whos_who.revealed_letters_count += 1
+        shambles.revealed_letters_count += 1
 
-    save_game(game, whos_who.get_board_json())
+    save_game(game, shambles.get_board_json())
 
     await run_game(context, game)

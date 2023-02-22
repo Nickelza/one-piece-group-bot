@@ -238,6 +238,7 @@ GAME_INPUT_NOT_PARTICIPANT = 'You are not a participant of this game'
 GAME_INPUT_GAME_FINISHED = 'This game has ended'
 GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
 GAME_RESULT_CHARACTER = '\n\nCharacter: {}'
+GAME_RESULT_TERM = '\n\nTerm: {}'
 
 ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
 ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
@@ -252,18 +253,25 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fir
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
 
+GUESS_GAME_INPUT_CAPTION_HINT = '\n\nHint: {}'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = '\n\nIn *{}* seconds, a hint will be sent'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '\n\nIn *{}* seconds, an easier variation will be sent'
+
+GUESS_CHARACTER_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
+                                     f'\nThe name must be the same as the one used on ' \
+                                     f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
+GUESS_TERM_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
+                                f'\nThe term must be the same as the one used on ' \
+                                f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
+GUESS_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
+                            '{}'
+GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
+                                     f'\nBetter luck next time!' \
+                                     '{}'
+
 WHOS_WHO_GAME_NAME = "Who's Who"
-WHOS_WHO_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
-                              f'\nThe name must be the same as the one used on ' \
-                              f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
-WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '\n\nIn *{}* seconds, a less blurred image will be sent'
-WHOS_WHO_GAME_INPUT_CAPTION_HINT = '\n\nHint: {}'
-WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = '\n\nIn *{}* seconds, a hint will be sent'
-WHOS_WHO_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
-                               f'{GAME_RESULT_CHARACTER}'
-WHOS_WHO_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
-                                        f'\nBetter luck next time!' \
-                                        f'{GAME_RESULT_CHARACTER}'
+
+SHAMBLES_GAME_NAME = 'Shambles'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'

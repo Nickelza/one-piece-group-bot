@@ -10,5 +10,6 @@ class SavedMediaName(StrEnum):
     GAME = 'game'
     GAME_ROCK_PAPER_SCISSORS = 'game_rock_paper_scissors'
     GAME_RUSSIAN_ROULETTE = 'game_russian_roulette'
+    GAME_SHAMBLES = 'game_shambles'
     GAME_WHOS_WHO = 'game_whos_who'
     SILENCE = 'silence'

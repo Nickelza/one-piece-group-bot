@@ -2,12 +2,12 @@ import json
 
 from PIL import Image, ImageFilter
 
-from src.model.game.whoswho.Character import Character
+from src.model.wiki.Character import Character
 from src.service.download_service import generate_temp_file_path, download_temp_file
 
 
 class WhosWho:
-    def __init__(self, character: Character, image_path: str, level: int = 5, latest_blurred_image: str = None,
+    def __init__(self, character: Character, image_path: str = None, level: int = 5, latest_blurred_image: str = None,
                  revealed_letters_count: int = 0):
         """
         Constructor
@@ -81,3 +81,10 @@ class WhosWho:
         :return: bool
         """
         return answer is not None and answer.lower() == self.character.name.lower()
+
+    def have_revealed_all_letters(self) -> bool:
+        """
+        Check if all letters have been revealed
+        :return: bool
+        """
+        return self.revealed_letters_count == len(self.character.name)
