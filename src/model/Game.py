@@ -6,6 +6,8 @@ from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.SavedMediaName import SavedMediaName
+from src.model.game.GameType import GameType
 
 
 class Game(BaseModel):
@@ -36,6 +38,13 @@ class Game(BaseModel):
         """
 
         return self.challenger == user or self.opponent == user
+
+    def get_saved_media_name(self) -> SavedMediaName:
+        """
+        Get the SavedMediaName for this GameType
+        :return: The SavedMediaName
+        """
+        return GameType(self.type).get_saved_media_name()
 
 
 Game.create_table()

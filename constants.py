@@ -12,7 +12,9 @@ TG_PROFILE_PHOTO_EXTENSION = 'jpg'
 
 TEMP_DIR = os.path.join(ROOT_DIR, 'temp')
 ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
-SAVED_MEDIA_DIR = os.path.join(ASSETS_DIR, 'saved_media')
+ASSETS_IMAGES_DIR = os.path.join(ASSETS_DIR, 'images')
+ASSETS_SAVED_MEDIA_DIR = os.path.join(ASSETS_IMAGES_DIR, 'saved_media')
+ASSETS_FONTS_DIR = os.path.join(ASSETS_DIR, 'fonts')
 
 # Command
 STANDARD_SPLIT_CHAR = "|"

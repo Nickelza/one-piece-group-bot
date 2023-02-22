@@ -151,6 +151,12 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
                                 screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rr])
 
+    # Shambles
+    button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.SHAMBLES}
+    btn_shambles: Keyboard = Keyboard(get_game_name(GameType.SHAMBLES), info=button_info,
+                                      screen=Screen.GRP_GAME_SELECTION)
+    inline_keyboard.append([btn_shambles])
+
     # Who's Who
     button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.WHOS_WHO}
     btn_ww: Keyboard = Keyboard(get_game_name(GameType.WHOS_WHO), info=button_info,
