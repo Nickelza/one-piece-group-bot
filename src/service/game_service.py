@@ -379,12 +379,13 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
 
     play_deeplink_button = get_guess_game_play_deeplink_button(game)
 
+    game_name = get_game_name(GameType(game.type))
     if remaining_seconds <= 0:
         game.status = GameStatus.IN_PROGRESS
         game.save()
 
         # Edit group message
-        ot_text = get_text(game, get_game_name(GameType.SHAMBLES), False, is_turn_based=False,
+        ot_text = get_text(game, game_name, False, is_turn_based=False,
                            is_played_in_private_chat=True)
         await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
                               edit_only_caption_and_keyboard=True)
@@ -394,7 +395,7 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
         return
 
     # Update message
-    ot_text = get_text(game, get_game_name(GameType.SHAMBLES), False, is_turn_based=False,
+    ot_text = get_text(game, game_name, False, is_turn_based=False,
                        remaining_seconds_to_start=remaining_seconds)
     await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
                           saved_media_name=game.get_saved_media_name())
@@ -493,7 +494,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
                           ignore_forbidden_exception=True, keyboard=outbound_keyboard)
 
     # Update group message
-    ot_text = get_text(game, get_game_name(GameType.SHAMBLES), True, is_turn_based=False,
+    ot_text = get_text(game, get_game_name(GameType(game.type)), True, is_turn_based=False,
                        terminology=terminology, game_outcome=outcome)
     group_chat: GroupChat = game.group_chat
     await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,

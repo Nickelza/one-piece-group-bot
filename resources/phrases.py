@@ -196,7 +196,7 @@ GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
                        f'\n\nExample: {Command.GRP_GAME.get_formatted()} 10.000.000'
 
 GAME_NOT_FOUND = 'Game not found'
-GAME_REQUEST = '{}, you have been challenged by {} to play {} with a wager of ฿*{}*' \
+GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of ฿*{}*' \
                '\nWould you like to accept?' \
                f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                f'it will be automatically rejected.'
@@ -270,7 +270,6 @@ GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the
                                      '{}'
 
 WHOS_WHO_GAME_NAME = "Who's Who"
-
 SHAMBLES_GAME_NAME = 'Shambles'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
