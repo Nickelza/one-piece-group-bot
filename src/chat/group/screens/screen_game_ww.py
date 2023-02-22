@@ -74,8 +74,7 @@ def get_board(game: Game) -> WhosWho:
     if game.board is None:
         random_character: Character = SupabaseRest.get_random_character()
         whos_who = WhosWho(random_character, download_temp_file(random_character.anime_image_url, 'jpg'))
-        game.board = whos_who.get_board_json()
-        game.save()
+        save_game(game, whos_who)
         return whos_who
 
     # Parse the JSON string and create a Character object
@@ -160,9 +159,18 @@ async def send_blurred_image(context: ContextTypes.DEFAULT_TYPE, game: Game, sen
     # Send the image
     saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=whos_who.latest_blurred_image)
     caption = phrases.WHOS_WHO_GAME_INPUT_CAPTION
-    if should_send_to_all_participants and whos_who.level > 1:
-        caption += phrases.WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
-            Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+    if should_send_to_all_participants:
+        if whos_who.level > 1:
+            caption += phrases.WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
+                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+        elif whos_who.revealed_letters_count >= 1:
+            # Add hint
+            hint = whos_who.character.name[:whos_who.revealed_letters_count]
+            caption += phrases.WHOS_WHO_GAME_INPUT_CAPTION_HINT.format(hint)
+
+        if whos_who.level == 1:
+            caption += phrases.WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
+                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
 
     for user in users:
         context.application.create_task(
@@ -186,12 +194,15 @@ async def send_blurred_image(context: ContextTypes.DEFAULT_TYPE, game: Game, sen
     whos_who = get_board(game)
 
     # Already at level 1
-    if whos_who.level == 1:
+    if whos_who.level == 1 and whos_who.revealed_letters_count == len(whos_who.character.name):
         return
 
-    whos_who.reduce_level()
-    game.board = whos_who.get_board_json()
-    game.save()
+    if whos_who.level > 1:
+        whos_who.reduce_level()
+    else:
+        whos_who.revealed_letters_count += 1
+
+    save_game(game, whos_who)
 
     await send_blurred_image(context, game)
 
@@ -271,3 +282,15 @@ def get_play_deeplink_button(game: Game) -> Keyboard:
     info: dict = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id}
     return Keyboard(phrases.GRP_KEY_GAME_PLAY, info, screen=Screen.PVT_GAME_WW_INPUT,
                     is_deeplink=True)
+
+
+def save_game(game: Game, whos_who: WhosWho) -> None:
+    """
+    Save the game
+    :param game: The game
+    :param whos_who: The board
+    :return: None
+    """
+
+    game.board = whos_who.get_board_json()
+    game.save()

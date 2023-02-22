@@ -256,7 +256,9 @@ WHOS_WHO_GAME_NAME = "Who's Who"
 WHOS_WHO_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
                               f'\nThe name must be the same as the one used on ' \
                               f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
-WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '.\n\nIn *{}* seconds, a less blurred image will be sent'
+WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '\n\nIn *{}* seconds, a less blurred image will be sent'
+WHOS_WHO_GAME_INPUT_CAPTION_HINT = '\n\nHint: {}'
+WHOS_WHO_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = '\n\nIn *{}* seconds, a hint will be sent'
 WHOS_WHO_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
                                f'{GAME_RESULT_CHARACTER}'
 WHOS_WHO_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \

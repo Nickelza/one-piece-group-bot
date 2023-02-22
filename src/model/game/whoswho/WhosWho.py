@@ -7,18 +7,21 @@ from src.service.download_service import generate_temp_file_path, download_temp_
 
 
 class WhosWho:
-    def __init__(self, character: Character, image_path: str, level: int = 5, latest_blurred_image: str = None):
+    def __init__(self, character: Character, image_path: str, level: int = 5, latest_blurred_image: str = None,
+                 revealed_letters_count: int = 0):
         """
         Constructor
         :param character: The character
         :param image_path: The downloaded image path
         :param level: The level
         :param latest_blurred_image: The latest blurred image tg media id
+        :param revealed_letters_count: The revealed letters count
         """
         self.character = character
         self.image_path = image_path
         self.level = level
         self.latest_blurred_image = latest_blurred_image
+        self.revealed_letters_count = revealed_letters_count
 
         # Re-download the image if it doesn't exist because it was deleted
         if self.image_path is not None:
