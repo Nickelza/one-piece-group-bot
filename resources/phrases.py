@@ -677,7 +677,7 @@ DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 DEVIL_FRUIT_SELL_NO_AMOUNT = 'You need to specify the amount of belly you want to sell the Devil Fruit for' \
                              f'\n\nExample: {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} 10.000.000'
 DEVIL_FRUIT_SELL_NO_FRUITS = 'You do not have any Devil Fruits that can be sold ' \
-                             '(only collected and non-eaten Devil Fruits can be sold)'
+                             '\\(only collected and non-eaten Devil Fruits can be sold\\)'
 DEVIL_FRUIT_SELL_SELECT_FRUIT = 'Select the Devil Fruit you want to sell' \
                                 '\n\n_Tip: When using this command in response to a user, ' \
                                 'only they will have the ability to purchase the Devil Fruit_'
