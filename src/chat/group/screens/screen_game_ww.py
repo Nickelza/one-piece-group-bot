@@ -74,22 +74,22 @@ def get_board(game: Game) -> WhosWho:
 
 
 async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
-                   should_send_to_all_participants: bool = True, schedule_next_send: bool = True) -> None:
+                   should_send_to_all_players: bool = True, schedule_next_send: bool = True) -> None:
     """
     Send the blurred image
     :param context: The context object
     :param game: The game object
     :param send_to_user: The user to send the image to
-    :param should_send_to_all_participants: If the image should be sent to all participants
+    :param should_send_to_all_players: If the image should be sent to all players
     :param schedule_next_send: If the next send should be scheduled
     :return: None
     """
 
-    if send_to_user is not None and should_send_to_all_participants:
-        raise ValueError('Cannot send to user and all participants')
+    if send_to_user is not None and should_send_to_all_players:
+        raise ValueError('Cannot send to user and all players')
 
-    if not should_send_to_all_participants and schedule_next_send:
-        raise ValueError('Cannot schedule next send if not sending to all participants')
+    if not should_send_to_all_players and schedule_next_send:
+        raise ValueError('Cannot schedule next send if not sending to all players')
 
     if send_to_user is not None:
         users: list[User] = [send_to_user]
@@ -104,7 +104,7 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     # Send the image
     saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=whos_who.latest_blurred_image)
     caption = phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION
-    if should_send_to_all_participants:
+    if should_send_to_all_players:
         if whos_who.level > 1:
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
                 Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())

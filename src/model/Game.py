@@ -30,11 +30,11 @@ class Game(BaseModel):
     class Meta:
         db_table = 'game'
 
-    def is_participant(self, user: User) -> bool:
+    def is_player(self, user: User) -> bool:
         """
-        Check if the user is a participant of the game
+        Check if the user is a player of the game
         :param user: The user
-        :return: True if the user is a participant, False otherwise
+        :return: True if the user is a player, False otherwise
         """
 
         return self.challenger == user or self.opponent == user

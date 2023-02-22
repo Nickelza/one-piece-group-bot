@@ -292,12 +292,12 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
         await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True)
 
 
-def get_participants(game: Game) -> Tuple[User, User]:
+def get_players(game: Game) -> Tuple[User, User]:
     """
-    Get the participants of a game
+    Get the players of a game
 
     :param game: The game
-    :return: The participants
+    :return: The players
     """
 
     return game.challenger, game.opponent
@@ -305,7 +305,7 @@ def get_participants(game: Game) -> Tuple[User, User]:
 
 async def set_user_private_screen(user: User, game: Game = None, should_reset: bool = False) -> None:
     """
-    Update the participants' private screen
+    Update the players' private screen
     :param game: The game
     :param user: The user
     :param should_reset: If True, reset the private screen
@@ -409,22 +409,22 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
         await guess_game_countdown_to_start(update, context, game, remaining_seconds - 1, run_game_function)
 
 
-async def get_guess_game_users_to_send_image_to(game: Game, send_to_user: User, should_send_to_all_participants: bool,
+async def get_guess_game_users_to_send_image_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
                                                 schedule_next_send: bool) -> list[User]:
     """
     Get the users to send the image to
     :param game: The game
     :param game: The game object
     :param send_to_user: The user to send the image to
-    :param should_send_to_all_participants: If the image should be sent to all participants
+    :param should_send_to_all_players: If the image should be sent to all players
     :param schedule_next_send: If the next send should be scheduled
     :return:
     """
 
-    if send_to_user is not None and should_send_to_all_participants:
-        raise ValueError('Cannot send to user and all participants')
-    if not should_send_to_all_participants and schedule_next_send:
-        raise ValueError('Cannot schedule next send if not sending to all participants')
+    if send_to_user is not None and should_send_to_all_players:
+        raise ValueError('Cannot send to user and all players')
+    if not should_send_to_all_players and schedule_next_send:
+        raise ValueError('Cannot schedule next send if not sending to all players')
     if send_to_user is not None:
         users: list[User] = [send_to_user]
     else:
@@ -466,7 +466,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
         return
 
     # End game
-    challenger, opponent = get_participants(game)
+    challenger, opponent = get_players(game)
     outcome: GameOutcome = GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
     await end_game(game, outcome)
     user.should_update_model = False  # To avoid re-writing bounty

@@ -76,18 +76,18 @@ def get_board(game: Game) -> Shambles:
 
 
 async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
-                   should_send_to_all_participants: bool = True, schedule_next_send: bool = True) -> None:
+                   should_send_to_all_players: bool = True, schedule_next_send: bool = True) -> None:
     """
     Send the blurred image
     :param context: The context object
     :param game: The game object
     :param send_to_user: The user to send the image to
-    :param should_send_to_all_participants: If the image should be sent to all participants
+    :param should_send_to_all_players: If the image should be sent to all players
     :param schedule_next_send: If the next send should be scheduled
     :return: None
     """
 
-    users = await get_guess_game_users_to_send_image_to(game, send_to_user, should_send_to_all_participants,
+    users = await get_guess_game_users_to_send_image_to(game, send_to_user, should_send_to_all_players,
                                                         schedule_next_send)
 
     # Get the board
@@ -96,7 +96,7 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     # Send the image
     saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=shambles.image_path)
     caption = phrases.GUESS_TERM_GAME_INPUT_CAPTION
-    if should_send_to_all_participants:
+    if should_send_to_all_players:
         if shambles.can_reduce_level():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
                 Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())

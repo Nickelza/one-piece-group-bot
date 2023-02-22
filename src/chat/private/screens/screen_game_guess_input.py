@@ -33,9 +33,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     else:  # From private chat
         game: Game = Game.get_by_id(user.private_screen_in_edit_id)
 
-    # User is not a participant of the game
-    if not game.is_participant(user):
-        await full_message_send(context, phrases.GAME_INPUT_NOT_PARTICIPANT, update=update)
+    # User is not a player of the game
+    if not game.is_player(user):
+        await full_message_send(context, phrases.GAME_INPUT_NOT_PLAYER, update=update)
         return
 
     # Game is finished
@@ -51,10 +51,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     if inbound_keyboard is not None:  # From deep link
         match GameType(game.type):
             case GameType.SHAMBLES:
-                await run_game_shambles(context, game, send_to_user=user, should_send_to_all_participants=False,
+                await run_game_shambles(context, game, send_to_user=user, should_send_to_all_players=False,
                                         schedule_next_send=False)
             case GameType.WHOS_WHO:
-                await run_game_ww(context, game, send_to_user=user, should_send_to_all_participants=False,
+                await run_game_ww(context, game, send_to_user=user, should_send_to_all_players=False,
                                   schedule_next_send=False)
 
             case _:

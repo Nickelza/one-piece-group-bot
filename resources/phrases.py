@@ -219,7 +219,7 @@ GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any
                        '\nYou can initiate another challenge in *{}*, but in the meantime you can ask another user ' \
                        'to challenge you.'
 GAME_PENDING_KEY = 'Pending challenge'
-GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the participants.'
+GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the players.'
 
 GAME_STATUS_ND = 'Not defined'
 GAME_STATUS_IN_PROGRESS = 'In progress'
@@ -234,7 +234,7 @@ GAME_COUNTDOWN = 'The game will start in *{}*'
 GAME_STARTED = 'Game in progress'
 GAME_TIMEOUT = 'This game was canceled due to timeout while awaiting opponent confirmation.' \
                '\n\nThe wager has been returned to the challenger.'
-GAME_INPUT_NOT_PARTICIPANT = 'You are not a participant of this game'
+GAME_INPUT_NOT_PLAYER = 'You are not a player of this game'
 GAME_INPUT_GAME_FINISHED = 'This game has ended'
 GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
 GAME_RESULT_CHARACTER = '\n\nCharacter: {}'
