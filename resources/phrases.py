@@ -273,7 +273,7 @@ GUESS_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFE
                             '\n\n{}'
 GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
                                      f'\nBetter luck next time!' \
-                                     '{}'
+                                     '\n\n{}'
 
 WHOS_WHO_GAME_NAME = "Who's Who"
 WHOS_WHO_GAME_DESCRIPTION = 'Guess the blurred character. ' \

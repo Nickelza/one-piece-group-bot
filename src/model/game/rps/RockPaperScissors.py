@@ -49,7 +49,7 @@ class RockPaperScissors:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
 
     def set_turn(self):
         """

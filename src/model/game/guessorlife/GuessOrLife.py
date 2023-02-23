@@ -53,7 +53,7 @@ class GuessOrLife:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
 
     def get_plain_word(self) -> str:
         """

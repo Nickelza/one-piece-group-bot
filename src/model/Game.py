@@ -19,7 +19,7 @@ class Game(BaseModel):
                                  on_update='CASCADE')
     opponent = ForeignKeyField(User, backref='game_opponents', on_delete='CASCADE', on_update='CASCADE')
     type = SmallIntegerField(null=True)
-    board = CharField(max_length=999, null=True)
+    board = CharField(max_length=9999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION)
     group_chat = ForeignKeyField(GroupChat, null=True, backref='game_groups_chats', on_delete='RESTRICT',
