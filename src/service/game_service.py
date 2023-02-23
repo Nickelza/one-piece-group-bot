@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import Tuple, Callable
 
+from peewee import DoesNotExist
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -273,7 +274,10 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
     # Wait for N time
     await asyncio.sleep(Env.GAME_CONFIRMATION_TIMEOUT.get_int())
 
-    updated_game = Game.get_by_id(game.id)
+    try:
+        updated_game = Game.get_by_id(game.id)
+    except DoesNotExist:
+        return  # Game was cancelled
 
     # Check if the game is still in the same state
     if GameStatus(updated_game.status) == GameStatus.AWAITING_OPPONENT_CONFIRMATION:

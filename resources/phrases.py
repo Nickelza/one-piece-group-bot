@@ -735,4 +735,4 @@ DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}'
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
-THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your group_chat!\n'
+THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your Group!\n'
