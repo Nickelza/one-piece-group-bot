@@ -355,18 +355,18 @@ ONE_PIECE_WIKI_URL = Environment('ONE_PIECE_WIKI_URL', default_value='https://on
 
 # Show bullet location. Default: False
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
-# How much time to wait before sending the next level in Who's Who game. Default: 90 seconds
-WHOS_WHO_NEXT_LEVEL_WAIT_TIME = Environment('WHOS_WHO_NEXT_LEVEL_WAIT_TIME', default_value='90')
+# How much time to wait before sending the next level in Who's Who game. Default: 30 seconds
+WHOS_WHO_NEXT_LEVEL_WAIT_TIME = Environment('WHOS_WHO_NEXT_LEVEL_WAIT_TIME', default_value='30')
 # Shambles grid size. Default: 7
 SHAMBLES_GRID_SIZE = Environment('SHAMBLES_GRID_SIZE', default_value='7')
-# How much time to wait before sending the next level in Shambles game. Default: 40 seconds
-SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment('SHAMBLES_NEXT_LEVEL_WAIT_TIME', default_value='40')
+# How much time to wait before sending the next level in Shambles game. Default: 30 seconds
+SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment('SHAMBLES_NEXT_LEVEL_WAIT_TIME', default_value='30')
 # Max number of characters in Guess or Life game. Default: 100
 GUESS_OR_LIFE_MAX_CHARACTERS = Environment('GUESS_OR_LIFE_MAX_CHARACTERS', default_value='100')
 # Starting lives in Guess or Life game. Default: 5
 GUESS_OR_LIFE_STARTING_LIVES = Environment('GUESS_OR_LIFE_STARTING_LIVES', default_value='5')
-# How much time to wait before issuing a new life in Guess or Life game. Default: 40 seconds
-GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME = Environment('GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME', default_value='40')
+# How much time to wait before issuing a new life in Guess or Life game. Default: 30 seconds
+GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME = Environment('GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME', default_value='30')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')
