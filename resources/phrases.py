@@ -196,8 +196,9 @@ GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
                        f'\n\nExample: {Command.GRP_GAME.get_formatted()} 10.000.000'
 
 GAME_NOT_FOUND = 'Game not found'
-GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of ฿*{}*' \
-               '\nWould you like to accept?' \
+GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of ฿*{}*.' \
+               '\n\n_*Description*: {}_' \
+               '\n\nWould you like to accept?' \
                f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                f'it will be automatically rejected.'
 GAME_CANCELED = 'Game cancelled'
@@ -205,6 +206,7 @@ GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
 GAME_INVALID = 'Invalid game'
 GAME_UNKNOWN_NAME = 'Unknown'
 GAME_TEXT = '*{}*' \
+            '\n\n_*Description*: {}_' \
             '\n\n{} vs {}' \
             '\n*Wager:* ฿*{}*' \
             '\n\n{}'
@@ -237,10 +239,12 @@ GAME_TIMEOUT = 'This game was canceled due to timeout while awaiting opponent co
 GAME_INPUT_NOT_PLAYER = 'You are not a player of this game'
 GAME_INPUT_GAME_FINISHED = 'This game has ended'
 GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
-GAME_RESULT_CHARACTER = '\n\nCharacter: {}'
-GAME_RESULT_TERM = '\n\nTerm: {}'
+GAME_RESULT_CHARACTER = 'Character: {}'
+GAME_RESULT_TERM = 'Word: {}'
 
 ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
+ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = 'Try to beat your opponent by choosing rock, paper or scissors. ' \
+                                       '\nRock beats scissors, scissors beats paper and paper beats rock.'
 ROCK_PAPER_SCISSORS_CHOICE_ALERT = 'You chose {}'
 ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + ' Rock'
 ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + ' Paper'
@@ -249,6 +253,8 @@ ROCK_PAPER_SCISSORS_CHOICES = '{} chose {} ' \
                               '\n{} chose {}\n\n'
 
 RUSSIAN_ROULETTE_GAME_NAME = 'Russian Roulette'
+RUSSIAN_ROULETTE_GAME_DESCRIPTION = 'Try to avoid choosing the chamber with the bullet.'
+
 RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fired. Choose another one.'
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
@@ -264,13 +270,42 @@ GUESS_TERM_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be
                                 f'\nThe term must be the same as the one used on ' \
                                 f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
 GUESS_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
-                            '{}'
+                            '\n\n{}'
 GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
                                      f'\nBetter luck next time!' \
                                      '{}'
 
 WHOS_WHO_GAME_NAME = "Who's Who"
+WHOS_WHO_GAME_DESCRIPTION = 'Guess the blurred character. ' \
+                            '\nEvery {} seconds, a less blurred image will be sent until the character is fully revealed.' \
+                            '\nThis game is played in private chat with the Bot.'
+
 SHAMBLES_GAME_NAME = 'Shambles'
+SHAMBLES_GAME_DESCRIPTION = 'Guess the One Piece related word from a crossword puzzle. ' \
+                            '\nEvery {} seconds, an extra letter will be removed from the puzzle making it easier to ' \
+                            'guess.' \
+                            '\nThis game is played in private chat with the Bot.'
+
+GUESS_OR_LIFE_GAME_NAME = 'Guess or Life'
+GUESS_OR_LIFE_GAME_DESCRIPTION = 'Guess the missing letters of the One Piece related word, any wrong guess will cost a ' \
+                                 'life.' \
+                                 '\n\A new life will be issued every {} seconds.'
+GUESS_OR_LIFE_INFO_USED_LETTERS = '\n\n{}' \
+                                  '\n\nUsed letters: {}'
+GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED = 'You have already used this letter' \
+                                         '{}'
+GUESS_OR_LIFE_GAME_NO_MORE_LIVES = 'You have no more lives left' \
+                                   '{}'
+GUESS_OR_LIFE_GAME_CORRECT_LETTER = f'{Emoji.LOG_POSITIVE}' + '{}'
+GUESS_OR_LIFE_GAME_CORRECT_LETTER_WIN = '{}' \
+                                        f'\n\nYou won the game{Emoji.CONFETTI}'
+GUESS_OR_LIFE_GAME_WRONG_LETTER = f'{Emoji.LOG_NEGATIVE}Wrong letter' \
+                                  '{}'
+GUESS_OR_LIFE_GAME_NAME_WORD_LIVES = '*{}*' \
+                                     '\n{}' \
+                                     '\nLives: {}'
+GUESS_OR_LIFE_NEW_LIFE_EVERY = '\n\nA new life will be issued every {} seconds'
+GUESS_OR_LIFE_GAME_CHECK = 'Check'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'

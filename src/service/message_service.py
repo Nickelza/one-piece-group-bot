@@ -355,7 +355,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                           only_authorized_users_can_interact: bool = True,
                           saved_media_name: SavedMediaName = None, group_chat: GroupChat = None,
                           exceptions_to_ignore: list[Exception] = None, ignore_forbidden_exception: bool = False,
-                          edit_message_id: int = None) -> Message | bool:
+                          edit_message_id: int = None, ignore_bad_request_exception: bool = False) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -386,6 +386,7 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
     :param group_chat: The group chat, used to get the group chat id
     :param exceptions_to_ignore: List of exceptions to ignore
     :param ignore_forbidden_exception: True if the forbidden exception should be ignored
+    :param ignore_bad_request_exception: True if the bad request exception should be ignored
     :param edit_message_id: Message id to edit
     :return: Message
     """
@@ -395,6 +396,9 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
 
     if ignore_forbidden_exception:
         exceptions_to_ignore.append(Forbidden)
+
+    if ignore_bad_request_exception:
+        exceptions_to_ignore.append(BadRequest)
 
     if caption is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         caption = escape_invalid_markdown_chars(caption)

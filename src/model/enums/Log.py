@@ -268,11 +268,10 @@ class GameLog(Log):
                                                  get_belly_formatted(self.object.wager))
 
     def get_item_detail_text(self) -> str:
-        from src.service.game_service import get_game_name
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
-        game_name = get_game_name(GameType(self.object.type))
+        game_name = GameType(self.object.type).get_name()
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON

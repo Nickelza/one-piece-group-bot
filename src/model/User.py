@@ -198,6 +198,16 @@ class User(BaseModel):
 
         return mention_markdown_v2(str(self.tg_user_id), str(self.tg_first_name))
 
+    def get_markdown_name(self):
+        """
+        Returns the markdown name of the user
+        :return: The markdown name of the user
+        """
+
+        from src.service.message_service import escape_valid_markdown_chars
+
+        return escape_valid_markdown_chars(str(self.tg_first_name))
+
     def refresh(self) -> 'User':
         """
         Refreshes the user

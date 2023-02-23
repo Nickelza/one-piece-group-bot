@@ -76,7 +76,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         user.should_update_model = False
 
         # Send result
-        await full_media_send(context, caption=get_text(game, russian_roulette), update=update,
+        await full_media_send(context, caption=get_specific_text(game, russian_roulette), update=update,
                               keyboard=get_outbound_keyboard(game, russian_roulette),
                               authorized_users=game_service.get_game_authorized_tg_user_ids(game),
                               edit_only_caption_and_keyboard=True)
@@ -86,7 +86,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
             russian_roulette.set_turn()
 
         # Send message
-        await full_media_send(context, caption=get_text(game, russian_roulette), update=update,
+        await full_media_send(context, caption=get_specific_text(game, russian_roulette), update=update,
                               keyboard=get_outbound_keyboard(game, russian_roulette),
                               authorized_users=game_service.get_game_authorized_tg_user_ids(game),
                               saved_media_name=SavedMediaName.GAME_RUSSIAN_ROULETTE)
@@ -168,7 +168,7 @@ def get_choice_text(bullet_shot: bool) -> str:
     return phrases.RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT
 
 
-def get_text(game: Game, russian_roulette: RussianRoulette) -> str:
+def get_specific_text(game: Game, russian_roulette: RussianRoulette) -> str:
     """
     Get the text
     :param game: The game object
@@ -176,5 +176,5 @@ def get_text(game: Game, russian_roulette: RussianRoulette) -> str:
     :return: The text
     """
 
-    return game_service.get_text(game, phrases.RUSSIAN_ROULETTE_GAME_NAME, russian_roulette.is_finished(),
-                                 russian_roulette.get_outcome(), russian_roulette.get_user_turn(game))
+    return game_service.get_text(game, russian_roulette.is_finished(), russian_roulette.get_outcome(),
+                                 russian_roulette.get_user_turn(game))

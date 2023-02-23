@@ -53,11 +53,9 @@ class SupabaseRest:
         if len(response) == 0:
             raise WikiException('No characters found')
 
-        # Randomly select a character
-        character_dict = random.choice(response)
+        random.shuffle(response)
 
-        # Return character
-        return Character(**character_dict)
+        return Character(**response[0])
 
     @staticmethod
     def get_random_terminology(max_len: int = None, only_letters: bool = False,
@@ -73,29 +71,17 @@ class SupabaseRest:
 
         # Get a random terminology
         response: list[dict] = SupabaseRest().make_get_request('terminology')
-        response_filtered = response.copy()
+        random.shuffle(response)
 
-        if max_len is not None or only_letters:
-            for term in response:
-                if max_len is not None and len(term['name']) > max_len:
-                    if not (consider_len_without_space and len(str(term['name']).replace(' ', '')) <= max_len):
-                        response_filtered.remove(term)
-                        continue
-
-                if only_letters and not str(term['name']).isalpha():
-                    if not (allow_spaces and str(term['name']).replace(' ', '').isalpha()):
-                        response_filtered.remove(term)
-                        continue
-
-                if not consider_len_without_space and ' ' in term['name']:
-                    response_filtered.remove(term)
+        for term in response:
+            if max_len is not None and len(term['name']) > max_len:
+                if not (consider_len_without_space and len(str(term['name']).replace(' ', '')) <= max_len):
                     continue
 
-        if len(response_filtered) == 0:
-            raise WikiException('No terminologies found')
+            if only_letters and not str(term['name']).isalpha():
+                if not (allow_spaces and str(term['name']).replace(' ', '').isalpha()):
+                    continue
 
-        # Randomly select a terminology
-        terminology_dict = random.choice(response_filtered)
+            return Terminology(**term)
 
-        # Return terminology
-        return Terminology(**terminology_dict)
+        raise WikiException('No terminologies found')

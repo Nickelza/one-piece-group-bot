@@ -50,6 +50,7 @@ class Emoji(StrEnum):
     WINNER = '🏆'
     LOSER = '💥'
     CONFETTI = '🎉'
+    HEART = '❤'
 
     # Prediction
     PREDICTION_BET_WIN = '🏆'

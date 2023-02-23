@@ -361,6 +361,12 @@ WHOS_WHO_NEXT_LEVEL_WAIT_TIME = Environment('WHOS_WHO_NEXT_LEVEL_WAIT_TIME', def
 SHAMBLES_GRID_SIZE = Environment('SHAMBLES_GRID_SIZE', default_value='7')
 # How much time to wait before sending the next level in Shambles game. Default: 40 seconds
 SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment('SHAMBLES_NEXT_LEVEL_WAIT_TIME', default_value='40')
+# Max number of characters in Guess or Life game. Default: 100
+GUESS_OR_LIFE_MAX_CHARACTERS = Environment('GUESS_OR_LIFE_MAX_CHARACTERS', default_value='100')
+# Starting lives in Guess or Life game. Default: 5
+GUESS_OR_LIFE_STARTING_LIVES = Environment('GUESS_OR_LIFE_STARTING_LIVES', default_value='5')
+# How much time to wait before issuing a new life in Guess or Life game. Default: 40 seconds
+GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME = Environment('GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME', default_value='40')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')

@@ -45,8 +45,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         game.status = GameStatus.COUNTDOWN_TO_START
         game.save()
         context.application.create_task(
-            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(),
-                                          run_game_function=run_game))
+            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game))
         return
 
 

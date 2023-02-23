@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
+from src.chat.group.screens.screen_game_gol import manage as manage_gol
 from src.chat.group.screens.screen_game_rps import manage as manage_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.chat.group.screens.screen_game_shambles import manage as manage_shambles
@@ -101,6 +102,9 @@ async def dispatch_game(update: Update, context: ContextTypes.DEFAULT_TYPE, user
 
         case GameType.WHOS_WHO:
             await manage_ww(update, context, inbound_keyboard, game)
+
+        case GameType.GUESS_OR_LIFE:
+            await manage_gol(update, context, user, inbound_keyboard, game)
 
         case _:
             raise GroupChatException(GroupChatError.INVALID_GAME)

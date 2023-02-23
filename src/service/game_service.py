@@ -95,13 +95,12 @@ def get_game_authorized_tg_user_ids(game: Game) -> list[int]:
     return [challenger.tg_user_id, opponent.tg_user_id]
 
 
-def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOutcome = None, user_turn: User = None,
+def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, user_turn: User = None,
              is_turn_based: bool = True, terminology: Terminology = None, remaining_seconds_to_start: int = None,
-             is_played_in_private_chat: bool = False) -> str:
+             is_played_in_private_chat: bool = False, text_to_add_before_footer: str = None) -> str:
     """
     Get the text
     :param game: The game object
-    :param game_name: The game name
     :param is_finished: Is the game finished
     :param game_outcome: The game outcome
     :param user_turn: The user turn
@@ -109,30 +108,37 @@ def get_text(game: Game, game_name: str, is_finished: bool, game_outcome: GameOu
     :param terminology: The character, in case of Who's Who
     :param remaining_seconds_to_start: The remaining seconds to start
     :param is_played_in_private_chat: Is the game played in private chat
+    :param text_to_add_before_footer: The text to add before the footer
     :return: The text
     """
 
     added_ot_text = ""
-    if is_finished:
-        if game_outcome is GameOutcome.CHALLENGER_WON:
-            added_ot_text = phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.challenger))
-        elif game_outcome is GameOutcome.OPPONENT_WON:
-            added_ot_text = phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.opponent))
-        else:
-            added_ot_text = phrases.GAME_RESULT_DRAW
 
+    if text_to_add_before_footer is not None:
+        added_ot_text += text_to_add_before_footer
+
+    if is_finished and game_outcome is not None and game_outcome is not GameOutcome.NONE:
         if not is_turn_based and terminology is not None:
-            added_ot_text += get_guess_game_result_term_text(terminology)
+            added_ot_text += get_guess_game_result_term_text(terminology) + '\n\n'
+
+        if game_outcome is GameOutcome.CHALLENGER_WON:
+            added_ot_text += phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.challenger))
+        elif game_outcome is GameOutcome.OPPONENT_WON:
+            added_ot_text += phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.opponent))
+        else:
+            added_ot_text += phrases.GAME_RESULT_DRAW
     else:
         if is_turn_based:
-            added_ot_text = phrases.GAME_TURN.format(mention_markdown_user(user_turn))
+            added_ot_text += phrases.GAME_TURN.format(mention_markdown_user(user_turn))
         else:
             if remaining_seconds_to_start is not None:
-                added_ot_text = phrases.GAME_COUNTDOWN.format(convert_seconds_to_time(remaining_seconds_to_start))
+                added_ot_text += phrases.GAME_COUNTDOWN.format(convert_seconds_to_time(remaining_seconds_to_start))
             elif is_played_in_private_chat:
-                added_ot_text = phrases.GAME_STARTED
+                added_ot_text += phrases.GAME_STARTED
 
-    return phrases.GAME_TEXT.format(game_name,
+    game_type: GameType = GameType(game.type)
+    return phrases.GAME_TEXT.format(game_type.get_name(),
+                                    game_type.get_description(),
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
                                     get_belly_formatted(game.wager),
@@ -155,7 +161,7 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
 
     if show_timeout_message:
         await full_media_send(context=context, group_chat=game.group_chat, caption=phrases.GAME_TIMEOUT,
-                              edit_message_id=game.message_id)
+                              edit_message_id=game.message_id, edit_only_caption_and_keyboard=True)
     elif should_delete_message:
         # Try to delete message
         if should_delete_message:
@@ -256,24 +262,6 @@ async def enqueue_game_turn_notification(context: ContextTypes.DEFAULT_TYPE, use
         await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
-def get_game_name(game_type: GameType) -> str:
-    match game_type:
-        case GameType.ROCK_PAPER_SCISSORS:
-            return phrases.ROCK_PAPER_SCISSORS_GAME_NAME
-
-        case GameType.RUSSIAN_ROULETTE:
-            return phrases.RUSSIAN_ROULETTE_GAME_NAME
-
-        case GameType.WHOS_WHO:
-            return phrases.WHOS_WHO_GAME_NAME
-
-        case GameType.SHAMBLES:
-            return phrases.SHAMBLES_GAME_NAME
-
-        case _:
-            return phrases.GAME_UNKNOWN_NAME
-
-
 async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
     """
     Enqueue a game timeout. Waits for N time and if the opponent doesn't accept, the game is deleted
@@ -366,7 +354,8 @@ def get_guess_game_result_term_text(terminology: Terminology):
 
 
 async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game,
-                                        remaining_seconds: int, run_game_function: Callable) -> None:
+                                        remaining_seconds: int, run_game_function: Callable,
+                                        is_played_in_private_chat: bool = True) -> None:
     """
     Countdown to start
     :param update: The update object
@@ -374,39 +363,40 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
     :param game: The game object
     :param remaining_seconds: The remaining time
     :param run_game_function: The function to run when the countdown is over
+    :param is_played_in_private_chat: If True, the game is played in private chat
     :return: None
     """
 
-    play_deeplink_button = get_guess_game_play_deeplink_button(game)
+    play_deeplink_button = [[get_guess_game_play_deeplink_button(game)]] if is_played_in_private_chat else None
 
-    game_name = get_game_name(GameType(game.type))
     if remaining_seconds <= 0:
         game.status = GameStatus.IN_PROGRESS
         game.save()
 
-        # Edit group message
-        ot_text = get_text(game, game_name, False, is_turn_based=False,
-                           is_played_in_private_chat=True)
-        await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
-                              edit_only_caption_and_keyboard=True)
+        # Edit group message if the game is played in private chat
+        if is_played_in_private_chat:
+            ot_text = get_text(game, False, is_turn_based=False, is_played_in_private_chat=True)
+            await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
+                                  edit_only_caption_and_keyboard=True)
 
         # Run game
         await run_game_function(context, game)
         return
 
     # Update message
-    ot_text = get_text(game, game_name, False, is_turn_based=False,
-                       remaining_seconds_to_start=remaining_seconds)
-    await full_media_send(context, caption=ot_text, update=update, keyboard=[[play_deeplink_button]],
-                          saved_media_name=game.get_saved_media_name())
+    ot_text = get_text(game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds)
+    await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
+                          saved_media_name=game.get_saved_media_name(), ignore_bad_request_exception=True)
 
     # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every second
     if remaining_seconds > 10:
         await asyncio.sleep(10)
-        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 10, run_game_function)
+        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 10, run_game_function,
+                                            is_played_in_private_chat=is_played_in_private_chat)
     else:
         await asyncio.sleep(1)
-        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 1, run_game_function)
+        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 1, run_game_function,
+                                            is_played_in_private_chat=is_played_in_private_chat)
 
 
 async def get_guess_game_users_to_send_image_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
@@ -494,8 +484,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
                           ignore_forbidden_exception=True, keyboard=outbound_keyboard)
 
     # Update group message
-    ot_text = get_text(game, get_game_name(GameType(game.type)), True, is_turn_based=False,
-                       terminology=terminology, game_outcome=outcome)
+    ot_text = get_text(game, True, game_outcome=outcome, is_turn_based=False, terminology=terminology)
     group_chat: GroupChat = game.group_chat
     await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,
                           edit_only_caption_and_keyboard=True)

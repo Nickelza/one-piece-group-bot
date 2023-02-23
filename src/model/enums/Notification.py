@@ -220,9 +220,7 @@ class GameTurnNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        from src.service.game_service import get_game_name
-
-        return self.text.format(get_game_name(GameType(self.game.type)),
+        return self.text.format(GameType(self.game.type).get_name(),
                                 mention_markdown_user(self.opponent),
                                 get_message_url(self.game.group_chat, self.game.message_id))
 

@@ -55,11 +55,11 @@ FIGHT = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.FIGHT, file_name=AssetPath.FIGHT)
 SAVED_MEDIA_DICT[SavedMediaName.FIGHT] = FIGHT
 
-# noinspection DuplicatedCode
 GAME = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME, file_name=AssetPath.GAME)
 SAVED_MEDIA_DICT[SavedMediaName.GAME] = GAME
 
+# noinspection DuplicatedCode
 GAME_ROCK_PAPER_SCISSORS = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
     file_name=AssetPath.GAME_ROCK_PAPER_SCISSORS)
@@ -78,6 +78,10 @@ SAVED_MEDIA_DICT[SavedMediaName.GAME_WHOS_WHO] = GAME_WHOS_WHO
 GAME_SHAMBLES = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_SHAMBLES, file_name=AssetPath.GAME_SHAMBLES)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_SHAMBLES] = GAME_SHAMBLES
+
+GAME_GUESS_OR_LIFE = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_GUESS_OR_LIFE, file_name=AssetPath.GAME_GUESS_OR_LIFE)
+SAVED_MEDIA_DICT[SavedMediaName.GAME_GUESS_OR_LIFE] = GAME_GUESS_OR_LIFE
 
 SILENCE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE)

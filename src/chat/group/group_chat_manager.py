@@ -15,6 +15,7 @@ from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_scre
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
+from src.chat.group.screens.screen_game_gol import manage as manage_screen_game_gol
 from src.chat.group.screens.screen_game_opponent_confirmation import manage as manage_screen_game_opponent_confirmation
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
@@ -194,6 +195,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
                 await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
                                                      group_chat)
+
+            case Screen.GRP_GUESS_OR_LIFE_GAME:  # Guess or life game
+                await manage_screen_game_gol(update, context, user, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

@@ -168,6 +168,7 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors) -> str:
             added_ot_text = phrases.GAME_STATUS_AWAITING_USER_CHOICE.format(mention_markdown_user(game.opponent))
 
     return phrases.GAME_TEXT.format(phrases.ROCK_PAPER_SCISSORS_GAME_NAME,
+                                    phrases.ROCK_PAPER_SCISSORS_GAME_DESCRIPTION,
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
                                     get_belly_formatted(game.wager),
