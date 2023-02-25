@@ -7,7 +7,8 @@ import src.model.enums.Timer as Timer
 from src.chat.manage_message import init, end
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus
+from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus, \
+    reset_bounty_message_limit
 from src.service.devil_fruit_service import schedule_devil_fruit_release, release_scheduled_devil_fruit, \
     respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
@@ -88,6 +89,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             add_crew_bounty_bonus()
         case Timer.ADD_CREW_MVP_BOUNTY_BONUS:
             add_crew_mvp_bounty_bonus()
+        case Timer.RESET_BOUNTY_MESSAGE_LIMIT:
+            reset_bounty_message_limit()
         case Timer.SEND_SCHEDULED_PREDICTIONS:
             await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:

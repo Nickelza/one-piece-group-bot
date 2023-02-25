@@ -188,6 +188,13 @@ SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment('SHOULD_LOG_TIMER_ADD_C
                                                          default_value='False')
 SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS = Environment('SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS',
                                                               default_value='False')
+# Maximum amount of bounty that can be gained from messages. Default: Every day at 00:10
+CRON_RESET_BOUNTY_MESSAGE_LIMIT = Environment('CRON_RESET_BOUNTY_MESSAGE_LIMIT', default_value='10 0 * * *')
+ENABLE_TIMER_RESET_BOUNTY_MESSAGE_LIMIT = Environment('ENABLE_TIMER_RESET_BOUNTY_MESSAGE_LIMIT', default_value='True')
+SHOULD_LOG_TIMER_RESET_BOUNTY_MESSAGE_LIMIT = Environment('SHOULD_LOG_TIMER_RESET_BOUNTY_MESSAGE_LIMIT',
+                                                          default_value='False')
+SHOULD_RUN_ON_STARTUP_RESET_BOUNTY_MESSAGE_LIMIT = Environment('SHOULD_RUN_ON_STARTUP_RESET_BOUNTY_MESSAGE_LIMIT',
+                                                               default_value='False')
 
 # Reddit post One Piece. Default: Every day at 00:00 and 12:00
 CRON_REDDIT_POST_ONE_PIECE = Environment('CRON_REDDIT_POST_ONE_PIECE', default_value='0 0,12 * * *')
@@ -294,6 +301,8 @@ BELLY_ANIMATION_MULTIPLIER = Environment('BELLY_ANIMATION_MULTIPLIER', default_v
 BELLY_LOCATION_LEVEL_MULTIPLIER = Environment('BELLY_LOCATION_LEVEL_MULTIPLIER', default_value='10')
 # How much should belly be upper rounded. Default: 1000
 BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value='1000')
+# Daily base limit of bellys gained from messages. Default: 5,000,000
+BELLY_DAILY_BASE_LIMIT = Environment('BELLY_DAILY_BASE_LIMIT', default_value='5000000')
 
 # After how many days from the last message should a group or group chat be considered inactive. Default: 14
 INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='14')

@@ -40,23 +40,10 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_bounty
 from src.service.bounty_service import get_message_belly
-from src.service.group_service import allow_bounty_from_messages, is_main_group, feature_is_enabled
+from src.service.group_service import is_main_group, feature_is_enabled
 from src.service.message_service import delete_message
 from src.service.notification_service import send_notification
 from src.service.user_service import user_is_muted
-
-
-async def update_user_bounty(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
-    """
-    Creates a new user or updates an existing user
-    :param update: Telegram update
-    :param context: Telegram context
-    :param user: User object
-    :return: Updated user
-    """
-
-    await add_bounty(user, get_message_belly(update, user), context=context, update=update,
-                     should_update_location=True)
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
@@ -106,8 +93,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 return
 
     # Update bounty from message gain
-    if allow_bounty_from_messages(group_chat) or command is not Command.ND:
-        await update_user_bounty(update, context, user)
+    await add_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
+                     should_update_location=True, from_message=True)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 

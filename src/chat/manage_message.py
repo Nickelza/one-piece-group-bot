@@ -378,6 +378,7 @@ def get_user(effective_user: TelegramUser) -> User:
     if user is None:
         user = User()
         user.tg_user_id = effective_user.id
+        user.bounty_message_limit = Env.BELLY_DAILY_BASE_LIMIT.get_int()
 
     user.tg_first_name = effective_user.first_name
     user.tg_last_name = effective_user.last_name

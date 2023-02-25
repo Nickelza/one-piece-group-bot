@@ -9,6 +9,7 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
@@ -17,6 +18,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_next_run
 from src.service.devil_fruit_service import get_value
+from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
@@ -33,13 +35,20 @@ def get_belly_formatted(belly: int) -> str:
     return '{0:,}'.format(belly)
 
 
-def get_message_belly(update: Update, user: User) -> int:
+def get_message_belly(update: Update, user: User, group_chat: GroupChat) -> int:
     """
     Calculates how much bellys a message is worth
     :param update: Telegram update
     :param user: The user who sent the message
+    :param group_chat: The group chat the message was sent in
     :return: How much bellys a message is worth
     """
+    should_allow_unlimited_bounty_from_messages = allow_unlimited_bounty_from_messages(group_chat)
+
+    # Unlimited bounty from messages not allowed and user have consumed all their bounty from messages, no belly
+    if not should_allow_unlimited_bounty_from_messages and user.bounty_message_limit <= 0:
+        return 0
+
     # New chat members - No belly
     try:
         if len(update.message.new_chat_members) > 0:
@@ -130,6 +139,10 @@ def get_message_belly(update: Update, user: User) -> int:
 
     final_belly += int((final_belly * location_percentage) / 100)
 
+    # Bounty from messages limit
+    if not should_allow_unlimited_bounty_from_messages:
+        final_belly = min(final_belly, user.bounty_message_limit)
+
     return round_belly_up(final_belly)
 
 
@@ -180,7 +193,8 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
 # noinspection PyUnusedLocal
 # pending_belly_amount will be used in the future
 async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TYPE = None, update: Update = None,
-                     should_update_location: bool = False, pending_belly_amount: int = 0) -> None:
+                     should_update_location: bool = False, pending_belly_amount: int = 0,
+                     from_message: bool = False) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -190,6 +204,7 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
     :param should_update_location: Whether to update the user's location
     :param pending_belly_amount: How much of the amount is from pending belly, so not newly acquired. Will be used to
                                  calculate eventual taxes
+    :param from_message: Whether the bounty is gained from a message
     :return: The updated user
     """
     from src.service.location_service import update_location
@@ -202,6 +217,10 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
         return
 
     user.bounty += amount
+
+    # If the bounty is gained from a message, subtract the amount from the bounty message limit
+    if from_message:
+        user.bounty_message_limit -= amount
 
     # Update the user's location
     if should_update_location:
@@ -380,3 +399,19 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
     tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
 
     return tax
+
+
+def reset_bounty_message_limit() -> None:
+    """
+    Reset the amount of bounty a user can gain from messages in a day
+    """
+
+    # If user location level is higher than 0, set their bounty_message_limit to Env.BELLY_DAILY_BASE_LIMIT +
+    # a percentage corresponding to their location level (e.g. 10% for location level 1, 20% for location level 2, etc.)
+    belly_daily_base_limit = Env.BELLY_DAILY_BASE_LIMIT.get_int()
+    condition: tuple[bool, int] = (
+        (User.location_level > 0),
+        belly_daily_base_limit + (belly_daily_base_limit * User.location_level * 0.1))
+
+    case_stmt = Case(None, [condition], belly_daily_base_limit)
+    User.update(bounty_message_limit=case_stmt).execute()

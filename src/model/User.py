@@ -47,6 +47,7 @@ class User(BaseModel):
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
     can_collect_devil_fruit = BooleanField(default=True)
+    bounty_message_limit = BigIntegerField(default=0)
 
     # Transient fields
 

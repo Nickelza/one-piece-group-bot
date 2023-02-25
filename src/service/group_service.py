@@ -63,9 +63,9 @@ def get_group_or_topic_text(group_chat: GroupChat) -> str:
         return phrases.TEXT_GROUP
 
 
-def allow_bounty_from_messages(group_chat: GroupChat) -> bool:
+def allow_unlimited_bounty_from_messages(group_chat: GroupChat) -> bool:
     """
-    Checks if the group chat/group_chat allows bounty from messages
+    Checks if the group chat/group_chat allows unlimited bounty from messages
     :param group_chat: The group chat
     :return: True if the group chat/group_chat allows bounty from messages, False otherwise
     """

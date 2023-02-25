@@ -84,6 +84,12 @@ ADD_CREW_MVP_BOUNTY_BONUS = Timer('add_crew_mvp_bounty_bonus', Env.CRON_ADD_CREW
                                   Env.SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS.get_bool())
 TIMERS.append(ADD_CREW_MVP_BOUNTY_BONUS)
 
+RESET_BOUNTY_MESSAGE_LIMIT = Timer('reset_bounty_message_limit', Env.CRON_RESET_BOUNTY_MESSAGE_LIMIT.get(),
+                                   Env.ENABLE_TIMER_RESET_BOUNTY_MESSAGE_LIMIT.get_bool(),
+                                   Env.SHOULD_LOG_TIMER_RESET_BOUNTY_MESSAGE_LIMIT.get_bool(),
+                                   Env.SHOULD_RUN_ON_STARTUP_RESET_BOUNTY_MESSAGE_LIMIT.get_bool())
+TIMERS.append(RESET_BOUNTY_MESSAGE_LIMIT)
+
 SEND_SCHEDULED_PREDICTIONS = Timer('send_scheduled_predictions', Env.CRON_SEND_SCHEDULED_PREDICTIONS.get(),
                                    Env.ENABLE_TIMER_SEND_SCHEDULED_PREDICTIONS.get_bool(),
                                    Env.SHOULD_LOG_TIMER_SEND_SCHEDULED_PREDICTIONS.get_bool(),
