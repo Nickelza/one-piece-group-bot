@@ -308,13 +308,16 @@ async def set_user_private_screen(user: User, game: Game = None, should_reset: b
         raise ValueError("If should_reset is False, game must be provided")
 
     if should_reset:
-        user.private_screen_list = None
-        user.private_screen_in_edit_id = None
+        private_screen_list = None
+        private_screen_in_edit_id = None
     else:
-        user.private_screen_list = Screen.PVT_GAME_GUESS_INPUT
-        user.private_screen_in_edit_id = game.id
+        private_screen_list = Screen.PVT_GAME_GUESS_INPUT
+        private_screen_in_edit_id = game.id
 
-    user.save()
+    # Using update instead of save to avoid overwriting other fields, namely bounty and pending_bounty
+    User.update(private_screen_list=private_screen_list,
+                private_screen_in_edit_id=private_screen_in_edit_id).where(User.id == user.id).execute()
+
     return
 
 

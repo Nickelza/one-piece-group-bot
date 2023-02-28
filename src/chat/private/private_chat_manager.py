@@ -13,7 +13,7 @@ from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_
 from src.chat.private.screens.screen_devil_fruit_detail_discard \
     import manage as manage_screen_devil_fruit_detail_discard
 from src.chat.private.screens.screen_devil_fruit_detail_eat import manage as manage_screen_devil_fruit_detail_eat
-from src.chat.private.screens.screen_game_guess_input import manage as manage_screen_game_ww_input
+from src.chat.private.screens.screen_game_guess_input import manage as manage_screen_game_guess_input
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
@@ -190,7 +190,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
                 await manage_screen_devil_fruit_detail_discard(update, context, inbound_keyboard, user)
 
             case Screen.PVT_GAME_GUESS_INPUT:  # Guess game input
-                await manage_screen_game_ww_input(update, context, inbound_keyboard, user)
+                await manage_screen_game_guess_input(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
