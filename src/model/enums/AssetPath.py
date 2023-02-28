@@ -18,9 +18,9 @@ class AssetPath(StrEnum):
     GAME = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game.jpg')
     GAME_ROCK_PAPER_SCISSORS = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game_rock_paper_scissors.jpg')
     GAME_RUSSIAN_ROULETTE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game_russian_roulette.jpg')
-    GAME_SHAMBLES = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'shambles.jpg')
+    GAME_SHAMBLES = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game_shambles.jpg')
     GAME_WHOS_WHO = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game_whos_who.jpg')
-    GAME_GUESS_OR_LIFE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'guess_or_life.jpg')
+    GAME_GUESS_OR_LIFE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'game_guess_or_life.jpg')
     SILENCE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'silence.jpg')
 
     # Other images
