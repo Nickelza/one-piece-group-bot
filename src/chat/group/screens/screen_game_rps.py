@@ -172,6 +172,7 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors) -> str:
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
                                     get_belly_formatted(game.wager),
+                                    '',
                                     added_ot_text)
 
 

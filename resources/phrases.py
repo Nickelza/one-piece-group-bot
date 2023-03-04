@@ -208,7 +208,8 @@ GAME_UNKNOWN_NAME = 'Unknown'
 GAME_TEXT = '*{}*' \
             '\n\n_*Description*: {}_' \
             '\n\n{} vs {}' \
-            '\n*Wager:* ฿*{}*' \
+            '\nWager: ฿*{}*' \
+            '{}' \
             '\n\n{}'
 GAME_STATUS_AWAITING_CHOICE = 'Status: Awaiting choice'
 GAME_STATUS_AWAITING_USER_CHOICE = "Status: Awaiting {}'s choice"
@@ -241,6 +242,10 @@ GAME_INPUT_GAME_FINISHED = 'This game has ended'
 GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
 GAME_RESULT_CHARACTER = 'Character: {}'
 GAME_RESULT_TERM = 'Word: {}'
+GAME_DIFFICULTY = '\nDifficulty: {}'
+GAME_DIFFICULTY_EASY = 'Easy'
+GAME_DIFFICULTY_MEDIUM = 'Medium'
+GAME_DIFFICULTY_HARD = 'Hard'
 
 ROCK_PAPER_SCISSORS_GAME_NAME = 'Rock Paper Scissors'
 ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = 'Try to beat your opponent by choosing rock, paper or scissors. ' \

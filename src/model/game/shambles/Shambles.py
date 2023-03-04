@@ -6,18 +6,20 @@ from PIL import Image, ImageDraw, ImageFont
 
 import resources.Environment as Env
 from src.model.enums.AssetPath import AssetPath
+from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Terminology import Terminology
 from src.service.download_service import generate_temp_file_path
 
 
 class Shambles:
-    def __init__(self, terminology: Terminology, grid: list[list[str]] = None,
+    def __init__(self, terminology: Terminology, grid_size: int, grid: list[list[str]] = None,
                  word_coordinates: list[tuple[int, int]] = None, excluded_coordinates: list[tuple[int, int]] = None,
                  image_path: str = None, revealed_letters_count: int = 0):
 
         """
         Constructor
         :param terminology: The terminology
+        :param grid_size: The grid size
         :param grid: The grid of letters
         :param word_coordinates: The coordinates of the word
         :param excluded_coordinates: The coordinates of the letters that have been blanked out to make it easier
@@ -26,6 +28,7 @@ class Shambles:
         """
 
         self.terminology = terminology
+        self.grid_size = grid_size
         self.grid = grid
         self.word_coordinates = word_coordinates
         self.excluded_coordinates = excluded_coordinates if excluded_coordinates is not None else []
@@ -61,17 +64,17 @@ class Shambles:
         """
 
         word = self.terminology.name.replace(' ', '')
-        grid_size = Env.SHAMBLES_GRID_SIZE.get_int()
+        grid_size = self.grid_size
 
         # Check if the word length is larger than the grid size
-        if len(word) > grid_size:
+        if len(word) > self.grid_size:
             raise ValueError('The length of the word cannot be larger than the grid size')
 
         # Convert the word to uppercase
         word = word.upper()
 
         # Define the grid for the crossword puzzle.
-        grid = [[' ' for _ in range(grid_size)] for _ in range(grid_size)]
+        grid = [[' ' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
 
         # Select a random direction for the word (either horizontal, vertical, or diagonal).
         direction = random.choice(['horizontal', 'vertical', 'diagonal'])
@@ -79,13 +82,13 @@ class Shambles:
         # Determine the number of cells in the grid that the word will occupy based on its length and direction.
         word_len = len(word)
         if direction == 'horizontal':
-            max_start_x = grid_size - word_len
-            max_start_y = grid_size - 1
+            max_start_x = self.grid_size - word_len
+            max_start_y = self.grid_size - 1
         elif direction == 'vertical':
-            max_start_x = grid_size - 1
-            max_start_y = grid_size - word_len
+            max_start_x = self.grid_size - 1
+            max_start_y = self.grid_size - word_len
         else:
-            max_start_x = max_start_y = grid_size - word_len
+            max_start_x = max_start_y = self.grid_size - word_len
 
         # Select a random starting point for the word that is within the grid boundaries.
         start_x = random.randint(0, max_start_x)
@@ -121,8 +124,6 @@ class Shambles:
         :return: None
         """
 
-        grid_size = Env.SHAMBLES_GRID_SIZE.get_int()
-
         # Open the crossword puzzle template image
         with Image.open(AssetPath.GAME_BACKGROUND) as image:
             # Get the box size of the image
@@ -131,8 +132,8 @@ class Shambles:
             height = lower - upper
 
             # Calculate the width and height of each cell in the grid
-            cell_width = width / grid_size
-            cell_height = height / grid_size
+            cell_width = width / self.grid_size
+            cell_height = height / self.grid_size
 
             # Get the font size based on the cell size, 8/10 of the cell width
             font_size = int(cell_width * 8 / 10)
@@ -142,8 +143,8 @@ class Shambles:
             font = ImageFont.truetype(AssetPath.FONT_BLOGGER_SANS_BOLD, font_size)
 
             # Write the word in the grid on the image, with an outline for each letter
-            for y in range(grid_size):
-                for x in range(grid_size):
+            for y in range(self.grid_size):
+                for x in range(self.grid_size):
                     letter = self.grid[y][x]
 
                     if letter != ' ':
@@ -232,3 +233,23 @@ class Shambles:
         :return: bool
         """
         return self.revealed_letters_count == len(self.terminology.name)
+
+    @staticmethod
+    def get_grid_size_by_difficulty(difficulty: GameDifficulty) -> int:
+        """
+        Get the grid size by difficulty level
+        :return: int
+        """
+
+        match difficulty:
+            case GameDifficulty.EASY:
+                return Env.SHAMBLES_GRID_SIZE_EASY.get_int()
+
+            case GameDifficulty.MEDIUM:
+                return Env.SHAMBLES_GRID_SIZE_MEDIUM.get_int()
+
+            case GameDifficulty.HARD:
+                return Env.SHAMBLES_GRID_SIZE_HARD.get_int()
+
+            case _:
+                raise ValueError('Invalid difficulty')

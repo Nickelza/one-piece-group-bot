@@ -235,7 +235,9 @@ def get_board(game: Game) -> GuessOrLife:
     # Create board
     if game.board is None:
         random_terminology: Terminology = SupabaseRest.get_random_terminology(
-            max_len=Env.GUESS_OR_LIFE_MAX_CHARACTERS.get_int(), only_letters=True)
+            max_len=Env.GUESS_OR_LIFE_MAX_CHARACTERS.get_int(), only_letters=True,
+            min_unique_characters=GuessOrLife.get_min_unique_characters_by_difficulty(game.get_difficulty()),
+            max_unique_characters=GuessOrLife.get_max_unique_characters_by_difficulty(game.get_difficulty()))
         guess_or_life = GuessOrLife(random_terminology)
         game_service.save_game(game, guess_or_life.get_board_json())
         return guess_or_life

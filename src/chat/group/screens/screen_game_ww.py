@@ -58,7 +58,7 @@ def get_board(game: Game) -> WhosWho:
 
     # Create board
     if game.board is None:
-        random_character: Character = SupabaseRest.get_random_character()
+        random_character: Character = SupabaseRest.get_random_character(game.get_difficulty())
         whos_who = WhosWho(random_character)
         save_game(game, whos_who.get_board_json())
         return whos_who

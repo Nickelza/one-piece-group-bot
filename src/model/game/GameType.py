@@ -36,6 +36,13 @@ class GameType(IntEnum):
         """
         return GAME_TYPE_DESCRIPTION_DICT[self]
 
+    def has_difficulty_level(self) -> bool:
+        """
+        Check if this game type has a difficulty
+        :return: True if it has a difficulty, False otherwise
+        """
+        return self in GAME_TYPE_WITH_DIFFICULTY
+
 
 GAME_TYPE_SAVED_MEDIA_NAME_DICT = {
     GameType.ROCK_PAPER_SCISSORS: SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
@@ -61,3 +68,5 @@ GAME_TYPE_DESCRIPTION_DICT = {
     GameType.GUESS_OR_LIFE: phrases.GUESS_OR_LIFE_GAME_DESCRIPTION.format(
         Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
 }
+
+GAME_TYPE_WITH_DIFFICULTY = [GameType.GUESS_OR_LIFE, GameType.SHAMBLES, GameType.WHOS_WHO]

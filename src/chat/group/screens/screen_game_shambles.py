@@ -60,9 +60,9 @@ def get_board(game: Game) -> Shambles:
 
     # Create board
     if game.board is None:
-        random_terminology: Terminology = SupabaseRest.get_random_terminology(
-            max_len=Env.SHAMBLES_GRID_SIZE.get_int(), only_letters=True)
-        shambles = Shambles(random_terminology)
+        grid_size = Shambles.get_grid_size_by_difficulty(game.get_difficulty())
+        random_terminology: Terminology = SupabaseRest.get_random_terminology(max_len=grid_size, only_letters=True)
+        shambles = Shambles(random_terminology, grid_size=grid_size)
         save_game(game, shambles.get_board_json())
         return shambles
 

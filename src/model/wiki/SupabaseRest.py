@@ -4,6 +4,7 @@ import requests
 
 import resources.Environment as Env
 from src.model.error.CustomException import WikiException
+from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
 
@@ -41,9 +42,10 @@ class SupabaseRest:
         return response.json()
 
     @staticmethod
-    def get_random_character() -> Character:
+    def get_random_character(difficulty: GameDifficulty) -> Character:
         """
         Get a random character
+        :param difficulty: The difficulty level
         :return: A random character
         """
 
@@ -55,17 +57,27 @@ class SupabaseRest:
 
         random.shuffle(response)
 
-        return Character(**response[0])
+        if difficulty is None:
+            return Character(**response[0])
+
+        for char in response:
+            if char['difficulty'] == difficulty.value:
+                return Character(**char)
+
+        raise WikiException(f'No characters found with difficulty {difficulty} or lower')
 
     @staticmethod
     def get_random_terminology(max_len: int = None, only_letters: bool = False,
-                               consider_len_without_space: bool = False, allow_spaces: bool = True) -> Terminology:
+                               consider_len_without_space: bool = False, allow_spaces: bool = True,
+                               min_unique_characters: int = None, max_unique_characters: int = None) -> Terminology:
         """
         Get a random terminology
         :param max_len: The maximum length of the terminology
         :param only_letters: Whether the terminology should only contain letters
         :param consider_len_without_space: Whether the length of the terminology should be considered without spaces
         :param allow_spaces: Whether the terminology can contain spaces if only_letters is True
+        :param min_unique_characters: The minimum amount of unique characters in the terminology
+        :param max_unique_characters: The maximum amount of unique characters in the terminology
         :return: A random terminology
         """
 
@@ -81,6 +93,12 @@ class SupabaseRest:
             if only_letters and not str(term['name']).isalpha():
                 if not (allow_spaces and str(term['name']).replace(' ', '').isalpha()):
                     continue
+
+            if min_unique_characters is not None and len(set(term['name'])) < min_unique_characters:
+                continue
+
+            if max_unique_characters is not None and len(set(term['name'])) > max_unique_characters:
+                continue
 
             return Terminology(**term)
 

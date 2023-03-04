@@ -7,6 +7,7 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.SavedMediaName import SavedMediaName
+from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameType import GameType
 
 
@@ -45,6 +46,14 @@ class Game(BaseModel):
         :return: The SavedMediaName
         """
         return GameType(self.type).get_saved_media_name()
+
+    def get_difficulty(self) -> GameDifficulty:
+        """
+        Get the difficulty level of the game
+        :return: The difficulty level
+        """
+
+        return GameDifficulty.get_from_total_wager(int(str(self.wager)))
 
 
 Game.create_table()

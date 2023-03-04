@@ -114,6 +114,11 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
     """
 
     added_ot_text = ""
+    difficulty_text = ""
+
+    game_type: GameType = GameType(game.type)
+    if game_type.has_difficulty_level():
+        difficulty_text = phrases.GAME_DIFFICULTY.format(game.get_difficulty().get_name())
 
     if text_to_add_before_footer is not None:
         added_ot_text += text_to_add_before_footer
@@ -143,6 +148,7 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
                                     mention_markdown_user(game.challenger),
                                     mention_markdown_user(game.opponent),
                                     get_belly_formatted(game.wager),
+                                    difficulty_text,
                                     added_ot_text)
 
 

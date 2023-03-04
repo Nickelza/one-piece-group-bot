@@ -351,6 +351,10 @@ DOC_Q_GAME_COOLDOWN_DURATION = Environment('DOC_Q_GAME_COOLDOWN_DURATION', defau
 
 # Minimum wager for games. Default: 10 million
 GAME_MIN_WAGER = Environment('GAME_MIN_WAGER', default_value='10000000')
+# Maximum total wager for easy mode. Default: 50 million
+GAME_MAX_TOTAL_WAGER_EASY = Environment('GAME_MAX_TOTAL_WAGER_EASY', default_value='50000000')
+# Maximum total wager for medium mode. Default: 200 million
+GAME_MAX_TOTAL_WAGER_MEDIUM = Environment('GAME_MAX_TOTAL_WAGER_MEDIUM', default_value='200000000')
 # After how much time in seconds without action should a user be notified about their turn. Default: 60 seconds
 GAME_TURN_NOTIFICATION_TIME = Environment('GAME_TURN_NOTIFICATION_TIME', default_value='60')
 # Game cooldown duration in hours. Default: 8
@@ -366,16 +370,25 @@ ONE_PIECE_WIKI_URL = Environment('ONE_PIECE_WIKI_URL', default_value='https://on
 RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION = Environment('RUSSIAN_ROULETTE_SHOW_BULLET_LOCATION', default_value='False')
 # How much time to wait before sending the next level in Who's Who game. Default: 30 seconds
 WHOS_WHO_NEXT_LEVEL_WAIT_TIME = Environment('WHOS_WHO_NEXT_LEVEL_WAIT_TIME', default_value='30')
-# Shambles grid size. Default: 7
-SHAMBLES_GRID_SIZE = Environment('SHAMBLES_GRID_SIZE', default_value='7')
+# Shambles grid size easy mode. Default: 7
+SHAMBLES_GRID_SIZE_EASY = Environment('SHAMBLES_GRID_SIZE_EASY', default_value='7')
+# Shambles grid size medium mode. Default: 10
+SHAMBLES_GRID_SIZE_MEDIUM = Environment('SHAMBLES_GRID_SIZE_MEDIUM', default_value='10')
+# Shambles grid size hard mode. Default: 13
+SHAMBLES_GRID_SIZE_HARD = Environment('SHAMBLES_GRID_SIZE_HARD', default_value='13')
 # How much time to wait before sending the next level in Shambles game. Default: 30 seconds
 SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment('SHAMBLES_NEXT_LEVEL_WAIT_TIME', default_value='30')
-# Max number of characters in Guess or Life game. Default: 100
-GUESS_OR_LIFE_MAX_CHARACTERS = Environment('GUESS_OR_LIFE_MAX_CHARACTERS', default_value='100')
 # Starting lives in Guess or Life game. Default: 5
 GUESS_OR_LIFE_STARTING_LIVES = Environment('GUESS_OR_LIFE_STARTING_LIVES', default_value='5')
 # How much time to wait before issuing a new life in Guess or Life game. Default: 30 seconds
 GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME = Environment('GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME', default_value='30')
+# Guess or Life max number of characters in Guess or Life game. Default: 100
+GUESS_OR_LIFE_MAX_CHARACTERS = Environment('GUESS_OR_LIFE_MAX_CHARACTERS', default_value='100')
+# Guess or Life max unique characters in easy mode. Default: 5
+GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY = Environment('GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY', default_value='5')
+# Guess or Life m unique characters in medium mode. Default: 10
+GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM = Environment('GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM',
+                                                         default_value='10')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')

@@ -3,6 +3,7 @@ import re
 from enum import IntEnum
 
 import resources.Environment as Env
+from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameOutcome import GameOutcome
 from src.model.wiki.Terminology import Terminology
 
@@ -231,3 +232,45 @@ class GuessOrLife:
             self.challenger_info.lives -= 1
         else:
             self.opponent_info.lives -= 1
+
+    @staticmethod
+    def get_max_unique_characters_by_difficulty(difficulty: GameDifficulty) -> int or None:
+        """
+        Get the max unique characters by difficulty
+        :param difficulty: The difficulty
+        :return: int
+        """
+
+        match difficulty:
+            case GameDifficulty.EASY:
+                return Env.GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY.get_int()
+
+            case GameDifficulty.MEDIUM:
+                return Env.GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM.get_int()
+
+            case GameDifficulty.HARD:
+                return None
+
+            case _:
+                raise ValueError('Invalid difficulty')
+
+    @staticmethod
+    def get_min_unique_characters_by_difficulty(difficulty: GameDifficulty) -> int or None:
+        """
+        Get the min unique characters by difficulty
+        :param difficulty: The difficulty
+        :return: int
+        """
+
+        match difficulty:
+            case GameDifficulty.EASY:
+                return None
+
+            case GameDifficulty.MEDIUM:
+                return Env.GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY.get_int() + 1
+
+            case GameDifficulty.HARD:
+                return Env.GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM.get_int() + 1
+
+            case _:
+                raise ValueError('Invalid difficulty')
