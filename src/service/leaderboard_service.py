@@ -24,21 +24,22 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
     :param leaderboard: The leaderboard
     :return: The leaderboard message
     """
-    ot_text = phrases.LEADERBOARD_HEADER.format(leaderboard.week, leaderboard.year,
-                                                leaderboard.leaderboard_users.count())
 
+    from src.service.bounty_service import get_next_bounty_reset_time
+    from src.service.cron_service import get_remaining_time
+
+    content_text = ""
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
         leaderboard_user: LeaderboardUser = leaderboard_user
         user: User = leaderboard_user.user
 
-        ot_text += '\n'
-        ot_text += '\n' if index > 0 else ''
-        ot_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
-                                                  get_leaderboard_rank_message(leaderboard_user.rank_index),
-                                                  mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                  user.get_bounty_formatted())
+        content_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
+                                                       get_leaderboard_rank_message(leaderboard_user.rank_index),
+                                                       mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                                                       user.get_bounty_formatted())
 
-    return ot_text
+    return phrases.LEADERBOARD.format(leaderboard.week, leaderboard.year, leaderboard.leaderboard_users.count(),
+                                      content_text, get_remaining_time(get_next_bounty_reset_time()))
 
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:

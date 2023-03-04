@@ -27,18 +27,25 @@ def convert_seconds_to_time(seconds: int) -> str:
     :param seconds: Seconds to convert
     :return: Days, hours e.g. 1 day 2 hours 5 minutes
     """
-    days = int(seconds // 86400)
+    weeks = int(seconds // 604800)
+    days = int((seconds % 604800) // 86400)
     hours = int((seconds % 86400) // 3600)
     minutes = int((seconds % 3600) // 60)
 
     result = ''
-    if days > 0:
+    if weeks > 0:
+        if weeks == 1:
+            result += f'{weeks} week'
+        else:
+            result += f'{weeks} weeks'
+
+    if days > 0 and weeks == 0:  # Show days only in last week
         if days == 1:
             result += f'{days} day'
         else:
             result += f'{days} days'
 
-    if hours > 0:
+    if hours > 0 and days == 0 and weeks == 0:  # Show hours only in last day
         if len(result) > 0:
             result += ' '
         if hours == 1:

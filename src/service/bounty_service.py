@@ -372,8 +372,8 @@ def should_reset_bounty(run_time: datetime = None) -> bool:
     if run_time is None:
         run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
 
-    # Reset if this is the last leaderboard of the month
-    return datetime.datetime.now().month != run_time.month
+    # Reset if this is the last leaderboard of the month, and the month before was even
+    return datetime.datetime.now().month != run_time.month and (run_time.month - 1) % 2 == 0
 
 
 def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
