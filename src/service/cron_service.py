@@ -114,6 +114,16 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
     return get_remaining_time(next_run)
 
 
+def get_datetime_in_future_seconds(seconds: int) -> datetime:
+    """
+    Get the datetime in the future
+    :param seconds: The number of seconds in the future
+    :return: The datetime in the future
+    """
+
+    return datetime.datetime.now() + datetime.timedelta(seconds=int(seconds))
+
+
 def get_datetime_in_future_hours(hours: float) -> datetime:
     """
     Get the datetime in the future
@@ -121,8 +131,7 @@ def get_datetime_in_future_hours(hours: float) -> datetime:
     :return: The datetime in the future
     """
 
-    seconds: int = int(hours * 3600)
-    return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+    return get_datetime_in_future_seconds(int(hours * 3600))
 
 
 def get_datetime_in_future_days(days: int) -> datetime:
@@ -165,3 +174,13 @@ def get_random_time_between_by_hours(hours: int) -> datetime:
     """
 
     return get_random_time_between(datetime.datetime.now(), get_datetime_in_future_hours(hours))
+
+
+def get_random_time_between_by_seconds(seconds: int) -> datetime:
+    """
+    Get a random time between now and next n seconds
+    :param seconds: The number of seconds
+    :return: The random datetime
+    """
+
+    return get_random_time_between(datetime.datetime.now(), get_datetime_in_future_seconds(seconds))

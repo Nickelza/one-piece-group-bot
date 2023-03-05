@@ -28,7 +28,7 @@ from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeSta
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
-    get_random_time_between_by_hours, get_datetime_in_future_hours
+    get_random_time_between_by_hours, get_datetime_in_future_hours, get_random_time_between_by_seconds
 from src.service.group_service import get_main_group, get_group_chats_with_feature_enabled, \
     broadcast_to_chats_with_feature_enabled_dispatch
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
@@ -213,7 +213,11 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
 
     # If it's a new release, set the release date to random time between now and next release
     if is_new_release:
-        release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
+        cron_is_in_seconds = len(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get().split()) == 1
+        if cron_is_in_seconds:
+            release_date = get_random_time_between_by_seconds(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
+        else:
+            release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
     else:  # If it's a re-release, set the release date to random time between now and next n hours
         release_date = get_random_time_between_by_hours(Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
 

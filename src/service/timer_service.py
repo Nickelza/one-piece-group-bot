@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from apscheduler.triggers.cron import CronTrigger
 from telegram.ext import ContextTypes, Application, Job
@@ -27,12 +28,27 @@ def add_to_queue(application: Application, timer: Timer.Timer) -> Job:
     :param timer: The timer
     :return: The job
     """
-    job = application.job_queue.run_custom(
-        callback=run,
-        job_kwargs={"trigger": CronTrigger.from_crontab(timer.cron_expression)},
-        name=timer.name,
-        data=timer
-    )
+    cron_expression_len = len(timer.cron_expression.split())
+
+    if cron_expression_len not in [1, 5]:
+        raise ValueError(f'Invalid cron expression for timer {timer.name}: {timer.cron_expression}')
+
+    if cron_expression_len == 1:  # Every X seconds
+        job = application.job_queue.run_repeating(
+            callback=run,
+            interval=int(timer.cron_expression),
+            first=datetime.min,
+            name=timer.name,
+            data=timer
+        )
+    else:
+        job = application.job_queue.run_custom(
+            callback=run,
+            job_kwargs={"trigger": CronTrigger.from_crontab(timer.cron_expression)},
+            name=timer.name,
+            data=timer
+        )
+
     logging.info(f'Next run of "{timer.name}" is {job.next_t}')
     return job
 
