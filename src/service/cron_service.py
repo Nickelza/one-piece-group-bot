@@ -39,13 +39,15 @@ def convert_seconds_to_time(seconds: int) -> str:
         else:
             result += f'{weeks} weeks'
 
-    if days > 0 and weeks == 0:  # Show days only in last week
+    # Show days only in last week
+    if days > 0 and weeks == 0:
         if days == 1:
             result += f'{days} day'
         else:
             result += f'{days} days'
 
-    if hours > 0 and days == 0 and weeks == 0:  # Show hours only in last day
+    # Show hours only in last day
+    if hours > 0 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if hours == 1:
@@ -53,7 +55,8 @@ def convert_seconds_to_time(seconds: int) -> str:
         else:
             result += f'{hours} hours'
 
-    if hours <= 1:  # Show minutes only in last hour
+    # Show minutes only in last hour
+    if minutes > 0 and hours == 0 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if minutes > 0 and seconds > 60:
@@ -62,7 +65,8 @@ def convert_seconds_to_time(seconds: int) -> str:
             else:
                 result += f'{minutes} minutes'
 
-    if minutes == 0 or seconds <= 60:  # Show seconds only in last minute
+    # Show seconds only in last minute
+    if seconds > 0 and minutes == 0 and hours == 0 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if seconds > 0:

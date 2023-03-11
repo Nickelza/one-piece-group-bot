@@ -343,7 +343,7 @@ def round_belly_up(belly: float) -> int:
     return ceil(belly / Env.BELLY_UPPER_ROUND_AMOUNT.get_int()) * Env.BELLY_UPPER_ROUND_AMOUNT.get_int()
 
 
-def get_next_bounty_reset_time() -> datetime:
+def get_next_bounty_reset_time() -> datetime.datetime:
     """
     Get the next bounty reset time
     :return: The next bounty reset time

@@ -51,7 +51,7 @@ BOUNTY_RESET = 'Bounties have been reset'
 
 LEADERBOARD = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
               '{}' \
-              '\n\n_Next bounty reset in {}_'
+              '\n\n_Next bounty reset on {} \\(in {}\\)_'
 LEADERBOARD_ROW = '\n\n{}°: {}\n{} - ฿*{}*'
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'

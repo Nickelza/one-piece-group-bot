@@ -2,6 +2,7 @@ import datetime
 
 from telegram.ext import ContextTypes
 
+import constants as c
 import src.model.enums.LeaderboardRank as LeaderboardRank
 from resources import phrases as phrases, Environment as Env
 from src.model.Crew import Crew
@@ -38,8 +39,10 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
                                                        mention_markdown_v2(user.tg_user_id, user.tg_first_name),
                                                        user.get_bounty_formatted())
 
+    next_bounty_reset_time = get_next_bounty_reset_time()
     return phrases.LEADERBOARD.format(leaderboard.week, leaderboard.year, leaderboard.leaderboard_users.count(),
-                                      content_text, get_remaining_time(get_next_bounty_reset_time()))
+                                      content_text, next_bounty_reset_time.strftime(c.STANDARD_DATE_FORMAT),
+                                      get_remaining_time(next_bounty_reset_time))
 
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
