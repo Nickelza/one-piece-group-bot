@@ -355,25 +355,26 @@ def get_next_bounty_reset_time() -> datetime.datetime:
         # Get next execution of leaderboard
         next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(), start_datetime=start_datetime)
 
-        if should_reset_bounty(run_time=next_run_time):
+        if should_reset_bounty(next_run_time=next_run_time):
             return current_run_time
 
         current_run_time = next_run_time
         start_datetime = next_run_time + datetime.timedelta(seconds=1)
 
 
-def should_reset_bounty(run_time: datetime = None) -> bool:
+def should_reset_bounty(next_run_time: datetime = None) -> bool:
     """
     Checks if the bounty should be reset given the run time
-    :param run_time: The run time
+    :param next_run_time: The run time
     :return: Whether the bounty should be reset
     """
 
-    if run_time is None:
-        run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
+    if next_run_time is None:
+        next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
 
-    # Reset if this is the last leaderboard of the month, and the month before was even
-    return datetime.datetime.now().month != run_time.month and (run_time.month - 1) % 2 == 0
+    # Reset if this is the last leaderboard of the month or today is the first, and the month before was even
+    return ((datetime.datetime.now().month != next_run_time.month or datetime.datetime.now().day)
+            and (next_run_time.month - 1) % 2 == 1)
 
 
 def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
