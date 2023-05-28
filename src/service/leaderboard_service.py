@@ -69,7 +69,7 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     Crew.update(can_accept_new_members=True).execute()
 
     # Reset bounty if last leaderboard of the month
-    if should_reset_bounty():
+    if should_reset_bounty(datetime.datetime.now(datetime.timezone.utc)):
         context.application.create_task(reset_bounty(context))
 
     # Disband inactive crews

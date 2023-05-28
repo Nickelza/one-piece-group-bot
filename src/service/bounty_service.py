@@ -350,31 +350,34 @@ def get_next_bounty_reset_time() -> datetime.datetime:
     """
 
     start_datetime = datetime.datetime.now(datetime.timezone.utc)
-    current_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
     while True:
         # Get next execution of leaderboard
         next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(), start_datetime=start_datetime)
 
-        if should_reset_bounty(next_run_time=next_run_time):
-            return current_run_time
+        if should_reset_bounty(next_run_time):
+            return next_run_time
 
-        current_run_time = next_run_time
         start_datetime = next_run_time + datetime.timedelta(seconds=1)
 
 
-def should_reset_bounty(next_run_time: datetime = None) -> bool:
+def should_reset_bounty(run_time: datetime) -> bool:
     """
-    Checks if the bounty should be reset given the run time
-    :param next_run_time: The run time
+    Checks if the bounty should be reset given the run time.
+    Bounties are reset on the last leaderboard of every even month.
+
+    :param run_time: The run time
     :return: Whether the bounty should be reset
     """
 
-    if next_run_time is None:
-        next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get())
+    # Adding 1 millisecond in case it's exactly midnight, else the next leaderboard will be considered as the
+    # current one
+    next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(),
+                                 start_datetime=run_time + datetime.timedelta(milliseconds=1))
 
-    # Reset if this is the last leaderboard of the month or today is the first, and the month before was even
-    return ((datetime.datetime.now().month != next_run_time.month or datetime.datetime.now().day)
-            and (next_run_time.month - 1) % 2 == 1)
+    # Reset if this is the last leaderboard of the month and the month before was odd
+    # or today is the first, and the month before was even
+    return ((run_time.month != next_run_time.month and (run_time.month - 1) % 2 == 1)
+            or (run_time.day == 1 and (run_time.month - 1) % 2 == 0))
 
 
 def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
