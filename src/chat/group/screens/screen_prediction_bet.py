@@ -96,7 +96,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # User has already bet and prediction does not allow multiple bets, unless the user is betting on the same option
     prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
     if len(prediction_options_user) > 0 and prediction.allow_multiple_choices is False:
-        if prediction_option in prediction_options_user:
+        if prediction_option not in prediction_options_user:
             await full_message_send(context, phrases.PREDICTION_ALREADY_BET, update=update,
                                     add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
                                     previous_screens=previous_screens,
