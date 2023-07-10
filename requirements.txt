@@ -5,7 +5,7 @@ asyncpraw~=7.6.1
 APScheduler==3.10.0
 Pillow==9.4.0
 validators==0.20.0
-pymysql~=1.0.2
+pymysql~=1.1.0
 pytz==2022.7.1
 cryptography==39.0.0
 requests==2.28.2
