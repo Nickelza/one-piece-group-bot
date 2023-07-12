@@ -151,7 +151,8 @@ DISABLE = Emoji.DISABLED + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
 
 # Private chat
-PVT_TXT_START = f'Welcome to @{Env.OPD_GROUP_USERNAME.get()} Bot! From here you can manage your profile.'
+PVT_TXT_START = f'Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!' \
+                f'\nWhat would you like to do?'
 PVT_KEY_SETTINGS = Emoji.SETTINGS + ' Settings'
 PVT_KEY_STATUS = Emoji.STATUS + ' Status'
 PVT_TXT_SETTINGS = 'Which setting would you like to change?'
