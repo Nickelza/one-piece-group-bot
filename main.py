@@ -1,11 +1,11 @@
 import logging
-
-import pytz
 import sys
 import time
+
+import pytz
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
-    ContextTypes
+    ContextTypes, BaseRateLimiter
 
 import constants as c
 import resources.Environment as Env
@@ -61,6 +61,7 @@ def main() -> None:
                    .token(Env.BOT_TOKEN.get())
                    .post_init(post_init)
                    .defaults(defaults)
+                   .rate_limiter(BaseRateLimiter())
                    .build())
 
     # Chat id handler
