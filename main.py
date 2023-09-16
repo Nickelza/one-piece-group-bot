@@ -5,7 +5,7 @@ import time
 import pytz
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
-    ContextTypes, BaseRateLimiter
+    ContextTypes, AIORateLimiter
 
 import constants as c
 import resources.Environment as Env
@@ -51,6 +51,9 @@ def main() -> None:
         logger.addHandler(logging.StreamHandler())
         logger.setLevel(logging.DEBUG)
 
+    # Disable httpx logging info
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO, stream=sys.stdout)
 
@@ -61,7 +64,7 @@ def main() -> None:
                    .token(Env.BOT_TOKEN.get())
                    .post_init(post_init)
                    .defaults(defaults)
-                   .rate_limiter(BaseRateLimiter())
+                   .rate_limiter(AIORateLimiter())
                    .build())
 
     # Chat id handler
