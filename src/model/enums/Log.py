@@ -9,11 +9,14 @@ from src.model.Crew import Crew
 from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.Game import Game
+from src.model.Leaderboard import Leaderboard
+from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.game.GameType import GameType
@@ -31,6 +34,7 @@ class LogType(IntEnum):
     BOUNTY_GIFT = 4
     LEGENDARY_PIRATE = 5
     NEW_WORLD_PIRATE = 6
+    LEADERBOARD_RANK = 7
 
 
 LOG_TYPE_BUTTON_TEXTS = {
@@ -40,6 +44,7 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY,
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_KEY,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_KEY,
+    LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_KEY,
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
@@ -49,6 +54,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 
@@ -436,7 +442,52 @@ class NewWorldPirateLog(Log):
             escape_valid_markdown_chars(self.object.get_location().name), crew_text)
 
 
-LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog()]
+class LeaderboardRankLog(Log):
+    """Class for leaderboard rank logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.LEADERBOARD_RANK)
+
+        self.object: LeaderboardUser = LeaderboardUser()
+        self.leaderboard: Leaderboard = Leaderboard()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: LeaderboardUser = LeaderboardUser.get(LeaderboardUser.id == object_id)
+        self.leaderboard: Leaderboard = self.object.leaderboard
+
+    def get_items(self, page) -> list[LeaderboardUser]:
+        return (self.object
+                .select()
+                .where(LeaderboardUser.user == self.user)
+                .order_by(LeaderboardUser.id.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where(LeaderboardUser.user == self.user)
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.LEADERBOARD_RANK_LOG_ITEM_TEXT.format(
+            self.leaderboard.week, self.leaderboard.year,
+            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)))
+
+    def get_item_detail_text(self) -> str:
+        return phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT.format(
+            self.leaderboard.week, self.leaderboard.year,
+            self.object.position,
+            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)),
+            get_belly_formatted(self.object.bounty))
+
+
+LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),
+        LeaderboardRankLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:

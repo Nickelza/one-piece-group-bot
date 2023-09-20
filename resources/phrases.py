@@ -665,6 +665,16 @@ NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\n\n*Bounty*: ฿{}' \
                                         '\n*Location*: {}{}'
 
+# Logs - Leaderboard Rank
+LEADERBOARD_RANK_LOG_KEY = 'Leaderboard Ranks'
+LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Leaderboard Rank'
+LEADERBOARD_RANK_LOG_ITEM_TEXT = 'Week {} of {} - {}'
+
+LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT = '*Week {} of {}*' \
+                                        '\n\n*Position*: {}°' \
+                                        '\n*Rank*: {}' \
+                                        '\n*Bounty*: ฿{}'
+
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
 SPEAK = '{} has been granted permission to speak'
