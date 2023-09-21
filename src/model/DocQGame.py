@@ -25,5 +25,42 @@ class DocQGame(BaseModel):
     class Meta:
         db_table = 'doc_q_game'
 
+    @staticmethod
+    def get_total_win_or_loss(user: User, status: GameStatus) -> int:
+        """
+        Get the total amount of wins or losses a user has
+        param user: The user
+        param status: The status (won or lost)
+        return: The total amount of wins or losses
+        """
+
+        return DocQGame().select().where((DocQGame.user == user) & (DocQGame.status == status)).count()
+
+    @staticmethod
+    def get_total_belly_won_or_lost(user: User, status: GameStatus) -> int:
+        """
+        Get the total amount of belly a user has won or lost
+        param user: The user
+        param status: The status (won or lost)
+        return: The total amount of belly won or lost
+        """
+
+        return (DocQGame().select(fn.SUM(DocQGame.belly))
+                .where((DocQGame.user == user) & (DocQGame.status == status))).scalar()
+
+    @staticmethod
+    def get_max_won_or_lost(user: User, status: GameStatus) -> 'DocQGame':
+        """
+        Get the DocQGame with the max amount of belly won or lost
+        param user: The user
+        param status: The status (won or lost)
+        return: The max amount of belly won or lost
+        """
+
+        return (DocQGame().select()
+                .where((DocQGame.user == user) & (DocQGame.status == status))
+                .order_by(DocQGame.belly.desc())
+                .first())
+
 
 DocQGame.create_table()

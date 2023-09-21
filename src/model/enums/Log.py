@@ -284,6 +284,29 @@ class DocQGameLog(Log):
             date, correct_apple, outcome_text,
             get_message_url(self.object.group_chat, self.object.message_id))
 
+    def get_stats_text(self) -> str:
+        total_games = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_games))
+        total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_games))
+        max_won_game = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+
+        return phrases.DOC_Q_GAME_LOG_STATS_TEXT.format(
+            LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type],
+            total_games,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_game.belly),
+            self.get_deeplink(max_won_game.id),
+            get_belly_formatted(max_lost_game.belly),
+            self.get_deeplink(max_lost_game.id))
+
 
 class GameLog(Log):
     """Class for game logs"""
