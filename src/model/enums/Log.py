@@ -17,7 +17,7 @@ from src.model.enums.BountyGiftRole import BountyGiftRole
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user, LeaderboardRankIndex
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.enums.Screen import Screen
@@ -63,7 +63,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
 class Log(ListPage):
     """Abstract class for logs."""
 
-    def __init__(self, log_type: LogType, only_by_boss: bool = False):
+    def __init__(self, log_type: LogType, only_by_boss: bool = False, has_stats: bool = True):
         """
         Constructor
 
@@ -75,6 +75,7 @@ class Log(ListPage):
         self.only_by_boss: bool = only_by_boss
         self.user: User = User()
         self.object: BaseModel = BaseModel()
+        self.has_stats: bool = has_stats
 
         super().__init__()
 
@@ -125,7 +126,6 @@ class Log(ListPage):
         """
         pass
 
-    # FIXME Make abstract once all logs stats are implemented
     def get_stats_text(self) -> str:
         """
         Get the stats for the log
@@ -507,7 +507,7 @@ class LegendaryPirateLog(Log):
 
         """
 
-        super().__init__(LogType.LEGENDARY_PIRATE)
+        super().__init__(LogType.LEGENDARY_PIRATE, has_stats=False)
 
         self.object: LegendaryPirate = LegendaryPirate()
         self.user: User = User()
@@ -546,7 +546,7 @@ class NewWorldPirateLog(Log):
 
         """
 
-        super().__init__(LogType.NEW_WORLD_PIRATE, only_by_boss=True)
+        super().__init__(LogType.NEW_WORLD_PIRATE, only_by_boss=True, has_stats=False)
 
         self.object: User = User()
 
@@ -627,6 +627,39 @@ class LeaderboardRankLog(Log):
             self.object.position,
             LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)),
             get_belly_formatted(self.object.bounty))
+
+    def get_stats_text(self) -> str:
+        total_appearances = self.get_total_items_count()
+        appearances_as_pirate_king = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.PIRATE_KING)
+        appearances_as_pirate_king_percentage = int(get_percentage_from_value(appearances_as_pirate_king,
+                                                                              total_appearances))
+        appearances_as_emperor = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.EMPEROR)
+        appearances_as_emperor_percentage = int(get_percentage_from_value(appearances_as_emperor, total_appearances))
+        appearances_as_first_mate = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.FIRST_MATE)
+        appearances_as_first_mate_percentage = int(get_percentage_from_value(appearances_as_first_mate,
+                                                                             total_appearances))
+        appearances_as_supernova = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.SUPERNOVA)
+        appearances_as_supernova_percentage = int(get_percentage_from_value(appearances_as_supernova,
+                                                                            total_appearances))
+        max_by_rank: LeaderboardUser = self.object.get_max_rank_attained(self.user)
+        max_by_bounty: LeaderboardUser = self.object.get(self.user)
+
+        return phrases.LEADERBOARD_RANK_LOG_STATS_TEXT.format(
+            total_appearances,
+            appearances_as_pirate_king,
+            appearances_as_pirate_king_percentage,
+            appearances_as_emperor,
+            appearances_as_emperor_percentage,
+            appearances_as_first_mate,
+            appearances_as_first_mate_percentage,
+            appearances_as_supernova,
+            appearances_as_supernova_percentage,
+            get_rank_by_leaderboard_user(max_by_rank).get_emoji_and_rank_message(),
+            max_by_rank.position,
+            self.get_deeplink(max_by_rank.id),
+            get_belly_formatted(max_by_bounty.bounty),
+            max_by_bounty.position,
+            self.get_deeplink(max_by_bounty.id))
 
 
 LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),

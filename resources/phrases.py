@@ -696,6 +696,7 @@ LEGENDARY_PIRATE_LOG_ITEM_TEXT = '{}'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\nEpithet: {}' \
                                         '\n\n*Reason*: {}'
+
 # Logs - New World Pirate
 NEW_WORLD_PIRATE_LOG_KEY = 'New World Pirates'
 NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'New World Pirate'
@@ -713,6 +714,13 @@ LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT = '*Week {} of {}*' \
                                         '\n\n*Position*: {}°' \
                                         '\n*Rank*: {}' \
                                         '\n*Bounty*: ฿{}'
+LEADERBOARD_RANK_LOG_STATS_TEXT = '*Total appearances*: {}' \
+                                  '\n*Appearances as Pirate King*: {} \\({}%\\)' \
+                                  '\n*Appearances as Emperor*: {} \\({}%\\)' \
+                                  '\n*Appearances as First Mate*: {} \\({}%\\)' \
+                                  '\n*Appearances as Supernova*: {} \\({}%\\)' \
+                                  '\n*Max rank*: [{} \\({}°\\)]({})' \
+                                  '\n*Max bounty*: [฿{} \\({}°\\)]({})'
 
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'

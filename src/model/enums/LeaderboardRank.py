@@ -1,6 +1,16 @@
+from enum import IntEnum
+
 import resources.Environment as Env
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.enums.Emoji import Emoji
+
+
+class LeaderboardRankIndex(IntEnum):
+    PIRATE_KING = 1
+    EMPEROR = 2
+    FIRST_MATE = 3
+    SUPERNOVA = 4
+    ROOKIE = 5
 
 
 class LeaderboardRank:
@@ -47,27 +57,27 @@ class LeaderboardRank:
         return self.index <= other.index
 
 
-PIRATE_KING = LeaderboardRank(1, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING, 1, 1,
+PIRATE_KING = LeaderboardRank(LeaderboardRankIndex.PIRATE_KING, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING, 1, 1,
                               Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
                               Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
                               Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
 
-EMPEROR = LeaderboardRank(2, 'Emperor', Emoji.LEADERBOARD_EMPEROR, 2, 5,
+EMPEROR = LeaderboardRank(LeaderboardRankIndex.EMPEROR, 'Emperor', Emoji.LEADERBOARD_EMPEROR, 2, 5,
                           Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int(),
                           Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
                           Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
-FIRST_MATE = LeaderboardRank(3, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE, 6, 9,
+FIRST_MATE = LeaderboardRank(LeaderboardRankIndex.FIRST_MATE, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE, 6, 9,
                              Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int(),
                              Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
                              Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
 
-SUPERNOVA = LeaderboardRank(4, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA, 10, 20,
+SUPERNOVA = LeaderboardRank(LeaderboardRankIndex.SUPERNOVA, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA, 10, 20,
                             Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int(),
                             Env.FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA.get_float(),
                             Env.FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA.get_float())
 
-ROOKIE = LeaderboardRank(5, 'Rookie', Emoji.LEADERBOARD_ROOKIE, 21, -1,
+ROOKIE = LeaderboardRank(LeaderboardRankIndex.ROOKIE, 'Rookie', Emoji.LEADERBOARD_ROOKIE, 21, -1,
                          Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int(),
                          Env.FIGHT_MAX_WIN_PROBABILITY_ROOKIE.get_float(),
                          Env.FIGHT_MIN_WIN_PROBABILITY_ROOKIE.get_float())

@@ -40,7 +40,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                                                              Screen.PVT_LOGS_TYPE_DETAIL)
 
         # Stats keyboard
-        if log.get_total_items_count() > 0:
+        if log.has_stats and log.get_total_items_count() > 0:
             stats_keyboard = Keyboard(phrases.PVT_KEY_LOGS_STATS, screen=Screen.PVT_LOGS_TYPE_STATS,
                                       inbound_info=inbound_keyboard.info)
             items_keyboard.append([stats_keyboard])
