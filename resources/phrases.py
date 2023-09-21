@@ -614,6 +614,7 @@ LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
                                  '\n_\\(The message may no longer be available\\)_')
 LOG_ITEM_DETAIL_NO_PERMISSION = 'You do not have permission to view this log'
+LOG_STATS_TEXT = '*{} Statistics*\n\n{}'
 LOG_STATS_NOT_ENOUGH_DATA = 'Not enough data to generate statistics for this log'
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
@@ -624,15 +625,14 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
                              f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
-FIGHT_LOG_STATS_TEXT = '*{} Statistics*' \
-                       '\n\n*Total fights*: {}' \
+FIGHT_LOG_STATS_TEXT = '*Total fights*: {}' \
                        '\n*Wins*: {} \\({}%\\)' \
                        '\n*Losses*: {} \\({}%\\)' \
                        '\n*Belly won*: ฿{}' \
                        '\n*Belly lost*: ฿{}' \
                        '\n*Max belly won*: [฿{} \\({}\\)]({})' \
                        '\n*Max belly lost*: [฿{} \\({}\\)]({})' \
-                       '\n*Most fought user*: {} \\({} times\\)'
+                       '\n*Most fought user*: {} \\({}x\\)'
 
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
@@ -642,8 +642,7 @@ DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
                                   '\n\n{}' \
                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
-DOC_Q_GAME_LOG_STATS_TEXT = '*{} Statistics*' \
-                            '\n\n*Total summons*: {}' \
+DOC_Q_GAME_LOG_STATS_TEXT = '*Total summons*: {}' \
                             '\n*Wins*: {} \\({}%\\)' \
                             '\n*Losses*: {} \\({}%\\)' \
                             '\n*Belly won*: ฿{}' \
@@ -651,7 +650,7 @@ DOC_Q_GAME_LOG_STATS_TEXT = '*{} Statistics*' \
                             '\n*Max belly won*: [฿{}]({})' \
                             '\n*Max belly lost*: [฿{}]({})' \
  \
-    # Logs - Game
+# Logs - Game
 GAME_LOG_KEY = 'Challenges'
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'
 GAME_LOG_ITEM_TEXT = '{} vs {} \\(฿{}\\)'
@@ -661,6 +660,17 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Wager*: ฿{}' \
                             '\n\n{}' \
                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+GAME_LOG_STATS_TEXT = '*Total challenges*: {}' \
+                      '\n*Wins*: {} \\({}%\\)' \
+                      '\n*Losses*: {} \\({}%\\)' \
+                      '\n*Draws*: {} \\({}%\\)' \
+                      '\n*Belly won*: ฿{}' \
+                      '\n*Belly lost*: ฿{}' \
+                      '\n*Max belly won*: [฿{} \\({}\\)]({})' \
+                      '\n*Max belly lost*: [฿{} \\({}\\)]({})' \
+                      '\n*Most challenged user*: {} \\({}x\\)' \
+                      '\n*Most played game*: {} \\({}x\\)'
+
 # Logs - Bounty Gift
 BOUNTY_GIFT_LOG_KEY = 'Bounty Gifts'
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Bounty Gift'

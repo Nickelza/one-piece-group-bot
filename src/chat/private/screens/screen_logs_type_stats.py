@@ -33,7 +33,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     if await validate(update, context, log, user):
         try:
-            await full_message_send(context, log.get_stats_text(), update=update, inbound_keyboard=inbound_keyboard)
+            await full_message_send(context,
+                                    phrases.LOG_STATS_TEXT.format(log.get_text_fill_in(), log.get_stats_text()),
+                                    update=update, inbound_keyboard=inbound_keyboard)
         except AttributeError:
             await full_message_send(context, phrases.LOG_STATS_NOT_ENOUGH_DATA, update=update,
                                     inbound_keyboard=inbound_keyboard)

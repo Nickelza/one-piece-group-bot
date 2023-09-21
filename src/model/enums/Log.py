@@ -147,6 +147,15 @@ class Log(ListPage):
         return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL,
                             previous_screens=[Screen.PVT_LOGS, Screen.PVT_LOGS_TYPE, Screen.PVT_LOGS_TYPE_STATS])
 
+    def get_text_fill_in(self) -> str:
+        """
+        Get the text fill in for the log
+
+        :return: The text fill in
+        """
+
+        return LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type]
+
 
 class FightLog(Log):
     """Class for fight logs"""
@@ -211,16 +220,15 @@ class FightLog(Log):
             outcome_text, get_message_url(self.object.group_chat, self.object.message_id))
 
     def get_stats_text(self) -> str:
-        most_fought_user, most_fought_count = self.object.get_most_fought_user(self.user)
         total_fights = self.get_total_items_count()
         total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
         total_wins_percentage = int(get_percentage_from_value(total_wins, total_fights))
         total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
         total_losses_percentage = int(get_percentage_from_value(total_losses, total_fights))
-        max_won_fight = self.object.get_max_fight_won_or_lost(self.user, GameStatus.WON)
-        max_lost_fight = self.object.get_max_fight_won_or_lost(self.user, GameStatus.LOST)
+        max_won_fight = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_fight = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+        most_fought_user, most_fought_count = self.object.get_most_fought_user(self.user)
         return phrases.FIGHT_LOG_STATS_TEXT.format(
-            LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type],
             total_fights,
             total_wins,
             total_wins_percentage,
@@ -294,7 +302,6 @@ class DocQGameLog(Log):
         max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
 
         return phrases.DOC_Q_GAME_LOG_STATS_TEXT.format(
-            LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type],
             total_games,
             total_wins,
             total_wins_percentage,
@@ -370,6 +377,40 @@ class GameLog(Log):
             challenger_text, self.opponent.get_markdown_mention(), game_name, date,
             get_belly_formatted(self.object.wager), outcome_text,
             get_message_url(self.object.group_chat, self.object.message_id))
+
+    def get_stats_text(self) -> str:
+        total_games = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_games))
+        total_losses = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_games))
+        total_draws = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.DRAW)
+        total_draws_percentage = int(get_percentage_from_value(total_draws, total_games))
+        max_won_game = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+        most_challenged_user, most_challenged_count = self.object.get_most_challenged_user(self.user)
+        most_played_game, most_played_count = self.object.get_most_played_game(self.user)
+
+        return phrases.GAME_LOG_STATS_TEXT.format(
+            total_games,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            total_draws,
+            total_draws_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_game.wager),
+            max_won_game.get_name(),
+            self.get_deeplink(max_won_game.id),
+            get_belly_formatted(max_lost_game.wager),
+            max_lost_game.get_name(),
+            self.get_deeplink(max_lost_game.id),
+            most_challenged_user.get_markdown_mention(),
+            most_challenged_count,
+            most_played_game.get_name(),
+            most_played_count)
 
 
 class BountyGiftLog(Log):

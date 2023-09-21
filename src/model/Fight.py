@@ -67,7 +67,7 @@ class Fight(BaseModel):
                                                            & (Fight.status == status.get_opposite_status())))).scalar()
 
     @staticmethod
-    def get_max_fight_won_or_lost(user: User, status: GameStatus) -> 'Fight':
+    def get_max_won_or_lost(user: User, status: GameStatus) -> 'Fight':
         """
         Get the fight with the max belly won or lost
         param user: The user
@@ -115,8 +115,8 @@ class Fight(BaseModel):
 
         if amount_as_opponent > amount_as_challenger:
             return most_fought_user_as_opponent.challenger, amount_as_opponent
-        else:
-            return most_fought_user_as_challenger.opponent, amount_as_challenger
+
+        return most_fought_user_as_challenger.opponent, amount_as_challenger
 
     def get_opponent(self, user: User) -> User:
         """
