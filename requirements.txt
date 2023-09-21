@@ -3,7 +3,7 @@ python-telegram-bot[rate-limiter]==20.4
 peewee==3.16.3
 asyncpraw~=7.7.1
 APScheduler==3.10.4
-Pillow~=10.0.0
+Pillow>=9.0.0
 validators==0.22.0
 pymysql~=1.1.0
 pytz==2023.3
