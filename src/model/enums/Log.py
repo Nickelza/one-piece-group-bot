@@ -13,6 +13,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
+from src.model.enums.BountyGiftRole import BountyGiftRole
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
@@ -471,6 +472,30 @@ class BountyGiftLog(Log):
             sender_text, self.other_user.get_markdown_mention(),
             date, get_belly_formatted(self.object.amount), tax_text,
             get_message_url(self.object.group_chat, self.object.message_id))
+
+    def get_stats_text(self) -> str:
+        highest_sent_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.SENDER)
+        highest_sent_user, highest_sent_amount = highest_sent_gift.receiver, highest_sent_gift.amount
+        highest_received_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)
+        highest_received_user, highest_received_amount = highest_received_gift.sender, highest_received_gift.amount
+        most_sent_user, most_sent_amount = self.object.get_top_givers_or_receiver(self.user, BountyGiftRole.SENDER)
+        most_received_user, most_received_amount = self.object.get_top_givers_or_receiver(self.user,
+                                                                                          BountyGiftRole.RECEIVER)
+
+        return phrases.BOUNTY_GIFT_LOG_STATS_TEXT.format(
+            self.get_total_items_count(),
+            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.SENDER)),
+            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)),
+            get_belly_formatted(highest_sent_amount),
+            highest_sent_user.get_markdown_name(),
+            self.get_deeplink(highest_sent_gift.id),
+            get_belly_formatted(highest_received_amount),
+            highest_received_user.get_markdown_name(),
+            self.get_deeplink(highest_received_gift.id),
+            most_sent_user.get_markdown_mention(),
+            get_belly_formatted(most_sent_amount),
+            most_received_user.get_markdown_mention(),
+            get_belly_formatted(most_received_amount))
 
 
 class LegendaryPirateLog(Log):
