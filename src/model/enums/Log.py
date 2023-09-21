@@ -19,10 +19,11 @@ from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
+from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
-from src.service.math_service import get_value_from_percentage
-from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url
+from src.service.math_service import get_value_from_percentage, get_percentage_from_value
+from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url, get_deeplink
 
 
 class LogType(IntEnum):
@@ -123,6 +124,29 @@ class Log(ListPage):
         """
         pass
 
+    # FIXME Make abstract once all logs stats are implemented
+    def get_stats_text(self) -> str:
+        """
+        Get the stats for the log
+
+        :return: The stats
+        """
+        pass
+
+    def get_deeplink(self, item_id) -> str:
+        """
+        Get the deeplink for the log
+
+        :param item_id: The item id
+        :return: The deeplink
+        """
+
+        from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
+
+        info: dict = {LogTypeReservedKeys.TYPE: self.type, LogTypeReservedKeys.ITEM_ID: item_id}
+        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL,
+                            previous_screens=[Screen.PVT_LOGS, Screen.PVT_LOGS_TYPE, Screen.PVT_LOGS_TYPE_STATS])
+
 
 class FightLog(Log):
     """Class for fight logs"""
@@ -143,7 +167,7 @@ class FightLog(Log):
     def set_object(self, object_id: int) -> None:
         self.object = Fight.get(Fight.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
-        self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
+        self.opponent = self.object.get_opponent(self.user)
         self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
             self.user_is_challenger)
 
@@ -166,6 +190,9 @@ class FightLog(Log):
                                                   get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
+        if self.user != self.object.challenger and self.user != self.object.opponent:
+            return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
+
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
 
@@ -182,6 +209,33 @@ class FightLog(Log):
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
             outcome_text, get_message_url(self.object.group_chat, self.object.message_id))
+
+    def get_stats_text(self) -> str:
+        most_fought_user, most_fought_count = self.object.get_most_fought_user(self.user)
+        total_fights = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_fights))
+        total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_fights))
+        max_won_fight = self.object.get_max_fight_won_or_lost(self.user, GameStatus.WON)
+        max_lost_fight = self.object.get_max_fight_won_or_lost(self.user, GameStatus.LOST)
+        return phrases.FIGHT_LOG_STATS_TEXT.format(
+            LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type],
+            total_fights,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_fight.belly),
+            max_won_fight.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_won_fight.id),
+            get_belly_formatted(max_lost_fight.belly),
+            max_lost_fight.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_lost_fight.id),
+            most_fought_user.get_markdown_mention(),
+            most_fought_count)
 
 
 class DocQGameLog(Log):

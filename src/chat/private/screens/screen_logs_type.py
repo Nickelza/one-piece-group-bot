@@ -39,6 +39,12 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log, LogTypeReservedKeys.ITEM_ID,
                                                              Screen.PVT_LOGS_TYPE_DETAIL)
 
+        # Stats keyboard
+        if log.get_total_items_count() > 0:
+            stats_keyboard = Keyboard(phrases.PVT_KEY_LOGS_STATS, screen=Screen.PVT_LOGS_TYPE_STATS,
+                                      inbound_info=inbound_keyboard.info)
+            items_keyboard.append([stats_keyboard])
+
         log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
         ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 

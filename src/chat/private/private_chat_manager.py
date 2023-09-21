@@ -17,6 +17,7 @@ from src.chat.private.screens.screen_game_guess_input import manage as manage_sc
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
+from src.chat.private.screens.screen_logs_type_stats import manage as manage_screen_logs_type_stats
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.private.screens.screen_prediction_detail import manage as manage_screen_prediction_detail
 from src.chat.private.screens.screen_prediction_detail_place_bet import \
@@ -191,6 +192,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_GAME_GUESS_INPUT:  # Guess game input
                 await manage_screen_game_guess_input(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_LOGS_TYPE_STATS:  # Logs Type Stats
+                await manage_screen_logs_type_stats(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

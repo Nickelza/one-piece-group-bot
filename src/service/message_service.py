@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import re
@@ -788,6 +789,30 @@ def get_start_with_command_url(command: str) -> str:
     :return: Start with command url
     """
     return f'https://t.me/{Env.BOT_USERNAME.get()}?start={command}'
+
+
+def get_deeplink(info: dict | str, screen: Screen = None, previous_screens: list[Screen] = None) -> str:
+    """
+    Get the deeplink
+    :param info: Info dict
+    :param screen: Screen
+    :param previous_screens: List of previous screens
+    :return: Deeplink
+    """
+
+    if isinstance(info, dict):
+        if screen is not None:
+            info[ReservedKeyboardKeys.SCREEN] = screen[1:]
+
+        if previous_screens is not None:
+            info[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [s[1:] for s in previous_screens]
+
+        info = json.dumps(info, separators=(',', ':'))
+
+    encoded_bytes = info.encode('utf-8')
+    encoded_string = base64.b64encode(encoded_bytes).decode('utf-8')
+
+    return get_start_with_command_url(encoded_string)
 
 
 def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[bool, bool, bool]:

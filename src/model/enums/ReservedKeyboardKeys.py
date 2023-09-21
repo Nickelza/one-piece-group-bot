@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ReservedKeyboardKeys(str, Enum):
+class ReservedKeyboardKeys(StrEnum):
     SCREEN = 'sc'
     PREVIOUS_SCREEN = 'psc'
     DELETE = 'del'

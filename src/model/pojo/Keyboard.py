@@ -1,9 +1,7 @@
-import base64
 import json
 
 from telegram import CallbackQuery
 
-import resources.Environment as Env
 from src.model.User import User
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -43,6 +41,7 @@ class Keyboard:
 
         if inbound_info is not None:
             self.info = inbound_info | self.info
+            self.refresh_callback_data()
 
         if self.is_deeplink:
             self.set_deeplink_url()
@@ -150,7 +149,5 @@ class Keyboard:
         Set the deeplink url for the keyboard
         """
 
-        encoded_bytes = self.callback_data.encode('utf-8')
-        encoded_string = base64.b64encode(encoded_bytes).decode('utf-8')
-
-        self.url = f'https://t.me/{Env.BOT_USERNAME.get()}?start={encoded_string}'
+        from src.service.message_service import get_deeplink
+        return get_deeplink(self.callback_data)

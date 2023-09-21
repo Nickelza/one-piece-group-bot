@@ -135,6 +135,8 @@ PVT_PREDICTION_DETAIL = Command('', Screen.PVT_PREDICTION_DETAIL, allow_deeplink
 COMMANDS.append(PVT_PREDICTION_DETAIL)
 PVT_GAME_GUESS_INPUT = Command('', Screen.PVT_GAME_GUESS_INPUT, allow_deeplink=True)
 COMMANDS.append(PVT_GAME_GUESS_INPUT)
+PVT_LOGS_TYPE_DETAIL = Command('', Screen.PVT_LOGS_TYPE_DETAIL, allow_deeplink=True)
+COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)

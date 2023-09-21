@@ -45,6 +45,7 @@ class Emoji(StrEnum):
     RADIO_BUTTON = '🔘'
     MONEY = '💰'
     SAD = '😢'
+    STATS = '📊'
 
     # Game
     WINNER = '🏆'

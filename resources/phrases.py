@@ -170,6 +170,7 @@ PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to chan
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
 PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
 PVT_TXT_LOGS = 'Which log would you like to view?'
+PVT_KEY_LOGS_STATS = Emoji.STATS + ' Stats'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
@@ -612,6 +613,8 @@ LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
                                  '\n_\\(The message may no longer be available\\)_')
+LOG_ITEM_DETAIL_NO_PERMISSION = 'You do not have permission to view this log'
+LOG_STATS_NOT_ENOUGH_DATA = 'Not enough data to generate statistics for this log'
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
@@ -621,6 +624,16 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
                              f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+FIGHT_LOG_STATS_TEXT = '*{} Statistics*' \
+                       '\n\n*Total fights*: {}' \
+                       '\n*Wins*: {} \\({}%\\)' \
+                       '\n*Losses*: {} \\({}%\\)' \
+                       '\n*Belly won*: ฿{}' \
+                       '\n*Belly lost*: ฿{}' \
+                       '\n*Max belly won*: [฿{} \\({}\\)]({})' \
+                       '\n*Max belly lost*: [฿{} \\({}\\)]({})' \
+                       '\n*Most fought user*: {} \\({} times\\)'
+
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Doc Q Game'
@@ -669,7 +682,6 @@ NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
 LEADERBOARD_RANK_LOG_KEY = 'Leaderboard Ranks'
 LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Leaderboard Rank'
 LEADERBOARD_RANK_LOG_ITEM_TEXT = 'Week {} of {} - {}'
-
 LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT = '*Week {} of {}*' \
                                         '\n\n*Position*: {}°' \
                                         '\n*Rank*: {}' \
