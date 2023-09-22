@@ -47,7 +47,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
                    command: Command = None,
                    bounty_gift: BountyGift = None) -> bool:
     """
-    Validate the fight request
+    Validate the bounty gift request
     :param update: The update object
     :param context: The context object
     :param sender: The user that wants to send a bounty gift
@@ -73,11 +73,14 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
 
     # Sender does not have enough bounty
     if sender.bounty < total_amount:
+        # Get max gift amount
+        max_amount = int(sender.bounty / (1 + (tax_percentage / 100)))
         ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(sender.bounty),
                                                                get_belly_formatted(amount),
                                                                get_belly_formatted(tax_amount),
                                                                tax_percentage,
-                                                               get_belly_formatted(total_amount))
+                                                               get_belly_formatted(total_amount),
+                                                               get_belly_formatted(max_amount))
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
