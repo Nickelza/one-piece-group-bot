@@ -66,7 +66,7 @@ def convert_seconds_to_time(seconds: int) -> str:
                 result += f'{minutes} minutes'
 
     # Show seconds only in last minute
-    if seconds > 0 and minutes == 0 and hours == 0 and days == 0 and weeks == 0:
+    if seconds > 0 and minutes <= 1 and hours == 0 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if seconds > 0:
