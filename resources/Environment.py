@@ -512,6 +512,8 @@ REQUIRED_LOCATION_LEVEL_PREDICTION_BET = Environment('REQUIRED_LOCATION_LEVEL_PR
 # Required location to collect Devil Fruit. Default: 10 (Whiskey Peak)
 REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT = Environment('REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT',
                                                           default_value='10')
+# Required location to view log stats. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_LOG_STATS = Environment('REQUIRED_LOCATION_LEVEL_LOG_STATS', default_value='21')
 
 # Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
 WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_value=(

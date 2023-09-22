@@ -112,6 +112,7 @@ COMMANDS.append(PVT_START)
 PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS, allow_while_arrested=True)
 COMMANDS.append(PVT_USER_STATUS)
 
+
 # Deprecated
 PVT_SETTINGS_LOCATION_UPDATE = Command('', Screen.PVT_SETTINGS_LOCATION_UPDATE, active=False)
 COMMANDS.append(PVT_SETTINGS_LOCATION_UPDATE)
@@ -133,10 +134,17 @@ COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT)
 # To allow deeplink
 PVT_PREDICTION_DETAIL = Command('', Screen.PVT_PREDICTION_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_PREDICTION_DETAIL)
+
 PVT_GAME_GUESS_INPUT = Command('', Screen.PVT_GAME_GUESS_INPUT, allow_deeplink=True)
 COMMANDS.append(PVT_GAME_GUESS_INPUT)
+
 PVT_LOGS_TYPE_DETAIL = Command('', Screen.PVT_LOGS_TYPE_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
+
+# To set required location
+PVT_LOGS_TYPE_STATS = Command('', Screen.PVT_LOGS_TYPE_STATS, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_LOG_STATS.get_int()))
+COMMANDS.append(PVT_LOGS_TYPE_STATS)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)
