@@ -150,4 +150,4 @@ class Keyboard:
         """
 
         from src.service.message_service import get_deeplink
-        return get_deeplink(self.callback_data)
+        self.url = get_deeplink(self.callback_data)
