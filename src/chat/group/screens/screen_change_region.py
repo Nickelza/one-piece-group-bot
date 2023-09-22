@@ -97,7 +97,8 @@ async def send_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE, user
                                                                  no_text=phrases.KEYBOARD_OPTION_REJECT,
                                                                  primary_key=region)]
 
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False)
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False,
+                            new_message=(update.callback_query is not None))
 
 
 async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard,
