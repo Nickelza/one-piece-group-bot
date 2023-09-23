@@ -1,5 +1,7 @@
 import asyncio
 import json
+import logging
+from datetime import datetime, timedelta
 from typing import Tuple, Callable
 
 from peewee import DoesNotExist
@@ -47,17 +49,19 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
         raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
 
 
-async def end_game(game: Game, game_outcome: GameOutcome) -> Game:
+async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = False) -> Game:
     """
     End the game, set the status and return the game
     :param game: The game
     :param game_outcome: The outcome
+    :param is_forced_end: If the game was forced to end
     :return: The game
     """
 
     challenger: User = game.challenger
     opponent: User = game.opponent
     half_wager: int = game.wager / 2
+    previous_status: GameStatus = GameStatus(game.status)
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
         game.status = GameStatus.WON
@@ -66,12 +70,22 @@ async def end_game(game: Game, game_outcome: GameOutcome) -> Game:
         game.status = GameStatus.LOST
         await add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
     else:
-        game.status = GameStatus.DRAW
+        if is_forced_end:
+            game.status = GameStatus.FORCED_END
+        else:
+            game.status = GameStatus.DRAW
+
+        if previous_status.only_challenger_wager():
+            half_wager *= 2
+        else:
+            await add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
+
         await add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
-        await add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
 
     challenger.pending_bounty -= half_wager
-    opponent.pending_bounty -= half_wager
+
+    if not previous_status.only_challenger_wager():
+        opponent.pending_bounty -= half_wager
 
     # Refresh
     game.challenger = challenger
@@ -226,6 +240,24 @@ def force_end_all_active() -> None:
     for game in active_games:
         game.status = GameStatus.FORCED_END
         game.save()
+
+
+async def end_inactive_games() -> None:
+    """
+    End inactive games (games which last interaction was more than N seconds ago)
+    :return: None
+    """
+
+    # Game
+    inactive_games = (Game
+                      .select()
+                      .where((Game.status.not_in(GameStatus.get_finished()))
+                             & (Game.last_interaction_date < (datetime.now()
+                                                              - timedelta(seconds=Env.GAME_INACTIVE_TIME.get_int())))))
+
+    for game in inactive_games:
+        await end_game(game, GameOutcome.NONE, is_forced_end=True)
+        logging.info(f'Game {game.id} was ended due to inactivity')
 
 
 async def notify_game_turn(context: ContextTypes.DEFAULT_TYPE, game: Game, game_turn: GameTurn):
@@ -540,4 +572,5 @@ def save_game(game: Game, board: str) -> None:
     """
 
     game.board = board
+    game.last_interaction_date = datetime.now()
     game.save()

@@ -226,7 +226,7 @@ GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any
                        '\nYou can initiate another challenge in *{}*, but in the meantime you can ask another user ' \
                        'to challenge you.'
 GAME_PENDING_KEY = 'Pending challenge'
-GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the players.'
+GAME_FORCED_END = 'This game has ended due to bounty reset or inactivity. The wagers has been returned to the players.'
 
 GAME_STATUS_ND = 'Not defined'
 GAME_STATUS_IN_PROGRESS = 'In progress'

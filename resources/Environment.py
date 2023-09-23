@@ -281,6 +281,13 @@ SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('SHOULD_LOG_TIMER
 SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment(
     'SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS', default_value='False')
 
+# End inactive games. Default: Every 5 minutes
+CRON_END_INACTIVE_GAMES = Environment('CRON_END_INACTIVE_GAMES', default_value='*/5 * * * *')
+ENABLE_TIMER_END_INACTIVE_GAMES = Environment('ENABLE_TIMER_END_INACTIVE_GAMES', default_value='True')
+SHOULD_LOG_TIMER_END_INACTIVE_GAMES = Environment('SHOULD_LOG_TIMER_END_INACTIVE_GAMES', default_value='False')
+SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES = Environment('SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES',
+                                                       default_value='False')
+
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
 
@@ -363,6 +370,8 @@ GAME_COOLDOWN_DURATION = Environment('GAME_COOLDOWN_DURATION', default_value='8'
 GAME_CONFIRMATION_TIMEOUT = Environment('GAME_CONFIRMATION_TIMEOUT', default_value='120')
 # How much time to wait after user has confirmed the game before starting the game. Default: 60 seconds
 GAME_START_WAIT_TIME = Environment('GAME_START_WAIT_TIME', default_value='60')
+# After how much time since the last interaction should a game be considered inactive. Default: 600 seconds
+GAME_INACTIVE_TIME = Environment('GAME_INACTIVE_TIME', default_value='600')
 # One Piece Wiki URL
 ONE_PIECE_WIKI_URL = Environment('ONE_PIECE_WIKI_URL', default_value='https://onepiece.fandom.com/wiki/')
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import DoesNotExist
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -47,6 +49,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     if game_status.is_finished():
         await full_message_send(context, phrases.GAME_INPUT_GAME_FINISHED, update=update)
         return
+
+    game.last_interaction_date = datetime.now()
+    game.save()
 
     # Game in countdown
     if game_status is GameStatus.COUNTDOWN_TO_START:

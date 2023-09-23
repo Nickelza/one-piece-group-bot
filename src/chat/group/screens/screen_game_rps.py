@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from enum import StrEnum
 from typing import Tuple
 
@@ -48,6 +49,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         return
 
     game, rock_paper_scissors = get_board(game)
+    game.last_interaction_date = datetime.now()
 
     if inbound_keyboard.screen == Screen.GRP_ROCK_PAPER_SCISSORS_GAME:
         rps_choice = RPSChoice(inbound_keyboard.info[GameRPSReservedKeys.CHOICE])

@@ -13,6 +13,7 @@ from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_
 from src.service.devil_fruit_service import schedule_devil_fruit_release, release_scheduled_devil_fruit, \
     respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
+from src.service.game_service import end_inactive_games
 from src.service.group_service import deactivate_inactive_group_chats
 from src.service.leaderboard_service import send_leaderboard
 from src.service.location_service import reset_can_change_region
@@ -121,6 +122,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await respawn_devil_fruit(context)
         case Timer.DEACTIVATE_INACTIVE_GROUP_CHATS:
             deactivate_inactive_group_chats()
+        case Timer.END_INACTIVE_GAMES:
+            await end_inactive_games()
         case _:
             raise ValueError(f'Unknown timer {timer.name}')
 

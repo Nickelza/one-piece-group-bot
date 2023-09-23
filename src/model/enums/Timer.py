@@ -145,3 +145,10 @@ DEACTIVATE_INACTIVE_GROUP_CHATS = Timer('deactivate_inactive_group_chats',
                                         Env.SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool(),
                                         Env.SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool())
 TIMERS.append(DEACTIVATE_INACTIVE_GROUP_CHATS)
+
+# End inactive games
+END_INACTIVE_GAMES = Timer('end_inactive_games', Env.CRON_END_INACTIVE_GAMES.get(),
+                           Env.ENABLE_TIMER_END_INACTIVE_GAMES.get_bool(),
+                           Env.SHOULD_LOG_TIMER_END_INACTIVE_GAMES.get_bool(),
+                           Env.SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES.get_bool())
+TIMERS.append(END_INACTIVE_GAMES)

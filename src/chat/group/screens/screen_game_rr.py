@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from enum import StrEnum
 from typing import Tuple
 
@@ -47,6 +48,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         return
 
     game, russian_roulette = get_board(game)
+    game.last_interaction_date = datetime.now()
 
     # Not invoked from opponent confirmation
     if inbound_keyboard.screen == Screen.GRP_RUSSIAN_ROULETTE_GAME:

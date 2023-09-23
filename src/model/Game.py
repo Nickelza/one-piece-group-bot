@@ -27,6 +27,7 @@ class Game(BaseModel):
                                  on_update='CASCADE')
     message_id = IntegerField(null=True)
     wager = IntegerField(null=True)
+    last_interaction_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
         db_table = 'game'
