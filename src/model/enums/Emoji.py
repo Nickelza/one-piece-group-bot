@@ -46,12 +46,13 @@ class Emoji(StrEnum):
     MONEY = '💰'
     SAD = '😢'
     STATS = '📊'
+    WARNING = '⚠'
 
     # Game
     WINNER = '🏆'
     LOSER = '💥'
     CONFETTI = '🎉'
-    HEART = '❤'
+    BLUE_HEART = '💙'
 
     # Prediction
     PREDICTION_BET_WIN = '🏆'

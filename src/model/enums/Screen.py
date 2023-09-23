@@ -25,7 +25,6 @@ class Screen(StrEnum):
     GRP_DEVIL_FRUIT_COLLECT = 'G19'
     GRP_SETTINGS = 'G20'
     GRP_DEVIL_FRUIT_SELL = 'G21'
-    GRP_GUESS_OR_LIFE_GAME = 'G22'
 
     PVT_START = 'P1'
     PVT_SETTINGS = 'P2'

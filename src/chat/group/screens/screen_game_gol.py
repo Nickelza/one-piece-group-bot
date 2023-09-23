@@ -1,228 +1,121 @@
 import asyncio
 import json
-import string
-from enum import StrEnum
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
-import src.service.game_service as game_service
 from src.model.Game import Game
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
-from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.guessorlife.GuessOrLife import GuessOrLife, PlayerType, PlayerInfo
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
-from src.service.game_service import get_text, save_game, get_players, get_game_authorized_tg_user_ids
-from src.service.message_service import full_media_send
-from src.service.message_service import full_message_send, escape_valid_markdown_chars
+from src.service.game_service import save_game, get_players, guess_game_countdown_to_start, \
+    get_guess_game_users_to_send_message_to, set_user_private_screen, validate_game, get_terminology_from_game, \
+    get_guess_game_result_term_text, end_game, get_text
+from src.service.message_service import full_message_send, escape_valid_markdown_chars, get_message_url, full_media_send
 
 
-class GameGOLReservedKeys(StrEnum):
-    """
-    The reserved keys for this screen
-    """
-
-    LETTER = 'b'
-    CHECK = 'c'
-
-
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 game: Game = None) -> None:
+async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
+                 ) -> None:
     """
     Manage the Guess or Life game screen
     :param update: The update object
     :param context: The context object
-    :param user: The user object
     :param inbound_keyboard: The inbound keyboard
     :param game: The game object
     :return: None
     """
 
     # Get the game from validation, will handle error messages
-    game = await game_service.validate_game(update, context, inbound_keyboard, game)
+    game = await validate_game(update, context, inbound_keyboard, game)
     if game is None:
         return
 
-    guess_or_life: GuessOrLife = get_board(game)
+    get_board(game)
 
     # From opponent confirmation, start countdown
     if inbound_keyboard.screen == Screen.GRP_GAME_OPPONENT_CONFIRMATION:
         game.status = GameStatus.COUNTDOWN_TO_START
         game.save()
         context.application.create_task(
-            game_service.guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(),
-                                                       run_game, is_played_in_private_chat=False))
+            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(),
+                                          run_game))
         return
-
-    player_type: PlayerType = get_player_type(game, user)
-    player_info: PlayerInfo = guess_or_life.get_player_info(player_type)
-    is_finished: bool = False
-
-    # Not invoked from opponent confirmation
-    if inbound_keyboard.screen == Screen.GRP_GUESS_OR_LIFE_GAME:
-        info_text_used_letters = get_info_text_with_used_letters(guess_or_life, player_type)
-
-        # Display current situation
-        if GameGOLReservedKeys.CHECK in inbound_keyboard.info:
-            await full_message_send(context, info_text_used_letters, update=update, answer_callback=True,
-                                    show_alert=True)
-            return
-
-        # Letter already used
-        if guess_or_life.has_used_letter(player_type, inbound_keyboard.info[GameGOLReservedKeys.LETTER]):
-            callback_text = phrases.GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED.format(info_text_used_letters)
-            await full_message_send(context, callback_text, update=update, answer_callback=True, show_alert=True)
-            return
-
-        # No more lives remaining
-        elif player_info.lives == 0:
-            callback_text = phrases.GUESS_OR_LIFE_GAME_NO_MORE_LIVES.format(info_text_used_letters)
-            await full_message_send(context, callback_text, update=update, answer_callback=True, show_alert=True)
-            return
-
-        else:
-            # Add letter to used letters
-            letter = inbound_keyboard.info[GameGOLReservedKeys.LETTER]
-            guess_or_life.add_used_letter(player_type, letter)
-            save_game(game, guess_or_life.get_board_json())
-
-            # Refresh info text
-            info_text_used_letters = get_info_text_with_used_letters(guess_or_life, player_type)
-
-            # Letter not in word
-            if not guess_or_life.is_letter_is_in_word(letter):
-                guess_or_life.remove_life(player_type)
-                save_game(game, guess_or_life.get_board_json())
-                callback_text = phrases.GUESS_OR_LIFE_GAME_WRONG_LETTER.format(info_text_used_letters)
-                await full_message_send(context, callback_text, update=update, answer_callback=True, show_alert=True)
-            # Game not finished
-            elif not guess_or_life.is_finished(player_type):
-                callback_text = phrases.GUESS_OR_LIFE_GAME_CORRECT_LETTER.format(
-                    guess_or_life.get_word_with_blanks(player_type))
-                await full_message_send(context, callback_text, update=update, answer_callback=True)
-
-            else:
-                # Game finished
-                callback_text = phrases.GUESS_OR_LIFE_GAME_CORRECT_LETTER_WIN.format(
-                    guess_or_life.get_word_with_blanks(player_type))
-                await full_message_send(context, callback_text, update=update, answer_callback=True, show_alert=True)
-                game_outcome: GameOutcome = guess_or_life.get_outcome(player_type)
-                await game_service.end_game(game, game_outcome)
-                user.should_update_model = False
-                is_finished = True
-
-    await refresh_message(context, game, guess_or_life, update=update, is_finished=is_finished, player_type=player_type)
-
-
-async def refresh_message(context, game, guess_or_life, update: Update = None, is_finished: bool = False,
-                          player_type: PlayerType = None):
-    """
-    Refresh the message
-    :param context: The context
-    :param game: The game object
-    :param guess_or_life: The guess or life object
-    :param update: The update
-    :param is_finished: If the game is finished
-    :param player_type: The player type, used to determine the outcome without checking both players board
-    :return: None
-    """
-
-    ot_text = get_specific_text(game, guess_or_life, is_finished=is_finished, player_type=player_type)
-
-    if not is_finished:
-        outbound_keyboard = get_outbound_keyboard(game)
-    else:
-        outbound_keyboard = None
-
-    await full_media_send(context, saved_media_name=SavedMediaName.GAME_GUESS_OR_LIFE, caption=ot_text,
-                          update=update, authorized_users=get_game_authorized_tg_user_ids(game),
-                          keyboard=outbound_keyboard, group_chat=game.group_chat, edit_message_id=game.message_id,
-                          ignore_bad_request_exception=True)
 
 
 def get_specific_text(game: Game, guess_or_life: GuessOrLife, is_finished: bool = False, player_type: PlayerType = None,
-                      remaining_seconds_to_start: int = None) -> str:
+                      outcome: GameOutcome = None, is_for_group: bool = False) -> str:
     """
     Get the specific text
     :param game: The game object
     :param guess_or_life: The guess or life object
     :param is_finished: If the game is finished
     :param player_type: The player type
-    :param remaining_seconds_to_start: The remaining seconds to start
+    :param outcome: The outcome if the game is finished
+    :param is_for_group: If the text is for the group message update
     :return: The specific text
     """
 
     challenger, opponent = get_players(game)
 
-    word_with_blanks = guess_or_life.get_word_with_blanks(PlayerType.CHALLENGER, show_guessed_letters=is_finished)
-    word_with_blanks = escape_valid_markdown_chars(word_with_blanks)
-    challenger_info_text = phrases.GUESS_OR_LIFE_GAME_NAME_WORD_LIVES.format(
-        challenger.get_markdown_name(), word_with_blanks,
-        Emoji.HEART * guess_or_life.get_player_info(PlayerType.CHALLENGER).lives)
+    ot_text_list = []
+    for pt in PlayerType:
+        word_with_blanks = guess_or_life.get_word_with_blanks(
+            pt, show_guessed_letters=(is_finished or pt is player_type))
+        word_with_blanks = escape_valid_markdown_chars(word_with_blanks)
 
-    word_with_blanks = guess_or_life.get_word_with_blanks(PlayerType.OPPONENT, show_guessed_letters=is_finished)
-    word_with_blanks = escape_valid_markdown_chars(word_with_blanks)
-    opponent_info_text = '\n\n' + phrases.GUESS_OR_LIFE_GAME_NAME_WORD_LIVES.format(
-        opponent.get_markdown_name(), word_with_blanks,
-        Emoji.HEART * guess_or_life.get_player_info(PlayerType.OPPONENT).lives)
+        addition = ''
+        hearts_text = (Emoji.BLUE_HEART * guess_or_life.get_player_info(pt).lives) if not is_for_group else ''
+        user = challenger if pt is PlayerType.CHALLENGER else opponent
+        if player_type is not None and (pt is player_type or is_finished):
+            # Show used and remaining letters to specific user or all players if game is finished
+            addition = phrases.GUESS_OR_LIFE_GAME_REMAINING_USED_LETTERS.format(
+                guess_or_life.get_remaining_letters(pt),
+                guess_or_life.get_used_letters_formatted(pt))
 
-    text_before_footer = challenger_info_text + opponent_info_text
+            # Do not show name if sending to specific user
+            if pt is player_type:
+                pt_text = phrases.GUESS_OR_LIFE_GAME_WORD_LIVES.format(
+                    word_with_blanks, '\n', hearts_text, addition)
+            else:
+                pt_text = phrases.GUESS_OR_LIFE_GAME_NAME_WORD_LIVES.format(
+                    user.get_markdown_name(), word_with_blanks, '\n', hearts_text, addition)
+        else:
+            if is_for_group:
+                pt_text = phrases.GUESS_OR_LIFE_GAME_NAME_WORD.format(
+                    user.get_markdown_name(), word_with_blanks)
+            else:
+                pt_text = phrases.GUESS_OR_LIFE_GAME_NAME_WORD_LIVES.format(
+                    user.get_markdown_name(), word_with_blanks, ('\n' if player_type is None else ''),
+                    hearts_text, addition)
 
-    if is_finished:
-        game_outcome: GameOutcome = guess_or_life.get_outcome(player_type)
-        text_before_footer += '\n\n'
-    else:
-        game_outcome: GameOutcome = GameOutcome.NONE
+        ot_text_list.append(pt_text)
 
-        if guess_or_life.can_issue_live():
-            text_before_footer += phrases.GUESS_OR_LIFE_NEW_LIFE_EVERY.format(
+    # If opponent, swap the order
+    if player_type is PlayerType.OPPONENT:
+        ot_text_list.reverse()
+
+    # Sending in private chat
+    if not is_for_group:
+        ot_text = '\n\n\n'.join(ot_text_list)
+        if guess_or_life.can_issue_live() and not is_finished:
+            ot_text += '\n\n' + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2.format(
                 Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
 
-    return get_text(game, is_finished, game_outcome=game_outcome, is_turn_based=False,
-                    terminology=guess_or_life.terminology, remaining_seconds_to_start=remaining_seconds_to_start,
+        return ot_text
+
+    # Updating the group message
+    text_before_footer = '\n\n'.join(ot_text_list) + '\n\n'
+    return get_text(game, is_finished, game_outcome=outcome, is_turn_based=False, terminology=guess_or_life.terminology,
                     text_to_add_before_footer=text_before_footer)
-
-
-def get_outbound_keyboard(game: Game) -> list[list[Keyboard]]:
-    """
-    Get the outbound keyboard
-    :param game: The game object
-    :return: The outbound keyboard
-    """
-
-    outbound_keyboard: list[list[Keyboard]] = []
-
-    # Alphabet
-    max_letters_per_row = 7
-    alphabet = list(string.ascii_uppercase)
-
-    keyboard_row: list[Keyboard] = []
-    for index, letter in enumerate(alphabet):
-        info: dict = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id,
-                      GameGOLReservedKeys.LETTER: letter}
-        keyboard_row.append(Keyboard(letter, info=info, screen=Screen.GRP_GUESS_OR_LIFE_GAME))
-
-        if (index + 1) % max_letters_per_row == 0:
-            outbound_keyboard.append(keyboard_row)
-            keyboard_row = []
-
-    outbound_keyboard.append(keyboard_row)
-
-    # Add check button
-    check_btn_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id, GameGOLReservedKeys.CHECK: True}
-    outbound_keyboard.append([Keyboard(
-        phrases.GUESS_OR_LIFE_GAME_CHECK, info=check_btn_info, screen=Screen.GRP_GUESS_OR_LIFE_GAME)])
-
-    return outbound_keyboard
 
 
 def get_board(game: Game) -> GuessOrLife:
@@ -239,7 +132,7 @@ def get_board(game: Game) -> GuessOrLife:
             min_unique_characters=GuessOrLife.get_min_unique_characters_by_difficulty(game.get_difficulty()),
             max_unique_characters=GuessOrLife.get_max_unique_characters_by_difficulty(game.get_difficulty()))
         guess_or_life = GuessOrLife(random_terminology)
-        game_service.save_game(game, guess_or_life.get_board_json())
+        save_game(game, guess_or_life.get_board_json())
         return guess_or_life
 
     # Parse the JSON string and create a Terminology object
@@ -273,51 +166,51 @@ def get_player_type(game: Game, user: User) -> PlayerType:
     return PlayerType.OPPONENT
 
 
-def get_info_text_with_used_letters(guess_or_life: GuessOrLife, player_type: PlayerType,
-                                    should_escape: bool = False) -> str:
-    """
-    Get the info text
-    :param guess_or_life: The guess or life object
-    :param player_type: The player type
-    :param should_escape: If the text should be escaped
-    :return: The info text
-    """
-
-    text = phrases.GUESS_OR_LIFE_INFO_USED_LETTERS.format(
-        guess_or_life.get_word_with_blanks(player_type), guess_or_life.get_used_letters_formatted(player_type))
-
-    if not should_escape:
-        return text
-
-    return escape_valid_markdown_chars(text)
-
-
-async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game):
-    """
-    Run the game
-    :param context: The context
-    :param game: The game
-    """
-
-    guess_or_life: GuessOrLife = get_board(game)
-    await refresh_message(context, game, guess_or_life)
-
-    context.application.create_task(issue_lives(context, game))
-
-
-async def issue_lives(context: ContextTypes.DEFAULT_TYPE, game: Game):
+async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
+                   should_send_to_all_players: bool = True, schedule_next_send: bool = True) -> None:
     """
     Issue lives to to the players
     :param context: The context
     :param game: The game
+    :param send_to_user: The user to send the message to
+    :param should_send_to_all_players: If the image should be sent to all players
+    :param schedule_next_send: If the next send should be scheduled
     """
 
-    await asyncio.sleep(Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
-    game = Game.get_by_id(game.id)  # Refresh the game
+    users = await get_guess_game_users_to_send_message_to(game, send_to_user, should_send_to_all_players,
+                                                          schedule_next_send)
 
+    # Get the board
+    guess_or_life = get_board(game)
+
+    # Send the message to the users
+    for user in users:
+        specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+        if guess_or_life.can_issue_live():
+            remaining_time_text = (phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 if should_send_to_all_players
+                                   else phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2)
+            ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+                specific_text,
+                remaining_time_text.format(Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int()))
+        else:
+            ot_text = specific_text
+
+        context.application.create_task(full_message_send(context, ot_text, chat_id=user.tg_user_id))
+
+        # Set private screen for input
+        context.application.create_task(set_user_private_screen(user, game))
+
+    if not schedule_next_send:
+        return
+
+    await asyncio.sleep(Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
+
+    # Refresh game, resend only if it's still ongoing
+    game = Game.get_by_id(game.id)
     if GameStatus(game.status) is not GameStatus.IN_PROGRESS:
         return
 
+    # Issue live
     guess_or_life: GuessOrLife = get_board(game)
     if not guess_or_life.can_issue_live():
         return
@@ -325,6 +218,105 @@ async def issue_lives(context: ContextTypes.DEFAULT_TYPE, game: Game):
     guess_or_life.issue_live()
     save_game(game, guess_or_life.get_board_json())
 
-    await refresh_message(context, game, guess_or_life)
+    await run_game(context, game)
 
-    await issue_lives(context, game)
+
+async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, user: User
+                          ) -> None:
+    """
+    Validate the answer
+    :param update: The update object
+    :param context: The context object
+    :param game: The game object
+    :param user: The user object
+    :return: None
+    """
+
+    try:
+        letter = update.effective_message.text
+    except AttributeError:
+        return
+
+    guess_or_life: GuessOrLife = get_board(game)
+    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+
+    # More than one letter sent
+    if len(letter) > 1:
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
+    # Letter already used
+    if guess_or_life.has_used_letter(get_player_type(game, user), letter):
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
+    # No more lives remaining
+    if guess_or_life.get_player_info(get_player_type(game, user)).lives == 0:
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_NO_MORE_LIVES, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
+    # Add letter to used letters and refresh specific text
+    guess_or_life.add_used_letter(get_player_type(game, user), letter)
+    save_game(game, guess_or_life.get_board_json())
+    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+
+    # Letter not in word
+    if not guess_or_life.is_letter_is_in_word(letter):
+        guess_or_life.remove_life(get_player_type(game, user))
+        save_game(game, guess_or_life.get_board_json())
+        specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_WRONG_LETTER, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
+    # Correct letter but game not finished
+    if not guess_or_life.is_finished(get_player_type(game, user)):
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_CORRECT_LETTER, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
+    # End game
+    challenger, opponent = get_players(game)
+    outcome: GameOutcome = GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
+    await end_game(game, outcome)
+    user.should_update_model = False  # To avoid re-writing bounty
+    loser = challenger if user == opponent else opponent
+
+    # Go to game message in group button
+    outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                                                         url=get_message_url(game.group_chat, game.message_id))]]
+
+    terminology: Terminology = await get_terminology_from_game(game)
+    term_text_addition = get_guess_game_result_term_text(terminology)
+
+    # Send message to winner
+    await set_user_private_screen(user, should_reset=True)
+    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user), is_finished=True)
+    winner_text: str = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+        phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text),
+        '\n' + term_text_addition)
+    context.application.create_task(
+        full_message_send(context, winner_text, chat_id=user.tg_user_id, keyboard=outbound_keyboard))
+
+    # Send message to loser
+    await set_user_private_screen(loser, should_reset=True)
+    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, loser), is_finished=True)
+    loser_caption: str = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text),
+        '\n' + term_text_addition)
+    context.application.create_task(
+        full_message_send(context, loser_caption, chat_id=loser.tg_user_id, keyboard=outbound_keyboard))
+
+    # Update group message
+    ot_text = get_specific_text(game, guess_or_life, is_finished=True, outcome=outcome, is_for_group=True)
+    group_chat: GroupChat = game.group_chat
+    await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,
+                          edit_only_caption_and_keyboard=True)

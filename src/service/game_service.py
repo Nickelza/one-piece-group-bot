@@ -4,6 +4,7 @@ from typing import Tuple, Callable
 
 from peewee import DoesNotExist
 from telegram import Update
+from telegram.error import RetryAfter
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -397,23 +398,26 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
         return
 
     # Update message
-    ot_text = get_text(game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds)
-    await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
-                          saved_media_name=game.get_saved_media_name(), ignore_bad_request_exception=True)
+    try:
+        ot_text = get_text(game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds)
+        await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
+                              saved_media_name=game.get_saved_media_name(), ignore_bad_request_exception=True)
+    except RetryAfter:
+        pass
 
-    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every second
+    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every 5 seconds
     if remaining_seconds > 10:
         await asyncio.sleep(10)
         await guess_game_countdown_to_start(update, context, game, remaining_seconds - 10, run_game_function,
                                             is_played_in_private_chat=is_played_in_private_chat)
     else:
-        await asyncio.sleep(1)
-        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 1, run_game_function,
+        await asyncio.sleep(5)
+        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 5, run_game_function,
                                             is_played_in_private_chat=is_played_in_private_chat)
 
 
-async def get_guess_game_users_to_send_image_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
-                                                schedule_next_send: bool) -> list[User]:
+async def get_guess_game_users_to_send_message_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
+                                                  schedule_next_send: bool) -> list[User]:
     """
     Get the users to send the image to
     :param game: The game
@@ -454,16 +458,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
     except AttributeError:
         return
 
-    # Parse the JSON string and create a Terminology object
-    json_dict = json.loads(game.board)
-    if "terminology" in json_dict:
-        term_dict = json_dict.pop("terminology")
-        terminology: Terminology = Terminology(**term_dict)
-    elif "character" in json_dict:
-        char_dict = json_dict.pop("character")
-        terminology: Terminology = Character(**char_dict)
-    else:
-        raise ValueError("No terminology or character in JSON string")
+    terminology = await get_terminology_from_game(game)
 
     if not terminology.name.lower() == answer.lower():
         return
@@ -501,6 +496,27 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
     group_chat: GroupChat = game.group_chat
     await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,
                           edit_only_caption_and_keyboard=True)
+
+
+async def get_terminology_from_game(game: Game) -> Terminology:
+    """
+    Get the terminology from the game
+    :param game: The game
+    :return: The terminology
+    """
+
+    # Parse the JSON string and create a Terminology object
+    json_dict = json.loads(game.board)
+    if "terminology" in json_dict:
+        term_dict = json_dict.pop("terminology")
+        terminology: Terminology = Terminology(**term_dict)
+    elif "character" in json_dict:
+        char_dict = json_dict.pop("character")
+        terminology: Terminology = Character(**char_dict)
+    else:
+        raise ValueError("No terminology or character in JSON string")
+
+    return terminology
 
 
 def get_guess_game_play_deeplink_button(game: Game) -> Keyboard:

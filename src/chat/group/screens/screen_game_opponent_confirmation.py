@@ -104,7 +104,7 @@ async def dispatch_game(update: Update, context: ContextTypes.DEFAULT_TYPE, user
             await manage_ww(update, context, inbound_keyboard, game)
 
         case GameType.GUESS_OR_LIFE:
-            await manage_gol(update, context, user, inbound_keyboard, game)
+            await manage_gol(update, context, inbound_keyboard, game)
 
         case _:
             raise GroupChatException(GroupChatError.INVALID_GAME)
