@@ -398,6 +398,10 @@ GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY = Environment('GUESS_OR_LIFE_MAX_UNIQUE
 # Guess or Life m unique characters in medium mode. Default: 10
 GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM = Environment('GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM',
                                                          default_value='10')
+# How much time to wait before sending the next detail in Punk Records game. Default: 30 seconds
+PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME = Environment('PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME', default_value='30')
+# How many details should be revealed at the start of the game. Default: 3
+PUNK_RECORDS_STARTING_DETAILS = Environment('PUNK_RECORDS_STARTING_DETAILS', default_value='3')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')

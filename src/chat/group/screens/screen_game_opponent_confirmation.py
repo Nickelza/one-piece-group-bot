@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.chat.group.screens.screen_game_gol import manage as manage_gol
+from src.chat.group.screens.screen_game_pr import manage as manage_pr
 from src.chat.group.screens.screen_game_rps import manage as manage_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.chat.group.screens.screen_game_shambles import manage as manage_shambles
@@ -72,7 +73,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     user.pending_bounty += game.wager
     game.wager += game.wager
     game.status = GameStatus.IN_PROGRESS
-    game.save()
+    # Will save game later to avoid doubling wager without actually starting game
 
     await dispatch_game(update, context, user, inbound_keyboard, game)
 
@@ -105,6 +106,9 @@ async def dispatch_game(update: Update, context: ContextTypes.DEFAULT_TYPE, user
 
         case GameType.GUESS_OR_LIFE:
             await manage_gol(update, context, inbound_keyboard, game)
+
+        case GameType.PUNK_RECORDS:
+            await manage_pr(update, context, inbound_keyboard, game)
 
         case _:
             raise GroupChatException(GroupChatError.INVALID_GAME)

@@ -13,4 +13,5 @@ class SavedMediaName(StrEnum):
     GAME_SHAMBLES = 'game_shambles'
     GAME_WHOS_WHO = 'game_whos_who'
     GAME_GUESS_OR_LIFE = 'game_guess_or_life'
+    GAME_PUNK_RECORDS = 'game_punk_records'
     SILENCE = 'silence'

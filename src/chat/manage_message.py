@@ -199,7 +199,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             case _:
                 raise ValueError('Invalid message source')
     except DoesNotExist:
-        await full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
+        await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
         raise ValueError('Item not found')
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors

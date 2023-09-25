@@ -7,7 +7,6 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Game import Game
-from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
@@ -18,9 +17,9 @@ from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
 from src.service.game_service import save_game, get_players, guess_game_countdown_to_start, \
-    get_guess_game_users_to_send_message_to, set_user_private_screen, validate_game, get_terminology_from_game, \
-    get_guess_game_result_term_text, end_game, get_text
-from src.service.message_service import full_message_send, escape_valid_markdown_chars, get_message_url, full_media_send
+    get_guess_game_users_to_send_message_to, set_user_private_screen, validate_game, end_game, get_text, \
+    end_text_based_game
+from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
@@ -52,7 +51,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
 
 def get_specific_text(game: Game, guess_or_life: GuessOrLife, is_finished: bool = False, player_type: PlayerType = None,
-                      outcome: GameOutcome = None, is_for_group: bool = False) -> str:
+                      outcome: GameOutcome = None, is_for_group: bool = False, is_for_new_life: bool = False) -> str:
     """
     Get the specific text
     :param game: The game object
@@ -61,6 +60,7 @@ def get_specific_text(game: Game, guess_or_life: GuessOrLife, is_finished: bool 
     :param player_type: The player type
     :param outcome: The outcome if the game is finished
     :param is_for_group: If the text is for the group message update
+    :param is_for_new_life: If the text is for a new life
     :return: The specific text
     """
 
@@ -106,7 +106,7 @@ def get_specific_text(game: Game, guess_or_life: GuessOrLife, is_finished: bool 
     # Sending in private chat
     if not is_for_group:
         ot_text = '\n\n\n'.join(ot_text_list)
-        if guess_or_life.can_issue_live() and not is_finished:
+        if guess_or_life.can_issue_live() and not is_finished and not is_for_new_life:
             ot_text += '\n\n' + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2.format(
                 Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
 
@@ -185,7 +185,8 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
 
     # Send the message to the users
     for user in users:
-        specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+        specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user),
+                                          is_for_new_life=True)
         if guess_or_life.can_issue_live():
             remaining_time_text = (phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 if should_send_to_all_players
                                    else phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2)
@@ -290,33 +291,11 @@ async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ga
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
-    # Go to game message in group button
-    outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                                                         url=get_message_url(game.group_chat, game.message_id))]]
-
-    terminology: Terminology = await get_terminology_from_game(game)
-    term_text_addition = get_guess_game_result_term_text(terminology)
-
-    # Send message to winner
-    await set_user_private_screen(user, should_reset=True)
     specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user), is_finished=True)
-    winner_text: str = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-        phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text),
-        '\n' + term_text_addition)
-    context.application.create_task(
-        full_message_send(context, winner_text, chat_id=user.tg_user_id, keyboard=outbound_keyboard))
+    winner_text: str = phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
 
-    # Send message to loser
-    await set_user_private_screen(loser, should_reset=True)
     specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, loser), is_finished=True)
-    loser_caption: str = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text),
-        '\n' + term_text_addition)
-    context.application.create_task(
-        full_message_send(context, loser_caption, chat_id=loser.tg_user_id, keyboard=outbound_keyboard))
+    loser_text: str = phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text)
 
-    # Update group message
-    ot_text = get_specific_text(game, guess_or_life, is_finished=True, outcome=outcome, is_for_group=True)
-    group_chat: GroupChat = game.group_chat
-    await full_media_send(context, caption=ot_text, group_chat=group_chat, edit_message_id=game.message_id,
-                          edit_only_caption_and_keyboard=True)
+    group_text = get_specific_text(game, guess_or_life, is_finished=True, outcome=outcome, is_for_group=True)
+    await end_text_based_game(context, game, outcome, user, winner_text, loser, loser_text, group_text)

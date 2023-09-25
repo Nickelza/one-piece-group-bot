@@ -47,6 +47,7 @@ class Emoji(StrEnum):
     SAD = '😢'
     STATS = '📊'
     WARNING = '⚠'
+    NEW = '🆕'
 
     # Game
     WINNER = '🏆'

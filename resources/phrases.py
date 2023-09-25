@@ -268,11 +268,12 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fir
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
 
-GUESS_GAME_INPUT_CAPTION_HINT = '\n\nHint: {}'
+GUESS_GAME_INPUT_CAPTION_HINT = '\n\n' + Emoji.NEW + 'Hint: {}'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = '\n\nIn *{}* seconds, a hint will be sent'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '\n\nIn *{}* seconds, an easier variation will be sent'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 = 'In *{}* seconds, a new life will be issued'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2 = 'A new life will be issued every {} seconds'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL = '\n\nIn *{}* seconds, a new detail will be given'
 
 GUESS_CHARACTER_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
                                      f'\nThe name must be the same as the one used on ' \
@@ -316,6 +317,16 @@ GUESS_OR_LIFE_GAME_REMAINING_USED_LETTERS = '\n\nRemaining letters: {}' \
                                             '\n\nUsed letters: {}'
 GUESS_OR_LIFE_GAME_PRIVATE_RECAP = '{}\n\n{}'
 GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER = f'{Emoji.WARNING}Please send only one letter at a time'
+
+PUNK_RECORDS_GAME_NAME = 'Punk Records'
+PUNK_RECORDS_GAME_DESCRIPTION = 'Guess the One Piece related character from details about them. ' \
+                                '\nEvery {} seconds, a new detail will be revealed making it easier to guess.' \
+                                '\nThis game is played in private chat with the Bot.'
+PUNK_RECORDS_GAME_RECAP = '{}' \
+                          '{}'
+PUNK_RECORDS_GAME_RECAP_DETAIL = '\n{}*{}*: {}'
+PUNK_RECORDS_GAME_RECAP_DETAIL_LIST = '\n*{}*' \
+                                      '\n{}'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'

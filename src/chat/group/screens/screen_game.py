@@ -150,6 +150,12 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
                                  screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rps])
 
+    # Punk Records
+    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.PUNK_RECORDS}
+    btn_pr: Keyboard = Keyboard(GameType.PUNK_RECORDS.get_name(), info=button_info,
+                                screen=Screen.GRP_GAME_SELECTION)
+    inline_keyboard.append([btn_pr])
+
     # Russian Roulette
     button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.RUSSIAN_ROULETTE}
     btn_rr: Keyboard = Keyboard(GameType.RUSSIAN_ROULETTE.get_name(), info=button_info,

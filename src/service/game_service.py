@@ -31,7 +31,8 @@ from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
 from src.service.bounty_service import get_belly_formatted, add_bounty
 from src.service.cron_service import convert_seconds_to_time
-from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url
+from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url, \
+    full_message_send
 from src.service.notification_service import send_notification
 
 
@@ -574,3 +575,54 @@ def save_game(game: Game, board: str) -> None:
     game.board = board
     game.last_interaction_date = datetime.now()
     game.save()
+
+
+async def end_text_based_game(context: ContextTypes.DEFAULT_TYPE, game: Game, outcome: GameOutcome, winner: User,
+                              winner_text: str, loser: User, loser_text: str, group_text: str = None) -> None:
+    """
+    End a text based game
+    :param context: The context
+    :param game: The game
+    :param outcome: The outcome
+    :param winner: The winner
+    :param winner_text: The winner text
+    :param loser: The loser
+    :param loser_text: The loser text
+    :param group_text: The group text
+    """
+
+    terminology: Terminology = await get_terminology_from_game(game)
+    term_text_addition = get_guess_game_result_term_text(terminology)
+
+    # If winner or loser text doesn't end with 3 new lines (just enough to add 3)
+    if not winner_text.endswith('\n\n\n'):
+        # Check how many new lines are missing at the end
+        missing_new_lines = 3 - winner_text.count('\n', -3)
+        winner_text += '\n' * missing_new_lines
+        loser_text += '\n' * missing_new_lines
+
+    # Add terminology text
+    winner_text += term_text_addition
+    loser_text += term_text_addition
+
+    # Go to game message in group button
+    outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                                                         url=get_message_url(game.group_chat, game.message_id))]]
+
+    # Send message to winner
+    await set_user_private_screen(winner, should_reset=True)
+    context.application.create_task(
+        full_message_send(context, winner_text, chat_id=winner.tg_user_id, keyboard=outbound_keyboard))
+
+    # Send message to loser
+    await set_user_private_screen(loser, should_reset=True)
+    context.application.create_task(
+        full_message_send(context, loser_text, chat_id=loser.tg_user_id, keyboard=outbound_keyboard))
+
+    # Update group message
+    if group_text is None:
+        group_text = get_text(game, True, game_outcome=outcome, is_turn_based=False, terminology=terminology)
+
+    group_chat: GroupChat = game.group_chat
+    await full_media_send(context, caption=group_text, group_chat=group_chat, edit_message_id=game.message_id,
+                          edit_only_caption_and_keyboard=True)

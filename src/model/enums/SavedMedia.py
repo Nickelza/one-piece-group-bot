@@ -83,6 +83,10 @@ GAME_GUESS_OR_LIFE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_GUESS_OR_LIFE, file_name=AssetPath.GAME_GUESS_OR_LIFE)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_GUESS_OR_LIFE] = GAME_GUESS_OR_LIFE
 
+PUNK_RECORDS = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_PUNK_RECORDS, file_name=AssetPath.GAME_PUNK_RECORDS)
+SAVED_MEDIA_DICT[SavedMediaName.GAME_PUNK_RECORDS] = PUNK_RECORDS
+
 SILENCE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE)
 SAVED_MEDIA_DICT[SavedMediaName.SILENCE] = SILENCE
