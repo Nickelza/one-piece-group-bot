@@ -1,0 +1,20 @@
+name: Deploy on dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_KEY }}
+          port: ${{ secrets.DEV_PORT }}
+          script: ${{ secrets.BETA_DEPLOY_COMMAND }}
