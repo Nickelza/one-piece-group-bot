@@ -3,7 +3,7 @@ name: Deploy on beta
 on:
   workflow_dispatch:
   push:
-    branches: [ dev ]
+    branches: [ beta ]
 
 jobs:
   build:
