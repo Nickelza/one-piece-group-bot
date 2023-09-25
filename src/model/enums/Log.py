@@ -642,7 +642,7 @@ class LeaderboardRankLog(Log):
         appearances_as_supernova_percentage = int(get_percentage_from_value(appearances_as_supernova,
                                                                             total_appearances))
         max_by_rank: LeaderboardUser = self.object.get_max_rank_attained(self.user)
-        max_by_bounty: LeaderboardUser = self.object.get(self.user)
+        max_by_bounty: LeaderboardUser = self.object.get_max_bounty_attained(self.user)
 
         return phrases.LEADERBOARD_RANK_LOG_STATS_TEXT.format(
             total_appearances,
