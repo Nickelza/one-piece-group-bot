@@ -317,6 +317,7 @@ GUESS_OR_LIFE_GAME_REMAINING_USED_LETTERS = '\n\nRemaining letters: {}' \
                                             '\n\nUsed letters: {}'
 GUESS_OR_LIFE_GAME_PRIVATE_RECAP = '{}\n\n{}'
 GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER = f'{Emoji.WARNING}Please send only one letter at a time'
+GUESS_OR_LIFE_GAME_INPUT_CAPTION_LETTER_ONLY = f'{Emoji.WARNING}Please send only letters (no numbers or symbols)'
 
 PUNK_RECORDS_GAME_NAME = 'Punk Records'
 PUNK_RECORDS_GAME_DESCRIPTION = 'Guess the One Piece related character from details about them. ' \

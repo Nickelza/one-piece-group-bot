@@ -248,6 +248,13 @@ async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ga
         await full_message_send(context, ot_text, update=update)
         return
 
+    # Not a letter
+    if not letter.isalpha():
+        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
+            phrases.GUESS_OR_LIFE_GAME_INPUT_CAPTION_LETTER_ONLY, specific_text)
+        await full_message_send(context, ot_text, update=update)
+        return
+
     # Letter already used
     if guess_or_life.has_used_letter(get_player_type(game, user), letter):
         ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
