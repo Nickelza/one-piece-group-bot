@@ -145,8 +145,7 @@ class Log(ListPage):
         from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
 
         info: dict = {LogTypeReservedKeys.TYPE: self.type, LogTypeReservedKeys.ITEM_ID: item_id}
-        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL,
-                            previous_screens=[Screen.PVT_LOGS, Screen.PVT_LOGS_TYPE, Screen.PVT_LOGS_TYPE_STATS])
+        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL)
 
     def get_text_fill_in(self) -> str:
         """

@@ -7,6 +7,7 @@ from resources import phrases
 from src.chat.private.screens.screen_logs_type import validate
 from src.model.User import User
 from src.model.enums.Log import Log, LogType, get_log_by_type
+from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
@@ -32,6 +33,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     log.user = user
 
     if await validate(update, context, log, user):
+        # For deep linking
+        if Screen.PVT_LOGS_TYPE not in inbound_keyboard.previous_screen_list:
+            inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS_TYPE)
+
         try:
             await full_message_send(context,
                                     phrases.LOG_STATS_TEXT.format(log.get_text_fill_in(), log.get_stats_text()),

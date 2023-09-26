@@ -48,6 +48,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
         ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 
+        # For deep linking
+        if Screen.PVT_LOGS not in inbound_keyboard.previous_screen_list:
+            inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS)
+
         await full_message_send(context, ot_text, update=update, keyboard=items_keyboard,
                                 inbound_keyboard=inbound_keyboard,
                                 excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
