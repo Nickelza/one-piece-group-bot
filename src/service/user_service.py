@@ -65,6 +65,9 @@ def user_is_muted(user: User, group_chat: GroupChat) -> bool:
     :return: True if the user is muted
     """
 
+    if group_chat is None:
+        return False
+
     if user_is_boss(user):
         return False
 
