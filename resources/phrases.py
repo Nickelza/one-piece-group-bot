@@ -753,7 +753,7 @@ BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
                                 '\nGift amount: ฿*{}*' \
                                 '\nTax: ฿{} \\({}%\\)' \
                                 '\nTotal: ฿*{}*' \
-                                '\n\nYou can gift up to ฿*{}*'
+                                '\n\nYou can gift up to ฿`{}`'
 # Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
 DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
