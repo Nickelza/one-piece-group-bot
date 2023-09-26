@@ -212,6 +212,7 @@ def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, r
     leaderboard_user.user = user
     leaderboard_user.position = position
     leaderboard_user.rank_index = rank.index
+    leaderboard_user.bounty = user.bounty
     leaderboard_user.save()
 
     return leaderboard_user
