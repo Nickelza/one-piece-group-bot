@@ -107,6 +107,10 @@ DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
 LIMIT_TO_AUTHORIZED_USERS = Environment('LIMIT_TO_AUTHORIZED_USERS', default_value='False')
 # List of authorized users
 AUTHORIZED_USERS = Environment('AUTHORIZED_USERS', default_value='')
+# Limit interaction to users members of authorized groups
+LIMIT_TO_AUTHORIZED_GROUPS = Environment('LIMIT_TO_AUTHORIZED_GROUPS', default_value='False')
+# List of authorized groups
+AUTHORIZED_GROUPS = Environment('AUTHORIZED_GROUPS', default_value='')
 # Group chat id
 OPD_GROUP_ID = Environment('OPD_GROUP_ID')
 # Group chat username

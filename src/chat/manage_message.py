@@ -103,6 +103,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     :param is_callback: True if the message is a callback
     :return: None
     """
+    # Recast necessary for match case to work, don't ask me why
+    message_source: MessageSource = MessageSource(get_message_source(update))
 
     user = User()
     if update.effective_user is not None:
@@ -112,10 +114,26 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
             return
 
-    user.previous_pending_bounty = user.pending_bounty
+        # Check if user in authorized groups
+        if Env.LIMIT_TO_AUTHORIZED_GROUPS.get_bool():
+            group_ids = Env.AUTHORIZED_GROUPS.get_list()
 
-    # Recast necessary for match case to work, don't ask me why
-    message_source: MessageSource = MessageSource(get_message_source(update))
+            # Group not authorized
+            if message_source is MessageSource.GROUP and str(update.effective_chat.id) not in group_ids:
+                # Leave chat
+                logging.error(f'Unauthorized group {update.effective_chat.id}: Leaving chat')
+                await update.effective_chat.leave()
+                return
+
+            # User not a member of an authorized group
+            if message_source is MessageSource.PRIVATE:
+                for group_id in group_ids:
+                    if await user.is_chat_member(context, group_id):
+                        break
+                else:
+                    return
+
+    user.previous_pending_bounty = user.pending_bounty
 
     # Leave chat if not recognized
     if message_source is MessageSource.ND:

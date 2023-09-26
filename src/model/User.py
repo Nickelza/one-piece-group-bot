@@ -1,9 +1,12 @@
 import datetime
+import logging
 from typing import Any
 
 from peewee import *
 from telegram import ChatMember, Update
 from telegram.constants import ChatMemberStatus
+from telegram.error import TelegramError
+from telegram.ext import ContextTypes
 
 import constants as c
 from src.model.BaseModel import BaseModel
@@ -323,6 +326,22 @@ class User(BaseModel):
             return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
         except Forbidden:  # Bot kicked from the group chat
             pass
+
+    async def is_chat_member(self, context: ContextTypes.DEFAULT_TYPE, chat_id: str):
+        """
+        Returns True if the user is in the chat
+        :param context: The context
+        :param chat_id: The chat id
+        :return: True if the user is in the chat
+        """
+
+        try:
+            chat_member: ChatMember = await context.bot.get_chat_member(chat_id, str(self.tg_user_id))
+            return (chat_member is not None
+                    and chat_member.status not in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED))
+        except TelegramError as e:
+            logging.error("Error while checking if user is in chat: " + str(e))
+            return False
 
 
 User.create_table()
