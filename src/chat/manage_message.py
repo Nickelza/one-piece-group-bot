@@ -108,7 +108,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
     user = User()
     if update.effective_user is not None:
-        user: User = get_user(update.effective_user)
+        user: User = get_user(update.effective_user, should_save=False)
 
         # Check if the user is authorized
         if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
@@ -132,6 +132,8 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
                         break
                 else:
                     return
+
+        user.save()
 
     user.previous_pending_bounty = user.pending_bounty
 
@@ -386,10 +388,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
     return True
 
 
-def get_user(effective_user: TelegramUser) -> User:
+def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     """
     Create or update the user
     :param effective_user: The Telegram user
+    :param should_save: True if the user should be saved
     :return: The user
     """
 
@@ -405,7 +408,8 @@ def get_user(effective_user: TelegramUser) -> User:
     user.tg_username = effective_user.username
     user.last_message_date = datetime.now()
 
-    user.save()
+    if should_save:
+        user.save()
 
     return user
 
