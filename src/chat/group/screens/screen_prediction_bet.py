@@ -115,7 +115,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
                                     previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
             return error_tuple
 
-    amount_parsed = get_amount_from_string(amount) if amount is not None else 0  # Using 0 to pass validation in PC
+    # Using 0 to pass validation in PC
+    amount_parsed = get_amount_from_string(amount, user) if amount is not None else 0
 
     return prediction, prediction_option, amount_parsed, prediction_option.number
 

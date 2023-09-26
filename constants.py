@@ -34,6 +34,7 @@ STANDARD_DATE_TIME_FORMAT = '%Y-%m-%d %H:%M'
 MAGNITUDE_AMOUNT_TO_NUMBER = {
     "k": 1000,
     "thousand": 1000,
+    "kk": 1000000,
     "million": 1000000,
     "billion": 1000000000,
     "trillion": 1000000000000,

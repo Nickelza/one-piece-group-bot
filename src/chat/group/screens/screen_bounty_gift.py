@@ -160,7 +160,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
     """
 
     if bounty_gift is None:
-        amount = get_amount_from_string(command.parameters[0])
+        amount = get_amount_from_string(command.parameters[0], sender)
     else:
         amount = bounty_gift.amount
 

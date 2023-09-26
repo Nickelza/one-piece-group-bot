@@ -97,7 +97,7 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     """
 
     if devil_fruit_trade is None:
-        amount = get_amount_from_string(command.parameters[0])
+        amount = get_amount_from_string(command.parameters[0], seller)
     else:
         amount = devil_fruit_trade.price
 

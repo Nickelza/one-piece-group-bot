@@ -113,7 +113,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game: Game = Game()
     game.challenger = user
     game.opponent = opponent
-    game.wager = get_amount_from_string(command.parameters[0])
+    game.wager = get_amount_from_string(command.parameters[0], user)
     game.group_chat = group_chat
     game.save()
 

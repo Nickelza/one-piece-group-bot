@@ -279,12 +279,17 @@ def add_crew_mvp_bounty_bonus() -> None:
     User.update(bounty=case_stmt).execute()
 
 
-def get_amount_from_string(amount: str) -> int:
+def get_amount_from_string(amount: str, user: User) -> int:
     """
     Get the wager amount
     :param amount: The wager amount
+    :param user: The user
     :return: The wager amount
     """
+
+    # If amount is *, return user's bounty
+    if amount == '*':
+        return user.bounty
 
     try:
         return int(amount.strip().replace(',', '').replace('.', ''))
@@ -306,7 +311,6 @@ def get_amount_from_string(amount: str) -> int:
             return int(amount_str)
 
         # Set magnitude full name
-        magnitude_full_name = ''
         for key in c.MAGNITUDE_AMOUNT_TO_NUMBER:
             # There is a key that is a substring of the magnitude, e.g. 'thousand' is a substring of 'th' (starts with)
             if key.startswith(magnitude.lower()):
@@ -346,7 +350,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     """
 
     try:
-        wager: int = get_amount_from_string(wager_str)
+        wager: int = get_amount_from_string(wager_str, user)
     except ValueError:
         await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
                                 add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
