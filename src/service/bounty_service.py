@@ -185,6 +185,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
 
+    # User can collect devil fruit
+    User.update(can_collect_devil_fruit=True).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
