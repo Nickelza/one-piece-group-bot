@@ -151,14 +151,15 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     recap_text = ''
     new_detail_text = ''
     new_detail = None
-    if punk_records.can_reveal_detail():
-        # New detail goes on top of text
-        if not is_first_run:  # First iteration, do not reveal new detail
+    # First iteration, do not reveal new detail or hint
+    if not is_first_run:
+        if punk_records.can_reveal_detail():
+            # New detail goes on top of text
             new_detail = punk_records.get_random_detail_to_reveal()
             punk_records.set_revealed_detail(new_detail)
-    else:
-        if not punk_records.have_revealed_all_letters():
-            punk_records.revealed_letters_count += 1
+        else:
+            if not punk_records.have_revealed_all_letters():
+                punk_records.revealed_letters_count += 1
 
         # Add hint, goes on bottom of text just before time remaining to next hint
         hint = punk_records.character.name[:punk_records.revealed_letters_count]
