@@ -279,14 +279,50 @@ def add_crew_mvp_bounty_bonus() -> None:
     User.update(bounty=case_stmt).execute()
 
 
-def get_amount_from_string(amount_str: str) -> int:
+def get_amount_from_string(amount: str) -> int:
     """
     Get the wager amount
-    :param amount_str: The wager amount
+    :param amount: The wager amount
     :return: The wager amount
     """
-    amount_str = amount_str.strip().replace(',', '').replace('.', '')
-    return int(amount_str)
+
+    try:
+        return int(amount.strip().replace(',', '').replace('.', ''))
+    except ValueError:
+        # Extract the contingent non-numeric characters, reversing to exclude '.' and ',' from the extraction
+        magnitude = ''
+        for char in reversed(amount):
+            if not char.isnumeric():
+                magnitude = char + magnitude
+            else:
+                break
+
+        amount_str = amount.strip().replace(',', '').replace('.', '').replace(magnitude, '')
+        # Amount not numeric
+        if not amount_str.isnumeric():
+            raise ValueError
+
+        if magnitude == '':
+            return int(amount_str)
+
+        # Set magnitude full name
+        magnitude_full_name = ''
+        for key in c.MAGNITUDE_AMOUNT_TO_NUMBER:
+            # There is a key that is a substring of the magnitude, e.g. 'thousand' is a substring of 'th' (starts with)
+            if key.startswith(magnitude.lower()):
+                magnitude_full_name = key
+                break
+        else:
+            raise ValueError
+
+        # Replace "," with "." to allow float conversion
+        amount_str = amount.replace(',', '.').replace(magnitude, '')
+
+        # More than 1 decimal point
+        if amount_str.count('.') > 1:
+            raise ValueError
+
+        return int(float(amount_str) * c.MAGNITUDE_AMOUNT_TO_NUMBER[magnitude_full_name])
 
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
