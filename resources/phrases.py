@@ -192,7 +192,12 @@ GRP_KEY_GAME_PLAY = 'Play'
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
-ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. Make sure it is a number with only '.' or ',' as decimal separator"
+ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. " \
+                              "Make sure it is a number with only '.' or ',' as decimal separator or with a valid " \
+                              "magnitude." \
+                              "\n\nExample: " \
+                              "\n- 10.000.000 or 10,000,000" \
+                              "\n- 10k, 10thousand, 10m, 10million, 10b, 10billion"
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
