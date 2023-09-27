@@ -34,6 +34,7 @@ from src.chat.private.screens.screen_settings_notifications_type import \
     manage as manage_screen_settings_notifications_type
 from src.chat.private.screens.screen_settings_notifications_type_edit import \
     manage as manage_screen_settings_notifications_type_edit
+from src.chat.private.screens.screen_settings_timezone import manage as manage_screen_settings_timezone
 from src.chat.private.screens.screen_start import manage as manage_screen_start
 from src.chat.private.screens.screen_status import manage as manage_screen_status
 from src.model.User import User
@@ -195,6 +196,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_LOGS_TYPE_STATS:  # Logs Type Stats
                 await manage_screen_logs_type_stats(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_SETTINGS_TIMEZONE:  # Settings Timezone
+                await manage_screen_settings_timezone(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

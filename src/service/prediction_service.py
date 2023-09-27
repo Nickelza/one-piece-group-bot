@@ -20,6 +20,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.error.CustomException import PredictionException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
+from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage, add_percentage_to_value
@@ -82,10 +83,10 @@ def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, u
     added_text = ""
 
     # Closing date if not None
-    added_text += phrases.PREDICTION_CLOSING_DATE.format(prediction.end_date) \
+    added_text += phrases.PREDICTION_CLOSING_DATE.format(default_datetime_format(prediction.end_date, user)) \
         if prediction.end_date is not None else ""
     # Cut Off date if not None
-    added_text += phrases.PREDICTION_CUT_OFF_DATE.format(prediction.cut_off_date) \
+    added_text += phrases.PREDICTION_CUT_OFF_DATE.format(default_datetime_format(prediction.cut_off_date, user)) \
         if prediction.cut_off_date is not None else ""
 
     optional_text = ""

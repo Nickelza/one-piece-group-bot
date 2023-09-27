@@ -2,7 +2,6 @@ import datetime
 
 from telegram.ext import ContextTypes
 
-import constants as c
 import src.model.enums.LeaderboardRank as LeaderboardRank
 from resources import phrases as phrases, Environment as Env
 from src.model.Crew import Crew
@@ -13,6 +12,7 @@ from src.model.enums.Feature import Feature
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
+from src.service.date_service import default_date_format
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
@@ -41,7 +41,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
 
     next_bounty_reset_time = get_next_bounty_reset_time()
     return phrases.LEADERBOARD.format(leaderboard.week, leaderboard.year, leaderboard.leaderboard_users.count(),
-                                      content_text, next_bounty_reset_time.strftime(c.STANDARD_DATE_FORMAT),
+                                      content_text, default_date_format(next_bounty_reset_time),
                                       get_remaining_time(next_bounty_reset_time))
 
 

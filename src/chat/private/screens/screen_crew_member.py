@@ -3,13 +3,13 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
+from src.service.date_service import default_date_format
 from src.service.message_service import full_message_send
 
 
@@ -41,7 +41,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     # Get crew member text
     ot_text = phrases.CREW_MEMBER.format(member.get_markdown_mention(), member.get_bounty_formatted(),
-                                         member.crew_join_date.strftime(c.STANDARD_DATE_FORMAT),
+                                         default_date_format(member.crew_join_date, user),
                                          (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO))
 
     inline_keyboard: list[list[Keyboard]] = []

@@ -51,6 +51,7 @@ class User(BaseModel):
     is_admin = BooleanField(default=False)
     can_collect_devil_fruit = BooleanField(default=True)
     bounty_message_limit = BigIntegerField(default=0)
+    timezone = CharField(max_length=99, null=True)
 
     # Transient fields
 
@@ -59,7 +60,6 @@ class User(BaseModel):
     should_update_model: bool = True
 
     # Pending bounty at the start of the script. Used to check if the pending bounty went negative
-
     previous_pending_bounty: int = 0
 
     class Meta:

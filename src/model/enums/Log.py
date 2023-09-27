@@ -23,6 +23,7 @@ from src.model.enums.Location import get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
+from src.service.date_service import default_datetime_format
 from src.service.math_service import get_value_from_percentage, get_percentage_from_value
 from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url, get_deeplink
 
@@ -203,7 +204,7 @@ class FightLog(Log):
             return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
@@ -266,7 +267,7 @@ class DocQGameLog(Log):
         return (self.object
                 .select()
                 .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
-                .order_by(DocQGame.datetime.desc())
+                .order_by(DocQGame.date.desc())
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
     def get_total_items_count(self) -> int:
@@ -280,7 +281,7 @@ class DocQGameLog(Log):
                                                        get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
-        date = self.object.datetime.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
         correct_apple = int((str(self.object.correct_choices_index).split(c.STANDARD_SPLIT_CHAR))[0]) + 1
         won = GameStatus(self.object.status) is GameStatus.WON
         outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
@@ -360,7 +361,7 @@ class GameLog(Log):
     def get_item_detail_text(self) -> str:
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
         game_name = GameType(self.object.type).get_name()
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
@@ -457,7 +458,7 @@ class BountyGiftLog(Log):
 
     def get_item_detail_text(self) -> str:
         sender_text = phrases.RECEIVER if self.user_is_sender else phrases.SENDER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
 
         tax_text = ''
         if self.user_is_sender:

@@ -168,6 +168,14 @@ PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
+PVT_KEY_SETTINGS_TIMEZONE = 'Time zone'
+PVT_TXT_SETTINGS_TIMEZONE = 'Current timezone: *{}* \\({}\\)' \
+                            '\n\nTo set a new time zone, send a location name \\(city, region, state or country\\)'
+PVT_TXT_SETTINGS_TIMEZONE_INVALID = 'Invalid location. Please send a correct location name ' \
+                                    '\\(city, region, state or country\\)'
+PVT_KEY_SETTINGS_TIMEZONE_RESET = 'Reset'
+PVT_TXT_UNKNOWN = 'Default - ' + Env.TZ.get()
+
 PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
 PVT_TXT_LOGS = 'Which log would you like to view?'
 PVT_KEY_LOGS_STATS = Emoji.STATS + ' Stats'
@@ -820,3 +828,4 @@ DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}'
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
 THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your Group!\n'
+
