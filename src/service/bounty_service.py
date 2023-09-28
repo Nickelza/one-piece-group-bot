@@ -9,9 +9,11 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
+from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
+from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
@@ -220,6 +222,24 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
     if user.is_arrested():
         return
 
+    effective_amount = amount - pending_belly_amount  # Amount that will be used to calculate eventual taxes
+
+    # If user has an expired bounty loan, use n% of the bounty to repay the loan
+    expired_bounty_loan: BountyLoan = (BountyLoan.select().where((BountyLoan.borrower == user)
+                                                                 & (BountyLoan.status == BountyLoanStatus.EXPIRED))
+                                       .order_by(BountyLoan.deadline_date.desc()).first())
+    if expired_bounty_loan is not None:
+        amount_for_repay = subtract_percentage_from_value(effective_amount,
+                                                          Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
+        # Cap to remaining amount
+        amount_for_repay = expired_bounty_loan.get_maximum_payable_amount(int(amount_for_repay))
+
+        # Pay loan
+        expired_bounty_loan.pay(amount_for_repay)
+
+        # Subtract from amount
+        amount -= amount_for_repay
+
     user.bounty += amount
 
     # If the bounty is gained from a message, subtract the amount from the bounty message limit
@@ -299,7 +319,7 @@ def get_amount_from_string(amount: str, user: User) -> int:
 
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
-                          required_belly: int = 0, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
+                          required_belly: int = None, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
                           previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None,
                           should_validate_user_has_amount: bool = True) -> bool:
     """
@@ -318,14 +338,17 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     :return: Whether the wager is valid
     """
 
-    try:
-        wager: int = get_amount_from_string(wager_str, user)
-    except ValueError:
-        await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
-                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
-        return False
+    if isinstance(wager_str, int):
+        wager = wager_str
+    else:
+        try:
+            wager: int = get_amount_from_string(wager_str, user)
+        except ValueError:
+            await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
+                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                    previous_screens=previous_screens,
+                                    previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+            return False
 
     # User does not have enough bounty
     if should_validate_user_has_amount and user.bounty < wager:
@@ -336,7 +359,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
         return False
 
     # Wager less than minimum required
-    if wager < required_belly:
+    if required_belly is not None and wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
         await full_message_send(context, ot_text, update=update, add_delete_button=add_delete_button,
                                 inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,

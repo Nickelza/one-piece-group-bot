@@ -17,7 +17,8 @@ from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import DevilFruitTradeValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, get_transaction_tax
+from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, \
+    get_transaction_tax, add_bounty
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
@@ -333,7 +334,7 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
     buyer.save()
 
     # Add the belly to the seller
-    devil_fruit_trade.giver.bounty += amount
+    await add_bounty(devil_fruit_trade.giver, amount)
     devil_fruit_trade.giver.save()
 
     list_page: DevilFruitListPage = DevilFruitListPage()

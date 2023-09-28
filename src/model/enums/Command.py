@@ -201,6 +201,9 @@ COMMANDS.append(GRP_SPEAK)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT)
 COMMANDS.append(GRP_BOUNTY_GIFT)
 
+GRP_BOUNTY_LOAN = Command('loan', Screen.GRP_BOUNTY_LOAN, only_in_reply=True, feature=Feature.BOUNTY_LOAN)
+COMMANDS.append(GRP_BOUNTY_LOAN)
+
 GRP_DEVIL_FRUIT_SELL = Command('dfsell', Screen.GRP_DEVIL_FRUIT_SELL, feature=Feature.DEVIL_FRUIT_SELL)
 COMMANDS.append(GRP_DEVIL_FRUIT_SELL)
 

@@ -2,6 +2,11 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
+from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
+from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_screen_bounty_loan_detail
+from src.chat.private.screens.screen_bounty_loan_detail_forgive import manage as \
+    manage_screen_bounty_loan_detail_forgive
+from src.chat.private.screens.screen_bounty_loan_detail_pay import manage as manage_screen_bounty_loan_detail_pay
 from src.chat.private.screens.screen_crew import manage as manage_screen_crew
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
@@ -80,7 +85,8 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
     if screen is not Screen.UNKNOWN:
 
         # No longer in Edit mode
-        if screen is not user.get_current_private_screen() or inbound_keyboard is not None:
+        if ((screen is not user.get_current_private_screen() or inbound_keyboard is not None)
+                and (inbound_keyboard is not None and ReservedKeyboardKeys.SCREEN_STEP not in inbound_keyboard.info)):
             user.private_screen_in_edit_id = None
             user.private_screen_step = None
 
@@ -199,6 +205,18 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_SETTINGS_TIMEZONE:  # Settings Timezone
                 await manage_screen_settings_timezone(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN:  # Bounty Loan
+                await manage_screen_bounty_loan(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL:  # Bounty Loan Detail
+                await manage_screen_bounty_loan_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL_PAY:  # Bounty Loan Detail Pay
+                await manage_screen_bounty_loan_detail_pay(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE:  # Bounty Loan Detail Forgive
+                await manage_screen_bounty_loan_detail_forgive(update, context, inbound_keyboard, user)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

@@ -4,6 +4,7 @@ from enum import IntEnum
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
+from src.model.BountyLoan import BountyLoan
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
 from src.model.Prediction import Prediction
@@ -11,9 +12,12 @@ from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
+from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import default_datetime_format
 from src.service.date_service import get_remaining_time
 from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
@@ -31,6 +35,7 @@ class NotificationCategory(IntEnum):
     DELETED_MESSAGE = 6
     BOUNTY_GIFT = 7
     DEVIL_FRUIT = 8
+    BOUNTY_LOAN = 9
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -41,7 +46,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.PREDICTION: phrases.NOTIFICATION_CATEGORY_PREDICTION,
     NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE,
     NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT,
-    NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT
+    NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT,
+    NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN
 }
 
 
@@ -66,13 +72,17 @@ class NotificationType(IntEnum):
     DEVIL_FRUIT_EXPIRED = 16
     DEVIL_FRUIT_REVOKE_WARNING = 17
     DEVIL_FRUIT_REVOKE = 18
+    BOUNTY_LOAN_PAYMENT = 19
+    BOUNTY_LOAN_FORGIVEN = 20
+    BOUNTY_LOAN_EXPIRED = 21
 
 
 class Notification:
     """Class for notifications."""
 
     def __init__(self, category: NotificationCategory, notification_type: NotificationType, text: str, description: str,
-                 button_text: str, disable_web_page_preview: bool = True, disable_notification: bool = True):
+                 button_text: str, disable_web_page_preview: bool = True, disable_notification: bool = True,
+                 item_screen: Screen = None, item_info: dict = None, to_to_item_button_text: str = None):
         """
         Constructor
 
@@ -83,6 +93,9 @@ class Notification:
         :param button_text: Text for the button to change the notification settings
         :param disable_web_page_preview: True if the web page preview should be disabled
         :param disable_notification: True if telegram should not notify of the message
+        :param item_screen: The screen of the item that is related to this notification
+        :param item_info: The info of the item that is related to this notification
+        :param to_to_item_button_text: The text for the button to go to the item
         """
 
         self.category = category
@@ -92,11 +105,22 @@ class Notification:
         self.button_text = button_text
         self.disable_web_page_preview = disable_web_page_preview
         self.disable_notification = disable_notification
+        self.item_screen = item_screen
+        self.item_info = item_info
+        self.to_to_item_button_text = to_to_item_button_text
 
     def build(self):
         """Builds the notification."""
 
         return self.text
+
+    def get_go_to_item_keyboard(self) -> list[Keyboard]:
+        """Gets the go to item keyboard."""
+
+        if self.item_screen is None or self.item_info is None or self.to_to_item_button_text is None:
+            return []
+
+        return [Keyboard(self.to_to_item_button_text, screen=self.item_screen, info=self.item_info)]
 
 
 class CrewLeaveNotification(Notification):
@@ -602,13 +626,105 @@ class DevilFruitRevokeWarningNotification(Notification):
         return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()))
 
 
+class BountyLoanPaymentNotification(Notification):
+    """Class for bounty loan payment notifications."""
+
+    def __init__(self, loan: BountyLoan = None, amount: int = None):
+        """
+        Constructor
+
+        :param loan: The loan
+        :param amount: The amount
+        """
+
+        self.loan = loan
+        self.amount = amount
+
+        item_id = loan.id if loan is not None else None
+        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_PAYMENT,
+                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION,
+                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_DESCRIPTION,
+                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY,
+                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        borrower: User = self.loan.borrower
+        return self.text.format(get_belly_formatted(self.amount),
+                                borrower.get_markdown_mention())
+
+
+class BountyLoanForgivenNotification(Notification):
+    """Class for bounty loan forgiven notifications."""
+
+    def __init__(self, loan: BountyLoan = None):
+        """
+        Constructor
+
+        :param loan: The loan
+        """
+
+        self.loan = loan
+
+        item_id = loan.id if loan is not None else None
+        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_FORGIVEN,
+                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION,
+                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_DESCRIPTION,
+                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY,
+                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        loaner: User = self.loan.loaner
+        return self.text.format(get_belly_formatted(self.loan.amount),
+                                loaner.get_markdown_mention())
+
+
+class BountyLoanExpiredNotification(Notification):
+    """Class for bounty loan expired notifications."""
+
+    def __init__(self, loan: BountyLoan = None):
+        """
+        Constructor
+
+        :param loan: The loan
+        """
+
+        self.loan = loan
+
+        item_id = loan.id if loan is not None else None
+        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_EXPIRED,
+                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION,
+                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION,
+                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY,
+                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+
+    def build(self) -> str:
+        from src.service.bounty_service import get_belly_formatted
+
+        loaner: User = self.loan.loaner
+        return self.text.format(get_belly_formatted(self.loan.amount),
+                                loaner.get_markdown_mention(),
+                                Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get(),
+                                loaner.get_markdown_mention())
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
                  PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
                  DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
                  BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification(),
-                 DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification()]
+                 DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification(), BountyLoanPaymentNotification(),
+                 BountyLoanForgivenNotification(), BountyLoanExpiredNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

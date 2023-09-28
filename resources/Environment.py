@@ -292,6 +292,14 @@ SHOULD_LOG_TIMER_END_INACTIVE_GAMES = Environment('SHOULD_LOG_TIMER_END_INACTIVE
 SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES = Environment('SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES',
                                                        default_value='False')
 
+# Set expired bounty loans. Default: Every 1 hour
+CRON_SET_EXPIRED_BOUNTY_LOANS = Environment('CRON_SET_EXPIRED_BOUNTY_LOANS', default_value='0 * * * *')
+ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS', default_value='True')
+SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS',
+                                                        default_value='False')
+SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment('SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS',
+                                                             default_value='False')
+
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
 
@@ -560,6 +568,13 @@ CREW_TRANSACTION_TAX_DISCOUNT = Environment('CREW_TRANSACTION_TAX_DISCOUNT', def
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')
 # Tax percentage increase after each Bounty Gift. Default: 1%
 BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value='1')
+
+# Minimum amount for Bounty Loan. Default: 10.000.000
+BOUNTY_LOAN_MIN_AMOUNT = Environment('BOUNTY_LOAN_MIN_AMOUNT', default_value='10000000')
+# Tax percentage increase after each Bounty Loan. Default: 1%
+BOUNTY_LOAN_TAX_INCREASE = Environment('BOUNTY_LOAN_TAX_INCREASE', default_value='1')
+# How many percent of newly gained bounty should be used to pay off loan in case of expiration. Default: 50%
+BOUNTY_LOAN_GARNISH_PERCENTAGE = Environment('BOUNTY_LOAN_GARNISH_PERCENTAGE', default_value='50')
 
 # How many days a user can hold a devil fruit before it expires. Default: 2
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='2')

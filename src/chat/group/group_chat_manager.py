@@ -7,6 +7,7 @@ import resources.Environment as Env
 import src.model.enums.Command as Command
 import src.model.enums.Location as Location
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
+from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
@@ -181,6 +182,10 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
                 await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
                                                      group_chat)
+
+            case Screen.GRP_BOUNTY_LOAN:  # Bounty loan
+                await manage_screen_bounty_loan(update, context, user, inbound_keyboard, target_user, command,
+                                                group_chat)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:

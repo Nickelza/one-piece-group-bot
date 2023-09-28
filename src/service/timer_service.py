@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes, Application, Job
 import src.model.enums.Timer as Timer
 from src.chat.manage_message import init, end
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
+from src.service.bounty_loan_service import set_expired_bounty_loans
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus, \
     reset_bounty_message_limit
@@ -124,6 +125,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             deactivate_inactive_group_chats()
         case Timer.END_INACTIVE_GAMES:
             await end_inactive_games()
+        case Timer.SET_EXPIRED_BOUNTY_LOANS:
+            await set_expired_bounty_loans(context)
         case _:
             raise ValueError(f'Unknown timer {timer.name}')
 

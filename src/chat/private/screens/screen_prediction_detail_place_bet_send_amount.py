@@ -64,7 +64,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             user.private_screen_step = Step.REQUEST_AMOUNT
 
         match Step(user.private_screen_step):
-            case Step.REQUEST_AMOUNT:  # Request crew name
+            case Step.REQUEST_AMOUNT:  # Request amount
                 ot_text = phrases.PREDICTION_PLACE_BET_DETAIL_TEXT.format(
                     escape_valid_markdown_chars(prediction.question),
                     escape_valid_markdown_chars(prediction_option.option))

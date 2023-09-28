@@ -13,12 +13,12 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, get_transaction_tax
+from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
+    get_transaction_tax, add_bounty
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
-from src.service.user_service import user_is_boss
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
@@ -129,25 +129,6 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     bounty_gift.save()
 
 
-async def transaction_is_tax_free(sender: User, receiver: User) -> bool:
-    """
-    Check if the transaction is tax-free
-    :param sender: The sender
-    :param receiver: The receiver
-    :return: True if the transaction is tax-free, False otherwise
-    """
-
-    # Sender and receiver are in the same crew, no tax
-    if sender.in_same_crew(receiver):
-        return True
-
-    # Sender is a boss, no tax
-    if user_is_boss(sender):
-        return True
-
-    return False
-
-
 async def get_amounts(sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
                       ) -> tuple[int, int, int, int]:
     """
@@ -219,7 +200,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
-    receiver.bounty += amount
+    await add_bounty(receiver, amount)
     receiver.save()
 
     # Send message

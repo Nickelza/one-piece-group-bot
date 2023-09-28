@@ -110,7 +110,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
     caption = phrases.CREW_JOIN_REQUEST_CAPTION.format(mention_markdown_user(user), captain.tg_user_id)
 
     # Keyboard
-    extra_keys = [{CrewReservedKeys.REQUESTING_USER_ID: user.id}]
+    extra_keys = {CrewReservedKeys.REQUESTING_USER_ID: user.id}
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(captain, screen=Screen.GRP_CREW_JOIN,
                                                                  yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
                                                                  no_text=phrases.KEYBOARD_OPTION_REJECT,

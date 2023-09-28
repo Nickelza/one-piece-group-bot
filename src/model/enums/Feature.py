@@ -15,6 +15,7 @@ class Feature(IntEnum):
     SILENCE = 11
     STATUS = 12
     DEVIL_FRUIT_SELL = 13
+    BOUNTY_LOAN = 14
 
     def get_description(self) -> str:
         """
@@ -44,7 +45,8 @@ class Feature(IntEnum):
                 Feature.PREDICTION,
                 Feature.SILENCE,
                 Feature.STATUS,
-                Feature.DEVIL_FRUIT_SELL]
+                Feature.DEVIL_FRUIT_SELL,
+                Feature.BOUNTY_LOAN]
 
     @staticmethod
     def get_restricted() -> list['Feature']:
@@ -107,5 +109,6 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.PREDICTION: "Prediction",
     Feature.SILENCE: "Silence",
     Feature.STATUS: "Status",
-    Feature.DEVIL_FRUIT_SELL: "Devil Fruit Sell"
+    Feature.DEVIL_FRUIT_SELL: "Devil Fruit Sell",
+    Feature.BOUNTY_LOAN: "Bounty Loan"
 }

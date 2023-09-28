@@ -152,3 +152,10 @@ END_INACTIVE_GAMES = Timer('end_inactive_games', Env.CRON_END_INACTIVE_GAMES.get
                            Env.SHOULD_LOG_TIMER_END_INACTIVE_GAMES.get_bool(),
                            Env.SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES.get_bool())
 TIMERS.append(END_INACTIVE_GAMES)
+
+# Set expired bounty loans
+SET_EXPIRED_BOUNTY_LOANS = Timer('set_expired_bounty_loans', Env.CRON_SET_EXPIRED_BOUNTY_LOANS.get(),
+                                 Env.ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS.get_bool(),
+                                 Env.SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS.get_bool(),
+                                 Env.SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS.get_bool())
+TIMERS.append(SET_EXPIRED_BOUNTY_LOANS)

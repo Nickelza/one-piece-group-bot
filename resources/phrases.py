@@ -86,6 +86,7 @@ UNRECOGNIZED_SCREEN = 'Unrecognized command'
 SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
 UNKNOWN_EXTRA_STEP = 'Unknown extra step'
 PRIVATE_STEP_NOT_SET = 'Private step not set'
+SAVED_USER_DATA_NOT_FOUND = 'Saved user data not found'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
@@ -181,7 +182,7 @@ PVT_TXT_LOGS = 'Which log would you like to view?'
 PVT_KEY_LOGS_STATS = Emoji.STATS + ' Stats'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
-PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
+PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Predictions'
 PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
 PVT_KEY_PREDICTION_DETAIL_REMOVE_BET = 'Remove bet'
 PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + ' Devil Fruit'
@@ -189,6 +190,9 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 PVT_KEY_GO_TO_MESSAGE = 'Go to message'
+PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + ' Loan'
+PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = 'Pay'
+PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = 'Forgive'
 
 GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + ' Buy'
@@ -206,6 +210,11 @@ ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. " \
                               "\n\nExample: " \
                               "\n- 10.000.000 or 10,000,000" \
                               "\n- 10k, 10thousand, 10m, 10million, 10b, 10billion"
+ACTION_INVALID_DURATION = "Invalid duration. " \
+                          "Make sure it is a number with only '.' or ',' as decimal separator or with a valid " \
+                          "unit." \
+                          "\n\nExample: " \
+                          "\n - 1min, 1h, 1d, 1week"
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
@@ -486,8 +495,92 @@ CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the C
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
 
+# Bounty Gift
+BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
+                        f'\n\nExample: {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000'
+BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
+                      '\n\nTax: ฿{} \\({}%\\)' \
+                      '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
+                        '\n\nTax: ฿{} \\({}%\\)' \
+                        '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
+BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
+                                '\n\nAvailable belly: ฿{}' \
+                                '\nGift amount: ฿*{}*' \
+                                '\nTax: ฿{} \\({}%\\)' \
+                                '\nTotal: ฿*{}*' \
+                                '\n\nYou can gift up to ฿`{}`'
+
+# Bounty Loan
+BOUNTY_LOAN_INVALID_COMMAND = 'You need to specify the amount to loan, the amount to repay and the duration' \
+                              f'\n\nExample: {Command.GRP_BOUNTY_LOAN.get_formatted()} 100mil 150mil 1day'
+BOUNTY_LOAN_LOANER = '\nLoaner: {}'
+BOUNTY_LOAN_BORROWER = '\nBorrower: {}'
+BOUNTY_LOAN_AMOUNT = '\nAmount: ฿*{}*'
+BOUNTY_LOAN_REPAY_AMOUNT = '\nRepay amount: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REPAID = '\nAmount paid: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REMAINING = '\nAmount remaining: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE = '\nAmount remaining: ฿`{}`'
+BOUNTY_LOAN_DATE = '\nDate: *{}*'
+BOUNTY_LOAN_DURATION = '\nDuration: *{}*'
+BOUNTY_LOAN_DEADLINE_DATE = '\nDeadline: *{}*'
+BOUNTY_LOAN_TAX = '\nTax: ฿{} \\({}%\\)'
+BOUNTY_LOAN_TOTAL = '\nTotal: ฿*{}*'
+BOUNTY_LOAN_STATUS = '\n\nStatus: *{}*'
+BOUNTY_LOAN_CANCELLED = 'Loan cancelled'
+BOUNTY_LOAN_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to loan' \
+                                '\n\nAvailable belly: ฿{}' \
+                                '\nLoan amount: ฿*{}*' \
+                                '\nTax: ฿{} \\({}%\\)' \
+                                '\nTotal: ฿*{}*' \
+                                '\n\nYou can loan up to ฿`{}`'
+BOUNTY_LOAN_STATUS_AWAITING_LOANER_CONFIRMATION = 'Awaiting loaner confirmation'
+BOUNTY_LOAN_STATUS_AWAITING_BORROWER_CONFIRMATION = 'Awaiting borrower confirmation'
+BOUNTY_LOAN_STATUS_ACTIVE = 'Active'
+BOUNTY_LOAN_STATUS_REPAID = 'Re-paid'
+BOUNTY_LOAN_STATUS_EXPIRED = 'Expired'
+BOUNTY_LOAN_STATUS_FORGIVEN = 'Forgiven'
+BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX = '\n\n_In case the loan is not repaid in time, '
+BOUNTY_LOAN_EXPIRED_ACTION_PREFIX = '\n\n_Since the loan was not repaid in time, '
+BOUNTY_LOAN_EXPIRED_ACTION_LOANER = '{}% of all new gained bounty by {} will be transferred to you until the loan ' \
+                                    'is repaid_'
+BOUNTY_LOAN_EXPIRED_ACTION_BORROWER = '{}% of all new gained bounty will be transferred to {} until the loan is repaid_'
+BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER = '{}% of all new gained bounty by {} will be transferred to {} ' \
+                                                 'until the loan is repaid_'
+BOUNTY_LOAN_REQUEST = '*New Loan*' \
+                      '\n' + BOUNTY_LOAN_LOANER \
+                      + BOUNTY_LOAN_BORROWER \
+                      + BOUNTY_LOAN_AMOUNT \
+                      + BOUNTY_LOAN_REPAY_AMOUNT \
+                      + BOUNTY_LOAN_DURATION \
+                      + BOUNTY_LOAN_TAX \
+                      + BOUNTY_LOAN_TOTAL \
+                      + BOUNTY_LOAN_STATUS \
+                      + BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX \
+                      + BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER \
+                      + '\n\n_To manage or pay this loan, go to Private Chat -> /start -> Loan_'
+# Bounty loan - Private Chat
+BOUNTY_LOAN_ITEM_TEXT = '{} ฿{} {} {}'
+BOUNTY_LOAN_ITEM_TEXT_FILL_IN = 'Loan'
+BOUNTY_LOAN_ITEM_NOT_ACTIVE = 'This loan is no longer active'
+BOUNTY_LOAN_ITEM_PAY_REQUEST = BOUNTY_LOAN_REPAY_AMOUNT.strip() \
+                               + BOUNTY_LOAN_AMOUNT_REPAID \
+                               + BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE \
+                               + '\n\n_Please send the amount you want to pay ' \
+                                 '\\(send \\* to repay the maximum allowed by your bounty\\)_'
+BOUNTY_LOAN_ITEM_PAY_CONFIRMATION_REQUEST = 'Are you sure you want to pay ฿*{}* for this loan?'
+BOUNTY_LOAN_ITEM_PAY_SUCCESS = 'You have successfully paid ฿{} for this loan'
+BOUNTY_LOAN_ITEM_FORGIVE_CONFIRMATION_REQUEST = BOUNTY_LOAN_REPAY_AMOUNT.strip() \
+                                                + BOUNTY_LOAN_AMOUNT_REPAID \
+                                                + BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE \
+                                                + '\n\nAre you sure you want to forgive this loan?' \
+                                                  '\nYou will not be able to collect the remaining amount'
+BOUNTY_LOAN_ITEM_FORGIVE_SUCCESS = 'You have forgiven this loan'
+
 # Notification - Categories
 NOTIFICATION_CATEGORY_BOUNTY_GIFT = 'Bounty Gift'
+NOTIFICATION_CATEGORY_BOUNTY_LOAN = 'Bounty Loan'
 NOTIFICATION_CATEGORY_CREW = 'Crew'
 NOTIFICATION_CATEGORY_DELETED_MESSAGE = 'Deleted Message'
 NOTIFICATION_CATEGORY_GAME = 'Game'
@@ -626,6 +719,22 @@ DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION = \
     'If to be notified a week before the Devil Fruit you ate is revoked due to not appearing in the leaderboard for ' \
     f'{Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get()} consecutive leaderboards'
 DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY = 'Devil Fruit revoke warning'
+# Notification - Bounty Loan
+BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT = 'Go to loan'
+# Notification - Bounty Loan Payment
+BOUNTY_LOAN_PAYMENT_NOTIFICATION = 'You have received a payment of ฿{} from {} for your loan'
+BOUNTY_LOAN_PAYMENT_NOTIFICATION_DESCRIPTION = 'If to be notified when you receive a payment for your loan'
+BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY = 'Bounty loan payment'
+# Notification - Bounty Loan Forgiven
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION = 'Your loan of ฿{} from {} has been forgiven'
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION_DESCRIPTION = 'If to be notified when your loan is forgiven'
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY = 'Bounty loan forgiven'
+# Notification - Bounty Loan Expired
+BOUNTY_LOAN_EXPIRED_NOTIFICATION = 'Your loan of ฿{} from {} has expired.' \
+                                   + BOUNTY_LOAN_EXPIRED_ACTION_PREFIX \
+                                   + BOUNTY_LOAN_EXPIRED_ACTION_BORROWER
+BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your loan expires'
+BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY = 'Bounty loan expired'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
@@ -675,6 +784,7 @@ DOC_Q_GAME_LOG_STATS_TEXT = '*Total summons*: {}' \
                             '\n*Belly lost*: ฿{}' \
                             '\n*Max belly won*: [฿{}]({})' \
                             '\n*Max belly lost*: [฿{}]({})' \
+                            '\n' \
  \
     # Logs - Game
 GAME_LOG_KEY = 'Challenges'
@@ -752,21 +862,6 @@ SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are gran
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
 SPEAK = '{} has been granted permission to speak'
 
-BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
-                        f'\n\nExample: {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000'
-BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
-                      '\n\nTax: ฿{} \\({}%\\)' \
-                      '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
-                        '\n\nTax: ฿{} \\({}%\\)' \
-                        '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
-BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
-                                '\n\nAvailable belly: ฿{}' \
-                                '\nGift amount: ฿*{}*' \
-                                '\nTax: ฿{} \\({}%\\)' \
-                                '\nTotal: ฿*{}*' \
-                                '\n\nYou can gift up to ฿`{}`'
 # Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
 DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
@@ -828,4 +923,3 @@ DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}'
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
 THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your Group!\n'
-

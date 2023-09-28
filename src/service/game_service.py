@@ -193,8 +193,8 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
     # Return wager to challenger
     challenger: User = game.challenger
     challenger.game_cooldown_end_date = None
-    challenger.bounty += game.wager
     challenger.pending_bounty -= game.wager
+    await add_bounty(challenger, game.wager, pending_belly_amount=game.wager)
     challenger.save()
 
     # Delete game

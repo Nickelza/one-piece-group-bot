@@ -11,6 +11,7 @@ from telegram.ext import ContextTypes
 import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
+from src.model.enums.ContextBotDataKey import ContextBotDataKey
 from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
     is_paradise_by_level
@@ -98,6 +99,9 @@ class User(BaseModel):
         :param screen: The screen
         :param previous_screen_list: The previous screen list
         """
+
+        if previous_screen_list is not None and len(previous_screen_list) == 0:
+            previous_screen_list = None
 
         if previous_screen_list is not None:
             self.private_screen_step = None  # Will have to update when Skip button is present
@@ -342,6 +346,37 @@ class User(BaseModel):
         except TelegramError as e:
             logging.error("Error while checking if user is in chat: " + str(e))
             return False
+
+    @staticmethod
+    def get_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextBotDataKey, should_erase: bool = True) -> str:
+        """
+        Get user data from context
+        :param context: The context
+        :param key: The key
+        :param should_erase: If the data should be erased after getting it
+        :return: The value
+        """
+
+        try:
+            value = context.user_data[key]
+        except KeyError:
+            raise KeyError(f"Key {key} not found in context user data")
+
+        if should_erase:
+            del context.user_data[key]
+
+        return value
+
+    @staticmethod
+    def set_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextBotDataKey, value: Any) -> Any:
+        """
+        Set user data to context
+        :param context: The context
+        :param key: The key
+        :param value: The value
+        """
+
+        context.user_data[key] = value
 
 
 User.create_table()
