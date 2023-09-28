@@ -11,7 +11,7 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
 from src.service.crew_service import get_crew, disband_crew
-from src.service.cron_service import get_remaining_time
+from src.service.date_service import get_remaining_time
 from src.service.message_service import full_message_send
 from src.service.message_service import get_yes_no_keyboard
 

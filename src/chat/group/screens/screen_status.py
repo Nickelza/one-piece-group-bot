@@ -18,7 +18,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
-from src.service.cron_service import get_remaining_time
+from src.service.date_service import get_remaining_time
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \

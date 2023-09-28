@@ -14,8 +14,8 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
-from src.service.cron_service import get_remaining_time
 from src.service.date_service import default_datetime_format
+from src.service.date_service import get_remaining_time
 from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
     get_message_url
 

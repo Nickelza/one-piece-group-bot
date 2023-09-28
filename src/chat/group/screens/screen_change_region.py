@@ -14,7 +14,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.cron_service import cron_datetime_difference
+from src.service.date_service import cron_datetime_difference
 from src.service.location_service import update_location
 from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
 

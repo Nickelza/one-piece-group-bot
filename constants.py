@@ -39,3 +39,13 @@ MAGNITUDE_AMOUNT_TO_NUMBER = {
     "billion": 1000000000,
     "trillion": 1000000000000,
 }
+
+DURATION_UNIT_TO_SECONDS = {
+    "seconds": 1,
+    "minutes": 60,
+    "hours": 3600,
+    "days": 86400,
+    "weeks": 604800,
+    "months": 2628000,
+    "years": 31536000
+}

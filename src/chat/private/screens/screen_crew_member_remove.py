@@ -11,7 +11,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import remove_member as remove_member_from_crew, get_crew
-from src.service.cron_service import get_remaining_time_from_next_cron
+from src.service.date_service import get_remaining_time_from_next_cron
 from src.service.message_service import full_message_send, get_yes_no_keyboard, mention_markdown_user
 
 

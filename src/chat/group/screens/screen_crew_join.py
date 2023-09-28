@@ -14,7 +14,7 @@ from src.model.error.CustomException import CrewValidationException, CrewJoinVal
     CrewJoinValidationUserException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member, get_crew
-from src.service.cron_service import get_remaining_time_from_next_cron
+from src.service.date_service import get_remaining_time_from_next_cron
 from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send, \
     full_message_or_media_send_or_edit, escape_valid_markdown_chars
 

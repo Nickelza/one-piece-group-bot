@@ -16,12 +16,13 @@ from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.cron_service import get_next_run
+from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
+from src.service.string_service import get_unit_value_from_string
 from src.service.user_service import user_is_boss
 
 
@@ -294,43 +295,11 @@ def get_amount_from_string(amount: str, user: User) -> int:
     try:
         return int(amount.strip().replace(',', '').replace('.', ''))
     except ValueError:
-        # Extract the contingent non-numeric characters, reversing to exclude '.' and ',' from the extraction
-        magnitude = ''
-        for char in reversed(amount):
-            if not char.isnumeric():
-                magnitude = char + magnitude
-            else:
-                break
-
-        amount_str = amount.strip().replace(',', '').replace('.', '').replace(magnitude, '')
-        # Amount not numeric
-        if not amount_str.isnumeric():
-            raise ValueError
-
-        if magnitude == '':
-            return int(amount_str)
-
-        # Set magnitude full name
-        for key in c.MAGNITUDE_AMOUNT_TO_NUMBER:
-            # There is a key that is a substring of the magnitude, e.g. 'thousand' is a substring of 'th' (starts with)
-            if key.startswith(magnitude.lower()):
-                magnitude_full_name = key
-                break
-        else:
-            raise ValueError
-
-        # Replace "," with "." to allow float conversion
-        amount_str = amount.replace(',', '.').replace(magnitude, '')
-
-        # More than 1 decimal point
-        if amount_str.count('.') > 1:
-            raise ValueError
-
-        return int(float(amount_str) * c.MAGNITUDE_AMOUNT_TO_NUMBER[magnitude_full_name])
+        return get_unit_value_from_string(amount, c.MAGNITUDE_AMOUNT_TO_NUMBER)
 
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
-                          required_belly: int, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
+                          required_belly: int = 0, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
                           previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None,
                           should_validate_user_has_amount: bool = True) -> bool:
     """

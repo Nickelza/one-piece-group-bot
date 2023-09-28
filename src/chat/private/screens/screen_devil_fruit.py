@@ -14,7 +14,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
-from src.service.cron_service import get_remaining_time
+from src.service.date_service import get_remaining_time
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard

@@ -27,7 +27,7 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
     """
 
     from src.service.bounty_service import get_next_bounty_reset_time
-    from src.service.cron_service import get_remaining_time
+    from src.service.date_service import get_remaining_time
 
     content_text = ""
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):

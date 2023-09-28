@@ -19,7 +19,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount
-from src.service.cron_service import get_remaining_time
+from src.service.date_service import get_remaining_time
 from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
 

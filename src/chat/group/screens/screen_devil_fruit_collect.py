@@ -11,7 +11,7 @@ from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
-from src.service.cron_service import get_remaining_time
+from src.service.date_service import get_remaining_time
 from src.service.devil_fruit_service import give_devil_fruit_to_user, get_devil_fruit_abilities_text
 from src.service.message_service import escape_valid_markdown_chars, full_message_send, full_media_send
 
