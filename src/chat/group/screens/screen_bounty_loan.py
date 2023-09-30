@@ -71,7 +71,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, loaner: U
             return False
 
         # Repayment amount validation, error message is sent by validate_wager
-        if not await validate_amount(update, context, loaner, command.parameters[1]):
+        if not await validate_amount(update, context, loaner, command.parameters[1],
+                                     should_validate_user_has_amount=False):
             return False
 
         # Deadline validation, error message is sent by validate_duration
