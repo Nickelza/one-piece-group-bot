@@ -111,7 +111,7 @@ class Game(BaseModel):
 
         # Max game as opponent
         max_game_as_opponent: Game = (Game().select()
-                                      .where((Game.opponent == user) & (Game.status == status))
+                                      .where((Game.opponent == user) & (Game.status == status.get_opposite_status()))
                                       .order_by(Game.wager.desc())
                                       .first())
 
