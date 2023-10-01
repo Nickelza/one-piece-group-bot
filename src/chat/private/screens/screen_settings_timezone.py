@@ -70,6 +70,7 @@ def get_text(user: User) -> str:
     :return: The text
     """
 
-    timezone_text = escape_valid_markdown_chars(user.timezone) if user.timezone is not None else phrases.PVT_TXT_UNKNOWN
+    timezone_text = escape_valid_markdown_chars(
+        user.timezone) if user.timezone is not None else phrases.PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN
     offset_text = get_utc_offset(user.timezone)
     return phrases.PVT_TXT_SETTINGS_TIMEZONE.format(timezone_text, offset_text)

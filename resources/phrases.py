@@ -175,7 +175,7 @@ PVT_TXT_SETTINGS_TIMEZONE = 'Current timezone: *{}* \\({}\\)' \
 PVT_TXT_SETTINGS_TIMEZONE_INVALID = 'Invalid location. Please send a correct location name ' \
                                     '\\(city, region, state or country\\)'
 PVT_KEY_SETTINGS_TIMEZONE_RESET = 'Reset'
-PVT_TXT_UNKNOWN = 'Default - ' + Env.TZ.get()
+PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN = 'Default - ' + Env.TZ.get()
 
 PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
 PVT_TXT_LOGS = 'Which log would you like to view?'
@@ -230,7 +230,7 @@ GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of 
 GAME_CANCELED = 'Game cancelled'
 GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
 GAME_INVALID = 'Invalid game'
-GAME_UNKNOWN_NAME = 'Unknown'
+GAME_NOT_SELECTED_NAME = 'Not selected'
 GAME_TEXT = '*{}*' \
             '\n\n_*Description*: {}_' \
             '\n\n{} vs {}' \

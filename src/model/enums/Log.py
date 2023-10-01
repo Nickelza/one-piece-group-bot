@@ -362,7 +362,8 @@ class GameLog(Log):
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = default_datetime_format(self.object.date, self.user)
-        game_name = GameType(self.object.type).get_name()
+        game_name = (GameType(self.object.type).get_name() if self.object.type is not None
+                     else phrases.GAME_NOT_SELECTED_NAME)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
