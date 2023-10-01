@@ -576,6 +576,9 @@ BOUNTY_LOAN_TAX_INCREASE = Environment('BOUNTY_LOAN_TAX_INCREASE', default_value
 # How many percent of newly gained bounty should be used to pay off loan in case of expiration. Default: 50%
 BOUNTY_LOAN_GARNISH_PERCENTAGE = Environment('BOUNTY_LOAN_GARNISH_PERCENTAGE', default_value='50')
 
+# How much percent should be removed from taxes for exchanges from Pirate King. Default: 50%
+PIRATE_KING_TRANSACTION_TAX_DISCOUNT = Environment('PIRATE_KING_TRANSACTION_TAX_DISCOUNT', default_value='50')
+
 # How many days a user can hold a devil fruit before it expires. Default: 2
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='2')
 # After how many hours does a Devil Fruit respawn. Default: 24

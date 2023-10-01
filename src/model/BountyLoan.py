@@ -7,7 +7,6 @@ from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
-from src.service.bounty_service import add_or_remove_bounty
 
 
 class BountyLoan(BaseModel):
@@ -35,6 +34,8 @@ class BountyLoan(BaseModel):
         db_table = 'bounty_loan'
 
     def pay(self, amount: int, update: Update = None):
+        from src.service.bounty_service import add_or_remove_bounty
+
         """
         Pay the loan
         :param amount: The amount to pay

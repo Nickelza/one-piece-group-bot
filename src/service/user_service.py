@@ -8,6 +8,7 @@ from src.model.GroupChat import GroupChat
 from src.model.LegendaryPirate import LegendaryPirate
 from src.model.UnmutedUser import UnmutedUser
 from src.model.User import User
+from src.model.enums.BossType import BossType
 from src.model.enums.LeaderboardRank import PIRATE_KING
 from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_current_leaderboard_rank
@@ -35,6 +36,25 @@ async def get_user_profile_photo(update: Update) -> str | None:
     return photo_path
 
 
+def get_boss_type(user: User) -> BossType | None:
+    """
+    Get the boss type of the user
+    :param user: The user
+    :return: The boss type
+    """
+
+    if user.is_admin:
+        return BossType.ADMIN
+
+    if LegendaryPirate.get_or_none(LegendaryPirate.user == user) is not None:
+        return BossType.LEGENDARY_PIRATE
+
+    if get_current_leaderboard_rank(user) == PIRATE_KING:
+        return BossType.PIRATE_KING
+
+    return None
+
+
 def user_is_boss(user: User) -> bool:
     """
     Returns True if the user is a boss
@@ -42,19 +62,7 @@ def user_is_boss(user: User) -> bool:
     :return: True if the user is a boss
     """
 
-    # Is admin field
-    if user.is_admin:
-        return True
-
-    # User is Pirate King
-    if get_current_leaderboard_rank(user) == PIRATE_KING:
-        return True
-
-    # User is a Legendary Pirate
-    if LegendaryPirate.get_or_none(LegendaryPirate.user == user) is not None:
-        return True
-
-    return False
+    return get_boss_type(user) is not None
 
 
 def user_is_muted(user: User, group_chat: GroupChat) -> bool:

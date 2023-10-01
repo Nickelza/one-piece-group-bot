@@ -12,6 +12,7 @@ import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.BossType import BossType
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
@@ -23,6 +24,7 @@ from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
 from src.service.string_service import get_unit_value_from_string
+from src.service.user_service import get_boss_type
 
 
 def get_belly_formatted(belly: int) -> str:
@@ -472,12 +474,18 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
     :return: The transaction tax
     """
 
-    # Sender or receiver is boss, no tax
-    from src.service.user_service import user_is_boss
-    if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
-        return 0
-
     tax = base_tax
+
+    from src.service.user_service import user_is_boss
+
+    if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
+        boss_type: BossType = get_boss_type(sender) if user_is_boss(sender) else get_boss_type(receiver)
+
+        # Admins and legendary pirates, no tax
+        if boss_type in (BossType.ADMIN, BossType.LEGENDARY_PIRATE):
+            return 0
+        elif boss_type is BossType.PIRATE_KING and user_is_boss(sender):
+            tax = subtract_percentage_from_value(base_tax, Env.PIRATE_KING_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Send and receiver in same crew, percentage deduction
     if receiver is not None and sender.in_same_crew(receiver):
