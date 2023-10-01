@@ -18,7 +18,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted, add_bounty
+from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
 from src.service.date_service import convert_seconds_to_time
 from src.service.devil_fruit_service import get_datetime
 from src.service.devil_fruit_service import get_value
@@ -265,9 +265,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
-        await add_bounty(user, win_amount)
+        await add_or_remove_bounty(user, win_amount, update=update)
         # Remove bounty from opponent
-        opponent.bounty -= win_amount
+        await add_or_remove_bounty(opponent, win_amount, add=False, update=update)
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                            mention_markdown_user(opponent), get_belly_formatted(win_amount),
                                            user.get_bounty_formatted())
@@ -275,9 +275,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.LOST
         fight.belly = lose_amount
         # Remove bounty from challenger
-        user.bounty -= lose_amount
+        await add_or_remove_bounty(user, lose_amount, add=False, update=update)
         # Add bounty to opponent
-        await add_bounty(opponent, lose_amount)
+        await add_or_remove_bounty(opponent, lose_amount, update=update)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())

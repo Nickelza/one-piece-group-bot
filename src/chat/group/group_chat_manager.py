@@ -38,7 +38,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import add_bounty
+from src.service.bounty_service import add_or_remove_bounty
 from src.service.bounty_service import get_message_belly
 from src.service.group_service import is_main_group, feature_is_enabled
 from src.service.message_service import delete_message
@@ -93,8 +93,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 return
 
     # Update bounty from message gain
-    await add_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
-                     should_update_location=True, from_message=True)
+    await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
+                               should_update_location=True, from_message=True)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 

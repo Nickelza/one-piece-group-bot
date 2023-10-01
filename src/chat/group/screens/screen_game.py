@@ -18,7 +18,7 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount
+from src.service.bounty_service import get_amount_from_string, validate_amount, add_or_remove_bounty
 from src.service.date_service import get_remaining_time
 from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
@@ -117,8 +117,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game.group_chat = group_chat
     game.save()
 
-    user.bounty -= game.wager
-    user.pending_bounty += game.wager
+    await add_or_remove_bounty(user, game.wager, add=False, should_affect_pending_bounty=True, update=update)
     user.game_cooldown_end_date = get_datetime(
         user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
 

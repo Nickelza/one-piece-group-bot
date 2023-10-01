@@ -60,9 +60,6 @@ class User(BaseModel):
     # passed as a parameter, so updating it at the end of the script would overwrite the changes
     should_update_model: bool = True
 
-    # Pending bounty at the start of the script. Used to check if the pending bounty went negative
-    previous_pending_bounty: int = 0
-
     class Meta:
         db_table = 'user'
 

@@ -1,4 +1,5 @@
 import datetime
+import logging
 from math import ceil
 
 from peewee import Case, fn
@@ -9,7 +10,6 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
-from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
@@ -19,13 +19,10 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
-from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
-from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
 from src.service.string_service import get_unit_value_from_string
-from src.service.user_service import user_is_boss
 
 
 def get_belly_formatted(belly: int) -> str:
@@ -177,6 +174,7 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     User.update(bounty=case_stmt).execute()
 
     # Reset location
+    from src.service.location_service import reset_location
     reset_location()
 
     # Reset can create crew flag
@@ -196,11 +194,11 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
 
-# noinspection PyUnusedLocal
-# pending_belly_amount will be used in the future
-async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TYPE = None, update: Update = None,
-                     should_update_location: bool = False, pending_belly_amount: int = 0,
-                     from_message: bool = False) -> None:
+async def add_or_remove_bounty(user: User, amount: int = None, context: ContextTypes.DEFAULT_TYPE = None,
+                               update: Update = None, should_update_location: bool = False,
+                               pending_belly_amount: int = None, from_message: bool = False, add: bool = True,
+                               should_save: bool = False, should_affect_pending_bounty: bool = False,
+                               check_for_loan: bool = True) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -211,9 +209,41 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
     :param pending_belly_amount: How much of the amount is from pending belly, so not newly acquired. Will be used to
                                  calculate eventual taxes
     :param from_message: Whether the bounty is gained from a message
+    :param add: Whether to add or remove the bounty
+    :param should_save: Whether to save the user
+    :param should_affect_pending_bounty: Whether to affect the pending bounty
+    :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
     :return: The updated user
     """
     from src.service.location_service import update_location
+
+    if amount is None and pending_belly_amount is None:
+        raise ValueError('Amount or pending belly amount must be specified')
+
+    previous_bounty = user.bounty
+    previous_pending_bounty = user.pending_bounty
+
+    if should_affect_pending_bounty and pending_belly_amount is None:
+        pending_belly_amount = amount
+
+    # Should remove bounty
+    if not add:
+        user.bounty -= amount
+        if should_affect_pending_bounty:
+            user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
+
+        if user.bounty < 0 and previous_bounty >= 0:
+            try:
+                raise ValueError(f'User {user.id} has negative bounty: {user.bounty} after removing '
+                                 f'{amount} bounty in event '
+                                 f'{update.to_dict() if update is not None else "None"}')
+            except ValueError as ve:
+                logging.exception(ve)
+
+        if should_save:
+            user.save()
+
+        return
 
     if amount <= 0 and not should_update_location:
         return
@@ -222,29 +252,47 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
     if user.is_arrested():
         return
 
-    effective_amount = amount - pending_belly_amount  # Amount that will be used to calculate eventual taxes
+    # Amount that will be used to calculate eventual taxes
+    effective_amount = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
 
-    # If user has an expired bounty loan, use n% of the bounty to repay the loan
-    expired_bounty_loan: BountyLoan = (BountyLoan.select().where((BountyLoan.borrower == user)
-                                                                 & (BountyLoan.status == BountyLoanStatus.EXPIRED))
-                                       .order_by(BountyLoan.deadline_date.desc()).first())
-    if expired_bounty_loan is not None:
-        amount_for_repay = subtract_percentage_from_value(effective_amount,
-                                                          Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
-        # Cap to remaining amount
-        amount_for_repay = expired_bounty_loan.get_maximum_payable_amount(int(amount_for_repay))
+    if check_for_loan:
+        from src.model.BountyLoan import BountyLoan
 
-        # Pay loan
-        expired_bounty_loan.pay(amount_for_repay)
+        # If user has an expired bounty loan, use n% of the bounty to repay the loan
+        expired_bounty_loan: BountyLoan = (BountyLoan.select().where((BountyLoan.borrower == user)
+                                                                     & (BountyLoan.status == BountyLoanStatus.EXPIRED))
+                                           .order_by(BountyLoan.deadline_date.desc()).first())
+        if expired_bounty_loan is not None:
+            amount_for_repay = subtract_percentage_from_value(effective_amount,
+                                                              Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
+            # Cap to remaining amount
+            amount_for_repay = expired_bounty_loan.get_maximum_payable_amount(int(amount_for_repay))
 
-        # Subtract from amount
-        amount -= amount_for_repay
+            # Pay loan
+            expired_bounty_loan.pay(amount_for_repay, update)
 
-    user.bounty += amount
+            # Subtract from amount
+            amount -= amount_for_repay
+
+        user.bounty += amount
+
+    if should_affect_pending_bounty:
+        user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
+
+        if user.pending_bounty < 0 and previous_pending_bounty >= 0:
+            try:
+                raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing '
+                                 f'{amount} pending bounty in event '
+                                 f'{update.to_dict() if update is not None else "None"}')
+            except ValueError as ve:
+                logging.exception(ve)
 
     # If the bounty is gained from a message, subtract the amount from the bounty message limit
     if from_message:
         user.bounty_message_limit -= amount
+
+    if should_save:
+        user.save()
 
     # Update the user's location
     if should_update_location:
@@ -425,6 +473,7 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
     """
 
     # Sender or receiver is boss, no tax
+    from src.service.user_service import user_is_boss
     if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
         return 0
 
@@ -435,6 +484,7 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
         tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Apply Devil Fruit ability
+    from src.service.devil_fruit_service import get_value
     tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
 
     return tax

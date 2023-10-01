@@ -135,8 +135,6 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
         user.save()
 
-    user.previous_pending_bounty = user.pending_bounty
-
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
         logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
@@ -233,12 +231,6 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()
-
-    # Negative pending bounty, log it
-    if user.pending_bounty != user.previous_pending_bounty and user.pending_bounty < 0:
-        logging.error(f'Negative pending bounty for user {user.tg_user_id}: '
-                      f'{user.previous_pending_bounty} -> {user.pending_bounty}'
-                      f'\n{update.to_dict()}')
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,

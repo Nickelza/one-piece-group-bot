@@ -78,7 +78,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
             case Step.END:
                 amount = int(user.get_context_data(context, ContextBotDataKey.BOUNTY_LOAN_REPAY_AMOUNT))
-                loan.pay(amount)
+                loan.pay(amount, update)
 
                 # Send notification to loaner
                 await send_notification(context, loan.loaner, BountyLoanPaymentNotification(loan, amount))

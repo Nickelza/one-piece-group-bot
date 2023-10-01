@@ -72,7 +72,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     # Game is finished
     if rock_paper_scissors.is_finished():
         game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
-        game = await game_service.end_game(game, game_outcome)
+        game = await game_service.end_game(game, game_outcome, update=update)
         user.should_update_model = False
 
         # Send result

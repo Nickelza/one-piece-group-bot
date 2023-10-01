@@ -1,11 +1,13 @@
 from datetime import datetime
 
 from peewee import *
+from telegram import Update
 
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
+from src.service.bounty_service import add_or_remove_bounty
 
 
 class BountyLoan(BaseModel):
@@ -32,10 +34,11 @@ class BountyLoan(BaseModel):
     class Meta:
         db_table = 'bounty_loan'
 
-    def pay(self, amount: int):
+    def pay(self, amount: int, update: Update = None):
         """
         Pay the loan
         :param amount: The amount to pay
+        :param update: The update object
         :return: None
         """
         self.amount_repaid += amount
@@ -46,18 +49,14 @@ class BountyLoan(BaseModel):
 
         # Subtract from borrower's bounty
         # noinspection PyTypeChecker
-        borrower: User = self.borrower
-        borrower.bounty -= amount
+        add_or_remove_bounty(self.borrower, amount, add=False, update=update)
 
         # Add to loaner's bounty
         # noinspection PyTypeChecker
-        loaner: User = self.loaner
-        # Adding directly instead of using add_bounty to avoid recursive import. Consequently, repaid amount
-        # won't be subject to income tax or used to pay loans
-        loaner.bounty += amount
+        add_or_remove_bounty(self.loaner, amount, check_for_loan=False, update=update)
 
-        borrower.save()
-        loaner.save()
+        self.borrower.save()
+        self.loaner.save()
         self.save()
 
     def get_maximum_payable_amount(self, amount: int) -> int:

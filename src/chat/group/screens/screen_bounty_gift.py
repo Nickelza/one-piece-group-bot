@@ -14,7 +14,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
-    get_transaction_tax, add_bounty
+    get_transaction_tax, add_or_remove_bounty
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -195,12 +195,11 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     bounty_gift.save()
 
     # Update sender
-    sender.bounty -= total_amount
-
+    await add_or_remove_bounty(sender, total_amount, add=False, update=update)
     sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
-    await add_bounty(receiver, amount)
+    await add_or_remove_bounty(receiver, amount, update=update)
     receiver.save()
 
     # Send message

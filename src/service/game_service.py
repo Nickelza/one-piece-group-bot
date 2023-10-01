@@ -29,7 +29,7 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
-from src.service.bounty_service import get_belly_formatted, add_bounty
+from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
 from src.service.date_service import convert_seconds_to_time
 from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url, \
     full_message_send
@@ -50,12 +50,13 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
         raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
 
 
-async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = False) -> Game:
+async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = False, update: Update = None) -> Game:
     """
     End the game, set the status and return the game
     :param game: The game
     :param game_outcome: The outcome
     :param is_forced_end: If the game was forced to end
+    :param update: The update
     :return: The game
     """
 
@@ -66,10 +67,10 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
 
     if game_outcome == GameOutcome.CHALLENGER_WON:
         game.status = GameStatus.WON
-        await add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
+        await add_or_remove_bounty(challenger, game.wager, pending_belly_amount=half_wager, update=update)
     elif game_outcome == GameOutcome.OPPONENT_WON:
         game.status = GameStatus.LOST
-        await add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
+        await add_or_remove_bounty(opponent, game.wager, pending_belly_amount=half_wager, update=update)
     else:
         if is_forced_end:
             game.status = GameStatus.FORCED_END
@@ -79,14 +80,9 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
         if previous_status.only_challenger_wager():
             half_wager *= 2
         else:
-            await add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
+            await add_or_remove_bounty(opponent, half_wager, should_affect_pending_bounty=True, update=update)
 
-        await add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
-
-    challenger.pending_bounty -= half_wager
-
-    if not previous_status.only_challenger_wager():
-        opponent.pending_bounty -= half_wager
+        await add_or_remove_bounty(challenger, half_wager, should_affect_pending_bounty=True, update=update)
 
     # Refresh
     game.challenger = challenger
@@ -169,13 +165,14 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
 
 
 async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_delete_message: bool = True,
-                      show_timeout_message: bool = False) -> None:
+                      show_timeout_message: bool = False, update: Update = None) -> None:
     """
     Delete game
     :param context: The context
     :param game: The game
     :param should_delete_message: If the message should be deleted
     :param show_timeout_message: If the message should be edited showing timeout
+    :param update: The update
     :return: None
     """
 
@@ -193,8 +190,7 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
     # Return wager to challenger
     challenger: User = game.challenger
     challenger.game_cooldown_end_date = None
-    challenger.pending_bounty -= game.wager
-    await add_bounty(challenger, game.wager, pending_belly_amount=game.wager)
+    await add_or_remove_bounty(challenger, game.wager, should_affect_pending_bounty=True, update=update)
     challenger.save()
 
     # Delete game
@@ -303,11 +299,12 @@ async def enqueue_game_turn_notification(context: ContextTypes.DEFAULT_TYPE, use
         await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
-async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
+async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game, update: Update):
     """
     Enqueue a game timeout. Waits for N time and if the opponent doesn't accept, the game is deleted
     :param context: The context
     :param game: The game
+    :param update: The update
     :return: None
     """
 
@@ -321,7 +318,7 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
 
     # Check if the game is still in the same state
     if GameStatus(updated_game.status) == GameStatus.AWAITING_OPPONENT_CONFIRMATION:
-        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True)
+        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True, update=update)
 
 
 def get_players(game: Game) -> Tuple[User, User]:
@@ -499,7 +496,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
     # End game
     challenger, opponent = get_players(game)
     outcome: GameOutcome = GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
-    await end_game(game, outcome)
+    await end_game(game, outcome, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 

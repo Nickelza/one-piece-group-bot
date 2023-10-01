@@ -42,7 +42,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
-        await delete_game(context, game)
+        await delete_game(context, game, update=update)
         user.should_update_model = False
         return
 
@@ -75,4 +75,4 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
                           saved_media_name=game.get_saved_media_name())
 
     # Enqueue the game for timeout
-    context.application.create_task(enqueue_game_timeout(context, game))
+    context.application.create_task(enqueue_game_timeout(context, game, update))

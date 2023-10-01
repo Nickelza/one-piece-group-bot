@@ -19,7 +19,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import PredictionException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
+from src.service.bounty_service import round_belly_up, add_or_remove_bounty, get_belly_formatted
 from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
@@ -247,9 +247,7 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
         for invalid_prediction_option_user in invalid_prediction_option_users:
             user: User = invalid_prediction_option_user.user
             # Return wager and subtract from pending bounty
-            user.pending_bounty -= invalid_prediction_option_user.wager
-            await add_bounty(user, invalid_prediction_option_user.wager,
-                             pending_belly_amount=invalid_prediction_option_user.wager)
+            await add_or_remove_bounty(user, invalid_prediction_option_user.wager, should_affect_pending_bounty=True)
             user.save()
 
             # Add to users_invalid_prediction_options
@@ -318,16 +316,13 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
-            await add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_or_remove_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
 
             # Add to total win
             users_total_win[user.id][1] += win_amount
         else:
             # Remove from total win
             users_total_win[user.id][1] -= prediction_option_user.wager
-
-        # Subtract bet wager from user pending bounty
-        user.pending_bounty -= prediction_option_user.wager
 
         # Should refund wager or no correct options
         if prediction.refund_wager or len(prediction_options_correct) == 0:
@@ -339,7 +334,8 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
                 won_amount = min(prediction_option_user.wager,
                                  get_max_wager_refund(prediction_option_user=prediction_option_user))
 
-            await add_bounty(user, won_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_or_remove_bounty(user, won_amount, pending_belly_amount=prediction_option_user.wager,
+                                       should_affect_pending_bounty=True)
 
         user.save()
 
@@ -575,8 +571,7 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
     prediction_option_user.save()
 
     # Remove wager from user balance
-    user.bounty -= wager
-    user.pending_bounty += wager
+    add_or_remove_bounty(user, wager, add=False, should_affect_pending_bounty=True)
 
     return prediction_option_user
 
@@ -589,8 +584,7 @@ def delete_prediction_option_user(user: User, prediction_option_user: Prediction
     :return: None
     """
     # Return wager
-    user.pending_bounty -= prediction_option_user.wager
-    add_bounty(user, prediction_option_user.wager, pending_belly_amount=prediction_option_user.wager)
+    add_or_remove_bounty(user, prediction_option_user.wager, should_affect_pending_bounty=True)
 
     # Delete prediction option user
     prediction_option_user.delete_instance()
