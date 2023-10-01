@@ -292,8 +292,8 @@ SHOULD_LOG_TIMER_END_INACTIVE_GAMES = Environment('SHOULD_LOG_TIMER_END_INACTIVE
 SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES = Environment('SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES',
                                                        default_value='False')
 
-# Set expired bounty loans. Default: Every 1 hour
-CRON_SET_EXPIRED_BOUNTY_LOANS = Environment('CRON_SET_EXPIRED_BOUNTY_LOANS', default_value='0 * * * *')
+# Set expired bounty loans. Default: Every 1 minute
+CRON_SET_EXPIRED_BOUNTY_LOANS = Environment('CRON_SET_EXPIRED_BOUNTY_LOANS', default_value='*/1 * * * *')
 ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS', default_value='True')
 SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS',
                                                         default_value='False')
