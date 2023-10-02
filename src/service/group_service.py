@@ -11,6 +11,7 @@ from src.model.GroupChat import GroupChat
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
+from src.model.GroupUser import GroupUser
 from src.model.Prediction import Prediction
 from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.enums.Feature import Feature
@@ -235,6 +236,21 @@ def deactivate_inactive_group_chats() -> None:
 
     (GroupChat.update(is_active=False)
      .where(GroupChat.last_message_date < datetime.now() - timedelta(days=inactive_days))
+     .execute())
+
+    # Deactivate inactive group users
+    deactivate_inactive_group_users()
+
+
+def deactivate_inactive_group_users() -> None:
+    """
+    Deactivates the inactive group users
+    """
+
+    inactive_days = Env.INACTIVE_GROUP_USER_DAYS.get_int()
+
+    (GroupUser.update(is_active=False)
+     .where(GroupUser.last_message_date < datetime.now() - timedelta(days=inactive_days))
      .execute())
 
 

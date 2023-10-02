@@ -275,7 +275,7 @@ SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RESPAWN_DEV
 SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT',
                                                         default_value='False')
 
-# Deactivate inactive groups and group chats. Default: Every day at midnight
+# Deactivate inactive groups and group chats and group users. Default: Every day at midnight
 CRON_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('CRON_DEACTIVATE_INACTIVE_GROUP_CHATS',
                                                    default_value='0 0 * * *')
 ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS',
@@ -325,6 +325,8 @@ BELLY_DAILY_BASE_LIMIT = Environment('BELLY_DAILY_BASE_LIMIT', default_value='50
 
 # After how many days from the last message should a group or group chat be considered inactive. Default: 14
 INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='14')
+# After how many days from the last message should a user be considered inactive in a group. Default: 14
+INACTIVE_GROUP_USER_DAYS = Environment('INACTIVE_GROUP_USER_DAYS', default_value='14')
 
 # BOUNTY BONUS
 # LOCATION

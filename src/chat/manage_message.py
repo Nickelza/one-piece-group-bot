@@ -16,6 +16,7 @@ from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
+from src.model.GroupUser import GroupUser
 from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
@@ -145,7 +146,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     # noinspection PyTypeChecker
     group_chat = None
     if message_source is MessageSource.GROUP:
-        group: Group = add_or_update_group(update)
+        group: Group = add_or_update_group(update, (user if update.effective_user is not None else None))
         group_chat: GroupChat = add_or_update_group_chat(update, group)
 
     command: Command.Command = Command.ND
@@ -406,10 +407,11 @@ def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     return user
 
 
-def add_or_update_group(update) -> Group:
+def add_or_update_group(update, user: User) -> Group:
     """
     Adds or updates a group_chat
     :param update: Telegram update
+    :param user: User object
     :return: Group object
     """
     group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
@@ -431,6 +433,18 @@ def add_or_update_group(update) -> Group:
     group.last_message_date = datetime.now()
     group.is_active = True
     group.save()
+
+    # Add or update the group user
+    if user is not None:
+        group_user = GroupUser.get_or_none((GroupUser.group == group) & (GroupUser.user == user))
+        if group_user is None:
+            group_user = GroupUser()
+            group_user.group = group
+            group_user.user = user
+
+        group_user.last_message_date = datetime.now()
+        group_user.is_active = True
+        group_user.save()
 
     return group
 
