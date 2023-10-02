@@ -77,6 +77,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                                         yes_extra_keys={ReservedKeyboardKeys.SCREEN_STEP: Step.END}))
 
             case Step.END:
+                if inbound_keyboard is None:
+                    return
+
                 amount = int(user.get_context_data(context, ContextBotDataKey.BOUNTY_LOAN_REPAY_AMOUNT))
                 await loan.pay(amount, update)
 
