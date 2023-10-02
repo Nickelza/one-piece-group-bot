@@ -375,5 +375,24 @@ class User(BaseModel):
 
         context.user_data[key] = value
 
+    def get_expired_bounty_loans(self) -> list:
+        """
+        Get the expired bounty loans
+        :return: The expired bounty loans
+        """
+
+        from src.model.enums.BountyLoanStatus import BountyLoanStatus
+        from src.model.BountyLoan import BountyLoan
+
+        return self.bounty_borrowers.where(BountyLoan.status == BountyLoanStatus.EXPIRED)
+
+    def has_expired_bounty_loans(self) -> bool:
+        """
+        Returns True if the user has expired bounty loans
+        :return: True if the user has expired bounty loans
+        """
+
+        return len(self.get_expired_bounty_loans()) > 0
+
 
 User.create_table()

@@ -15,7 +15,6 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BossType import BossType
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
-from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
@@ -259,24 +258,25 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     # Amount that will be used to calculate eventual taxes
     effective_amount = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
 
+    amount_to_add = amount
     if check_for_loan:
         # If user has an expired bounty loan, use n% of the bounty to repay the loan
-        expired_bounty_loan: BountyLoan = (BountyLoan.select().where((BountyLoan.borrower == user)
-                                                                     & (BountyLoan.status == BountyLoanStatus.EXPIRED))
-                                           .order_by(BountyLoan.deadline_date.desc()).first())
-        if expired_bounty_loan is not None:
+        expired_loans = user.get_expired_bounty_loans()
+        if len(expired_loans) > 0:
+            expired_loan: BountyLoan = expired_loans[0]
+
             amount_for_repay = subtract_percentage_from_value(effective_amount,
                                                               Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
             # Cap to remaining amount
-            amount_for_repay = expired_bounty_loan.get_maximum_payable_amount(int(amount_for_repay))
+            amount_for_repay = expired_loan.get_maximum_payable_amount(int(amount_for_repay))
 
             # Pay loan
-            expired_bounty_loan.pay(amount_for_repay, update)
+            expired_loan.pay(amount_for_repay, update)
 
             # Subtract from amount
-            amount -= amount_for_repay
+            amount_to_add -= amount_for_repay
 
-        user.bounty += amount
+    user.bounty += amount_to_add
 
     if should_affect_pending_bounty:
         user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)

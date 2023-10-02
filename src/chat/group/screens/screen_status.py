@@ -179,6 +179,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             Env.NEW_WORLD_BOUNTY_BONUS.get_int())
         has_bounty_bonus = True
 
+    # Expired loan
+    if target_user.has_expired_bounty_loans():
+        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
+            (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_int()))
+        has_bounty_bonus = True
+
     if has_bounty_bonus:
         message_text += bounty_bonus_text
 
