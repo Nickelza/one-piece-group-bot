@@ -16,6 +16,7 @@ from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
     is_paradise_by_level
 from src.model.enums.Screen import Screen
+from src.model.error.CommonChatError import CommonChatException
 
 
 class User(BaseModel):
@@ -357,7 +358,8 @@ class User(BaseModel):
         try:
             value = context.user_data[key]
         except KeyError:
-            raise KeyError(f"Key {key} not found in context user data")
+            raise CommonChatException(f"Key {key} not found in context user data, "
+                                      f"this might be due to a system restart.")
 
         if should_erase:
             del context.user_data[key]

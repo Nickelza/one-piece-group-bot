@@ -27,7 +27,7 @@ from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
-    full_message_or_media_send_or_edit, message_is_reply
+    full_message_or_media_send_or_edit, message_is_reply, escape_valid_markdown_chars
 from src.service.user_service import user_is_boss, user_is_muted
 
 
@@ -222,9 +222,9 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         try:
-            await full_message_send(context, str(ce), update=update)
+            await full_message_send(context, escape_valid_markdown_chars(str(ce)), update=update)
         except BadRequest:
-            await full_message_or_media_send_or_edit(context, str(ce), update=update)
+            await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update)
     except NavigationLimitReachedException:
         await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                                 show_alert=True)
