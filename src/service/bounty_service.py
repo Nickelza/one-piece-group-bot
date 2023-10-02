@@ -10,6 +10,7 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
+from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BossType import BossType
@@ -20,11 +21,13 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
+from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
+from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
 from src.service.string_service import get_unit_value_from_string
-from src.service.user_service import get_boss_type
+from src.service.user_service import get_boss_type, user_is_boss
 
 
 def get_belly_formatted(belly: int) -> str:
@@ -176,7 +179,6 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     User.update(bounty=case_stmt).execute()
 
     # Reset location
-    from src.service.location_service import reset_location
     reset_location()
 
     # Reset can create crew flag
@@ -258,8 +260,6 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     effective_amount = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
 
     if check_for_loan:
-        from src.model.BountyLoan import BountyLoan
-
         # If user has an expired bounty loan, use n% of the bounty to repay the loan
         expired_bounty_loan: BountyLoan = (BountyLoan.select().where((BountyLoan.borrower == user)
                                                                      & (BountyLoan.status == BountyLoanStatus.EXPIRED))
@@ -476,8 +476,6 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
 
     tax = base_tax
 
-    from src.service.user_service import user_is_boss
-
     if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
         boss_type: BossType = get_boss_type(sender) if user_is_boss(sender) else get_boss_type(receiver)
 
@@ -492,7 +490,6 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
         tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Apply Devil Fruit ability
-    from src.service.devil_fruit_service import get_value
     tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
 
     return tax
