@@ -226,7 +226,9 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     previous_bounty = user.bounty
     previous_pending_bounty = user.pending_bounty
 
-    if should_affect_pending_bounty and pending_belly_amount is None:
+    if pending_belly_amount is not None and pending_belly_amount > 0:
+        should_affect_pending_bounty = True
+    elif should_affect_pending_bounty:
         pending_belly_amount = amount
 
     # Should remove bounty
@@ -245,8 +247,21 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
 
         if should_save:
             user.save()
-
         return
+
+    if should_affect_pending_bounty:
+        user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
+
+        if user.pending_bounty < 0 and previous_pending_bounty >= 0:
+            try:
+                raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing '
+                                 f'{amount} pending bounty in event '
+                                 f'{update.to_dict() if update is not None else "None"}')
+            except ValueError as ve:
+                logging.exception(ve)
+
+        if should_save:
+            user.save()
 
     if amount <= 0 and not should_update_location:
         return
@@ -271,23 +286,12 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
             amount_for_repay = expired_loan.get_maximum_payable_amount(int(amount_for_repay))
 
             # Pay loan
-            expired_loan.pay(amount_for_repay, update)
+            await expired_loan.pay(amount_for_repay, update)
 
             # Subtract from amount
             amount_to_add -= amount_for_repay
 
     user.bounty += amount_to_add
-
-    if should_affect_pending_bounty:
-        user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
-
-        if user.pending_bounty < 0 and previous_pending_bounty >= 0:
-            try:
-                raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing '
-                                 f'{amount} pending bounty in event '
-                                 f'{update.to_dict() if update is not None else "None"}')
-            except ValueError as ve:
-                logging.exception(ve)
 
     # If the bounty is gained from a message, subtract the amount from the bounty message limit
     if from_message:

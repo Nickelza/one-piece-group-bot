@@ -65,24 +65,31 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
     half_wager: int = game.wager / 2
     previous_status: GameStatus = GameStatus(game.status)
 
+    bounty_for_challenger = bounty_for_opponent = 0
+    pending_bounty_for_challenger = pending_bounty_for_opponent = game.wager / 2
     if game_outcome == GameOutcome.CHALLENGER_WON:
+        # Challenger won
         game.status = GameStatus.WON
-        await add_or_remove_bounty(challenger, game.wager, pending_belly_amount=half_wager, update=update)
+        bounty_for_challenger = game.wager
     elif game_outcome == GameOutcome.OPPONENT_WON:
+        # Opponent won
         game.status = GameStatus.LOST
-        await add_or_remove_bounty(opponent, game.wager, pending_belly_amount=half_wager, update=update)
+        bounty_for_opponent = game.wager
     else:
-        if is_forced_end:
-            game.status = GameStatus.FORCED_END
-        else:
-            game.status = GameStatus.DRAW
+        # No one won
+        bounty_for_challenger = half_wager
+        bounty_for_opponent = half_wager
+        game.status = GameStatus.FORCED_END if is_forced_end else GameStatus.DRAW
 
+        # Only challenger wagered
         if previous_status.only_challenger_wager():
-            half_wager *= 2
-        else:
-            await add_or_remove_bounty(opponent, half_wager, should_affect_pending_bounty=True, update=update)
+            bounty_for_challenger = pending_bounty_for_challenger = game.wager
+            bounty_for_opponent = pending_bounty_for_opponent = 0
 
-        await add_or_remove_bounty(challenger, half_wager, should_affect_pending_bounty=True, update=update)
+    await add_or_remove_bounty(challenger, bounty_for_challenger, pending_belly_amount=pending_bounty_for_challenger,
+                               update=update)
+    await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
+                               update=update)
 
     # Refresh
     game.challenger = challenger

@@ -334,8 +334,7 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
                 won_amount = min(prediction_option_user.wager,
                                  get_max_wager_refund(prediction_option_user=prediction_option_user))
 
-            await add_or_remove_bounty(user, won_amount, pending_belly_amount=prediction_option_user.wager,
-                                       should_affect_pending_bounty=True)
+            await add_or_remove_bounty(user, won_amount, pending_belly_amount=prediction_option_user.wager)
 
         user.save()
 

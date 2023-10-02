@@ -33,7 +33,7 @@ class BountyLoan(BaseModel):
     class Meta:
         db_table = 'bounty_loan'
 
-    def pay(self, amount: int, update: Update = None):
+    async def pay(self, amount: int, update: Update = None):
         from src.service.bounty_service import add_or_remove_bounty
 
         """
@@ -50,11 +50,11 @@ class BountyLoan(BaseModel):
 
         # Subtract from borrower's bounty
         # noinspection PyTypeChecker
-        add_or_remove_bounty(self.borrower, amount, add=False, update=update)
+        await add_or_remove_bounty(self.borrower, amount, add=False, update=update)
 
         # Add to loaner's bounty
         # noinspection PyTypeChecker
-        add_or_remove_bounty(self.loaner, amount, check_for_loan=False, update=update)
+        await add_or_remove_bounty(self.loaner, amount, check_for_loan=False, update=update)
 
         self.borrower.save()
         self.loaner.save()
