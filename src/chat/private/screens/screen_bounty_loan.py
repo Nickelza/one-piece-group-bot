@@ -44,14 +44,16 @@ class BountyLoanListPage(ListPage):
 
         return (self.object
                 .select()
-                .where(BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
+                .where((BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
+                       & ((BountyLoan.loaner == self.user) | (BountyLoan.borrower == self.user)))
                 .order_by(BountyLoan.date.desc())
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
     def get_total_items_count(self) -> int:
         return (self.object
                 .select()
-                .where(BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
+                .where((BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
+                       & ((BountyLoan.loaner == self.user) | (BountyLoan.borrower == self.user)))
                 .count())
 
     def get_item_text(self) -> str:
@@ -60,8 +62,10 @@ class BountyLoanListPage(ListPage):
                                                     to_text, self.other_user.get_markdown_mention())
 
     def get_item_detail_text(self) -> str:
-        ot_text = ''
+        if self.user != self.object.loaner and self.user != self.object.borrower:
+            return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
 
+        ot_text = ''
         # Loaner or borrower
         loaner_text = phrases.BOUNTY_LOAN_BORROWER if self.user_is_loaner else phrases.BOUNTY_LOAN_LOANER
         ot_text += loaner_text.format(self.other_user.get_markdown_mention()).strip()

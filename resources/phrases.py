@@ -749,7 +749,7 @@ LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
                                  '\n_\\(The message may no longer be available\\)_')
-LOG_ITEM_DETAIL_NO_PERMISSION = 'You do not have permission to view this log'
+LOG_ITEM_DETAIL_NO_PERMISSION = 'You do not have permission to view this item'
 LOG_STATS_TEXT = '*{} Statistics*\n\n{}'
 LOG_STATS_NOT_ENOUGH_DATA = 'Not enough data to generate statistics for this log'
 # Logs - Fight
