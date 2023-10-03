@@ -138,8 +138,9 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
-        logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
-        await update.effective_chat.leave()
+        if str(update.effective_chat.id) != Env.UPDATES_CHANNEL_ID.get():
+            logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
+            await update.effective_chat.leave()
         return
 
     # Group
@@ -400,6 +401,7 @@ def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     user.tg_last_name = effective_user.last_name
     user.tg_username = effective_user.username
     user.last_message_date = datetime.now()
+    user.is_active = True
 
     if should_save:
         user.save()

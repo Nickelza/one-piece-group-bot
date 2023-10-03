@@ -9,6 +9,7 @@ import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
 import src.service.bounty_service as bounty_service
 from src.model.DevilFruit import DevilFruit
+from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums import Location
 from src.model.enums.Emoji import Emoji
@@ -27,7 +28,7 @@ from src.service.user_service import user_is_boss
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, original_user: User,
-                 inbound_keyboard: Keyboard = None) -> None:
+                 inbound_keyboard: Keyboard = None, group_chat: GroupChat = None) -> None:
     """
     Displays a user's status
     :param update: Telegram update
@@ -35,6 +36,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     :param command: Command
     :param original_user: The original user
     :param inbound_keyboard: Inbound keyboard
+    :param group_chat: Group chat
     :return: None
     """
 
@@ -62,7 +64,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if target_user is None:
         raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
 
-    leaderboard_target_user = get_current_leaderboard_user(target_user)
+    leaderboard_target_user = get_current_leaderboard_user(target_user, group_chat=group_chat)
     leaderboard_target_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_target_user)
 
     # If used in reply to a message, verify that requesting user ranks above the user being replied to
@@ -70,9 +72,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         # Add the requested user to the list of users that can delete the message
         can_delete_users.append(target_user.tg_user_id)
 
-        requesting_user_leaderboard_user = get_current_leaderboard_user(user)
+        requesting_user_leaderboard_user = get_current_leaderboard_user(user, group_chat=group_chat)
 
-        if not user_is_boss(user) and (requesting_user_leaderboard_user is None or (
+        if not user_is_boss(user, group_chat=group_chat) and (requesting_user_leaderboard_user is None or (
                 leaderboard_target_user is not None
                 and requesting_user_leaderboard_user.position >= leaderboard_target_user.position)):
             requesting_user_leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
@@ -92,10 +94,11 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         if user == target_user:
             leaderboard_user_rank = leaderboard_target_user_rank
         else:
-            leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(get_current_leaderboard_user(user))
-        if (command.message_source is not MessageSource.PRIVATE and ((leaderboard_user_rank is LeaderboardRank.ROOKIE
-                                                                      and not user_is_boss(user))
-                                                                     or user.is_arrested())):
+            leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
+                get_current_leaderboard_user(user, group_chat=group_chat))
+        if (command.message_source is not MessageSource.PRIVATE
+                and ((leaderboard_user_rank is LeaderboardRank.ROOKIE and not user_is_boss(user, group_chat=group_chat))
+                     or user.is_arrested())):
             outbound_keyboard: list[list[Keyboard]] = [[
                 Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY,
                          url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
@@ -206,12 +209,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
-    if (not in_reply_to_message and (user_is_boss(target_user) or target_user.bounty_poster_limit > 0) and
-            not target_user.is_arrested()):
+    if (not in_reply_to_message
+            and (user_is_boss(target_user, group_chat=group_chat) or target_user.bounty_poster_limit > 0)
+            and not target_user.is_arrested()):
         await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
-        if not user_is_boss(target_user):
+        if not user_is_boss(target_user, group_chat=group_chat):
             target_user.bounty_poster_limit -= 1
             target_user.save()
             original_user.should_update_model = False

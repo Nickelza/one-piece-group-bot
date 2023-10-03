@@ -119,7 +119,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
     if command is not Command.ND:
         match command.screen:
             case Screen.GRP_USER_STATUS:  # User status
-                await manage_screen_show_status(update, context, command, user)
+                await manage_screen_show_status(update, context, command, user, group_chat=group_chat)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
                 await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)

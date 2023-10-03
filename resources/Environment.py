@@ -121,6 +121,8 @@ OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
 ERROR_LOG_CHAT_ID = Environment('ERROR_LOG_CHAT_ID')
 # OPMA bot id
 OPMA_BOT_ID = Environment('OPMA_BOT_ID', default_value='921260484')
+# Updates channel id
+UPDATES_CHANNEL_ID = Environment('UPDATES_CHANNEL_ID')
 
 # TgRest Channel ID
 TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
@@ -323,10 +325,10 @@ BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value
 # Daily base limit of bellys gained from messages. Default: 5,000,000
 BELLY_DAILY_BASE_LIMIT = Environment('BELLY_DAILY_BASE_LIMIT', default_value='5000000')
 
-# After how many days from the last message should a group or group chat be considered inactive. Default: 14
-INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='14')
-# After how many days from the last message should a user be considered inactive in a group. Default: 14
-INACTIVE_GROUP_USER_DAYS = Environment('INACTIVE_GROUP_USER_DAYS', default_value='14')
+# After how many days from the last message should a group or group chat be considered inactive. Default: 7
+INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='7')
+# After how many days from the last message should a user be considered inactive in a group. Default: 7
+INACTIVE_GROUP_USER_DAYS = Environment('INACTIVE_GROUP_USER_DAYS', default_value='7')
 
 # BOUNTY BONUS
 # LOCATION
@@ -353,6 +355,8 @@ BOUNTY_POSTER_LIMIT_ROOKIE = Environment('BOUNTY_POSTER_LIMIT_ROOKIE', default_v
 
 # How many entries should be shown in the leaderboard. Default: 20
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='20')
+# How many active users are required to create a local leaderboard. Default: 20
+LEADERBOARD_MIN_ACTIVE_USERS = Environment('LEADERBOARD_MIN_ACTIVE_USERS', default_value='0')
 
 # DOC Q
 # How much bounty is required to play the Doc Q game. Default: 10,000,000

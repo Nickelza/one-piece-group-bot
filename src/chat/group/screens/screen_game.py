@@ -64,7 +64,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
                                                         (Game.status.not_in(GameStatus.get_finished())))
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
-                                               url=get_message_url(game.group_chat, game.message_id))])
+                                               url=get_message_url(game.message_id, game.group_chat))])
 
         await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False

@@ -246,7 +246,7 @@ class GameTurnNotification(Notification):
 
         return self.text.format(GameType(self.game.type).get_name(),
                                 mention_markdown_user(self.opponent),
-                                get_message_url(self.game.group_chat, self.game.message_id))
+                                get_message_url(self.game.message_id, self.game.group_chat))
 
 
 class CrewMemberRemoveNotification(Notification):

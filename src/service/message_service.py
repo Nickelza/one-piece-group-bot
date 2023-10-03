@@ -878,15 +878,24 @@ def message_is_reply(update: Update) -> bool:
         return False
 
 
-def get_message_url(group_chat: GroupChat, message_id: int) -> str:
+def get_message_url(message_id: int, group_chat: GroupChat = None, chat_id: str = None) -> str:
     """
     Gets the message url
     :param group_chat: The group chat
     :param message_id: The message id
+    :param chat_id: The chat id
     :return: The message url
     """
 
-    group: Group = group_chat.group
-    tg_group_id = str(group.tg_group_id).replace('-100', '')
+    if chat_id is None and group_chat is None:
+        raise ValueError('chat_id or group_chat must be specified')
 
-    return f"https://t.me/c/{tg_group_id}/{message_id}"
+    tg_chat_id = chat_id
+
+    if group_chat is not None:
+        group: Group = group_chat.group
+        tg_chat_id = str(group.tg_group_id)
+
+    tg_chat_id = tg_chat_id.replace('-100', '')
+
+    return f"https://t.me/c/{tg_chat_id}/{message_id}"

@@ -50,10 +50,14 @@ PRISONER_STATUS_PRIVATE_CHAT_ONLY = 'Prisoners can only view their status in Pri
 STATUS_PRIVATE_CHAT_KEY = 'View in Private Chat'
 BOUNTY_RESET = 'Bounties have been reset'
 
-LEADERBOARD = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
+LEADERBOARD = '*{}* Leaderboard for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
+              '{}' \
               '{}' \
               '\n\n_Next bounty reset on {} \\(in {}\\)_'
 LEADERBOARD_ROW = '\n\n{}°: {}\n{} - ฿*{}*'
+LEADERBOARD_LOCAL = 'Local'
+LEADERBOARD_GLOBAL = 'Global'
+LEADERBOARD_VIEW_GLOBAL_LEADERBOARD = '\n\n\n' + Emoji.GLOBE + '[Global Leaderboard]({})'
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
 SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
@@ -844,8 +848,8 @@ NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\n*Location*: {}{}'
 
 # Logs - Leaderboard Rank
-LEADERBOARD_RANK_LOG_KEY = 'Leaderboard Ranks'
-LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Leaderboard Rank'
+LEADERBOARD_RANK_LOG_KEY = 'Global Leaderboard Ranks'
+LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Global Leaderboard Rank'
 LEADERBOARD_RANK_LOG_ITEM_TEXT = 'Week {} of {} - {}'
 LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT = '*Week {} of {}*' \
                                         '\n\n*Position*: {}°' \

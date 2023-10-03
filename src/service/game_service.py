@@ -509,7 +509,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
 
     # Go to game message in group button
     outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                                                         url=get_message_url(game.group_chat, game.message_id))]]
+                                                         url=get_message_url(game.message_id, game.group_chat))]]
 
     term_text_addition = get_guess_game_result_term_text(terminology)
     image_path: str = get_guess_game_final_image_path(game)
@@ -611,7 +611,7 @@ async def end_text_based_game(context: ContextTypes.DEFAULT_TYPE, game: Game, ou
 
     # Go to game message in group button
     outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                                                         url=get_message_url(game.group_chat, game.message_id))]]
+                                                         url=get_message_url(game.message_id, game.group_chat))]]
 
     # Send message to winner
     await set_user_private_screen(winner, should_reset=True)

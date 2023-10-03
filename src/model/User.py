@@ -46,6 +46,7 @@ class User(BaseModel):
     can_create_crew = BooleanField(default=True)
     can_join_crew = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
+    last_system_interaction_date = DateTimeField(null=True)
     private_screen_list = CharField(max_length=99)
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
@@ -54,6 +55,7 @@ class User(BaseModel):
     can_collect_devil_fruit = BooleanField(default=True)
     bounty_message_limit = BigIntegerField(default=0)
     timezone = CharField(max_length=99, null=True)
+    is_active = BooleanField(default=True)
 
     # Transient fields
 

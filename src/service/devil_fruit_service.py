@@ -195,7 +195,7 @@ async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devi
 
         # Send notification to other chats
         text = phrases.DEVIL_FRUIT_APPEARED
-        message_url = get_message_url(release_group_chat, devil_fruit.release_message_id)
+        message_url = get_message_url(devil_fruit.release_message_id, release_group_chat)
         inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
 
         await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.DEVIL_FRUIT_APPEARANCE, text,

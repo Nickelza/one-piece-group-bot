@@ -3,6 +3,7 @@ import datetime
 from peewee import *
 
 from src.model.BaseModel import BaseModel
+from src.model.User import User
 
 
 class Group(BaseModel):
@@ -23,6 +24,23 @@ class Group(BaseModel):
 
     class Meta:
         db_table = 'group'
+
+    def get_active_users(self) -> list[User]:
+        """
+        Get the active users in the group
+        :return: The active users in the group
+        """
+        from src.model.GroupUser import GroupUser
+
+        return User().select().join(GroupUser).join(Group).where((Group.id == self.id) & (GroupUser.is_active == True))
+
+    def get_active_users_ids(self) -> list[int]:
+        """
+        Get the active users ids in the group
+        :return: The active users ids in the group
+        """
+
+        return [user.id for user in self.get_active_users()]
 
 
 Group.create_table()

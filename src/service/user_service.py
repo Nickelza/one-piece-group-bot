@@ -36,10 +36,11 @@ async def get_user_profile_photo(update: Update) -> str | None:
     return photo_path
 
 
-def get_boss_type(user: User) -> BossType | None:
+def get_boss_type(user: User, group_chat: GroupChat) -> BossType | None:
     """
     Get the boss type of the user
     :param user: The user
+    :param group_chat: The group chat
     :return: The boss type
     """
 
@@ -49,20 +50,26 @@ def get_boss_type(user: User) -> BossType | None:
     if LegendaryPirate.get_or_none(LegendaryPirate.user == user) is not None:
         return BossType.LEGENDARY_PIRATE
 
-    if get_current_leaderboard_rank(user) == PIRATE_KING:
+    if get_current_leaderboard_rank(user, group_chat) == PIRATE_KING:
         return BossType.PIRATE_KING
+
+    if group_chat is not None:
+        # Check for Pirate King in global leaderboard
+        if get_current_leaderboard_rank(user) == PIRATE_KING:
+            return BossType.PIRATE_KING
 
     return None
 
 
-def user_is_boss(user: User) -> bool:
+def user_is_boss(user: User, group_chat: GroupChat = None) -> bool:
     """
     Returns True if the user is a boss
     :param user: The user
+    :param group_chat: The group chat chat
     :return: True if the user is a boss
     """
 
-    return get_boss_type(user) is not None
+    return get_boss_type(user, group_chat) is not None
 
 
 def user_is_muted(user: User, group_chat: GroupChat) -> bool:

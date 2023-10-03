@@ -27,8 +27,10 @@ class LeaderboardUser(BaseModel):
         return: The appearances
         """
 
-        return (LeaderboardUser().select()
-                .where((LeaderboardUser.user == user) & (LeaderboardUser.rank_index == rank_index)).count())
+        return (LeaderboardUser().select().join(Leaderboard)
+                .where((LeaderboardUser.user == user)
+                       & (Leaderboard.group.is_null())
+                       & (LeaderboardUser.rank_index == rank_index)).count())
 
     @staticmethod
     def get_max_rank_attained(user: User) -> 'LeaderboardUser':
@@ -38,8 +40,8 @@ class LeaderboardUser(BaseModel):
         return: The highest rank attained
         """
 
-        return (LeaderboardUser().select()
-                .where(LeaderboardUser.user == user)
+        return (LeaderboardUser().select().join(Leaderboard)
+                .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
                 .order_by(LeaderboardUser.rank_index.asc()).first())
 
     @staticmethod
@@ -50,8 +52,8 @@ class LeaderboardUser(BaseModel):
         return: The highest bounty attained
         """
 
-        return (LeaderboardUser().select()
-                .where(LeaderboardUser.user == user)
+        return (LeaderboardUser().select().join(Leaderboard)
+                .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
                 .order_by(LeaderboardUser.bounty.desc()).first())
 
 

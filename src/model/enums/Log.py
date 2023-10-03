@@ -218,7 +218,7 @@ class FightLog(Log):
 
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
-            outcome_text, get_message_url(self.object.group_chat, self.object.message_id))
+            outcome_text, get_message_url(self.object.message_id, self.object.group_chat))
 
     def get_stats_text(self) -> str:
         total_fights = self.get_total_items_count()
@@ -291,7 +291,7 @@ class DocQGameLog(Log):
 
         return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
             date, correct_apple, outcome_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
 
     def get_stats_text(self) -> str:
         total_games = self.get_total_items_count()
@@ -378,7 +378,7 @@ class GameLog(Log):
         return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), game_name, date,
             get_belly_formatted(self.object.wager), outcome_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
 
     def get_stats_text(self) -> str:
         total_games = self.get_total_items_count()
@@ -472,7 +472,7 @@ class BountyGiftLog(Log):
         return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(
             sender_text, self.other_user.get_markdown_mention(),
             date, get_belly_formatted(self.object.amount), tax_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
 
     def get_stats_text(self) -> str:
         highest_sent_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.SENDER)
@@ -606,15 +606,15 @@ class LeaderboardRankLog(Log):
 
     def get_items(self, page) -> list[LeaderboardUser]:
         return (self.object
-                .select()
-                .where(LeaderboardUser.user == self.user)
+                .select().join(Leaderboard)
+                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
                 .order_by(LeaderboardUser.id.desc())
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
     def get_total_items_count(self) -> int:
         return (self.object
-                .select()
-                .where(LeaderboardUser.user == self.user)
+                .select().join(Leaderboard)
+                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
                 .count())
 
     def get_item_text(self) -> str:

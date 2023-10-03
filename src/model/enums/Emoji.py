@@ -48,6 +48,7 @@ class Emoji(StrEnum):
     STATS = '📊'
     WARNING = '⚠'
     NEW = '🆕'
+    GLOBE = '🌎'
 
     # Game
     WINNER = '🏆'
