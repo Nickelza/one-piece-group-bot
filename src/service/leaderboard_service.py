@@ -33,7 +33,7 @@ def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message
     """
 
     from src.service.bounty_service import get_next_bounty_reset_time
-    from src.service.date_service import get_remaining_time
+    from src.service.date_service import get_remaining_duration
 
     content_text = ""
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
@@ -55,7 +55,7 @@ def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message
     return phrases.LEADERBOARD.format(local_global_text, leaderboard.week, leaderboard.year,
                                       leaderboard.leaderboard_users.count(), content_text, view_global_leaderboard_text,
                                       default_date_format(next_bounty_reset_time),
-                                      get_remaining_time(next_bounty_reset_time))
+                                      get_remaining_duration(next_bounty_reset_time))
 
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:

@@ -40,7 +40,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         ot_text = phrases.CREW_USER_NOT_IN_CREW
 
         # Create crew button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_CREATE, screen=Screen.PVT_CREW_CREATE_OR_EDIT)])
+        inline_keyboard.append([Keyboard(phrases.KEY_CREATE, screen=Screen.PVT_CREW_CREATE_OR_EDIT)])
     else:
         crew: Crew = get_crew(user=user)
 

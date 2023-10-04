@@ -13,7 +13,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.date_service import convert_seconds_to_time, default_datetime_format
+from src.service.date_service import convert_seconds_to_duration, default_datetime_format
 from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
 from src.service.math_service import get_value_from_percentage
@@ -80,7 +80,7 @@ class BountyLoanListPage(ListPage):
         # Dates
         ot_text += "\n"
         ot_text += phrases.BOUNTY_LOAN_DATE.format(default_datetime_format(self.object.date, self.user))
-        ot_text += phrases.BOUNTY_LOAN_DURATION.format(convert_seconds_to_time(self.object.duration))
+        ot_text += phrases.BOUNTY_LOAN_DURATION.format(convert_seconds_to_duration(self.object.duration))
         ot_text += phrases.BOUNTY_LOAN_DEADLINE_DATE.format(
             default_datetime_format(self.object.deadline_date, self.user))
 

@@ -30,7 +30,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
 from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
-from src.service.date_service import convert_seconds_to_time
+from src.service.date_service import convert_seconds_to_duration
 from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url, \
     full_message_send
 from src.service.notification_service import send_notification
@@ -157,7 +157,7 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
             added_ot_text += phrases.GAME_TURN.format(mention_markdown_user(user_turn))
         else:
             if remaining_seconds_to_start is not None:
-                added_ot_text += phrases.GAME_COUNTDOWN.format(convert_seconds_to_time(remaining_seconds_to_start))
+                added_ot_text += phrases.GAME_COUNTDOWN.format(convert_seconds_to_duration(remaining_seconds_to_start))
             elif is_played_in_private_chat:
                 added_ot_text += phrases.GAME_STARTED
 

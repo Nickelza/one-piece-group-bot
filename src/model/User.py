@@ -1,23 +1,21 @@
 import datetime
-import logging
 from typing import Any
 
+import pytz
 from peewee import *
-from telegram import ChatMember, Update
-from telegram.constants import ChatMemberStatus
-from telegram.error import TelegramError
+from telegram import Update
 from telegram.ext import ContextTypes
 
 import constants as c
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
-from src.model.enums.ContextBotDataKey import ContextBotDataKey
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
     is_paradise_by_level
 from src.model.enums.Screen import Screen
-from src.model.error.CommonChatError import CommonChatException
+from src.service.bot_service import get_user_context_data, set_user_context_data
 
 
 class User(BaseModel):
@@ -57,8 +55,15 @@ class User(BaseModel):
     bounty_message_limit = BigIntegerField(default=0)
     timezone = CharField(max_length=99, null=True)
     is_active = BooleanField(default=True)
+    prediction_creation_cooldown_end_date = DateTimeField(null=True)
 
     # Transient fields
+    # The private screen step with which the user arrived to the current screen
+    private_screen_previous_step: int = None
+    # If to stay on the same screen
+    private_screen_stay: bool = False
+    # Step to go back to
+    private_screen_stay_step: int | None = None
 
     # If the model should be updated at script end. Sometimes the model is updated in functions where it can not be
     # passed as a parameter, so updating it at the end of the script would overwrite the changes
@@ -158,6 +163,37 @@ class User(BaseModel):
 
         self.private_screen_step = None
         self.private_screen_in_edit_id = None
+        self.private_screen_stay = False
+        self.private_screen_stay_step = None
+
+    def remove_last_private_screen(self):
+        """
+        Removes the last private screen
+        """
+
+        private_screen_list = self.get_private_screen_list()
+        if len(private_screen_list) > 0:
+            private_screen_list.pop()
+            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(private_screen_list)
+
+    def add_private_screen(self, screen: Screen):
+        """
+        Adds a private screen
+        :param screen: The screen
+        """
+
+        private_screen_list = self.get_private_screen_list()
+        private_screen_list.append(screen)
+        self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(private_screen_list)
+
+    def replace_last_private_screen(self, screen: Screen):
+        """
+        Replaces the last private screen
+        :param screen: The screen
+        """
+
+        self.remove_last_private_screen()
+        self.add_private_screen(screen)
 
     def is_crew_captain(self):
         """
@@ -318,19 +354,30 @@ class User(BaseModel):
                  ((User.bounty + User.pending_bounty) >= get_first_new_world().required_bounty)) |
                 ((User.bounty + User.pending_bounty) >= get_last_new_world().required_bounty))
 
-    async def is_chat_admin(self, update: Update):
+    def get_in_same_crew_statement_condition(self, other_user: 'User') -> Any:
+        """
+        Returns the in same crew statement condition
+        :param other_user: The other user
+        :return: The in same crew statement condition
+        """
+
+        return (User.select(fn.COUNT(User.id))
+                .where((other_user.crew.is_null(False))
+                       & (other_user.crew == self.crew)
+                       & (other_user == User.id)
+                       ) > 0)
+
+    async def is_chat_admin(self, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: str = None
+                            ) -> bool:
         """
         Returns True if the user is an admin of the chat
         :param update: The update
+        :param context: The context
+        :param chat_id: The chat id
         :return: True if the user is an admin of the chat
         """
-
-        from telegram.error import Forbidden
-        try:
-            chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
-            return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
-        except Forbidden:  # Bot kicked from the group chat
-            pass
+        from src.service.user_service import user_is_chat_admin
+        return await user_is_chat_admin(self, update=update, context=context, tg_group_id=chat_id)
 
     async def is_chat_member(self, context: ContextTypes.DEFAULT_TYPE, chat_id: str):
         """
@@ -340,45 +387,48 @@ class User(BaseModel):
         :return: True if the user is in the chat
         """
 
-        try:
-            chat_member: ChatMember = await context.bot.get_chat_member(chat_id, str(self.tg_user_id))
-            return (chat_member is not None
-                    and chat_member.status not in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED))
-        except TelegramError as e:
-            logging.error("Error while checking if user is in chat: " + str(e))
-            return False
+        from src.service.user_service import user_is_chat_member
+        return await user_is_chat_member(self, context=context, tg_group_id=chat_id)
 
     @staticmethod
-    def get_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextBotDataKey, should_erase: bool = True) -> str:
+    def get_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey,
+                         tolerate_key_exception: bool = True, inner_key: str = None) -> any:
         """
         Get user data from context
         :param context: The context
         :param key: The key
-        :param should_erase: If the data should be erased after getting it
+        :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+        :param inner_key: The inner key
         :return: The value
         """
 
-        try:
-            value = context.user_data[key]
-        except KeyError:
-            raise CommonChatException(f"Key {key} not found in context user data, "
-                                      f"this might be due to a system restart.")
-
-        if should_erase:
-            del context.user_data[key]
-
-        return value
+        return get_user_context_data(context, key, tolerate_key_exception=tolerate_key_exception, inner_key=inner_key)
 
     @staticmethod
-    def set_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextBotDataKey, value: Any) -> Any:
+    def set_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, value: Any,
+                         inner_key: str = None) -> Any:
         """
         Set user data to context
         :param context: The context
         :param key: The key
         :param value: The value
+        :param inner_key: The inner key
         """
 
-        context.user_data[key] = value
+        return set_user_context_data(context, key, value, inner_key=inner_key)
+
+    @staticmethod
+    def remove_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey):
+        """
+        Remove user data from context
+        :param context: The context
+        :param key: The key
+        """
+
+        try:
+            del context.user_data[key]
+        except KeyError:
+            pass
 
     def get_expired_bounty_loans(self) -> list:
         """
@@ -408,6 +458,22 @@ class User(BaseModel):
 
         return User.select().where(User.last_system_interaction_date > datetime.datetime.now() - datetime.timedelta(
             days=Env.INACTIVE_GROUP_USER_DAYS.get_int()))
+
+    def get_timezone(self) -> pytz.timezone:
+        """
+        Returns the timezone of the user
+        :return: The timezone of the user
+        """
+
+        return pytz.timezone(self.timezone or Env.TZ.get())
+
+    def get_current_time(self) -> datetime.datetime:
+        """
+        Returns the current time of the user
+        :return: The current time of the user
+        """
+
+        return datetime.datetime.now(self.get_timezone())
 
 
 User.create_table()

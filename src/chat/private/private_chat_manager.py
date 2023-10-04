@@ -26,6 +26,8 @@ from src.chat.private.screens.screen_logs_type import manage as manage_screen_lo
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
 from src.chat.private.screens.screen_logs_type_stats import manage as manage_screen_logs_type_stats
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
+from src.chat.private.screens.screen_prediction_create import \
+    manage as manage_screen_prediction_create
 from src.chat.private.screens.screen_prediction_detail import manage as manage_screen_prediction_detail
 from src.chat.private.screens.screen_prediction_detail_place_bet import \
     manage as manage_screen_prediction_detail_place_bet
@@ -35,6 +37,10 @@ from src.chat.private.screens.screen_prediction_detail_remove_bet import \
     manage as manage_screen_prediction_detail_remove_bet
 from src.chat.private.screens.screen_prediction_detail_remove_bet_confirm import \
     manage as manage_screen_prediction_detail_remove_bet_confirm
+from src.chat.private.screens.screen_prediction_detail_send_to_group_chat import \
+    manage as manage_screen_prediction_detail_send_to_group
+from src.chat.private.screens.screen_prediction_detail_set_result import \
+    manage as manage_screen_prediction_detail_set_result
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import \
@@ -186,6 +192,15 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM:  # Prediction Detail Remove Bet Confirm
                 await manage_screen_prediction_detail_remove_bet_confirm(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_SEND_TO_GROUP:  # Prediction Detail Send To Group
+                await manage_screen_prediction_detail_send_to_group(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_SET_RESULT:  # Prediction Detail Set Result
+                await manage_screen_prediction_detail_set_result(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_CREATE:  # Prediction Create
+                await manage_screen_prediction_create(update, context, inbound_keyboard, user)
 
             case Screen.PVT_DEVIL_FRUIT:  # Devil Fruit
                 await manage_screen_devil_fruit(update, context, inbound_keyboard, user)

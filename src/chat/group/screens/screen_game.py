@@ -19,7 +19,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, add_or_remove_bounty
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
 
@@ -57,7 +57,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
 
     # Challenger cannot initiate a game
     if challenger.game_cooldown_end_date and challenger.game_cooldown_end_date > datetime.now():
-        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_time(challenger.game_cooldown_end_date))
+        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_duration(challenger.game_cooldown_end_date))
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where((Game.challenger == challenger) &

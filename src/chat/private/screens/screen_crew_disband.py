@@ -11,7 +11,7 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
 from src.service.crew_service import get_crew, disband_crew
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.message_service import full_message_send
 from src.service.message_service import get_yes_no_keyboard
 
@@ -41,7 +41,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         # Send disband confirmation request
-        ot_text = phrases.CREW_DISBAND_CONFIRMATION.format(get_remaining_time(get_next_bounty_reset_time()))
+        ot_text = phrases.CREW_DISBAND_CONFIRMATION.format(get_remaining_duration(get_next_bounty_reset_time()))
         inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_DISBAND,
                                                                      inbound_keyboard=inbound_keyboard,
                                                                      no_is_back_button=True)]

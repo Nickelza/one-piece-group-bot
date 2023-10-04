@@ -49,6 +49,13 @@ class Emoji(StrEnum):
     WARNING = '⚠'
     NEW = '🆕'
     GLOBE = '🌎'
+    SAVE = '💾'
+    CREATE = '➕'
+    CHANGE = '🔄'
+    SHARE = '📤'
+    GROUP = '👥'
+    USER = '👤'
+    NULL = ''
 
     # Game
     WINNER = '🏆'
@@ -65,6 +72,7 @@ class Emoji(StrEnum):
     PREDICTION_OPEN = '🔓'
     PREDICTION_CLOSED = '🔐'
     PREDICTION = '📊'
+    PREDICTION_CUT_OFF = '✂'
 
     # Rock Paper Scissors
     ROCK = '✊'

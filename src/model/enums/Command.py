@@ -145,10 +145,17 @@ COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
 PVT_DEVIL_FRUIT_DETAIL = Command('', Screen.PVT_DEVIL_FRUIT_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_DEVIL_FRUIT_DETAIL)
 
+PVT_SETTINGS_TIMEZONE = Command('', Screen.PVT_SETTINGS_TIMEZONE, allow_deeplink=True)
+COMMANDS.append(PVT_SETTINGS_TIMEZONE)
+
 # To set required location
 PVT_LOGS_TYPE_STATS = Command('', Screen.PVT_LOGS_TYPE_STATS, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_LOG_STATS.get_int()))
 COMMANDS.append(PVT_LOGS_TYPE_STATS)
+
+PVT_PREDICTION_CREATE = Command('', Screen.PVT_PREDICTION_CREATE, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE.get_int()))
+COMMANDS.append(PVT_PREDICTION_CREATE)
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)

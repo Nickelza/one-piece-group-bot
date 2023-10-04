@@ -14,7 +14,7 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.leaderboard_service import get_leaderboard_user
 from src.service.message_service import full_message_send, escape_valid_markdown_chars, get_create_or_edit_status
 
@@ -113,7 +113,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
 
         # User cannot create a crew
         if not user.can_create_crew:
-            ot_text = phrases.CREW_CANNOT_CREATE_CREW.format(get_remaining_time(get_next_bounty_reset_time()))
+            ot_text = phrases.CREW_CANNOT_CREATE_CREW.format(get_remaining_duration(get_next_bounty_reset_time()))
             raise CrewValidationException(ot_text)
 
         # User has not appeared in the latest required leaderboards

@@ -14,7 +14,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
@@ -72,7 +72,7 @@ class DevilFruitListPage(ListPage):
             if DevilFruitStatus(self.object.status) is DevilFruitStatus.COLLECTED:
                 if self.object.expiration_date is not None:  # Should always be the case
                     expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-                        get_remaining_time(self.object.expiration_date))
+                        get_remaining_duration(self.object.expiration_date))
                 else:
                     logging.error('Devil Fruit %s in collected status has no expiration date', self.object.id)
 

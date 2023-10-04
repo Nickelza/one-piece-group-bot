@@ -28,7 +28,7 @@ from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours, get_remaining_time_in_minutes, \
-    datetime_is_past
+    datetime_is_before
 from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value, get_random_win
 from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
 from src.service.notification_service import send_notification
@@ -205,7 +205,7 @@ async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFA
 
     db = init()
 
-    if not datetime_is_past(user.devil_fruit_collection_cooldown_end_date):
+    if not datetime_is_before(user.devil_fruit_collection_cooldown_end_date):
         return
 
     with db.atomic() as transaction:

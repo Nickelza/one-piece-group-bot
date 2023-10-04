@@ -7,8 +7,9 @@ import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_timezone_from_location, get_utc_offset
-from src.service.message_service import full_message_send, escape_valid_markdown_chars
+from src.service.date_service import get_timezone_from_location, get_user_timezone_and_offset_text, \
+    default_datetime_format
+from src.service.message_service import full_message_send
 
 
 class Step(IntEnum):
@@ -70,7 +71,6 @@ def get_text(user: User) -> str:
     :return: The text
     """
 
-    timezone_text = escape_valid_markdown_chars(
-        user.timezone) if user.timezone is not None else phrases.PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN
-    offset_text = get_utc_offset(user.timezone)
-    return phrases.PVT_TXT_SETTINGS_TIMEZONE.format(timezone_text, offset_text)
+    timezone_text, offset_text = get_user_timezone_and_offset_text(user)
+    return phrases.PVT_TXT_SETTINGS_TIMEZONE.format(
+        default_datetime_format(user.get_current_time()), timezone_text, offset_text)

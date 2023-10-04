@@ -18,7 +18,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
-from src.service.date_service import validate_duration, get_duration_from_string, convert_seconds_to_time
+from src.service.date_service import validate_duration, get_duration_from_string, convert_seconds_to_duration
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -164,7 +164,7 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
                                               borrower.get_markdown_mention(),
                                               get_belly_formatted(loan.amount),
                                               get_belly_formatted(loan.repay_amount),
-                                              convert_seconds_to_time(loan.duration),
+                                              convert_seconds_to_duration(loan.duration),
                                               get_belly_formatted(tax_amount),
                                               loan.tax_percentage,
                                               get_belly_formatted(total_amount),

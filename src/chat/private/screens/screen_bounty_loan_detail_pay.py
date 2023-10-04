@@ -7,10 +7,11 @@ from resources import phrases
 from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_bounty_loan_detail
 from src.model.BountyLoan import BountyLoan
 from src.model.User import User
-from src.model.enums.ContextBotDataKey import ContextBotDataKey
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.Notification import BountyLoanPaymentNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import BountyLoanValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import validate_amount, get_belly_formatted, get_amount_from_string
@@ -54,6 +55,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
         inline_keyboard = [[]]
         step = Step(user.private_screen_step)
+        user.private_screen_stay = True
         match step:
             case Step.REQUEST_AMOUNT:
                 ot_text = phrases.BOUNTY_LOAN_ITEM_PAY_REQUEST.format(
@@ -66,7 +68,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                 ot_text = phrases.BOUNTY_LOAN_ITEM_PAY_CONFIRMATION_REQUEST.format(get_belly_formatted(amount))
 
                 # Save amount to user_data
-                user.set_context_data(context, ContextBotDataKey.BOUNTY_LOAN_REPAY_AMOUNT, amount)
+                user.set_context_data(context, ContextDataKey.BOUNTY_LOAN_REPAY_AMOUNT, amount)
 
                 # Add confirmation buttons
                 # Adding no_extra_keys to go back to the request amount step
@@ -80,7 +82,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                 if inbound_keyboard is None:
                     return
 
-                amount = int(user.get_context_data(context, ContextBotDataKey.BOUNTY_LOAN_REPAY_AMOUNT))
+                amount = int(user.get_context_data(context, ContextDataKey.BOUNTY_LOAN_REPAY_AMOUNT))
                 await loan.pay(amount, update)
 
                 # Send notification to loaner
@@ -91,6 +93,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                 await full_message_send(context, ot_text, update=update, answer_callback=True, show_alert=True)
 
                 # Go back to loan detail
+                user.reset_private_screen()
                 await manage_bounty_loan_detail(update, context, inbound_keyboard, user,
                                                 called_from_another_screen=True)
                 return
@@ -107,7 +110,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id})
         await full_message_send(context, str(ot_text), update=update, inbound_keyboard=inbound_keyboard,
                                 keyboard=inline_keyboard, previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info, user=user)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
@@ -137,8 +140,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
                 raise BountyLoanValidationException(phrases.ACTION_INVALID_WAGER_AMOUNT)
         else:
             try:
-                amount = user.get_context_data(context, ContextBotDataKey.BOUNTY_LOAN_REPAY_AMOUNT, should_erase=False)
-            except KeyError:
+                amount = user.get_context_data(context, ContextDataKey.BOUNTY_LOAN_REPAY_AMOUNT)
+            except CommonChatException:
                 pass
 
         if amount is not None:

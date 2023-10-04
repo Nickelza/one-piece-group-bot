@@ -12,6 +12,7 @@ import resources.phrases as phrases
 import src.model.enums.Command as Command
 from resources.Database import Database
 from src.chat.group.group_chat_manager import manage as manage_group_chat
+from src.chat.inline_query.inline_query_manager import manage as manage_inline_query
 from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.Group import Group
@@ -134,6 +135,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
                 else:
                     return
 
+        user.private_screen_previous_step = user.private_screen_step
         user.save()
 
     # Leave chat if not recognized
@@ -147,7 +149,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     # noinspection PyTypeChecker
     group_chat = None
     if message_source is MessageSource.GROUP:
-        group: Group = add_or_update_group(update, (user if update.effective_user is not None else None))
+        group: Group = await add_or_update_group(update, (user if update.effective_user is not None else None))
         group_chat: GroupChat = add_or_update_group_chat(update, group)
 
     command: Command.Command = Command.ND
@@ -216,17 +218,22 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
                 await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback, group_chat)
             case MessageSource.TG_REST:
                 await manage_tgrest_chat(update, context)
+            case MessageSource.INLINE_QUERY:
+                await manage_inline_query(update, context, user)
             case _:
                 raise ValueError('Invalid message source')
     except DoesNotExist:
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
-        raise ValueError('Item not found')
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
+        previous_screens = (user.get_private_screen_list()[:-1]
+                            if message_source is MessageSource.PRIVATE else None)
         try:
-            await full_message_send(context, escape_valid_markdown_chars(str(ce)), update=update)
+            await full_message_send(context, escape_valid_markdown_chars(str(ce)), update=update,
+                                    previous_screens=previous_screens, from_exception=True)
         except BadRequest:
-            await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update)
+            await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update,
+                                                     previous_screens=previous_screens, from_exception=True)
     except NavigationLimitReachedException:
         await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                                 show_alert=True)
@@ -408,7 +415,7 @@ def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     return user
 
 
-def add_or_update_group(update, user: User) -> Group:
+async def add_or_update_group(update, user: User) -> Group:
     """
     Adds or updates a group_chat
     :param update: Telegram update
@@ -445,6 +452,7 @@ def add_or_update_group(update, user: User) -> Group:
 
         group_user.last_message_date = datetime.now()
         group_user.is_active = True
+        group_user.is_admin = await user.is_chat_admin(update)
         group_user.save()
 
     return group
@@ -469,6 +477,11 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
         group_chat = GroupChat()
         group_chat.group = group
         group_chat.tg_topic_id = tg_topic_id
+
+    try:
+        group_chat.tg_topic_name = update.message.reply_to_message.forum_topic_created.name
+    except AttributeError:
+        pass
 
     group_chat.last_message_date = datetime.now()
     group_chat.is_active = True

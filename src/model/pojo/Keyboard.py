@@ -12,7 +12,7 @@ class Keyboard:
     def __init__(self, text: str, info: dict = None, screen: Screen = None, previous_screen_list: list[Screen] = None,
                  url: str = None, inherit_authorized_users: bool = True, authorized_users: list[User] = None,
                  inbound_info: dict = None, from_deeplink: bool = False, is_deeplink: bool = False,
-                 only_authorized_users_can_interact: bool = True):
+                 only_authorized_users_can_interact: bool = True, switch_inline_query: str = None):
         """
         Creates a keyboard object
         :param text: The text to be displayed on the keyboard
@@ -26,6 +26,7 @@ class Keyboard:
         :param from_deeplink: If the keyboard is being created from a deeplink
         :param is_deeplink: If the keyboard is a deeplink, generate the deeplink url
         :param only_authorized_users_can_interact: If only authorized users can interact with the keyboard
+        :param switch_inline_query: The switch inline query
         """
         self.text = text
         self.info: dict = info if info is not None else {}
@@ -38,6 +39,7 @@ class Keyboard:
         self.from_deeplink: bool = from_deeplink
         self.is_deeplink: bool = is_deeplink
         self.only_authorized_users_can_interact: bool = only_authorized_users_can_interact
+        self.switch_inline_query: str = switch_inline_query
 
         if inbound_info is not None:
             self.info = inbound_info | self.info
@@ -151,3 +153,12 @@ class Keyboard:
 
         from src.service.message_service import get_deeplink
         self.url = get_deeplink(self.callback_data)
+
+    def set_screen(self, screen: Screen):
+        """
+        Set the screen
+        :param screen: The screen
+        """
+
+        self.screen = screen
+        self.info[ReservedKeyboardKeys.SCREEN] = int(screen[1:])

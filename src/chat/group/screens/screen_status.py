@@ -19,7 +19,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
@@ -135,7 +135,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     # Remaining sentence if arrested
     if target_user.is_arrested():
         if not user.impel_down_is_permanent:
-            remaining_time = get_remaining_time(target_user.impel_down_release_date)
+            remaining_time = get_remaining_duration(target_user.impel_down_release_date)
         else:
             remaining_time = phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
         message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
@@ -144,14 +144,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if target_user.fight_immunity_end_date is not None and \
             target_user.fight_immunity_end_date > datetime.datetime.now():
         # Get remaining time
-        remaining_time = get_remaining_time(target_user.fight_immunity_end_date)
+        remaining_time = get_remaining_duration(target_user.fight_immunity_end_date)
         message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
 
     # Add fight cooldown if active
     if target_user.fight_cooldown_end_date is not None and \
             target_user.fight_cooldown_end_date > datetime.datetime.now():
         # Get remaining time
-        remaining_time = get_remaining_time(target_user.fight_cooldown_end_date)
+        remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
         message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
     # BOUNTY BONUSES

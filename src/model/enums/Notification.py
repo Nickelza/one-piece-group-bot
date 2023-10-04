@@ -19,7 +19,7 @@ from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceTy
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import default_datetime_format
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
     get_message_url
 
@@ -311,7 +311,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
             restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION
 
             duration_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION.format(
-                get_remaining_time(self.release_date_time) if self.sentence_type is ImpelDownSentenceType.TEMPORARY
+                get_remaining_duration(self.release_date_time) if self.sentence_type is ImpelDownSentenceType.TEMPORARY
                 else phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT)
 
         return self.text.format(escape_valid_markdown_chars(self.reason), restriction_text, duration_text)

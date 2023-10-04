@@ -115,6 +115,7 @@ TEXT_FROM = 'from'
 TEXT_TO = 'to'
 TEXT_TOPIC = 'Topic'
 TEXT_GROUP = 'Group'
+TEXT_NOT_SET = 'Not set'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -152,12 +153,22 @@ FIGHT_CONFIRMATION_RETREAT = 'You have successfully retreated'
 
 ENABLED = Emoji.ENABLED + ' Enabled'
 DISABLED = Emoji.DISABLED + ' Disabled'
-ENABLE = Emoji.ENABLED + ' Enable'
-DISABLE = Emoji.DISABLED + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
+
+INLINE_QUERY_SEND_ITEM = 'Send item'
 
 # General
 KEY_MANAGE = 'Manage'
+KEY_CREATE = Emoji.CREATE + ' Create'
+KEY_SAVE = Emoji.SAVE + ' Save'
+KEY_ENABLE = Emoji.ENABLED + ' Enable'
+KEY_DISABLE = Emoji.DISABLED + ' Disable'
+KEY_OPEN = 'Open'
+KEY_CLOSE = Emoji.CLOSE + ' Close'
+KEY_SHARE = Emoji.SHARE + ' Share'
+KEY_SEND_TO_GROUP = Emoji.GROUP + ' Send to group'
+KEY_SET_RESULT = 'Set result'
+KEY_CONFIRM = 'Confirm'
 
 # Private chat
 PVT_TXT_START = f'Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!' \
@@ -168,7 +179,6 @@ PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
 PVT_KEY_CREW = Emoji.CREW + ' Crew'
-PVT_KEY_CREW_CREATE = 'Create'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
@@ -178,7 +188,8 @@ PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
 PVT_KEY_SETTINGS_TIMEZONE = 'Time zone'
-PVT_TXT_SETTINGS_TIMEZONE = 'Current timezone: *{}* \\({}\\)' \
+PVT_TXT_SETTINGS_TIMEZONE = '\nCurrent time: *{}*' \
+                            '\nCurrent timezone: *{}* \\({}\\)' \
                             '\n\nTo set a new time zone, send a location name \\(city, region, state or country\\)'
 PVT_TXT_SETTINGS_TIMEZONE_INVALID = 'Invalid location. Please send a correct location name ' \
                                     '\\(city, region, state or country\\)'
@@ -193,6 +204,15 @@ PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
 PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Predictions'
 PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
 PVT_KEY_PREDICTION_DETAIL_REMOVE_BET = 'Remove bet'
+PVT_KEY_PREDICTION_DETAIL_EDIT = 'Edit'
+PVT_KEY_PREDICTION_CREATE_ALLOW_MULTIPLE_CHOICES = 'Allow multiple choices'
+PVT_KEY_PREDICTION_CREATE_ALLOW_BET_WITHDRAWAL = 'Allow bet withdrawal'
+PVT_KEY_PREDICTION_CREATE_IS_PUBLIC = 'Public'
+PVT_KEY_PREDICTION_CREATE_SET_CLOSE_DATE = Emoji.PREDICTION_CLOSED + ' Set closing date'
+PVT_KEY_PREDICTION_CREATE_REMOVE_CLOSE_DATE = Emoji.PREDICTION_CLOSED + ' Remove closing date'
+PVT_KEY_PREDICTION_CREATE_SET_CUT_OFF_DATE = Emoji.PREDICTION_CUT_OFF + ' Set cut-off date'
+PVT_KEY_PREDICTION_CHANGE_POLL = Emoji.CHANGE + ' Change poll'
+PVT_KEY_PREDICTION_NO_CORRECT_OPTION = 'No correct option'
 PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + ' Devil Fruit'
 PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
@@ -208,6 +228,34 @@ GRP_KEY_GO_TO_MESSAGE = 'Go to message'
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = 'Bet in private chat'
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = 'View in private chat'
 GRP_KEY_GAME_PLAY = 'Play'
+
+DATETIME_EXAMPLES = '''
+Write the date using this format:
+dd/mm/yy hh:mm
+
+*Examples*:
+• 1/4/2022 22:30
+• in 10 days 5 hours 2 minutes
+• Tomorrow at 12:00
+
+Current time: *{}*
+Current time zone: *{}* \\({}\\)
+[Change time zone]({})
+'''.strip()
+
+DATETIME_EXAMPLES_NO_DURATION = '''
+Write the date using this format:
+dd/mm/yy hh:mm
+
+*Examples*:
+• 1/4/2022 22:30
+• 10 hours ago
+• Yesterday at 12:00
+
+Current time: *{}*
+Current time zone: *{}* \\({}\\)
+[Change time zone]({})
+'''.strip()
 
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
@@ -368,14 +416,24 @@ PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Total wager*: ฿{}' \
                   '\n*Status*: {}' \
-                  '{}{}{}'
-PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
+                  '{}{}{}{}'
+PREDICTION_CREATE_RECAP = '*{}*' \
+                          '\n{}' \
+                          '{}'
+PREDICTION_TEXT_OPTION = '\n{}. {}'
+PREDICTION_TEXT_OPTION_WITH_PERCENTAGE = PREDICTION_TEXT_OPTION + ' \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
 PREDICTION_WAGERS_REFUNDED = '\n{} Wagers refunded{}'
 PREDICTION_WAGERS_REFUNDED_MAX = ' \\(max. ฿{}\\)'
 PREDICTION_MULTIPLE_BETS_ALLOWED = '\n{} Multiple bets allowed'
+PREDICTION_MULTIPLE_BETS_ALLOWED_DESCRIPTION = '\n_\\(Users can bet on multiple options\\)_'
 PREDICTION_CAN_WITHDRAW_BETS = '\n{} Can withdraw bets'
+PREDICTION_CAN_WITHDRAW_BETS_DESCRIPTION = '\n_\\(Users can withdraw their bets before the prediction is closed\\)_'
+PREDICTION_IS_PUBLIC = '\n{} Public'
+PREDICTION_IS_PUBLIC_DESCRIPTION = '\n_\\(Anyone in your groups can find this prediction.' \
+                                   '\nIf disabled, only those who you share the prediction with can view it.' \
+                                   '\nYour fellow Crew members will always be able to find it._\\)'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
                                 f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
@@ -392,7 +450,8 @@ PREDICTION_BET_HOW_TO_VIEW_BET_STATUS = '\n\n_To view your bet status, reply to 
                                         f'\n{Command.GRP_PREDICTION_BET_STATUS.get_formatted()}_'
 
 PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
-PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
+PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction ' \
+                                'or the prediction might have been deleted.'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_ALREADY_BET_ON_OPTION = 'You have already bet on this option'
 PREDICTION_OPTION_NOT_FOUND = 'Option *{}* not found in prediction'
@@ -430,6 +489,81 @@ PREDICTION_PLACE_BET_DETAIL_TEXT = '*Question*: {}' \
 PREDICTION_PLACE_BET_LIST_OVERVIEW = 'On which option do you want to place a bet?\n{}'
 PREDICTION_REMOVE_BET_TEXT = '{}'
 PREDICTION_REMOVE_BET_LIST_OVERVIEW = 'From which option do you want to remove your bet?\n{}'
+PREDICTION_CREATE_COOLDOWN_ACTIVE = 'You can create a prediction in *{}*'
+PREDICTION_CREATE_REQUEST_POLL = 'Send the prediction as a Telegram poll with the question and options'
+PREDICTION_CREATE_INVALID_POLL = 'Invalid poll. Make sure to send a Telegram poll with a question and at least ' \
+                                 'two options'
+PREDICTION_CAN_EDIT_POLL_ONLY_IF_NEW = 'You can only edit the question and options if the prediction if the ' \
+                                       'prediction has not been enabled yet'
+PREDICTION_CREATE_REQUEST_CLOSE_DATE = 'Send the closing date of the prediction.\n\n' + DATETIME_EXAMPLES
+PREDICTION_CREATE_INVALID_CLOSE_DATE = 'Invalid closing date. Make sure to send a valid date.\n\n' + DATETIME_EXAMPLES
+PREDICTION_CREATE_INVALID_CLOSE_DATE_PAST = 'Invalid closing date. Make sure to send a date in the future.\n\n' \
+                                            + DATETIME_EXAMPLES
+PREDICTION_CREATE_REQUEST_CUT_OFF_DATE = 'Send the cut off date of the prediction.' \
+                                         '\nAll bets placed after this time will be removed and refunded.' \
+                                         '\nThis action cannot be undone.' \
+                                         '\nThe time must be after the prediction was opened and before it was ' \
+                                         'closed or any previously set cut off time' \
+                                         '\n\n*Opened time*: {}' \
+                                         '\n*Closed time*: {}' \
+                                         '\n*Cut off time*: {}' \
+                                         '\n\n' + DATETIME_EXAMPLES_NO_DURATION
+PREDICTION_CREATE_INVALID_CUT_OFF_DATE = 'Invalid cut off date. Make sure to send a valid date and time after the ' \
+                                         'prediction was opened and before it was closed or any previously set cut ' \
+                                         'off time.' \
+                                         '\n\n*Opened time*: {}' \
+                                         '\n*Closed time*: {}' \
+                                         '\n*Cut off time*: {}' \
+                                         '\n\n' + DATETIME_EXAMPLES_NO_DURATION
+PREDICTION_CUT_OFF_DATE_CONFIRMATION_REQUEST = 'Are you sure you want to set the cut off date to *{}*?' \
+                                               '\n{} bets with a total of ฿{} will be removed'
+PREDICTION_SETTING_CANNOT_BE_CHANGED = 'This setting cannot be changed'
+PREDICTION_CREATE_CLOSE_DATE = PREDICTION_CLOSING_DATE \
+                               + '\n_\\(If set, the prediction will be automatically closed to new bets at this ' \
+                                 'date\\)_'
+PREDICTION_CREATE_CUT_OFF_DATE = '\n' + PREDICTION_CUT_OFF_DATE \
+                                 + '\n_\\(If set, all bets placed after this time will be removed and refunded\\)_'
+PREDICTION_CUT_OFF_DATE_HOW_TO_SET = '\n_You can set it from the edit menu_'
+PREDICTION_USER_DISCLAIMER = '\n\n_This prediction was created by a regular user and is not endorsed by the ' \
+                             'Bounty System Staff. Make sure to trust the creator before placing a bet._'
+PREDICTION_DELETE_CONFIRMATION = 'Are you sure you want to delete this prediction? This action cannot be undone.' \
+                                 '\nYou will be able to create another prediction in *{}*.' \
+                                 '\n\nIf someone has placed a bet on this prediction, they will be refunded.'
+PREDICTION_OPEN_CONFIRMATION = 'Are you sure you want to open this prediction? You will not be able to change the ' \
+                               'question or options after this.' \
+                               '\n\nIf the prediction is public, anyone in your groups will be able to find it.' \
+                               '\nYour fellow Crew members will always be able to find it.'
+PREDICTION_CREATE_SUCCESS = 'Prediction created successfully'
+PREDICTION_DELETE_SUCCESS = 'Prediction deleted successfully'
+PREDICTION_OPEN_SUCCESS = 'Prediction now open for bets'
+PREDICTION_ALREADY_OPEN = 'Prediction already open for bets'
+PREDICTION_ALREADY_CLOSED = 'Prediction already closed for bets'
+PREDICTION_CLOSE_CONFIRMATION = 'Are you sure you want to close this prediction to new bets?' \
+                                '\nThis action cannot be undone.'
+PREDICTION_CLOSE_SUCCESS = 'Prediction closed successfully'
+PREDICTION_INLINE_RESULT_SHARE = 'Share Prediction'
+PREDICTION_IN_WRONG_STATUS = 'Prediction in wrong status'
+PREDICTION_SEND_TO_GROUP = 'You can send this prediction to groups or topics where you are an Admin and users will ' \
+                           'be able to bet on it by replying to the message.' \
+                           '\nIf you don\'t find a group, make sure the Bot is a member of the group and use the ' \
+                           f'{Command.PVT_USER_STATUS.get_formatted()} command in the group.' \
+                           '\nYou can send only once to each group or topic.{}'
+PREDICTION_SEND_TO_GROUP_NO_GROUPS = '\n\n_No groups found_'
+PREDICTION_SEND_TO_GROUP_GROUPS_AVAILABLE = '*\n\nAvailable*:{}' \
+                                            '\n\nSelect the number of the group \\(no confirmation is required\\)'
+PREDICTION_SEND_TO_GROUP_GROUPS_ALREADY_SENT = '*\n\nAlready sent*:{}'
+PREDICTION_SEND_TO_GROUP_GROUPS_ALREADY_SENT_ITEM = '\n•{}'
+PREDICTION_SEND_TO_GROUP_GROUPS_AVAILABLE_ITEM = '\n{}. {}'
+PREDICTION_SEND_TO_GROUP_NOT_ADMIN = 'You are no longer an Admin'
+PREDICTION_SEND_TO_GROUP_ALREADY_SENT = 'This prediction has already been sent to this group'
+PREDICTION_SET_RESULT = 'Select the correct options for this prediction\n\n*{}*\n{}'
+PREDICTION_SET_RESULT_CONFIRMATION_REQUEST = 'Are you sure you want to set the result of this prediction?' \
+                                             '\nThe wagers will be distributed accordingly to the winners and.' \
+                                             '\nThis action cannot be undone' \
+                                             '\n\nCorrect options:' \
+                                             '{}'
+PREDICTION_SET_RESULT_SUCCESS = 'Prediction result set successfully'
+PREDICTION_SET_RESULT_CONFIRMATION_REQUEST_NO_CORRECT_OPTION = 'No correct option set, wagers will be refunded.'
 
 CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
 
@@ -478,6 +612,9 @@ CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'
+INLINE_QUERY_ITEM_NOT_FOUND_TITLE = 'Item not found'
+INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION = 'Restart the Bot to retrieve a valid url'
+INLINE_QUERY_ITEM_NOT_FOUND_MESSAGE = 'Error'
 
 # Crew - Leave
 CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?' \

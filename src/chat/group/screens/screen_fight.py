@@ -19,7 +19,7 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
-from src.service.date_service import convert_seconds_to_time
+from src.service.date_service import convert_seconds_to_duration
 from src.service.devil_fruit_service import get_datetime
 from src.service.devil_fruit_service import get_value
 from src.service.leaderboard_service import get_current_leaderboard_user
@@ -106,8 +106,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # User is in fight cooldown
     if user.fight_cooldown_end_date is not None and user.fight_cooldown_end_date > now:
         # Get remaining time
-        remaining_time = convert_seconds_to_time((user.fight_cooldown_end_date - datetime.datetime.now())
-                                                 .total_seconds())
+        remaining_time = convert_seconds_to_duration((user.fight_cooldown_end_date - datetime.datetime.now())
+                                                     .total_seconds())
         ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
         await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False

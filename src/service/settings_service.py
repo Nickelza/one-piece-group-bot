@@ -32,7 +32,7 @@ def get_toggle_keyboard(enabled: bool, screen: Screen, inbound_keyboard: Keyboar
     default_keyboard_data = inbound_keyboard.info if inbound_keyboard is not None else {}
 
     return Keyboard(
-        (phrases.DISABLE if enabled else phrases.ENABLE),
+        (phrases.KEY_DISABLE if enabled else phrases.KEY_ENABLE),
         info=default_keyboard_data | {ReservedKeyboardKeys.TOGGLE: (not enabled)},
         screen=screen
     )

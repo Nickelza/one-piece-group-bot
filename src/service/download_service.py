@@ -1,7 +1,9 @@
 import logging
 import os
 import pathlib
+import random
 import shutil
+import string
 import time
 import urllib.error
 import urllib.request
@@ -69,3 +71,17 @@ def generate_temp_file_path(extension: str) -> str:
 
     # File path
     return os.path.join(c.TEMP_DIR, file_name)
+
+
+def get_random_string(length: int = 10) -> str:
+    """
+    Create a random string
+    :param length: The length of the string
+    :return: The random string
+    """
+
+    # Define the characters you want to include in the random string
+    characters = string.ascii_letters + string.digits  # includes uppercase letters, lowercase letters, and digits
+
+    # Generate a random string of length 10
+    return ''.join(random.choice(characters) for _ in range(length))

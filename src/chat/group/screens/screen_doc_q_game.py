@@ -20,7 +20,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
-from src.service.date_service import get_remaining_time
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_datetime
 from src.service.message_service import full_message_send, full_media_send, full_message_or_media_send_or_edit, \
     mention_markdown_v2, delete_message
@@ -84,7 +84,7 @@ async def validate_play(update: Update, context: ContextTypes.DEFAULT_TYPE, user
         return False
 
     if user.doc_q_cooldown_end_date is not None and user.doc_q_cooldown_end_date > datetime.now():
-        ot_text = phrases.DOC_Q_GAME_LIMIT_REACHED.format(get_remaining_time(user.doc_q_cooldown_end_date))
+        ot_text = phrases.DOC_Q_GAME_LIMIT_REACHED.format(get_remaining_duration(user.doc_q_cooldown_end_date))
         try:
             await full_message_send(context, ot_text, update=update, add_delete_button=True)
         except BadRequest:

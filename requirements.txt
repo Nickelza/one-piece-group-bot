@@ -12,3 +12,4 @@ requests==2.31.0
 one-piece-wanted-poster>=0.0.10
 geopy~=2.4.0
 timezonefinder~=6.2.0
+parsedatetime~=2.6

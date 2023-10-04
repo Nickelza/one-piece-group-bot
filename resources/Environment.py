@@ -493,6 +493,8 @@ FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE
 
 # Minimum wager for prediction bets. Default: 10 million
 PREDICTION_BET_MIN_WAGER = Environment('PREDICTION_BET_MIN_WAGER', default_value='10000000')
+# How long a user has to wait before creating a new prediction in hours. Default: 48 hours
+PREDICTION_CREATE_COOLDOWN_DURATION = Environment('PREDICTION_CREATE_COOLDOWN_DURATION', default_value='48')
 
 # Send leaderboard message. Default: True
 SEND_MESSAGE_LEADERBOARD = Environment('SEND_MESSAGE_LEADERBOARD', default_value='True')
@@ -521,6 +523,9 @@ REQUIRED_LOCATION_LEVEL_FIGHT = Environment('REQUIRED_LOCATION_LEVEL_FIGHT', def
 REQUIRED_LOCATION_LEVEL_GAME = Environment('REQUIRED_LOCATION_LEVEL_GAME', default_value='21')
 # Required location to bet on predictions. Default: 21 (Fishman Island)
 REQUIRED_LOCATION_LEVEL_PREDICTION_BET = Environment('REQUIRED_LOCATION_LEVEL_PREDICTION_BET', default_value='21')
+# Required location to create predictions. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE = Environment('REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE',
+                                                        default_value='21')
 # Required location to collect Devil Fruit. Default: 10 (Whiskey Peak)
 REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT = Environment('REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT',
                                                           default_value='10')

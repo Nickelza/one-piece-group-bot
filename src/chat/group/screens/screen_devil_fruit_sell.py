@@ -37,8 +37,8 @@ class Step(IntEnum):
     """
     The steps for this screen
     """
-    SELECT_FRUIT = 1
-    BUY = 2
+    SELECT_FRUIT = 0
+    BUY = 1
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,

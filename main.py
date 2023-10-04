@@ -5,7 +5,7 @@ import time
 import pytz
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
-    ContextTypes, AIORateLimiter
+    ContextTypes, AIORateLimiter, InlineQueryHandler
 
 import constants as c
 import resources.Environment as Env
@@ -75,6 +75,9 @@ def main() -> None:
 
     # Callback query handler
     application.add_handler(CallbackQueryHandler(manage_callback_message))
+
+    # Inline query handler
+    application.add_handler(InlineQueryHandler(manage_regular_message))
 
     # Activate timers
     logging.getLogger('apscheduler.executors.default').propagate = False

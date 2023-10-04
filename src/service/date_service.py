@@ -1,6 +1,7 @@
 import datetime
 import random
 
+import parsedatetime
 import pytz
 from apscheduler.triggers.cron import CronTrigger
 from geopy.geocoders import Nominatim
@@ -13,8 +14,9 @@ import resources.Environment as Env
 from resources import phrases
 from src.model.User import User
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import DateValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.string_service import get_unit_value_from_string
 
 
@@ -35,7 +37,7 @@ def get_next_run(cron_expression: str, start_datetime: datetime = None, previous
     return cron_trigger.get_next_fire_time(previous_fire_time, start_datetime)
 
 
-def convert_seconds_to_time(seconds: int) -> str:
+def convert_seconds_to_duration(seconds: int) -> str:
     """
     Converts seconds to days, hours, minutes, seconds
     :param seconds: Seconds to convert
@@ -80,7 +82,7 @@ def convert_seconds_to_time(seconds: int) -> str:
                 result += f'{minutes} minutes'
 
     # Show seconds only in last minute
-    if seconds > 0 and minutes <= 1 and hours == 0 and days == 0 and weeks == 0:
+    if seconds == 0 and minutes <= 1 and hours == 0 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if seconds > 0:
@@ -104,18 +106,21 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
         start_datetime = datetime.datetime.now(datetime.timezone.utc)
 
     next_run = get_next_run(cron_expression, start_datetime)
-    return convert_seconds_to_time((next_run - start_datetime).total_seconds())
+    return convert_seconds_to_duration((next_run - start_datetime).total_seconds())
 
 
-def get_remaining_time(end_datetime: datetime) -> str:
+def get_remaining_duration(end_datetime: datetime) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
     :return: The remaining time in days and hours e.g. 1 day 2h hours
     """
+    if end_datetime is None:
+        return convert_seconds_to_duration(0)
+
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
-    return convert_seconds_to_time((end_datetime - datetime.datetime.now()).total_seconds())
+    return convert_seconds_to_duration((end_datetime - datetime.datetime.now()).total_seconds())
 
 
 def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: datetime = None) -> str:
@@ -129,7 +134,7 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
         start_datetime = datetime.datetime.now(datetime.timezone.utc)
 
     next_run = get_next_run(cron_expression, start_datetime)
-    return get_remaining_time(next_run)
+    return get_remaining_duration(next_run)
 
 
 def get_remaining_time_in_seconds(end_datetime: datetime, start_datetime: datetime = None) -> int:
@@ -271,9 +276,7 @@ def get_time_with_timezone(date_time: datetime, user: User) -> datetime:
     if date_time.tzinfo is None:
         date_time = date_time.replace(tzinfo=pytz.timezone(Env.TZ.get()))
 
-    timezone = user.timezone if user.timezone is not None else Env.TZ.get()
-
-    return date_time.astimezone(pytz.timezone(timezone))
+    return date_time.astimezone(user.get_timezone())
 
 
 def get_utc_offset(timezone_name: str) -> str:
@@ -358,14 +361,69 @@ async def validate_duration(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         return False
 
 
-def datetime_is_past(dt: datetime) -> bool:
+def datetime_is_before(dt: datetime, starting_date: datetime = None, tz: pytz.tzinfo = None) -> bool:
     """
     Check if the datetime is before the current datetime
     :param dt: The datetime
+    :param starting_date: The starting date
+    :param tz: The timezone
     :return: Whether the datetime is after the current datetime
     """
 
     if dt is None:
         return True
 
-    return dt < datetime.datetime.now()
+    if tz is None:
+        tz = pytz.timezone(Env.TZ.get())
+
+    # Add timezone to datetime if it's not timezone aware
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=tz)
+
+    # If staring date in give, convert it to the same timezone as dt
+    if starting_date is not None:
+        if starting_date.tzinfo is None:
+            starting_date = starting_date.replace(tzinfo=tz)
+        else:
+            starting_date = starting_date.astimezone(tz)
+    else:
+        starting_date = datetime.datetime.now(tz)
+
+    return dt < starting_date
+
+
+def get_datetime_from_natural_language(text: str, user: User) -> datetime.datetime:
+    """
+    Get the datetime from a natural language string
+    :param text: The text
+    :param user: The user
+    :return: The datetime
+    """
+
+    cal = parsedatetime.Calendar()
+    user_tz = user.get_timezone()
+
+    # Get now
+    now: datetime.datetime = datetime.datetime.now(user_tz).replace(microsecond=0)
+    parsed_datetime = cal.parseDT(text, now, tzinfo=user_tz)[0].replace(microsecond=0)
+
+    # If input is the same as now, it means the string is invalid
+    if parsed_datetime == now:
+        raise DateValidationException()
+
+    # Convert to default timezone
+    return parsed_datetime.astimezone(pytz.timezone(Env.TZ.get()))
+
+
+def get_user_timezone_and_offset_text(user: User) -> (str, str):
+    """
+    Get the user timezone and offset text
+    :param user: The user
+    :return: The user timezone and offset text
+    """
+
+    timezone_text = escape_valid_markdown_chars(
+        user.timezone) if user.timezone is not None else phrases.PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN
+    offset_text = get_utc_offset(user.timezone)
+
+    return timezone_text, offset_text
