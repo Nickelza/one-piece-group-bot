@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -221,3 +223,5 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)
+
+        user.last_system_interaction_date = datetime.now()

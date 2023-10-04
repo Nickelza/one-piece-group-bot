@@ -156,6 +156,9 @@ ENABLE = Emoji.ENABLED + ' Enable'
 DISABLE = Emoji.DISABLED + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
 
+# General
+KEY_MANAGE = 'Manage'
+
 # Private chat
 PVT_TXT_START = f'Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!' \
                 f'\nWhat would you like to do?'
@@ -199,7 +202,6 @@ PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + ' Loan'
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = 'Pay'
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = 'Forgive'
 
-GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + ' Buy'
 GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
 GRP_KEY_GO_TO_MESSAGE = 'Go to message'
@@ -699,15 +701,16 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION = 'You have been gifted ฿{} by {}'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are gifted bounties'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
 # Notification - Devil Fruit Awarded
+DEVIL_FRUIT_EAT_OR_SELL = f"\n\nYou can eat it or sell it with the {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} " \
+                          f"command in a group"
 DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fruit:' \
                                    '\n\n*{}*' \
                                    '\nReason: {}' \
-                                   "\n\n_Go to start->Devil Fruit to eat it or trade it_"
+                                   + DEVIL_FRUIT_EAT_OR_SELL
 DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
 DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
 # Notification - Devil Fruit Expired
-DEVIL_FRUIT_EXPIRED_NOTIFICATION = 'Your Devil Fruit *{}* has expired and has been released. ' \
-                                   '\nIt will appear sometime in the next {} hours.'
+DEVIL_FRUIT_EXPIRED_NOTIFICATION = 'Your Devil Fruit *{}* has expired and has been revoked'
 DEVIL_FRUIT_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your Devil Fruit expires'
 DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY = 'Devil Fruit expired'
 # Notification - Devil Fruit revoke
@@ -753,7 +756,7 @@ LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
                                  '\n_\\(The message may no longer be available\\)_')
-LOG_ITEM_DETAIL_NO_PERMISSION = 'You do not have permission to view this item'
+LOG_ITEM_DETAIL_NO_PERMISSION = 'You are not authorized to view this item'
 LOG_STATS_TEXT = '*{} Statistics*\n\n{}'
 LOG_STATS_NOT_ENOUGH_DATA = 'Not enough data to generate statistics for this log'
 # Logs - Fight
@@ -890,16 +893,12 @@ DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED = 'You have eaten the {} and gained the f
 DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the {}?' \
                                            "\n\nYou will lose it and can regain it by finding or trading for it again"
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
-DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
-DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
+DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "Congratulations {}, you have found a Devil Fruit!" \
+                                   "\n\nName: *{}*" \
                                    "\nCategory: {}" \
-                                   "{}"
-DEVIL_FRUIT_APPEARED = 'A Devil Fruit has appeared!'
-DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
+                                   "{}" \
+                                   + DEVIL_FRUIT_EAT_OR_SELL
 
-DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
-DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
-DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 DEVIL_FRUIT_SELL_NO_AMOUNT = 'You need to specify the amount of belly you want to sell the Devil Fruit for' \
                              f'\n\nExample: {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} 10.000.000'
 DEVIL_FRUIT_SELL_NO_FRUITS = 'You do not have any Devil Fruits that can be sold ' \

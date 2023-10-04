@@ -13,3 +13,12 @@ class DevilFruitStatus(IntEnum):
     RELEASED = 5  # Released in the system
     COLLECTED = 6  # Collected by a user
     EATEN = 7  # Eaten by a user
+
+    @staticmethod
+    def get_released_statuses() -> list:
+        """
+        Get the statuses that are released
+        :return: The statuses that are released
+        """
+        return [DevilFruitStatus.SCHEDULED, DevilFruitStatus.RELEASED, DevilFruitStatus.COLLECTED,
+                DevilFruitStatus.EATEN]

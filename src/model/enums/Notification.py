@@ -82,7 +82,7 @@ class Notification:
 
     def __init__(self, category: NotificationCategory, notification_type: NotificationType, text: str, description: str,
                  button_text: str, disable_web_page_preview: bool = True, disable_notification: bool = True,
-                 item_screen: Screen = None, item_info: dict = None, to_to_item_button_text: str = None):
+                 item_screen: Screen = None, item_info: dict = None, go_to_item_button_text: str = None):
         """
         Constructor
 
@@ -95,7 +95,7 @@ class Notification:
         :param disable_notification: True if telegram should not notify of the message
         :param item_screen: The screen of the item that is related to this notification
         :param item_info: The info of the item that is related to this notification
-        :param to_to_item_button_text: The text for the button to go to the item
+        :param go_to_item_button_text: The text for the button to go to the item
         """
 
         self.category = category
@@ -107,7 +107,7 @@ class Notification:
         self.disable_notification = disable_notification
         self.item_screen = item_screen
         self.item_info = item_info
-        self.to_to_item_button_text = to_to_item_button_text
+        self.to_to_item_button_text = go_to_item_button_text
 
     def build(self):
         """Builds the notification."""
@@ -548,10 +548,14 @@ class DevilFruitAwardedNotification(Notification):
         self.devil_fruit = devil_fruit
         self.reason = reason
 
+        item_id = devil_fruit.id if devil_fruit is not None else None
         super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_AWARDED,
                          phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION,
                          phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION,
-                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY)
+                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY,
+                         item_screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
+                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                         go_to_item_button_text=phrases.KEY_MANAGE)
 
     def build(self) -> str:
         return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()),
@@ -576,12 +580,11 @@ class DevilFruitExpiredNotification(Notification):
                          phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY)
 
     def build(self) -> str:
-        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()),
-                                Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
+        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()))
 
 
 class DevilFruitRevokeNotification(Notification):
-    """Class for crew disband warning notifications."""
+    """Class for Devil Fruit revoke notifications."""
 
     def __init__(self, devil_fruit: DevilFruit = None):
         """
@@ -647,7 +650,7 @@ class BountyLoanPaymentNotification(Notification):
                          phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY,
                          item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
                          item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
@@ -676,7 +679,7 @@ class BountyLoanForgivenNotification(Notification):
                          phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY,
                          item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
                          item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
@@ -705,7 +708,7 @@ class BountyLoanExpiredNotification(Notification):
                          phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY,
                          item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
                          item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         to_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted

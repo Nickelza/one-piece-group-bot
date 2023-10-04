@@ -241,34 +241,15 @@ SHOULD_LOG_TIMER_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
 SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
     'SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE', default_value='False')
 
-# Schedule Devil Fruit Zoan release. Default: 3 weeks in seconds
+# Schedule Devil Fruit Zoan release. Default: Every sunday at midnight
 CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
-    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='1814400')
+    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='0 0 * * Sun')
 ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='True')
 SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
 SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
-
-# Schedule Devil Fruit Ancient Zoan release. Default: Every 9 weeks in seconds
-CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='5443200')
-ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='True')
-SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
-SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
-
-# Release scheduled Devil Fruit. Default: Every 1 minute
-CRON_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('CRON_RELEASE_SCHEDULED_DEVIL_FRUIT', default_value='*/1 * * * *')
-ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                         default_value='True')
-SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                             default_value='False')
-SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                                  default_value='False')
 
 # Respawn Devil Fruit. Default: Every 1 minute
 CRON_RESPAWN_DEVIL_FRUIT = Environment('CRON_RESPAWN_DEVIL_FRUIT', default_value='*/1 * * * *')
@@ -596,6 +577,14 @@ DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
 DEVIL_FRUIT_SELL_MIN_AMOUNT = Environment('DEVIL_FRUIT_SELL_MIN_AMOUNT', default_value='100000000')
 # Tax applied when selling a Devil Fruit. Default: 50%
 DEVIL_FRUIT_SELL_TAX = Environment('DEVIL_FRUIT_SELL_TAX', default_value='50')
+# How many active users are required for each Devil Fruit in circulation. Default: 20
+DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT = Environment('DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT',
+                                                           default_value='20')
+# How many Regular Zoan Devil Fruits are should be in circulation for each Ancient Zoan Devil Fruit. Default: 5
+DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO = Environment('DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO',
+                                                             default_value='5')
+# How long a user has to wait before trying to collect a Devil Fruit again in hours. Default: 1
+DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION = Environment('DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION', default_value='1')
 
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment('ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP',

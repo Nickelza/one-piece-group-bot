@@ -118,21 +118,6 @@ SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Timer('schedule_devil_fruit_zoan_release',
                                           info=str(DevilFruitCategory.ZOAN))
 TIMERS.append(SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE)
 
-SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Timer(
-    'schedule_devil_fruit_ancient_zoan_release',
-    Env.CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get(),
-    Env.ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    Env.SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    Env.SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    info=str(DevilFruitCategory.ANCIENT_ZOAN))
-TIMERS.append(SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE)
-
-RELEASE_SCHEDULED_DEVIL_FRUIT = Timer('release_scheduled_devil_fruit', Env.CRON_RELEASE_SCHEDULED_DEVIL_FRUIT.get(),
-                                      Env.ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool(),
-                                      Env.SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool(),
-                                      Env.SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool())
-TIMERS.append(RELEASE_SCHEDULED_DEVIL_FRUIT)
-
 RESPAWN_DEVIL_FRUIT = Timer('respawn_devil_fruit', Env.CRON_RESPAWN_DEVIL_FRUIT.get(),
                             Env.ENABLE_TIMER_RESPAWN_DEVIL_FRUIT.get_bool(),
                             Env.SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT.get_bool(),

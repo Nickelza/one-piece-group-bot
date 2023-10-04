@@ -9,6 +9,7 @@ from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import constants as c
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.ContextBotDataKey import ContextBotDataKey
@@ -52,7 +53,7 @@ class User(BaseModel):
     private_screen_in_edit_id = IntegerField(null=True)
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
-    can_collect_devil_fruit = BooleanField(default=True)
+    devil_fruit_collection_cooldown_end_date = DateTimeField(null=True)
     bounty_message_limit = BigIntegerField(default=0)
     timezone = CharField(max_length=99, null=True)
     is_active = BooleanField(default=True)
@@ -397,6 +398,16 @@ class User(BaseModel):
         """
 
         return len(self.get_expired_bounty_loans()) > 0
+
+    @staticmethod
+    def get_active_interactive_users() -> list:
+        """
+        Get the active users who interacted with the system
+        :return: The active interactive users
+        """
+
+        return User.select().where(User.last_system_interaction_date > datetime.datetime.now() - datetime.timedelta(
+            days=Env.INACTIVE_GROUP_USER_DAYS.get_int()))
 
 
 User.create_table()

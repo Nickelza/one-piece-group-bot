@@ -112,10 +112,11 @@ COMMANDS.append(PVT_START)
 PVT_USER_STATUS = Command('status', Screen.PVT_USER_STATUS, allow_while_arrested=True)
 COMMANDS.append(PVT_USER_STATUS)
 
-
 # Deprecated
 PVT_SETTINGS_LOCATION_UPDATE = Command('', Screen.PVT_SETTINGS_LOCATION_UPDATE, active=False)
 COMMANDS.append(PVT_SETTINGS_LOCATION_UPDATE)
+GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, active=False)
+COMMANDS.append(GRP_DEVIL_FRUIT_COLLECT)
 
 # To allow while arrested
 PVT_SETTINGS = Command('', Screen.PVT_SETTINGS, allow_while_arrested=True)
@@ -140,6 +141,9 @@ COMMANDS.append(PVT_GAME_GUESS_INPUT)
 
 PVT_LOGS_TYPE_DETAIL = Command('', Screen.PVT_LOGS_TYPE_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
+
+PVT_DEVIL_FRUIT_DETAIL = Command('', Screen.PVT_DEVIL_FRUIT_DETAIL, allow_deeplink=True)
+COMMANDS.append(PVT_DEVIL_FRUIT_DETAIL)
 
 # To set required location
 PVT_LOGS_TYPE_STATS = Command('', Screen.PVT_LOGS_TYPE_STATS, required_location=Location.get_by_level(
@@ -208,10 +212,6 @@ GRP_DEVIL_FRUIT_SELL = Command('dfsell', Screen.GRP_DEVIL_FRUIT_SELL, feature=Fe
 COMMANDS.append(GRP_DEVIL_FRUIT_SELL)
 
 # To define limitations
-GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
-    Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),
-                                  answer_callback=True)
-COMMANDS.append(GRP_DEVIL_FRUIT_COLLECT)
 GRP_SETTINGS = Command('settings', Screen.GRP_SETTINGS, allow_while_arrested=True, only_by_chat_admin=True,
                        answer_callback=True, send_message_if_error=False)
 COMMANDS.append(GRP_SETTINGS)

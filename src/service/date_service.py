@@ -132,6 +132,36 @@ def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: date
     return get_remaining_time(next_run)
 
 
+def get_remaining_time_in_seconds(end_datetime: datetime, start_datetime: datetime = None) -> int:
+    """
+    Get the remaining time in seconds until the end_datetime
+    :param end_datetime: The end datetime
+    :param start_datetime: The start datetime. If None, the current datetime is used
+    :return: The remaining time in seconds
+    """
+    # Remove offset awareness from end_datetime
+    end_datetime = end_datetime.replace(tzinfo=None)
+    if start_datetime is None:
+        start_datetime = datetime.datetime.now(datetime.timezone.utc)
+    start_datetime = start_datetime.replace(tzinfo=None)
+
+    # If the end_datetime is in the past, return 0
+    if end_datetime < start_datetime:
+        return 0
+
+    return int((end_datetime - start_datetime).total_seconds())
+
+
+def get_remaining_time_in_minutes(end_datetime: datetime, start_datetime: datetime = None) -> int:
+    """
+    Get the remaining time in minutes until the end_datetime
+    :param end_datetime: The end datetime
+    :param start_datetime: The start datetime. If None, the current datetime is used
+    :return: The remaining time in minutes
+    """
+    return get_remaining_time_in_seconds(end_datetime, start_datetime) // 60
+
+
 def get_datetime_in_future_seconds(seconds: int) -> datetime:
     """
     Get the datetime in the future
@@ -326,3 +356,16 @@ async def validate_duration(update: Update, context: ContextTypes.DEFAULT_TYPE, 
                                 previous_screens=previous_screens,
                                 previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
+
+
+def datetime_is_past(dt: datetime) -> bool:
+    """
+    Check if the datetime is before the current datetime
+    :param dt: The datetime
+    :return: Whether the datetime is after the current datetime
+    """
+
+    if dt is None:
+        return True
+
+    return dt < datetime.datetime.now()

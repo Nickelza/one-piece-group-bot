@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Tuple
 
 from telegram import Update
@@ -11,7 +12,6 @@ from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bo
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
-from src.chat.group.screens.screen_devil_fruit_collect import manage as manage_screen_devil_fruit_collect
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
@@ -40,6 +40,7 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.bounty_service import get_message_belly
+from src.service.devil_fruit_service import release_devil_fruit_to_user
 from src.service.group_service import is_main_group, feature_is_enabled
 from src.service.message_service import delete_message
 from src.service.notification_service import send_notification
@@ -173,9 +174,6 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
                                                 group_chat)
 
-            case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
-                await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)
-
             case Screen.GRP_SETTINGS:  # Settings
                 await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
 
@@ -190,6 +188,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
+
+        # Setting here to avoid regular messages to be counted as interaction
+        user.last_system_interaction_date = datetime.now()
+
+        if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE):
+            await release_devil_fruit_to_user(update, context, user)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,

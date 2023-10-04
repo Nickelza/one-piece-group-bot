@@ -36,7 +36,7 @@ async def get_user_profile_photo(update: Update) -> str | None:
     return photo_path
 
 
-def get_boss_type(user: User, group_chat: GroupChat) -> BossType | None:
+def get_boss_type(user: User, group_chat: GroupChat = None) -> BossType | None:
     """
     Get the boss type of the user
     :param user: The user

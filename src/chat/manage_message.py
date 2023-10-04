@@ -372,11 +372,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             await delete_message(update)
         else:
             if (command.answer_callback and is_callback) or command.send_message_if_error:
-                if inbound_keyboard is not None:
-                    await full_message_or_media_send_or_edit(
-                        context, str(cve), update=update, add_delete_button=(inbound_keyboard is None),
-                        answer_callback=command.answer_callback, show_alert=command.show_alert,
-                        inbound_keyboard=inbound_keyboard)
+                await full_message_or_media_send_or_edit(
+                    context, str(cve), update=update, add_delete_button=(inbound_keyboard is None),
+                    answer_callback=command.answer_callback, show_alert=command.show_alert,
+                    inbound_keyboard=inbound_keyboard)
         return False
 
     return True
