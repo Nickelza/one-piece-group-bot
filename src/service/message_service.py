@@ -156,7 +156,11 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                                         button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = authorized_users_ids
                                 elif not button.inherit_authorized_users and len(button.authorized_users) > 0:
                                     button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
-                                        u.id for u in button.authorized_users]
+                                        u.id for u in button.authorized_users if u is not None]
+
+                            if (ReservedKeyboardKeys.AUTHORIZED_USER in button.info
+                                    and len(button.info[ReservedKeyboardKeys.AUTHORIZED_USER]) == 0):
+                                del button.info[ReservedKeyboardKeys.AUTHORIZED_USER]
 
                             button.refresh_callback_data()
 
@@ -193,7 +197,7 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
     :param update: Update object. Required if reply_to_message_id is None
     :param quote: Quote message. Default: False
     :param reply_to_message_id: Reply message id. Default: None
-    :param quote_if_group: If the message should be quoted if it is in a filter_by_groups and update is not None. 
+    :param quote_if_group: If the message should be quoted if it is in a filter_by_groups and update is not None.
                            Default: True
     :return: Reply message id
     """
@@ -672,14 +676,15 @@ def get_delete_button(user_ids: list[int], use_close_delete=False, button_text: 
     return Keyboard(button_text, keyboard_data)
 
 
-def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
+def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
                         no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
                         extra_keys: dict = None, yes_screen: Screen = None, no_screen: Screen = None,
                         yes_extra_keys: dict = None, no_extra_keys: dict = None,
                         confirm_key: str = ReservedKeyboardKeys.CONFIRM, inbound_keyboard: Keyboard = None,
                         yes_is_back_button: bool = False, no_is_back_button: bool = False,
                         yes_is_delete_button: bool = False, no_is_delete_button: bool = False,
-                        add_inbound_key_info: bool = False, keys_to_exclude: list[str] = None) -> list[Keyboard]:
+                        add_inbound_key_info: bool = False, keys_to_exclude: list[str] = None,
+                        exclude_yes_button: bool = False, exclude_no_button: bool = False, ) -> list[Keyboard]:
     """
     Create a yes/no keyboard
 
@@ -701,6 +706,8 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
     :param no_is_delete_button: True if the no button should be a delete button
     :param add_inbound_key_info: True if the inbound key info should be added to the yes and no buttons
     :param keys_to_exclude: List of keys to exclude from the copy of info dict
+    :param exclude_yes_button: True if the yes button should be excluded
+    :param exclude_no_button: True if the no button should be excluded
     :return: The yes and no keyboard
     """
 
@@ -735,38 +742,41 @@ def get_yes_no_keyboard(user: User, screen: Screen = None, yes_text: str = phras
             default_keyboard_data.pop(key)
 
     # Yes
-    if yes_is_back_button:
-        keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text, user=user,
-                                             info=default_keyboard_data))
-    elif yes_is_delete_button:
-        keyboard_line.append(get_delete_button([user.tg_user_id], button_text=yes_text))
-    else:
-        # If screen is being changed, discard yes key value
-        keyboard_data_yes: dict = default_keyboard_data | (
-            {confirm_key: True} if not (yes_screen is not None and screen is not yes_screen) else {})
-        if yes_extra_keys is not None:
-            for key, value in yes_extra_keys.items():
-                keyboard_data_yes[key] = value
+    if not exclude_yes_button:
+        if yes_is_back_button:
+            keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text, user=user,
+                                                 info=default_keyboard_data))
+        elif yes_is_delete_button:
+            keyboard_line.append(get_delete_button([user.tg_user_id], button_text=yes_text))
+        else:
+            # If screen is being changed, discard yes key value
+            keyboard_data_yes: dict = default_keyboard_data | (
+                {confirm_key: True} if not (yes_screen is not None and screen is not yes_screen) else {})
+            if yes_extra_keys is not None:
+                for key, value in yes_extra_keys.items():
+                    keyboard_data_yes[key] = value
 
-        yes_screen = screen if yes_screen is None else yes_screen
-        keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
-                                      inherit_authorized_users=False))
+            yes_screen = screen if yes_screen is None else yes_screen
+            keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
+                                          inherit_authorized_users=False))
 
     # No
-    if no_is_back_button:
-        keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text, user=user, info=default_keyboard_data))
-    elif no_is_delete_button:
-        keyboard_line.append(get_delete_button([user.tg_user_id], button_text=no_text))
-    else:
-        # If screen is being changed, discard no key value
-        keyboard_data_no: dict = default_keyboard_data | (
-            {confirm_key: False} if not (no_screen is not None and screen is not no_screen) else {})
-        if no_extra_keys is not None:
-            for key, value in no_extra_keys.items():
-                keyboard_data_no[key] = value
-        no_screen = screen if no_screen is None else no_screen
-        keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
-                                      inherit_authorized_users=False))
+    if not exclude_no_button:
+        if no_is_back_button:
+            keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text, user=user,
+                                                 info=default_keyboard_data))
+        elif no_is_delete_button:
+            keyboard_line.append(get_delete_button([user.tg_user_id], button_text=no_text))
+        else:
+            # If screen is being changed, discard no key value
+            keyboard_data_no: dict = default_keyboard_data | (
+                {confirm_key: False} if not (no_screen is not None and screen is not no_screen) else {})
+            if no_extra_keys is not None:
+                for key, value in no_extra_keys.items():
+                    keyboard_data_no[key] = value
+            no_screen = screen if no_screen is None else no_screen
+            keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
+                                          inherit_authorized_users=False))
 
     return keyboard_line
 

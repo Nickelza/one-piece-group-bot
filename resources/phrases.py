@@ -272,7 +272,7 @@ ACTION_INVALID_DURATION = "Invalid duration. " \
                           "\n - 1min, 1h, 1d, 1week"
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
-GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
+GAME_CHOOSE_GAME = 'Which game would you like to play?'
 GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
                        f'\n\nExample: {Command.GRP_GAME.get_formatted()} 10.000.000'
 
@@ -282,6 +282,10 @@ GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of 
                '\n\nWould you like to accept?' \
                f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                f'it will be automatically rejected.'
+GAME_REQUEST_OPEN = '{} has challenged anyone to play *{}* with a wager of ฿*{}*.' \
+                    '\n\nPress the button below to accept.' \
+                    f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
+                    f'it will be automatically rejected.'
 GAME_CANCELED = 'Game cancelled'
 GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
 GAME_INVALID = 'Invalid game'

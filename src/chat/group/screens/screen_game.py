@@ -21,7 +21,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, add_or_remove_bounty
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_datetime
-from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
+from src.service.message_service import full_message_send, get_message_url, full_media_send
 
 
 class GameReservedKeys(StrEnum):
@@ -70,21 +70,23 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
         return False
 
     # Opponent validation
-    try:
-        # Opponent is not in the minimum required location
-        if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
-            raise OpponentValidationException()
+    if opponent is not None:
+        try:
+            # Opponent is not in the minimum required location
+            if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
+                raise OpponentValidationException()
 
-        # Opponent is arrested
-        if opponent.is_arrested():
-            raise OpponentValidationException()
+            # Opponent is arrested
+            if opponent.is_arrested():
+                raise OpponentValidationException()
 
-    except OpponentValidationException as ove:
-        if ove.message is not None:
-            await full_message_send(context, ove.message, update)
-        else:
-            await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update, add_delete_button=True)
-        return False
+        except OpponentValidationException as ove:
+            if ove.message is not None:
+                await full_message_send(context, ove.message, update)
+            else:
+                await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update,
+                                        add_delete_button=True)
+            return False
 
     return True
 
@@ -100,10 +102,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :param group_chat: The group chat
     :return: None
     """
-    opponent: User = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
+    try:
+        opponent: User | None = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
 
-    if opponent is None:
-        raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
+        if opponent is None:
+            raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
+    except AttributeError:
+        opponent = None
 
     # Validate the request
     if not await validate(update, context, user, opponent, command):
@@ -122,17 +127,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
 
     # Display available games
-    await display_games(game, update, context, opponent)
+    await display_games(game, update, context)
     return
 
 
-async def display_games(game: Game, update: Update, context: ContextTypes.DEFAULT_TYPE, opponent: User) -> None:
+async def display_games(game: Game, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Display the available games
     :param game: The game object
     :param update: The update object
     :param context: The context object
-    :param opponent: The opponent object
     :return: None
     """
     inline_keyboard: list[list[Keyboard]] = [[]]
@@ -178,7 +182,7 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
                                                                            GameReservedKeys.CANCEL: True},
                                      screen=Screen.GRP_GAME_SELECTION)])
 
-    ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
+    ot_text = phrases.GAME_CHOOSE_GAME
     message: Message = await full_media_send(context, saved_media_name=SavedMediaName.GAME, caption=ot_text,
                                              update=update, keyboard=inline_keyboard)
     game.message_id = message.message_id

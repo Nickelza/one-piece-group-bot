@@ -19,7 +19,7 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.game_service import delete_game, validate_game
-from src.service.message_service import mention_markdown_user, full_media_send
+from src.service.message_service import mention_markdown_user, full_media_send, full_message_send
 
 
 class GameOpponentConfirmationReservedKeys(StrEnum):
@@ -64,15 +64,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
-        await delete_game(context, game, should_delete_message=False, update=update)
-        await full_media_send(context, caption=phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
-                              add_delete_button=True, edit_only_caption_and_keyboard=True)
-        user.should_update_model = False
-        return
+        if game.opponent is not None:
+            await delete_game(context, game, should_delete_message=False, update=update)
+            await full_media_send(context, caption=phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
+                                  add_delete_button=True, edit_only_caption_and_keyboard=True)
+            user.should_update_model = False
+            return
+        else:  # Open to everyone, alert
+            await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, show_alert=True)
+            return
 
     await add_or_remove_bounty(user, game.wager, add=False, update=update, should_affect_pending_bounty=True)
     game.wager += game.wager
     game.status = GameStatus.IN_PROGRESS
+    game.opponent = user
     # Will save game later to avoid doubling wager without actually starting game
 
     await dispatch_game(update, context, user, inbound_keyboard, game)

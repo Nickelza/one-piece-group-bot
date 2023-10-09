@@ -157,6 +157,10 @@ PVT_PREDICTION_CREATE = Command('', Screen.PVT_PREDICTION_CREATE, required_locat
     Env.REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE.get_int()))
 COMMANDS.append(PVT_PREDICTION_CREATE)
 
+GRP_GAME_OPPONENT_CONFIRMATION = Command(
+    '', Screen.GRP_GAME_OPPONENT_CONFIRMATION, answer_callback=True,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
+
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)
 COMMANDS.append(GRP_DOC_Q_GAME)
@@ -177,7 +181,7 @@ GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True, feature=Featu
                     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()))
 COMMANDS.append(GRP_FIGHT)
 
-GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True, feature=Feature.CHALLENGE,
+GRP_GAME = Command('challenge', Screen.GRP_GAME, feature=Feature.CHALLENGE,
                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 COMMANDS.append(GRP_GAME)
 

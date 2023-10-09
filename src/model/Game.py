@@ -18,7 +18,7 @@ class Game(BaseModel):
     id = PrimaryKeyField()
     challenger = ForeignKeyField(User, backref='game_challengers', on_delete='CASCADE',
                                  on_update='CASCADE')
-    opponent = ForeignKeyField(User, backref='game_opponents', on_delete='CASCADE', on_update='CASCADE')
+    opponent = ForeignKeyField(User, backref='game_opponents', on_delete='CASCADE', on_update='CASCADE', null=True)
     type = SmallIntegerField(null=True)
     board = CharField(max_length=9999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
@@ -181,6 +181,13 @@ class Game(BaseModel):
             return GameType(most_played_as_challenger.type), amount_as_challenger
 
         return GameType(most_played_as_opponent.type), amount_as_opponent
+
+    def get_type(self) -> GameType:
+        """
+        Get the GameType
+        :return: The GameType
+        """
+        return GameType(self.type)
 
 
 Game.create_table()

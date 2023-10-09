@@ -53,21 +53,30 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     challenger: User = game.challenger
     opponent: User = game.opponent
 
-    game_type: GameType = GameType(game.type)
-    ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
-                                          mention_markdown_user(challenger),
-                                          game_type.get_name(),
-                                          get_belly_formatted(game.wager),
-                                          game_type.get_description())
-    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
-                                                                   screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
-                                                                   yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                   no_text=phrases.KEYBOARD_OPTION_REJECT,
-                                                                   primary_key=game.id)]
+    if opponent is not None:
+        # Direct request to opponent
+        ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
+                                              mention_markdown_user(challenger),
+                                              game.get_type().get_name(),
+                                              get_belly_formatted(game.wager),
+                                              game.get_type().get_description())
+        outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
+                                                                       screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                                                                       yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                       no_text=phrases.KEYBOARD_OPTION_REJECT,
+                                                                       primary_key=game.id)]
+    else:
+        # Open to all
+        ot_text = phrases.GAME_REQUEST_OPEN.format(mention_markdown_user(challenger),
+                                                   game.get_type().get_name(),
+                                                   get_belly_formatted(game.wager),
+                                                   game.get_type().get_description())
+        outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                                                                       yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                       primary_key=game.id, exclude_no_button=True)]
 
     button_delete_info = {GameSelectionReservedKeys.GAME_ID: game.id,
-                          ReservedKeyboardKeys.AUTHORIZED_USER: [
-                              challenger.id, opponent.id], GameSelectionReservedKeys.CANCEL: True}
+                          ReservedKeyboardKeys.AUTHORIZED_USER: [challenger.id], GameSelectionReservedKeys.CANCEL: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 

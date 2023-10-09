@@ -88,15 +88,18 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
 
     await add_or_remove_bounty(challenger, bounty_for_challenger, pending_belly_amount=pending_bounty_for_challenger,
                                update=update)
-    await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
-                               update=update)
+
+    if opponent is not None:
+        await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
+                                   update=update)
 
     # Refresh
     game.challenger = challenger
     game.opponent = opponent
 
     challenger.save()
-    opponent.save()
+    if opponent is not None:
+        opponent.save()
     game.save()
 
     return game
