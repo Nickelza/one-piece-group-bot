@@ -321,7 +321,9 @@ def get_leaderboard_user(user: User, index: int = None, group_chat: GroupChat = 
     :return: The leaderboard user
     """
 
-    leaderboard = get_leaderboard(index, group_chat=group_chat)
+    leaderboard = get_leaderboard(index, group_chat=group_chat)  # Local
+    if leaderboard is None and group_chat is not None:
+        leaderboard = get_leaderboard(index)
 
     leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
     return leaderboard_user
