@@ -3,6 +3,7 @@ from enum import IntEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
+import resources.Environment as Env
 from resources import phrases
 from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_bounty_loan_detail
 from src.model.BountyLoan import BountyLoan
@@ -55,7 +56,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
         inline_keyboard = [[]]
         step = Step(user.private_screen_step)
-        user.private_screen_stay = True
         match step:
             case Step.REQUEST_AMOUNT:
                 ot_text = phrases.BOUNTY_LOAN_ITEM_PAY_REQUEST.format(
@@ -94,6 +94,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
                 # Go back to loan detail
                 user.reset_private_screen()
+                # Remove step
+                if ReservedKeyboardKeys.SCREEN_STEP in inbound_keyboard.info:
+                    inbound_keyboard.info.pop(ReservedKeyboardKeys.SCREEN_STEP)
                 await manage_bounty_loan_detail(update, context, inbound_keyboard, user,
                                                 called_from_another_screen=True)
                 return
@@ -145,7 +148,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
                 pass
 
         if amount is not None:
-            if not await validate_amount(update, context, user, amount):
+            minimum_required = min(loan.get_remaining_amount(), Env.BOUNTY_LOAN_MIN_AMOUNT.get_int())
+            if not await validate_amount(update, context, user, amount, required_belly=minimum_required):
                 return False  # Error message sent by validate_amount
 
     except BountyLoanValidationException as e:
