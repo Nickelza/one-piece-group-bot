@@ -282,7 +282,7 @@ GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of 
                '\n\nWould you like to accept?' \
                f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                f'it will be automatically rejected.'
-GAME_REQUEST_OPEN = '{} has challenged anyone to play *{}* with a wager of ฿*{}*.' \
+GAME_REQUEST_OPEN = '{} is challenging anyone to play *{}* with a wager of ฿*{}*.' \
                     '\n\nPress the button below to accept.' \
                     f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                     f'it will be automatically rejected.'
