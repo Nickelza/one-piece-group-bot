@@ -12,6 +12,7 @@ from src.model.enums.Notification import BountyGiftReceivedNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
@@ -149,7 +150,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
-        tax_percentage = get_value(sender, DevilFruitAbilityType.TAX, tax_percentage)
+        tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage)
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():
@@ -199,7 +200,8 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
-    await add_or_remove_bounty(receiver, amount, update=update)
+    await add_or_remove_bounty(receiver, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_GIFT,
+                               event_id=bounty_gift.id)
     receiver.save()
 
     # Send message

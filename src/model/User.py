@@ -56,6 +56,7 @@ class User(BaseModel):
     timezone = CharField(max_length=99, null=True)
     is_active = BooleanField(default=True)
     prediction_creation_cooldown_end_date = DateTimeField(null=True)
+    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen

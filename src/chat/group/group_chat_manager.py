@@ -94,8 +94,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 return
 
     # Update bounty from message gain
-    await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
-                               should_update_location=True, from_message=True)
+    if command is Command.ND:
+        await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
+                                   should_update_location=True, from_message=True)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 

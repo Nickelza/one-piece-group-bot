@@ -15,6 +15,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -265,9 +266,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
-        await add_or_remove_bounty(user, win_amount, update=update)
+        await add_or_remove_bounty(user, win_amount, update=update, pending_belly_is_user_bounty=True,
+                                   tax_event_type=IncomeTaxEventType.FIGHT, event_id=fight.id)
         # Remove bounty from opponent
-        await add_or_remove_bounty(opponent, win_amount, add=False, update=update)
+        await add_or_remove_bounty(opponent, win_amount, add=False, update=update, pending_belly_is_user_bounty=True)
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                            mention_markdown_user(opponent), get_belly_formatted(win_amount),
                                            user.get_bounty_formatted())
@@ -275,9 +277,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.LOST
         fight.belly = lose_amount
         # Remove bounty from challenger
-        await add_or_remove_bounty(user, lose_amount, add=False, update=update)
+        await add_or_remove_bounty(user, lose_amount, add=False, update=update, pending_belly_is_user_bounty=True)
         # Add bounty to opponent
-        await add_or_remove_bounty(opponent, lose_amount, update=update)
+        await add_or_remove_bounty(opponent, lose_amount, update=update, pending_belly_is_user_bounty=True,
+                                   tax_event_type=IncomeTaxEventType.FIGHT, event_id=fight.id)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())

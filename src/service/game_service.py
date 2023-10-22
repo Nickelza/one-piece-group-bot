@@ -20,6 +20,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
@@ -87,11 +88,11 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
             bounty_for_opponent = pending_bounty_for_opponent = 0
 
     await add_or_remove_bounty(challenger, bounty_for_challenger, pending_belly_amount=pending_bounty_for_challenger,
-                               update=update)
+                               update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
     if opponent is not None:
         await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
-                                   update=update)
+                                   update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
     # Refresh
     game.challenger = challenger

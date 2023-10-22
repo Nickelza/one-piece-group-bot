@@ -19,6 +19,7 @@ from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_st
 from src.model.enums.PredictionType import PredictionType
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import PredictionException
 from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
@@ -420,7 +421,8 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
-            await add_or_remove_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_or_remove_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager,
+                                       tax_event_type=IncomeTaxEventType.PREDICTION, event_id=prediction.id)
 
             # Add to total win
             users_total_win[user.id][1] += win_amount
@@ -432,13 +434,13 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
         if prediction.refund_wager or len(prediction_options_correct) == 0:
             if len(prediction_options_correct) == 0:
                 # No correct options, refund full wager
-                won_amount = prediction_option_user.wager
+                refund_amount = prediction_option_user.wager
             else:
                 # Cap refund
-                won_amount = min(prediction_option_user.wager,
-                                 get_max_wager_refund(prediction_option_user=prediction_option_user))
+                refund_amount = min(prediction_option_user.wager,
+                                    get_max_wager_refund(prediction_option_user=prediction_option_user))
 
-            await add_or_remove_bounty(user, won_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_or_remove_bounty(user, refund_amount, pending_belly_amount=prediction_option_user.wager)
 
         user.save()
 

@@ -315,23 +315,10 @@ def get_value(user: User, ability_type: DevilFruitAbilityType, value: float, add
     :return: The value
     """
 
-    # Get Devil Fruit eaten by user that has the ability
-    devil_fruit: DevilFruit = (DevilFruit.select()
-                               .join(DevilFruitAbility)
-                               .where((DevilFruit.owner == user)
-                                      & (DevilFruit.status == DevilFruitStatus.EATEN)
-                                      & (DevilFruitAbility.ability_type == ability_type))
-                               .get_or_none())
-
-    # User has no Devil Fruit with the ability
-    if not devil_fruit:
+    # Get ability from a Devil Fruit eaten by user that has the ability
+    ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(user, ability_type)
+    if not ability:
         return value
-
-    # Get ability
-    ability: DevilFruitAbility = (DevilFruitAbility.select()
-                                  .where((DevilFruitAbility.devil_fruit == devil_fruit)
-                                         & (DevilFruitAbility.ability_type == ability_type))
-                                  .get_or_none())
 
     ability_type_sign: DevilFruitAbilityTypeSign = ability_type.get_sign()
 

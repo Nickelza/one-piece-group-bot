@@ -594,3 +594,53 @@ DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION = Environment('DEVIL_FRUIT_COLLECT_COOLDOW
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment('ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP',
                                                            default_value='True')
+
+# Tax brackets
+# Level 0 total bounty. Default: 0
+TAX_BRACKET_0_TOTAL_BOUNTY = Environment('TAX_BRACKET_0_TOTAL_BOUNTY', default_value='0')
+# Level 0 percentage. Default: 0%
+TAX_BRACKET_0_PERCENTAGE = Environment('TAX_BRACKET_0_PERCENTAGE', default_value='0')
+# Level 1 total bounty. Default: 400mil
+TAX_BRACKET_1_TOTAL_BOUNTY = Environment('TAX_BRACKET_1_TOTAL_BOUNTY', default_value='400000000')
+# Level 1 percentage. Default: 5%
+TAX_BRACKET_1_PERCENTAGE = Environment('TAX_BRACKET_1_PERCENTAGE', default_value='5')
+# Level 2 total bounty. Default: 1bil
+TAX_BRACKET_2_TOTAL_BOUNTY = Environment('TAX_BRACKET_2_TOTAL_BOUNTY', default_value='1000000000')
+# Level 2 percentage. Default: 10%
+TAX_BRACKET_2_PERCENTAGE = Environment('TAX_BRACKET_2_PERCENTAGE', default_value='10')
+# Level 3 total bounty. Default: 2bil
+TAX_BRACKET_3_TOTAL_BOUNTY = Environment('TAX_BRACKET_3_TOTAL_BOUNTY', default_value='2000000000')
+# Level 3 percentage. Default: 20%
+TAX_BRACKET_3_PERCENTAGE = Environment('TAX_BRACKET_3_PERCENTAGE', default_value='20')
+# Level 4 total bounty. Default: 3bil
+TAX_BRACKET_4_TOTAL_BOUNTY = Environment('TAX_BRACKET_4_TOTAL_BOUNTY', default_value='3000000000')
+# Level 4 percentage. Default: 30%
+TAX_BRACKET_4_PERCENTAGE = Environment('TAX_BRACKET_4_PERCENTAGE', default_value='30')
+# Level 5 total bounty. Default: 4bil
+TAX_BRACKET_5_TOTAL_BOUNTY = Environment('TAX_BRACKET_5_TOTAL_BOUNTY', default_value='4000000000')
+# Level 5 percentage. Default: 40%
+TAX_BRACKET_5_PERCENTAGE = Environment('TAX_BRACKET_5_PERCENTAGE', default_value='40')
+# Level 6 total bounty. Default: 5bil
+TAX_BRACKET_6_TOTAL_BOUNTY = Environment('TAX_BRACKET_6_TOTAL_BOUNTY', default_value='5000000000')
+# Level 6 percentage. Default: 50%
+TAX_BRACKET_6_PERCENTAGE = Environment('TAX_BRACKET_6_PERCENTAGE', default_value='50')
+# Level 7 total bounty. Default: 6bil
+TAX_BRACKET_7_TOTAL_BOUNTY = Environment('TAX_BRACKET_7_TOTAL_BOUNTY', default_value='6000000000')
+# Level 7 percentage. Default: 60%
+TAX_BRACKET_7_PERCENTAGE = Environment('TAX_BRACKET_7_PERCENTAGE', default_value='60')
+# Level 8 total bounty. Default: 7bil
+TAX_BRACKET_8_TOTAL_BOUNTY = Environment('TAX_BRACKET_8_TOTAL_BOUNTY', default_value='7000000000')
+# Level 8 percentage. Default: 70%
+TAX_BRACKET_8_PERCENTAGE = Environment('TAX_BRACKET_8_PERCENTAGE', default_value='70')
+# Level 9 total bounty. Default: 8bil
+TAX_BRACKET_9_TOTAL_BOUNTY = Environment('TAX_BRACKET_9_TOTAL_BOUNTY', default_value='8000000000')
+# Level 9 percentage. Default: 80%
+TAX_BRACKET_9_PERCENTAGE = Environment('TAX_BRACKET_9_PERCENTAGE', default_value='80')
+# Level 10 total bounty. Default: 9bil
+TAX_BRACKET_10_TOTAL_BOUNTY = Environment('TAX_BRACKET_10_TOTAL_BOUNTY', default_value='9000000000')
+# Level 10 percentage. Default: 90%
+TAX_BRACKET_10_PERCENTAGE = Environment('TAX_BRACKET_10_PERCENTAGE', default_value='90')
+# Level 11 total bounty. Default: 10bil
+TAX_BRACKET_11_TOTAL_BOUNTY = Environment('TAX_BRACKET_11_TOTAL_BOUNTY', default_value='10000000000')
+# Level 11 percentage. Default: 99%
+TAX_BRACKET_11_PERCENTAGE = Environment('TAX_BRACKET_11_PERCENTAGE', default_value='99')

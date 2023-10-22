@@ -12,16 +12,21 @@ import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
 from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
+from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.User import User
 from src.model.enums.BossType import BossType
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
+from src.service.income_tax_service import get_tax_amount, get_tax_reductions
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
@@ -189,6 +194,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
 
+    # Delete tax events
+    IncomeTaxEvent.delete().execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
@@ -198,7 +206,8 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                                update: Update = None, should_update_location: bool = False,
                                pending_belly_amount: int = None, from_message: bool = False, add: bool = True,
                                should_save: bool = False, should_affect_pending_bounty: bool = False,
-                               check_for_loan: bool = True) -> None:
+                               check_for_loan: bool = True, pending_belly_is_user_bounty: bool = False,
+                               tax_event_type: IncomeTaxEventType = None, event_id: int = None) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -213,12 +222,20 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     :param should_save: Whether to save the user
     :param should_affect_pending_bounty: Whether to affect the pending bounty
     :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
+    :param pending_belly_is_user_bounty: If the pending belly is the user's bounty, so it should
+                                         not be added or removed from the bounty
+    :param tax_event_type: The tax event type
+    :param event_id: The event id
+
     :return: The updated user
     """
     from src.service.location_service import update_location
 
     if amount is None and pending_belly_amount is None:
         raise ValueError('Amount or pending belly amount must be specified')
+
+    if (tax_event_type is not None or event_id is not None) and (tax_event_type is None or event_id is None):
+        raise ValueError('Tax event type and event id must be specified together')
 
     previous_bounty = user.bounty
     previous_pending_bounty = user.pending_bounty
@@ -228,74 +245,109 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     elif should_affect_pending_bounty:
         pending_belly_amount = amount
 
-    # Should remove bounty
-    if not add:
-        user.bounty -= amount
+    # Don't add or remove to user's pending bounty
+    if pending_belly_is_user_bounty:
+        pending_belly_amount = user.bounty
+        should_affect_pending_bounty = False
+
+    from src.chat.manage_message import init
+    db = init()
+
+    with db.atomic():
+        # Should remove bounty
+        if not add:
+            user.bounty -= amount
+            if should_affect_pending_bounty:
+                user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
+
+            if user.bounty < 0 and previous_bounty >= 0:
+                try:
+                    raise ValueError(f'User {user.id} has negative bounty: {user.bounty} after removing '
+                                     f'{amount} bounty in event '
+                                     f'{update.to_dict() if update is not None else "None"}')
+                except ValueError as ve:
+                    logging.exception(ve)
+
+            if should_save:
+                user.save()
+            return
+
         if should_affect_pending_bounty:
-            user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
+            user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
 
-        if user.bounty < 0 and previous_bounty >= 0:
-            try:
-                raise ValueError(f'User {user.id} has negative bounty: {user.bounty} after removing '
-                                 f'{amount} bounty in event '
-                                 f'{update.to_dict() if update is not None else "None"}')
-            except ValueError as ve:
-                logging.exception(ve)
+            if user.pending_bounty < 0 and previous_pending_bounty >= 0:
+                try:
+                    raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing'
+                                     f' {amount} pending bounty in event '
+                                     f'{update.to_dict() if update is not None else "None"}')
+                except ValueError as ve:
+                    logging.exception(ve)
 
-        if should_save:
-            user.save()
-        return
+            if should_save:
+                user.save()
 
-    if should_affect_pending_bounty:
-        user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
+        if amount <= 0 and not should_update_location:
+            return
 
-        if user.pending_bounty < 0 and previous_pending_bounty >= 0:
-            try:
-                raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing '
-                                 f'{amount} pending bounty in event '
-                                 f'{update.to_dict() if update is not None else "None"}')
-            except ValueError as ve:
-                logging.exception(ve)
+        # User is arrested, no bounty is gained
+        if user.is_arrested():
+            return
 
-        if should_save:
-            user.save()
+        if amount > 0:
+            # Amount that will be used to calculate eventual taxes
+            net_amount_without_pending = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
+            net_amount_after_tax = net_amount_without_pending
+            amount_to_add = amount
 
-    if amount <= 0 and not should_update_location:
-        return
+            # Get net amount after taxes
+            tax_breakdown: list[IncomeTaxBreakdown] = IncomeTaxBracket.get_tax_breakdown(user.total_gained_bounty,
+                                                                                         net_amount_without_pending)
+            tax_amount = IncomeTaxBracket.get_tax_amount_from_breakdown(tax_breakdown)
 
-    # User is arrested, no bounty is gained
-    if user.is_arrested():
-        return
+            if tax_amount > 0:
+                tax_amount = get_tax_amount(user, net_amount_without_pending)  # Recalculate with eventual reductions
+                net_amount_after_tax = net_amount_without_pending - tax_amount
+                amount_to_add -= tax_amount
 
-    # Amount that will be used to calculate eventual taxes
-    effective_amount = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
+                # Create tax event
+                if tax_event_type is not None:
+                    tax_event: IncomeTaxEvent = IncomeTaxEvent()
+                    tax_event.user = user
+                    tax_event.event_type = tax_event_type.value
+                    tax_event.event_id = event_id
+                    tax_event.starting_amount = user.total_gained_bounty
+                    tax_event.amount = net_amount_without_pending
+                    tax_event.breakdown_list = str([breakdown.get_json() for breakdown in tax_breakdown])
+                    tax_event.reduction_list = str([reduction.get_json() for reduction in get_tax_reductions(user)])
+                    tax_event.save()
 
-    amount_to_add = amount
-    if check_for_loan:
-        # If user has an expired bounty loan, use n% of the bounty to repay the loan
-        expired_loans = user.get_expired_bounty_loans()
-        if len(expired_loans) > 0:
-            expired_loan: BountyLoan = expired_loans[0]
+            user.total_gained_bounty += net_amount_after_tax
 
-            amount_for_repay = subtract_percentage_from_value(effective_amount,
-                                                              Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
-            # Cap to remaining amount
-            amount_for_repay = expired_loan.get_maximum_payable_amount(int(amount_for_repay))
+            if check_for_loan:
+                # If user has an expired bounty loan, use n% of the bounty to repay the loan
+                expired_loans = user.get_expired_bounty_loans()
+                if len(expired_loans) > 0:
+                    expired_loan: BountyLoan = expired_loans[0]
 
-            # Pay loan
-            await expired_loan.pay(amount_for_repay, update)
+                    amount_for_repay = subtract_percentage_from_value(net_amount_after_tax,
+                                                                      Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
+                    # Cap to remaining amount
+                    amount_for_repay = expired_loan.get_maximum_payable_amount(int(amount_for_repay))
 
-            # Subtract from amount
-            amount_to_add -= amount_for_repay
+                    # Pay loan
+                    await expired_loan.pay(amount_for_repay, update)
 
-    user.bounty += amount_to_add
+                    # Subtract from amount
+                    amount_to_add -= amount_for_repay
 
-    # If the bounty is gained from a message, subtract the amount from the bounty message limit
-    if from_message:
-        user.bounty_message_limit -= amount
+            user.bounty += amount_to_add
 
-    if should_save:
-        user.save()
+            # If the bounty is gained from a message, subtract the amount from the bounty message limit
+            if from_message:
+                user.bounty_message_limit -= amount
+
+            if should_save:
+                user.save()
 
     # Update the user's location
     if should_update_location:
@@ -491,7 +543,7 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
         tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Apply Devil Fruit ability
-    tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
+    tax = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax)
 
     return tax
 

@@ -14,6 +14,7 @@ from src.model.enums.Command import Command
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import DevilFruitTradeValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -334,8 +335,9 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
     buyer.save()
 
     # Add the belly to the seller
-    await add_or_remove_bounty(devil_fruit_trade.giver, amount, update=update)
     devil_fruit_trade.giver.save()
+    await add_or_remove_bounty(devil_fruit_trade.giver, amount, update=update,
+                               tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL, event_id=devil_fruit_trade.id)
 
     list_page: DevilFruitListPage = DevilFruitListPage()
     list_page.object = devil_fruit
