@@ -4,10 +4,13 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
+from src.model.Crew import Crew
+from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew
 from src.service.date_service import default_date_format
 from src.service.message_service import full_message_send
@@ -34,14 +37,31 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     member: User = User.get_by_id(inbound_keyboard.info[CrewMemberReservedKeys.MEMBER_ID])
 
     try:
-        get_crew(user=member, validate_against_crew=user.crew)
+        crew: Crew = get_crew(user=member, validate_against_crew=user.crew)
     except CrewValidationException as cve:
         await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
         return
 
     # Get crew member text
+    # Get join date and relative order
+    crew_members = crew.get_members()  # Already ordered by join date
+    member_join_order = list(crew_members).index(member) + 1
+
+    # Get chest contribution and relative order
+    chest_contributions = crew.get_chest_contributions()  # Already ordered by contribution
+    member_contribution = CrewMemberChestContribution.get_or_none((CrewMemberChestContribution.crew == crew) &
+                                                                  (CrewMemberChestContribution.user == member))
+    member_contribution_amount = 0
+    if member_contribution is None:
+        member_chest_order = len(chest_contributions) + 1
+    else:
+        member_contribution_amount = member_contribution.amount
+        member_chest_order = list(chest_contributions).index(member_contribution) + 1
+
     ot_text = phrases.CREW_MEMBER.format(member.get_markdown_mention(), member.get_bounty_formatted(),
                                          default_date_format(member.crew_join_date, user),
+                                         member_join_order, get_belly_formatted(member_contribution_amount),
+                                         member_chest_order,
                                          (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO))
 
     inline_keyboard: list[list[Keyboard]] = []

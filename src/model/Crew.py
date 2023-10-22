@@ -18,6 +18,7 @@ class Crew(BaseModel):
     can_accept_new_members = BooleanField(default=True)
     is_active = BooleanField(default=True)
     disband_date = DateTimeField(null=True)
+    chest_amount = BigIntegerField(default=0)
 
     class Meta:
         db_table = 'crew'
@@ -100,6 +101,16 @@ class Crew(BaseModel):
         """
 
         return self.crew_members.select().count()
+
+    def get_chest_contributions(self) -> list:
+        """
+        Returns the crew members ordered by contribution
+        :return: The crew members
+        """
+
+        from src.model.CrewMemberChestContribution import CrewMemberChestContribution
+
+        return self.crew_member_chest_contributions.select().order_by(CrewMemberChestContribution.amount.desc())
 
 
 Crew.create_table()

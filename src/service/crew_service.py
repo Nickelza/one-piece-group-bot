@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Crew import Crew
+from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
@@ -209,3 +210,33 @@ def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
                                 & (User.is_admin == False)))
 
     return inactive_captains
+
+
+def add_to_crew_chest(user: User, amount: int) -> None:
+    """
+    Adds to the crew chest
+
+    :param user: The user
+    :param amount: The amount
+    :return: None
+    """
+
+    if not user.is_crew_member():
+        raise ValueError('User is not a crew member')
+
+    crew: Crew = user.crew
+    crew.chest_amount += amount
+    crew.save()
+
+    # Save contribution
+    contribution: CrewMemberChestContribution = CrewMemberChestContribution.get_or_none(
+        (CrewMemberChestContribution.crew == crew) & (CrewMemberChestContribution.user == user))
+
+    if contribution is None:
+        contribution = CrewMemberChestContribution()
+        contribution.crew = crew
+        contribution.user = user
+
+    contribution.amount += amount
+    contribution.last_contribution_date = datetime.now()
+    contribution.save()

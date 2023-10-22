@@ -13,6 +13,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import NavigationLimitReachedException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew
 from src.service.list_service import get_navigation_buttons
 from src.service.message_service import full_message_send, mention_markdown_user, escape_valid_markdown_chars
@@ -46,7 +47,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
         crew_members_text, crew_members_keyboard = get_crew_members_text_keyboard(inbound_keyboard, crew)
 
-        ot_text = phrases.CREW_OVERVIEW.format(escape_valid_markdown_chars(crew.name), crew_members_text)
+        ot_text = phrases.CREW_OVERVIEW.format(
+            escape_valid_markdown_chars(crew.name),
+            get_belly_formatted(crew.chest_amount),
+            crew_members_text)
         inline_keyboard = crew_members_keyboard
 
         if user.is_crew_captain():

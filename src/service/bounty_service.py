@@ -11,6 +11,8 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
 from src.model.BountyLoan import BountyLoan
+from src.model.Crew import Crew
+from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.GroupChat import GroupChat
 from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.User import User
@@ -23,12 +25,13 @@ from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
+from src.service.crew_service import add_to_crew_chest
 from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.income_tax_service import get_tax_amount, get_tax_reductions
 from src.service.location_service import reset_location
-from src.service.math_service import subtract_percentage_from_value
+from src.service.math_service import subtract_percentage_from_value, get_value_from_percentage
 from src.service.message_service import full_message_send
 from src.service.string_service import get_unit_value_from_string
 from src.service.user_service import get_boss_type, user_is_boss
@@ -197,6 +200,19 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Delete tax events
     IncomeTaxEvent.delete().execute()
 
+    # Erase all crew chests and delete all contributions from previous crew members
+    # For some reason a direct delete query does not work, had to first get all valid contributions and then delete
+    Crew.update(chest_amount=0).execute()
+
+    # Still valid contributions
+    valid_contributions = CrewMemberChestContribution.select().where(
+        CrewMemberChestContribution.crew == User.select(User.crew).where(User.id == CrewMemberChestContribution.user))
+
+    # Delete all contributions that are not valid
+    CrewMemberChestContribution.delete().where(
+        (CrewMemberChestContribution.id.not_in([
+            contribution.id for contribution in valid_contributions]))).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
@@ -320,6 +336,13 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                     tax_event.breakdown_list = str([breakdown.get_json() for breakdown in tax_breakdown])
                     tax_event.reduction_list = str([reduction.get_json() for reduction in get_tax_reductions(user)])
                     tax_event.save()
+
+                # Add tax to crew chest
+                remaining_tax_amount = tax_amount
+                if user.is_crew_member():
+                    crew_chest_amount = get_value_from_percentage(tax_amount, Env.TAX_CREW_CHEST_PERCENTAGE.get_float())
+                    add_to_crew_chest(user, int(crew_chest_amount))
+                    remaining_tax_amount -= crew_chest_amount  # Will use for group chest
 
             user.total_gained_bounty += net_amount_after_tax
 
@@ -506,7 +529,6 @@ def should_reset_bounty(run_time: datetime) -> bool:
     :param run_time: The run time
     :return: Whether the bounty should be reset
     """
-
     # Adding 1 millisecond in case it's exactly midnight, else the next leaderboard will be considered as the
     # current one
     next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(),

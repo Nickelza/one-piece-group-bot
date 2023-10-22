@@ -105,8 +105,8 @@ KEYBOARD_OPTION_BACK = Emoji.BACK + ' Back'
 KEYBOARD_OPTION_YES = Emoji.YES + ' Yes'
 KEYBOARD_OPTION_NO = Emoji.NO + ' No'
 
-TEXT_YES = f'{Emoji.YES}Yes'
-TEXT_NO = f'{Emoji.NO}No'
+TEXT_YES = 'Yes'
+TEXT_NO = 'No'
 TEXT_WON = 'won'
 TEXT_LOST = 'lost'
 TEXT_IT_WAS = 'it was'
@@ -579,7 +579,9 @@ CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_ME
                         f' one or create your own.' \
                         f'\n\nTo create a Crew, you must have appeared in the the last ' \
                         f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.'
-CREW_OVERVIEW = '*{}*\n{}'
+CREW_OVERVIEW = '*{}*' \
+                '\n\nTreasure Chest: ฿{}' \
+                '\n{}'
 CREW_OVERVIEW_MEMBER = '\n{}. {}'
 CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
@@ -634,8 +636,9 @@ CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 # Crew - Member
 CREW_MEMBER = '*{}*' \
               '\n\n*Bounty*: ฿{}' \
-              '\n*Join Date*: {}' \
-              '\n\nCrew MVP Bonus: {}'
+              '\n*Join Date*: {} \\({}°\\)' \
+              '\n\nChest contribution: ฿{} \\({}°\\)' \
+              '\nCrew MVP Bonus: {}'
 
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'

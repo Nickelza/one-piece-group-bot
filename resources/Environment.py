@@ -644,3 +644,5 @@ TAX_BRACKET_10_PERCENTAGE = Environment('TAX_BRACKET_10_PERCENTAGE', default_val
 TAX_BRACKET_11_TOTAL_BOUNTY = Environment('TAX_BRACKET_11_TOTAL_BOUNTY', default_value='10000000000')
 # Level 11 percentage. Default: 99%
 TAX_BRACKET_11_PERCENTAGE = Environment('TAX_BRACKET_11_PERCENTAGE', default_value='99')
+# What percentage of the tax should go to the crew chest. Default: 50%
+TAX_CREW_CHEST_PERCENTAGE = Environment('TAX_CREW_CHEST_PERCENTAGE', default_value='50')
