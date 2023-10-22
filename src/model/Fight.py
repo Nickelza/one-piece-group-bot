@@ -21,7 +21,7 @@ class Fight(BaseModel):
     group_chat = ForeignKeyField(GroupChat, null=True, backref='fight_groups_chats', on_delete='RESTRICT',
                                  on_update='CASCADE')
     message_id = IntegerField(null=True)
-    belly = IntegerField(null=True)
+    belly = BigIntegerField(null=True)
 
     class Meta:
         db_table = 'fight'

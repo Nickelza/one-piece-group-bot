@@ -26,7 +26,7 @@ class Game(BaseModel):
     group_chat = ForeignKeyField(GroupChat, null=True, backref='game_groups_chats', on_delete='RESTRICT',
                                  on_update='CASCADE')
     message_id = IntegerField(null=True)
-    wager = IntegerField(null=True)
+    wager = BigIntegerField(null=True)
     last_interaction_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:

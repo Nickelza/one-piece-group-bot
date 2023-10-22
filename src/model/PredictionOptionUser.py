@@ -19,7 +19,7 @@ class PredictionOptionUser(BaseModel):
     prediction_option = ForeignKeyField(PredictionOption, backref='prediction_options_users', on_delete='RESTRICT',
                                         on_update='RESTRICT')
     user = ForeignKeyField(User, backref='prediction_options_users', on_delete='CASCADE', on_update='CASCADE')
-    wager = IntegerField()
+    wager = BigIntegerField()
     max_refund_wager_boost = IntegerField(default=0)
     date = DateTimeField(default=datetime.now)
     prediction_group_chat_message = ForeignKeyField(PredictionGroupChatMessage, null=True,
