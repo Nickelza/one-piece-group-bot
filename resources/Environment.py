@@ -59,7 +59,9 @@ class Environment:
         Get the environment variable as a float
         :return: The environment variable as a float
         """
-        return float(self.get())
+        from src.service.math_service import format_percentage_value
+
+        return format_percentage_value(float(self.get()))
 
     def get_bool(self) -> bool:
         """

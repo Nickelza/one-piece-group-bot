@@ -156,7 +156,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 
     # BOUNTY BONUSES
     has_bounty_bonus = False
-    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE
+    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE
 
     # Crew Bounty Bonus
     if target_user.has_crew_bonus():
@@ -182,16 +182,31 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             Env.NEW_WORLD_BOUNTY_BONUS.get_int())
         has_bounty_bonus = True
 
-    # Expired loan
-    if target_user.has_expired_bounty_loans():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
-            (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_int()))
-        has_bounty_bonus = True
-
     if has_bounty_bonus:
         message_text += bounty_bonus_text
+
+    # BOUNTY DEDUCTIONS
+    has_bounty_deduction = False
+    bounty_deduction_text = phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE
+
+    # Expired loan
+    if target_user.has_expired_bounty_loans():
+        bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
+            (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()))
+        has_bounty_deduction = True
+
+    # Income tax
+    if target_user.has_income_tax():
+        bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+            Emoji.LOG_NEGATIVE,
+            phrases.SHOW_USER_STATUS_INCOME_TAX,
+            (-1 * target_user.get_income_tax_percentage()))
+        has_bounty_deduction = True
+
+    if has_bounty_deduction:
+        message_text += bounty_deduction_text
 
     # Devil Fruit
     eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)

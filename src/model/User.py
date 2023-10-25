@@ -450,6 +450,35 @@ class User(BaseModel):
 
         return len(self.get_expired_bounty_loans()) > 0
 
+    def get_bounty_plus_pending_bounty(self) -> int:
+        """
+        Returns the bounty plus the pending bounty
+        :return: The bounty plus the pending bounty
+        """
+
+        return int(str(self.bounty)) + int(str(self.pending_bounty))
+
+    def has_income_tax(self):
+        """
+        Returns True if the user has income tax
+        :return: True if the user has income tax
+        """
+
+        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+
+        return IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage > 0
+
+    def get_income_tax_percentage(self) -> float:
+        """
+        Returns the income tax percentage
+        :return: The income tax percentage
+        """
+
+        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+        from src.service.math_service import format_percentage_value
+
+        return format_percentage_value(IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage)
+
     @staticmethod
     def get_active_interactive_users() -> list:
         """

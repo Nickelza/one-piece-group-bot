@@ -85,3 +85,18 @@ def get_cumulative_percentage_sum(percentages: list[float]) -> float:
         remaining_percentage -= percentage_of_remaining_percentage
 
     return result
+
+
+def format_percentage_value(percentage: float, decimals: int = 2) -> int | float:
+    """
+    Convert a percentage to an integer value or a float value with specified decimals.
+
+    :param percentage: The percentage to convert.
+    :param decimals: Number of decimal places (default is 2).
+    :return: An integer or float value.
+    """
+
+    if percentage % 1 == 0:
+        return int(percentage)
+
+    return round(percentage, decimals)
