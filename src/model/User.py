@@ -28,6 +28,7 @@ class User(BaseModel):
     tg_last_name = CharField(max_length=99)
     tg_username = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
+    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
     pending_bounty = BigIntegerField(default=0)
     doc_q_cooldown_end_date = DateTimeField(null=True)
     game_cooldown_end_date = DateTimeField(null=True)
@@ -56,7 +57,6 @@ class User(BaseModel):
     timezone = CharField(max_length=99, null=True)
     is_active = BooleanField(default=True)
     prediction_creation_cooldown_end_date = DateTimeField(null=True)
-    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen
@@ -475,6 +475,18 @@ class User(BaseModel):
         """
 
         return datetime.datetime.now(self.get_timezone())
+
+    def get_datetime_formatted(self, date: datetime.datetime) -> str:
+        """
+        Returns the formatted datetime of the user in their timezone
+
+        :param date: The datetime
+        :return: The formatted datetime of the user
+        """
+
+        from src.service.date_service import default_datetime_format
+
+        return default_datetime_format(date, self)
 
 
 User.create_table()

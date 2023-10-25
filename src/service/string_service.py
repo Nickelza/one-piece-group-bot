@@ -1,3 +1,6 @@
+import json
+
+
 def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
     """
     Get the value from a string
@@ -42,3 +45,12 @@ def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
         raise ValueError
 
     return int(float(value_str) * unit_multiplier_map[unit_full_name])
+
+
+def object_to_json_string(obj: any) -> str:
+    """
+    Convert an object to a JSON string
+    :param obj: The object
+    :return: The JSON string
+    """
+    return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))

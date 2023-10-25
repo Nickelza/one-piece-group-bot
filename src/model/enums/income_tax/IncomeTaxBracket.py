@@ -82,15 +82,6 @@ class IncomeTaxBracket:
         return sum([tax.tax_amount
                     for tax in IncomeTaxBracket.get_tax_breakdown(starting_amount, amount)])
 
-    @staticmethod
-    def get_tax_amount_from_breakdown(tax_breakdown: list[IncomeTaxBreakdown]) -> int:
-        """
-        Get the tax from a tax breakdown
-        :param tax_breakdown: The tax breakdown
-        :return: The tax
-        """
-        return sum([tax.tax_amount for tax in tax_breakdown])
-
 
 # noinspection DuplicatedCode
 TAX_BRACKET_0 = IncomeTaxBracket(Env.TAX_BRACKET_0_TOTAL_BOUNTY.get_int(), Env.TAX_BRACKET_0_PERCENTAGE.get_float())

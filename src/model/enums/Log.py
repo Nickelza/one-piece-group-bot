@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from enum import IntEnum
 
 import constants as c
 import resources.phrases as phrases
@@ -9,6 +8,7 @@ from src.model.Crew import Crew
 from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.Game import Game
+from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
@@ -20,25 +20,18 @@ from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user, LeaderboardRankIndex
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
+from src.model.enums.LogType import LogType
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
+from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
+from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import default_datetime_format
 from src.service.math_service import get_value_from_percentage, get_percentage_from_value
 from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url, get_deeplink
-
-
-class LogType(IntEnum):
-    """Enum for different types of logs"""
-
-    FIGHT = 1
-    DOC_Q_GAME = 2
-    GAME = 3
-    BOUNTY_GIFT = 4
-    LEGENDARY_PIRATE = 5
-    NEW_WORLD_PIRATE = 6
-    LEADERBOARD_RANK = 7
-
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,
@@ -48,6 +41,7 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_KEY,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_KEY,
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_KEY,
+    LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_KEY,
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
@@ -58,6 +52,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 
@@ -135,6 +130,21 @@ class Log(ListPage):
         """
         pass
 
+    @staticmethod
+    def get_deeplink_by_type(log_type: LogType, item_id: int) -> str:
+        """
+        Get the deeplink for the log
+
+        :param log_type: The log type
+        :param item_id: The item id
+        :return: The deeplink
+        """
+
+        from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
+
+        info: dict = {LogTypeReservedKeys.TYPE: log_type, LogTypeReservedKeys.ITEM_ID: item_id}
+        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL)
+
     def get_deeplink(self, item_id) -> str:
         """
         Get the deeplink for the log
@@ -143,10 +153,7 @@ class Log(ListPage):
         :return: The deeplink
         """
 
-        from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
-
-        info: dict = {LogTypeReservedKeys.TYPE: self.type, LogTypeReservedKeys.ITEM_ID: item_id}
-        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL)
+        return self.get_deeplink_by_type(self.type, item_id)
 
     def get_text_fill_in(self) -> str:
         """
@@ -663,8 +670,111 @@ class LeaderboardRankLog(Log):
             self.get_deeplink(max_by_bounty.id))
 
 
+class IncomeTaxEventLog(Log):
+    """Class for income tax event logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.INCOME_TAX_EVENT, has_stats=False)
+
+        self.object: IncomeTaxEvent = IncomeTaxEvent()
+        self.user: User = User()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: IncomeTaxEvent = IncomeTaxEvent.get(IncomeTaxEvent.id == object_id)
+        self.user: User = self.object.user
+
+    def get_items(self, page) -> list[IncomeTaxEvent]:
+        return (self.object
+                .select()
+                .where((IncomeTaxEvent.user == self.user))
+                .order_by(IncomeTaxEvent.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where((IncomeTaxEvent.user == self.user))
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.INCOME_TAX_EVENT_LOG_ITEM_TEXT.format(self.object.get_event_type_description(),
+                                                             get_belly_formatted(self.object.amount))
+
+    def get_item_detail_text(self) -> str:
+        from src.service.message_service import get_deeplink
+
+        # Build url to event log
+        event_type = self.object.get_event_type()
+        log_type: LogType = event_type.get_log_type()
+        event_log_url = ''
+
+        if log_type is not None:
+            event_log_url = Log.get_deeplink_by_type(log_type, self.object.event_id)
+        else:
+            # Manually manage events that are not shown in regular logs screen
+            item_id = self.object.event_id
+            match event_type:
+                case IncomeTaxEventType.BOUNTY_LOAN:
+                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                                                 screen=Screen.PVT_BOUNTY_LOAN_DETAIL)
+
+                case IncomeTaxEventType.PREDICTION:
+                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                                                 screen=Screen.PVT_PREDICTION_DETAIL)
+
+        breakdown_list = IncomeTaxBreakdown.from_string(self.object.breakdown_list)
+        deduction_list = IncomeTaxDeduction.from_string(self.object.deduction_list)
+        contribution_list = IncomeTaxContribution.from_string(self.object.contribution_list)
+
+        total_tax = IncomeTaxBreakdown.get_amount_with_deduction_from_list(breakdown_list, deduction_list)
+        total_tax_percentage = int(get_percentage_from_value(total_tax, self.object.amount, add_decimal=False))
+        net_income = self.object.amount - total_tax
+
+        deduction_text = ''
+        if len(deduction_list) > 0:
+            deduction_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION
+            for deduction in deduction_list:
+                deduction_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM.format(
+                    deduction.get_description(),
+                    deduction.percentage)
+
+        contribution_text = ''
+        if len(contribution_list) > 0:
+            contribution_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION
+            for contribution in contribution_list:
+                contribution_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM.format(
+                    contribution.get_description(),
+                    get_belly_formatted(int(get_value_from_percentage(total_tax, contribution.percentage))),
+                    contribution.percentage)
+
+        breakdown_text = ''
+        for breakdown in breakdown_list:
+            breakdown_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM.format(
+                get_belly_formatted(breakdown.taxable_amount),
+                get_belly_formatted(breakdown.taxable_amount - breakdown.tax_amount),
+                get_belly_formatted(breakdown.tax_amount),
+                int(get_percentage_from_value(breakdown.tax_amount, breakdown.taxable_amount)))
+
+        return phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT.format(
+            self.object.get_event_type_description(),
+            event_log_url,
+            self.user.get_datetime_formatted(self.object.date),
+            get_belly_formatted(self.object.amount),
+            get_belly_formatted(net_income),
+            get_belly_formatted(total_tax),
+            total_tax_percentage,
+            deduction_text,
+            contribution_text,
+            breakdown_text)
+
+
 LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),
-        LeaderboardRankLog()]
+        LeaderboardRankLog(), IncomeTaxEventLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:

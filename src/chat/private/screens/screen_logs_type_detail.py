@@ -5,7 +5,8 @@ from telegram.ext import ContextTypes
 
 from src.chat.private.screens.screen_logs_type import validate
 from src.model.User import User
-from src.model.enums.Log import Log, LogType, get_log_by_type
+from src.model.enums.Log import Log, get_log_by_type
+from src.model.enums.LogType import LogType
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send

@@ -5,7 +5,8 @@ from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.User import User
-from src.model.enums.Log import Log, LogType, get_log_by_type, LOG_TYPE_DETAIL_TEXT_FILL_IN
+from src.model.enums.Log import Log, get_log_by_type, LOG_TYPE_DETAIL_TEXT_FILL_IN
+from src.model.enums.LogType import LogType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard

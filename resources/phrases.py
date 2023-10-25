@@ -1010,6 +1010,29 @@ LEADERBOARD_RANK_LOG_STATS_TEXT = '*Total appearances*: {}' \
                                   '\n*Max rank*: [{} \\({}°\\)]({})' \
                                   '\n*Max bounty*: [฿{} \\({}°\\)]({})'
 
+# Logs - Income tax event
+INCOME_TAX_EVENT_LOG_KEY = 'Tax Breakdown'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Income Tax Breakdown'
+INCOME_TAX_EVENT_LOG_ITEM_TEXT = '{} \\(฿{}\\)'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT = '*Event*: [{}]({})' \
+                                        '\n*Date*: {}' \
+                                        '\n*Income*: ฿{}' \
+                                        '\n*Net gain*: ' \
+                                        + Emoji.LOG_POSITIVE + '฿{}' \
+                                                               '\n*Total tax*: ' \
+                                        + Emoji.LOG_NEGATIVE + '฿{} \\({}%\\)' \
+                                                               '{}{}' \
+                                                               '\n\n\n*Breakdown*' \
+                                                               '{}'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION = '\n\n*Deductions*'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM = '\n{}: {}%'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION = '\n\n*Contributions* \\(from tax\\)'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM = '\n{}: ฿{} \\({}%\\)'
+
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM = '\n\nAmount: ฿{}' \
+                                                       '\nGain: ฿{}' \
+                                                       '\nTax: ฿{} \\({}%\\)'
+
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
 SPEAK = '{} has been granted permission to speak'
@@ -1071,3 +1094,13 @@ DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}'
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
 THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your Group!\n'
+
+INCOME_TAX_EVENT_BOUNTY_LOAN = 'Bounty Loan'
+INCOME_TAX_EVENT_DEVIL_FRUIT_SELL = 'Devil Fruit Sell'
+INCOME_TAX_EVENT_PREDICTION = 'Prediction'
+
+INCOME_TAX_DEDUCTION_TYPE_ADMIN = 'Admin'
+INCOME_TAX_DEDUCTION_TYPE_CREW_ABILITY = 'Crew Ability'
+INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT = 'Devil Fruit'
+
+INCOME_TAX_CONTRIBUTION_TYPE_CREW_CHEST = 'Crew Chest'

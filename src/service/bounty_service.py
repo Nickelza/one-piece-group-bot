@@ -23,17 +23,17 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
+from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributionType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import add_to_crew_chest
 from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
-from src.service.income_tax_service import get_tax_amount, get_tax_reductions
+from src.service.income_tax_service import get_tax_amount, get_tax_deductions, add_contribution
 from src.service.location_service import reset_location
-from src.service.math_service import subtract_percentage_from_value, get_value_from_percentage
+from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
-from src.service.string_service import get_unit_value_from_string
+from src.service.string_service import get_unit_value_from_string, object_to_json_string
 from src.service.user_service import get_boss_type, user_is_boss
 
 
@@ -44,7 +44,7 @@ def get_belly_formatted(belly: int) -> str:
     :return: The formatted belly e.g. 1,000,000
     """
 
-    return '{0:,}'.format(belly)
+    return '{0:,}'.format(int(belly))
 
 
 def get_message_belly(update: Update, user: User, group_chat: GroupChat) -> int:
@@ -318,14 +318,15 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
             # Get net amount after taxes
             tax_breakdown: list[IncomeTaxBreakdown] = IncomeTaxBracket.get_tax_breakdown(user.total_gained_bounty,
                                                                                          net_amount_without_pending)
-            tax_amount = IncomeTaxBracket.get_tax_amount_from_breakdown(tax_breakdown)
+            tax_amount = IncomeTaxBreakdown.get_amount_from_list(tax_breakdown)
 
             if tax_amount > 0:
-                tax_amount = get_tax_amount(user, net_amount_without_pending)  # Recalculate with eventual reductions
+                tax_amount = get_tax_amount(user, net_amount_without_pending)  # Recalculate with eventual deductions
                 net_amount_after_tax = net_amount_without_pending - tax_amount
                 amount_to_add -= tax_amount
 
                 # Create tax event
+                tax_event: IncomeTaxEvent = IncomeTaxEvent()
                 if tax_event_type is not None:
                     tax_event: IncomeTaxEvent = IncomeTaxEvent()
                     tax_event.user = user
@@ -333,16 +334,14 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                     tax_event.event_id = event_id
                     tax_event.starting_amount = user.total_gained_bounty
                     tax_event.amount = net_amount_without_pending
-                    tax_event.breakdown_list = str([breakdown.get_json() for breakdown in tax_breakdown])
-                    tax_event.reduction_list = str([reduction.get_json() for reduction in get_tax_reductions(user)])
+                    tax_event.breakdown_list = object_to_json_string(tax_breakdown)
+                    tax_event.deduction_list = object_to_json_string(get_tax_deductions(user))
                     tax_event.save()
 
                 # Add tax to crew chest
-                remaining_tax_amount = tax_amount
                 if user.is_crew_member():
-                    crew_chest_amount = get_value_from_percentage(tax_amount, Env.TAX_CREW_CHEST_PERCENTAGE.get_float())
-                    add_to_crew_chest(user, int(crew_chest_amount))
-                    remaining_tax_amount -= crew_chest_amount  # Will use for group chest
+                    # Add crew chest contribution
+                    add_contribution(IncomeTaxContributionType.CREW_CHEST, tax_amount, tax_event)
 
             user.total_gained_bounty += net_amount_after_tax
 
@@ -386,18 +385,30 @@ def add_region_bounty_bonus() -> None:
     :return: None
     """
 
-    conditions: list[tuple[bool, int]] = [((User.location_level <= get_last_paradise().level)
-                                           & (User.get_is_not_arrested_statement_condition())
-                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
-                                           User.bounty +
-                                           ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
-                                          ((User.location_level >= get_first_new_world().level)
-                                           & (User.get_is_not_arrested_statement_condition())
-                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
-                                           User.bounty +
-                                           ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
-    case_stmt = Case(None, conditions, User.bounty)
-    User.update(bounty=case_stmt).execute()
+    paradise_condition = ((User.location_level <= get_last_paradise().level)
+                          & (User.get_is_not_arrested_statement_condition())
+                          & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    new_world_condition = ((User.location_level >= get_first_new_world().level)
+                           & (User.get_is_not_arrested_statement_condition())
+                           & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    bounty_conditions: list[tuple[bool, int]] = [(
+        paradise_condition,
+        User.bounty + ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
+        (new_world_condition,
+         User.bounty + ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
+    bounty_case_stmt = Case(None, bounty_conditions, User.bounty)
+
+    # Also add to total gained bounty
+    total_gained_bounty_conditions: list[tuple[bool, int]] = [(
+        paradise_condition,
+        User.total_gained_bounty + ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
+        (new_world_condition,
+         User.total_gained_bounty + ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
+    total_gained_bounty_case_stmt = Case(None, total_gained_bounty_conditions, User.total_gained_bounty)
+
+    User.update(bounty=bounty_case_stmt, total_gained_bounty=total_gained_bounty_case_stmt).execute()
 
 
 def add_crew_bounty_bonus() -> None:
@@ -405,7 +416,10 @@ def add_crew_bounty_bonus() -> None:
     Adds a bounty percentage to users in a crew
     """
 
-    (User.update(bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
+    (User
+     .update(
+        bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)),
+        total_gained_bounty=(User.total_gained_bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
      .where((User.crew.is_null(False))
             & ~(User.get_has_bounty_gain_limitations_statement_condition()))
      .execute())
@@ -416,14 +430,22 @@ def add_crew_mvp_bounty_bonus() -> None:
     Adds a bounty percentage to users in a crew with bounty higher than the crew average
     """
 
-    condition: tuple[bool, int] = (
-        ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
-         & (User.get_is_not_arrested_statement_condition())
-         & ~(User.get_has_bounty_gain_limitations_statement_condition())),
+    crew_mvp_condition = ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
+                          & (User.get_is_not_arrested_statement_condition())
+                          & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    bounty_condition: tuple[bool, int] = (
+        crew_mvp_condition,
         User.bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
 
-    case_stmt = Case(None, [condition], User.bounty)
-    User.update(bounty=case_stmt).execute()
+    total_gained_bounty_condition: tuple[bool, int] = (
+        crew_mvp_condition,
+        User.total_gained_bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
+
+    bounty_case_stmt = Case(None, [bounty_condition], User.bounty)
+    total_gained_bounty_case_stmt = Case(None, [total_gained_bounty_condition], User.total_gained_bounty)
+
+    User.update(bounty=bounty_case_stmt, total_gained_bounty=total_gained_bounty_case_stmt).execute()
 
 
 def get_amount_from_string(amount: str, user: User) -> int:
