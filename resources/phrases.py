@@ -1073,6 +1073,7 @@ DEVIL_FRUIT_SELL_NO_LONGER_OWN = '{} no longer owns this Devil Fruit'
 DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = 'This Devil Fruit is no longer sellable'
 DEVIL_FRUIT_SELL_BUY = '{} has put up the following Devil Fruit for sale:' \
                        '\n\n{}' \
+                       '\n\nExpiring in: {}' \
                        '\n\nPrice: ฿{}' \
                        '\nTax: ฿{} \\({}%\\)' \
                        '\nTotal Price: ฿*{}*' \
@@ -1082,6 +1083,7 @@ DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = 'You do not have enough belly to buy thi
 DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = 'You cannot buy your own Devil Fruit'
 DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}' \
                                '\n\n{}' \
+                               '\n\nExpiring in: *{}*' \
                                '\n\nPrice: ฿{}' \
                                '\nTax: ฿{} \\({}%\\)' \
                                '\nTotal Price: ฿*{}*'

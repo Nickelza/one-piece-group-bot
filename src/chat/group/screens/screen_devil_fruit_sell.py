@@ -20,6 +20,7 @@ from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
@@ -273,8 +274,8 @@ async def send_sell_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY.format(
         user.get_markdown_mention(), list_page.get_item_detail_text(from_private_chat=False),
-        get_belly_formatted(amount), get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount),
-        ot_text_addendum)
+        get_remaining_duration(devil_fruit.expiration_date), get_belly_formatted(amount),
+        get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount), ot_text_addendum)
 
     await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
 
@@ -349,7 +350,7 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
     seller: User = devil_fruit_trade.giver
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
         buyer.get_markdown_mention(), seller.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False), get_belly_formatted(amount),
-        get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount))
+        list_page.get_item_detail_text(from_private_chat=False), get_remaining_duration(devil_fruit.expiration_date),
+        get_belly_formatted(amount), get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount))
 
     await full_message_send(context, ot_text, update=update, add_delete_button=True)
