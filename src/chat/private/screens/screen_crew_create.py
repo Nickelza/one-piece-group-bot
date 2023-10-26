@@ -7,15 +7,14 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.CrewRole as CrewRole
-import src.model.enums.LeaderboardRank as LeaderboardRank
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_next_bounty_reset_time
+from src.service.bounty_service import get_next_bounty_reset_time, add_or_remove_bounty
+from src.service.crew_service import warn_inactive_captains
 from src.service.date_service import get_remaining_duration
-from src.service.leaderboard_service import get_leaderboard_user
 from src.service.message_service import full_message_send, escape_valid_markdown_chars, get_create_or_edit_status
 
 
@@ -68,6 +67,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
                     # Add user to crew
                     if should_create_item:
+                        # Remove price from user bounty
+                        await add_or_remove_bounty(user, Env.CREW_CREATE_PRICE.get_int(), add=False)
+
                         # Add user to Crew as captain
                         user.crew = crew
                         user.crew_role = CrewRole.CrewRole.CAPTAIN
@@ -75,6 +77,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
                         # Creation success message
                         ot_text = phrases.CREW_CREATE_SUCCESS.format(escape_valid_markdown_chars(crew_name))
+
+                        # Newly created crew, alert user if it will be disbanded if they don't appear in the next
+                        # leaderboard
+                        context.application.create_task(warn_inactive_captains(context, users=[user]))
                     else:  # Edit mode
                         # Edit success message
                         ot_text = phrases.CREW_NAME_EDIT_SUCCESS.format(escape_valid_markdown_chars(crew_name))
@@ -116,13 +122,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
             ot_text = phrases.CREW_CANNOT_CREATE_CREW.format(get_remaining_duration(get_next_bounty_reset_time()))
             raise CrewValidationException(ot_text)
 
-        # User has not appeared in the latest required leaderboards
-        required_rank = LeaderboardRank.get_rank_by_index(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK.get_int())
-        for i in range(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()):
-            leaderboard_rank: LeaderboardRank.LeaderboardRank = LeaderboardRank.get_rank_by_leaderboard_user(
-                get_leaderboard_user(user, index=i))
-            if not leaderboard_rank.is_equal_or_higher(required_rank):
-                raise CrewValidationException(phrases.CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES)
+        # User does not have enough bounty
+        if user.bounty < Env.CREW_CREATE_PRICE.get_int():
+            raise CrewValidationException(phrases.CREW_CREATE_USER_NOT_ENOUGH_BOUNTY)
 
     except CrewValidationException as e:
         # Show alert if callback else send a message
