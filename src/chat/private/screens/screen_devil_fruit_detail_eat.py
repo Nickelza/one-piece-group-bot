@@ -12,7 +12,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.devil_fruit_service import get_devil_fruit_abilities_text, warn_inactive_users_with_eaten_devil_fruit
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 
 
@@ -67,6 +67,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     ot_text = phrases.DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED.format(
         devil_fruit.get_full_name(), get_devil_fruit_abilities_text(devil_fruit, add_header=False))
     await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)
+
+    # Alert user if it will be disbanded if they don't appear in the next leaderboard
+    context.application.create_task(warn_inactive_users_with_eaten_devil_fruit(context, users=[user]))
 
 
 def validate(devil_fruit: DevilFruit, user: User) -> None:

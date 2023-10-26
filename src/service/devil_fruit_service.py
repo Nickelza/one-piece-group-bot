@@ -361,11 +361,13 @@ def user_has_eaten_devil_fruit(user: User) -> bool:
             .exists())
 
 
-async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAULT_TYPE, users: list[User] = None
+                                                     ) -> None:
     """
     Warn inactive users with eaten Devil Fruits
 
     :param context: The context object
+    :param users: The users to warn. If provided, it will only warn these users, else it will warn all inactive users
     :return: None
     """
 
@@ -373,8 +375,9 @@ async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAU
         Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
     for devil_fruit in inactive_users_devil_fruits:
-        await send_notification(
-            context, devil_fruit.owner, DevilFruitRevokeWarningNotification(devil_fruit=devil_fruit))
+        if users is None or (users is not None and devil_fruit.owner in users):
+            await send_notification(
+                context, devil_fruit.owner, DevilFruitRevokeWarningNotification(devil_fruit=devil_fruit))
 
 
 def get_inactive_users_with_eaten_devil_fruits(latest_leaderboard_appearance: int) -> list[DevilFruit]:
