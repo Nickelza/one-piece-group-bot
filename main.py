@@ -24,6 +24,17 @@ async def chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await full_message_send(context, str(update.effective_chat.id), update)
 
 
+def pre_init():
+    """
+    Pre init checks
+    :return: None, raises Exception if something is wrong
+    """
+
+    # Check that all the required environment variables are set
+    for env in Env.Environment.instances:
+        env.get()
+
+
 async def post_init(application: Application) -> None:
     """
     Post init
@@ -44,6 +55,9 @@ def main() -> None:
         time.tzset()
     except AttributeError:
         pass
+
+    # Pre init checks
+    pre_init()
 
     if Env.DB_LOG_QUERIES.get_bool():
         # Set Peewee logger

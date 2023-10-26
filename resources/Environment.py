@@ -8,10 +8,14 @@ import constants as c
 
 
 class Environment:
+    instances: list['Environment'] = []
+
     def __init__(self, name: str, default_value: str = None, can_be_empty: bool = False):
         self.name = name
         self.default_value = default_value
         self.can_be_empty = can_be_empty
+
+        Environment.instances.append(self)
 
     def get_or_none(self) -> str | None:
         """
