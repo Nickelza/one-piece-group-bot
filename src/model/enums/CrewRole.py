@@ -7,6 +7,14 @@ class CrewRole(IntEnum):
     """
     CAPTAIN = 1
 
+    def get_description(self) -> str:
+        """
+        Returns the description of the Crew Role
+        :return: The description of the Crew Role
+        """
+
+        return CREW_ROLE_NAME_MAP[self]
+
 
 CREW_ROLE_NAME_MAP = {
     CrewRole.CAPTAIN: "Captain"

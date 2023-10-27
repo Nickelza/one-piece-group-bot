@@ -46,7 +46,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         ot_text = phrases.CREW_REMOVE_MEMBER_CONFIRMATION.format(mention_markdown_user(member),
                                                                  get_remaining_time_from_next_cron(
                                                                      Env.CRON_SEND_LEADERBOARD.get()))
-        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_MEMBER_REMOVE,
+        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_CREW_MEMBER_DETAIL_REMOVE,
                                                                      primary_key=member.id,
                                                                      inbound_keyboard=inbound_keyboard,
                                                                      no_is_back_button=True)]

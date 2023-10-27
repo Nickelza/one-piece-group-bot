@@ -1,26 +1,78 @@
-from enum import StrEnum
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
+import constants as c
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.User import User
+from src.model.enums.ListPage import ListPage
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew
 from src.service.date_service import default_date_format
-from src.service.message_service import full_message_send
+from src.service.english_phrase_service import determine_article
+from src.service.list_service import get_items_text_keyboard
+from src.service.message_service import full_message_send, mention_markdown_user
 
 
-class CrewMemberReservedKeys(StrEnum):
-    """
-    The reserved keys for the Crew disband screen
-    """
-    MEMBER_ID = 'a'
+class CrewMemberListPage(ListPage):
+    def __init__(self):
+        """
+        Constructor
+        """
+
+        super().__init__()
+
+        self.object: User = User()  # Current member
+        self.crew: Crew = Crew()  # Crew of the current member
+
+    def set_object(self, object_id: int) -> None:
+        self.object = User.get_by_id(object_id)
+        self.crew = get_crew(self.object, validate_against_crew=self.user.crew)
+
+    def get_items(self, page) -> list[User]:
+        return self.crew.get_members(limit=c.STANDARD_LIST_SIZE, page=page)
+
+    def get_total_items_count(self) -> int:
+        return len(self.crew.get_members())
+
+    def get_item_text(self) -> str:
+        ot_text = phrases.CREW_MEMBER_ITEM_TEXT.format(mention_markdown_user(self.object))
+        if self.object.crew_role is None:
+            return ot_text
+
+        return ot_text + phrases.CREW_MEMBER_ITEM_ROLE.format(self.object.get_crew_role_description())
+
+    def get_item_detail_text(self) -> str:
+
+        member: User = self.object
+        crew: Crew = self.crew
+
+        # Get join date and relative order
+        crew_members = crew.get_members()  # Already ordered by join date
+        member_join_order = list(crew_members).index(member) + 1
+
+        # Get chest contribution and relative order
+        chest_contributions = crew.get_chest_contributions()  # Already ordered by contribution
+        member_contribution = CrewMemberChestContribution.get_or_none((CrewMemberChestContribution.crew == crew) &
+                                                                      (CrewMemberChestContribution.user == member))
+        member_contribution_amount = 0
+        if member_contribution is None:
+            member_chest_order = len(chest_contributions) + 1
+        else:
+            member_contribution_amount = member_contribution.amount
+            member_chest_order = list(chest_contributions).index(member_contribution) + 1
+
+        ot_text = phrases.CREW_MEMBER_ITEM_DETAIL.format(
+            member.get_markdown_mention(), member.get_bounty_formatted(),
+            default_date_format(member.crew_join_date, member), member_join_order,
+            get_belly_formatted(member_contribution_amount), member_chest_order,
+            (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO))
+
+        return ot_text
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
@@ -33,43 +85,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     :return: None
     """
 
-    # Get member
-    member: User = User.get_by_id(inbound_keyboard.info[CrewMemberReservedKeys.MEMBER_ID])
+    crew_member_list_page: CrewMemberListPage = CrewMemberListPage()
+    crew_member_list_page.user = user
+    crew_member_list_page.crew = user.crew
 
-    try:
-        crew: Crew = get_crew(user=member, validate_against_crew=user.crew)
-    except CrewValidationException as cve:
-        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
-        return
+    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, crew_member_list_page,
+                                                         ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
+                                                         Screen.PVT_CREW_MEMBER_DETAIL)
 
-    # Get crew member text
-    # Get join date and relative order
-    crew_members = crew.get_members()  # Already ordered by join date
-    member_join_order = list(crew_members).index(member) + 1
+    ot_text = phrases.LIST_OVERVIEW.format(determine_article(phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN),
+                                           phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN, items_text)
 
-    # Get chest contribution and relative order
-    chest_contributions = crew.get_chest_contributions()  # Already ordered by contribution
-    member_contribution = CrewMemberChestContribution.get_or_none((CrewMemberChestContribution.crew == crew) &
-                                                                  (CrewMemberChestContribution.user == member))
-    member_contribution_amount = 0
-    if member_contribution is None:
-        member_chest_order = len(chest_contributions) + 1
-    else:
-        member_contribution_amount = member_contribution.amount
-        member_chest_order = list(chest_contributions).index(member_contribution) + 1
-
-    ot_text = phrases.CREW_MEMBER.format(member.get_markdown_mention(), member.get_bounty_formatted(),
-                                         default_date_format(member.crew_join_date, user),
-                                         member_join_order, get_belly_formatted(member_contribution_amount),
-                                         member_chest_order,
-                                         (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO))
-
-    inline_keyboard: list[list[Keyboard]] = []
-    # Show remove button if user is captain and member is not captain
-    if user.is_crew_captain() and user != member:
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_MEMBER_REMOVE, screen=Screen.PVT_CREW_MEMBER_REMOVE,
-                                         info={CrewMemberReservedKeys.MEMBER_ID: member.id},
-                                         inbound_info=inbound_keyboard.info)])
-
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard)
+    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
+                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])

@@ -123,6 +123,20 @@ def get_remaining_duration(end_datetime: datetime) -> str:
     return convert_seconds_to_duration((end_datetime - datetime.datetime.now()).total_seconds())
 
 
+def get_elapsed_duration(start_datetime: datetime) -> str:
+    """
+    Get the elapsed time since the start_datetime
+    :param start_datetime: The start datetime
+    :return: The elapsed time in days and hours e.g. 1 day 2h hours
+    """
+    if start_datetime is None:
+        return convert_seconds_to_duration(0)
+
+    # Remove offset awareness from start_datetime
+    start_datetime = start_datetime.replace(tzinfo=None)
+    return convert_seconds_to_duration(int((datetime.datetime.now() - start_datetime).total_seconds()))
+
+
 def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: datetime = None) -> str:
     """
     Get the remaining time until the next cron run

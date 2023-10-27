@@ -179,10 +179,11 @@ PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
 PVT_KEY_CREW = Emoji.CREW + ' Crew'
+PVT_KEY_CREW_MEMBERS = 'Members'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
-PVT_KEY_CREW_MEMBER_REMOVE = 'Remove'
+PVT_KEY_CREW_MEMBER_REMOVE = 'Expel'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
@@ -578,10 +579,20 @@ CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over a Chat Group to the t
                         f'\n\nIf you create a Crew, you must appear at least once every ' \
                         f'{CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX} or else your Crew will be disbanded.'
 CREW_OVERVIEW = '*{}*' \
-                '\n\nTreasure Chest: ฿{}' \
-                '\n{}'
-CREW_OVERVIEW_MEMBER = '\n{}. {}'
-CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
+                '\n\n*Formation date*: {} \\({}\\)' \
+                '\n*Members*: {} \\(Max. {}\\)' \
+                '\n\n*Treasure Chest*: ฿{}' \
+                '{}'
+CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = '\n\n_No new members allowed until the next weekly leaderboard in {}_'
+CREW_MEMBER_ITEM_TEXT = '{}'
+CREW_MEMBER_ITEM_ROLE = ' \\({}\\)'
+# Crew - Member
+CREW_MEMBER_ITEM_DETAIL = '*{}*' \
+                          '\n\n*Bounty*: ฿{}' \
+                          '\n*Join Date*: {} \\({}°\\)' \
+                          '\n\nChest contribution: ฿{} \\({}°\\)' \
+                          '\nCrew MVP Bonus: {}'
+CREW_MEMBER_ITEM_TEXT_FILL_IN = 'Crew Member'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
 CREW_CREATE_USER_NOT_ENOUGH_BOUNTY = f"Insufficient bounty, forming a Crew costs " \
                                      f"฿{Env.CREW_CREATE_PRICE.get_belly()}"
@@ -630,18 +641,11 @@ CREW_DISBAND_CONFIRMATION = 'Are you sure you want to disband the Crew?\n' \
                             'You will not be able to create another Crew until the next bounty reset in {}'
 CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 
-# Crew - Member
-CREW_MEMBER = '*{}*' \
-              '\n\n*Bounty*: ฿{}' \
-              '\n*Join Date*: {} \\({}°\\)' \
-              '\n\nChest contribution: ฿{} \\({}°\\)' \
-              '\nCrew MVP Bonus: {}'
-
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'
-CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the Crew?' \
+CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to expel {} from the Crew?' \
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
-CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
+CREW_REMOVE_MEMBER_SUCCESS = '{} has been expelled from the Crew'
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
@@ -743,9 +747,9 @@ CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves th
                                       '\nApplicable only if you are the Captain of the Crew.'
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew leave'
 # Notification - Crew Member removed
-CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been removed from the Crew'
-CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = 'If to be notified when you are removed from the Crew.'
-CREW_MEMBER_REMOVE_NOTIFICATION_KEY = 'Crew member removed'
+CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been expelled from the Crew'
+CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = 'If to be notified when you are expelled from the Crew.'
+CREW_MEMBER_REMOVE_NOTIFICATION_KEY = 'Crew member expelled'
 # Notification - Crew Disband
 CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
 CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.'
@@ -858,11 +862,10 @@ DEVIL_FRUIT_REVOKE_NOTIFICATION = 'Your Devil Fruit *{}* has been revoked'
 DEVIL_FRUIT_REVOKE_NOTIFICATION_DESCRIPTION = 'If to be notified when your Devil Fruit is revoked'
 DEVIL_FRUIT_REVOKE_NOTIFICATION_KEY = 'Devil Fruit revoked'
 # Notification - Devil Fruit revoke warning
-DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION = f'You have not appeared in the last ' \
-                                          f'{Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1}' \
-                                          f' leaderboards.' \
-                                          '\nIf you do not appear in the next leaderboard, your Devil Fruit *{}* ' \
-                                          'will be revoked.'
+DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION = \
+    f'You have not appeared in the last {Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1}' \
+    f' leaderboards.' \
+    '\nIf you do not appear in the next leaderboard, your Devil Fruit *{}* will be revoked.'
 DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION = \
     'If to be notified a week before the Devil Fruit you ate is revoked due to not appearing in the leaderboard for ' \
     f'{Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get()} consecutive leaderboards'

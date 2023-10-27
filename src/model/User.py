@@ -517,5 +517,33 @@ class User(BaseModel):
 
         return default_datetime_format(date, self)
 
+    def get_date_formatted(self, date: datetime.datetime) -> str:
+        """
+        Returns the formatted date of the user in their timezone
+
+        :param date: The date
+        :return: The formatted date of the user
+        """
+
+        from src.service.date_service import default_date_format
+
+        return default_date_format(date, self)
+
+    def get_crew_role(self):
+        """
+        Returns the crew role
+        :return: The crew role
+        """
+
+        return CrewRole(self.crew_role)
+
+    def get_crew_role_description(self):
+        """
+        Returns the crew role description
+        :return: The crew role description
+        """
+
+        return self.get_crew_role().get_description()
+
 
 User.create_table()
