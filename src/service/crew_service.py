@@ -3,8 +3,9 @@ from datetime import datetime
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
-import resources.phrases as phrases
+from resources import phrases as phrases
 from src.model.Crew import Crew
+from src.model.CrewAbility import CrewAbility
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
@@ -14,6 +15,7 @@ from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWar
     CrewLeaveNotification, CrewMemberRemoveNotification
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.date_service import get_remaining_duration
 from src.service.location_service import update_location
 from src.service.notification_service import send_notification
 
@@ -240,3 +242,36 @@ def add_to_crew_chest(user: User, amount: int) -> None:
     contribution.amount += amount
     contribution.last_contribution_date = datetime.now()
     contribution.save()
+
+
+def get_active_crew_abilities(crew: Crew) -> list[CrewAbility]:
+    """
+    Returns the active crew abilities
+
+    :param crew: The crew
+    :return: The active crew abilities
+    """
+
+    return list(crew.crew_abilities.select().where(CrewAbility.expiration_date > datetime.now()))
+
+
+def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbility] = None):
+    """
+    Returns the crew abilities text
+    :param crew: The crew
+    :param active_abilities: The active abilities
+    :return: The crew abilities text
+    """
+
+    if active_abilities is None:
+        active_abilities = get_active_crew_abilities(crew)
+
+    abilities_text = ""
+    if len(active_abilities) == 0:
+        abilities_text = phrases.CREW_ABILITY_NO_ABILITIES
+    else:  # Recap
+        for ability in active_abilities:
+            abilities_text += phrases.CREW_ABILITY_ITEM_TEXT.format(
+                ability.get_description(), ability.value, get_remaining_duration(ability.expiration_date))
+
+    return abilities_text

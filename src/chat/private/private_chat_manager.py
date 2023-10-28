@@ -10,6 +10,8 @@ from src.chat.private.screens.screen_bounty_loan_detail_forgive import manage as
     manage_screen_bounty_loan_detail_forgive
 from src.chat.private.screens.screen_bounty_loan_detail_pay import manage as manage_screen_bounty_loan_detail_pay
 from src.chat.private.screens.screen_crew import manage as manage_screen_crew
+from src.chat.private.screens.screen_crew_ability import manage as manage_screen_crew_ability
+from src.chat.private.screens.screen_crew_ability_activate import manage as manage_screen_crew_ability_activate
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
@@ -142,6 +144,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_CREW:  # Crew
                 await manage_screen_crew(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_ABILITY:  # Crew Ability
+                await manage_screen_crew_ability(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_ABILITY_ACTIVATE:  # Crew Ability Activate
+                await manage_screen_crew_ability_activate(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
                 await manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)

@@ -10,7 +10,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.crew_service import get_crew
+from src.service.crew_service import get_crew, get_crew_abilities_text
 from src.service.date_service import get_remaining_time_from_next_cron, \
     get_elapsed_duration
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
@@ -48,10 +48,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             len(crew.get_members()),
             Env.CREW_MAX_MEMBERS.get_int(),
             get_belly_formatted(crew.chest_amount),
+            get_crew_abilities_text(crew=crew),
             no_new_members_allowed_text)
 
         # Members button
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_MEMBERS, screen=Screen.PVT_CREW_MEMBER)])
+
+        # Abilities button
+        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)])
 
         if user.is_crew_captain():
             # Name edit button

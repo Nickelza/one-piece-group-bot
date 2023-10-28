@@ -213,6 +213,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
         (CrewMemberChestContribution.id.not_in([
             contribution.id for contribution in valid_contributions]))).execute()
 
+    # Reset crew powerup counter
+    Crew.update(powerup_counter=0).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())

@@ -566,6 +566,10 @@ CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
 CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')
 # How much percent should be removed from taxes for exchanges between Crew members. Default: 50%
 CREW_TRANSACTION_TAX_DISCOUNT = Environment('CREW_TRANSACTION_TAX_DISCOUNT', default_value='50')
+# Base price for Crew Powerups. Default: 1.000.000.000
+CREW_POWERUP_BASE_PRICE = Environment('CREW_POWERUP_BASE_PRICE', default_value='1000000000')
+# How long a crew ability should last in days. Default: 7
+CREW_ABILITY_DURATION_DAYS = Environment('CREW_ABILITY_DURATION_DAYS', default_value='7')
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')

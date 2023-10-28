@@ -184,6 +184,8 @@ PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
 PVT_KEY_CREW_MEMBER_REMOVE = 'Expel'
+PVT_KEY_CREW_ABILITY = 'Abilities'
+PVT_KEY_CREW_ABILITY_ACTIVATE = 'Activate'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
@@ -582,6 +584,8 @@ CREW_OVERVIEW = '*{}*' \
                 '\n\n*Formation date*: {} \\({}\\)' \
                 '\n*Members*: {} \\(Max. {}\\)' \
                 '\n\n*Treasure Chest*: ฿{}' \
+                '\n\n*Abilities*' \
+                '{}' \
                 '{}'
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = '\n\n_No new members allowed until the next weekly leaderboard in {}_'
 CREW_MEMBER_ITEM_TEXT = '{}'
@@ -646,6 +650,23 @@ CREW_NOT_SAME = 'You are not in the same Crew'
 CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to expel {} from the Crew?' \
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been expelled from the Crew'
+
+# Crew abilities
+CREW_ABILITIES = '*Crew Abilities*' \
+                 '\n\nAbilities mimic the effects of Devil Fruits and are extended to all members of the Crew.' + \
+                 f'\nEach ability doubles the price of the next one and lasts ' \
+                 f'{Env.CREW_ABILITY_DURATION_DAYS.get_int()} days.' \
+                 f'\nOnly the Crew Captain can activate an ability.' + \
+                 '\n{}' \
+                 '\n\nNext ability cost: *฿{}*' \
+                 '\nCrew chest: ฿{}'
+CREW_ABILITY_NO_ABILITIES = '\n_No abilities are currently activated in this Crew_'
+CREW_ABILITY_ITEM_TEXT = '\n{}: {}%' \
+                         '\nRemaining time: {}'
+CREW_ABILITY_INSUFFICIENT_CREW_CHEST = 'Insufficient Crew Chest' \
+                                       '\n\nCrew chest: ฿{}' \
+                                       '\nAbility cost: ฿{}'
+CREW_ABILITY_MAX_ABILITIES_REACHED = 'Max number of active abilities reached'
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
