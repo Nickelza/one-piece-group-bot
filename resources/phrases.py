@@ -221,6 +221,7 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 PVT_KEY_GO_TO_MESSAGE = 'Go to message'
+PVT_KEY_VIEW = 'View'
 PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + ' Loan'
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = 'Pay'
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = 'Forgive'
@@ -273,6 +274,11 @@ ACTION_INVALID_DURATION = "Invalid duration. " \
                           "unit." \
                           "\n\nExample: " \
                           "\n - 1min, 1h, 1d, 1week"
+
+SYSTEM_UPDATE = Emoji.CONFETTI + 'New update' + Emoji.CONFETTI + \
+                '\n\n*{}*' \
+                '\n\n{}' \
+                '\n\n[View full changelog]({})'
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = 'Which game would you like to play?'

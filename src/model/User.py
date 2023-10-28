@@ -27,6 +27,7 @@ class User(BaseModel):
     tg_first_name = CharField(max_length=99)
     tg_last_name = CharField(max_length=99)
     tg_username = CharField(max_length=99)
+    join_date = DateTimeField(default=datetime.datetime.now)
     bounty = BigIntegerField(default=0)
     total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
     pending_bounty = BigIntegerField(default=0)

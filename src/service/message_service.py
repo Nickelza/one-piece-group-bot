@@ -1012,4 +1012,10 @@ def get_message_url(message_id: int, group_chat: GroupChat = None, chat_id: str 
 
     tg_chat_id = tg_chat_id.replace('-100', '')
 
-    return f"https://t.me/c/{tg_chat_id}/{message_id}"
+    url = f"https://t.me/c/{tg_chat_id}/{message_id}"
+
+    # If tg_chat_id is not a number, it is a username so remove the /c/ part
+    if not tg_chat_id.isnumeric():
+        url = url.replace('/c/', '/')
+
+    return url
