@@ -1,8 +1,12 @@
+from datetime import datetime
+
 from peewee import DoesNotExist
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
+from src.chat.group.screens.screen_game_gol import run_game as run_game_gol, validate_answer as validate_answer_gol
+from src.chat.group.screens.screen_game_pr import run_game as run_game_pr, validate_answer as validate_answer_pr
 from src.chat.group.screens.screen_game_shambles import run_game as run_game_shambles
 from src.chat.group.screens.screen_game_ww import run_game as run_game_ww
 from src.model.Game import Game
@@ -38,18 +42,24 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         await full_message_send(context, phrases.GAME_INPUT_NOT_PLAYER, update=update)
         return
 
+    game_status: GameStatus = GameStatus(game.status)
+    game_type: GameType = GameType(game.type)
+
     # Game is finished
-    if GameStatus(game.status).is_finished():
+    if game_status.is_finished():
         await full_message_send(context, phrases.GAME_INPUT_GAME_FINISHED, update=update)
         return
 
+    game.last_interaction_date = datetime.now()
+    game.save()
+
     # Game in countdown
-    if GameStatus(game.status) is GameStatus.COUNTDOWN_TO_START:
+    if game_status is GameStatus.COUNTDOWN_TO_START:
         await full_message_send(context, phrases.GAME_INPUT_COUNTDOWN, update=update)
         return
 
     if inbound_keyboard is not None:  # From deep link
-        match GameType(game.type):
+        match game_type:
             case GameType.SHAMBLES:
                 await run_game_shambles(context, game, send_to_user=user, should_send_to_all_players=False,
                                         schedule_next_send=False)
@@ -57,10 +67,25 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                 await run_game_ww(context, game, send_to_user=user, should_send_to_all_players=False,
                                   schedule_next_send=False)
 
+            case GameType.GUESS_OR_LIFE:
+                await run_game_gol(context, game, send_to_user=user, should_send_to_all_players=False,
+                                   schedule_next_send=False)
+
+            case GameType.PUNK_RECORDS:
+                await run_game_pr(context, game, send_to_user=user, should_send_to_all_players=False,
+                                  schedule_next_send=False, is_first_run=False)
+
             case _:
                 raise ValueError(f"Game type {game.type} not supported")
 
         return
 
     # Regular input
-    await guess_game_validate_answer(update, context, game, user)
+    match game_type:
+        case GameType.GUESS_OR_LIFE:
+            return await validate_answer_gol(update, context, game, user)
+
+        case GameType.PUNK_RECORDS:
+            return await validate_answer_pr(update, context, game, user)
+        case _:
+            return await guess_game_validate_answer(update, context, game, user)

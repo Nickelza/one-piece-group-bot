@@ -18,6 +18,9 @@ class Crew(BaseModel):
     can_accept_new_members = BooleanField(default=True)
     is_active = BooleanField(default=True)
     disband_date = DateTimeField(null=True)
+    chest_amount = BigIntegerField(default=0)
+    powerup_counter = IntegerField(default=0)
+    max_abilities = IntegerField(default=0)
 
     class Meta:
         db_table = 'crew'
@@ -100,6 +103,52 @@ class Crew(BaseModel):
         """
 
         return self.crew_members.select().count()
+
+    def get_chest_contributions(self) -> list:
+        """
+        Returns the crew members ordered by contribution
+        :return: The crew members
+        """
+
+        from src.model.CrewMemberChestContribution import CrewMemberChestContribution
+
+        return self.crew_member_chest_contributions.select().order_by(CrewMemberChestContribution.amount.desc())
+
+    def get_powerup_price(self) -> int:
+        """
+        Returns the next powerup price
+        :return: The next powerup price
+        """
+
+        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (self.powerup_counter + 1)
+
+    def get_powerup_price_formatted(self) -> str:
+        """
+        Returns the next powerup price formatted
+        :return: The next powerup price formatted
+        """
+
+        from src.service.bounty_service import get_belly_formatted
+
+        return get_belly_formatted(self.get_powerup_price())
+
+    def can_powerup(self) -> bool:
+        """
+        Returns True if the crew can powerup
+        :return: True if the crew can powerup
+        """
+
+        return self.chest_amount >= self.get_powerup_price()
+
+    def get_crew_chest_formatted(self) -> str:
+        """
+        Returns the crew chest formatted
+        :return: The crew chest formatted
+        """
+
+        from src.service.bounty_service import get_belly_formatted
+
+        return get_belly_formatted(int(str(self.chest_amount)))
 
 
 Crew.create_table()

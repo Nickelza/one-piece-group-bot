@@ -12,13 +12,14 @@ from src.model.enums.Notification import BountyGiftReceivedNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, get_transaction_tax
+from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
+    get_transaction_tax, add_or_remove_bounty
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
-from src.service.user_service import user_is_boss
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
@@ -47,7 +48,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
                    command: Command = None,
                    bounty_gift: BountyGift = None) -> bool:
     """
-    Validate the fight request
+    Validate the bounty gift request
     :param update: The update object
     :param context: The context object
     :param sender: The user that wants to send a bounty gift
@@ -73,11 +74,14 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
 
     # Sender does not have enough bounty
     if sender.bounty < total_amount:
+        # Get max gift amount
+        max_amount = int(sender.bounty / (1 + (tax_percentage / 100)))
         ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(sender.bounty),
                                                                get_belly_formatted(amount),
                                                                get_belly_formatted(tax_amount),
                                                                tax_percentage,
-                                                               get_belly_formatted(total_amount))
+                                                               get_belly_formatted(total_amount),
+                                                               get_belly_formatted(max_amount))
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
@@ -126,25 +130,6 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     bounty_gift.save()
 
 
-async def transaction_is_tax_free(sender: User, receiver: User) -> bool:
-    """
-    Check if the transaction is tax-free
-    :param sender: The sender
-    :param receiver: The receiver
-    :return: True if the transaction is tax-free, False otherwise
-    """
-
-    # Sender and receiver are in the same crew, no tax
-    if sender.in_same_crew(receiver):
-        return True
-
-    # Sender is a boss, no tax
-    if user_is_boss(sender):
-        return True
-
-    return False
-
-
 async def get_amounts(sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
                       ) -> tuple[int, int, int, int]:
     """
@@ -157,7 +142,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
     """
 
     if bounty_gift is None:
-        amount = get_amount_from_string(command.parameters[0])
+        amount = get_amount_from_string(command.parameters[0], sender)
     else:
         amount = bounty_gift.amount
 
@@ -165,7 +150,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
-        tax_percentage = get_value(sender, DevilFruitAbilityType.TAX, tax_percentage)
+        tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage)
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():
@@ -211,12 +196,12 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     bounty_gift.save()
 
     # Update sender
-    sender.bounty -= total_amount
-
+    await add_or_remove_bounty(sender, total_amount, add=False, update=update)
     sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
 
     # Update receiver
-    receiver.bounty += amount
+    await add_or_remove_bounty(receiver, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_GIFT,
+                               event_id=bounty_gift.id)
     receiver.save()
 
     # Send message

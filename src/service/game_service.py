@@ -1,9 +1,12 @@
 import asyncio
 import json
+import logging
+from datetime import datetime, timedelta
 from typing import Tuple, Callable
 
 from peewee import DoesNotExist
 from telegram import Update
+from telegram.error import RetryAfter
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -17,6 +20,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
@@ -26,9 +30,10 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
-from src.service.bounty_service import get_belly_formatted, add_bounty
-from src.service.cron_service import convert_seconds_to_time
-from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url
+from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
+from src.service.date_service import convert_seconds_to_duration
+from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url, \
+    full_message_send
 from src.service.notification_service import send_notification
 
 
@@ -46,38 +51,56 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
         raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
 
 
-async def end_game(game: Game, game_outcome: GameOutcome) -> Game:
+async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = False, update: Update = None) -> Game:
     """
     End the game, set the status and return the game
     :param game: The game
     :param game_outcome: The outcome
+    :param is_forced_end: If the game was forced to end
+    :param update: The update
     :return: The game
     """
 
     challenger: User = game.challenger
     opponent: User = game.opponent
     half_wager: int = game.wager / 2
+    previous_status: GameStatus = GameStatus(game.status)
 
+    bounty_for_challenger = bounty_for_opponent = 0
+    pending_bounty_for_challenger = pending_bounty_for_opponent = game.wager / 2
     if game_outcome == GameOutcome.CHALLENGER_WON:
+        # Challenger won
         game.status = GameStatus.WON
-        await add_bounty(challenger, game.wager, pending_belly_amount=half_wager)
+        bounty_for_challenger = game.wager
     elif game_outcome == GameOutcome.OPPONENT_WON:
+        # Opponent won
         game.status = GameStatus.LOST
-        await add_bounty(opponent, game.wager, pending_belly_amount=half_wager)
+        bounty_for_opponent = game.wager
     else:
-        game.status = GameStatus.DRAW
-        await add_bounty(challenger, half_wager, pending_belly_amount=half_wager)
-        await add_bounty(opponent, half_wager, pending_belly_amount=half_wager)
+        # No one won
+        bounty_for_challenger = half_wager
+        bounty_for_opponent = half_wager
+        game.status = GameStatus.FORCED_END if is_forced_end else GameStatus.DRAW
 
-    challenger.pending_bounty -= half_wager
-    opponent.pending_bounty -= half_wager
+        # Only challenger wagered
+        if previous_status.only_challenger_wager():
+            bounty_for_challenger = pending_bounty_for_challenger = game.wager
+            bounty_for_opponent = pending_bounty_for_opponent = 0
+
+    await add_or_remove_bounty(challenger, bounty_for_challenger, pending_belly_amount=pending_bounty_for_challenger,
+                               update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
+
+    if opponent is not None:
+        await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
+                                   update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
     # Refresh
     game.challenger = challenger
     game.opponent = opponent
 
     challenger.save()
-    opponent.save()
+    if opponent is not None:
+        opponent.save()
     game.save()
 
     return game
@@ -138,7 +161,7 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
             added_ot_text += phrases.GAME_TURN.format(mention_markdown_user(user_turn))
         else:
             if remaining_seconds_to_start is not None:
-                added_ot_text += phrases.GAME_COUNTDOWN.format(convert_seconds_to_time(remaining_seconds_to_start))
+                added_ot_text += phrases.GAME_COUNTDOWN.format(convert_seconds_to_duration(remaining_seconds_to_start))
             elif is_played_in_private_chat:
                 added_ot_text += phrases.GAME_STARTED
 
@@ -153,13 +176,14 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
 
 
 async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_delete_message: bool = True,
-                      show_timeout_message: bool = False) -> None:
+                      show_timeout_message: bool = False, update: Update = None) -> None:
     """
     Delete game
     :param context: The context
     :param game: The game
     :param should_delete_message: If the message should be deleted
     :param show_timeout_message: If the message should be edited showing timeout
+    :param update: The update
     :return: None
     """
 
@@ -177,8 +201,7 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
     # Return wager to challenger
     challenger: User = game.challenger
     challenger.game_cooldown_end_date = None
-    challenger.bounty += game.wager
-    challenger.pending_bounty -= game.wager
+    await add_or_remove_bounty(challenger, game.wager, should_affect_pending_bounty=True, update=update)
     challenger.save()
 
     # Delete game
@@ -227,6 +250,24 @@ def force_end_all_active() -> None:
         game.save()
 
 
+async def end_inactive_games() -> None:
+    """
+    End inactive games (games which last interaction was more than N seconds ago)
+    :return: None
+    """
+
+    # Game
+    inactive_games = (Game
+                      .select()
+                      .where((Game.status.not_in(GameStatus.get_finished()))
+                             & (Game.last_interaction_date < (datetime.now()
+                                                              - timedelta(seconds=Env.GAME_INACTIVE_TIME.get_int())))))
+
+    for game in inactive_games:
+        await end_game(game, GameOutcome.NONE, is_forced_end=True)
+        logging.info(f'Game {game.id} was ended due to inactivity')
+
+
 async def notify_game_turn(context: ContextTypes.DEFAULT_TYPE, game: Game, game_turn: GameTurn):
     """
     Notify a user that it's their turn
@@ -269,11 +310,12 @@ async def enqueue_game_turn_notification(context: ContextTypes.DEFAULT_TYPE, use
         await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
-async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
+async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game, update: Update):
     """
     Enqueue a game timeout. Waits for N time and if the opponent doesn't accept, the game is deleted
     :param context: The context
     :param game: The game
+    :param update: The update
     :return: None
     """
 
@@ -287,7 +329,7 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
 
     # Check if the game is still in the same state
     if GameStatus(updated_game.status) == GameStatus.AWAITING_OPPONENT_CONFIRMATION:
-        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True)
+        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True, update=update)
 
 
 def get_players(game: Game) -> Tuple[User, User]:
@@ -397,23 +439,26 @@ async def guess_game_countdown_to_start(update: Update, context: ContextTypes.DE
         return
 
     # Update message
-    ot_text = get_text(game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds)
-    await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
-                          saved_media_name=game.get_saved_media_name(), ignore_bad_request_exception=True)
+    try:
+        ot_text = get_text(game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds)
+        await full_media_send(context, caption=ot_text, update=update, keyboard=play_deeplink_button,
+                              saved_media_name=game.get_saved_media_name(), ignore_bad_request_exception=True)
+    except RetryAfter:
+        pass
 
-    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every second
+    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every 5 seconds
     if remaining_seconds > 10:
         await asyncio.sleep(10)
         await guess_game_countdown_to_start(update, context, game, remaining_seconds - 10, run_game_function,
                                             is_played_in_private_chat=is_played_in_private_chat)
     else:
-        await asyncio.sleep(1)
-        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 1, run_game_function,
+        await asyncio.sleep(5)
+        await guess_game_countdown_to_start(update, context, game, remaining_seconds - 5, run_game_function,
                                             is_played_in_private_chat=is_played_in_private_chat)
 
 
-async def get_guess_game_users_to_send_image_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
-                                                schedule_next_send: bool) -> list[User]:
+async def get_guess_game_users_to_send_message_to(game: Game, send_to_user: User, should_send_to_all_players: bool,
+                                                  schedule_next_send: bool) -> list[User]:
     """
     Get the users to send the image to
     :param game: The game
@@ -454,16 +499,7 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
     except AttributeError:
         return
 
-    # Parse the JSON string and create a Terminology object
-    json_dict = json.loads(game.board)
-    if "terminology" in json_dict:
-        term_dict = json_dict.pop("terminology")
-        terminology: Terminology = Terminology(**term_dict)
-    elif "character" in json_dict:
-        char_dict = json_dict.pop("character")
-        terminology: Terminology = Character(**char_dict)
-    else:
-        raise ValueError("No terminology or character in JSON string")
+    terminology = await get_terminology_from_game(game)
 
     if not terminology.name.lower() == answer.lower():
         return
@@ -471,13 +507,13 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
     # End game
     challenger, opponent = get_players(game)
     outcome: GameOutcome = GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
-    await end_game(game, outcome)
+    await end_game(game, outcome, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
     # Go to game message in group button
     outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                                                         url=get_message_url(game.group_chat, game.message_id))]]
+                                                         url=get_message_url(game.message_id, game.group_chat))]]
 
     term_text_addition = get_guess_game_result_term_text(terminology)
     image_path: str = get_guess_game_final_image_path(game)
@@ -503,6 +539,27 @@ async def guess_game_validate_answer(update: Update, context: ContextTypes.DEFAU
                           edit_only_caption_and_keyboard=True)
 
 
+async def get_terminology_from_game(game: Game) -> Terminology:
+    """
+    Get the terminology from the game
+    :param game: The game
+    :return: The terminology
+    """
+
+    # Parse the JSON string and create a Terminology object
+    json_dict = json.loads(game.board)
+    if "terminology" in json_dict:
+        term_dict = json_dict.pop("terminology")
+        terminology: Terminology = Terminology(**term_dict)
+    elif "character" in json_dict:
+        char_dict = json_dict.pop("character")
+        terminology: Terminology = Character(**char_dict)
+    else:
+        raise ValueError("No terminology or character in JSON string")
+
+    return terminology
+
+
 def get_guess_game_play_deeplink_button(game: Game) -> Keyboard:
     """
     Get the play button for the game
@@ -524,4 +581,56 @@ def save_game(game: Game, board: str) -> None:
     """
 
     game.board = board
+    game.last_interaction_date = datetime.now()
     game.save()
+
+
+async def end_text_based_game(context: ContextTypes.DEFAULT_TYPE, game: Game, outcome: GameOutcome, winner: User,
+                              winner_text: str, loser: User, loser_text: str, group_text: str = None) -> None:
+    """
+    End a text based game
+    :param context: The context
+    :param game: The game
+    :param outcome: The outcome
+    :param winner: The winner
+    :param winner_text: The winner text
+    :param loser: The loser
+    :param loser_text: The loser text
+    :param group_text: The group text
+    """
+
+    terminology: Terminology = await get_terminology_from_game(game)
+    term_text_addition = get_guess_game_result_term_text(terminology)
+
+    # If winner or loser text doesn't end with 3 new lines (just enough to add 3)
+    if not winner_text.endswith('\n\n\n'):
+        # Check how many new lines are missing at the end
+        missing_new_lines = 3 - winner_text.count('\n', -3)
+        winner_text += '\n' * missing_new_lines
+        loser_text += '\n' * missing_new_lines
+
+    # Add terminology text
+    winner_text += term_text_addition
+    loser_text += term_text_addition
+
+    # Go to game message in group button
+    outbound_keyboard: list[list[Keyboard]] = [[Keyboard(text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                                                         url=get_message_url(game.message_id, game.group_chat))]]
+
+    # Send message to winner
+    await set_user_private_screen(winner, should_reset=True)
+    context.application.create_task(
+        full_message_send(context, winner_text, chat_id=winner.tg_user_id, keyboard=outbound_keyboard))
+
+    # Send message to loser
+    await set_user_private_screen(loser, should_reset=True)
+    context.application.create_task(
+        full_message_send(context, loser_text, chat_id=loser.tg_user_id, keyboard=outbound_keyboard))
+
+    # Update group message
+    if group_text is None:
+        group_text = get_text(game, True, game_outcome=outcome, is_turn_based=False, terminology=terminology)
+
+    group_chat: GroupChat = game.group_chat
+    await full_media_send(context, caption=group_text, group_chat=group_chat, edit_message_id=game.message_id,
+                          edit_only_caption_and_keyboard=True)

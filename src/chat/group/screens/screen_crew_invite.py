@@ -58,7 +58,7 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, capta
                                                          mention_markdown_user(target_user))
 
     # Keyboard
-    extra_keys = [{CrewReservedKeys.CAPTAIN_USER_ID: captain.id}]
+    extra_keys = {CrewReservedKeys.CAPTAIN_USER_ID: captain.id}
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(target_user, screen=Screen.GRP_CREW_INVITE,
                                                                  yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
                                                                  no_text=phrases.KEYBOARD_OPTION_REJECT,

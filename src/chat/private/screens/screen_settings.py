@@ -17,8 +17,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     """
 
     # Notifications
-    inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.PVT_KEY_SETTINGS_NOTIFICATIONS,
-                                                       screen=Screen.PVT_SETTINGS_NOTIFICATIONS)]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [Keyboard(phrases.PVT_KEY_SETTINGS_NOTIFICATIONS, screen=Screen.PVT_SETTINGS_NOTIFICATIONS)],
+        [Keyboard(phrases.PVT_KEY_SETTINGS_TIMEZONE, screen=Screen.PVT_SETTINGS_TIMEZONE)]
+    ]
 
     await full_message_send(context, phrases.PVT_TXT_SETTINGS, update=update, keyboard=inline_keyboard,
                             inbound_keyboard=inbound_keyboard)

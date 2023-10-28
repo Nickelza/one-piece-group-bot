@@ -1,13 +1,23 @@
+from datetime import datetime
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
+from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
+from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_screen_bounty_loan_detail
+from src.chat.private.screens.screen_bounty_loan_detail_forgive import manage as \
+    manage_screen_bounty_loan_detail_forgive
+from src.chat.private.screens.screen_bounty_loan_detail_pay import manage as manage_screen_bounty_loan_detail_pay
 from src.chat.private.screens.screen_crew import manage as manage_screen_crew
+from src.chat.private.screens.screen_crew_ability import manage as manage_screen_crew_ability
+from src.chat.private.screens.screen_crew_ability_activate import manage as manage_screen_crew_ability_activate
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
-from src.chat.private.screens.screen_crew_member_remove import manage as manage_screen_crew_member_remove
+from src.chat.private.screens.screen_crew_member_detail import manage as manage_screen_crew_member_detail
+from src.chat.private.screens.screen_crew_member_detail_remove import manage as manage_screen_crew_member_detail_remove
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
 from src.chat.private.screens.screen_devil_fruit_detail_discard \
@@ -17,7 +27,10 @@ from src.chat.private.screens.screen_game_guess_input import manage as manage_sc
 from src.chat.private.screens.screen_logs import manage as manage_screen_logs
 from src.chat.private.screens.screen_logs_type import manage as manage_screen_logs_type
 from src.chat.private.screens.screen_logs_type_detail import manage as manage_screen_logs_type_detail
+from src.chat.private.screens.screen_logs_type_stats import manage as manage_screen_logs_type_stats
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
+from src.chat.private.screens.screen_prediction_create import \
+    manage as manage_screen_prediction_create
 from src.chat.private.screens.screen_prediction_detail import manage as manage_screen_prediction_detail
 from src.chat.private.screens.screen_prediction_detail_place_bet import \
     manage as manage_screen_prediction_detail_place_bet
@@ -27,12 +40,17 @@ from src.chat.private.screens.screen_prediction_detail_remove_bet import \
     manage as manage_screen_prediction_detail_remove_bet
 from src.chat.private.screens.screen_prediction_detail_remove_bet_confirm import \
     manage as manage_screen_prediction_detail_remove_bet_confirm
+from src.chat.private.screens.screen_prediction_detail_send_to_group_chat import \
+    manage as manage_screen_prediction_detail_send_to_group
+from src.chat.private.screens.screen_prediction_detail_set_result import \
+    manage as manage_screen_prediction_detail_set_result
 from src.chat.private.screens.screen_settings import manage as manage_screen_settings
 from src.chat.private.screens.screen_settings_notifications import manage as manage_screen_settings_notifications
 from src.chat.private.screens.screen_settings_notifications_type import \
     manage as manage_screen_settings_notifications_type
 from src.chat.private.screens.screen_settings_notifications_type_edit import \
     manage as manage_screen_settings_notifications_type_edit
+from src.chat.private.screens.screen_settings_timezone import manage as manage_screen_settings_timezone
 from src.chat.private.screens.screen_start import manage as manage_screen_start
 from src.chat.private.screens.screen_status import manage as manage_screen_status
 from src.model.User import User
@@ -78,7 +96,8 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
     if screen is not Screen.UNKNOWN:
 
         # No longer in Edit mode
-        if screen is not user.get_current_private_screen() or inbound_keyboard is not None:
+        if ((screen is not user.get_current_private_screen() or inbound_keyboard is not None)
+                and (inbound_keyboard is not None and ReservedKeyboardKeys.SCREEN_STEP not in inbound_keyboard.info)):
             user.private_screen_in_edit_id = None
             user.private_screen_step = None
 
@@ -126,6 +145,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case Screen.PVT_CREW:  # Crew
                 await manage_screen_crew(update, context, inbound_keyboard, user)
 
+            case Screen.PVT_CREW_ABILITY:  # Crew Ability
+                await manage_screen_crew_ability(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_ABILITY_ACTIVATE:  # Crew Ability Activate
+                await manage_screen_crew_ability_activate(update, context, inbound_keyboard, user)
+
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
                 await manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
 
@@ -138,8 +163,11 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case Screen.PVT_CREW_MEMBER:  # Crew Member
                 await manage_screen_crew_member(update, context, inbound_keyboard, user)
 
-            case Screen.PVT_CREW_MEMBER_REMOVE:  # Crew Member Remove
-                await manage_screen_crew_member_remove(update, context, inbound_keyboard, user)
+            case Screen.PVT_CREW_MEMBER_DETAIL:  # Crew Member Detail
+                await manage_screen_crew_member_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MEMBER_DETAIL_REMOVE:  # Crew Member Remove
+                await manage_screen_crew_member_detail_remove(update, context, inbound_keyboard, user)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
                 await manage_screen_settings_notifications(update, context, inbound_keyboard)
@@ -177,6 +205,15 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM:  # Prediction Detail Remove Bet Confirm
                 await manage_screen_prediction_detail_remove_bet_confirm(update, context, inbound_keyboard, user)
 
+            case Screen.PVT_PREDICTION_DETAIL_SEND_TO_GROUP:  # Prediction Detail Send To Group
+                await manage_screen_prediction_detail_send_to_group(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_DETAIL_SET_RESULT:  # Prediction Detail Set Result
+                await manage_screen_prediction_detail_set_result(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_PREDICTION_CREATE:  # Prediction Create
+                await manage_screen_prediction_create(update, context, inbound_keyboard, user)
+
             case Screen.PVT_DEVIL_FRUIT:  # Devil Fruit
                 await manage_screen_devil_fruit(update, context, inbound_keyboard, user)
 
@@ -192,6 +229,26 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
             case Screen.PVT_GAME_GUESS_INPUT:  # Guess game input
                 await manage_screen_game_guess_input(update, context, inbound_keyboard, user)
 
+            case Screen.PVT_LOGS_TYPE_STATS:  # Logs Type Stats
+                await manage_screen_logs_type_stats(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_SETTINGS_TIMEZONE:  # Settings Timezone
+                await manage_screen_settings_timezone(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN:  # Bounty Loan
+                await manage_screen_bounty_loan(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL:  # Bounty Loan Detail
+                await manage_screen_bounty_loan_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL_PAY:  # Bounty Loan Detail Pay
+                await manage_screen_bounty_loan_detail_pay(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE:  # Bounty Loan Detail Forgive
+                await manage_screen_bounty_loan_detail_forgive(update, context, inbound_keyboard, user)
+
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)
+
+        user.last_system_interaction_date = datetime.now()

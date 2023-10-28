@@ -15,11 +15,12 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted, add_bounty
-from src.service.cron_service import convert_seconds_to_time
+from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
+from src.service.date_service import convert_seconds_to_duration
 from src.service.devil_fruit_service import get_datetime
 from src.service.devil_fruit_service import get_value
 from src.service.leaderboard_service import get_current_leaderboard_user
@@ -106,8 +107,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     # User is in fight cooldown
     if user.fight_cooldown_end_date is not None and user.fight_cooldown_end_date > now:
         # Get remaining time
-        remaining_time = convert_seconds_to_time((user.fight_cooldown_end_date - datetime.datetime.now())
-                                                 .total_seconds())
+        remaining_time = convert_seconds_to_duration((user.fight_cooldown_end_date - datetime.datetime.now())
+                                                     .total_seconds())
         ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
         await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False
@@ -265,9 +266,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.WON
         fight.belly = win_amount
         # Add bounty to challenger
-        await add_bounty(user, win_amount)
+        await add_or_remove_bounty(user, win_amount, update=update, pending_belly_is_user_bounty=True,
+                                   tax_event_type=IncomeTaxEventType.FIGHT, event_id=fight.id)
         # Remove bounty from opponent
-        opponent.bounty -= win_amount
+        await add_or_remove_bounty(opponent, win_amount, add=False, update=update, pending_belly_is_user_bounty=True)
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                            mention_markdown_user(opponent), get_belly_formatted(win_amount),
                                            user.get_bounty_formatted())
@@ -275,9 +277,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.LOST
         fight.belly = lose_amount
         # Remove bounty from challenger
-        user.bounty -= lose_amount
+        await add_or_remove_bounty(user, lose_amount, add=False, update=update, pending_belly_is_user_bounty=True)
         # Add bounty to opponent
-        await add_bounty(opponent, lose_amount)
+        await add_or_remove_bounty(opponent, lose_amount, update=update, pending_belly_is_user_bounty=True,
+                                   tax_event_type=IncomeTaxEventType.FIGHT, event_id=fight.id)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())

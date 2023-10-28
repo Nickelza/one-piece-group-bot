@@ -9,3 +9,4 @@ class MessageSource(StrEnum):
     PRIVATE = 'P'
     GROUP = 'G'
     TG_REST = 'T'
+    INLINE_QUERY = 'I'

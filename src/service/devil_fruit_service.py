@@ -1,8 +1,8 @@
 import logging
-import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from telegram import Message
+from telegram import Update
+from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -10,14 +10,13 @@ from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
-from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.Feature import Feature
 from src.model.enums.Notification import DevilFruitExpiredNotification, DevilFruitRevokeWarningNotification, \
     DevilFruitRevokeNotification
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType, Sign as DevilFruitAbilityTypeSign
@@ -27,13 +26,11 @@ from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeStatus
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.cron_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
-    get_random_time_between_by_hours, get_datetime_in_future_hours, get_random_time_between_by_seconds
-from src.service.group_service import get_main_group, get_group_chats_with_feature_enabled, \
-    broadcast_to_chats_with_feature_enabled_dispatch
-from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value
-from src.service.message_service import log_error, escape_valid_markdown_chars, delete_message, get_message_url, \
-    full_media_send
+from src.service.date_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
+    get_random_time_between_by_hours, get_datetime_in_future_hours, get_remaining_time_in_minutes, \
+    datetime_is_before
+from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value, get_random_win
+from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
 from src.service.notification_service import send_notification
 
 
@@ -119,14 +116,65 @@ def get_devil_fruit_abilities_text(devil_fruit: DevilFruit, add_header: bool = T
     return abilities_text
 
 
-async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE, category: DevilFruitCategory) -> None:
+def get_devil_fruits_in_circulation(category: DevilFruitCategory = None) -> list[DevilFruit]:
+    """
+    Get all devil fruits in circulation
+    :param category: The category (optional)
+    :return: The devil fruits
+    """
+
+    query = DevilFruit.select().where(DevilFruit.status.in_(DevilFruitStatus.get_released_statuses()))
+    if category:
+        query = query.where(DevilFruit.category == category)
+
+    return list(query)
+
+
+def should_release_devil_fruit() -> bool:
+    """
+    Checks if a Devil Fruit should be released based on the number of Devil Fruits in circulation and the number of
+    active users
+    :return: Whether a Devil Fruit should be released
+    """
+
+    # Get count of all devil fruits in circulation
+    devil_fruits_in_circulation_count = len(get_devil_fruits_in_circulation())
+    # Get count of active users
+    active_users_count = len(User.get_active_interactive_users())
+
+    if active_users_count == 0:
+        return False
+
+    max_devil_fruits_in_circulation = int(
+        active_users_count / Env.DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT.get_int())
+
+    return devil_fruits_in_circulation_count < max_devil_fruits_in_circulation
+
+
+async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Schedule devil fruit release
     :param context: The context
-    :param category: The category
     """
 
-    # Get all devil fruits that are not released yet
+    if not should_release_devil_fruit():
+        return
+
+    # Get all regular zoans in circulation count
+    active_regular_zoans: int = len(get_devil_fruits_in_circulation(category=DevilFruitCategory.ZOAN))
+    # Get all ancient zoans in circulation count
+    active_ancient_zoans: int = len(get_devil_fruits_in_circulation(category=DevilFruitCategory.ANCIENT_ZOAN))
+
+    # Check if we should release a regular zoan or an ancient zoan based on the ratio
+    try:
+        current_ratio: int = int(active_regular_zoans / active_ancient_zoans)
+        category: DevilFruitCategory = (DevilFruitCategory.ZOAN
+                                        if current_ratio < Env.DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO.get_int()
+                                        else DevilFruitCategory.ANCIENT_ZOAN)
+    except ZeroDivisionError:
+        category = DevilFruitCategory.ZOAN
+
+    # Get a fruit to release
     devil_fruit: DevilFruit = (DevilFruit.select()
                                .where((DevilFruit.status == DevilFruitStatus.ENABLED)
                                       & (DevilFruit.category == category))
@@ -143,64 +191,68 @@ async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE, categ
     set_devil_fruit_release_date(devil_fruit, is_new_release=True)
 
 
-async def release_scheduled_devil_fruit(context: ContextTypes.DEFAULT_TYPE, devil_fruit: DevilFruit = None) -> None:
+async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
     """
-    Release Devil Fruits that are scheduled to be released
+    Release a Devil Fruit to a user
+    :param update: The update
     :param context: The context
-    :param devil_fruit: The Devil Fruit to release
+    :param user: The user
     :return: None
     """
-    from src.chat.group.screens.screen_devil_fruit_collect import DevilFruitCollectReservedKeys
 
-    # Get all Devil Fruits that are scheduled to be released and have a release date in the past
-    if not devil_fruit:
-        devil_fruits: list[DevilFruit] = (DevilFruit.select()
-                                          .where((DevilFruit.status == DevilFruitStatus.SCHEDULED)
-                                                 & (DevilFruit.release_date <= datetime.now()))
-                                          .order_by(DevilFruit.id.asc()))
-    else:
-        devil_fruits = [devil_fruit]
+    from src.chat.manage_message import init
+    from src.service.bounty_service import get_next_bounty_reset_time
 
-    for devil_fruit in devil_fruits:
-        # Send to chat
-        text = phrases.DEVIL_FRUIT_APPEARED_WITH_INFO.format(
+    db = init()
+
+    if not datetime_is_before(user.devil_fruit_collection_cooldown_end_date):
+        return
+
+    with db.atomic() as transaction:
+        # Check if there are any Devil Fruits to release, lock the row
+        devil_fruit: DevilFruit = (DevilFruit.select()
+                                   .where(DevilFruit.status == DevilFruitStatus.SCHEDULED)
+                                   .for_update()
+                                   .get_or_none())
+
+        if not devil_fruit:
+            return
+
+        minutes_to_release: int = get_remaining_time_in_minutes(devil_fruit.release_date)
+
+        # Probability of releasing the Devil Fruit
+        try:
+            probability: float = (1 / minutes_to_release) * 100
+        except ZeroDivisionError:
+            probability = 100
+
+        if not get_random_win(probability):
+            user.devil_fruit_collection_cooldown_end_date = get_datetime_in_future_hours(
+                Env.DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION.get_int())
+            return
+
+        # Release the Devil Fruit to the user
+        text = phrases.DEVIL_FRUIT_RELEASE_MESSAGE_INFO.format(
+            user.get_markdown_mention(),
             escape_valid_markdown_chars(devil_fruit.get_full_name()),
             DevilFruitCategory(devil_fruit.category).get_description(),
             get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False))
 
-        # Add collect button
-        button_info = {DevilFruitCollectReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
-        inline_keyboard: list[list[Keyboard]] = [
-            [Keyboard(phrases.GRP_KEY_DEVIL_FRUIT_COLLECT, screen=Screen.GRP_DEVIL_FRUIT_COLLECT, info=button_info)]]
+        # Add deeplink button
+        info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id}
+        inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.KEY_MANAGE, screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
+                                                           info=info, is_deeplink=True)]]
 
-        # Get release group chat
-        enabled_group_chats: list[GroupChat] = list(get_group_chats_with_feature_enabled(
-            Feature.DEVIL_FRUIT_APPEARANCE, filter_by_groups=[get_main_group()]))
+        try:
+            # Send release message
+            await full_media_send(context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text,
+                                  keyboard=inline_keyboard, update=update, new_message=True)
 
-        if len(enabled_group_chats) == 0:
-            raise Exception("No group_chat chats with Devil Fruit appearance feature enabled")
-
-        release_group_chat: GroupChat = random.choice(enabled_group_chats)
-        devil_fruit.release_group_chat = release_group_chat
-
-        # Send release message
-        message: Message = await full_media_send(
-            context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text, keyboard=inline_keyboard,
-            group_chat=release_group_chat)
-
-        devil_fruit.release_date = datetime.now()
-        devil_fruit.release_message_id = message.message_id
-        devil_fruit.status = DevilFruitStatus.RELEASED
-        devil_fruit.save()
-
-        # Send notification to other chats
-        text = phrases.DEVIL_FRUIT_APPEARED
-        message_url = get_message_url(release_group_chat, devil_fruit.release_message_id)
-        inline_keyboard: list[list[Keyboard]] = [[Keyboard(phrases.GRP_KEY_GO_TO_MESSAGE, url=message_url)]]
-
-        await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.DEVIL_FRUIT_APPEARANCE, text,
-                                                               inline_keyboard=inline_keyboard,
-                                                               excluded_group_chats=[release_group_chat])
+            give_devil_fruit_to_user(devil_fruit, user, DevilFruitSource.BOT)
+            user.devil_fruit_collection_cooldown_end_date = get_next_bounty_reset_time()
+        except (TelegramError, DevilFruitValidationException) as e:
+            transaction.rollback()
+            logging.error(f"Error giving devil fruit to user {user.tg_user_id}: {e}")
 
 
 def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool = False) -> None:
@@ -211,13 +263,14 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     :return: None
     """
 
+    if not should_release_devil_fruit():
+        devil_fruit.status = DevilFruitStatus.ENABLED
+        devil_fruit.save()
+        return
+
     # If it's a new release, set the release date to random time between now and next release
     if is_new_release:
-        cron_is_in_seconds = len(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get().split()) == 1
-        if cron_is_in_seconds:
-            release_date = get_random_time_between_by_seconds(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
-        else:
-            release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
+        release_date = get_random_time_between_by_cron(Env.CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE.get())
     else:  # If it's a re-release, set the release date to random time between now and next n hours
         release_date = get_random_time_between_by_hours(Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
 
@@ -237,19 +290,6 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
     :param context: The context
     :return: None
     """
-
-    # Get all devil fruits that were released more than n hours ago and have not been collected yet
-    limit_date: datetime = datetime.now() - timedelta(hours=Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
-    devil_fruits: list[DevilFruit] = (DevilFruit.select()
-                                      .where((DevilFruit.status == DevilFruitStatus.RELEASED)
-                                             & (DevilFruit.release_date <= limit_date)))
-    for devil_fruit in devil_fruits:
-        # Try to delete previous message
-        await delete_message(
-            context=context, chat_id=Env.OPD_GROUP_ID.get_int(), message_id=devil_fruit.release_message_id)
-
-        # Release
-        await release_scheduled_devil_fruit(context, devil_fruit=devil_fruit)
 
     # Get all Devil Fruits that have expired and have not been eaten yet
     devil_fruits: list[DevilFruit] = (DevilFruit.select()
@@ -275,23 +315,10 @@ def get_value(user: User, ability_type: DevilFruitAbilityType, value: float, add
     :return: The value
     """
 
-    # Get Devil Fruit eaten by user that has the ability
-    devil_fruit: DevilFruit = (DevilFruit.select()
-                               .join(DevilFruitAbility)
-                               .where((DevilFruit.owner == user)
-                                      & (DevilFruit.status == DevilFruitStatus.EATEN)
-                                      & (DevilFruitAbility.ability_type == ability_type))
-                               .get_or_none())
-
-    # User has no Devil Fruit with the ability
-    if not devil_fruit:
+    # Get ability from a Devil Fruit eaten by user that has the ability
+    ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(user, ability_type)
+    if not ability:
         return value
-
-    # Get ability
-    ability: DevilFruitAbility = (DevilFruitAbility.select()
-                                  .where((DevilFruitAbility.devil_fruit == devil_fruit)
-                                         & (DevilFruitAbility.ability_type == ability_type))
-                                  .get_or_none())
 
     ability_type_sign: DevilFruitAbilityTypeSign = ability_type.get_sign()
 
@@ -334,11 +361,13 @@ def user_has_eaten_devil_fruit(user: User) -> bool:
             .exists())
 
 
-async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAULT_TYPE, users: list[User] = None
+                                                     ) -> None:
     """
     Warn inactive users with eaten Devil Fruits
 
     :param context: The context object
+    :param users: The users to warn. If provided, it will only warn these users, else it will warn all inactive users
     :return: None
     """
 
@@ -346,8 +375,9 @@ async def warn_inactive_users_with_eaten_devil_fruit(context: ContextTypes.DEFAU
         Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
 
     for devil_fruit in inactive_users_devil_fruits:
-        await send_notification(
-            context, devil_fruit.owner, DevilFruitRevokeWarningNotification(devil_fruit=devil_fruit))
+        if users is None or (users is not None and devil_fruit.owner in users):
+            await send_notification(
+                context, devil_fruit.owner, DevilFruitRevokeWarningNotification(devil_fruit=devil_fruit))
 
 
 def get_inactive_users_with_eaten_devil_fruits(latest_leaderboard_appearance: int) -> list[DevilFruit]:

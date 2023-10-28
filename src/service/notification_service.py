@@ -54,6 +54,7 @@ async def send_notification_execute(context: ContextTypes.DEFAULT_TYPE, user: Us
         button_info = {NotificationTypeReservedKeys.CATEGORY: notification.category,
                        NotificationTypeReservedKeys.TYPE: notification.type}
 
+        inline_keyboard.append(notification.get_go_to_item_keyboard())
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS, info=button_info,
                                          screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
                                          previous_screen_list=previous_screens)])

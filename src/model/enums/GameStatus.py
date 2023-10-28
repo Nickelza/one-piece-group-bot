@@ -65,6 +65,27 @@ class GameStatus(IntEnum):
 
         return self
 
+    def get_opposite_status(self):
+        """
+        Get the opposite status.
+        :return: The opposite status
+        """
+
+        if self == GameStatus.WON:
+            return GameStatus.LOST
+        elif self == GameStatus.LOST:
+            return GameStatus.WON
+
+        raise ValueError('Status with no opposite: ' + str(self))
+
+    def only_challenger_wager(self):
+        """
+        Check if only the challenger has staked belly.
+        :return: True if only the challenger has staked belly, False otherwise
+        """
+
+        return self in (GameStatus.AWAITING_SELECTION, GameStatus.AWAITING_OPPONENT_CONFIRMATION)
+
 
 GAME_STATUS_DESCRIPTIONS = {
     GameStatus.ND: phrases.GAME_STATUS_ND,

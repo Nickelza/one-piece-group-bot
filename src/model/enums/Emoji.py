@@ -45,12 +45,23 @@ class Emoji(StrEnum):
     RADIO_BUTTON = '🔘'
     MONEY = '💰'
     SAD = '😢'
+    STATS = '📊'
+    WARNING = '⚠'
+    NEW = '🆕'
+    GLOBE = '🌎'
+    SAVE = '💾'
+    CREATE = '➕'
+    CHANGE = '🔄'
+    SHARE = '📤'
+    GROUP = '👥'
+    USER = '👤'
+    NULL = ''
 
     # Game
     WINNER = '🏆'
     LOSER = '💥'
     CONFETTI = '🎉'
-    HEART = '❤'
+    BLUE_HEART = '💙'
 
     # Prediction
     PREDICTION_BET_WIN = '🏆'
@@ -61,6 +72,7 @@ class Emoji(StrEnum):
     PREDICTION_OPEN = '🔓'
     PREDICTION_CLOSED = '🔐'
     PREDICTION = '📊'
+    PREDICTION_CUT_OFF = '✂'
 
     # Rock Paper Scissors
     ROCK = '✊'

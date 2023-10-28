@@ -42,7 +42,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
-        await delete_game(context, game)
+        await delete_game(context, game, update=update)
         user.should_update_model = False
         return
 
@@ -53,21 +53,30 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     challenger: User = game.challenger
     opponent: User = game.opponent
 
-    game_type: GameType = GameType(game.type)
-    ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
-                                          mention_markdown_user(challenger),
-                                          game_type.get_name(),
-                                          get_belly_formatted(game.wager),
-                                          game_type.get_description())
-    outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
-                                                                   screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
-                                                                   yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                   no_text=phrases.KEYBOARD_OPTION_REJECT,
-                                                                   primary_key=game.id)]
+    if opponent is not None:
+        # Direct request to opponent
+        ot_text = phrases.GAME_REQUEST.format(mention_markdown_user(opponent),
+                                              mention_markdown_user(challenger),
+                                              game.get_type().get_name(),
+                                              get_belly_formatted(game.wager),
+                                              game.get_type().get_description())
+        outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(opponent,
+                                                                       screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                                                                       yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                       no_text=phrases.KEYBOARD_OPTION_REJECT,
+                                                                       primary_key=game.id)]
+    else:
+        # Open to all
+        ot_text = phrases.GAME_REQUEST_OPEN.format(mention_markdown_user(challenger),
+                                                   game.get_type().get_name(),
+                                                   get_belly_formatted(game.wager),
+                                                   game.get_type().get_description())
+        outbound_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                                                                       yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                                                                       primary_key=game.id, exclude_no_button=True)]
 
     button_delete_info = {GameSelectionReservedKeys.GAME_ID: game.id,
-                          ReservedKeyboardKeys.AUTHORIZED_USER: [
-                              challenger.id, opponent.id], GameSelectionReservedKeys.CANCEL: True}
+                          ReservedKeyboardKeys.AUTHORIZED_USER: [challenger.id], GameSelectionReservedKeys.CANCEL: True}
     outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info=button_delete_info,
                                        screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION)])
 
@@ -75,4 +84,4 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
                           saved_media_name=game.get_saved_media_name())
 
     # Enqueue the game for timeout
-    context.application.create_task(enqueue_game_timeout(context, game))
+    context.application.create_task(enqueue_game_timeout(context, game, update))

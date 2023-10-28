@@ -18,10 +18,10 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount
-from src.service.cron_service import get_remaining_time
+from src.service.bounty_service import get_amount_from_string, validate_amount, add_or_remove_bounty
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_datetime
-from src.service.message_service import full_message_send, mention_markdown_user, get_message_url, full_media_send
+from src.service.message_service import full_message_send, get_message_url, full_media_send
 
 
 class GameReservedKeys(StrEnum):
@@ -57,34 +57,36 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
 
     # Challenger cannot initiate a game
     if challenger.game_cooldown_end_date and challenger.game_cooldown_end_date > datetime.now():
-        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_time(challenger.game_cooldown_end_date))
+        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_duration(challenger.game_cooldown_end_date))
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
         pending_games: list[Game] = Game.select().where((Game.challenger == challenger) &
                                                         (Game.status.not_in(GameStatus.get_finished())))
         for game in pending_games:
             outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
-                                               url=get_message_url(game.group_chat, game.message_id))])
+                                               url=get_message_url(game.message_id, game.group_chat))])
 
         await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
         return False
 
     # Opponent validation
-    try:
-        # Opponent is not in the minimum required location
-        if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
-            raise OpponentValidationException()
+    if opponent is not None:
+        try:
+            # Opponent is not in the minimum required location
+            if not opponent.location_level >= Env.REQUIRED_LOCATION_LEVEL_GAME.get_int():
+                raise OpponentValidationException()
 
-        # Opponent is arrested
-        if opponent.is_arrested():
-            raise OpponentValidationException()
+            # Opponent is arrested
+            if opponent.is_arrested():
+                raise OpponentValidationException()
 
-    except OpponentValidationException as ove:
-        if ove.message is not None:
-            await full_message_send(context, ove.message, update)
-        else:
-            await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update, add_delete_button=True)
-        return False
+        except OpponentValidationException as ove:
+            if ove.message is not None:
+                await full_message_send(context, ove.message, update)
+            else:
+                await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update,
+                                        add_delete_button=True)
+            return False
 
     return True
 
@@ -100,10 +102,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :param group_chat: The group chat
     :return: None
     """
-    opponent: User = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
+    try:
+        opponent: User | None = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
 
-    if opponent is None:
-        raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
+        if opponent is None:
+            raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
+    except AttributeError:
+        opponent = None
 
     # Validate the request
     if not await validate(update, context, user, opponent, command):
@@ -113,27 +118,25 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game: Game = Game()
     game.challenger = user
     game.opponent = opponent
-    game.wager = get_amount_from_string(command.parameters[0])
+    game.wager = get_amount_from_string(command.parameters[0], user)
     game.group_chat = group_chat
     game.save()
 
-    user.bounty -= game.wager
-    user.pending_bounty += game.wager
+    await add_or_remove_bounty(user, game.wager, add=False, should_affect_pending_bounty=True, update=update)
     user.game_cooldown_end_date = get_datetime(
         user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
 
     # Display available games
-    await display_games(game, update, context, opponent)
+    await display_games(game, update, context)
     return
 
 
-async def display_games(game: Game, update: Update, context: ContextTypes.DEFAULT_TYPE, opponent: User) -> None:
+async def display_games(game: Game, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Display the available games
     :param game: The game object
     :param update: The update object
     :param context: The context object
-    :param opponent: The opponent object
     :return: None
     """
     inline_keyboard: list[list[Keyboard]] = [[]]
@@ -149,6 +152,12 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
     btn_rps: Keyboard = Keyboard(GameType.ROCK_PAPER_SCISSORS.get_name(), info=button_info,
                                  screen=Screen.GRP_GAME_SELECTION)
     inline_keyboard.append([btn_rps])
+
+    # Punk Records
+    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.PUNK_RECORDS}
+    btn_pr: Keyboard = Keyboard(GameType.PUNK_RECORDS.get_name(), info=button_info,
+                                screen=Screen.GRP_GAME_SELECTION)
+    inline_keyboard.append([btn_pr])
 
     # Russian Roulette
     button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.RUSSIAN_ROULETTE}
@@ -173,7 +182,7 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
                                                                            GameReservedKeys.CANCEL: True},
                                      screen=Screen.GRP_GAME_SELECTION)])
 
-    ot_text = phrases.GAME_CHOOSE_GAME.format(mention_markdown_user(opponent))
+    ot_text = phrases.GAME_CHOOSE_GAME
     message: Message = await full_media_send(context, saved_media_name=SavedMediaName.GAME, caption=ot_text,
                                              update=update, keyboard=inline_keyboard)
     game.message_id = message.message_id

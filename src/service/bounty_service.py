@@ -1,4 +1,5 @@
 import datetime
+import logging
 from math import ceil
 
 from peewee import Case, fn
@@ -9,20 +10,31 @@ import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyGift import BountyGift
+from src.model.BountyLoan import BountyLoan
+from src.model.Crew import Crew
+from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.GroupChat import GroupChat
+from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.User import User
+from src.model.enums.BossType import BossType
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
+from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributionType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.cron_service import get_next_run
+from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
+from src.service.income_tax_service import get_tax_amount, get_tax_deductions, add_contribution
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
-from src.service.user_service import user_is_boss
+from src.service.string_service import get_unit_value_from_string, object_to_json_string
+from src.service.user_service import get_boss_type, user_is_boss
 
 
 def get_belly_formatted(belly: int) -> str:
@@ -32,7 +44,7 @@ def get_belly_formatted(belly: int) -> str:
     :return: The formatted belly e.g. 1,000,000
     """
 
-    return '{0:,}'.format(belly)
+    return '{0:,}'.format(int(belly))
 
 
 def get_message_belly(update: Update, user: User, group_chat: GroupChat) -> int:
@@ -185,16 +197,36 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
 
+    # Delete tax events
+    IncomeTaxEvent.delete().execute()
+
+    # Erase all crew chests and delete all contributions from previous crew members
+    # For some reason a direct delete query does not work, had to first get all valid contributions and then delete
+    Crew.update(chest_amount=0).execute()
+
+    # Still valid contributions
+    valid_contributions = CrewMemberChestContribution.select().where(
+        CrewMemberChestContribution.crew == User.select(User.crew).where(User.id == CrewMemberChestContribution.user))
+
+    # Delete all contributions that are not valid
+    CrewMemberChestContribution.delete().where(
+        (CrewMemberChestContribution.id.not_in([
+            contribution.id for contribution in valid_contributions]))).execute()
+
+    # Reset crew powerup counter
+    Crew.update(powerup_counter=0).execute()
+
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
 
-# noinspection PyUnusedLocal
-# pending_belly_amount will be used in the future
-async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TYPE = None, update: Update = None,
-                     should_update_location: bool = False, pending_belly_amount: int = 0,
-                     from_message: bool = False) -> None:
+async def add_or_remove_bounty(user: User, amount: int = None, context: ContextTypes.DEFAULT_TYPE = None,
+                               update: Update = None, should_update_location: bool = False,
+                               pending_belly_amount: int = None, from_message: bool = False, add: bool = True,
+                               should_save: bool = False, should_affect_pending_bounty: bool = False,
+                               check_for_loan: bool = True, pending_belly_is_user_bounty: bool = False,
+                               tax_event_type: IncomeTaxEventType = None, event_id: int = None) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -205,22 +237,142 @@ async def add_bounty(user: User, amount: float, context: ContextTypes.DEFAULT_TY
     :param pending_belly_amount: How much of the amount is from pending belly, so not newly acquired. Will be used to
                                  calculate eventual taxes
     :param from_message: Whether the bounty is gained from a message
+    :param add: Whether to add or remove the bounty
+    :param should_save: Whether to save the user
+    :param should_affect_pending_bounty: Whether to affect the pending bounty
+    :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
+    :param pending_belly_is_user_bounty: If the pending belly is the user's bounty, so it should
+                                         not be added or removed from the bounty
+    :param tax_event_type: The tax event type
+    :param event_id: The event id
+
     :return: The updated user
     """
     from src.service.location_service import update_location
 
-    if amount <= 0 and not should_update_location:
-        return
+    if amount is None and pending_belly_amount is None:
+        raise ValueError('Amount or pending belly amount must be specified')
 
-    # User is arrested, no bounty is gained
-    if user.is_arrested():
-        return
+    if (tax_event_type is not None or event_id is not None) and (tax_event_type is None or event_id is None):
+        raise ValueError('Tax event type and event id must be specified together')
 
-    user.bounty += amount
+    previous_bounty = user.bounty
+    previous_pending_bounty = user.pending_bounty
 
-    # If the bounty is gained from a message, subtract the amount from the bounty message limit
-    if from_message:
-        user.bounty_message_limit -= amount
+    if pending_belly_amount is not None and pending_belly_amount > 0:
+        should_affect_pending_bounty = True
+    elif should_affect_pending_bounty:
+        pending_belly_amount = amount
+
+    # Don't add or remove to user's pending bounty
+    if pending_belly_is_user_bounty:
+        pending_belly_amount = user.bounty
+        should_affect_pending_bounty = False
+
+    from src.chat.manage_message import init
+    db = init()
+
+    with db.atomic():
+        # Should remove bounty
+        if not add:
+            user.bounty -= amount
+            if should_affect_pending_bounty:
+                user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
+
+            if user.bounty < 0 and previous_bounty >= 0:
+                try:
+                    raise ValueError(f'User {user.id} has negative bounty: {user.bounty} after removing '
+                                     f'{amount} bounty in event '
+                                     f'{update.to_dict() if update is not None else "None"}')
+                except ValueError as ve:
+                    logging.exception(ve)
+
+            if should_save:
+                user.save()
+            return
+
+        if should_affect_pending_bounty:
+            user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
+
+            if user.pending_bounty < 0 and previous_pending_bounty >= 0:
+                try:
+                    raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing'
+                                     f' {amount} pending bounty in event '
+                                     f'{update.to_dict() if update is not None else "None"}')
+                except ValueError as ve:
+                    logging.exception(ve)
+
+            if should_save:
+                user.save()
+
+        if amount <= 0 and not should_update_location:
+            return
+
+        # User is arrested, no bounty is gained
+        if user.is_arrested():
+            return
+
+        if amount > 0:
+            # Amount that will be used to calculate eventual taxes
+            net_amount_without_pending = amount - (pending_belly_amount if pending_belly_amount is not None else 0)
+            net_amount_after_tax = net_amount_without_pending
+            amount_to_add = amount
+
+            # Get net amount after taxes
+            tax_breakdown: list[IncomeTaxBreakdown] = IncomeTaxBracket.get_tax_breakdown(user.total_gained_bounty,
+                                                                                         net_amount_without_pending)
+            tax_amount = IncomeTaxBreakdown.get_amount_from_list(tax_breakdown)
+
+            if tax_amount > 0:
+                tax_amount = get_tax_amount(user, net_amount_without_pending)  # Recalculate with eventual deductions
+                net_amount_after_tax = net_amount_without_pending - tax_amount
+                amount_to_add -= tax_amount
+
+                # Create tax event
+                tax_event: IncomeTaxEvent = IncomeTaxEvent()
+                if tax_event_type is not None:
+                    tax_event: IncomeTaxEvent = IncomeTaxEvent()
+                    tax_event.user = user
+                    tax_event.event_type = tax_event_type.value
+                    tax_event.event_id = event_id
+                    tax_event.starting_amount = user.total_gained_bounty
+                    tax_event.amount = net_amount_without_pending
+                    tax_event.breakdown_list = object_to_json_string(tax_breakdown)
+                    tax_event.deduction_list = object_to_json_string(get_tax_deductions(user))
+                    tax_event.save()
+
+                # Add tax to crew chest
+                if user.is_crew_member():
+                    # Add crew chest contribution
+                    add_contribution(IncomeTaxContributionType.CREW_CHEST, tax_amount, tax_event)
+
+            user.total_gained_bounty += net_amount_after_tax
+
+            if check_for_loan:
+                # If user has an expired bounty loan, use n% of the bounty to repay the loan
+                expired_loans = user.get_expired_bounty_loans()
+                if len(expired_loans) > 0:
+                    expired_loan: BountyLoan = expired_loans[0]
+
+                    amount_for_repay = subtract_percentage_from_value(net_amount_after_tax,
+                                                                      Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float())
+                    # Cap to remaining amount
+                    amount_for_repay = expired_loan.get_maximum_payable_amount(int(amount_for_repay))
+
+                    # Pay loan
+                    await expired_loan.pay(amount_for_repay, update)
+
+                    # Subtract from amount
+                    amount_to_add -= amount_for_repay
+
+            user.bounty += amount_to_add
+
+            # If the bounty is gained from a message, subtract the amount from the bounty message limit
+            if from_message:
+                user.bounty_message_limit -= amount
+
+            if should_save:
+                user.save()
 
     # Update the user's location
     if should_update_location:
@@ -236,18 +388,30 @@ def add_region_bounty_bonus() -> None:
     :return: None
     """
 
-    conditions: list[tuple[bool, int]] = [((User.location_level <= get_last_paradise().level)
-                                           & (User.get_is_not_arrested_statement_condition())
-                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
-                                           User.bounty +
-                                           ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
-                                          ((User.location_level >= get_first_new_world().level)
-                                           & (User.get_is_not_arrested_statement_condition())
-                                           & ~(User.get_has_bounty_gain_limitations_statement_condition()),
-                                           User.bounty +
-                                           ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
-    case_stmt = Case(None, conditions, User.bounty)
-    User.update(bounty=case_stmt).execute()
+    paradise_condition = ((User.location_level <= get_last_paradise().level)
+                          & (User.get_is_not_arrested_statement_condition())
+                          & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    new_world_condition = ((User.location_level >= get_first_new_world().level)
+                           & (User.get_is_not_arrested_statement_condition())
+                           & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    bounty_conditions: list[tuple[bool, int]] = [(
+        paradise_condition,
+        User.bounty + ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
+        (new_world_condition,
+         User.bounty + ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
+    bounty_case_stmt = Case(None, bounty_conditions, User.bounty)
+
+    # Also add to total gained bounty
+    total_gained_bounty_conditions: list[tuple[bool, int]] = [(
+        paradise_condition,
+        User.total_gained_bounty + ((User.bounty * Env.PARADISE_BOUNTY_BONUS.get_float()) / 100)),
+        (new_world_condition,
+         User.total_gained_bounty + ((User.bounty * Env.NEW_WORLD_BOUNTY_BONUS.get_float()) / 100))]
+    total_gained_bounty_case_stmt = Case(None, total_gained_bounty_conditions, User.total_gained_bounty)
+
+    User.update(bounty=bounty_case_stmt, total_gained_bounty=total_gained_bounty_case_stmt).execute()
 
 
 def add_crew_bounty_bonus() -> None:
@@ -255,7 +419,10 @@ def add_crew_bounty_bonus() -> None:
     Adds a bounty percentage to users in a crew
     """
 
-    (User.update(bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
+    (User
+     .update(
+        bounty=(User.bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)),
+        total_gained_bounty=(User.total_gained_bounty + ((User.bounty * Env.CREW_BOUNTY_BONUS.get_float()) / 100)))
      .where((User.crew.is_null(False))
             & ~(User.get_has_bounty_gain_limitations_statement_condition()))
      .execute())
@@ -266,28 +433,44 @@ def add_crew_mvp_bounty_bonus() -> None:
     Adds a bounty percentage to users in a crew with bounty higher than the crew average
     """
 
-    condition: tuple[bool, int] = (
-        ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
-         & (User.get_is_not_arrested_statement_condition())
-         & ~(User.get_has_bounty_gain_limitations_statement_condition())),
+    crew_mvp_condition = ((User.bounty > (User.select(fn.Avg(User.bounty)).where(User.crew == User.crew).scalar()))
+                          & (User.get_is_not_arrested_statement_condition())
+                          & ~(User.get_has_bounty_gain_limitations_statement_condition()))
+
+    bounty_condition: tuple[bool, int] = (
+        crew_mvp_condition,
         User.bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
 
-    case_stmt = Case(None, [condition], User.bounty)
-    User.update(bounty=case_stmt).execute()
+    total_gained_bounty_condition: tuple[bool, int] = (
+        crew_mvp_condition,
+        User.total_gained_bounty + ((User.bounty * Env.CREW_MVP_BOUNTY_BONUS.get_float()) / 100))
+
+    bounty_case_stmt = Case(None, [bounty_condition], User.bounty)
+    total_gained_bounty_case_stmt = Case(None, [total_gained_bounty_condition], User.total_gained_bounty)
+
+    User.update(bounty=bounty_case_stmt, total_gained_bounty=total_gained_bounty_case_stmt).execute()
 
 
-def get_amount_from_string(amount_str: str) -> int:
+def get_amount_from_string(amount: str, user: User) -> int:
     """
     Get the wager amount
-    :param amount_str: The wager amount
+    :param amount: The wager amount
+    :param user: The user
     :return: The wager amount
     """
-    amount_str = amount_str.strip().replace(',', '').replace('.', '')
-    return int(amount_str)
+
+    # If amount is *, return user's bounty
+    if amount == '*':
+        return user.bounty
+
+    try:
+        return int(amount.strip().replace(',', '').replace('.', ''))
+    except ValueError:
+        return get_unit_value_from_string(amount, c.MAGNITUDE_AMOUNT_TO_NUMBER)
 
 
 async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, wager_str: str,
-                          required_belly: int, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
+                          required_belly: int = None, add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
                           previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None,
                           should_validate_user_has_amount: bool = True) -> bool:
     """
@@ -306,14 +489,17 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
     :return: Whether the wager is valid
     """
 
-    try:
-        wager: int = get_amount_from_string(wager_str)
-    except ValueError:
-        await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
-                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
-        return False
+    if isinstance(wager_str, int):
+        wager = wager_str
+    else:
+        try:
+            wager: int = get_amount_from_string(wager_str, user)
+        except ValueError:
+            await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
+                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+                                    previous_screens=previous_screens,
+                                    previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+            return False
 
     # User does not have enough bounty
     if should_validate_user_has_amount and user.bounty < wager:
@@ -324,7 +510,7 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
         return False
 
     # Wager less than minimum required
-    if wager < required_belly:
+    if required_belly is not None and wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
         await full_message_send(context, ot_text, update=update, add_delete_button=add_delete_button,
                                 inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
@@ -368,7 +554,6 @@ def should_reset_bounty(run_time: datetime) -> bool:
     :param run_time: The run time
     :return: Whether the bounty should be reset
     """
-
     # Adding 1 millisecond in case it's exactly midnight, else the next leaderboard will be considered as the
     # current one
     next_run_time = get_next_run(Env.CRON_SEND_LEADERBOARD.get(),
@@ -389,18 +574,23 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
     :return: The transaction tax
     """
 
-    # Sender or receiver is boss, no tax
-    if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
-        return 0
-
     tax = base_tax
+
+    if user_is_boss(sender) or (receiver is not None and user_is_boss(receiver)):
+        boss_type: BossType = get_boss_type(sender) if user_is_boss(sender) else get_boss_type(receiver)
+
+        # Admins and legendary pirates, no tax
+        if boss_type in (BossType.ADMIN, BossType.LEGENDARY_PIRATE):
+            return 0
+        elif boss_type is BossType.PIRATE_KING and user_is_boss(sender):
+            tax = subtract_percentage_from_value(base_tax, Env.PIRATE_KING_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Send and receiver in same crew, percentage deduction
     if receiver is not None and sender.in_same_crew(receiver):
         tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Apply Devil Fruit ability
-    tax = get_value(sender, DevilFruitAbilityType.TAX, tax)
+    tax = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax)
 
     return tax
 

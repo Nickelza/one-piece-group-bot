@@ -1,5 +1,3 @@
-from enum import StrEnum
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -7,17 +5,11 @@ from resources import phrases
 from src.chat.private.screens.screen_devil_fruit import DevilFruitListPage
 from src.model.DevilFruit import DevilFruit
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
-
-
-class DevilFruitDetailReservedKeys(StrEnum):
-    """
-    The reserved keys for this screen
-    """
-    DEVIL_FRUIT_ID = 'a'
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
@@ -33,13 +25,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     devil_fruit_list_page = DevilFruitListPage()
 
     devil_fruit_list_page.user = user
-    devil_fruit_list_page.set_object(inbound_keyboard.get_int(DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID))
+    devil_fruit_list_page.set_object(inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
 
     devil_fruit: DevilFruit = devil_fruit_list_page.object
     inline_keyboard: list[list[Keyboard]] = []
 
+    if devil_fruit.owner != user:
+        await full_message_send(context, phrases.LOG_ITEM_DETAIL_NO_PERMISSION, update=update)
+        return
+
     devil_fruit_status: DevilFruitStatus = DevilFruitStatus(devil_fruit.status)
-    button_info = {DevilFruitDetailReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id}
+    button_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id}
 
     # Show eat and trade buttons if the user have not eaten the Devil Fruit
     if devil_fruit_status is DevilFruitStatus.COLLECTED:

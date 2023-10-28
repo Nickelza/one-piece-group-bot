@@ -14,7 +14,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
-from src.service.cron_service import cron_datetime_difference
+from src.service.date_service import cron_datetime_difference
 from src.service.location_service import update_location
 from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
 
@@ -97,7 +97,8 @@ async def send_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE, user
                                                                  no_text=phrases.KEYBOARD_OPTION_REJECT,
                                                                  primary_key=region)]
 
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False)
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False,
+                            new_message=(update.callback_query is not None))
 
 
 async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard,

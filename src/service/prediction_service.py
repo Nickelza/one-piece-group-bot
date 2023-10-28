@@ -11,16 +11,22 @@ from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
 from src.model.enums.Notification import PredictionResultNotification, PredictionBetInvalidNotification
 from src.model.enums.PredictionStatus import PredictionStatus, get_prediction_status_name_by_key
+from src.model.enums.PredictionType import PredictionType
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import PredictionException
+from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import round_belly_up, add_bounty, get_belly_formatted
+from src.service.bounty_service import round_belly_up, add_or_remove_bounty, get_belly_formatted
+from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_value
+from src.service.download_service import get_random_string
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage, add_percentage_to_value
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
@@ -51,68 +57,124 @@ async def send(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction, is_re
         inline_keyboard=[[get_prediction_deeplink_button(prediction)]])
 
 
-def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, user: User = None) -> str:
+def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, user: User = None,
+                        is_creator_recap: bool = False) -> str:
     """
     Get prediction text
     :param prediction: Prediction
     :param add_bets_command: If to add commands on how to place and remove bets
     :param user: User, if called from private chat and prediction max refund should be customized by DF ability
+    :param is_creator_recap: If the prediction is being sent to the creator as a recap
     :return: Prediction text
     """
 
+    if is_creator_recap:
+        add_bets_command = False
+
+    is_creator = prediction.creator is not None and user == prediction.creator
+    is_creator_but_not_sent = is_creator and prediction.get_status() is PredictionStatus.NEW
+    if not is_creator_recap:
+        is_creator_recap = prediction.id is None and prediction.creator is not None and user == prediction.creator
+
     # Options text
     options_text = ""
-    prediction_options: list[PredictionOption] = prediction.prediction_options
-    prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
-    total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
+    total_wager = 0
+    if not (is_creator_recap or is_creator_but_not_sent):
+        prediction_options: list[PredictionOption] = prediction.prediction_options
+        prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
+        total_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_options_users)
 
-    for index, prediction_option in enumerate(prediction_options):
-        prediction_option_users: list[PredictionOptionUser] = [
-            prediction_option_user for prediction_option_user in prediction_options_users
-            if prediction_option_user.prediction_option.id == prediction_option.id
-        ]
-        option_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_option_users)
-        options_text += phrases.PREDICTION_TEXT_OPTION.format(
-            prediction_option.number,
-            escape_valid_markdown_chars(prediction_option.option),
-            get_percentage_from_value(option_wager, total_wager, add_decimal=False),
-            (Emoji.CORRECT if prediction_option.is_correct else "")
-        )
-
+        for index, prediction_option in enumerate(prediction_options):
+            prediction_option_users: list[PredictionOptionUser] = [
+                prediction_option_user for prediction_option_user in prediction_options_users
+                if prediction_option_user.prediction_option.id == prediction_option.id
+            ]
+            option_wager = sum(prediction_option_user.wager for prediction_option_user in prediction_option_users)
+            options_text += phrases.PREDICTION_TEXT_OPTION_WITH_PERCENTAGE.format(
+                prediction_option.number,
+                escape_valid_markdown_chars(prediction_option.option),
+                get_percentage_from_value(option_wager, total_wager, add_decimal=False),
+                (Emoji.CORRECT if prediction_option.is_correct else "")
+            )
+    else:  # User prediction, not saved yet
+        if prediction.id is None:
+            for index, option in enumerate(prediction.options):
+                options_text += phrases.PREDICTION_TEXT_OPTION.format(
+                    index + 1,
+                    escape_valid_markdown_chars(option),
+                )
+        else:
+            prediction_options: list[PredictionOption] = prediction.prediction_options
+            for index, prediction_option in enumerate(prediction_options):
+                options_text += phrases.PREDICTION_TEXT_OPTION.format(
+                    prediction_option.number,
+                    escape_valid_markdown_chars(prediction_option.option),
+                )
+        options_text += "\n" if prediction.end_date is not None else ""
     added_text = ""
 
     # Closing date if not None
-    added_text += phrases.PREDICTION_CLOSING_DATE.format(prediction.end_date) \
-        if prediction.end_date is not None else ""
-    # Cut Off date if not None
-    added_text += phrases.PREDICTION_CUT_OFF_DATE.format(prediction.cut_off_date) \
-        if prediction.cut_off_date is not None else ""
+    if not is_creator_recap:
+        added_text += phrases.PREDICTION_CLOSING_DATE.format(default_datetime_format(prediction.end_date, user)) \
+            if prediction.end_date is not None else ""
+
+        # If creator and bets closed, show cut off date with description
+        if is_creator and prediction.get_status() is PredictionStatus.BETS_CLOSED:
+            added_text += phrases.PREDICTION_CREATE_CUT_OFF_DATE.format(
+                default_datetime_format(prediction.cut_off_date, user)
+                if prediction.cut_off_date is not None else phrases.TEXT_NOT_SET)
+            added_text += phrases.PREDICTION_CUT_OFF_DATE_HOW_TO_SET
+        else:
+            added_text += phrases.PREDICTION_CUT_OFF_DATE.format(
+                default_datetime_format(prediction.cut_off_date, user)) if prediction.cut_off_date is not None else ""
+    else:
+        added_text += phrases.PREDICTION_CREATE_CLOSE_DATE.format(
+            default_datetime_format(prediction.end_date, user)
+            if prediction.end_date is not None else phrases.TEXT_NOT_SET)
+
+        added_text += phrases.PREDICTION_CREATE_CUT_OFF_DATE.format(
+            default_datetime_format(prediction.cut_off_date, user)
+            if prediction.cut_off_date is not None else phrases.TEXT_NOT_SET)
 
     optional_text = ""
 
     # Wagers refunded
-    if prediction.refund_wager:
-        enabled_emoji = Emoji.PREDICTION_FEATURE_ENABLED
-        if user is not None:
-            max_refund_wager = get_max_wager_refund(prediction=prediction, user=user)
+    if PredictionType(prediction.type) is not PredictionType.USER:
+        if prediction.refund_wager:
+            enabled_emoji = Emoji.PREDICTION_FEATURE_ENABLED
+            if user is not None:
+                max_refund_wager = get_max_wager_refund(prediction=prediction, user=user)
+            else:
+                max_refund_wager = prediction.max_refund_wager
+            max_refund_text = phrases.PREDICTION_WAGERS_REFUNDED_MAX.format(
+                get_belly_formatted(max_refund_wager))  # Get from get_value, if user param is not None
         else:
-            max_refund_wager = prediction.max_refund_wager
-        max_refund_text = phrases.PREDICTION_WAGERS_REFUNDED_MAX.format(
-            get_belly_formatted(max_refund_wager))  # Get from get_value, if user param is not None
-    else:
-        enabled_emoji = Emoji.PREDICTION_FEATURE_DISABLED
-        max_refund_text = ""
-    optional_text += phrases.PREDICTION_WAGERS_REFUNDED.format(enabled_emoji, max_refund_text)
+            enabled_emoji = Emoji.PREDICTION_FEATURE_DISABLED
+            max_refund_text = ""
+        optional_text += phrases.PREDICTION_WAGERS_REFUNDED.format(enabled_emoji, max_refund_text)
 
     # Multiple bets allowed
     enabled_emoji = (Emoji.PREDICTION_FEATURE_ENABLED if prediction.allow_multiple_choices
                      else Emoji.PREDICTION_FEATURE_DISABLED)
     optional_text += phrases.PREDICTION_MULTIPLE_BETS_ALLOWED.format(enabled_emoji)
+    if is_creator_recap:
+        optional_text += phrases.PREDICTION_MULTIPLE_BETS_ALLOWED_DESCRIPTION
 
     # Bet withdrawal allowed
+    optional_text += "\n" if is_creator_recap else ""
     enabled_emoji = (Emoji.PREDICTION_FEATURE_ENABLED if prediction.can_withdraw_bet
                      else Emoji.PREDICTION_FEATURE_DISABLED)
     optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS.format(enabled_emoji)
+    if is_creator_recap:
+        optional_text += phrases.PREDICTION_CAN_WITHDRAW_BETS_DESCRIPTION
+
+    # Is public, only for creator
+    if is_creator:
+        optional_text += "\n" if is_creator_recap else ""
+        enabled_emoji = (Emoji.PREDICTION_FEATURE_ENABLED if prediction.is_public
+                         else Emoji.PREDICTION_FEATURE_DISABLED)
+        optional_text += phrases.PREDICTION_IS_PUBLIC.format(enabled_emoji)
+        optional_text += phrases.PREDICTION_IS_PUBLIC_DESCRIPTION if is_creator_recap else ""
 
     # Add command to place and remove bets if prediction is open
     how_to_bet_command_text = ""
@@ -128,15 +190,28 @@ def get_prediction_text(prediction: Prediction, add_bets_command: bool = True, u
     optional_text = "\n" + optional_text if optional_text != "" else ""
     added_text += optional_text
 
+    # User prediction disclaimer
+    user_prediction_disclaimer = ""
+    if PredictionType(prediction.type) is PredictionType.USER and not is_creator:
+        user_prediction_disclaimer = phrases.PREDICTION_USER_DISCLAIMER
+
     # Prediction text
-    prediction_text = phrases.PREDICTION_TEXT.format(
-        escape_valid_markdown_chars(prediction.question),
-        options_text,
-        get_belly_formatted(total_wager),
-        get_prediction_status_name_by_key(PredictionStatus(prediction.status)),
-        added_text,
-        how_to_bet_command_text,
-        how_to_remove_bet_command_text)
+    if prediction.id is not None and not is_creator_but_not_sent and not is_creator_recap:
+        prediction_text = phrases.PREDICTION_TEXT.format(
+            escape_valid_markdown_chars(prediction.question),
+            options_text,
+            get_belly_formatted(total_wager),
+            get_prediction_status_name_by_key(PredictionStatus(prediction.status)),
+            added_text,
+            how_to_bet_command_text,
+            how_to_remove_bet_command_text,
+            user_prediction_disclaimer)
+    else:  # User prediction, not saved yet - recap
+        added_text += user_prediction_disclaimer
+        prediction_text = phrases.PREDICTION_CREATE_RECAP.format(
+            escape_valid_markdown_chars(prediction.question),
+            options_text,
+            added_text)
 
     return prediction_text
 
@@ -153,6 +228,9 @@ def get_user_prediction_status_text(prediction: Prediction, user: User,
     :param add_bets_command: Whether to add the command to remove all bets
     :return: The prediction status text
     """
+
+    if PredictionStatus(prediction.status) is PredictionStatus.NEW:
+        return ""
 
     if prediction_options_user is None:
         prediction_options_user = get_prediction_options_user(prediction, user)
@@ -235,29 +313,7 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
     if PredictionStatus(prediction.status) is not PredictionStatus.SENT:
         raise PredictionException(phrases.PREDICTION_NOT_IN_SENT_STATUS)
 
-    # Dictionary with key: user_id, value: user, prediction option user, total refund
-    users_invalid_prediction_options: dict[int, [User, list[PredictionOptionUser], int]] = {}
-
-    # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
-    if prediction.cut_off_date is not None:
-        invalid_prediction_option_users: list[PredictionOptionUser] = PredictionOptionUser.select().where(
-            (PredictionOptionUser.prediction == prediction)
-            & (PredictionOptionUser.date > prediction.cut_off_date))
-        for invalid_prediction_option_user in invalid_prediction_option_users:
-            user: User = invalid_prediction_option_user.user
-            # Return wager and subtract from pending bounty
-            user.pending_bounty -= invalid_prediction_option_user.wager
-            user.bounty += invalid_prediction_option_user.wager
-            user.save()
-
-            # Add to users_invalid_prediction_options
-            if user.id not in users_invalid_prediction_options:
-                users_invalid_prediction_options[user.id] = [user, [], 0]
-
-            users_invalid_prediction_options[user.id][1].append(invalid_prediction_option_user)
-            users_invalid_prediction_options[user.id][2] += invalid_prediction_option_user.wager
-
-            invalid_prediction_option_user.delete_instance()
+    await cut_off_invalid_bets(context, prediction)
 
     # Update status
     prediction.status = PredictionStatus.BETS_CLOSED
@@ -271,6 +327,36 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
     await send_prediction_status_change_message_or_refresh_dispatch(context, phrases.PREDICTION_CLOSED_FOR_BETS,
                                                                     prediction)
 
+
+async def cut_off_invalid_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction):
+    """
+    Cut off invalid bets (bets placed after cut off date), notifying the users
+    :param context: Telegram context
+    :param prediction: Prediction
+    :return: None
+    """
+
+    # Dictionary with key: user_id, value: user, prediction option user, total refund
+    users_invalid_prediction_options: dict[int, [User, list[PredictionOptionUser], int]] = {}
+
+    # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
+    if prediction.cut_off_date is not None:
+        invalid_prediction_option_users: list[PredictionOptionUser] = get_invalid_bets(prediction)
+        for invalid_prediction_option_user in invalid_prediction_option_users:
+            user: User = invalid_prediction_option_user.user
+            # Return wager and subtract from pending bounty
+            await add_or_remove_bounty(user, invalid_prediction_option_user.wager, should_affect_pending_bounty=True)
+            user.save()
+
+            # Add to users_invalid_prediction_options
+            if user.id not in users_invalid_prediction_options:
+                users_invalid_prediction_options[user.id] = [user, [], 0]
+
+            users_invalid_prediction_options[user.id][1].append(invalid_prediction_option_user)
+            users_invalid_prediction_options[user.id][2] += invalid_prediction_option_user.wager
+
+            invalid_prediction_option_user.delete_instance()
+
     # Send notification to users
     for user_id, value in users_invalid_prediction_options.items():
         user: User = value[0]
@@ -281,6 +367,25 @@ async def close_bets(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction)
             prediction, prediction_options_user, total_refund)
 
         await send_notification(context, user, notification)
+
+
+def get_invalid_bets(prediction: Prediction, cut_off_date: datetime = None) -> list[PredictionOptionUser]:
+    """
+    Get invalid bets (bets placed after cut off date)
+    :param prediction: Prediction
+    :param cut_off_date: Cut off date
+    :return: List of invalid bets
+    """
+
+    if cut_off_date is None:
+        if prediction.cut_off_date is None:
+            raise ValueError("cut_off_date cannot be None if prediction.cut_off_date is None")
+
+        cut_off_date = prediction.cut_off_date
+
+    return PredictionOptionUser.select().where(
+        (PredictionOptionUser.prediction == prediction)
+        & (PredictionOptionUser.date > cut_off_date))
 
 
 async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction) -> None:
@@ -316,7 +421,8 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
             win_amount = get_prediction_option_user_win(prediction_option_user,
                                                         prediction_options_users=prediction_options_users)
             # Add to bounty
-            await add_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager)
+            await add_or_remove_bounty(user, win_amount, pending_belly_amount=prediction_option_user.wager,
+                                       tax_event_type=IncomeTaxEventType.PREDICTION, event_id=prediction.id)
 
             # Add to total win
             users_total_win[user.id][1] += win_amount
@@ -324,18 +430,17 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
             # Remove from total win
             users_total_win[user.id][1] -= prediction_option_user.wager
 
-        # Subtract bet wager from user pending bounty
-        user.pending_bounty -= prediction_option_user.wager
-
         # Should refund wager or no correct options
         if prediction.refund_wager or len(prediction_options_correct) == 0:
             if len(prediction_options_correct) == 0:
                 # No correct options, refund full wager
-                user.bounty += prediction_option_user.wager
+                refund_amount = prediction_option_user.wager
             else:
                 # Cap refund
-                user.bounty += min(prediction_option_user.wager,
-                                   get_max_wager_refund(prediction_option_user=prediction_option_user))
+                refund_amount = min(prediction_option_user.wager,
+                                    get_max_wager_refund(prediction_option_user=prediction_option_user))
+
+            await add_or_remove_bounty(user, refund_amount, pending_belly_amount=prediction_option_user.wager)
 
         user.save()
 
@@ -509,8 +614,10 @@ def get_user_prediction_status_emoji(prediction: Prediction, user: User) -> Emoj
                 return Emoji.LOG_POSITIVE
             else:
                 return Emoji.LOG_NEGATIVE
-    else:  # If user didn't bet on prediction, and it's not open, it won't show up in the list
+    elif prediction_status is PredictionStatus.NEW:
         return Emoji.PREDICTION_NEW
+    else:  # If user didn't bet on prediction, and it's not open, it means they are the creator
+        return Emoji.NULL
 
 
 def get_prediction_net_win(prediction: Prediction, user: User) -> int:
@@ -571,8 +678,7 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
     prediction_option_user.save()
 
     # Remove wager from user balance
-    user.bounty -= wager
-    user.pending_bounty += wager
+    add_or_remove_bounty(user, wager, add=False, should_affect_pending_bounty=True)
 
     return prediction_option_user
 
@@ -585,8 +691,7 @@ def delete_prediction_option_user(user: User, prediction_option_user: Prediction
     :return: None
     """
     # Return wager
-    user.pending_bounty -= prediction_option_user.wager
-    user.bounty += prediction_option_user.wager
+    add_or_remove_bounty(user, prediction_option_user.wager, should_affect_pending_bounty=True)
 
     # Delete prediction option user
     prediction_option_user.delete_instance()
@@ -734,3 +839,55 @@ def get_prediction_deeplink_button(prediction: Prediction) -> Keyboard:
                      else phrases.GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT)
     return Keyboard(keyboard_text, info, screen=Screen.PVT_PREDICTION_DETAIL,
                     previous_screen_list=[Screen.PVT_PREDICTION], is_deeplink=True)
+
+
+def delete_prediction(prediction: Prediction):
+    """
+    Delete a prediction
+    :param prediction: The prediction
+    :return: None
+    """
+
+    # Delete all prediction option users and return wagers
+    prediction_option_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
+    for prediction_option_user in prediction_option_users:
+        user: User = prediction_option_user.user
+        delete_prediction_option_user(user, prediction_option_user)
+
+    # Delete prediction
+    prediction.delete_instance()
+
+
+def get_share_text(context: ContextTypes.DEFAULT_TYPE, user: User, prediction: Prediction) -> str:
+    """
+    Get the share button url
+    :param context: The context
+    :param user: The user
+    :param prediction: The prediction
+    :return: The share button url
+    """
+
+    # Save get_text to context
+    inner_key = get_random_string()
+    keyboard: Keyboard = (get_prediction_deeplink_button(prediction)
+                          if prediction.get_status() is PredictionStatus.SENT else None)
+
+    context_data_value: ContextDataValue = ContextDataValue(
+        phrases.PREDICTION_INLINE_RESULT_SHARE, get_prediction_text, args=(prediction, False),
+        description=prediction.question, keyboard=[[keyboard]])
+    user.set_context_data(context, ContextDataKey.INLINE_QUERY, context_data_value, inner_key=inner_key)
+
+    return inner_key
+
+
+def prediction_is_sent_to_group_chat(prediction: Prediction, group_chat: GroupChat) -> bool:
+    """
+    Check if a prediction is sent to a group
+    :param prediction: The prediction
+    :param group_chat: The group chat
+    :return: True if the prediction is sent to the group
+    """
+
+    return (PredictionGroupChatMessage.get_or_none((PredictionGroupChatMessage.prediction == prediction)
+                                                   & (PredictionGroupChatMessage.group_chat == group_chat))
+            is not None)

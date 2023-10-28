@@ -18,7 +18,7 @@ def get_random_win(percentage: float) -> bool:
     :param percentage: The percentage to get a win for
     :return: True if the percentage is greater than a random number, False otherwise
     """
-    return percentage * 100 > random.randint(0, 10000)
+    return percentage * 10000 >= random.randint(0, 1000000)
 
 
 def get_percentage_from_value(value: float, total: float, add_decimal=True) -> float:
@@ -63,3 +63,40 @@ def subtract_percentage_from_value(value: float, percentage: float) -> float:
     """
 
     return value - get_value_from_percentage(value, percentage)
+
+
+def get_cumulative_percentage_sum(percentages: list[float]) -> float:
+    """
+    Calculate the cumulative sum of percentages.
+
+    This function takes a list of percentages and calculates the cumulative sum by iteratively adding each percentage to
+    the result and adjusting the remaining percentage for subsequent iterations.
+
+    :param percentages: A list of percentages to sum.
+    :return: The cumulative sum of the percentages.
+    """
+    result = 0
+    remaining_percentage = 100
+
+    for percentage in percentages:
+        # Calculate the percentage of the remaining percentage
+        percentage_of_remaining_percentage = (remaining_percentage * percentage) / 100
+        result += percentage_of_remaining_percentage
+        remaining_percentage -= percentage_of_remaining_percentage
+
+    return result
+
+
+def format_percentage_value(percentage: float, decimals: int = 2) -> int | float:
+    """
+    Convert a percentage to an integer value or a float value with specified decimals.
+
+    :param percentage: The percentage to convert.
+    :param decimals: Number of decimal places (default is 2).
+    :return: An integer or float value.
+    """
+
+    if percentage % 1 == 0:
+        return int(percentage)
+
+    return round(percentage, decimals)

@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from enum import IntEnum
 
 import constants as c
 import resources.phrases as phrases
@@ -9,29 +8,30 @@ from src.model.Crew import Crew
 from src.model.DocQGame import DocQGame
 from src.model.Fight import Fight
 from src.model.Game import Game
+from src.model.IncomeTaxEvent import IncomeTaxEvent
+from src.model.Leaderboard import Leaderboard
+from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
+from src.model.enums.BountyGiftRole import BountyGiftRole
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user, LeaderboardRankIndex
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
+from src.model.enums.LogType import LogType
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
+from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
+from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
+from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
-from src.service.math_service import get_value_from_percentage
-from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url
-
-
-class LogType(IntEnum):
-    """Enum for different types of logs"""
-
-    FIGHT = 1
-    DOC_Q_GAME = 2
-    GAME = 3
-    BOUNTY_GIFT = 4
-    LEGENDARY_PIRATE = 5
-    NEW_WORLD_PIRATE = 6
-
+from src.service.date_service import default_datetime_format
+from src.service.math_service import get_value_from_percentage, get_percentage_from_value
+from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url, get_deeplink
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,
@@ -40,6 +40,8 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY,
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_KEY,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_KEY,
+    LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_KEY,
+    LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_KEY,
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
@@ -49,13 +51,15 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 
 class Log(ListPage):
     """Abstract class for logs."""
 
-    def __init__(self, log_type: LogType, only_by_boss: bool = False):
+    def __init__(self, log_type: LogType, only_by_boss: bool = False, has_stats: bool = True):
         """
         Constructor
 
@@ -67,6 +71,7 @@ class Log(ListPage):
         self.only_by_boss: bool = only_by_boss
         self.user: User = User()
         self.object: BaseModel = BaseModel()
+        self.has_stats: bool = has_stats
 
         super().__init__()
 
@@ -117,6 +122,48 @@ class Log(ListPage):
         """
         pass
 
+    def get_stats_text(self) -> str:
+        """
+        Get the stats for the log
+
+        :return: The stats
+        """
+        pass
+
+    @staticmethod
+    def get_deeplink_by_type(log_type: LogType, item_id: int) -> str:
+        """
+        Get the deeplink for the log
+
+        :param log_type: The log type
+        :param item_id: The item id
+        :return: The deeplink
+        """
+
+        from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
+
+        info: dict = {LogTypeReservedKeys.TYPE: log_type, LogTypeReservedKeys.ITEM_ID: item_id}
+        return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL)
+
+    def get_deeplink(self, item_id) -> str:
+        """
+        Get the deeplink for the log
+
+        :param item_id: The item id
+        :return: The deeplink
+        """
+
+        return self.get_deeplink_by_type(self.type, item_id)
+
+    def get_text_fill_in(self) -> str:
+        """
+        Get the text fill in for the log
+
+        :return: The text fill in
+        """
+
+        return LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type]
+
 
 class FightLog(Log):
     """Class for fight logs"""
@@ -137,7 +184,7 @@ class FightLog(Log):
     def set_object(self, object_id: int) -> None:
         self.object = Fight.get(Fight.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
-        self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
+        self.opponent = self.object.get_opponent(self.user)
         self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
             self.user_is_challenger)
 
@@ -160,8 +207,11 @@ class FightLog(Log):
                                                   get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
+        if self.user != self.object.challenger and self.user != self.object.opponent:
+            return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
+
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
@@ -175,7 +225,33 @@ class FightLog(Log):
 
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
-            outcome_text, get_message_url(self.object.group_chat, self.object.message_id))
+            outcome_text, get_message_url(self.object.message_id, self.object.group_chat))
+
+    def get_stats_text(self) -> str:
+        total_fights = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_fights))
+        total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_fights))
+        max_won_fight = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_fight = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+        most_fought_user, most_fought_count = self.object.get_most_fought_user(self.user)
+        return phrases.FIGHT_LOG_STATS_TEXT.format(
+            total_fights,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_fight.belly),
+            max_won_fight.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_won_fight.id),
+            get_belly_formatted(max_lost_fight.belly),
+            max_lost_fight.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_lost_fight.id),
+            most_fought_user.get_markdown_mention(),
+            most_fought_count)
 
 
 class DocQGameLog(Log):
@@ -198,7 +274,7 @@ class DocQGameLog(Log):
         return (self.object
                 .select()
                 .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
-                .order_by(DocQGame.datetime.desc())
+                .order_by(DocQGame.date.desc())
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
     def get_total_items_count(self) -> int:
@@ -212,7 +288,7 @@ class DocQGameLog(Log):
                                                        get_belly_formatted(self.object.belly))
 
     def get_item_detail_text(self) -> str:
-        date = self.object.datetime.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
         correct_apple = int((str(self.object.correct_choices_index).split(c.STANDARD_SPLIT_CHAR))[0]) + 1
         won = GameStatus(self.object.status) is GameStatus.WON
         outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
@@ -222,7 +298,29 @@ class DocQGameLog(Log):
 
         return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
             date, correct_apple, outcome_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
+
+    def get_stats_text(self) -> str:
+        total_games = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_games))
+        total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_games))
+        max_won_game = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+
+        return phrases.DOC_Q_GAME_LOG_STATS_TEXT.format(
+            total_games,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_game.belly),
+            self.get_deeplink(max_won_game.id),
+            get_belly_formatted(max_lost_game.belly),
+            self.get_deeplink(max_lost_game.id))
 
 
 class GameLog(Log):
@@ -270,8 +368,9 @@ class GameLog(Log):
     def get_item_detail_text(self) -> str:
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
-        game_name = GameType(self.object.type).get_name()
+        date = default_datetime_format(self.object.date, self.user)
+        game_name = (GameType(self.object.type).get_name() if self.object.type is not None
+                     else phrases.GAME_NOT_SELECTED_NAME)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
@@ -286,7 +385,41 @@ class GameLog(Log):
         return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text, self.opponent.get_markdown_mention(), game_name, date,
             get_belly_formatted(self.object.wager), outcome_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
+
+    def get_stats_text(self) -> str:
+        total_games = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_games))
+        total_losses = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_games))
+        total_draws = self.object.get_total_win_or_loss_or_draw(self.user, GameStatus.DRAW)
+        total_draws_percentage = int(get_percentage_from_value(total_draws, total_games))
+        max_won_game = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+        most_challenged_user, most_challenged_count = self.object.get_most_challenged_user(self.user)
+        most_played_game, most_played_count = self.object.get_most_played_game(self.user)
+
+        return phrases.GAME_LOG_STATS_TEXT.format(
+            total_games,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            total_draws,
+            total_draws_percentage,
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
+            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(max_won_game.wager),
+            max_won_game.get_name(),
+            self.get_deeplink(max_won_game.id),
+            get_belly_formatted(max_lost_game.wager),
+            max_lost_game.get_name(),
+            self.get_deeplink(max_lost_game.id),
+            most_challenged_user.get_markdown_mention(),
+            most_challenged_count,
+            most_played_game.get_name(),
+            most_played_count)
 
 
 class BountyGiftLog(Log):
@@ -333,7 +466,7 @@ class BountyGiftLog(Log):
 
     def get_item_detail_text(self) -> str:
         sender_text = phrases.RECEIVER if self.user_is_sender else phrases.SENDER
-        date = self.object.date.strftime(c.STANDARD_DATE_TIME_FORMAT)
+        date = default_datetime_format(self.object.date, self.user)
 
         tax_text = ''
         if self.user_is_sender:
@@ -346,7 +479,31 @@ class BountyGiftLog(Log):
         return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(
             sender_text, self.other_user.get_markdown_mention(),
             date, get_belly_formatted(self.object.amount), tax_text,
-            get_message_url(self.object.group_chat, self.object.message_id))
+            get_message_url(self.object.message_id, self.object.group_chat))
+
+    def get_stats_text(self) -> str:
+        highest_sent_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.SENDER)
+        highest_sent_user, highest_sent_amount = highest_sent_gift.receiver, highest_sent_gift.amount
+        highest_received_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)
+        highest_received_user, highest_received_amount = highest_received_gift.sender, highest_received_gift.amount
+        most_sent_user, most_sent_amount = self.object.get_top_givers_or_receiver(self.user, BountyGiftRole.SENDER)
+        most_received_user, most_received_amount = self.object.get_top_givers_or_receiver(self.user,
+                                                                                          BountyGiftRole.RECEIVER)
+
+        return phrases.BOUNTY_GIFT_LOG_STATS_TEXT.format(
+            self.get_total_items_count(),
+            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.SENDER)),
+            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)),
+            get_belly_formatted(highest_sent_amount),
+            highest_sent_user.get_markdown_name(),
+            self.get_deeplink(highest_sent_gift.id),
+            get_belly_formatted(highest_received_amount),
+            highest_received_user.get_markdown_name(),
+            self.get_deeplink(highest_received_gift.id),
+            most_sent_user.get_markdown_mention(),
+            get_belly_formatted(most_sent_amount),
+            most_received_user.get_markdown_mention(),
+            get_belly_formatted(most_received_amount))
 
 
 class LegendaryPirateLog(Log):
@@ -358,7 +515,7 @@ class LegendaryPirateLog(Log):
 
         """
 
-        super().__init__(LogType.LEGENDARY_PIRATE)
+        super().__init__(LogType.LEGENDARY_PIRATE, has_stats=False)
 
         self.object: LegendaryPirate = LegendaryPirate()
         self.user: User = User()
@@ -397,7 +554,7 @@ class NewWorldPirateLog(Log):
 
         """
 
-        super().__init__(LogType.NEW_WORLD_PIRATE, only_by_boss=True)
+        super().__init__(LogType.NEW_WORLD_PIRATE, only_by_boss=True, has_stats=False)
 
         self.object: User = User()
 
@@ -436,7 +593,188 @@ class NewWorldPirateLog(Log):
             escape_valid_markdown_chars(self.object.get_location().name), crew_text)
 
 
-LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog()]
+class LeaderboardRankLog(Log):
+    """Class for leaderboard rank logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.LEADERBOARD_RANK)
+
+        self.object: LeaderboardUser = LeaderboardUser()
+        self.leaderboard: Leaderboard = Leaderboard()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: LeaderboardUser = LeaderboardUser.get(LeaderboardUser.id == object_id)
+        self.leaderboard: Leaderboard = self.object.leaderboard
+
+    def get_items(self, page) -> list[LeaderboardUser]:
+        return (self.object
+                .select().join(Leaderboard)
+                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
+                .order_by(LeaderboardUser.id.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select().join(Leaderboard)
+                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.LEADERBOARD_RANK_LOG_ITEM_TEXT.format(
+            self.leaderboard.week, self.leaderboard.year,
+            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)))
+
+    def get_item_detail_text(self) -> str:
+        return phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT.format(
+            self.leaderboard.week, self.leaderboard.year,
+            self.object.position,
+            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)),
+            get_belly_formatted(self.object.bounty))
+
+    def get_stats_text(self) -> str:
+        total_appearances = self.get_total_items_count()
+        appearances_as_pirate_king = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.PIRATE_KING)
+        appearances_as_pirate_king_percentage = int(get_percentage_from_value(appearances_as_pirate_king,
+                                                                              total_appearances))
+        appearances_as_emperor = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.EMPEROR)
+        appearances_as_emperor_percentage = int(get_percentage_from_value(appearances_as_emperor, total_appearances))
+        appearances_as_first_mate = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.FIRST_MATE)
+        appearances_as_first_mate_percentage = int(get_percentage_from_value(appearances_as_first_mate,
+                                                                             total_appearances))
+        appearances_as_supernova = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.SUPERNOVA)
+        appearances_as_supernova_percentage = int(get_percentage_from_value(appearances_as_supernova,
+                                                                            total_appearances))
+        max_by_rank: LeaderboardUser = self.object.get_max_rank_attained(self.user)
+        max_by_bounty: LeaderboardUser = self.object.get_max_bounty_attained(self.user)
+
+        return phrases.LEADERBOARD_RANK_LOG_STATS_TEXT.format(
+            total_appearances,
+            appearances_as_pirate_king,
+            appearances_as_pirate_king_percentage,
+            appearances_as_emperor,
+            appearances_as_emperor_percentage,
+            appearances_as_first_mate,
+            appearances_as_first_mate_percentage,
+            appearances_as_supernova,
+            appearances_as_supernova_percentage,
+            get_rank_by_leaderboard_user(max_by_rank).get_emoji_and_rank_message(),
+            max_by_rank.position,
+            self.get_deeplink(max_by_rank.id),
+            get_belly_formatted(max_by_bounty.bounty),
+            max_by_bounty.position,
+            self.get_deeplink(max_by_bounty.id))
+
+
+class IncomeTaxEventLog(Log):
+    """Class for income tax event logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.INCOME_TAX_EVENT, has_stats=False)
+
+        self.object: IncomeTaxEvent = IncomeTaxEvent()
+        self.user: User = User()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: IncomeTaxEvent = IncomeTaxEvent.get(IncomeTaxEvent.id == object_id)
+        self.user: User = self.object.user
+
+    def get_items(self, page) -> list[IncomeTaxEvent]:
+        return (self.object
+                .select()
+                .where((IncomeTaxEvent.user == self.user))
+                .order_by(IncomeTaxEvent.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where((IncomeTaxEvent.user == self.user))
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.INCOME_TAX_EVENT_LOG_ITEM_TEXT.format(self.object.get_event_type_description(),
+                                                             get_belly_formatted(self.object.amount))
+
+    def get_item_detail_text(self) -> str:
+        from src.service.message_service import get_deeplink
+
+        # Build url to event log
+        event_type = self.object.get_event_type()
+        log_type: LogType = event_type.get_log_type()
+        event_log_url = ''
+
+        if log_type is not None:
+            event_log_url = Log.get_deeplink_by_type(log_type, self.object.event_id)
+        else:
+            # Manually manage events that are not shown in regular logs screen
+            item_id = self.object.event_id
+            match event_type:
+                case IncomeTaxEventType.BOUNTY_LOAN:
+                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                                                 screen=Screen.PVT_BOUNTY_LOAN_DETAIL)
+
+                case IncomeTaxEventType.PREDICTION:
+                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                                                 screen=Screen.PVT_PREDICTION_DETAIL)
+
+        breakdown_list = IncomeTaxBreakdown.from_string(self.object.breakdown_list)
+        deduction_list = IncomeTaxDeduction.from_string(self.object.deduction_list)
+        contribution_list = IncomeTaxContribution.from_string(self.object.contribution_list)
+
+        total_tax = IncomeTaxBreakdown.get_amount_with_deduction_from_list(breakdown_list, deduction_list)
+        total_tax_percentage = int(get_percentage_from_value(total_tax, self.object.amount, add_decimal=False))
+        net_income = self.object.amount - total_tax
+
+        deduction_text = ''
+        if len(deduction_list) > 0:
+            deduction_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION
+            for deduction in deduction_list:
+                deduction_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM.format(
+                    deduction.get_description(),
+                    deduction.percentage)
+
+        contribution_text = ''
+        if len(contribution_list) > 0:
+            contribution_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION
+            for contribution in contribution_list:
+                contribution_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM.format(
+                    contribution.get_description(),
+                    get_belly_formatted(int(get_value_from_percentage(total_tax, contribution.percentage))),
+                    contribution.percentage)
+
+        breakdown_text = ''
+        for breakdown in breakdown_list:
+            breakdown_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM.format(
+                get_belly_formatted(breakdown.taxable_amount),
+                get_belly_formatted(breakdown.taxable_amount - breakdown.tax_amount),
+                get_belly_formatted(breakdown.tax_amount),
+                int(get_percentage_from_value(breakdown.tax_amount, breakdown.taxable_amount)))
+
+        return phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT.format(
+            self.object.get_event_type_description(),
+            event_log_url,
+            self.user.get_datetime_formatted(self.object.date),
+            get_belly_formatted(self.object.amount),
+            get_belly_formatted(net_income),
+            get_belly_formatted(total_tax),
+            total_tax_percentage,
+            deduction_text,
+            contribution_text,
+            breakdown_text)
+
+
+LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),
+        LeaderboardRankLog(), IncomeTaxEventLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:

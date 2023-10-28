@@ -1,11 +1,15 @@
 import datetime
+import logging
 
+from telegram import Message
+from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
-import constants as c
 import src.model.enums.LeaderboardRank as LeaderboardRank
 from resources import phrases as phrases, Environment as Env
 from src.model.Crew import Crew
+from src.model.Group import Group
+from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
@@ -13,21 +17,23 @@ from src.model.enums.Feature import Feature
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
+from src.service.date_service import default_date_format
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
-from src.service.message_service import mention_markdown_v2
+from src.service.message_service import mention_markdown_v2, full_message_send, get_message_url
 
 
-def get_leaderboard_message(leaderboard: Leaderboard) -> str:
+def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message_id: int = None) -> str:
     """
     Gets the leaderboard message
     :param leaderboard: The leaderboard
+    :param global_leaderboard_message_id: The global leaderboard message id
     :return: The leaderboard message
     """
 
     from src.service.bounty_service import get_next_bounty_reset_time
-    from src.service.cron_service import get_remaining_time
+    from src.service.date_service import get_remaining_duration
 
     content_text = ""
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
@@ -40,9 +46,16 @@ def get_leaderboard_message(leaderboard: Leaderboard) -> str:
                                                        user.get_bounty_formatted())
 
     next_bounty_reset_time = get_next_bounty_reset_time()
-    return phrases.LEADERBOARD.format(leaderboard.week, leaderboard.year, leaderboard.leaderboard_users.count(),
-                                      content_text, next_bounty_reset_time.strftime(c.STANDARD_DATE_FORMAT),
-                                      get_remaining_time(next_bounty_reset_time))
+    local_global_text = phrases.LEADERBOARD_GLOBAL if leaderboard.group is None else phrases.LEADERBOARD_LOCAL
+    if global_leaderboard_message_id is not None:
+        view_global_leaderboard_text = phrases.LEADERBOARD_VIEW_GLOBAL_LEADERBOARD.format(
+            get_message_url(message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHANNEL_ID.get()))
+    else:
+        view_global_leaderboard_text = ""
+    return phrases.LEADERBOARD.format(local_global_text, leaderboard.week, leaderboard.year,
+                                      leaderboard.leaderboard_users.count(), content_text, view_global_leaderboard_text,
+                                      default_date_format(next_bounty_reset_time),
+                                      get_remaining_duration(next_bounty_reset_time))
 
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -52,12 +65,9 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     from src.service.bounty_service import should_reset_bounty, reset_bounty
 
-    leaderboard = create_leaderboard()
-
-    # Send the leaderboard to the group chat
-    if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
-        ot_text = get_leaderboard_message(leaderboard)
-        await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.LEADERBOARD, ot_text)
+    # Create and send the leaderboard, not fire and forget because all leaderboards need to be completed before
+    # eventually resetting the bounty
+    await manage_leaderboard(context)
 
     # Reset bounty poster limit
     context.application.create_task(reset_bounty_poster_limit(reset_previous_leaderboard=True))
@@ -85,26 +95,75 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     context.application.create_task(warn_inactive_users_with_eaten_devil_fruit(context))
 
 
-def create_leaderboard() -> Leaderboard:
+async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Creates a leaderboard list
+    Manages the leaderboard
+    :param context: Context of callback
+    :return: None
+    """
+
+    # Create and send global leaderboard
+    global_leaderboard = await create_and_send_leaderboard(context)
+
+    # Get all active groups
+    groups: list[Group] = Group.select().where(Group.is_active == True).order_by(Group.id.asc())
+
+    # Create and send local leaderboards
+    for group in groups:
+        await create_and_send_leaderboard(context, group, global_leaderboard)
+
+
+async def create_and_send_leaderboard(context: ContextTypes, group: Group = None, global_leaderboard: Leaderboard = None
+                                      ) -> Leaderboard | None:
+    """
+    Creates a leaderboard list and sends it to the group chat
     :return: The leaderboard
     """
 
-    year = datetime.datetime.now().isocalendar()[0]
-    week = datetime.datetime.now().isocalendar()[1]
+    if group is not None and global_leaderboard is None:
+        raise ValueError("In order to create a local leaderboard, a global leaderboard must be provided")
+
+    # If local leaderboard, check that the group has enough active users
+    if group is not None and len(group.get_active_users()) < Env.LEADERBOARD_MIN_ACTIVE_USERS.get_int():
+        return
+
+    leaderboard = Leaderboard()
+
+    # If global leaderboard is provided, use its data
+    if global_leaderboard is not None:
+        year = global_leaderboard.year
+        week = global_leaderboard.week
+    else:
+        year = datetime.datetime.now().isocalendar()[0]
+        week = datetime.datetime.now().isocalendar()[1]
 
     # Delete the leaderboard if it exists
-    Leaderboard.delete().where(Leaderboard.year == year, Leaderboard.week == week).execute()
+    Leaderboard.delete().where(Leaderboard.year == year, Leaderboard.week == week, Leaderboard.group == group).execute()
 
-    # Create a leaderboard for the current week and year
-    leaderboard = Leaderboard()
+    # Create a leaderboard for the current week and year and group
     leaderboard.year = datetime.datetime.now().isocalendar()[0]
     leaderboard.week = datetime.datetime.now().isocalendar()[1]
+    leaderboard.group = group
+
     leaderboard.save()
 
     # Create the leaderboard users
-    create_leaderboard_users(leaderboard)
+    create_leaderboard_users(leaderboard, group)
+
+    # Send message to chats
+    if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
+        ot_text = get_leaderboard_message(leaderboard, (global_leaderboard.global_message_id
+                                                        if global_leaderboard is not None else None))
+        if group is not None:
+            await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.LEADERBOARD, ot_text,
+                                                                   filter_by_groups=[group])
+        else:
+            try:
+                message: Message = await full_message_send(context, ot_text, chat_id=Env.UPDATES_CHANNEL_ID.get())
+                leaderboard.global_message_id = message.message_id
+                leaderboard.save()
+            except TelegramError:
+                logging.exception(f'Failed to send global leaderboard to {Env.UPDATES_CHANNEL_ID.get()}')
 
     return leaderboard
 
@@ -119,10 +178,11 @@ def get_leaderboard_rank_message(index: int) -> str:
     return leaderboard_rank.get_emoji_and_rank_message()
 
 
-def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
+def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> list[LeaderboardUser]:
     """
     Creates a leaderboard list
     :param leaderboard: The leaderboard to create the users for
+    :param group: The group to create the users for
     :return: The leaderboard users
     """
 
@@ -130,7 +190,17 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     position = 1
 
     # Get previous leaderboard users who were Emperors or higher
-    previous_leaderboard_users: list[LeaderboardUser] = get_leaderboard(1).leaderboard_users
+    previous_leaderboard: Leaderboard = get_leaderboard(1, group)
+    if previous_leaderboard is None:
+        previous_leaderboard_users = []
+    else:
+        previous_leaderboard_users = previous_leaderboard.leaderboard_users
+
+    # Ids of eligible users for the leaderboard
+    if group is None:
+        eligible_leaderboard_user_ids: list[int] = User.select(User.id)
+    else:
+        eligible_leaderboard_user_ids: list[int] = User.select(User.id).where(User.id.in_(group.get_active_users_ids()))
 
     # Eligible users for Pirate King position - Those who were Emperor or higher in the previous leaderboard
     eligible_pk_users: list[User] = [leaderboard_user.user for leaderboard_user in previous_leaderboard_users
@@ -140,7 +210,8 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     new_world_users: list[User] = list(User.select()
                                        .where((User.location_level >= get_first_new_world().level)
                                               & (User.get_is_not_arrested_statement_condition())
-                                              & (User.is_admin == False))
+                                              & (User.is_admin == False)
+                                              & (User.id.in_(eligible_leaderboard_user_ids)))
                                        .order_by(User.bounty.desc()))
 
     # Save Pirate King, if available
@@ -180,7 +251,8 @@ def create_leaderboard_users(leaderboard: Leaderboard) -> list[LeaderboardUser]:
     paradise_users: list[User] = list(User.select()
                                       .where((User.location_level <= get_last_paradise().level)
                                              & (User.get_is_not_arrested_statement_condition())
-                                             & (User.is_admin == False))
+                                             & (User.is_admin == False)
+                                             & (User.id.in_(eligible_leaderboard_user_ids)))
                                       .order_by(User.bounty.desc()))
 
     # Save Supernovas, next 11 users
@@ -212,18 +284,26 @@ def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, r
     leaderboard_user.user = user
     leaderboard_user.position = position
     leaderboard_user.rank_index = rank.index
+    leaderboard_user.bounty = user.bounty
     leaderboard_user.save()
 
     return leaderboard_user
 
 
-def get_leaderboard(index: int = 0) -> Leaderboard | None:
+def get_leaderboard(index: int = 0, group: Group = None, group_chat: GroupChat = None) -> Leaderboard | None:
     """
     Gets the current leaderboard
     :param index: The index of the leaderboard to get. Higher the index, older the leaderboard.
+    :param group: The group to get the leaderboard for
+    :param group_chat: The group chat to get the leaderboard for
     :return: The leaderboard
     """
+
+    if group_chat is not None:
+        group = group_chat.group
+
     leaderboard: Leaderboard = (Leaderboard.select()
+                                .where(Leaderboard.group == group)
                                 .order_by(Leaderboard.year.desc(),
                                           Leaderboard.week.desc())
                                 .limit(1)
@@ -232,41 +312,41 @@ def get_leaderboard(index: int = 0) -> Leaderboard | None:
     return leaderboard
 
 
-def get_leaderboard_user(user: User, leaderboard: Leaderboard = None, index: int = None) -> LeaderboardUser | None:
+def get_leaderboard_user(user: User, index: int = None, group_chat: GroupChat = None) -> LeaderboardUser | None:
     """
     Gets the leaderboard user for the user
     :param user: The user to get the leaderboard user for
-    :param leaderboard: The leaderboard to get the leaderboard user for
     :param index: The index of the leaderboard to get. Higher the index, older the leaderboard
+    :param group_chat: The group chat to get the leaderboard user for
     :return: The leaderboard user
     """
 
-    if leaderboard is None and index is None:
-        raise ValueError("Either leaderboard or index must be provided")
-
-    if leaderboard is None:
+    leaderboard = get_leaderboard(index, group_chat=group_chat)  # Local
+    if leaderboard is None and group_chat is not None:
         leaderboard = get_leaderboard(index)
 
     leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
     return leaderboard_user
 
 
-def get_current_leaderboard_user(user: User) -> LeaderboardUser | None:
+def get_current_leaderboard_user(user: User, group_chat: GroupChat = None) -> LeaderboardUser | None:
     """
     Gets the current leaderboard user for the user
     :param user: The user to get the leaderboard user for
+    :param group_chat: The group chat to get the leaderboard user for
     :return: The leaderboard user
     """
 
-    return get_leaderboard_user(user, index=0)
+    return get_leaderboard_user(user, index=0, group_chat=group_chat)
 
 
-def get_current_leaderboard_rank(user: User) -> LeaderboardRank.LeaderboardRank:
+def get_current_leaderboard_rank(user: User, group_chat: GroupChat = None) -> LeaderboardRank.LeaderboardRank:
     """
     Gets the current leaderboard rank for the user
     :param user: The user to get the leaderboard rank for
+    :param group_chat: The group chat to get the leaderboard rank for
     :return: The leaderboard rank
     """
 
-    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user)
+    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user, group_chat=group_chat)
     return LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_user)

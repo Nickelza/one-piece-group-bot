@@ -118,21 +118,6 @@ SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Timer('schedule_devil_fruit_zoan_release',
                                           info=str(DevilFruitCategory.ZOAN))
 TIMERS.append(SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE)
 
-SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Timer(
-    'schedule_devil_fruit_ancient_zoan_release',
-    Env.CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get(),
-    Env.ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    Env.SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    Env.SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE.get_bool(),
-    info=str(DevilFruitCategory.ANCIENT_ZOAN))
-TIMERS.append(SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE)
-
-RELEASE_SCHEDULED_DEVIL_FRUIT = Timer('release_scheduled_devil_fruit', Env.CRON_RELEASE_SCHEDULED_DEVIL_FRUIT.get(),
-                                      Env.ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool(),
-                                      Env.SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool(),
-                                      Env.SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT.get_bool())
-TIMERS.append(RELEASE_SCHEDULED_DEVIL_FRUIT)
-
 RESPAWN_DEVIL_FRUIT = Timer('respawn_devil_fruit', Env.CRON_RESPAWN_DEVIL_FRUIT.get(),
                             Env.ENABLE_TIMER_RESPAWN_DEVIL_FRUIT.get_bool(),
                             Env.SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT.get_bool(),
@@ -145,3 +130,17 @@ DEACTIVATE_INACTIVE_GROUP_CHATS = Timer('deactivate_inactive_group_chats',
                                         Env.SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool(),
                                         Env.SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS.get_bool())
 TIMERS.append(DEACTIVATE_INACTIVE_GROUP_CHATS)
+
+# End inactive games
+END_INACTIVE_GAMES = Timer('end_inactive_games', Env.CRON_END_INACTIVE_GAMES.get(),
+                           Env.ENABLE_TIMER_END_INACTIVE_GAMES.get_bool(),
+                           Env.SHOULD_LOG_TIMER_END_INACTIVE_GAMES.get_bool(),
+                           Env.SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES.get_bool())
+TIMERS.append(END_INACTIVE_GAMES)
+
+# Set expired bounty loans
+SET_EXPIRED_BOUNTY_LOANS = Timer('set_expired_bounty_loans', Env.CRON_SET_EXPIRED_BOUNTY_LOANS.get(),
+                                 Env.ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS.get_bool(),
+                                 Env.SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS.get_bool(),
+                                 Env.SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS.get_bool())
+TIMERS.append(SET_EXPIRED_BOUNTY_LOANS)

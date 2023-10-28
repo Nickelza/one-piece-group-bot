@@ -18,7 +18,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
 from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game, \
-    get_guess_game_users_to_send_image_to
+    get_guess_game_users_to_send_message_to
 from src.service.message_service import full_media_send
 
 
@@ -87,8 +87,8 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     :return: None
     """
 
-    users = await get_guess_game_users_to_send_image_to(game, send_to_user, should_send_to_all_players,
-                                                        schedule_next_send)
+    users = await get_guess_game_users_to_send_message_to(game, send_to_user, should_send_to_all_players,
+                                                          schedule_next_send)
 
     # Get the board
     shambles = get_board(game)

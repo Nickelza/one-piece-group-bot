@@ -115,6 +115,8 @@ COMMANDS.append(PVT_USER_STATUS)
 # Deprecated
 PVT_SETTINGS_LOCATION_UPDATE = Command('', Screen.PVT_SETTINGS_LOCATION_UPDATE, active=False)
 COMMANDS.append(PVT_SETTINGS_LOCATION_UPDATE)
+GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, active=False)
+COMMANDS.append(GRP_DEVIL_FRUIT_COLLECT)
 
 # To allow while arrested
 PVT_SETTINGS = Command('', Screen.PVT_SETTINGS, allow_while_arrested=True)
@@ -133,8 +135,31 @@ COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT)
 # To allow deeplink
 PVT_PREDICTION_DETAIL = Command('', Screen.PVT_PREDICTION_DETAIL, allow_deeplink=True)
 COMMANDS.append(PVT_PREDICTION_DETAIL)
+
 PVT_GAME_GUESS_INPUT = Command('', Screen.PVT_GAME_GUESS_INPUT, allow_deeplink=True)
 COMMANDS.append(PVT_GAME_GUESS_INPUT)
+
+PVT_LOGS_TYPE_DETAIL = Command('', Screen.PVT_LOGS_TYPE_DETAIL, allow_deeplink=True)
+COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
+
+PVT_DEVIL_FRUIT_DETAIL = Command('', Screen.PVT_DEVIL_FRUIT_DETAIL, allow_deeplink=True)
+COMMANDS.append(PVT_DEVIL_FRUIT_DETAIL)
+
+PVT_SETTINGS_TIMEZONE = Command('', Screen.PVT_SETTINGS_TIMEZONE, allow_deeplink=True)
+COMMANDS.append(PVT_SETTINGS_TIMEZONE)
+
+# To set required location
+PVT_LOGS_TYPE_STATS = Command('', Screen.PVT_LOGS_TYPE_STATS, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_LOG_STATS.get_int()))
+COMMANDS.append(PVT_LOGS_TYPE_STATS)
+
+PVT_PREDICTION_CREATE = Command('', Screen.PVT_PREDICTION_CREATE, required_location=Location.get_by_level(
+    Env.REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE.get_int()))
+COMMANDS.append(PVT_PREDICTION_CREATE)
+
+GRP_GAME_OPPONENT_CONFIRMATION = Command(
+    '', Screen.GRP_GAME_OPPONENT_CONFIRMATION, answer_callback=True,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 
 GRP_DOC_Q_GAME = Command('docq', Screen.GRP_DOC_Q_GAME, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()), feature=Feature.DOC_Q)
@@ -156,7 +181,7 @@ GRP_FIGHT = Command('fight', Screen.GRP_FIGHT, only_in_reply=True, feature=Featu
                     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()))
 COMMANDS.append(GRP_FIGHT)
 
-GRP_GAME = Command('challenge', Screen.GRP_GAME, only_in_reply=True, feature=Feature.CHALLENGE,
+GRP_GAME = Command('challenge', Screen.GRP_GAME, feature=Feature.CHALLENGE,
                    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
 COMMANDS.append(GRP_GAME)
 
@@ -191,14 +216,13 @@ COMMANDS.append(GRP_SPEAK)
 GRP_BOUNTY_GIFT = Command('gift', Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT)
 COMMANDS.append(GRP_BOUNTY_GIFT)
 
+GRP_BOUNTY_LOAN = Command('loan', Screen.GRP_BOUNTY_LOAN, only_in_reply=True, feature=Feature.BOUNTY_LOAN)
+COMMANDS.append(GRP_BOUNTY_LOAN)
+
 GRP_DEVIL_FRUIT_SELL = Command('dfsell', Screen.GRP_DEVIL_FRUIT_SELL, feature=Feature.DEVIL_FRUIT_SELL)
 COMMANDS.append(GRP_DEVIL_FRUIT_SELL)
 
 # To define limitations
-GRP_DEVIL_FRUIT_COLLECT = Command('', Screen.GRP_DEVIL_FRUIT_COLLECT, required_location=Location.get_by_level(
-    Env.REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT.get_int()),
-                                  answer_callback=True)
-COMMANDS.append(GRP_DEVIL_FRUIT_COLLECT)
 GRP_SETTINGS = Command('settings', Screen.GRP_SETTINGS, allow_while_arrested=True, only_by_chat_admin=True,
                        answer_callback=True, send_message_if_error=False)
 COMMANDS.append(GRP_SETTINGS)

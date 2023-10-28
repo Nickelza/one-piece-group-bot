@@ -5,7 +5,8 @@ from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.User import User
-from src.model.enums.Log import Log, LogType, get_log_by_type, LOG_TYPE_DETAIL_TEXT_FILL_IN
+from src.model.enums.Log import Log, get_log_by_type, LOG_TYPE_DETAIL_TEXT_FILL_IN
+from src.model.enums.LogType import LogType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
@@ -39,8 +40,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log, LogTypeReservedKeys.ITEM_ID,
                                                              Screen.PVT_LOGS_TYPE_DETAIL)
 
+        # Stats keyboard
+        if log.has_stats and log.get_total_items_count() > 0:
+            stats_keyboard = Keyboard(phrases.PVT_KEY_LOGS_STATS, screen=Screen.PVT_LOGS_TYPE_STATS,
+                                      inbound_info=inbound_keyboard.info)
+            items_keyboard.append([stats_keyboard])
+
         log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
         ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
+
+        # For deep linking
+        if Screen.PVT_LOGS not in inbound_keyboard.previous_screen_list:
+            inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS)
 
         await full_message_send(context, ot_text, update=update, keyboard=items_keyboard,
                                 inbound_keyboard=inbound_keyboard,

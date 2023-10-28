@@ -1,17 +1,21 @@
 import datetime
 from typing import Any
 
+import pytz
 from peewee import *
-from telegram import ChatMember, Update
-from telegram.constants import ChatMemberStatus
+from telegram import Update
+from telegram.ext import ContextTypes
 
 import constants as c
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
     is_paradise_by_level
 from src.model.enums.Screen import Screen
+from src.service.bot_service import get_user_context_data, set_user_context_data
 
 
 class User(BaseModel):
@@ -24,6 +28,7 @@ class User(BaseModel):
     tg_last_name = CharField(max_length=99)
     tg_username = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
+    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
     pending_bounty = BigIntegerField(default=0)
     doc_q_cooldown_end_date = DateTimeField(null=True)
     game_cooldown_end_date = DateTimeField(null=True)
@@ -41,23 +46,29 @@ class User(BaseModel):
     can_create_crew = BooleanField(default=True)
     can_join_crew = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
+    last_system_interaction_date = DateTimeField(null=True)
     private_screen_list = CharField(max_length=99)
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
-    can_collect_devil_fruit = BooleanField(default=True)
+    devil_fruit_collection_cooldown_end_date = DateTimeField(null=True)
     bounty_message_limit = BigIntegerField(default=0)
+    timezone = CharField(max_length=99, null=True)
+    is_active = BooleanField(default=True)
+    prediction_creation_cooldown_end_date = DateTimeField(null=True)
 
     # Transient fields
+    # The private screen step with which the user arrived to the current screen
+    private_screen_previous_step: int = None
+    # If to stay on the same screen
+    private_screen_stay: bool = False
+    # Step to go back to
+    private_screen_stay_step: int | None = None
 
     # If the model should be updated at script end. Sometimes the model is updated in functions where it can not be
     # passed as a parameter, so updating it at the end of the script would overwrite the changes
     should_update_model: bool = True
-
-    # Pending bounty at the start of the script. Used to check if the pending bounty went negative
-
-    previous_pending_bounty: int = 0
 
     class Meta:
         db_table = 'user'
@@ -95,6 +106,9 @@ class User(BaseModel):
         :param screen: The screen
         :param previous_screen_list: The previous screen list
         """
+
+        if previous_screen_list is not None and len(previous_screen_list) == 0:
+            previous_screen_list = None
 
         if previous_screen_list is not None:
             self.private_screen_step = None  # Will have to update when Skip button is present
@@ -150,6 +164,37 @@ class User(BaseModel):
 
         self.private_screen_step = None
         self.private_screen_in_edit_id = None
+        self.private_screen_stay = False
+        self.private_screen_stay_step = None
+
+    def remove_last_private_screen(self):
+        """
+        Removes the last private screen
+        """
+
+        private_screen_list = self.get_private_screen_list()
+        if len(private_screen_list) > 0:
+            private_screen_list.pop()
+            self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(private_screen_list)
+
+    def add_private_screen(self, screen: Screen):
+        """
+        Adds a private screen
+        :param screen: The screen
+        """
+
+        private_screen_list = self.get_private_screen_list()
+        private_screen_list.append(screen)
+        self.private_screen_list = c.STANDARD_SPLIT_CHAR.join(private_screen_list)
+
+    def replace_last_private_screen(self, screen: Screen):
+        """
+        Replaces the last private screen
+        :param screen: The screen
+        """
+
+        self.remove_last_private_screen()
+        self.add_private_screen(screen)
 
     def is_crew_captain(self):
         """
@@ -310,19 +355,195 @@ class User(BaseModel):
                  ((User.bounty + User.pending_bounty) >= get_first_new_world().required_bounty)) |
                 ((User.bounty + User.pending_bounty) >= get_last_new_world().required_bounty))
 
-    async def is_chat_admin(self, update: Update):
+    def get_in_same_crew_statement_condition(self, other_user: 'User') -> Any:
+        """
+        Returns the in same crew statement condition
+        :param other_user: The other user
+        :return: The in same crew statement condition
+        """
+
+        return (User.select(fn.COUNT(User.id))
+                .where((other_user.crew.is_null(False))
+                       & (other_user.crew == self.crew)
+                       & (other_user == User.id)
+                       ) > 0)
+
+    async def is_chat_admin(self, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: str = None
+                            ) -> bool:
         """
         Returns True if the user is an admin of the chat
         :param update: The update
+        :param context: The context
+        :param chat_id: The chat id
         :return: True if the user is an admin of the chat
         """
+        from src.service.user_service import user_is_chat_admin
+        return await user_is_chat_admin(self, update=update, context=context, tg_group_id=chat_id)
 
-        from telegram.error import Forbidden
+    async def is_chat_member(self, context: ContextTypes.DEFAULT_TYPE, chat_id: str):
+        """
+        Returns True if the user is in the chat
+        :param context: The context
+        :param chat_id: The chat id
+        :return: True if the user is in the chat
+        """
+
+        from src.service.user_service import user_is_chat_member
+        return await user_is_chat_member(self, context=context, tg_group_id=chat_id)
+
+    @staticmethod
+    def get_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey,
+                         tolerate_key_exception: bool = True, inner_key: str = None) -> any:
+        """
+        Get user data from context
+        :param context: The context
+        :param key: The key
+        :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+        :param inner_key: The inner key
+        :return: The value
+        """
+
+        return get_user_context_data(context, key, tolerate_key_exception=tolerate_key_exception, inner_key=inner_key)
+
+    @staticmethod
+    def set_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, value: Any,
+                         inner_key: str = None) -> Any:
+        """
+        Set user data to context
+        :param context: The context
+        :param key: The key
+        :param value: The value
+        :param inner_key: The inner key
+        """
+
+        return set_user_context_data(context, key, value, inner_key=inner_key)
+
+    @staticmethod
+    def remove_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey):
+        """
+        Remove user data from context
+        :param context: The context
+        :param key: The key
+        """
+
         try:
-            chat_member: ChatMember = await update.effective_chat.get_member(str(self.tg_user_id))
-            return chat_member.status in (ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR)
-        except Forbidden:  # Bot kicked from the group chat
+            del context.user_data[key]
+        except KeyError:
             pass
+
+    def get_expired_bounty_loans(self) -> list:
+        """
+        Get the expired bounty loans
+        :return: The expired bounty loans
+        """
+
+        from src.model.enums.BountyLoanStatus import BountyLoanStatus
+        from src.model.BountyLoan import BountyLoan
+
+        return self.bounty_borrowers.where(BountyLoan.status == BountyLoanStatus.EXPIRED)
+
+    def has_expired_bounty_loans(self) -> bool:
+        """
+        Returns True if the user has expired bounty loans
+        :return: True if the user has expired bounty loans
+        """
+
+        return len(self.get_expired_bounty_loans()) > 0
+
+    def get_bounty_plus_pending_bounty(self) -> int:
+        """
+        Returns the bounty plus the pending bounty
+        :return: The bounty plus the pending bounty
+        """
+
+        return int(str(self.bounty)) + int(str(self.pending_bounty))
+
+    def has_income_tax(self):
+        """
+        Returns True if the user has income tax
+        :return: True if the user has income tax
+        """
+
+        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+
+        return IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage > 0
+
+    def get_income_tax_percentage(self) -> float:
+        """
+        Returns the income tax percentage
+        :return: The income tax percentage
+        """
+
+        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
+        from src.service.math_service import format_percentage_value
+
+        return format_percentage_value(IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage)
+
+    @staticmethod
+    def get_active_interactive_users() -> list:
+        """
+        Get the active users who interacted with the system
+        :return: The active interactive users
+        """
+
+        return User.select().where(User.last_system_interaction_date > datetime.datetime.now() - datetime.timedelta(
+            days=Env.INACTIVE_GROUP_USER_DAYS.get_int()))
+
+    def get_timezone(self) -> pytz.timezone:
+        """
+        Returns the timezone of the user
+        :return: The timezone of the user
+        """
+
+        return pytz.timezone(self.timezone or Env.TZ.get())
+
+    def get_current_time(self) -> datetime.datetime:
+        """
+        Returns the current time of the user
+        :return: The current time of the user
+        """
+
+        return datetime.datetime.now(self.get_timezone())
+
+    def get_datetime_formatted(self, date: datetime.datetime) -> str:
+        """
+        Returns the formatted datetime of the user in their timezone
+
+        :param date: The datetime
+        :return: The formatted datetime of the user
+        """
+
+        from src.service.date_service import default_datetime_format
+
+        return default_datetime_format(date, self)
+
+    def get_date_formatted(self, date: datetime.datetime) -> str:
+        """
+        Returns the formatted date of the user in their timezone
+
+        :param date: The date
+        :return: The formatted date of the user
+        """
+
+        from src.service.date_service import default_date_format
+
+        return default_date_format(date, self)
+
+    def get_crew_role(self):
+        """
+        Returns the crew role
+        :return: The crew role
+        """
+
+        return CrewRole(self.crew_role)
+
+    def get_crew_role_description(self):
+        """
+        Returns the crew role description
+        :return: The crew role description
+        """
+
+        return self.get_crew_role().get_description()
 
 
 User.create_table()

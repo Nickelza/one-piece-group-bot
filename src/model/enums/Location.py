@@ -1,5 +1,6 @@
 import resources.Environment as Env
 from src.model.enums.Region import Region
+from src.model.error.CommonChatError import CommonChatException
 
 
 class Location:
@@ -102,7 +103,7 @@ def get_by_bounty(bounty: int) -> Location:
         if bounty >= location.required_bounty:
             return location
 
-    raise ValueError('No location found for bounty: {}'.format(bounty))
+    raise CommonChatException('No location found for bounty: {}'.format(bounty))
 
 
 def get_by_level(level: int) -> Location:

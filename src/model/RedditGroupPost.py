@@ -11,7 +11,7 @@ class RedditGroupPost(BaseModel):
     """
     id = PrimaryKeyField()
     short_link = CharField(max_length=99, unique=True)
-    datetime = DateTimeField(default=datetime.datetime.now)
+    date = DateTimeField(default=datetime.datetime.now)
     message_id = BigIntegerField()
 
     class Meta:

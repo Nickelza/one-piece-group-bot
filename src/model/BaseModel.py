@@ -13,3 +13,4 @@ class BaseModel(Model):
 
     class Meta:
         database = db_obj.get_db()
+        only_save_dirty = True

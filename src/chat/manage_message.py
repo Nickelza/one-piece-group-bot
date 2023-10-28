@@ -12,10 +12,12 @@ import resources.phrases as phrases
 import src.model.enums.Command as Command
 from resources.Database import Database
 from src.chat.group.group_chat_manager import manage as manage_group_chat
+from src.chat.inline_query.inline_query_manager import manage as manage_inline_query
 from src.chat.private.private_chat_manager import manage as manage_private_chat
 from src.chat.tgrest.tgrest_chat_manager import manage as manage_tgrest_chat
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
+from src.model.GroupUser import GroupUser
 from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
@@ -27,7 +29,7 @@ from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
-    full_message_or_media_send_or_edit, message_is_reply
+    full_message_or_media_send_or_edit, message_is_reply, escape_valid_markdown_chars
 from src.service.user_service import user_is_boss, user_is_muted
 
 
@@ -103,31 +105,51 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     :param is_callback: True if the message is a callback
     :return: None
     """
+    # Recast necessary for match case to work, don't ask me why
+    message_source: MessageSource = MessageSource(get_message_source(update))
 
     user = User()
     if update.effective_user is not None:
-        user: User = get_user(update.effective_user)
+        user: User = get_user(update.effective_user, should_save=False)
 
         # Check if the user is authorized
         if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
             return
 
-    user.previous_pending_bounty = user.pending_bounty
+        # Check if user in authorized groups
+        if Env.LIMIT_TO_AUTHORIZED_GROUPS.get_bool():
+            group_ids = Env.AUTHORIZED_GROUPS.get_list()
 
-    # Recast necessary for match case to work, don't ask me why
-    message_source: MessageSource = MessageSource(get_message_source(update))
+            # Group not authorized
+            if message_source is MessageSource.GROUP and str(update.effective_chat.id) not in group_ids:
+                # Leave chat
+                logging.error(f'Unauthorized group {update.effective_chat.id}: Leaving chat')
+                await update.effective_chat.leave()
+                return
+
+            # User not a member of an authorized group
+            if message_source is MessageSource.PRIVATE:
+                for group_id in group_ids:
+                    if await user.is_chat_member(context, group_id):
+                        break
+                else:
+                    return
+
+        user.private_screen_previous_step = user.private_screen_step
+        user.save()
 
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
-        logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
-        await update.effective_chat.leave()
+        if str(update.effective_chat.id) != Env.UPDATES_CHANNEL_ID.get():
+            logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
+            await update.effective_chat.leave()
         return
 
     # Group
     # noinspection PyTypeChecker
     group_chat = None
     if message_source is MessageSource.GROUP:
-        group: Group = add_or_update_group(update)
+        group: Group = await add_or_update_group(update, (user if update.effective_user is not None else None))
         group_chat: GroupChat = add_or_update_group_chat(update, group)
 
     command: Command.Command = Command.ND
@@ -196,29 +218,28 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
                 await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback, group_chat)
             case MessageSource.TG_REST:
                 await manage_tgrest_chat(update, context)
+            case MessageSource.INLINE_QUERY:
+                await manage_inline_query(update, context, user)
             case _:
                 raise ValueError('Invalid message source')
     except DoesNotExist:
-        await full_message_send(context, phrases.ITEM_NOT_FOUND, update=update)
-        raise ValueError('Item not found')
+        await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
+        previous_screens = (user.get_private_screen_list()[:-1]
+                            if message_source is MessageSource.PRIVATE else None)
         try:
-            await full_message_send(context, str(ce), update=update)
+            await full_message_send(context, escape_valid_markdown_chars(str(ce)), update=update,
+                                    previous_screens=previous_screens, from_exception=True)
         except BadRequest:
-            await full_message_or_media_send_or_edit(context, str(ce), update=update)
+            await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update,
+                                                     previous_screens=previous_screens, from_exception=True)
     except NavigationLimitReachedException:
         await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                                 show_alert=True)
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()
-
-    # Negative pending bounty, log it
-    if user.pending_bounty != user.previous_pending_bounty and user.pending_bounty < 0:
-        logging.error(f'Negative pending bounty for user {user.tg_user_id}: '
-                      f'{user.previous_pending_bounty} -> {user.pending_bounty}'
-                      f'\n{update.to_dict()}')
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
@@ -358,18 +379,20 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             await delete_message(update)
         else:
             if (command.answer_callback and is_callback) or command.send_message_if_error:
-                await full_message_or_media_send_or_edit(context, str(cve), update=update, add_delete_button=True,
-                                                         answer_callback=command.answer_callback,
-                                                         show_alert=command.show_alert)
+                await full_message_or_media_send_or_edit(
+                    context, str(cve), update=update, add_delete_button=(inbound_keyboard is None),
+                    answer_callback=command.answer_callback, show_alert=command.show_alert,
+                    inbound_keyboard=inbound_keyboard)
         return False
 
     return True
 
 
-def get_user(effective_user: TelegramUser) -> User:
+def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     """
     Create or update the user
     :param effective_user: The Telegram user
+    :param should_save: True if the user should be saved
     :return: The user
     """
 
@@ -384,16 +407,19 @@ def get_user(effective_user: TelegramUser) -> User:
     user.tg_last_name = effective_user.last_name
     user.tg_username = effective_user.username
     user.last_message_date = datetime.now()
+    user.is_active = True
 
-    user.save()
+    if should_save:
+        user.save()
 
     return user
 
 
-def add_or_update_group(update) -> Group:
+async def add_or_update_group(update, user: User) -> Group:
     """
     Adds or updates a group_chat
     :param update: Telegram update
+    :param user: User object
     :return: Group object
     """
     group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
@@ -415,6 +441,19 @@ def add_or_update_group(update) -> Group:
     group.last_message_date = datetime.now()
     group.is_active = True
     group.save()
+
+    # Add or update the group user
+    if user is not None:
+        group_user = GroupUser.get_or_none((GroupUser.group == group) & (GroupUser.user == user))
+        if group_user is None:
+            group_user = GroupUser()
+            group_user.group = group
+            group_user.user = user
+
+        group_user.last_message_date = datetime.now()
+        group_user.is_active = True
+        group_user.is_admin = await user.is_chat_admin(update)
+        group_user.save()
 
     return group
 
@@ -438,6 +477,11 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
         group_chat = GroupChat()
         group_chat.group = group
         group_chat.tg_topic_id = tg_topic_id
+
+    try:
+        group_chat.tg_topic_name = update.message.reply_to_message.forum_topic_created.name
+    except AttributeError:
+        pass
 
     group_chat.last_message_date = datetime.now()
     group_chat.is_active = True

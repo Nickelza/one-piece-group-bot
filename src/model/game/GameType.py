@@ -14,6 +14,7 @@ class GameType(IntEnum):
     WHOS_WHO = 3
     SHAMBLES = 4
     GUESS_OR_LIFE = 5
+    PUNK_RECORDS = 6
 
     def get_saved_media_name(self) -> SavedMediaName:
         """
@@ -50,6 +51,7 @@ GAME_TYPE_SAVED_MEDIA_NAME_DICT = {
     GameType.WHOS_WHO: SavedMediaName.GAME_WHOS_WHO,
     GameType.SHAMBLES: SavedMediaName.GAME_SHAMBLES,
     GameType.GUESS_OR_LIFE: SavedMediaName.GAME_GUESS_OR_LIFE,
+    GameType.PUNK_RECORDS: SavedMediaName.GAME_PUNK_RECORDS,
 }
 
 GAME_TYPE_NAME_DICT = {
@@ -58,6 +60,7 @@ GAME_TYPE_NAME_DICT = {
     GameType.WHOS_WHO: phrases.WHOS_WHO_GAME_NAME,
     GameType.SHAMBLES: phrases.SHAMBLES_GAME_NAME,
     GameType.GUESS_OR_LIFE: phrases.GUESS_OR_LIFE_GAME_NAME,
+    GameType.PUNK_RECORDS: phrases.PUNK_RECORDS_GAME_NAME,
 }
 
 GAME_TYPE_DESCRIPTION_DICT = {
@@ -66,7 +69,10 @@ GAME_TYPE_DESCRIPTION_DICT = {
     GameType.WHOS_WHO: phrases.WHOS_WHO_GAME_DESCRIPTION.format(Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int()),
     GameType.SHAMBLES: phrases.SHAMBLES_GAME_DESCRIPTION.format(Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int()),
     GameType.GUESS_OR_LIFE: phrases.GUESS_OR_LIFE_GAME_DESCRIPTION.format(
-        Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
+        Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int()),
+    GameType.PUNK_RECORDS: phrases.PUNK_RECORDS_GAME_DESCRIPTION.format(
+        Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int()
+    ),
 }
 
-GAME_TYPE_WITH_DIFFICULTY = [GameType.GUESS_OR_LIFE, GameType.SHAMBLES, GameType.WHOS_WHO]
+GAME_TYPE_WITH_DIFFICULTY = [GameType.GUESS_OR_LIFE, GameType.SHAMBLES, GameType.WHOS_WHO, GameType.PUNK_RECORDS]

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -16,6 +18,7 @@ class PredictionGroupChatMessage(BaseModel):
     group_chat = ForeignKeyField(GroupChat, backref='prediction_group_chat_messages', on_delete='CASCADE',
                                  on_update='CASCADE')
     message_id = BigIntegerField()
+    sent_date = DateTimeField(default=datetime.now)
 
     class Meta:
         db_table = 'prediction_group_chat_message'

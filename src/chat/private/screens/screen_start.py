@@ -35,6 +35,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_PREDICTION, screen=Screen.PVT_PREDICTION,
                                        previous_screen_list=[Screen.PVT_START])])
 
+    # Bounty Loan button
+    outbound_keyboard.append([Keyboard(phrases.PVT_KEY_BOUNTY_LOAN, screen=Screen.PVT_BOUNTY_LOAN,
+                                       previous_screen_list=[Screen.PVT_START])])
+
     # Logs
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_LOGS, screen=Screen.PVT_LOGS,
                                        previous_screen_list=[Screen.PVT_START])])

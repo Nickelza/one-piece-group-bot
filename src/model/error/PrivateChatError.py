@@ -10,6 +10,7 @@ class PrivateChatError(Error):
     UNKNOWN_EXTRA_STEP = Error(2, phrases.UNKNOWN_EXTRA_STEP, source)
     PRIVATE_STEP_NOT_SET = Error(3, phrases.PRIVATE_STEP_NOT_SET, source)
     ITEM_NOT_FOUND = Error(4, phrases.ITEM_NOT_FOUND, source)
+    SAVED_USER_DATA_NOT_FOUND = Error(5, phrases.SAVED_USER_DATA_NOT_FOUND, source)
 
 
 class PrivateChatException(Exception):

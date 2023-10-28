@@ -176,6 +176,16 @@ class GuessOrLife:
 
         return str(', '.join(letters)).upper()
 
+    def get_remaining_letters(self, player_type: PlayerType):
+        """
+        Get the remaining letters
+        :param player_type: The player
+        :return: str
+        """
+
+        used_letters = self.get_used_letters_formatted(player_type)
+        return ', '.join([chr(i) for i in range(ord('A'), ord('Z') + 1) if chr(i) not in used_letters])
+
     def get_word_with_blanks(self, player_type: PlayerType, show_guessed_letters: bool = True):
         """
         Get the word with blanks

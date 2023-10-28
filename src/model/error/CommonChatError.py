@@ -1,15 +1,9 @@
-import resources.phrases as phrases
 from src.model.error.Error import Error
 from src.model.error.ErrorSource import ErrorSource
 
 
-class CommonChatError(Error):
-    source = ErrorSource.COMMON
-
-    SAVED_MEDIA_NOT_FOUND = Error(1, phrases.SAVED_MEDIA_NOT_FOUND, source)
-
-
 class CommonChatException(Exception):
-    def __init__(self, error: CommonChatError):
-        self.message = error.build()
+    def __init__(self, message: str = None):
+        message = message if message is not None else ''
+        self.message = Error(0, message, ErrorSource.COMMON).build()
         super().__init__(self.message)

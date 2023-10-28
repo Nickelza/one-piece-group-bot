@@ -8,10 +8,14 @@ import constants as c
 
 
 class Environment:
+    instances: list['Environment'] = []
+
     def __init__(self, name: str, default_value: str = None, can_be_empty: bool = False):
         self.name = name
         self.default_value = default_value
         self.can_be_empty = can_be_empty
+
+        Environment.instances.append(self)
 
     def get_or_none(self) -> str | None:
         """
@@ -59,7 +63,9 @@ class Environment:
         Get the environment variable as a float
         :return: The environment variable as a float
         """
-        return float(self.get())
+        from src.service.math_service import format_percentage_value
+
+        return format_percentage_value(float(self.get()))
 
     def get_bool(self) -> bool:
         """
@@ -74,6 +80,14 @@ class Environment:
         :return: The environment variable as a list
         """
         return self.get().split(c.STANDARD_SPLIT_CHAR)
+
+    def get_belly(self):
+        """
+        Get the environment variable as a belly amount
+        :return: The environment variable as a belly amount
+        """
+
+        return '{0:,}'.format(self.get_int())
 
 
 load_dotenv(sys.argv[1])
@@ -107,6 +121,10 @@ DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
 LIMIT_TO_AUTHORIZED_USERS = Environment('LIMIT_TO_AUTHORIZED_USERS', default_value='False')
 # List of authorized users
 AUTHORIZED_USERS = Environment('AUTHORIZED_USERS', default_value='')
+# Limit interaction to users members of authorized groups
+LIMIT_TO_AUTHORIZED_GROUPS = Environment('LIMIT_TO_AUTHORIZED_GROUPS', default_value='False')
+# List of authorized groups
+AUTHORIZED_GROUPS = Environment('AUTHORIZED_GROUPS', default_value='')
 # Group chat id
 OPD_GROUP_ID = Environment('OPD_GROUP_ID')
 # Group chat username
@@ -117,6 +135,8 @@ OPD_CHANNEL_ID = Environment('OPD_CHANNEL_ID')
 ERROR_LOG_CHAT_ID = Environment('ERROR_LOG_CHAT_ID')
 # OPMA bot id
 OPMA_BOT_ID = Environment('OPMA_BOT_ID', default_value='921260484')
+# Updates channel id
+UPDATES_CHANNEL_ID = Environment('UPDATES_CHANNEL_ID')
 
 # TgRest Channel ID
 TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
@@ -235,34 +255,15 @@ SHOULD_LOG_TIMER_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
 SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
     'SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE', default_value='False')
 
-# Schedule Devil Fruit Zoan release. Default: 3 weeks in seconds
+# Schedule Devil Fruit Zoan release. Default: Every sunday at midnight
 CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
-    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='1814400')
+    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='0 0 * * Sun')
 ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='True')
 SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
 SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='False')
-
-# Schedule Devil Fruit Ancient Zoan release. Default: Every 9 weeks in seconds
-CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'CRON_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='5443200')
-ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='True')
-SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
-SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE = Environment(
-    'SHOULD_RUN_ON_STARTUP_SCHEDULE_DEVIL_FRUIT_ANCIENT_ZOAN_RELEASE', default_value='False')
-
-# Release scheduled Devil Fruit. Default: Every 1 minute
-CRON_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('CRON_RELEASE_SCHEDULED_DEVIL_FRUIT', default_value='*/1 * * * *')
-ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('ENABLE_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                         default_value='True')
-SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                             default_value='False')
-SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RELEASE_SCHEDULED_DEVIL_FRUIT',
-                                                                  default_value='False')
 
 # Respawn Devil Fruit. Default: Every 1 minute
 CRON_RESPAWN_DEVIL_FRUIT = Environment('CRON_RESPAWN_DEVIL_FRUIT', default_value='*/1 * * * *')
@@ -271,7 +272,7 @@ SHOULD_LOG_TIMER_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_LOG_TIMER_RESPAWN_DEV
 SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT = Environment('SHOULD_RUN_ON_STARTUP_RESPAWN_DEVIL_FRUIT',
                                                         default_value='False')
 
-# Deactivate inactive groups and group chats. Default: Every day at midnight
+# Deactivate inactive groups and group chats and group users. Default: Every day at midnight
 CRON_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('CRON_DEACTIVATE_INACTIVE_GROUP_CHATS',
                                                    default_value='0 0 * * *')
 ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('ENABLE_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS',
@@ -280,6 +281,21 @@ SHOULD_LOG_TIMER_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment('SHOULD_LOG_TIMER
                                                                default_value='False')
 SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS = Environment(
     'SHOULD_RUN_ON_STARTUP_DEACTIVATE_INACTIVE_GROUP_CHATS', default_value='False')
+
+# End inactive games. Default: Every 5 minutes
+CRON_END_INACTIVE_GAMES = Environment('CRON_END_INACTIVE_GAMES', default_value='*/5 * * * *')
+ENABLE_TIMER_END_INACTIVE_GAMES = Environment('ENABLE_TIMER_END_INACTIVE_GAMES', default_value='True')
+SHOULD_LOG_TIMER_END_INACTIVE_GAMES = Environment('SHOULD_LOG_TIMER_END_INACTIVE_GAMES', default_value='False')
+SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES = Environment('SHOULD_RUN_ON_STARTUP_END_INACTIVE_GAMES',
+                                                       default_value='False')
+
+# Set expired bounty loans. Default: Every 1 minute
+CRON_SET_EXPIRED_BOUNTY_LOANS = Environment('CRON_SET_EXPIRED_BOUNTY_LOANS', default_value='*/1 * * * *')
+ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('ENABLE_TIMER_SET_EXPIRED_BOUNTY_LOANS', default_value='True')
+SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS = Environment('SHOULD_LOG_TIMER_SET_EXPIRED_BOUNTY_LOANS',
+                                                        default_value='False')
+SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment('SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS',
+                                                             default_value='False')
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment('TEMP_DIR_CLEANUP_TIME_SECONDS', '21600')
@@ -304,8 +320,10 @@ BELLY_UPPER_ROUND_AMOUNT = Environment('BELLY_UPPER_ROUND_AMOUNT', default_value
 # Daily base limit of bellys gained from messages. Default: 5,000,000
 BELLY_DAILY_BASE_LIMIT = Environment('BELLY_DAILY_BASE_LIMIT', default_value='5000000')
 
-# After how many days from the last message should a group or group chat be considered inactive. Default: 14
-INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='14')
+# After how many days from the last message should a group or group chat be considered inactive. Default: 7
+INACTIVE_GROUP_DAYS = Environment('INACTIVE_GROUP_DAYS', default_value='7')
+# After how many days from the last message should a user be considered inactive in a group. Default: 7
+INACTIVE_GROUP_USER_DAYS = Environment('INACTIVE_GROUP_USER_DAYS', default_value='7')
 
 # BOUNTY BONUS
 # LOCATION
@@ -332,6 +350,8 @@ BOUNTY_POSTER_LIMIT_ROOKIE = Environment('BOUNTY_POSTER_LIMIT_ROOKIE', default_v
 
 # How many entries should be shown in the leaderboard. Default: 20
 LEADERBOARD_LIMIT = Environment('LEADERBOARD_LIMIT', default_value='20')
+# How many active users are required to create a local leaderboard. Default: 20
+LEADERBOARD_MIN_ACTIVE_USERS = Environment('LEADERBOARD_MIN_ACTIVE_USERS', default_value='0')
 
 # DOC Q
 # How much bounty is required to play the Doc Q game. Default: 10,000,000
@@ -363,6 +383,8 @@ GAME_COOLDOWN_DURATION = Environment('GAME_COOLDOWN_DURATION', default_value='8'
 GAME_CONFIRMATION_TIMEOUT = Environment('GAME_CONFIRMATION_TIMEOUT', default_value='120')
 # How much time to wait after user has confirmed the game before starting the game. Default: 60 seconds
 GAME_START_WAIT_TIME = Environment('GAME_START_WAIT_TIME', default_value='60')
+# After how much time since the last interaction should a game be considered inactive. Default: 600 seconds
+GAME_INACTIVE_TIME = Environment('GAME_INACTIVE_TIME', default_value='600')
 # One Piece Wiki URL
 ONE_PIECE_WIKI_URL = Environment('ONE_PIECE_WIKI_URL', default_value='https://onepiece.fandom.com/wiki/')
 
@@ -389,6 +411,10 @@ GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_EASY = Environment('GUESS_OR_LIFE_MAX_UNIQUE
 # Guess or Life m unique characters in medium mode. Default: 10
 GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM = Environment('GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM',
                                                          default_value='10')
+# How much time to wait before sending the next detail in Punk Records game. Default: 30 seconds
+PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME = Environment('PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME', default_value='30')
+# How many details should be revealed at the start of the game. Default: 3
+PUNK_RECORDS_STARTING_DETAILS = Environment('PUNK_RECORDS_STARTING_DETAILS', default_value='3')
 
 LOCATION_PARADISE_IMAGE_URL = Environment('LOCATION_PARADISE_IMAGE_URL',
                                           default_value='https://i.imgur.com/omBDMbu.jpg')
@@ -481,6 +507,8 @@ FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment('FIGHT_MIN_WIN_PROBABILITY_ROOKIE
 
 # Minimum wager for prediction bets. Default: 10 million
 PREDICTION_BET_MIN_WAGER = Environment('PREDICTION_BET_MIN_WAGER', default_value='10000000')
+# How long a user has to wait before creating a new prediction in hours. Default: 48 hours
+PREDICTION_CREATE_COOLDOWN_DURATION = Environment('PREDICTION_CREATE_COOLDOWN_DURATION', default_value='48')
 
 # Send leaderboard message. Default: True
 SEND_MESSAGE_LEADERBOARD = Environment('SEND_MESSAGE_LEADERBOARD', default_value='True')
@@ -509,9 +537,14 @@ REQUIRED_LOCATION_LEVEL_FIGHT = Environment('REQUIRED_LOCATION_LEVEL_FIGHT', def
 REQUIRED_LOCATION_LEVEL_GAME = Environment('REQUIRED_LOCATION_LEVEL_GAME', default_value='21')
 # Required location to bet on predictions. Default: 21 (Fishman Island)
 REQUIRED_LOCATION_LEVEL_PREDICTION_BET = Environment('REQUIRED_LOCATION_LEVEL_PREDICTION_BET', default_value='21')
+# Required location to create predictions. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE = Environment('REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE',
+                                                        default_value='21')
 # Required location to collect Devil Fruit. Default: 10 (Whiskey Peak)
 REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT = Environment('REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT',
                                                           default_value='10')
+# Required location to view log stats. Default: 21 (Fishman Island)
+REQUIRED_LOCATION_LEVEL_LOG_STATS = Environment('REQUIRED_LOCATION_LEVEL_LOG_STATS', default_value='21')
 
 # Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
 WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_value=(
@@ -522,25 +555,36 @@ WHITELIST_FORWARD_MESSAGE = Environment('WHITELIST_FORWARD_MESSAGE', default_val
 # Whitelist of bot ids which users can use inline mode. Default: Empty
 WHITELIST_INLINE_BOTS = Environment('WHITELIST_INLINE_BOTS', default_value='')
 
-# How many latest leaderboard user has to be in to be able to create a Crew. Default: 4
-CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE',
-                                                            default_value='4')
-# Which rank user must have attained in the latest leaderboards to be able to create a Crew. Default: 2 (Emperor)
-CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK', default_value='2')
-# Which rank user must have attained in at least one of the latest leaderboards to be able to maintain a Crew.
-# Default: 3 (First Mate)
-CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK = Environment('CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK', default_value='3')
+# Price to create a crew. Default: 100,000,000
+CREW_CREATE_PRICE = Environment('CREW_CREATE_PRICE', default_value='100000000')
+# How many latest leaderboard user has to be in to be able to maintain a Crew. Default: 4
+CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment('CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE',
+                                                              default_value='4')
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment('CREW_MAX_NAME_LENGTH', default_value='50')
 # Maximum number of Crew members. Default: 10
 CREW_MAX_MEMBERS = Environment('CREW_MAX_MEMBERS', default_value='10')
 # How much percent should be removed from taxes for exchanges between Crew members. Default: 50%
 CREW_TRANSACTION_TAX_DISCOUNT = Environment('CREW_TRANSACTION_TAX_DISCOUNT', default_value='50')
+# Base price for Crew Powerups. Default: 1.000.000.000
+CREW_POWERUP_BASE_PRICE = Environment('CREW_POWERUP_BASE_PRICE', default_value='1000000000')
+# How long a crew ability should last in days. Default: 7
+CREW_ABILITY_DURATION_DAYS = Environment('CREW_ABILITY_DURATION_DAYS', default_value='7')
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')
 # Tax percentage increase after each Bounty Gift. Default: 1%
 BOUNTY_GIFT_TAX_INCREASE = Environment('BOUNTY_GIFT_TAX_INCREASE', default_value='1')
+
+# Minimum amount for Bounty Loan. Default: 10.000.000
+BOUNTY_LOAN_MIN_AMOUNT = Environment('BOUNTY_LOAN_MIN_AMOUNT', default_value='10000000')
+# Tax percentage increase after each Bounty Loan. Default: 1%
+BOUNTY_LOAN_TAX_INCREASE = Environment('BOUNTY_LOAN_TAX_INCREASE', default_value='1')
+# How many percent of newly gained bounty should be used to pay off loan in case of expiration. Default: 50%
+BOUNTY_LOAN_GARNISH_PERCENTAGE = Environment('BOUNTY_LOAN_GARNISH_PERCENTAGE', default_value='50')
+
+# How much percent should be removed from taxes for exchanges from Pirate King. Default: 50%
+PIRATE_KING_TRANSACTION_TAX_DISCOUNT = Environment('PIRATE_KING_TRANSACTION_TAX_DISCOUNT', default_value='50')
 
 # How many days a user can hold a devil fruit before it expires. Default: 2
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment('DEVIL_FRUIT_EXPIRATION_DAYS', default_value='2')
@@ -553,7 +597,67 @@ DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
 DEVIL_FRUIT_SELL_MIN_AMOUNT = Environment('DEVIL_FRUIT_SELL_MIN_AMOUNT', default_value='100000000')
 # Tax applied when selling a Devil Fruit. Default: 50%
 DEVIL_FRUIT_SELL_TAX = Environment('DEVIL_FRUIT_SELL_TAX', default_value='50')
+# How many active users are required for each Devil Fruit in circulation. Default: 20
+DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT = Environment('DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT',
+                                                           default_value='20')
+# How many Regular Zoan Devil Fruits are should be in circulation for each Ancient Zoan Devil Fruit. Default: 5
+DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO = Environment('DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO',
+                                                             default_value='5')
+# How long a user has to wait before trying to collect a Devil Fruit again in hours. Default: 1
+DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION = Environment('DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION', default_value='1')
 
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment('ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP',
                                                            default_value='True')
+
+# Tax brackets
+# Level 0 total bounty. Default: 0
+TAX_BRACKET_0_TOTAL_BOUNTY = Environment('TAX_BRACKET_0_TOTAL_BOUNTY', default_value='0')
+# Level 0 percentage. Default: 0%
+TAX_BRACKET_0_PERCENTAGE = Environment('TAX_BRACKET_0_PERCENTAGE', default_value='0')
+# Level 1 total bounty. Default: 400mil
+TAX_BRACKET_1_TOTAL_BOUNTY = Environment('TAX_BRACKET_1_TOTAL_BOUNTY', default_value='400000000')
+# Level 1 percentage. Default: 5%
+TAX_BRACKET_1_PERCENTAGE = Environment('TAX_BRACKET_1_PERCENTAGE', default_value='5')
+# Level 2 total bounty. Default: 1bil
+TAX_BRACKET_2_TOTAL_BOUNTY = Environment('TAX_BRACKET_2_TOTAL_BOUNTY', default_value='1000000000')
+# Level 2 percentage. Default: 10%
+TAX_BRACKET_2_PERCENTAGE = Environment('TAX_BRACKET_2_PERCENTAGE', default_value='10')
+# Level 3 total bounty. Default: 2bil
+TAX_BRACKET_3_TOTAL_BOUNTY = Environment('TAX_BRACKET_3_TOTAL_BOUNTY', default_value='2000000000')
+# Level 3 percentage. Default: 20%
+TAX_BRACKET_3_PERCENTAGE = Environment('TAX_BRACKET_3_PERCENTAGE', default_value='20')
+# Level 4 total bounty. Default: 3bil
+TAX_BRACKET_4_TOTAL_BOUNTY = Environment('TAX_BRACKET_4_TOTAL_BOUNTY', default_value='3000000000')
+# Level 4 percentage. Default: 30%
+TAX_BRACKET_4_PERCENTAGE = Environment('TAX_BRACKET_4_PERCENTAGE', default_value='30')
+# Level 5 total bounty. Default: 4bil
+TAX_BRACKET_5_TOTAL_BOUNTY = Environment('TAX_BRACKET_5_TOTAL_BOUNTY', default_value='4000000000')
+# Level 5 percentage. Default: 40%
+TAX_BRACKET_5_PERCENTAGE = Environment('TAX_BRACKET_5_PERCENTAGE', default_value='40')
+# Level 6 total bounty. Default: 5bil
+TAX_BRACKET_6_TOTAL_BOUNTY = Environment('TAX_BRACKET_6_TOTAL_BOUNTY', default_value='5000000000')
+# Level 6 percentage. Default: 50%
+TAX_BRACKET_6_PERCENTAGE = Environment('TAX_BRACKET_6_PERCENTAGE', default_value='50')
+# Level 7 total bounty. Default: 6bil
+TAX_BRACKET_7_TOTAL_BOUNTY = Environment('TAX_BRACKET_7_TOTAL_BOUNTY', default_value='6000000000')
+# Level 7 percentage. Default: 60%
+TAX_BRACKET_7_PERCENTAGE = Environment('TAX_BRACKET_7_PERCENTAGE', default_value='60')
+# Level 8 total bounty. Default: 7bil
+TAX_BRACKET_8_TOTAL_BOUNTY = Environment('TAX_BRACKET_8_TOTAL_BOUNTY', default_value='7000000000')
+# Level 8 percentage. Default: 70%
+TAX_BRACKET_8_PERCENTAGE = Environment('TAX_BRACKET_8_PERCENTAGE', default_value='70')
+# Level 9 total bounty. Default: 8bil
+TAX_BRACKET_9_TOTAL_BOUNTY = Environment('TAX_BRACKET_9_TOTAL_BOUNTY', default_value='8000000000')
+# Level 9 percentage. Default: 80%
+TAX_BRACKET_9_PERCENTAGE = Environment('TAX_BRACKET_9_PERCENTAGE', default_value='80')
+# Level 10 total bounty. Default: 9bil
+TAX_BRACKET_10_TOTAL_BOUNTY = Environment('TAX_BRACKET_10_TOTAL_BOUNTY', default_value='9000000000')
+# Level 10 percentage. Default: 90%
+TAX_BRACKET_10_PERCENTAGE = Environment('TAX_BRACKET_10_PERCENTAGE', default_value='90')
+# Level 11 total bounty. Default: 10bil
+TAX_BRACKET_11_TOTAL_BOUNTY = Environment('TAX_BRACKET_11_TOTAL_BOUNTY', default_value='10000000000')
+# Level 11 percentage. Default: 99%
+TAX_BRACKET_11_PERCENTAGE = Environment('TAX_BRACKET_11_PERCENTAGE', default_value='99')
+# What percentage of the tax should go to the crew chest. Default: 50%
+TAX_CREW_CHEST_PERCENTAGE = Environment('TAX_CREW_CHEST_PERCENTAGE', default_value='50')

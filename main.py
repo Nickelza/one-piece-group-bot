@@ -5,7 +5,7 @@ import time
 import pytz
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
-    ContextTypes, AIORateLimiter
+    ContextTypes, AIORateLimiter, InlineQueryHandler
 
 import constants as c
 import resources.Environment as Env
@@ -22,6 +22,17 @@ async def chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     :return: None
     """
     await full_message_send(context, str(update.effective_chat.id), update)
+
+
+def pre_init():
+    """
+    Pre init checks
+    :return: None, raises Exception if something is wrong
+    """
+
+    # Check that all the required environment variables are set
+    for env in Env.Environment.instances:
+        env.get()
 
 
 async def post_init(application: Application) -> None:
@@ -44,6 +55,9 @@ def main() -> None:
         time.tzset()
     except AttributeError:
         pass
+
+    # Pre init checks
+    pre_init()
 
     if Env.DB_LOG_QUERIES.get_bool():
         # Set Peewee logger
@@ -75,6 +89,9 @@ def main() -> None:
 
     # Callback query handler
     application.add_handler(CallbackQueryHandler(manage_callback_message))
+
+    # Inline query handler
+    application.add_handler(InlineQueryHandler(manage_regular_message))
 
     # Activate timers
     logging.getLogger('apscheduler.executors.default').propagate = False

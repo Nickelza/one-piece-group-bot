@@ -1,8 +1,6 @@
 import resources.Environment as Env
 import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
-from src.model.enums.LeaderboardRank import get_rank_by_index
-from src.service.english_phrase_service import get_word_with_article
 
 COMMAND_NOT_IN_REPLY_ERROR = 'This command can only be used in a reply to a message'
 COMMAND_IN_REPLY_TO_BOT_ERROR = "This command can't be used in reply to a bot"
@@ -34,11 +32,14 @@ SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
 SHOW_USER_STATUS_CREW = '\nCrew: {}'
-SHOW_USER_STATUS_BOUNTY_BONUSES_TITLE = '\n\n*Bounty bonuses*'
+SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = '\n\n*Daily Bounty Bonus*'
 SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = '\n{}{} \\({}%\\)'
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW = 'Crew'
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP = 'Crew MVP'
 SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD = 'New World'
+SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE = '\n\n*Bounty Deductions*'
+SHOW_USER_STATUS_EXPIRED_LOAN = 'Expired loan'
+SHOW_USER_STATUS_INCOME_TAX = 'Income tax'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 SHOW_USER_STATUS_DEVIL_FRUIT = '\n\n*Devil Fruit*\n_{}_{}'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
@@ -49,10 +50,14 @@ PRISONER_STATUS_PRIVATE_CHAT_ONLY = 'Prisoners can only view their status in Pri
 STATUS_PRIVATE_CHAT_KEY = 'View in Private Chat'
 BOUNTY_RESET = 'Bounties have been reset'
 
-LEADERBOARD = '*Leaderboard* for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
+LEADERBOARD = '*{}* Leaderboard for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
+              '{}' \
               '{}' \
               '\n\n_Next bounty reset on {} \\(in {}\\)_'
 LEADERBOARD_ROW = '\n\n{}°: {}\n{} - ฿*{}*'
+LEADERBOARD_LOCAL = 'Local'
+LEADERBOARD_GLOBAL = 'Global'
+LEADERBOARD_VIEW_GLOBAL_LEADERBOARD = '\n\n\n' + Emoji.GLOBE + '[Global Leaderboard]({})'
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
 SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
@@ -86,6 +91,7 @@ UNRECOGNIZED_SCREEN = 'Unrecognized command'
 SAVED_MEDIA_NOT_FOUND = 'Saved Media not found'
 UNKNOWN_EXTRA_STEP = 'Unknown extra step'
 PRIVATE_STEP_NOT_SET = 'Private step not set'
+SAVED_USER_DATA_NOT_FOUND = 'Saved user data not found'
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + ' Cancel'
@@ -99,8 +105,8 @@ KEYBOARD_OPTION_BACK = Emoji.BACK + ' Back'
 KEYBOARD_OPTION_YES = Emoji.YES + ' Yes'
 KEYBOARD_OPTION_NO = Emoji.NO + ' No'
 
-TEXT_YES = f'{Emoji.YES}Yes'
-TEXT_NO = f'{Emoji.NO}No'
+TEXT_YES = 'Yes'
+TEXT_NO = 'No'
 TEXT_WON = 'won'
 TEXT_LOST = 'lost'
 TEXT_IT_WAS = 'it was'
@@ -109,6 +115,7 @@ TEXT_FROM = 'from'
 TEXT_TO = 'to'
 TEXT_TOPIC = 'Topic'
 TEXT_GROUP = 'Group'
+TEXT_NOT_SET = 'Not set'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -146,9 +153,22 @@ FIGHT_CONFIRMATION_RETREAT = 'You have successfully retreated'
 
 ENABLED = Emoji.ENABLED + ' Enabled'
 DISABLED = Emoji.DISABLED + ' Disabled'
-ENABLE = Emoji.ENABLED + ' Enable'
-DISABLE = Emoji.DISABLED + ' Disable'
 CURRENT_SETTING = 'Current setting: {}'
+
+INLINE_QUERY_SEND_ITEM = 'Send item'
+
+# General
+KEY_MANAGE = 'Manage'
+KEY_CREATE = Emoji.CREATE + ' Create'
+KEY_SAVE = Emoji.SAVE + ' Save'
+KEY_ENABLE = Emoji.ENABLED + ' Enable'
+KEY_DISABLE = Emoji.DISABLED + ' Disable'
+KEY_OPEN = 'Open'
+KEY_CLOSE = Emoji.CLOSE + ' Close'
+KEY_SHARE = Emoji.SHARE + ' Share'
+KEY_SEND_TO_GROUP = Emoji.GROUP + ' Send to group'
+KEY_SET_RESULT = 'Set result'
+KEY_CONFIRM = 'Confirm'
 
 # Private chat
 PVT_TXT_START = f'Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!' \
@@ -159,29 +179,52 @@ PVT_TXT_SETTINGS = 'Which setting would you like to change?'
 PVT_KEY_SETTINGS_LOCATION_UPDATE = 'Location update'
 PVT_TXT_SETTINGS_LOCATION_UPDATE = 'Do you want to receive an update when you move to a new location?'
 PVT_KEY_CREW = Emoji.CREW + ' Crew'
-PVT_KEY_CREW_CREATE = 'Create'
+PVT_KEY_CREW_MEMBERS = 'Members'
 PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
-PVT_KEY_CREW_MEMBER_REMOVE = 'Remove'
+PVT_KEY_CREW_MEMBER_REMOVE = 'Expel'
+PVT_KEY_CREW_ABILITY = 'Abilities'
+PVT_KEY_CREW_ABILITY_ACTIVATE = 'Activate'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
 PVT_KEY_MANAGE_NOTIFICATION_SETTINGS = 'Manage notification settings'
+PVT_KEY_SETTINGS_TIMEZONE = 'Time zone'
+PVT_TXT_SETTINGS_TIMEZONE = '\nCurrent time: *{}*' \
+                            '\nCurrent timezone: *{}* \\({}\\)' \
+                            '\n\nTo set a new time zone, send a location name \\(city, region, state or country\\)'
+PVT_TXT_SETTINGS_TIMEZONE_INVALID = 'Invalid location. Please send a correct location name ' \
+                                    '\\(city, region, state or country\\)'
+PVT_KEY_SETTINGS_TIMEZONE_RESET = 'Reset'
+PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN = 'Default - ' + Env.TZ.get()
+
 PVT_KEY_LOGS = Emoji.LOGS + ' Logs'
 PVT_TXT_LOGS = 'Which log would you like to view?'
+PVT_KEY_LOGS_STATS = Emoji.STATS + ' Stats'
 PVT_KEY_PREVIOUS_PAGE = Emoji.LEFT_ARROW
 PVT_KEY_NEXT_PAGE = Emoji.RIGHT_ARROW
-PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Prediction'
+PVT_KEY_PREDICTION = Emoji.PREDICTION + ' Predictions'
 PVT_KEY_PREDICTION_DETAIL_PLACE_BET = 'Place bet'
 PVT_KEY_PREDICTION_DETAIL_REMOVE_BET = 'Remove bet'
+PVT_KEY_PREDICTION_DETAIL_EDIT = 'Edit'
+PVT_KEY_PREDICTION_CREATE_ALLOW_MULTIPLE_CHOICES = 'Allow multiple choices'
+PVT_KEY_PREDICTION_CREATE_ALLOW_BET_WITHDRAWAL = 'Allow bet withdrawal'
+PVT_KEY_PREDICTION_CREATE_IS_PUBLIC = 'Public'
+PVT_KEY_PREDICTION_CREATE_SET_CLOSE_DATE = Emoji.PREDICTION_CLOSED + ' Set closing date'
+PVT_KEY_PREDICTION_CREATE_REMOVE_CLOSE_DATE = Emoji.PREDICTION_CLOSED + ' Remove closing date'
+PVT_KEY_PREDICTION_CREATE_SET_CUT_OFF_DATE = Emoji.PREDICTION_CUT_OFF + ' Set cut-off date'
+PVT_KEY_PREDICTION_CHANGE_POLL = Emoji.CHANGE + ' Change poll'
+PVT_KEY_PREDICTION_NO_CORRECT_OPTION = 'No correct option'
 PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + ' Devil Fruit'
 PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = 'Eat'
 PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = 'Trade'
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = 'Discard'
 PVT_KEY_GO_TO_MESSAGE = 'Go to message'
+PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + ' Loan'
+PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = 'Pay'
+PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = 'Forgive'
 
-GRP_KEY_DEVIL_FRUIT_COLLECT = 'Collect'
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + ' Buy'
 GRP_TXT_SETTINGS = '{}Which Bounty System features would you like to enable in this {}?'
 GRP_KEY_GO_TO_MESSAGE = 'Go to message'
@@ -189,12 +232,50 @@ GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = 'Bet in private chat'
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = 'View in private chat'
 GRP_KEY_GAME_PLAY = 'Play'
 
+DATETIME_EXAMPLES = '''
+Write the date using this format:
+dd/mm/yy hh:mm
+
+*Examples*:
+• 1/4/2022 22:30
+• in 10 days 5 hours 2 minutes
+• Tomorrow at 12:00
+
+Current time: *{}*
+Current time zone: *{}* \\({}\\)
+[Change time zone]({})
+'''.strip()
+
+DATETIME_EXAMPLES_NO_DURATION = '''
+Write the date using this format:
+dd/mm/yy hh:mm
+
+*Examples*:
+• 1/4/2022 22:30
+• 10 hours ago
+• Yesterday at 12:00
+
+Current time: *{}*
+Current time zone: *{}* \\({}\\)
+[Change time zone]({})
+'''.strip()
+
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
-ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. Make sure it is a number with only '.' or ',' as decimal separator"
+ACTION_INVALID_WAGER_AMOUNT = "Invalid amount. " \
+                              "Make sure it is a number with only '.' or ',' as decimal separator or with a valid " \
+                              "magnitude." \
+                              "\n\nExample: " \
+                              "\n- 10.000.000 or 10,000,000" \
+                              "\n- 10k, 10thousand, 10m, 10million, 10b, 10billion"
+ACTION_INVALID_DURATION = "Invalid duration. " \
+                          "Make sure it is a number with only '.' or ',' as decimal separator or with a valid " \
+                          "unit." \
+                          "\n\nExample: " \
+                          "\n - 1min, 1h, 1d, 1week"
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
-GAME_CHOOSE_GAME = 'On which game would you like to challenge {}?'
+GAME_CHOOSE_GAME = 'Which game would you like to play?'
 GAME_NO_WAGER_AMOUNT = 'You need to specify a wager amount.' \
                        f'\n\nExample: {Command.GRP_GAME.get_formatted()} 10.000.000'
 
@@ -204,10 +285,14 @@ GAME_REQUEST = '{}, you have been challenged by {} to play *{}* with a wager of 
                '\n\nWould you like to accept?' \
                f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
                f'it will be automatically rejected.'
+GAME_REQUEST_OPEN = '{} is challenging anyone to play *{}* with a wager of ฿*{}*.' \
+                    '\n\nPress the button below to accept.' \
+                    f'\n\nIf the challenge is not accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, ' \
+                    f'it will be automatically rejected.'
 GAME_CANCELED = 'Game cancelled'
 GAME_CHALLENGE_REJECTED = '{} has rejected the challenge'
 GAME_INVALID = 'Invalid game'
-GAME_UNKNOWN_NAME = 'Unknown'
+GAME_NOT_SELECTED_NAME = 'Not selected'
 GAME_TEXT = '*{}*' \
             '\n\n_*Description*: {}_' \
             '\n\n{} vs {}' \
@@ -225,7 +310,7 @@ GAME_CANNOT_INITIATE = 'Challenge limit reached, make sure you have canceled any
                        '\nYou can initiate another challenge in *{}*, but in the meantime you can ask another user ' \
                        'to challenge you.'
 GAME_PENDING_KEY = 'Pending challenge'
-GAME_FORCED_END = 'This game has ended due to bounty reset. The wagers has been returned to the players.'
+GAME_FORCED_END = 'This game has ended due to bounty reset or inactivity. The wagers has been returned to the players.'
 
 GAME_STATUS_ND = 'Not defined'
 GAME_STATUS_IN_PROGRESS = 'In progress'
@@ -242,7 +327,7 @@ GAME_TIMEOUT = 'This game was canceled due to timeout while awaiting opponent co
                '\n\nThe wager has been returned to the challenger.'
 GAME_INPUT_NOT_PLAYER = 'You are not a player of this game'
 GAME_INPUT_GAME_FINISHED = 'This game has ended'
-GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first image!'
+GAME_INPUT_COUNTDOWN = 'The game has not started yet.\nStay on this chat as to not miss the first message!'
 GAME_RESULT_CHARACTER = 'Character: {}'
 GAME_RESULT_TERM = 'Word: {}'
 GAME_DIFFICULTY = '\nDifficulty: {}'
@@ -267,9 +352,12 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = 'This chamber has already been fir
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
 
-GUESS_GAME_INPUT_CAPTION_HINT = '\n\nHint: {}'
+GUESS_GAME_INPUT_CAPTION_HINT = '\n\n' + Emoji.NEW + 'Hint: {}'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = '\n\nIn *{}* seconds, a hint will be sent'
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = '\n\nIn *{}* seconds, an easier variation will be sent'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 = 'In *{}* seconds, a new life will be issued'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2 = 'A new life will be issued every {} seconds'
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL = '\n\nIn *{}* seconds, a new detail will be given'
 
 GUESS_CHARACTER_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be notified if you are correct. ' \
                                      f'\nThe name must be the same as the one used on ' \
@@ -279,13 +367,14 @@ GUESS_TERM_GAME_INPUT_CAPTION = 'Send your guesses as text messages, you will be
                                 f'[One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})'
 GUESS_GAME_CORRECT_ANSWER = f'Congratulations, you guessed correctly{Emoji.CONFETTI}' \
                             '\n\n{}'
-GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess the character before you😔' \
+GUESS_GAME_OPPONENT_CORRECT_ANSWER = f'Oops, your opponent was able to guess before you😔' \
                                      f'\nBetter luck next time!' \
                                      '\n\n{}'
 
 WHOS_WHO_GAME_NAME = "Who's Who"
 WHOS_WHO_GAME_DESCRIPTION = 'Guess the blurred character. ' \
-                            '\nEvery {} seconds, a less blurred image will be sent until the character is fully revealed.' \
+                            '\nEvery {} seconds, a less blurred image will be sent until the character is fully ' \
+                            'revealed.' \
                             '\nThis game is played in private chat with the Bot.'
 
 SHAMBLES_GAME_NAME = 'Shambles'
@@ -295,25 +384,34 @@ SHAMBLES_GAME_DESCRIPTION = 'Guess the One Piece related word from a crossword p
                             '\nThis game is played in private chat with the Bot.'
 
 GUESS_OR_LIFE_GAME_NAME = 'Guess or Life'
-GUESS_OR_LIFE_GAME_DESCRIPTION = 'Guess the missing letters of the One Piece related word, any wrong guess will cost a ' \
-                                 'life.' \
-                                 '\n\A new life will be issued every {} seconds.'
-GUESS_OR_LIFE_INFO_USED_LETTERS = '\n\n{}' \
-                                  '\n\nUsed letters: {}'
-GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED = 'You have already used this letter' \
-                                         '{}'
-GUESS_OR_LIFE_GAME_NO_MORE_LIVES = 'You have no more lives left' \
-                                   '{}'
-GUESS_OR_LIFE_GAME_CORRECT_LETTER = f'{Emoji.LOG_POSITIVE}' + '{}'
-GUESS_OR_LIFE_GAME_CORRECT_LETTER_WIN = '{}' \
-                                        f'\n\nYou won the game{Emoji.CONFETTI}'
-GUESS_OR_LIFE_GAME_WRONG_LETTER = f'{Emoji.LOG_NEGATIVE}Wrong letter' \
-                                  '{}'
+GUESS_OR_LIFE_GAME_DESCRIPTION = 'Guess the missing letters of the One Piece related word, any wrong guess will cost ' \
+                                 'a life.' \
+                                 '\nA new life will be issued every {} seconds.'
+GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED = f'{Emoji.WARNING} You have already used this letter'
+GUESS_OR_LIFE_GAME_NO_MORE_LIVES = f'{Emoji.WARNING} You have no more lives left'
+GUESS_OR_LIFE_GAME_CORRECT_LETTER = f'{Emoji.CORRECT} Correct letter!'
+GUESS_OR_LIFE_GAME_WRONG_LETTER = f'{Emoji.LOG_NEGATIVE} Wrong letter'
+GUESS_OR_LIFE_GAME_WORD_LIVES = '{}' \
+                                '{}\nLives: {}{}'
+GUESS_OR_LIFE_GAME_NAME_WORD = '*{}*' \
+                               '\n{}'
 GUESS_OR_LIFE_GAME_NAME_WORD_LIVES = '*{}*' \
-                                     '\n{}' \
-                                     '\nLives: {}'
-GUESS_OR_LIFE_NEW_LIFE_EVERY = '\n\nA new life will be issued every {} seconds'
-GUESS_OR_LIFE_GAME_CHECK = 'Check'
+                                     '\n' + GUESS_OR_LIFE_GAME_WORD_LIVES
+GUESS_OR_LIFE_GAME_REMAINING_USED_LETTERS = '\n\nRemaining letters: {}' \
+                                            '\n\nUsed letters: {}'
+GUESS_OR_LIFE_GAME_PRIVATE_RECAP = '{}\n\n{}'
+GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER = f'{Emoji.WARNING}Please send only one letter at a time'
+GUESS_OR_LIFE_GAME_INPUT_CAPTION_LETTER_ONLY = f'{Emoji.WARNING}Please send only letters (no numbers or symbols)'
+
+PUNK_RECORDS_GAME_NAME = 'Punk Records'
+PUNK_RECORDS_GAME_DESCRIPTION = 'Guess the One Piece related character from details about them. ' \
+                                '\nEvery {} seconds, a new detail will be revealed making it easier to guess.' \
+                                '\nThis game is played in private chat with the Bot.'
+PUNK_RECORDS_GAME_RECAP = '{}' \
+                          '{}'
+PUNK_RECORDS_GAME_RECAP_DETAIL = '\n{}*{}*: {}'
+PUNK_RECORDS_GAME_RECAP_DETAIL_LIST = '\n*{}*' \
+                                      '\n{}'
 
 PREDICTION_NOT_FOUND = 'Prediction not found'
 PREDICTION_NOT_IN_NEW_STATUS = 'Prediction not in NEW status'
@@ -325,14 +423,24 @@ PREDICTION_TEXT = '*{}*' \
                   '\n{}' \
                   '\n\n*Total wager*: ฿{}' \
                   '\n*Status*: {}' \
-                  '{}{}{}'
-PREDICTION_TEXT_OPTION = '\n{}. {} \\(*{}%*\\){}'
+                  '{}{}{}{}'
+PREDICTION_CREATE_RECAP = '*{}*' \
+                          '\n{}' \
+                          '{}'
+PREDICTION_TEXT_OPTION = '\n{}. {}'
+PREDICTION_TEXT_OPTION_WITH_PERCENTAGE = PREDICTION_TEXT_OPTION + ' \\(*{}%*\\){}'
 PREDICTION_CLOSING_DATE = '\n*Closing date*: {}'
 PREDICTION_CUT_OFF_DATE = '\n*Cut off date*: {}'
 PREDICTION_WAGERS_REFUNDED = '\n{} Wagers refunded{}'
 PREDICTION_WAGERS_REFUNDED_MAX = ' \\(max. ฿{}\\)'
 PREDICTION_MULTIPLE_BETS_ALLOWED = '\n{} Multiple bets allowed'
+PREDICTION_MULTIPLE_BETS_ALLOWED_DESCRIPTION = '\n_\\(Users can bet on multiple options\\)_'
 PREDICTION_CAN_WITHDRAW_BETS = '\n{} Can withdraw bets'
+PREDICTION_CAN_WITHDRAW_BETS_DESCRIPTION = '\n_\\(Users can withdraw their bets before the prediction is closed\\)_'
+PREDICTION_IS_PUBLIC = '\n{} Public'
+PREDICTION_IS_PUBLIC_DESCRIPTION = '\n_\\(Anyone in your groups can find this prediction.' \
+                                   '\nIf disabled, only those who you share the prediction with can view it.' \
+                                   '\nYour fellow Crew members will always be able to find it._\\)'
 PREDICTION_BET_INVALID_FORMAT = 'Make sure your bet is in the following format:' \
                                 f'\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>' \
                                 f'\n\nExample: {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1'
@@ -349,7 +457,8 @@ PREDICTION_BET_HOW_TO_VIEW_BET_STATUS = '\n\n_To view your bet status, reply to 
                                         f'\n{Command.GRP_PREDICTION_BET_STATUS.get_formatted()}_'
 
 PREDICTION_CLOSED_FOR_BETS = 'This prediction no longer accept bets'
-PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction'
+PREDICTION_NOT_FOUND_IN_REPLY = 'Prediction not found in replied message. Make sure you replied to a prediction ' \
+                                'or the prediction might have been deleted.'
 PREDICTION_ALREADY_BET = 'You have already bet on this prediction'
 PREDICTION_ALREADY_BET_ON_OPTION = 'You have already bet on this option'
 PREDICTION_OPTION_NOT_FOUND = 'Option *{}* not found in prediction'
@@ -387,30 +496,116 @@ PREDICTION_PLACE_BET_DETAIL_TEXT = '*Question*: {}' \
 PREDICTION_PLACE_BET_LIST_OVERVIEW = 'On which option do you want to place a bet?\n{}'
 PREDICTION_REMOVE_BET_TEXT = '{}'
 PREDICTION_REMOVE_BET_LIST_OVERVIEW = 'From which option do you want to remove your bet?\n{}'
-
-CHAT_GROUP_MENTION = f'[Chat Group](t.me/{Env.OPD_GROUP_USERNAME.get()})'
+PREDICTION_CREATE_COOLDOWN_ACTIVE = 'You can create a prediction in *{}*'
+PREDICTION_CREATE_REQUEST_POLL = 'Send the prediction as a Telegram poll with the question and options'
+PREDICTION_CREATE_INVALID_POLL = 'Invalid poll. Make sure to send a Telegram poll with a question and at least ' \
+                                 'two options'
+PREDICTION_CAN_EDIT_POLL_ONLY_IF_NEW = 'You can only edit the question and options if the prediction if the ' \
+                                       'prediction has not been enabled yet'
+PREDICTION_CREATE_REQUEST_CLOSE_DATE = 'Send the closing date of the prediction.\n\n' + DATETIME_EXAMPLES
+PREDICTION_CREATE_INVALID_CLOSE_DATE = 'Invalid closing date. Make sure to send a valid date.\n\n' + DATETIME_EXAMPLES
+PREDICTION_CREATE_INVALID_CLOSE_DATE_PAST = 'Invalid closing date. Make sure to send a date in the future.\n\n' \
+                                            + DATETIME_EXAMPLES
+PREDICTION_CREATE_REQUEST_CUT_OFF_DATE = 'Send the cut off date of the prediction.' \
+                                         '\nAll bets placed after this time will be removed and refunded.' \
+                                         '\nThis action cannot be undone.' \
+                                         '\nThe time must be after the prediction was opened and before it was ' \
+                                         'closed or any previously set cut off time' \
+                                         '\n\n*Opened time*: {}' \
+                                         '\n*Closed time*: {}' \
+                                         '\n*Cut off time*: {}' \
+                                         '\n\n' + DATETIME_EXAMPLES_NO_DURATION
+PREDICTION_CREATE_INVALID_CUT_OFF_DATE = 'Invalid cut off date. Make sure to send a valid date and time after the ' \
+                                         'prediction was opened and before it was closed or any previously set cut ' \
+                                         'off time.' \
+                                         '\n\n*Opened time*: {}' \
+                                         '\n*Closed time*: {}' \
+                                         '\n*Cut off time*: {}' \
+                                         '\n\n' + DATETIME_EXAMPLES_NO_DURATION
+PREDICTION_CUT_OFF_DATE_CONFIRMATION_REQUEST = 'Are you sure you want to set the cut off date to *{}*?' \
+                                               '\n{} bets with a total of ฿{} will be removed'
+PREDICTION_SETTING_CANNOT_BE_CHANGED = 'This setting cannot be changed'
+PREDICTION_CREATE_CLOSE_DATE = PREDICTION_CLOSING_DATE \
+                               + '\n_\\(If set, the prediction will be automatically closed to new bets at this ' \
+                                 'date\\)_'
+PREDICTION_CREATE_CUT_OFF_DATE = '\n' + PREDICTION_CUT_OFF_DATE \
+                                 + '\n_\\(If set, all bets placed after this time will be removed and refunded\\)_'
+PREDICTION_CUT_OFF_DATE_HOW_TO_SET = '\n_You can set it from the edit menu_'
+PREDICTION_USER_DISCLAIMER = '\n\n_This prediction was created by a regular user and is not endorsed by the ' \
+                             'Bounty System Staff. Make sure to trust the creator before placing a bet._'
+PREDICTION_DELETE_CONFIRMATION = 'Are you sure you want to delete this prediction? This action cannot be undone.' \
+                                 '\nYou will be able to create another prediction in *{}*.' \
+                                 '\n\nIf someone has placed a bet on this prediction, they will be refunded.'
+PREDICTION_OPEN_CONFIRMATION = 'Are you sure you want to open this prediction? You will not be able to change the ' \
+                               'question or options after this.' \
+                               '\n\nIf the prediction is public, anyone in your groups will be able to find it.' \
+                               '\nYour fellow Crew members will always be able to find it.'
+PREDICTION_CREATE_SUCCESS = 'Prediction created successfully'
+PREDICTION_DELETE_SUCCESS = 'Prediction deleted successfully'
+PREDICTION_OPEN_SUCCESS = 'Prediction now open for bets'
+PREDICTION_ALREADY_OPEN = 'Prediction already open for bets'
+PREDICTION_ALREADY_CLOSED = 'Prediction already closed for bets'
+PREDICTION_CLOSE_CONFIRMATION = 'Are you sure you want to close this prediction to new bets?' \
+                                '\nThis action cannot be undone.'
+PREDICTION_CLOSE_SUCCESS = 'Prediction closed successfully'
+PREDICTION_INLINE_RESULT_SHARE = 'Share Prediction'
+PREDICTION_IN_WRONG_STATUS = 'Prediction in wrong status'
+PREDICTION_SEND_TO_GROUP = 'You can send this prediction to groups or topics where you are an Admin and users will ' \
+                           'be able to bet on it by replying to the message.' \
+                           '\nIf you don\'t find a group, make sure the Bot is a member of the group and use the ' \
+                           f'{Command.PVT_USER_STATUS.get_formatted()} command in the group.' \
+                           '\nYou can send only once to each group or topic.{}'
+PREDICTION_SEND_TO_GROUP_NO_GROUPS = '\n\n_No groups found_'
+PREDICTION_SEND_TO_GROUP_GROUPS_AVAILABLE = '*\n\nAvailable*:{}' \
+                                            '\n\nSelect the number of the group \\(no confirmation is required\\)'
+PREDICTION_SEND_TO_GROUP_GROUPS_ALREADY_SENT = '*\n\nAlready sent*:{}'
+PREDICTION_SEND_TO_GROUP_GROUPS_ALREADY_SENT_ITEM = '\n•{}'
+PREDICTION_SEND_TO_GROUP_GROUPS_AVAILABLE_ITEM = '\n{}. {}'
+PREDICTION_SEND_TO_GROUP_NOT_ADMIN = 'You are no longer an Admin'
+PREDICTION_SEND_TO_GROUP_ALREADY_SENT = 'This prediction has already been sent to this group'
+PREDICTION_SET_RESULT = 'Select the correct options for this prediction\n\n*{}*\n{}'
+PREDICTION_SET_RESULT_CONFIRMATION_REQUEST = 'Are you sure you want to set the result of this prediction?' \
+                                             '\nThe wagers will be distributed accordingly to the winners and.' \
+                                             '\nThis action cannot be undone' \
+                                             '\n\nCorrect options:' \
+                                             '{}'
+PREDICTION_SET_RESULT_SUCCESS = 'Prediction result set successfully'
+PREDICTION_SET_RESULT_CONFIRMATION_REQUEST_NO_CORRECT_OPTION = 'No correct option set, wagers will be refunded.'
 
 # Crew - Private
-CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = \
-    f'{Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards as at least ' \
-    f'{get_word_with_article(get_rank_by_index(Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_RANK.get_int()).title)}'
-CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over to the {CHAT_GROUP_MENTION} to join' \
+CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = \
+    f'{Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1} global leaderboards'
+CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over a Chat Group to the to join' \
                         f' one or create your own.' \
-                        f'\n\nTo create a Crew, you must have appeared in the the last ' \
-                        f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.'
-CREW_OVERVIEW = '*{}*\n{}'
-CREW_OVERVIEW_MEMBER = '\n{}. {}'
-CREW_OVERVIEW_MEMBER_ROLE = f'{CREW_OVERVIEW_MEMBER} ' + '\\({}\\)'
+                        f'\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}.' \
+                        f'\n\nIf you create a Crew, you must appear at least once every ' \
+                        f'{CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX} or else your Crew will be disbanded.'
+CREW_OVERVIEW = '*{}*' \
+                '\n\n*Formation date*: {} \\({}\\)' \
+                '\n*Members*: {} \\(Max. {}\\)' \
+                '\n\n*Treasure Chest*: ฿{}' \
+                '\n\n*Abilities*' \
+                '{}' \
+                '{}'
+CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = '\n\n_No new members allowed until the next weekly leaderboard in {}_'
+CREW_MEMBER_ITEM_TEXT = '{}'
+CREW_MEMBER_ITEM_ROLE = ' \\({}\\)'
+# Crew - Member
+CREW_MEMBER_ITEM_DETAIL = '*{}*' \
+                          '\n\n*Bounty*: ฿{}' \
+                          '\n*Join Date*: {} \\({}°\\)' \
+                          '\n\nChest contribution: ฿{} \\({}°\\)' \
+                          '\nCrew MVP Bonus: {}'
+CREW_MEMBER_ITEM_TEXT_FILL_IN = 'Crew Member'
 CREW_USER_ALREADY_IN_CREW = 'You are already in a Crew'
-CREW_USER_NOT_IN_LATEST_LEADERBOARD_REQUIRED_APPEARANCES = \
-    'You must have appeared in the the last ' \
-    f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}'
+CREW_CREATE_USER_NOT_ENOUGH_BOUNTY = f"Insufficient bounty, forming a Crew costs " \
+                                     f"฿{Env.CREW_CREATE_PRICE.get_belly()}"
 CREW_CANNOT_CREATE_CREW = 'You can create a Crew in {}'
 CREW_CREATE_REQUEST_NAME = 'Send the name of your Crew'
 CREW_CREATE_NAME_ALREADY_EXISTS = 'A Crew with this name already exists'
 CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH.get_int()} characters'
 CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
-                      f'\n\nHead over to the {CHAT_GROUP_MENTION} to start recruiting members!'
+                      f'\n\nHead over to a Chat Group to start recruiting members!'
 CREW_NAME_EDIT_SUCCESS = 'Crew name updated successfully'
 
 # Crew - Join request
@@ -435,6 +630,9 @@ CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'
+INLINE_QUERY_ITEM_NOT_FOUND_TITLE = 'Item not found'
+INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION = 'Restart the Bot to retrieve a valid url'
+INLINE_QUERY_ITEM_NOT_FOUND_MESSAGE = 'Error'
 
 # Crew - Leave
 CREW_LEAVE_CONFIRMATION = 'Are you sure you want to leave the Crew?' \
@@ -447,20 +645,115 @@ CREW_DISBAND_CONFIRMATION = 'Are you sure you want to disband the Crew?\n' \
                             'You will not be able to create another Crew until the next bounty reset in {}'
 CREW_DISBAND_SUCCESS = 'You have disbanded the Crew'
 
-# Crew - Member
-CREW_MEMBER = '*{}*' \
-              '\n\n*Bounty*: ฿{}' \
-              '\n*Join Date*: {}' \
-              '\n\nCrew MVP Bonus: {}'
-
 # Crew - Remove member
 CREW_NOT_SAME = 'You are not in the same Crew'
-CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to remove {} from the Crew?' \
+CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to expel {} from the Crew?' \
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
-CREW_REMOVE_MEMBER_SUCCESS = '{} has been removed from the Crew'
+CREW_REMOVE_MEMBER_SUCCESS = '{} has been expelled from the Crew'
+
+# Crew abilities
+CREW_ABILITIES = '*Crew Abilities*' \
+                 '\n\nAbilities mimic the effects of Devil Fruits and are extended to all members of the Crew.' + \
+                 f'\nEach ability doubles the price of the next one and lasts ' \
+                 f'{Env.CREW_ABILITY_DURATION_DAYS.get_int()} days.' \
+                 f'\nOnly the Crew Captain can activate an ability.' + \
+                 '\n{}' \
+                 '\n\nNext ability cost: *฿{}*' \
+                 '\nCrew chest: ฿{}'
+CREW_ABILITY_NO_ABILITIES = '\n_No abilities are currently activated in this Crew_'
+CREW_ABILITY_ITEM_TEXT = '\n{}: {}%' \
+                         '\nRemaining time: {}'
+CREW_ABILITY_INSUFFICIENT_CREW_CHEST = 'Insufficient Crew Chest' \
+                                       '\n\nCrew chest: ฿{}' \
+                                       '\nAbility cost: ฿{}'
+CREW_ABILITY_MAX_ABILITIES_REACHED = 'Max number of active abilities reached'
+
+# Bounty Gift
+BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
+                        f'\n\nExample: {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000'
+BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
+                      '\n\nTax: ฿{} \\({}%\\)' \
+                      '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
+                        '\n\nTax: ฿{} \\({}%\\)' \
+                        '\nTotal: ฿*{}*'
+BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
+BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
+                                '\n\nAvailable belly: ฿{}' \
+                                '\nGift amount: ฿*{}*' \
+                                '\nTax: ฿{} \\({}%\\)' \
+                                '\nTotal: ฿*{}*' \
+                                '\n\nYou can gift up to ฿`{}`'
+
+# Bounty Loan
+BOUNTY_LOAN_INVALID_COMMAND = 'You need to specify the amount to loan, the amount to repay and the duration' \
+                              f'\n\nExample: {Command.GRP_BOUNTY_LOAN.get_formatted()} 100mil 150mil 1day'
+BOUNTY_LOAN_LOANER = '\nLoaner: {}'
+BOUNTY_LOAN_BORROWER = '\nBorrower: {}'
+BOUNTY_LOAN_AMOUNT = '\nAmount: ฿*{}*'
+BOUNTY_LOAN_REPAY_AMOUNT = '\nRepay amount: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REPAID = '\nAmount paid: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REMAINING = '\nAmount remaining: ฿*{}*'
+BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE = '\nAmount remaining: ฿`{}`'
+BOUNTY_LOAN_DATE = '\nDate: *{}*'
+BOUNTY_LOAN_DURATION = '\nDuration: *{}*'
+BOUNTY_LOAN_DEADLINE_DATE = '\nDeadline: *{}*'
+BOUNTY_LOAN_TAX = '\nTax: ฿{} \\({}%\\)'
+BOUNTY_LOAN_TOTAL = '\nTotal: ฿*{}*'
+BOUNTY_LOAN_STATUS = '\n\nStatus: *{}*'
+BOUNTY_LOAN_CANCELLED = 'Loan cancelled'
+BOUNTY_LOAN_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to loan' \
+                                '\n\nAvailable belly: ฿{}' \
+                                '\nLoan amount: ฿*{}*' \
+                                '\nTax: ฿{} \\({}%\\)' \
+                                '\nTotal: ฿*{}*' \
+                                '\n\nYou can loan up to ฿`{}`'
+BOUNTY_LOAN_STATUS_AWAITING_LOANER_CONFIRMATION = 'Awaiting loaner confirmation'
+BOUNTY_LOAN_STATUS_AWAITING_BORROWER_CONFIRMATION = 'Awaiting borrower confirmation'
+BOUNTY_LOAN_STATUS_ACTIVE = 'Active'
+BOUNTY_LOAN_STATUS_REPAID = 'Re-paid'
+BOUNTY_LOAN_STATUS_EXPIRED = 'Expired'
+BOUNTY_LOAN_STATUS_FORGIVEN = 'Forgiven'
+BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX = '\n\n_In case the loan is not repaid in time, '
+BOUNTY_LOAN_EXPIRED_ACTION_PREFIX = '\n\n_Since the loan was not repaid in time, '
+BOUNTY_LOAN_EXPIRED_ACTION_LOANER = '{}% of all new gained bounty by {} will be transferred to you until the loan ' \
+                                    'is repaid_'
+BOUNTY_LOAN_EXPIRED_ACTION_BORROWER = '{}% of all new gained bounty will be transferred to {} until the loan is repaid_'
+BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER = '{}% of all new gained bounty by {} will be transferred to {} ' \
+                                                 'until the loan is repaid_'
+BOUNTY_LOAN_REQUEST = '*New Loan*' \
+                      '\n' + BOUNTY_LOAN_LOANER \
+                      + BOUNTY_LOAN_BORROWER \
+                      + BOUNTY_LOAN_AMOUNT \
+                      + BOUNTY_LOAN_REPAY_AMOUNT \
+                      + BOUNTY_LOAN_DURATION \
+                      + BOUNTY_LOAN_TAX \
+                      + BOUNTY_LOAN_TOTAL \
+                      + BOUNTY_LOAN_STATUS \
+                      + BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX \
+                      + BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER \
+                      + '\n\n_To manage or pay this loan, go to Private Chat -> /start -> Loan_'
+# Bounty loan - Private Chat
+BOUNTY_LOAN_ITEM_TEXT = '{} ฿{} {} {}'
+BOUNTY_LOAN_ITEM_TEXT_FILL_IN = 'Loan'
+BOUNTY_LOAN_ITEM_NOT_ACTIVE = 'This loan is no longer active'
+BOUNTY_LOAN_ITEM_PAY_REQUEST = BOUNTY_LOAN_REPAY_AMOUNT.strip() \
+                               + BOUNTY_LOAN_AMOUNT_REPAID \
+                               + BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE \
+                               + '\n\n_Please send the amount you want to pay ' \
+                                 '\\(send \\* to repay the maximum allowed by your bounty\\)_'
+BOUNTY_LOAN_ITEM_PAY_CONFIRMATION_REQUEST = 'Are you sure you want to pay ฿*{}* for this loan?'
+BOUNTY_LOAN_ITEM_PAY_SUCCESS = 'You have successfully paid ฿{} for this loan'
+BOUNTY_LOAN_ITEM_FORGIVE_CONFIRMATION_REQUEST = BOUNTY_LOAN_REPAY_AMOUNT.strip() \
+                                                + BOUNTY_LOAN_AMOUNT_REPAID \
+                                                + BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE \
+                                                + '\n\nAre you sure you want to forgive this loan?' \
+                                                  '\nYou will not be able to collect the remaining amount'
+BOUNTY_LOAN_ITEM_FORGIVE_SUCCESS = 'You have forgiven this loan'
 
 # Notification - Categories
 NOTIFICATION_CATEGORY_BOUNTY_GIFT = 'Bounty Gift'
+NOTIFICATION_CATEGORY_BOUNTY_LOAN = 'Bounty Loan'
 NOTIFICATION_CATEGORY_CREW = 'Crew'
 NOTIFICATION_CATEGORY_DELETED_MESSAGE = 'Deleted Message'
 NOTIFICATION_CATEGORY_GAME = 'Game'
@@ -475,21 +768,20 @@ CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves th
                                       '\nApplicable only if you are the Captain of the Crew.'
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew leave'
 # Notification - Crew Member removed
-CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been removed from the Crew'
-CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = 'If to be notified when you are removed from the Crew.'
-CREW_MEMBER_REMOVE_NOTIFICATION_KEY = 'Crew member removed'
+CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been expelled from the Crew'
+CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = 'If to be notified when you are expelled from the Crew.'
+CREW_MEMBER_REMOVE_NOTIFICATION_KEY = 'Crew member expelled'
 # Notification - Crew Disband
 CREW_DISBAND_NOTIFICATION = 'Your Crew has been disbanded'
 CREW_DISBAND_NOTIFICATION_DESCRIPTION = 'If to be notified when your Crew is disbanded.'
 CREW_DISBAND_NOTIFICATION_KEY = 'Crew disband'
 # Notification - Crew disband warning
 CREW_DISBAND_WARNING_NOTIFICATION = f'You have not appeared in the last ' \
-                                    f'{CREW_CREATE_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.' \
+                                    f'{CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.' \
                                     '\nIf you do not appear in the next leaderboard, your Crew will be disbanded.'
 CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = \
-    'If to be notified a week before your Crew is disbanded due to not appearing in the leaderboard for ' \
-    f'{Env.CREW_CREATE_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive leaderboards as at least ' \
-    f'{get_word_with_article(get_rank_by_index(Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_RANK.get_int()).title)}.' \
+    'If to be notified a week before your Crew is disbanded due to not appearing in the global leaderboard for ' \
+    f'{Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive leaderboards.' \
     f'\nApplicable only if you are the Captain of the Crew.'
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
 # Notification - Game turn
@@ -574,15 +866,16 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION = 'You have been gifted ฿{} by {}'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are gifted bounties'
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = 'Bounty gift'
 # Notification - Devil Fruit Awarded
+DEVIL_FRUIT_EAT_OR_SELL = f"\n\nYou can eat it or sell it with the {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} " \
+                          f"command in a group"
 DEVIL_FRUIT_AWARDED_NOTIFICATION = 'You have been awarded the following Devil Fruit:' \
                                    '\n\n*{}*' \
                                    '\nReason: {}' \
-                                   "\n\n_Go to start->Devil Fruit to eat it or trade it_"
+                                   + DEVIL_FRUIT_EAT_OR_SELL
 DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION = 'If to be notified when you are awarded a Devil Fruit'
 DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY = 'Devil Fruit award'
 # Notification - Devil Fruit Expired
-DEVIL_FRUIT_EXPIRED_NOTIFICATION = 'Your Devil Fruit *{}* has expired and has been released. ' \
-                                   '\nIt will appear sometime in the next {} hours.'
+DEVIL_FRUIT_EXPIRED_NOTIFICATION = 'Your Devil Fruit *{}* has expired and has been revoked'
 DEVIL_FRUIT_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your Devil Fruit expires'
 DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY = 'Devil Fruit expired'
 # Notification - Devil Fruit revoke
@@ -590,15 +883,30 @@ DEVIL_FRUIT_REVOKE_NOTIFICATION = 'Your Devil Fruit *{}* has been revoked'
 DEVIL_FRUIT_REVOKE_NOTIFICATION_DESCRIPTION = 'If to be notified when your Devil Fruit is revoked'
 DEVIL_FRUIT_REVOKE_NOTIFICATION_KEY = 'Devil Fruit revoked'
 # Notification - Devil Fruit revoke warning
-DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION = f'You have not appeared in the last ' \
-                                          f'{Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get()}' \
-                                          f' leaderboards.' \
-                                          '\nIf you do not appear in the next leaderboard, your Devil Fruit *{}* ' \
-                                          'will be revoked.'
+DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION = \
+    f'You have not appeared in the last {Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1}' \
+    f' leaderboards.' \
+    '\nIf you do not appear in the next leaderboard, your Devil Fruit *{}* will be revoked.'
 DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION = \
     'If to be notified a week before the Devil Fruit you ate is revoked due to not appearing in the leaderboard for ' \
     f'{Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get()} consecutive leaderboards'
 DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY = 'Devil Fruit revoke warning'
+# Notification - Bounty Loan
+BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT = 'Go to loan'
+# Notification - Bounty Loan Payment
+BOUNTY_LOAN_PAYMENT_NOTIFICATION = 'You have received a payment of ฿{} from {} for your loan'
+BOUNTY_LOAN_PAYMENT_NOTIFICATION_DESCRIPTION = 'If to be notified when you receive a payment for your loan'
+BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY = 'Bounty loan payment'
+# Notification - Bounty Loan Forgiven
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION = 'Your loan of ฿{} from {} has been forgiven'
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION_DESCRIPTION = 'If to be notified when your loan is forgiven'
+BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY = 'Bounty loan forgiven'
+# Notification - Bounty Loan Expired
+BOUNTY_LOAN_EXPIRED_NOTIFICATION = 'Your loan of ฿{} from {} has expired.' \
+                                   + BOUNTY_LOAN_EXPIRED_ACTION_PREFIX \
+                                   + BOUNTY_LOAN_EXPIRED_ACTION_BORROWER
+BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your loan expires'
+BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY = 'Bounty loan expired'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
@@ -612,6 +920,9 @@ LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = '{}You *{}* ฿{}'
 LOG_ITEM_DETAIL_STATUS_TEXT = '*Status*: {}'
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (f'\n\n{Emoji.RIGHT_ARROW}[Go to message](' + '{}' + f'){Emoji.LEFT_ARROW}' +
                                  '\n_\\(The message may no longer be available\\)_')
+LOG_ITEM_DETAIL_NO_PERMISSION = 'You are not authorized to view this item'
+LOG_STATS_TEXT = '*{} Statistics*\n\n{}'
+LOG_STATS_NOT_ENOUGH_DATA = 'Not enough data to generate statistics for this log'
 # Logs - Fight
 FIGHT_LOG_KEY = 'Fights'
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Fight'
@@ -621,6 +932,15 @@ FIGHT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                              '\n*Win probability*: {}%' \
                              '\n\n{}' \
                              f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+FIGHT_LOG_STATS_TEXT = '*Total fights*: {}' \
+                       '\n*Wins*: {} \\({}%\\)' \
+                       '\n*Losses*: {} \\({}%\\)' \
+                       '\n*Belly won*: ฿{}' \
+                       '\n*Belly lost*: ฿{}' \
+                       '\n*Max belly won*: [฿{} \\({}\\)]({})' \
+                       '\n*Max belly lost*: [฿{} \\({}\\)]({})' \
+                       '\n*Most fought user*: {} \\({}x\\)'
+
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = 'Doc Q'
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Doc Q Game'
@@ -629,7 +949,16 @@ DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = '*Date*: {}' \
                                   '\n*Correct apple*: {}°' \
                                   '\n\n{}' \
                                   f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
-# Logs - Game
+DOC_Q_GAME_LOG_STATS_TEXT = '*Total summons*: {}' \
+                            '\n*Wins*: {} \\({}%\\)' \
+                            '\n*Losses*: {} \\({}%\\)' \
+                            '\n*Belly won*: ฿{}' \
+                            '\n*Belly lost*: ฿{}' \
+                            '\n*Max belly won*: [฿{}]({})' \
+                            '\n*Max belly lost*: [฿{}]({})' \
+                            '\n' \
+ \
+    # Logs - Game
 GAME_LOG_KEY = 'Challenges'
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Challenge'
 GAME_LOG_ITEM_TEXT = '{} vs {} \\(฿{}\\)'
@@ -639,6 +968,17 @@ GAME_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                             '\n*Wager*: ฿{}' \
                             '\n\n{}' \
                             f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+GAME_LOG_STATS_TEXT = '*Total challenges*: {}' \
+                      '\n*Wins*: {} \\({}%\\)' \
+                      '\n*Losses*: {} \\({}%\\)' \
+                      '\n*Draws*: {} \\({}%\\)' \
+                      '\n*Belly won*: ฿{}' \
+                      '\n*Belly lost*: ฿{}' \
+                      '\n*Max belly won*: [฿{} \\({}\\)]({})' \
+                      '\n*Max belly lost*: [฿{} \\({}\\)]({})' \
+                      '\n*Most challenged user*: {} \\({}x\\)' \
+                      '\n*Most played game*: {} \\({}x\\)'
+
 # Logs - Bounty Gift
 BOUNTY_GIFT_LOG_KEY = 'Bounty Gifts'
 BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Bounty Gift'
@@ -649,6 +989,14 @@ BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT = '*{}*: {}' \
                                    '\n*Date*: {}' \
                                    '\n*Amount*: ฿{}{}' \
                                    f'{LOG_ITEM_DETAIL_GO_TO_MESSAGE}'
+BOUNTY_GIFT_LOG_STATS_TEXT = '*Total gifts*: {}' \
+                             '\n*Total given*: ฿{}' \
+                             '\n*Total received*: ฿{}' \
+                             '\n*Highest given*: [฿{} \\({}\\)]({})' \
+                             '\n*Highest received*: [฿{} \\({}\\)]({})' \
+                             '\n*Top receiver*: {} \\(฿{}\\)' \
+                             '\n*Top giver*: {} \\(฿{}\\)'
+
 # Logs - Legendary Pirate
 LEGENDARY_PIRATE_LOG_KEY = 'Legendary Pirates'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Legendary Pirate'
@@ -656,6 +1004,7 @@ LEGENDARY_PIRATE_LOG_ITEM_TEXT = '{}'
 LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\nEpithet: {}' \
                                         '\n\n*Reason*: {}'
+
 # Logs - New World Pirate
 NEW_WORLD_PIRATE_LOG_KEY = 'New World Pirates'
 NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'New World Pirate'
@@ -665,24 +1014,49 @@ NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\n\n*Bounty*: ฿{}' \
                                         '\n*Location*: {}{}'
 
+# Logs - Leaderboard Rank
+LEADERBOARD_RANK_LOG_KEY = 'Global Leaderboard Ranks'
+LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Global Leaderboard Rank'
+LEADERBOARD_RANK_LOG_ITEM_TEXT = 'Week {} of {} - {}'
+LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT = '*Week {} of {}*' \
+                                        '\n\n*Position*: {}°' \
+                                        '\n*Rank*: {}' \
+                                        '\n*Bounty*: ฿{}'
+LEADERBOARD_RANK_LOG_STATS_TEXT = '*Total appearances*: {}' \
+                                  '\n*Appearances as Pirate King*: {} \\({}%\\)' \
+                                  '\n*Appearances as Emperor*: {} \\({}%\\)' \
+                                  '\n*Appearances as First Mate*: {} \\({}%\\)' \
+                                  '\n*Appearances as Supernova*: {} \\({}%\\)' \
+                                  '\n*Max rank*: [{} \\({}°\\)]({})' \
+                                  '\n*Max bounty*: [฿{} \\({}°\\)]({})'
+
+# Logs - Income tax event
+INCOME_TAX_EVENT_LOG_KEY = 'Tax Breakdown'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Income Tax Breakdown'
+INCOME_TAX_EVENT_LOG_ITEM_TEXT = '{} \\(฿{}\\)'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT = '*Event*: [{}]({})' \
+                                        '\n*Date*: {}' \
+                                        '\n*Income*: ฿{}' \
+                                        '\n*Net gain*: ' \
+                                        + Emoji.LOG_POSITIVE + '฿{}' \
+                                                               '\n*Total tax*: ' \
+                                        + Emoji.LOG_NEGATIVE + '฿{} \\({}%\\)' \
+                                                               '{}{}' \
+                                                               '\n\n\n*Breakdown*' \
+                                                               '{}'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION = '\n\n*Deductions*'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM = '\n{}: {}%'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION = '\n\n*Contributions* \\(from tax\\)'
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM = '\n{}: ฿{} \\({}%\\)'
+
+INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM = '\n\nAmount: ฿{}' \
+                                                       '\nGain: ฿{}' \
+                                                       '\nTax: ฿{} \\({}%\\)'
+
 SILENCE_ACTIVE = 'A soundproof field has been activated, only those who are granted permission can speak'
 SILENCE_END = 'The soundproof field has been cancelled, everyone can speak again'
 SPEAK = '{} has been granted permission to speak'
 
-BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
-                        f'\n\nExample: {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000'
-BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
-                      '\n\nTax: ฿{} \\({}%\\)' \
-                      '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
-                        '\n\nTax: ฿{} \\({}%\\)' \
-                        '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
-BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to gift' \
-                                '\n\nAvailable belly: ฿{}' \
-                                '\nGift amount: ฿*{}*' \
-                                '\nTax: ฿{} \\({}%\\)' \
-                                '\nTotal: ฿*{}*'
 # Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
 DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
@@ -706,16 +1080,12 @@ DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED = 'You have eaten the {} and gained the f
 DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = 'Are you sure you want to discard the {}?' \
                                            "\n\nYou will lose it and can regain it by finding or trading for it again"
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = 'You have discarded the {}'
-DEVIL_FRUIT_NOT_EATEN = 'You have not eaten this Devil Fruit'
-DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "\n\nName: *{}*" \
+DEVIL_FRUIT_RELEASE_MESSAGE_INFO = "Congratulations {}, you have found a Devil Fruit!" \
+                                   "\n\nName: *{}*" \
                                    "\nCategory: {}" \
-                                   "{}"
-DEVIL_FRUIT_APPEARED = 'A Devil Fruit has appeared!'
-DEVIL_FRUIT_APPEARED_WITH_INFO = f'{DEVIL_FRUIT_RELEASE_MESSAGE_INFO}'
+                                   "{}" \
+                                   + DEVIL_FRUIT_EAT_OR_SELL
 
-DEVIL_FRUIT_ALREADY_COLLECTED = 'Devil Fruit already collected'
-DEVIL_FRUIT_COLLECT_SUCCESS = '{} has collected the Devil Fruit!' + DEVIL_FRUIT_RELEASE_MESSAGE_INFO
-DEVIL_FRUIT_USER_CANNOT_COLLECT = 'You can collect another Devil Fruit in {}'
 DEVIL_FRUIT_SELL_NO_AMOUNT = 'You need to specify the amount of belly you want to sell the Devil Fruit for' \
                              f'\n\nExample: {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} 10.000.000'
 DEVIL_FRUIT_SELL_NO_FRUITS = 'You do not have any Devil Fruits that can be sold ' \
@@ -727,6 +1097,7 @@ DEVIL_FRUIT_SELL_NO_LONGER_OWN = '{} no longer owns this Devil Fruit'
 DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = 'This Devil Fruit is no longer sellable'
 DEVIL_FRUIT_SELL_BUY = '{} has put up the following Devil Fruit for sale:' \
                        '\n\n{}' \
+                       '\n\nExpiring in: {}' \
                        '\n\nPrice: ฿{}' \
                        '\nTax: ฿{} \\({}%\\)' \
                        '\nTotal Price: ฿*{}*' \
@@ -736,6 +1107,7 @@ DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = 'You do not have enough belly to buy thi
 DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = 'You cannot buy your own Devil Fruit'
 DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}' \
                                '\n\n{}' \
+                               '\n\nExpiring in: *{}*' \
                                '\n\nPrice: ฿{}' \
                                '\nTax: ฿{} \\({}%\\)' \
                                '\nTotal Price: ฿*{}*'
@@ -744,3 +1116,13 @@ DEVIL_FRUIT_SELL_BUY_SUCCESS = '{} has bought the following Devil Fruit from {}'
 NO_DEVIL_FRUIT_TO_SCHEDULE = 'There are no {} Devil Fruits to schedule for release'
 
 THANKS_FOR_ADDING_TO_GROUP = 'Thanks for adding me to your Group!\n'
+
+INCOME_TAX_EVENT_BOUNTY_LOAN = 'Bounty Loan'
+INCOME_TAX_EVENT_DEVIL_FRUIT_SELL = 'Devil Fruit Sell'
+INCOME_TAX_EVENT_PREDICTION = 'Prediction'
+
+INCOME_TAX_DEDUCTION_TYPE_ADMIN = 'Admin'
+INCOME_TAX_DEDUCTION_TYPE_CREW_ABILITY = 'Crew Ability'
+INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT = 'Devil Fruit'
+
+INCOME_TAX_CONTRIBUTION_TYPE_CREW_CHEST = 'Crew Chest'

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Tuple
 
 from telegram import Update
@@ -7,15 +8,14 @@ import resources.Environment as Env
 import src.model.enums.Command as Command
 import src.model.enums.Location as Location
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
+from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
-from src.chat.group.screens.screen_devil_fruit_collect import manage as manage_screen_devil_fruit_collect
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
-from src.chat.group.screens.screen_game_gol import manage as manage_screen_game_gol
 from src.chat.group.screens.screen_game_opponent_confirmation import manage as manage_screen_game_opponent_confirmation
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
@@ -38,8 +38,9 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import add_bounty
+from src.service.bounty_service import add_or_remove_bounty
 from src.service.bounty_service import get_message_belly
+from src.service.devil_fruit_service import release_devil_fruit_to_user
 from src.service.group_service import is_main_group, feature_is_enabled
 from src.service.message_service import delete_message
 from src.service.notification_service import send_notification
@@ -93,8 +94,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 return
 
     # Update bounty from message gain
-    await add_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
-                     should_update_location=True, from_message=True)
+    if command is Command.ND:
+        await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
+                                   should_update_location=True, from_message=True)
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 
@@ -119,7 +121,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
     if command is not Command.ND:
         match command.screen:
             case Screen.GRP_USER_STATUS:  # User status
-                await manage_screen_show_status(update, context, command, user)
+                await manage_screen_show_status(update, context, command, user, group_chat=group_chat)
 
             case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
                 await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)
@@ -173,9 +175,6 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
                                                 group_chat)
 
-            case Screen.GRP_DEVIL_FRUIT_COLLECT:  # Devil fruit collect
-                await manage_screen_devil_fruit_collect(update, context, user, inbound_keyboard)
-
             case Screen.GRP_SETTINGS:  # Settings
                 await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
 
@@ -183,12 +182,19 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
                                                      group_chat)
 
-            case Screen.GRP_GUESS_OR_LIFE_GAME:  # Guess or life game
-                await manage_screen_game_gol(update, context, user, inbound_keyboard)
+            case Screen.GRP_BOUNTY_LOAN:  # Bounty loan
+                await manage_screen_bounty_loan(update, context, user, inbound_keyboard, target_user, command,
+                                                group_chat)
 
             case _:  # Unknown screen
                 if update.callback_query is not None:
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
+
+        # Setting here to avoid regular messages to be counted as interaction
+        user.last_system_interaction_date = datetime.now()
+
+        if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE):
+            await release_devil_fruit_to_user(update, context, user)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,

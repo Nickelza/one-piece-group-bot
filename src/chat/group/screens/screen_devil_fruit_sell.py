@@ -14,10 +14,13 @@ from src.model.enums.Command import Command
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import DevilFruitTradeValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, get_transaction_tax
+from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, \
+    get_transaction_tax, add_or_remove_bounty
+from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
@@ -36,8 +39,8 @@ class Step(IntEnum):
     """
     The steps for this screen
     """
-    SELECT_FRUIT = 1
-    BUY = 2
+    SELECT_FRUIT = 0
+    BUY = 1
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
@@ -97,7 +100,7 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     """
 
     if devil_fruit_trade is None:
-        amount = get_amount_from_string(command.parameters[0])
+        amount = get_amount_from_string(command.parameters[0], seller)
     else:
         amount = devil_fruit_trade.price
 
@@ -271,8 +274,8 @@ async def send_sell_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY.format(
         user.get_markdown_mention(), list_page.get_item_detail_text(from_private_chat=False),
-        get_belly_formatted(amount), get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount),
-        ot_text_addendum)
+        get_remaining_duration(devil_fruit.expiration_date), get_belly_formatted(amount),
+        get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount), ot_text_addendum)
 
     await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
 
@@ -329,12 +332,13 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
                                                                          devil_fruit_trade=devil_fruit_trade)
 
     # Remove the belly from the buyer
-    buyer.bounty -= total_amount
+    await add_or_remove_bounty(buyer, total_amount, add=False, update=update)
     buyer.save()
 
     # Add the belly to the seller
-    devil_fruit_trade.giver.bounty += amount
     devil_fruit_trade.giver.save()
+    await add_or_remove_bounty(devil_fruit_trade.giver, amount, update=update,
+                               tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL, event_id=devil_fruit_trade.id)
 
     list_page: DevilFruitListPage = DevilFruitListPage()
     list_page.object = devil_fruit
@@ -346,7 +350,7 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
     seller: User = devil_fruit_trade.giver
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
         buyer.get_markdown_mention(), seller.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False), get_belly_formatted(amount),
-        get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount))
+        list_page.get_item_detail_text(from_private_chat=False), get_remaining_duration(devil_fruit.expiration_date),
+        get_belly_formatted(amount), get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount))
 
     await full_message_send(context, ot_text, update=update, add_delete_button=True)

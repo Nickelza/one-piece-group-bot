@@ -11,8 +11,10 @@ from src.model.GroupChat import GroupChat
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
+from src.model.GroupUser import GroupUser
 from src.model.Prediction import Prediction
 from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
+from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
@@ -119,7 +121,8 @@ def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: lis
 async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
                                                            text: str, inline_keyboard: list[list[Keyboard]] = None,
                                                            excluded_group_chats: list[GroupChat] = None,
-                                                           prediction: Prediction = None) -> None:
+                                                           prediction: Prediction = None,
+                                                           filter_by_groups: list[Group] = None) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -128,17 +131,19 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
     :param prediction: The prediction, to save the group chat message
+    :param filter_by_groups: The groups to filter by
     """
 
     context.application.create_task(broadcast_to_chats_with_feature_enabled(
         context, feature, text, inline_keyboard=inline_keyboard, excluded_group_chats=excluded_group_chats,
-        prediction=prediction))
+        prediction=prediction, filter_by_groups=filter_by_groups))
 
 
 async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
                                                   text: str, inline_keyboard: list[list[Keyboard]] = None,
                                                   excluded_group_chats: list[GroupChat] = None,
-                                                  prediction: Prediction = None) -> None:
+                                                  prediction: Prediction = None, filter_by_groups: list[Group] = None
+                                                  ) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -147,13 +152,17 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
     :param prediction: The prediction, to save the group chat message
+    :param filter_by_groups: The groups to filter by
     """
 
     if feature is Feature.PREDICTION and prediction is None:
         raise ValueError("Prediction cannot be None if the feature is PREDICTION")
 
-    group_chats: list[GroupChat] = get_group_chats_with_feature_enabled(feature,
-                                                                        excluded_group_chats=excluded_group_chats)
+    if filter_by_groups is None:
+        filter_by_groups = []
+
+    group_chats: list[GroupChat] = get_group_chats_with_feature_enabled(
+        feature, excluded_group_chats=excluded_group_chats, filter_by_groups=filter_by_groups)
     feature_is_pinnable = feature.is_pinnable()
 
     # Unpin all previous messages of this feature
@@ -235,6 +244,25 @@ def deactivate_inactive_group_chats() -> None:
 
     (GroupChat.update(is_active=False)
      .where(GroupChat.last_message_date < datetime.now() - timedelta(days=inactive_days))
+     .execute())
+
+    # Deactivate inactive group users
+    deactivate_inactive_group_users()
+
+
+def deactivate_inactive_group_users() -> None:
+    """
+    Deactivates the inactive group users
+    """
+
+    inactive_days = Env.INACTIVE_GROUP_USER_DAYS.get_int()
+
+    (GroupUser.update(is_active=False)
+     .where(GroupUser.last_message_date < datetime.now() - timedelta(days=inactive_days))
+     .execute())
+
+    (User.update(is_active=False)
+     .where(User.last_message_date < datetime.now() - timedelta(days=inactive_days))
      .execute())
 
 
