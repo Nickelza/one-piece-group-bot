@@ -664,7 +664,7 @@ CREW_ABILITIES = '*Crew Abilities*' \
                  f'{Env.CREW_ABILITY_DURATION_DAYS.get_int()} days.' \
                  f'\nOnly the Crew Captain can activate an ability.' + \
                  '\n{}' \
-                 '\n\nNext ability cost: *฿{}*' \
+                 '\n\nNext ability cost: ฿*{}*' \
                  '\nCrew chest: ฿{}'
 CREW_ABILITY_NO_ABILITIES = '\n_No abilities are currently activated in this Crew_'
 CREW_ABILITY_ITEM_TEXT = '\n{}: {}%' \
