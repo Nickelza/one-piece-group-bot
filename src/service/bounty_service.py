@@ -344,7 +344,7 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                 # Add tax to crew chest
                 if user.is_crew_member():
                     # Add crew chest contribution
-                    add_contribution(IncomeTaxContributionType.CREW_CHEST, tax_amount, tax_event)
+                    add_contribution(IncomeTaxContributionType.CREW_CHEST, tax_amount, tax_event=tax_event, user=user)
 
             user.total_gained_bounty += net_amount_after_tax
 
