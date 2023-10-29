@@ -329,7 +329,7 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                 amount_to_add -= tax_amount
 
                 # Create tax event
-                tax_event: IncomeTaxEvent = IncomeTaxEvent()
+                tax_event: IncomeTaxEvent | None = None
                 if tax_event_type is not None:
                     tax_event: IncomeTaxEvent = IncomeTaxEvent()
                     tax_event.user = user
