@@ -465,9 +465,7 @@ class User(BaseModel):
         :return: True if the user has income tax
         """
 
-        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
-
-        return IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage > 0
+        return self.get_income_tax_percentage() > 0
 
     def get_income_tax_percentage(self) -> float:
         """
@@ -478,7 +476,7 @@ class User(BaseModel):
         from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
         from src.service.math_service import format_percentage_value
 
-        return format_percentage_value(IncomeTaxBracket.get_bracket(self.get_bounty_plus_pending_bounty()).percentage)
+        return format_percentage_value(IncomeTaxBracket.get_bracket(int(str(self.total_gained_bounty))).percentage)
 
     @staticmethod
     def get_active_interactive_users() -> list:

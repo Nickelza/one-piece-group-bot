@@ -16,11 +16,9 @@ class IncomeTaxBracket:
         :return: The tax bracket
         """
 
-        for tax_bracket in TAX_BRACKETS:
-            if amount <= tax_bracket.min_amount:
+        for tax_bracket in reversed(TAX_BRACKETS):
+            if amount >= tax_bracket.min_amount:
                 return tax_bracket
-
-        return TAX_BRACKETS[-1]  # Return last bracket
 
     @staticmethod
     def get_tax_breakdown(starting_amount: int, amount: int) -> list[IncomeTaxBreakdown]:
