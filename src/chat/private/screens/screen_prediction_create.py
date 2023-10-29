@@ -4,6 +4,7 @@ from enum import IntEnum, StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.chat.private.screens.screen_prediction_detail import PredictionDetailReservedKeys
 from src.model.Prediction import Prediction
@@ -21,7 +22,7 @@ from src.model.error.CustomException import PredictionException, StepValidationE
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import datetime_is_before, get_remaining_duration, get_user_timezone_and_offset_text, \
-    get_datetime_from_natural_language, default_datetime_format
+    get_datetime_from_natural_language, default_datetime_format, get_datetime_in_future_hours
 from src.service.message_service import full_message_send, get_create_or_edit_status, get_deeplink, get_yes_no_keyboard
 from src.service.prediction_service import get_prediction_text, get_invalid_bets, cut_off_invalid_bets
 
@@ -63,7 +64,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     if not should_ignore_input:
         # Validate that the user can create a prediction
-        if not await validate(update, context, user):
+        if not await validate(update, context, inbound_keyboard, user):
             return
 
         if user.private_screen_step is None:
@@ -350,9 +351,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
                 case Step.END:  # End
                     # Create prediction
                     prediction.save()
-
                     # Save options
                     await save_prediction_options(prediction)
+
+                    # Add prediction creation cooldown
+                    user.prediction_creation_cooldown_end_date = get_datetime_in_future_hours(
+                        Env.PREDICTION_CREATE_COOLDOWN_DURATION.get_int()
+                    )
 
                     # Reset user private screen
                     user.reset_private_screen()
@@ -482,22 +487,23 @@ async def go_to_prediction_detail(context: ContextTypes.DEFAULT_TYPE, inbound_ke
     return await prediction_detail_manage(update, context, inbound_keyboard, user)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> bool:
+async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> bool:
     """
     Validate the prediction create screen
     :param update: The update
     :param context: The context
+    :param inbound_keyboard: The inbound keyboard
     :param user: The user
     """
 
     try:
-        # User not in required location
+        # Prediction creation cooldown active
         if not datetime_is_before(user.prediction_creation_cooldown_end_date):
             raise PredictionException(phrases.PREDICTION_CREATE_COOLDOWN_ACTIVE.format(
                 get_remaining_duration(user.prediction_creation_cooldown_end_date))
             )
     except PredictionException as e:
-        await full_message_send(context, str(e), update=update)
+        await full_message_send(context, str(e), update=update, inbound_keyboard=inbound_keyboard)
         return False
 
     return True

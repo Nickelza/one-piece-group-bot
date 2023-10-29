@@ -1,9 +1,11 @@
 from datetime import datetime
 
 from telegram import Update
+from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
+from resources import phrases
 from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_screen_bounty_loan_detail
 from src.chat.private.screens.screen_bounty_loan_detail_forgive import manage as \
@@ -53,11 +55,14 @@ from src.chat.private.screens.screen_settings_notifications_type_edit import \
 from src.chat.private.screens.screen_settings_timezone import manage as manage_screen_settings_timezone
 from src.chat.private.screens.screen_start import manage as manage_screen_start
 from src.chat.private.screens.screen_status import manage as manage_screen_status
+from src.model.SystemUpdate import SystemUpdate
+from src.model.SystemUpdateUser import SystemUpdateUser
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.message_service import full_message_send, get_message_url, escape_valid_markdown_chars
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
@@ -252,3 +257,55 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)
 
         user.last_system_interaction_date = datetime.now()
+        await send_system_update_message(update, context, user)
+
+
+async def send_system_update_message(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
+    """
+    Sends a system update message to the user
+    :param update: Telegram update
+    :param context: Telegram context
+    :param user: User
+    :return: None
+    """
+
+    # Get the system update
+    system_update: SystemUpdate = SystemUpdate.get_latest_update()
+
+    if system_update is None:
+        return
+
+    # Check if the user already received this system update
+    system_update_user: SystemUpdateUser = SystemUpdateUser.get_or_none(
+        SystemUpdateUser.system_update == system_update,
+        SystemUpdateUser.user == user)
+
+    if system_update_user is not None:
+        return
+
+    # Don't send update if user joined after the update was made
+    if user.join_date > system_update.date:
+        return
+
+    ot_text = phrases.SYSTEM_UPDATE.format(
+        escape_valid_markdown_chars(system_update.title), escape_valid_markdown_chars(system_update.description),
+        get_message_url(chat_id=system_update.chat_id, message_id=system_update.message_id))
+
+    # Add view button
+    # Notifications
+    inline_keyboard: list[list[Keyboard]] = [
+        [Keyboard(phrases.PVT_KEY_VIEW,
+                  url=get_message_url(chat_id=system_update.chat_id, message_id=system_update.message_id))]
+    ]
+
+    system_update_user = SystemUpdateUser()
+    system_update_user.system_update = system_update
+    system_update_user.user = user
+
+    try:
+        # In try except because it should never prevent from updating the user model which happens at script end
+        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, new_message=True)
+    except TelegramError as e:
+        system_update_user.error = str(e)
+
+    system_update_user.save()
