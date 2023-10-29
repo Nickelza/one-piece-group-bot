@@ -225,8 +225,8 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                                update: Update = None, should_update_location: bool = False,
                                pending_belly_amount: int = None, from_message: bool = False, add: bool = True,
                                should_save: bool = False, should_affect_pending_bounty: bool = False,
-                               check_for_loan: bool = True, pending_belly_is_user_bounty: bool = False,
-                               tax_event_type: IncomeTaxEventType = None, event_id: int = None) -> None:
+                               check_for_loan: bool = True, tax_event_type: IncomeTaxEventType = None,
+                               event_id: int = None) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -241,8 +241,6 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     :param should_save: Whether to save the user
     :param should_affect_pending_bounty: Whether to affect the pending bounty
     :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
-    :param pending_belly_is_user_bounty: If the pending belly is the user's bounty, so it should
-                                         not be added or removed from the bounty
     :param tax_event_type: The tax event type
     :param event_id: The event id
 
@@ -263,11 +261,6 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
         should_affect_pending_bounty = True
     elif should_affect_pending_bounty:
         pending_belly_amount = amount
-
-    # Don't add or remove to user's pending bounty
-    if pending_belly_is_user_bounty:
-        pending_belly_amount = user.bounty
-        should_affect_pending_bounty = False
 
     from src.chat.manage_message import init
     db = init()

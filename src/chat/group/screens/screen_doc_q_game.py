@@ -224,8 +224,8 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         correct_choices_index = str(doc_q_game.correct_choices_index).split(c.STANDARD_SPLIT_CHAR)
         if str(keyboard.info[DocQReservedKeys.CHOICE_INDEX]) in correct_choices_index:
             # Increase user's bounty
-            await add_or_remove_bounty(user, win_amount, update=update, pending_belly_is_user_bounty=True,
-                                       tax_event_type=IncomeTaxEventType.DOC_Q_GAME, event_id=doc_q_game.id)
+            await add_or_remove_bounty(user, win_amount, update=update, tax_event_type=IncomeTaxEventType.DOC_Q_GAME,
+                                       event_id=doc_q_game.id)
 
             # Update game status
             doc_q_game.status = GameStatus.WON
@@ -237,7 +237,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
                                                     user.get_bounty_formatted())
         else:  # User chose wrong option
             # Decrease user's bounty
-            await add_or_remove_bounty(user, lose_amount, add=False, update=update, pending_belly_is_user_bounty=True)
+            await add_or_remove_bounty(user, lose_amount, add=False, update=update)
 
             # Update game status
             doc_q_game.status = GameStatus.LOST
