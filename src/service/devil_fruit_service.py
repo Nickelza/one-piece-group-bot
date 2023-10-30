@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from telegram import Update
+from telegram import Update, Message
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
@@ -10,6 +10,7 @@ from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
+from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
@@ -191,12 +192,14 @@ async def schedule_devil_fruit_release(context: ContextTypes.DEFAULT_TYPE) -> No
     set_devil_fruit_release_date(devil_fruit, is_new_release=True)
 
 
-async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User) -> None:
+async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
+                                      group_chat: GroupChat) -> None:
     """
     Release a Devil Fruit to a user
     :param update: The update
     :param context: The context
     :param user: The user
+    :param group_chat: The group chat
     :return: None
     """
 
@@ -245,8 +248,12 @@ async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFA
 
         try:
             # Send release message
-            await full_media_send(context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text,
-                                  keyboard=inline_keyboard, update=update, new_message=True)
+            message: Message = await full_media_send(
+                context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text, keyboard=inline_keyboard,
+                update=update, new_message=True)
+
+            devil_fruit.release_group_chat = group_chat
+            devil_fruit.release_message_id = message.message_id
 
             give_devil_fruit_to_user(devil_fruit, user, DevilFruitSource.BOT)
             user.devil_fruit_collection_cooldown_end_date = get_next_bounty_reset_time()

@@ -194,7 +194,7 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         user.last_system_interaction_date = datetime.now()
 
         if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE):
-            await release_devil_fruit_to_user(update, context, user)
+            await release_devil_fruit_to_user(update, context, user, group_chat)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,
