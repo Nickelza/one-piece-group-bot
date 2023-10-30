@@ -45,7 +45,7 @@ async def validate_and_delete(context: ContextTypes.DEFAULT_TYPE, prediction_opt
         await validate(update, user, prediction_option=prediction_option)
 
         # Delete the prediction option for the user
-        delete_prediction_option_for_user(user, prediction_option)
+        await delete_prediction_option_for_user(user, prediction_option)
         ot_text = phrases.PREDICTION_BET_REMOVE_SUCCESS
     except PredictionException as pe:
         ot_text = pe.message

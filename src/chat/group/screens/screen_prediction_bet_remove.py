@@ -104,13 +104,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     if prediction_option is None:
         # Remove all bets on this prediction
         for prediction_option_user in prediction_options_user:
-            delete_prediction_option_user(user, prediction_option_user)
+            await delete_prediction_option_user(user, prediction_option_user)
 
         await full_message_send(context, phrases.PREDICTION_BET_REMOVE_ALL_SUCCESS, update=update,
                                 add_delete_button=True)
     else:
         # Remove bet on this prediction option
-        delete_prediction_option_for_user(user, prediction_option)
+        await delete_prediction_option_for_user(user, prediction_option)
 
         await full_message_send(context, phrases.PREDICTION_BET_REMOVE_SUCCESS, update=update, add_delete_button=True)
 

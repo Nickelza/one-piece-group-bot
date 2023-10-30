@@ -644,9 +644,9 @@ def get_prediction_net_win(prediction: Prediction, user: User) -> int:
     return net_win
 
 
-def save_prediction_option_user(prediction_option: PredictionOption, user: User, wager: int,
-                                prediction_group_chat_message: PredictionGroupChatMessage = None
-                                ) -> PredictionOptionUser:
+async def save_prediction_option_user(prediction_option: PredictionOption, user: User, wager: int,
+                                      prediction_group_chat_message: PredictionGroupChatMessage = None
+                                      ) -> PredictionOptionUser:
     """
     Save the prediction option user
     :param prediction_option: The prediction option
@@ -678,12 +678,12 @@ def save_prediction_option_user(prediction_option: PredictionOption, user: User,
     prediction_option_user.save()
 
     # Remove wager from user balance
-    add_or_remove_bounty(user, wager, add=False, should_affect_pending_bounty=True)
+    await add_or_remove_bounty(user, wager, add=False, should_affect_pending_bounty=True)
 
     return prediction_option_user
 
 
-def delete_prediction_option_user(user: User, prediction_option_user: PredictionOptionUser) -> None:
+async def delete_prediction_option_user(user: User, prediction_option_user: PredictionOptionUser) -> None:
     """
     Delete a prediction option user
     :param user: The user object
@@ -691,13 +691,13 @@ def delete_prediction_option_user(user: User, prediction_option_user: Prediction
     :return: None
     """
     # Return wager
-    add_or_remove_bounty(user, prediction_option_user.wager, should_affect_pending_bounty=True)
+    await add_or_remove_bounty(user, prediction_option_user.wager, should_affect_pending_bounty=True)
 
     # Delete prediction option user
     prediction_option_user.delete_instance()
 
 
-def delete_prediction_option_for_user(user: User, prediction_option: PredictionOption) -> None:
+async def delete_prediction_option_for_user(user: User, prediction_option: PredictionOption) -> None:
     """
     Delete a prediction option for a user
     :param user: The user object
@@ -708,7 +708,7 @@ def delete_prediction_option_for_user(user: User, prediction_option: PredictionO
         (PredictionOptionUser.user == user) & (PredictionOptionUser.prediction_option == prediction_option))
 
     if prediction_option_user is not None:  # Should always be true
-        delete_prediction_option_user(user, prediction_option_user)
+        await delete_prediction_option_user(user, prediction_option_user)
 
 
 def get_max_wager_refund(prediction_option_user: PredictionOptionUser = None, prediction: Prediction = None,
@@ -841,7 +841,7 @@ def get_prediction_deeplink_button(prediction: Prediction) -> Keyboard:
                     previous_screen_list=[Screen.PVT_PREDICTION], is_deeplink=True)
 
 
-def delete_prediction(prediction: Prediction):
+async def delete_prediction(prediction: Prediction):
     """
     Delete a prediction
     :param prediction: The prediction
@@ -852,7 +852,7 @@ def delete_prediction(prediction: Prediction):
     prediction_option_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
     for prediction_option_user in prediction_option_users:
         user: User = prediction_option_user.user
-        delete_prediction_option_user(user, prediction_option_user)
+        await delete_prediction_option_user(user, prediction_option_user)
 
     # Delete prediction
     prediction.delete_instance()

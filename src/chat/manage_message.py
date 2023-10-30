@@ -219,7 +219,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             case MessageSource.TG_REST:
                 await manage_tgrest_chat(update, context)
             case MessageSource.INLINE_QUERY:
-                await manage_inline_query(update, context, user)
+                await manage_inline_query(update, context)
             case _:
                 raise ValueError('Invalid message source')
     except DoesNotExist:

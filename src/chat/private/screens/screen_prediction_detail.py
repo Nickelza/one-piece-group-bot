@@ -63,7 +63,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             inbound_keyboard.info.pop(ReservedKeyboardKeys.CONFIRM)
 
             if is_confirmed:
-                delete_prediction(prediction)
+                await delete_prediction(prediction)
                 # Return to prediction list
                 await full_message_send(context, phrases.PREDICTION_DELETE_SUCCESS, update=update, show_alert=True)
                 from src.chat.private.screens.screen_prediction import manage as manage_prediction

@@ -71,7 +71,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
             case Step.END:  # End
                 wager: int = validation_tuple[2]
-                save_prediction_option_user(prediction_option, user, wager)
+                await save_prediction_option_user(prediction_option, user, wager)
 
                 # Bet success message
                 ot_text = phrases.PREDICTION_BET_SUCCESS

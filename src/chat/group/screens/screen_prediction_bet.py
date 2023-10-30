@@ -143,7 +143,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     if prediction is None or prediction_option is None or wager is None or option_number is None:
         return
 
-    save_prediction_option_user(prediction_option, user, wager)
+    await save_prediction_option_user(prediction_option, user, wager)
 
     # Send success message
     ot_text = phrases.PREDICTION_BET_SUCCESS + phrases.PREDICTION_BET_HOW_TO_VIEW_BET_STATUS
