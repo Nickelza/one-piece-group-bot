@@ -29,7 +29,8 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
-from src.service.income_tax_service import get_tax_amount, get_tax_deductions, add_contribution
+from src.service.income_tax_service import get_tax_amount, get_tax_deductions, add_contribution, \
+    user_has_complete_tax_deduction
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send
@@ -316,7 +317,7 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                                                                                          net_amount_without_pending)
             tax_amount = IncomeTaxBreakdown.get_amount_from_list(tax_breakdown)
 
-            if tax_amount > 0:
+            if tax_amount > 0 and not user_has_complete_tax_deduction(user):
                 tax_amount = get_tax_amount(user, net_amount_without_pending)  # Recalculate with eventual deductions
                 net_amount_after_tax = net_amount_without_pending - tax_amount
                 amount_to_add -= tax_amount

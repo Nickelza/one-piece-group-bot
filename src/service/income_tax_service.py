@@ -47,12 +47,11 @@ def get_tax_amount(user: User, amount: int) -> int:
     if total_tax_amount == 0:
         return amount
 
-    deductions = get_tax_deductions(user)
-    if len(deductions) == 0:
-        return total_tax_amount
-
     # Calculate cumulative deduction percentage
-    tax_deduction_percentage = get_cumulative_percentage_sum([deduction.percentage for deduction in deductions])
+    tax_deduction_percentage = get_tax_deduction_cumulative_percentage(user)
+    if tax_deduction_percentage >= 100:
+        return 0
+
     total_tax_amount -= get_value_from_percentage(total_tax_amount, tax_deduction_percentage)
 
     # Apply tax to amount
@@ -99,3 +98,27 @@ def add_contribution(contribution_type: IncomeTaxContributionType, tax_amount: i
     # Update tax event
     tax_event.contribution_list = object_to_json_string(contribution_list)
     tax_event.save()
+
+
+def get_tax_deduction_cumulative_percentage(user: User) -> float:
+    """
+    Get the cumulative percentage of all tax deductions
+    :param user: The user
+    :return: The cumulative percentage
+    """
+
+    deductions = get_tax_deductions(user)
+    if len(deductions) == 0:
+        return 0
+
+    return get_cumulative_percentage_sum([deduction.percentage for deduction in deductions])
+
+
+def user_has_complete_tax_deduction(user: User) -> bool:
+    """
+    Check if a user has a complete deduction
+    :param user: The user
+    :return: True if the user has a complete deduction, False otherwise
+    """
+
+    return get_tax_deduction_cumulative_percentage(user) >= 100

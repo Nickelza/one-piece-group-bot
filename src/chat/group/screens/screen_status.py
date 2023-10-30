@@ -21,6 +21,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.income_tax_service import user_has_complete_tax_deduction
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
     get_start_with_command_url, escape_valid_markdown_chars, message_is_reply
@@ -198,7 +199,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         has_bounty_deduction = True
 
     # Income tax
-    if target_user.has_income_tax():
+    if target_user.has_income_tax() and not user_has_complete_tax_deduction(user):
         bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
             Emoji.LOG_NEGATIVE,
             phrases.SHOW_USER_STATUS_INCOME_TAX,
