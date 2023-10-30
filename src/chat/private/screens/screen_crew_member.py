@@ -13,7 +13,6 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew
 from src.service.date_service import default_date_format
-from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, mention_markdown_user
 
@@ -89,12 +88,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     crew_member_list_page.user = user
     crew_member_list_page.crew = user.crew
 
-    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, crew_member_list_page,
-                                                         ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
-                                                         Screen.PVT_CREW_MEMBER_DETAIL)
-
-    ot_text = phrases.LIST_OVERVIEW.format(determine_article(phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN),
-                                           phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN, items_text)
+    ot_text, items_keyboard = get_items_text_keyboard(
+        inbound_keyboard, crew_member_list_page, ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
+        Screen.PVT_CREW_MEMBER_DETAIL, text_fill_in=phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN)
 
     await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
                             excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])

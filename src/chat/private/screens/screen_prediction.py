@@ -16,7 +16,6 @@ from src.model.enums.PredictionType import PredictionType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.prediction_service import get_user_prediction_status_emoji, get_prediction_text, \
@@ -98,17 +97,15 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     prediction_list_page: PredictionListPage = PredictionListPage()
     prediction_list_page.user = user
 
-    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, prediction_list_page,
-                                                         PredictionReservedKeys.ITEM_ID, Screen.PVT_PREDICTION_DETAIL)
+    ot_text, items_keyboard = get_items_text_keyboard(
+        inbound_keyboard, prediction_list_page, PredictionReservedKeys.ITEM_ID, Screen.PVT_PREDICTION_DETAIL,
+        text_fill_in=phrases.PREDICTION_ITEM_TEXT_FILL_IN)
 
     inline_keyboard: list[list[Keyboard]] = items_keyboard
 
     # Add the create prediction button
     inline_keyboard.append([Keyboard(text=phrases.KEY_CREATE, screen=Screen.PVT_PREDICTION_CREATE)])
 
-    ot_text = phrases.LIST_OVERVIEW.format(determine_article(phrases.PREDICTION_ITEM_TEXT_FILL_IN),
-                                           phrases.PREDICTION_ITEM_TEXT_FILL_IN, items_text)
-
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(
+        context, ot_text, update=update, keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])

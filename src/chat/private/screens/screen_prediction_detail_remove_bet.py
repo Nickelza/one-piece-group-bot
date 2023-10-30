@@ -99,11 +99,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         await manage_prediction_detail(update, context, inbound_keyboard, user)
         return
 
-    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, prediction_remove_bet_list_page,
-                                                         PredictionRemoveBetReservedKeys.PREDICTION_OPTION_ID,
-                                                         Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM)
-
-    ot_text = phrases.PREDICTION_REMOVE_BET_LIST_OVERVIEW.format(items_text)
+    ot_text, items_keyboard = get_items_text_keyboard(
+        inbound_keyboard, prediction_remove_bet_list_page, PredictionRemoveBetReservedKeys.PREDICTION_OPTION_ID,
+        Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM, text_overview=phrases.PREDICTION_REMOVE_BET_LIST_OVERVIEW)
 
     await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
                             excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])

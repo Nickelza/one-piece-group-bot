@@ -10,7 +10,6 @@ from src.model.enums.LogType import LogType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send
 from src.service.user_service import user_is_boss
@@ -37,17 +36,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     log: Log = get_log_by_type(LogType(inbound_keyboard.info[LogTypeReservedKeys.TYPE]))
     if await validate(update, context, log, user):
         log.user = user
-        items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, log, LogTypeReservedKeys.ITEM_ID,
-                                                             Screen.PVT_LOGS_TYPE_DETAIL)
+
+        ot_text, items_keyboard = get_items_text_keyboard(
+            inbound_keyboard, log, LogTypeReservedKeys.ITEM_ID, Screen.PVT_LOGS_TYPE_DETAIL,
+            text_fill_in=LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type])
 
         # Stats keyboard
         if log.has_stats and log.get_total_items_count() > 0:
             stats_keyboard = Keyboard(phrases.PVT_KEY_LOGS_STATS, screen=Screen.PVT_LOGS_TYPE_STATS,
                                       inbound_info=inbound_keyboard.info)
             items_keyboard.append([stats_keyboard])
-
-        log_fill_in_text = LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type]
-        ot_text = phrases.LIST_OVERVIEW.format(determine_article(log_fill_in_text), log_fill_in_text, items_text)
 
         # For deep linking
         if Screen.PVT_LOGS not in inbound_keyboard.previous_screen_list:

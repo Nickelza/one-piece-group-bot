@@ -8,6 +8,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import NavigationLimitReachedException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.english_phrase_service import determine_article
 
 
 def get_navigation_buttons(inbound_keyboard: Keyboard, current_page: int) -> list[Keyboard]:
@@ -81,7 +82,8 @@ def get_items_paginate(inbound_keyboard: Keyboard, list_page: ListPage) -> [list
 
 
 def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, item_detail_key: StrEnum,
-                            item_detail_screen: Screen) -> tuple[str, list[list[Keyboard]]]:
+                            item_detail_screen: Screen, text_fill_in: str = None, text_overview: str = None
+                            ) -> tuple[str, list[list[Keyboard]]]:
     """
     Get the items text and keyboard
 
@@ -89,6 +91,8 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
     :param list_page: The list page
     :param item_detail_key: The item detail keyboard key
     :param item_detail_screen: The item detail screen
+    :param text_fill_in: The text fill in
+    :param text_overview: The text overview
     :return: The text and keyboard
     """
 
@@ -99,6 +103,10 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
     items_text = ''
     inline_keyboard: list[list[Keyboard]] = []
     keyboard_line: list[Keyboard] = []
+
+    if total_count == 0:
+        items_text = phrases.LIST_OVERVIEW_NO_ITEMS.format(text_fill_in)
+        return items_text, inline_keyboard
 
     for index, item in enumerate(items):
         current_number = start_number + index
@@ -123,5 +131,11 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
     if total_count > c.STANDARD_LIST_SIZE:
         items_text += phrases.LIST_FOOTER.format(start_number, end_number, total_count)
         inline_keyboard.append(get_navigation_buttons(inbound_keyboard, page))
+
+    list_overview = text_overview if text_overview is not None else phrases.LIST_OVERVIEW
+    if text_fill_in is None:
+        items_text = list_overview.format(items_text)
+    else:
+        items_text = list_overview.format(determine_article(text_fill_in), text_fill_in, items_text)
 
     return items_text, inline_keyboard

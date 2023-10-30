@@ -916,6 +916,7 @@ BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY = 'Bounty loan expired'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL
+LIST_OVERVIEW_NO_ITEMS = 'No {} found'
 LIST_ITEM_TEXT = '\n*{}*. {}'
 LIST_FOOTER = '\n\n_Showing {}-{} of {} items_'
 NAVIGATION_LIMIT_REACHED = 'Limit reached'

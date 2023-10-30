@@ -16,7 +16,6 @@ from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
-from src.service.english_phrase_service import determine_article
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
@@ -110,11 +109,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         await skip_screen(update, context, inbound_keyboard, user, devil_fruit_list_page)
         return
 
-    items_text, items_keyboard = get_items_text_keyboard(inbound_keyboard, devil_fruit_list_page,
-                                                         DevilFruitReservedKeys.ITEM_ID, Screen.PVT_DEVIL_FRUIT_DETAIL)
-
-    ot_text = phrases.LIST_OVERVIEW.format(determine_article(phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN),
-                                           phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN, items_text)
+    ot_text, items_keyboard = get_items_text_keyboard(
+        inbound_keyboard, devil_fruit_list_page, DevilFruitReservedKeys.ITEM_ID, Screen.PVT_DEVIL_FRUIT_DETAIL,
+        text_fill_in=phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN)
 
     await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
                             excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
