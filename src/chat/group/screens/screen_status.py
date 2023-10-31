@@ -199,7 +199,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         has_bounty_deduction = True
 
     # Income tax
-    if target_user.has_income_tax() and not user_has_complete_tax_deduction(user):
+    if target_user.has_income_tax() and not user_has_complete_tax_deduction(target_user):
         bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
             Emoji.LOG_NEGATIVE,
             phrases.SHOW_USER_STATUS_INCOME_TAX,
