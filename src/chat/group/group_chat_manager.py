@@ -190,12 +190,13 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                 if update.callback_query is not None:
                     raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
-        # Setting here to avoid regular messages to be counted as interaction
-        user.last_system_interaction_date = datetime.now()
+        if inbound_keyboard is not None:
+            # Setting here to avoid regular messages to be counted as interaction
+            user.last_system_interaction_date = datetime.now()
 
-        group: Group = group_chat.group
-        if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE) and group.tg_group_username is not None:
-            await release_devil_fruit_to_user(update, context, user, group_chat)
+            group: Group = group_chat.group
+            if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE) and group.tg_group_username is not None:
+                await release_devil_fruit_to_user(update, context, user, group_chat)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,
