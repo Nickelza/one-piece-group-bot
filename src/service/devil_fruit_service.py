@@ -216,6 +216,7 @@ async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFA
         devil_fruit: DevilFruit = (DevilFruit.select()
                                    .where(DevilFruit.status == DevilFruitStatus.SCHEDULED)
                                    .for_update()
+                                   .order_by(DevilFruit.release_date.asc())
                                    .get_or_none())
 
         if not devil_fruit:
