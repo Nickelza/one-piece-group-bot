@@ -251,7 +251,7 @@ async def release_devil_fruit_to_user(update: Update, context: ContextTypes.DEFA
             # Send release message
             message: Message = await full_media_send(
                 context, saved_media_name=SavedMediaName.DEVIL_FRUIT_NEW, caption=text, keyboard=inline_keyboard,
-                update=update, new_message=True)
+                update=update, new_message=True, quote_if_group=False)
 
             devil_fruit.release_group_chat = group_chat
             devil_fruit.release_message_id = message.message_id
