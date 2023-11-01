@@ -11,7 +11,7 @@ class AssetPath(StrEnum):
 
     # Saved Media
     CREW_INVITE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'crew_invite.jpg')
-    CREW_JOIN = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'join_crew.jpg')
+    CREW_JOIN = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'crew_join.jpg')
     DEVIL_FRUIT_NEW = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'devil_fruit_new.jpg')
     DOC_Q = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'docq.jpg')
     FIGHT = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, 'fight.jpg')
