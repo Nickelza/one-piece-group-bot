@@ -181,14 +181,18 @@ def get_remaining_time_in_minutes(end_datetime: datetime, start_datetime: dateti
     return get_remaining_time_in_seconds(end_datetime, start_datetime) // 60
 
 
-def get_datetime_in_future_seconds(seconds: int) -> datetime:
+def get_datetime_in_future_seconds(seconds: int, start_time: datetime.datetime = None) -> datetime:
     """
     Get the datetime in the future
     :param seconds: The number of seconds in the future
+    :param start_time: The start time. If None, the current datetime is used
     :return: The datetime in the future
     """
 
-    return datetime.datetime.now() + datetime.timedelta(seconds=int(seconds))
+    if start_time is None:
+        start_time = datetime.datetime.now()
+
+    return start_time + datetime.timedelta(seconds=int(seconds))
 
 
 def get_datetime_in_future_hours(hours: float) -> datetime:

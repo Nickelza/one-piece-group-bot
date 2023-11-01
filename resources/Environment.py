@@ -141,6 +141,14 @@ UPDATES_CHANNEL_ID = Environment('UPDATES_CHANNEL_ID')
 # TgRest Channel ID
 TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
 
+# ANTI SPAM
+# How many messages can be sent in private chat before spam is detected. Default: 10
+ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT', default_value='10')
+# How many messages can be sent in group chat before spam is detected. Default: 15
+ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT', default_value='15')
+# Time interval in seconds to check for spam. Default: 60
+ANTI_SPAM_TIME_INTERVAL_SECONDS = Environment('ANTI_SPAM_TIME_INTERVAL_SECONDS', default_value='60')
+
 # REDDIT
 # Reddit client id
 REDDIT_CLIENT_ID = Environment('REDDIT_CLIENT_ID')

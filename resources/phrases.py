@@ -2,6 +2,8 @@ import resources.Environment as Env
 import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
 
+ANTI_SPAM_WARNING = 'Too many messages sent, please slow down...'
+
 COMMAND_NOT_IN_REPLY_ERROR = 'This command can only be used in a reply to a message'
 COMMAND_IN_REPLY_TO_BOT_ERROR = "This command can't be used in reply to a bot"
 COMMAND_IN_REPLY_TO_ERROR = "This command can't be used in a reply to your own message"

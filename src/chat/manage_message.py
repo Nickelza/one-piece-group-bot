@@ -19,6 +19,7 @@ from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.GroupUser import GroupUser
 from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataType, ContextDataKey
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -27,6 +28,8 @@ from src.model.error.CustomException import CommandValidationException, Navigati
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bot_service import get_context_data, set_context_data
+from src.service.date_service import get_datetime_in_future_seconds
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
     full_message_or_media_send_or_edit, message_is_reply, escape_valid_markdown_chars
@@ -87,9 +90,15 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     :param is_callback: True if the message is a callback
     :return: None
     """
+    # Recast necessary for match case to work, don't ask me why
+    message_source: MessageSource = MessageSource(get_message_source(update))
+    if await is_spam(update, context, message_source):
+        logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
+        return
+
     db = init()
     try:
-        await manage_after_db(update, context, is_callback)
+        await manage_after_db(update, context, is_callback, message_source)
     except Exception as e:
         logging.error(update)
         logging.error(e, exc_info=True)
@@ -97,16 +106,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
         end(db)
 
 
-async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> None:
+async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool,
+                          message_source: MessageSource) -> None:
     """
     Manage a regular message after the database is initialized
     :param update: The update
     :param context: The context
     :param is_callback: True if the message is a callback
+    :param message_source: The message source
     :return: None
     """
-    # Recast necessary for match case to work, don't ask me why
-    message_source: MessageSource = MessageSource(get_message_source(update))
 
     user = User()
     if update.effective_user is not None:
@@ -488,3 +497,52 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
     group_chat.save()
 
     return group_chat
+
+
+async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_source: MessageSource) -> bool:
+    """
+    Check if the message is spam, which would cause flooding
+    :param update: Telegram update
+    :param context: Telegram context
+    :param message_source: The message source
+    :return: True if the message is spam
+    """
+
+    if message_source is MessageSource.PRIVATE:
+        context_data_type = ContextDataType.USER
+    elif message_source is MessageSource.GROUP:
+        context_data_type = ContextDataType.BOT
+    else:
+        return True  # Not managing spam for other message sources
+
+    # Get past messages date list
+    try:
+        past_messages_date_list: list[datetime] = get_context_data(context, context_data_type,
+                                                                   ContextDataKey.PAST_MESSAGES_DATE)
+    except CommonChatException:
+        past_messages_date_list = []
+
+    # Remove old messages
+    now = datetime.now()
+    past_messages_date_list = [
+        x for x in past_messages_date_list
+        if now < get_datetime_in_future_seconds(Env.ANTI_SPAM_TIME_INTERVAL_SECONDS.get_int(), start_time=x)]
+
+    # Check if the message is spam
+    spam_limit = (Env.ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT.get_int() if message_source is MessageSource.PRIVATE
+                  else Env.ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT.get_int())
+
+    if len(past_messages_date_list) >= spam_limit:
+        # In case spam limit was just reached, send warning message
+        if len(past_messages_date_list) == spam_limit:
+            past_messages_date_list.append(now)
+            set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list)
+            await full_message_send(context, phrases.ANTI_SPAM_WARNING, update=update, quote_if_group=False,
+                                    new_message=True)
+        return True
+
+    # Add the message to the list
+    past_messages_date_list.append(now)
+    set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list)
+
+    return False
