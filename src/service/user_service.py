@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Sequence, Optional
 
+from asyncprawcore import BadRequest
 from telegram import Update, PhotoSize, UserProfilePhotos, File, ChatMember
 from telegram.constants import ChatMemberStatus
 from telegram.ext import ContextTypes
@@ -126,7 +127,7 @@ async def get_chat_member(user: User, group_chat: GroupChat, update: Update = No
             return await context.bot.get_chat_member(tg_group_id, str(user.tg_user_id))
         else:
             raise ValueError('update or group_chat must be specified')
-    except Forbidden:  # Bot kicked from the group chat
+    except (Forbidden, BadRequest):  # Bot kicked from the group chat or user not found
         return None
 
 
