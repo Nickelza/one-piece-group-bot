@@ -20,7 +20,7 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, add_or_remove_bounty
 from src.service.date_service import get_remaining_duration
-from src.service.devil_fruit_service import get_datetime
+from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.message_service import full_message_send, get_message_url, full_media_send
 
 
@@ -123,7 +123,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     game.save()
 
     await add_or_remove_bounty(user, game.wager, add=False, should_affect_pending_bounty=True, update=update)
-    user.game_cooldown_end_date = get_datetime(
+    user.game_cooldown_end_date = get_ability_adjusted_datetime(
         user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
 
     # Display available games

@@ -313,7 +313,8 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
         await send_notification(context, owner, notification)
 
 
-def get_value(user: User, ability_type: DevilFruitAbilityType, value: float, add_to_value: bool = False) -> float:
+def get_ability_value(user: User, ability_type: DevilFruitAbilityType, value: float,
+                      add_to_value: bool = False) -> float:
     """
     Given a value, gets the updated value if user has eaten a Devil Fruit that modifies it
     :param user: The user
@@ -344,7 +345,7 @@ def get_value(user: User, ability_type: DevilFruitAbilityType, value: float, add
     return subtract_percentage_from_value(value, ability.value)
 
 
-def get_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) -> int:
+def get_ability_adjusted_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) -> int:
     """
     Given a value, get the updated datetime if user has eaten a Devil Fruit that modifies it
     :param user: The user
@@ -353,7 +354,7 @@ def get_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) ->
     :return: The value
     """
 
-    new_hours: float = get_value(user, ability_type, hours)
+    new_hours: float = get_ability_value(user, ability_type, hours)
     return get_datetime_in_future_hours(new_hours)
 
 

@@ -16,7 +16,7 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
-from src.service.devil_fruit_service import get_value
+from src.service.devil_fruit_service import get_ability_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
@@ -150,7 +150,7 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
-        tax_percentage = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage)
+        tax_percentage = get_ability_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage)
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():

@@ -25,7 +25,7 @@ from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import round_belly_up, add_or_remove_bounty, get_belly_formatted
 from src.service.date_service import default_datetime_format
-from src.service.devil_fruit_service import get_value
+from src.service.devil_fruit_service import get_ability_value
 from src.service.download_service import get_random_string
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch, save_group_chat_error
 from src.service.math_service import get_percentage_from_value, get_value_from_percentage, add_percentage_to_value
@@ -669,7 +669,8 @@ async def save_prediction_option_user(prediction_option: PredictionOption, user:
         prediction_option_user.prediction_option = prediction_option
         prediction_option_user.user = user
         prediction_option_user.wager = wager
-        max_refund_wager_boost = get_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, 0, add_to_value=True)
+        max_refund_wager_boost = get_ability_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, 0,
+                                                   add_to_value=True)
         prediction_option_user.max_refund_wager_boost = max_refund_wager_boost if max_refund_wager_boost > 0 else None
 
     prediction_option_user.prediction_group_chat_message = (prediction_group_chat_message
@@ -730,7 +731,7 @@ def get_max_wager_refund(prediction_option_user: PredictionOptionUser = None, pr
             (PredictionOptionUser.user == user) & (PredictionOptionUser.prediction == prediction))
 
     if prediction_option_user is None:  # user has not yet placed a bet
-        return int(get_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, prediction.max_refund_wager))
+        return int(get_ability_value(user, DevilFruitAbilityType.PREDICTION_WAGER_REFUND, prediction.max_refund_wager))
 
     if prediction is None:
         prediction: Prediction = prediction_option_user.prediction

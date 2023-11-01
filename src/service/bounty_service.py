@@ -28,7 +28,7 @@ from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributi
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
-from src.service.devil_fruit_service import get_value
+from src.service.devil_fruit_service import get_ability_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.income_tax_service import get_tax_amount, get_tax_deductions, add_contribution, \
     user_has_complete_tax_deduction
@@ -588,7 +588,7 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
         tax = subtract_percentage_from_value(tax, Env.CREW_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Apply Devil Fruit ability
-    tax = get_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax)
+    tax = get_ability_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax)
 
     return tax
 

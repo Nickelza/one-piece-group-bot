@@ -21,8 +21,8 @@ from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
 from src.service.date_service import convert_seconds_to_duration
-from src.service.devil_fruit_service import get_datetime
-from src.service.devil_fruit_service import get_value
+from src.service.devil_fruit_service import get_ability_adjusted_datetime
+from src.service.devil_fruit_service import get_ability_value
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import full_message_send, mention_markdown_user, get_yes_no_keyboard, \
@@ -141,7 +141,7 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     lose_probability = 100 - win_probability
 
     # Recalculate opponent win probability with Devil Fruit ability
-    opponent_win_probability = get_value(
+    opponent_win_probability = get_ability_value(
         opponent, DevilFruitAbilityType.FIGHT_DEFENSE_BOOST, lose_probability, add_to_value=True)
     # Cap opponent win probability to max allowed for Devil Fruit boost
     opponent_win_probability = round(
@@ -286,13 +286,13 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
                                             user.get_bounty_formatted())
 
     # Add fight immunity to opponent
-    opponent.fight_immunity_end_date = get_datetime(
+    opponent.fight_immunity_end_date = get_ability_adjusted_datetime(
         opponent, DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION, Env.FIGHT_IMMUNITY_DURATION.get_int())
     # Remove fight immunity from user
     user.fight_immunity_end_date = None
 
     # Add fight cooldown to user
-    user.fight_cooldown_end_date = get_datetime(
+    user.fight_cooldown_end_date = get_ability_adjusted_datetime(
         user, DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION, Env.FIGHT_COOLDOWN_DURATION.get_int())
     # Remove fight cooldown from opponent
     opponent.fight_cooldown_end_date = None
