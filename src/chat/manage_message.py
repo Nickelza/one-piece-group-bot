@@ -104,7 +104,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
             end(db)
 
     if is_callback:
-        await update.callback_query.answer()
+        try:
+            await update.callback_query.answer()
+        except BadRequest:
+            pass
 
 
 async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool,
