@@ -120,7 +120,7 @@ class Crew(BaseModel):
         :return: The next powerup price
         """
 
-        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (self.powerup_counter + 1)
+        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (self.powerup_counter + 1) * 2
 
     def get_powerup_price_formatted(self) -> str:
         """

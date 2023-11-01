@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peewee import *
 from telegram import Update
 
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -58,6 +59,13 @@ class BountyLoan(BaseModel):
 
         self.borrower.save()
         self.loaner.save()
+
+        # If N days since expiration and at least double the amount repaid, set forgiven
+        if (self.status == BountyLoanStatus.EXPIRED
+                and self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int()) < datetime.now()
+                and self.amount_repaid * 2 <= self.repay_amount):
+            self.forgive()
+
         self.save()
 
     def get_maximum_payable_amount(self, amount: int) -> int:

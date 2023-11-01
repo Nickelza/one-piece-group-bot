@@ -19,7 +19,8 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
-from src.service.date_service import validate_duration, get_duration_from_string, convert_seconds_to_duration
+from src.service.date_service import validate_duration, get_duration_from_string, convert_seconds_to_duration, \
+    datetime_is_before, get_datetime_in_future_hours
 from src.service.devil_fruit_service import get_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -95,6 +96,21 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, loaner: U
                                                                get_belly_formatted(total_amount),
                                                                get_belly_formatted(max_amount))
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
+        return False
+
+    # Sender in cooldown
+    if not datetime_is_before(loaner.bounty_loan_issue_cool_down_end_date):
+        remaining_time = convert_seconds_to_duration(
+            (loaner.bounty_loan_issue_cool_down_end_date - datetime.datetime.now()).total_seconds())
+        await full_message_send(context, phrases.BOUNTY_LOAN_ISSUE_COOLDOWN_ACTIVE.format(remaining_time),
+                                update=update, add_delete_button=True)
+        return False
+
+    # Exceeds max allowed duration
+    duration_days = int(duration / 86400)
+    if duration_days > Env.BOUNTY_LOAN_MAX_DURATION_DAYS.get_int():
+        await full_message_send(context, phrases.BOUNTY_LOAN_MAX_DURATION_EXCEEDED, update=update,
+                                add_delete_button=True)
         return False
 
     return True
@@ -259,6 +275,8 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     # Update loaner
     await add_or_remove_bounty(loaner, total_amount, add=False, update=update)
     loaner.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
+    loaner.bounty_loan_issue_cool_down_end_date = get_datetime_in_future_hours(
+        Env.BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION.get_int())
     loaner.save()
 
     # Update receiver

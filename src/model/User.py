@@ -58,6 +58,7 @@ class User(BaseModel):
     timezone = CharField(max_length=99, null=True)
     is_active = BooleanField(default=True)
     prediction_creation_cooldown_end_date = DateTimeField(null=True)
+    bounty_loan_issue_cool_down_end_date = DateTimeField(null=True)
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen

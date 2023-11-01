@@ -590,6 +590,13 @@ BOUNTY_LOAN_MIN_AMOUNT = Environment('BOUNTY_LOAN_MIN_AMOUNT', default_value='10
 BOUNTY_LOAN_TAX_INCREASE = Environment('BOUNTY_LOAN_TAX_INCREASE', default_value='1')
 # How many percent of newly gained bounty should be used to pay off loan in case of expiration. Default: 50%
 BOUNTY_LOAN_GARNISH_PERCENTAGE = Environment('BOUNTY_LOAN_GARNISH_PERCENTAGE', default_value='50')
+# Maximum duration of a loan in days. Default: 7
+BOUNTY_LOAN_MAX_DURATION_DAYS = Environment('BOUNTY_LOAN_MAX_DURATION_DAYS', default_value='7')
+# After how many days since expiration should a loan be forgiven if at least double the amount has been paid back.
+# Default: 7
+BOUNTY_LOAN_FORGIVENESS_DAYS = Environment('BOUNTY_LOAN_FORGIVENESS_DAYS', default_value='7')
+# How long a user has to wait before issuing a new loan in hours. Default: 24
+BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION = Environment('BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION', default_value='24')
 
 # How much percent should be removed from taxes for exchanges from Pirate King. Default: 50%
 PIRATE_KING_TRANSACTION_TAX_DISCOUNT = Environment('PIRATE_KING_TRANSACTION_TAX_DISCOUNT', default_value='50')

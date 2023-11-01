@@ -716,6 +716,8 @@ BOUNTY_LOAN_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to loan' \
                                 '\nTax: ฿{} \\({}%\\)' \
                                 '\nTotal: ฿*{}*' \
                                 '\n\nYou can loan up to ฿`{}`'
+BOUNTY_LOAN_ISSUE_COOLDOWN_ACTIVE = 'You can issue a loan in *{}*'
+BOUNTY_LOAN_MAX_DURATION_EXCEEDED = f'A loan cannot last more than {Env.BOUNTY_LOAN_MAX_DURATION_DAYS.get_int()} days'
 BOUNTY_LOAN_STATUS_AWAITING_LOANER_CONFIRMATION = 'Awaiting loaner confirmation'
 BOUNTY_LOAN_STATUS_AWAITING_BORROWER_CONFIRMATION = 'Awaiting borrower confirmation'
 BOUNTY_LOAN_STATUS_ACTIVE = 'Active'
@@ -723,12 +725,16 @@ BOUNTY_LOAN_STATUS_REPAID = 'Re-paid'
 BOUNTY_LOAN_STATUS_EXPIRED = 'Expired'
 BOUNTY_LOAN_STATUS_FORGIVEN = 'Forgiven'
 BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX = '\n\n_In case the loan is not repaid in time, '
+BOUNTY_LOAN_EXPIRED_ACTION_SUFFIX = f'\nThe loan will be automatically forgiven if ' \
+                                    f'{Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int()} days have passed since the ' \
+                                    f'expiration date and at least double the loan amount has been repaid.'
 BOUNTY_LOAN_EXPIRED_ACTION_PREFIX = '\n\n_Since the loan was not repaid in time, '
 BOUNTY_LOAN_EXPIRED_ACTION_LOANER = '{}% of all new gained bounty by {} will be transferred to you until the loan ' \
-                                    'is repaid_'
-BOUNTY_LOAN_EXPIRED_ACTION_BORROWER = '{}% of all new gained bounty will be transferred to {} until the loan is repaid_'
+                                    'is repaid.' + BOUNTY_LOAN_EXPIRED_ACTION_SUFFIX + '_'
+BOUNTY_LOAN_EXPIRED_ACTION_BORROWER = '{}% of all new gained bounty will be transferred to {} until the loan is' \
+                                      ' repaid.' + BOUNTY_LOAN_EXPIRED_ACTION_SUFFIX + '_'
 BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER = '{}% of all new gained bounty by {} will be transferred to {} ' \
-                                                 'until the loan is repaid_'
+                                                 'until the loan is repaid.' + BOUNTY_LOAN_EXPIRED_ACTION_SUFFIX + '_'
 BOUNTY_LOAN_REQUEST = '*New Loan*' \
                       '\n' + BOUNTY_LOAN_LOANER \
                       + BOUNTY_LOAN_BORROWER \

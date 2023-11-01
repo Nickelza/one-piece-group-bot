@@ -43,6 +43,7 @@ MAGNITUDE_AMOUNT_TO_NUMBER = {
 DURATION_UNIT_TO_SECONDS = {
     "seconds": 1,
     "minutes": 60,
+    "hrs": 3600,
     "hours": 3600,
     "days": 86400,
     "weeks": 604800,
