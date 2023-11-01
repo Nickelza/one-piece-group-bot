@@ -518,7 +518,7 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
     elif message_source is MessageSource.GROUP:
         context_data_type = ContextDataType.BOT
     else:
-        return True  # Not managing spam for other message sources
+        return False  # Not managing spam for other message sources
 
     # Get past messages date list
     try:

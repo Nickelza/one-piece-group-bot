@@ -47,7 +47,7 @@ def set_context_data(context: ContextTypes.DEFAULT_TYPE, data_type: ContextDataT
 
     data = context.bot_data if data_type is ContextDataType.BOT else context.user_data
 
-    if key not in context.bot_data:
+    if key not in data:
         data[key] = {"value": {}}
 
     if inner_key is not None:
