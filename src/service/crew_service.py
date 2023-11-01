@@ -244,17 +244,6 @@ def add_to_crew_chest(user: User, amount: int) -> None:
     contribution.save()
 
 
-def get_active_crew_abilities(crew: Crew) -> list[CrewAbility]:
-    """
-    Returns the active crew abilities
-
-    :param crew: The crew
-    :return: The active crew abilities
-    """
-
-    return list(crew.crew_abilities.select().where(CrewAbility.expiration_date > datetime.now()))
-
-
 def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbility] = None):
     """
     Returns the crew abilities text
@@ -264,7 +253,7 @@ def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbilit
     """
 
     if active_abilities is None:
-        active_abilities = get_active_crew_abilities(crew)
+        active_abilities = crew.get_active_abilities()
 
     abilities_text = ""
     if len(active_abilities) == 0:

@@ -6,6 +6,7 @@ from peewee import *
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.enums.CrewRole import CrewRole
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 
 
 class Crew(BaseModel):
@@ -149,6 +150,30 @@ class Crew(BaseModel):
         from src.service.bounty_service import get_belly_formatted
 
         return get_belly_formatted(int(str(self.chest_amount)))
+
+    def get_active_abilities(self) -> list:
+        """
+        Returns the crew active abilities
+        :return: The crew active abilities
+        """
+
+        from src.model.CrewAbility import CrewAbility
+
+        return self.crew_abilities.select().where((CrewAbility.crew == self)
+                                                  & (CrewAbility.expiration_date > datetime.datetime.now()))
+
+    def get_active_ability(self, ability_type: DevilFruitAbilityType) -> list:
+        """
+        Returns the crew active ability of the given type
+        :param ability_type: The ability type
+        :return: The crew active ability
+        """
+
+        from src.model.CrewAbility import CrewAbility
+
+        return self.crew_abilities.select().where((CrewAbility.crew == self)
+                                                  & (CrewAbility.expiration_date > datetime.datetime.now())
+                                                  & (CrewAbility.ability_type == ability_type.value))
 
 
 Crew.create_table()

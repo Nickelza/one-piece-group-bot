@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
+from src.model.Crew import Crew
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
 from src.model.DevilFruitTrade import DevilFruitTrade
@@ -30,7 +31,8 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_datetime_in_future_days, get_random_time_between_by_cron, \
     get_random_time_between_by_hours, get_datetime_in_future_hours, get_remaining_time_in_minutes, \
     datetime_is_before
-from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value, get_random_win
+from src.service.math_service import add_percentage_to_value, subtract_percentage_from_value, get_random_win, \
+    get_cumulative_percentage_sum, format_percentage_value
 from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
 from src.service.notification_service import send_notification
 
@@ -324,25 +326,36 @@ def get_ability_value(user: User, ability_type: DevilFruitAbilityType, value: fl
     :return: The value
     """
 
+    abilities: list[DevilFruitAbility] = []
+
     # Get ability from a Devil Fruit eaten by user that has the ability
-    ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(user, ability_type)
-    if not ability:
+    devil_fruit_ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(user, ability_type)
+    if devil_fruit_ability is not None:
+        abilities.append(devil_fruit_ability)
+
+    # Get ability from user's crew abilities
+    if user.is_crew_member():
+        crew: Crew = user.crew
+        abilities.extend(list(crew.get_active_ability(ability_type)))
+
+    if len(abilities) == 0:
         return value
 
     ability_type_sign: DevilFruitAbilityTypeSign = ability_type.get_sign()
+    ability_value = format_percentage_value(get_cumulative_percentage_sum([ability.value for ability in abilities]))
 
     # Positive sign
     if ability_type_sign == DevilFruitAbilityTypeSign.POSITIVE:
         if add_to_value:
-            return value + ability.value
+            return value + ability_value
         else:
-            return add_percentage_to_value(value, ability.value)
+            return add_percentage_to_value(value, ability_value)
 
     # Negative sign
     if add_to_value:
-        return value - ability.value
+        return value - ability_value
 
-    return subtract_percentage_from_value(value, ability.value)
+    return subtract_percentage_from_value(value, ability_value)
 
 
 def get_ability_adjusted_datetime(user: User, ability_type: DevilFruitAbilityType, hours: int) -> int:

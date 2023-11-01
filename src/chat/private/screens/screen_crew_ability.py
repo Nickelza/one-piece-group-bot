@@ -7,7 +7,7 @@ from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import get_crew, get_active_crew_abilities, get_crew_abilities_text
+from src.service.crew_service import get_crew, get_crew_abilities_text
 from src.service.message_service import full_message_send
 
 
@@ -28,7 +28,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         return
 
     # Get all active abilities
-    active_abilities = get_active_crew_abilities(crew)
+    active_abilities = crew.get_active_abilities()
 
     inline_keyboard: list[list[Keyboard]] = []
 

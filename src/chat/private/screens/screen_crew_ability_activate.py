@@ -6,7 +6,7 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import get_crew, get_active_crew_abilities
+from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
 
 
@@ -46,7 +46,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
     """
 
     try:
-        active_abilities = get_active_crew_abilities(crew)
+        active_abilities = crew.get_active_abilities()
 
         # Insufficient crew chest amount
         if crew.chest_amount < crew.get_powerup_price():
