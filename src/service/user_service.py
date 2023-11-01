@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Sequence, Optional
 
-from asyncprawcore import BadRequest
 from telegram import Update, PhotoSize, UserProfilePhotos, File, ChatMember
 from telegram.constants import ChatMemberStatus
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 import constants as c
