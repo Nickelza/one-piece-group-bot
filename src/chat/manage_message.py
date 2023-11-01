@@ -515,15 +515,17 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
 
     if message_source is MessageSource.PRIVATE:
         context_data_type = ContextDataType.USER
+        inner_key = None
     elif message_source is MessageSource.GROUP:
         context_data_type = ContextDataType.BOT
+        inner_key = str(update.effective_chat.id)
     else:
         return False  # Not managing spam for other message sources
 
     # Get past messages date list
     try:
-        past_messages_date_list: list[datetime] = get_context_data(context, context_data_type,
-                                                                   ContextDataKey.PAST_MESSAGES_DATE)
+        past_messages_date_list: list[datetime] = get_context_data(
+            context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, inner_key=inner_key)
     except CommonChatException:
         past_messages_date_list = []
 
@@ -541,13 +543,15 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
         # In case spam limit was just reached, send warning message
         if len(past_messages_date_list) == spam_limit:
             past_messages_date_list.append(now)
-            set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list)
+            set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list,
+                             inner_key=inner_key)
             await full_message_send(context, phrases.ANTI_SPAM_WARNING, update=update, quote_if_group=False,
                                     new_message=True)
         return True
 
     # Add the message to the list
     past_messages_date_list.append(now)
-    set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list)
+    set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list,
+                     inner_key=inner_key)
 
     return False
