@@ -44,7 +44,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         await send_request(update, context, user, target_user, command, group_chat)
         return
 
-    await keyboard_interaction(update, context, inbound_keyboard)
+    await keyboard_interaction(update, context, inbound_keyboard, user)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, loaner: User, borrower: User,
@@ -211,12 +211,14 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, loa
     return amount, tax_percentage, tax_amount, total_amount, repay_amount, duration
 
 
-async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard) -> None:
+async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard,
+                               user: User) -> None:
     """
     Keyboard interaction
     :param update: The update object
     :param context: The context object
     :param inbound_keyboard: The inbound keyboard
+    :param user: The user object
     :return: None
     """
 
@@ -257,11 +259,11 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     # Update loaner
     await add_or_remove_bounty(loaner, total_amount, add=False, update=update)
     loaner.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
+    loaner.save()
 
     # Update receiver
-    await add_or_remove_bounty(borrower, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_LOAN,
+    await add_or_remove_bounty(user, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_LOAN,
                                event_id=loan.id)
-    borrower.save()
 
     # Send message
     ot_text = get_text(loan, tax_amount, total_amount)
