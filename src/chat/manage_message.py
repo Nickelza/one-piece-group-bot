@@ -89,19 +89,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     :param is_callback: True if the message is a callback
     :return: None
     """
-    # Recast necessary for match case to work, don't ask me why
-    message_source: MessageSource = MessageSource(get_message_source(update))
-    if is_spam(update, context, message_source):
-        logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
-    else:
-        db = init()
-        try:
-            await manage_after_db(update, context, is_callback, message_source)
-        except Exception as e:
-            logging.error(update)
-            logging.error(e, exc_info=True)
-        finally:
-            end(db)
+    db = init()
+    try:
+        await manage_after_db(update, context, is_callback)
+    except Exception as e:
+        logging.error(update)
+        logging.error(e, exc_info=True)
+    finally:
+        end(db)
 
     if is_callback:
         try:
@@ -110,16 +105,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
             pass
 
 
-async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool,
-                          message_source: MessageSource) -> None:
+async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool) -> None:
     """
     Manage a regular message after the database is initialized
     :param update: The update
     :param context: The context
     :param is_callback: True if the message is a callback
-    :param message_source: The message source
     :return: None
     """
+    # Recast necessary for match case to work, don't ask me why
+    message_source: MessageSource = MessageSource(get_message_source(update))
 
     user = User()
     if update.effective_user is not None:
@@ -215,12 +210,18 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         except AttributeError:
             pass
 
+    # Check for spam only if a valid command or private chat
+    if command != Command.ND or message_source is MessageSource.PRIVATE:
+        if await is_spam(update, context, message_source):
+            logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
+            return
+
     if command != Command.ND or is_callback:
         if not await validate(update, context, command, user, keyboard, target_user, is_callback, message_source,
                               group_chat):
             return
 
-    if command is not None:
+    if command != Command.ND:
         command.message_source = message_source
 
     try:
