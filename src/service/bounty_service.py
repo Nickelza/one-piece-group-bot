@@ -18,6 +18,7 @@ from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.User import User
 from src.model.enums.BossType import BossType
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
+from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Location import get_last_paradise, get_first_new_world
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
@@ -194,6 +195,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Delete all pending bounty gifts
     BountyGift.delete().where(BountyGift.status == BountyGiftStatus.AWAITING_CONFIRMATION).execute()
+
+    # Delete all pending bounty loans
+    BountyLoan.delete().where(BountyLoan.status.in_(BountyLoanStatus.get_not_confirmed_statuses())).execute()
 
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
