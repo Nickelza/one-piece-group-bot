@@ -67,7 +67,7 @@ async def manage_regular(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     :return: None
     """
 
-    await manage(update, context, False)
+    context.application.create_task(manage(update, context, False))
 
 
 async def manage_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -78,8 +78,7 @@ async def manage_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     :return: None
     """
 
-    await manage(update, context, True)
-    await update.callback_query.answer()
+    context.application.create_task(manage(update, context, True))
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool) -> None:
@@ -92,18 +91,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     """
     # Recast necessary for match case to work, don't ask me why
     message_source: MessageSource = MessageSource(get_message_source(update))
-    if await is_spam(update, context, message_source):
+    if is_spam(update, context, message_source):
         logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
-        return
+    else:
+        db = init()
+        try:
+            await manage_after_db(update, context, is_callback, message_source)
+        except Exception as e:
+            logging.error(update)
+            logging.error(e, exc_info=True)
+        finally:
+            end(db)
 
-    db = init()
-    try:
-        await manage_after_db(update, context, is_callback, message_source)
-    except Exception as e:
-        logging.error(update)
-        logging.error(e, exc_info=True)
-    finally:
-        end(db)
+    if is_callback:
+        await update.callback_query.answer()
 
 
 async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool,
