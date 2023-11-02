@@ -202,6 +202,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Reset bounty gift tax
     User.update(bounty_gift_tax=0).execute()
 
+    # Reset total gained bounty
+    User.update(total_gained_bounty=0).execute()
+
     # Delete tax events
     IncomeTaxEvent.delete().execute()
 
