@@ -700,7 +700,7 @@ BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gif
 BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
                       '\n\nTax: ฿{} \\({}%\\)' \
                       '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CONFIRMED = '_You have gifted ฿*{}* to {}' \
+BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
                         '\n\nTax: ฿{} \\({}%\\)' \
                         '\nTotal: ฿*{}*'
 BOUNTY_GIFT_CANCELLED = 'Gift cancelled'
