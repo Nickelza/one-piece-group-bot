@@ -336,7 +336,7 @@ def get_ability_value(user: User, ability_type: DevilFruitAbilityType, value: fl
     # Get ability from user's crew abilities
     if user.is_crew_member():
         crew: Crew = user.crew
-        abilities.extend(list(crew.get_active_ability(ability_type)))
+        abilities.extend(crew.get_active_ability(ability_type))
 
     if len(abilities) == 0:
         return value

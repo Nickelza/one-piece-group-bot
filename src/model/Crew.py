@@ -5,7 +5,7 @@ from peewee import *
 
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
-from src.model.enums.CrewRole import CrewRole
+from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 
 
@@ -121,7 +121,10 @@ class Crew(BaseModel):
         :return: The next powerup price
         """
 
-        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (self.powerup_counter + 1) * 2
+        if self.powerup_counter == 0:
+            return Env.CREW_POWERUP_BASE_PRICE.get_int()
+
+        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (2 ** int(str(self.powerup_counter)))
 
     def get_powerup_price_formatted(self) -> str:
         """
@@ -159,8 +162,7 @@ class Crew(BaseModel):
 
         from src.model.CrewAbility import CrewAbility
 
-        return self.crew_abilities.select().where((CrewAbility.crew == self)
-                                                  & (CrewAbility.expiration_date > datetime.datetime.now()))
+        return self.crew_abilities.select().where(CrewAbility.expiration_date > datetime.datetime.now())
 
     def get_active_ability(self, ability_type: DevilFruitAbilityType) -> list:
         """
@@ -171,8 +173,7 @@ class Crew(BaseModel):
 
         from src.model.CrewAbility import CrewAbility
 
-        return self.crew_abilities.select().where((CrewAbility.crew == self)
-                                                  & (CrewAbility.expiration_date > datetime.datetime.now())
+        return self.crew_abilities.select().where((CrewAbility.expiration_date > datetime.datetime.now())
                                                   & (CrewAbility.ability_type == ability_type.value))
 
 

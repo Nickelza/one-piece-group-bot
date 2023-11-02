@@ -1,18 +1,29 @@
+from enum import StrEnum
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.Crew import Crew
+from src.model.CrewAbility import CrewAbility
 from src.model.User import User
+from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
 
 
+class CrewAbilityActivateReservedKeys(StrEnum):
+    """
+    The reserved keys for the Crew ability activate screen
+    """
+    ABILITY_TYPE = 'a'
+
+
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
     """
-    Manage the Crew ability activate screen
+    Manage the Crew ability activate choose screen
     :param update: The update object
     :param context: The context object
     :param user: The user object
@@ -29,10 +40,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     if not await validate(update, context, inbound_keyboard, crew):
         return
 
-    await full_message_send(
-        context, "Awkward, this is not implemented yet, never thought a Crew would get here this fast."
-                 "\nForward this message to an Admin in @onepiecegroup to get a special price",
-        update=update, inbound_keyboard=inbound_keyboard)
+    allowed_ability_types = CrewAbility.get_allowed_ability_types()
+    inline_keyboard: list[list[Keyboard]] = []
+
+    screen = Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM
+    for ability_type in allowed_ability_types:
+        info = {CrewAbilityActivateReservedKeys.ABILITY_TYPE: ability_type}
+        inline_keyboard.append([Keyboard(ability_type.get_description(), info=info, screen=screen)])
+
+    # Add random ability
+    info = {CrewAbilityActivateReservedKeys.ABILITY_TYPE: None}
+    inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY_RANDOM, info=info, screen=screen)])
+
+    await full_message_send(context, phrases.CREW_ABILITY_ACTIVATE_CHOOSE, update=update, keyboard=inline_keyboard,
+                            inbound_keyboard=inbound_keyboard)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, crew: Crew) -> bool:

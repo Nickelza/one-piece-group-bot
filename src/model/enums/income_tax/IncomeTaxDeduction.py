@@ -6,7 +6,7 @@ from resources import phrases
 
 class IncomeTaxDeductionType(StrEnum):
     ADMIN = 'admin'
-    CREW_ability = 'crew_ability'
+    CREW_ability = 'crew'
     DEVIL_FRUIT = 'devil_fruit'
 
 

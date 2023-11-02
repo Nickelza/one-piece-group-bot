@@ -578,6 +578,14 @@ CREW_TRANSACTION_TAX_DISCOUNT = Environment('CREW_TRANSACTION_TAX_DISCOUNT', def
 CREW_POWERUP_BASE_PRICE = Environment('CREW_POWERUP_BASE_PRICE', default_value='1000000000')
 # How long a crew ability should last in days. Default: 7
 CREW_ABILITY_DURATION_DAYS = Environment('CREW_ABILITY_DURATION_DAYS', default_value='7')
+# Default value percentage for crew ability. Default: 50%
+CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE = Environment('CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE', default_value='50')
+# Minimum value percentage for crew random ability. Default: 1%
+CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE = Environment('CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE',
+                                                       default_value='1')
+# Maximum value percentage for crew random ability. Default: 99%
+CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE = Environment('CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE',
+                                                       default_value='99')
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment('BOUNTY_GIFT_MIN_AMOUNT', default_value='10000000')

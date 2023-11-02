@@ -44,6 +44,7 @@ SHOW_USER_STATUS_EXPIRED_LOAN = 'Expired loan'
 SHOW_USER_STATUS_INCOME_TAX = 'Income tax'
 SHOW_USER_STATUS_ADD_REPLY = '_Requested by {}_'
 SHOW_USER_STATUS_DEVIL_FRUIT = '\n\n*Devil Fruit*\n_{}_{}'
+SHOW_USER_STATUS_CREW_ABILITIES = '\n\n*Crew Abilities*{}'
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = 'You can only view the status of those who rank below you.' \
                                      '\n\n{} rank: {}' \
                                      '\n{} rank: {}'
@@ -118,6 +119,7 @@ TEXT_TO = 'to'
 TEXT_TOPIC = 'Topic'
 TEXT_GROUP = 'Group'
 TEXT_NOT_SET = 'Not set'
+TEXT_RANDOM = 'Random'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -188,6 +190,7 @@ PVT_KEY_CREW_DISBAND = 'Disband'
 PVT_KEY_CREW_MEMBER_REMOVE = 'Expel'
 PVT_KEY_CREW_ABILITY = 'Abilities'
 PVT_KEY_CREW_ABILITY_ACTIVATE = 'Activate'
+PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + ' Random'
 PVT_KEY_SETTINGS_NOTIFICATIONS = 'Notifications'
 PVT_TXT_SETTINGS_NOTIFICATIONS = 'Which category of notifications would you like to change?'
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = 'Which notification would you like to change?'
@@ -669,12 +672,26 @@ CREW_ABILITIES = '*Crew Abilities*' \
                  '\n\nNext ability cost: ฿*{}*' \
                  '\nCrew chest: ฿{}'
 CREW_ABILITY_NO_ABILITIES = '\n_No abilities are currently activated in this Crew_'
-CREW_ABILITY_ITEM_TEXT = '\n{}: {}%' \
-                         '\nRemaining time: {}'
+CREW_ABILITY_ITEM_TEXT = '\n{}{} \\({}%\\)'
+CREW_ABILITY_ITEM_TEXT_DURATION = '\nRemaining time: {}'
 CREW_ABILITY_INSUFFICIENT_CREW_CHEST = 'Insufficient Crew Chest' \
                                        '\n\nCrew chest: ฿{}' \
                                        '\nAbility cost: ฿{}'
 CREW_ABILITY_MAX_ABILITIES_REACHED = 'Max number of active abilities reached'
+CREW_ABILITY_ACTIVATE_CHOOSE = "Choose an ability you want to use, or go with Random' for a surprise. " \
+                               "\n\nIf you pick a specific ability, it will always be set at " \
+                               f"{Env.CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE.get_int()}%." \
+                               f"\n\nIf you choose Random instead you'll get a completely random ability and its " \
+                               f"value can be anywhere between " \
+                               f"{Env.CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE.get_int()}% " \
+                               f"and {Env.CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE.get_int()}%."
+CREW_ABILITY_ACTIVATE_CHOOSE_RECAP = '\n\n*Ability*: {}' \
+                                     '\n*Value*: {}' \
+                                     '\n*Duration*: {} days' \
+                                     '\n*Cost*: ฿{}'
+CREW_ABILITY_ACTIVATE_CHOOSE_CONFIRMATION_REQUEST = 'Are you sure you want to activate the following ability?' \
+                                                    + CREW_ABILITY_ACTIVATE_CHOOSE_RECAP
+CREW_ABILITY_ACTIVATE_SUCCESS = 'Ability activated successfully' + CREW_ABILITY_ACTIVATE_CHOOSE_RECAP
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gift' \
@@ -1074,7 +1091,7 @@ SPEAK = '{} has been granted permission to speak'
 
 # Devil Fruit
 DEVIL_FRUIT_ABILITY_TEXT = '\n\n*Abilities*'
-DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{}: \\({}{}%\\)'
+DEVIL_FRUIT_ABILITY_TEXT_LINE = '\n{}{} \\({}{}%\\)'
 DEVIL_FRUIT_ABILITY_UNKNOWN = '\nUnknown'
 # Devil Fruit - Private Chat
 DEVIL_FRUIT_ITEM_TEXT = '{}'

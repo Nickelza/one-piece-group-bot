@@ -71,8 +71,8 @@ def convert_seconds_to_duration(seconds: int) -> str:
         else:
             result += f'{hours} hours'
 
-    # Show minutes only in last hour
-    if minutes > 0 and hours == 0 and days == 0 and weeks == 0:
+    # Show minutes only in last 24 hours
+    if minutes > 0 and hours < 24 and days == 0 and weeks == 0:
         if len(result) > 0:
             result += ' '
         if minutes > 0 and seconds > 60:

@@ -11,10 +11,10 @@ import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.ContextDataKey import ContextDataKey
-from src.model.enums.CrewRole import CrewRole
 from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
     is_paradise_by_level
 from src.model.enums.Screen import Screen
+from src.model.enums.crew.CrewRole import CrewRole
 from src.service.bot_service import get_user_context_data, set_user_context_data
 
 

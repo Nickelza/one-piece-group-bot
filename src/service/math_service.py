@@ -21,6 +21,17 @@ def get_random_win(percentage: float) -> bool:
     return percentage * 10000 >= random.randint(0, 1000000)
 
 
+def get_random_int(min_value: int, max_value: int) -> int:
+    """
+    Gets a random int between the min and max values
+    :param min_value: The minimum value
+    :param max_value: The maximum value
+    :return: The random int
+    """
+
+    return random.randint(min_value, max_value)
+
+
 def get_percentage_from_value(value: float, total: float, add_decimal=True) -> float:
     """
     Gets a percentage from a value

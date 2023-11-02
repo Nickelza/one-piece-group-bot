@@ -17,9 +17,11 @@ class CrewAbility(BaseModel):
     ability_type = SmallIntegerField()
     value = SmallIntegerField()
     acquired_method = SmallIntegerField()
-    acquired_user = ForeignKeyField(User, backref='crew_abilities', null=True)
+    acquired_user = ForeignKeyField(User, backref='crew_abilities_acquired', null=True)
     acquired_date = DateTimeField(default=datetime.datetime.now)
     expiration_date = DateTimeField(null=True)
+    was_removed = BooleanField(default=False)
+    removed_user = ForeignKeyField(User, backref='crew_abilities_removed', null=True)
 
     class Meta:
         db_table = 'crew_ability'
@@ -37,6 +39,31 @@ class CrewAbility(BaseModel):
         :return: The description
         """
         return self.get_ability_type().get_description()
+
+    def get_value_with_sign(self):
+        """
+        Returns the value with sign
+        :return: The value with sign
+        """
+        return self.get_ability_type().get_sign() + str(self.value)
+
+    @staticmethod
+    def get_not_allowed_ability_types() -> list[DevilFruitAbilityType]:
+        """
+        Returns the not allowed ability types
+        :return: The not allowed ability types
+        """
+
+        return [DevilFruitAbilityType.INCOME_TAX]
+
+    @staticmethod
+    def get_allowed_ability_types() -> list[DevilFruitAbilityType]:
+        """
+        Returns the allowed ability types
+        :return: The allowed ability types
+        """
+        return [ability_type for ability_type in DevilFruitAbilityType if ability_type not in
+                CrewAbility.get_not_allowed_ability_types()]
 
 
 CrewAbility.create_table()

@@ -37,7 +37,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY_ACTIVATE,
                                          screen=Screen.PVT_CREW_ABILITY_ACTIVATE)])
 
-    abilities_text = get_crew_abilities_text(active_abilities=active_abilities)
+    abilities_text = get_crew_abilities_text(active_abilities=active_abilities, add_duration=True)
 
     ot_text = phrases.CREW_ABILITIES.format(abilities_text, crew.get_powerup_price_formatted(),
                                             crew.get_crew_chest_formatted())

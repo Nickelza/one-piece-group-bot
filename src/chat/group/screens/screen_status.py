@@ -8,6 +8,7 @@ import resources.phrases as phrases
 import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
 import src.service.bounty_service as bounty_service
+from src.model.Crew import Crew
 from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -19,6 +20,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
+from src.service.crew_service import get_crew_abilities_text
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.income_tax_service import user_has_complete_tax_deduction
@@ -58,8 +60,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             return
 
         target_user: User = User.get_or_none(User.tg_user_id == update.effective_message.reply_to_message.from_user.id)
+        own_status = False
     else:
         target_user: User = user
+        own_status = True
 
     # If the user is not in the database, error
     if target_user is None:
@@ -128,93 +132,105 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         target_user_rank,
         escape_valid_markdown_chars(location_name))
 
-    # Add Crew if in one
-    if target_user.is_crew_member():
-        crew = target_user.crew
-        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
+    # Extra info visible only if checking own status
+    if own_status:
+        # Add Crew if in one
+        if target_user.is_crew_member():
+            crew = target_user.crew
+            message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
 
-    # Remaining sentence if arrested
-    if target_user.is_arrested():
-        if not user.impel_down_is_permanent:
-            remaining_time = get_remaining_duration(target_user.impel_down_release_date)
-        else:
-            remaining_time = phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
-        message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
+        # Remaining sentence if arrested
+        if target_user.is_arrested():
+            if not user.impel_down_is_permanent:
+                remaining_time = get_remaining_duration(target_user.impel_down_release_date)
+            else:
+                remaining_time = phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
+            message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
 
-    # Add fight immunity if active
-    if target_user.fight_immunity_end_date is not None and \
-            target_user.fight_immunity_end_date > datetime.datetime.now():
-        # Get remaining time
-        remaining_time = get_remaining_duration(target_user.fight_immunity_end_date)
-        message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
+        # Add fight immunity if active
+        if target_user.fight_immunity_end_date is not None and \
+                target_user.fight_immunity_end_date > datetime.datetime.now():
+            # Get remaining time
+            remaining_time = get_remaining_duration(target_user.fight_immunity_end_date)
+            message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
 
-    # Add fight cooldown if active
-    if target_user.fight_cooldown_end_date is not None and \
-            target_user.fight_cooldown_end_date > datetime.datetime.now():
-        # Get remaining time
-        remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
-        message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
+        # Add fight cooldown if active
+        if target_user.fight_cooldown_end_date is not None and \
+                target_user.fight_cooldown_end_date > datetime.datetime.now():
+            # Get remaining time
+            remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
+            message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
-    # BOUNTY BONUSES
-    has_bounty_bonus = False
-    bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE
+        # BOUNTY BONUSES
+        has_bounty_bonus = False
+        bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE
 
-    # Crew Bounty Bonus
-    if target_user.has_crew_bonus():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_POSITIVE if Env.CREW_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
-            Env.CREW_BOUNTY_BONUS.get_int())
-        has_bounty_bonus = True
+        # Crew Bounty Bonus
+        if target_user.has_crew_bonus():
+            bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                Emoji.LOG_POSITIVE if Env.CREW_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+                phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
+                Env.CREW_BOUNTY_BONUS.get_int())
+            has_bounty_bonus = True
 
-    # Crew MVP Bounty Bonus
-    if target_user.has_crew_mvp_bonus():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_POSITIVE if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
-            Env.CREW_MVP_BOUNTY_BONUS.get_int())
-        has_bounty_bonus = True
+        # Crew MVP Bounty Bonus
+        if target_user.has_crew_mvp_bonus():
+            bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                Emoji.LOG_POSITIVE if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+                phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
+                Env.CREW_MVP_BOUNTY_BONUS.get_int())
+            has_bounty_bonus = True
 
-    # New World Bounty Bonus
-    if target_user.has_new_world_bonus():
-        bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_POSITIVE if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD,
-            Env.NEW_WORLD_BOUNTY_BONUS.get_int())
-        has_bounty_bonus = True
+        # New World Bounty Bonus
+        if target_user.has_new_world_bonus():
+            bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                Emoji.LOG_POSITIVE if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+                phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD,
+                Env.NEW_WORLD_BOUNTY_BONUS.get_int())
+            has_bounty_bonus = True
 
-    if has_bounty_bonus:
-        message_text += bounty_bonus_text
+        if has_bounty_bonus:
+            message_text += bounty_bonus_text
 
-    # BOUNTY DEDUCTIONS
-    has_bounty_deduction = False
-    bounty_deduction_text = phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE
+        # BOUNTY DEDUCTIONS
+        has_bounty_deduction = False
+        bounty_deduction_text = phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE
 
-    # Expired loan
-    if target_user.has_expired_bounty_loans():
-        bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
-            (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()))
-        has_bounty_deduction = True
+        # Expired loan
+        if target_user.has_expired_bounty_loans():
+            bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                Emoji.LOG_NEGATIVE,
+                phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
+                (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()))
+            has_bounty_deduction = True
 
-    # Income tax
-    if target_user.has_income_tax() and not user_has_complete_tax_deduction(target_user):
-        bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-            Emoji.LOG_NEGATIVE,
-            phrases.SHOW_USER_STATUS_INCOME_TAX,
-            (-1 * target_user.get_income_tax_percentage()))
-        has_bounty_deduction = True
+        # Income tax
+        if target_user.has_income_tax() and not user_has_complete_tax_deduction(target_user):
+            bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                Emoji.LOG_NEGATIVE,
+                phrases.SHOW_USER_STATUS_INCOME_TAX,
+                (-1 * target_user.get_income_tax_percentage()))
+            has_bounty_deduction = True
 
-    if has_bounty_deduction:
-        message_text += bounty_deduction_text
+        if has_bounty_deduction:
+            message_text += bounty_deduction_text
 
-    # Devil Fruit
-    eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)
-    if eaten_devil_fruit is not None:
-        message_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
-            eaten_devil_fruit.get_full_name(),
-            get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False))
+        # Abilities visible only if checking own status
+        if own_status:
+            # Devil Fruit
+            eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)
+            if eaten_devil_fruit is not None:
+                message_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
+                    eaten_devil_fruit.get_full_name(),
+                    get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False))
+
+            # Crew abilities
+            if target_user.is_crew_member():
+                crew: Crew = target_user.crew
+                crew_active_abilities = crew.get_active_abilities()
+                if len(crew_active_abilities) > 0:
+                    message_text += phrases.SHOW_USER_STATUS_CREW_ABILITIES.format(
+                        get_crew_abilities_text(active_abilities=crew_active_abilities, add_emoji=True))
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

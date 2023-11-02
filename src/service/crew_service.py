@@ -6,16 +6,21 @@ import resources.Environment as Env
 from resources import phrases as phrases
 from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
+from src.model.CrewChestSpendingRecord import CrewChestSpendingRecord
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.CrewRole import CrewRole
+from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWarningNotification, \
-    CrewLeaveNotification, CrewMemberRemoveNotification
+    CrewLeaveNotification, CrewMemberRemoveNotification, Notification
+from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
+from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
+from src.model.enums.crew.CrewRole import CrewRole
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_remaining_duration
+from src.service.date_service import get_remaining_duration, get_datetime_in_future_days
 from src.service.location_service import update_location
 from src.service.notification_service import send_notification
 
@@ -244,23 +249,133 @@ def add_to_crew_chest(user: User, amount: int) -> None:
     contribution.save()
 
 
-def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbility] = None):
+def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbility] = None,
+                            add_duration: bool = False, add_emoji: bool = False):
     """
     Returns the crew abilities text
     :param crew: The crew
     :param active_abilities: The active abilities
+    :param add_duration: Whether to add the duration
+    :param add_emoji: Whether to add the positive log emoji
     :return: The crew abilities text
     """
 
     if active_abilities is None:
         active_abilities = crew.get_active_abilities()
 
-    abilities_text = ""
     if len(active_abilities) == 0:
         abilities_text = phrases.CREW_ABILITY_NO_ABILITIES
     else:  # Recap
+        active_abilities_text_list = []
+        emoji_text = Emoji.LOG_POSITIVE.value if add_emoji else ''
         for ability in active_abilities:
-            abilities_text += phrases.CREW_ABILITY_ITEM_TEXT.format(
-                ability.get_description(), ability.value, get_remaining_duration(ability.expiration_date))
+            text = phrases.CREW_ABILITY_ITEM_TEXT.format(emoji_text, ability.get_description(),
+                                                         ability.get_value_with_sign())
+            if add_duration:
+                text += phrases.CREW_ABILITY_ITEM_TEXT_DURATION.format(get_remaining_duration(ability.expiration_date))
+
+            active_abilities_text_list.append(text)
+
+        abilities_text = ('\n' if add_duration else '').join(active_abilities_text_list)
 
     return abilities_text
+
+
+def notify_crew_members(context: ContextTypes.DEFAULT_TYPE, crew: Crew, notification: Notification,
+                        exclude_user: User = None) -> None:
+    """
+    Notifies crew members
+
+    :param context: The context
+    :param crew: The crew
+    :param notification: The notification
+    :param exclude_user: The user to exclude
+    :return: None
+    """
+
+    for member in crew.get_members():
+        if member.id != exclude_user.id:
+            send_notification(context, member, notification)
+
+
+async def add_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew: Crew, ability_type: DevilFruitAbilityType,
+                           ability_value: int, acquired_method: CrewAbilityAcquiredMethod, acquired_user: User) -> None:
+    """
+    Adds a crew ability
+
+    :param context: The context
+    :param crew: The crew
+    :param ability_type: The ability type
+    :param ability_value: The ability value
+    :param acquired_method: The acquired method
+    :param acquired_user: The acquired user
+    :return: The crew ability
+    """
+
+    ability: CrewAbility = CrewAbility()
+    ability.crew = crew
+    ability.ability_type = ability_type
+    ability.value = ability_value
+    ability.acquired_method = acquired_method
+    ability.acquired_user = acquired_user
+    ability.expiration_date = get_datetime_in_future_days(Env.CREW_ABILITY_DURATION_DAYS.get_int())
+    ability.save()
+
+    # Notify crew members
+    # TODO build notification
+
+
+async def remove_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew_ability: CrewAbility) -> None:
+    """
+    Removes a crew ability
+
+    :param context: The context
+    :param crew_ability: The crew ability
+    :return: None
+    """
+
+    crew_ability.expiration_date = datetime.now()
+    crew_ability.was_removed = True
+    crew_ability.save()
+
+    # TODO build notification
+
+
+def add_powerup(crew: Crew, acquired_user: User) -> None:
+    """
+    Adds a powerup to a crew
+
+    :param crew: The crew
+    :param acquired_user: The user who acquired the powerup
+    :return: None
+    """
+
+    powerup_price = crew.get_powerup_price()
+    crew.chest_amount -= powerup_price
+    crew.powerup_counter += 1
+    crew.save()
+
+    # Add spending record
+    add_chest_spending_record(crew, powerup_price, CrewChestSpendingReason.ABILITY, acquired_user)
+
+
+def add_chest_spending_record(crew: Crew, amount: int, reason: CrewChestSpendingReason, by_user: User,
+                              to_user: User = None) -> None:
+    """
+    Adds a chest spending record
+
+    :param crew: The crew
+    :param amount: The amount
+    :param reason: The reason
+    :param by_user: User who spent the amount
+    :param to_user: User who received the amount, in case of a transfer
+    :return: None
+    """
+
+    record: CrewChestSpendingRecord = CrewChestSpendingRecord()
+    record.crew = crew
+    record.amount = amount
+    record.reason = reason
+    record.by_user = by_user
+    record.to_user = to_user
+    record.save()

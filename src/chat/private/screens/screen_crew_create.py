@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
-import src.model.enums.CrewRole as CrewRole
+import src.model.enums.crew.CrewRole as CrewRole
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.error.CustomException import CrewValidationException

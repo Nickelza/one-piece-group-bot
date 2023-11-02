@@ -56,6 +56,7 @@ class Emoji(StrEnum):
     GROUP = '👥'
     USER = '👤'
     NULL = ''
+    DICE = '🎲'
 
     # Game
     WINNER = '🏆'
