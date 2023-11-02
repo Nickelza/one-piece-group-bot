@@ -132,8 +132,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         target_user_rank,
         escape_valid_markdown_chars(location_name))
 
-    # Extra info visible only if checking own status
-    if own_status:
+    # Extra info visible only if checking own status or being checked by a boss
+    if own_status or user_is_boss(user, group_chat=group_chat):
         # Add Crew if in one
         if target_user.is_crew_member():
             crew = target_user.crew
