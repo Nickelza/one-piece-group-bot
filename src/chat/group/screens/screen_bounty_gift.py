@@ -13,6 +13,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
+from src.model.error.GroupChatError import GroupChatException, GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
@@ -84,6 +85,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
                                                                get_belly_formatted(max_amount))
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
+
+    # Wrong status
+    if bounty_gift is not None and bounty_gift.get_status() is BountyGiftStatus.CONFIRMED:
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     return True
 
@@ -196,13 +201,12 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     bounty_gift.save()
 
     # Update sender
-    await add_or_remove_bounty(sender, total_amount, add=False, update=update)
     sender.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
+    await add_or_remove_bounty(sender, total_amount, add=False, update=update, should_save=True)
 
     # Update receiver
     await add_or_remove_bounty(receiver, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_GIFT,
-                               event_id=bounty_gift.id)
-    receiver.save()
+                               event_id=bounty_gift.id, should_save=True)
 
     # Send message
     ot_text = phrases.BOUNTY_GIFT_CONFIRMED.format(get_belly_formatted(amount), receiver.get_markdown_mention(),

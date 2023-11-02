@@ -80,6 +80,13 @@ class BountyGift(BaseModel):
                       .order_by(fn.SUM(BountyGift.amount).desc()).first())
         return top_sender.sender, top_sender.total
 
+    def get_status(self) -> BountyGiftStatus:
+        """
+        Get the status
+        :return: The status
+        """
+        return BountyGiftStatus(self.status)
+
     class Meta:
         db_table = 'bounty_gift'
 

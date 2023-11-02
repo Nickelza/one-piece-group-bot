@@ -79,7 +79,12 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         await full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update=update, show_alert=True)
         return
 
-    await add_or_remove_bounty(user, game.wager, add=False, update=update, should_affect_pending_bounty=True)
+    # Wrong status
+    if game.get_status() is not GameStatus.AWAITING_OPPONENT_CONFIRMATION:
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
+
+    await add_or_remove_bounty(user, game.wager, add=False, update=update, should_affect_pending_bounty=True,
+                               should_save=True)
     game.wager += game.wager
     game.status = GameStatus.IN_PROGRESS
     game.opponent = user

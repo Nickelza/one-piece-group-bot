@@ -189,5 +189,13 @@ class Game(BaseModel):
         """
         return GameType(self.type)
 
+    def get_status(self) -> GameStatus:
+        """
+        Get the status of the game
+        :return: The status of the game
+        """
+
+        return GameStatus(self.status)
+
 
 Game.create_table()

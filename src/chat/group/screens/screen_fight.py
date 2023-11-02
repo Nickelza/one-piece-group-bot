@@ -64,6 +64,7 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     :return: True if the request is valid, False otherwise
     """
     # If not query callback
+    fight: Fight | None = None
     if update.callback_query is not None:
         # Get opponent from fight id
         fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info[FightReservedKeys.FIGHT_ID]))
@@ -112,6 +113,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
         ot_text = phrases.FIGHT_USER_IN_COOLDOWN.format(remaining_time)
         await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False
+
+    # Wrong status
+    if fight is not None and fight.get_status() is not GameStatus.IN_PROGRESS:
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     return True
 
@@ -267,9 +272,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.belly = win_amount
         # Add bounty to challenger
         await add_or_remove_bounty(user, win_amount, update=update, tax_event_type=IncomeTaxEventType.FIGHT,
-                                   event_id=fight.id)
+                                   event_id=fight.id, should_save=True)
         # Remove bounty from opponent
-        await add_or_remove_bounty(opponent, win_amount, add=False, update=update)
+        await add_or_remove_bounty(opponent, win_amount, add=False, update=update, should_save=True)
         caption = phrases.FIGHT_WIN.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                            mention_markdown_user(opponent), get_belly_formatted(win_amount),
                                            user.get_bounty_formatted())
@@ -277,10 +282,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         fight.status = GameStatus.LOST
         fight.belly = lose_amount
         # Remove bounty from challenger
-        await add_or_remove_bounty(user, lose_amount, add=False, update=update)
+        await add_or_remove_bounty(user, lose_amount, add=False, update=update, should_save=True)
         # Add bounty to opponent
         await add_or_remove_bounty(opponent, lose_amount, update=update, tax_event_type=IncomeTaxEventType.FIGHT,
-                                   event_id=fight.id)
+                                   event_id=fight.id, should_save=True)
         caption = phrases.FIGHT_LOSE.format(mention_markdown_v2(user.tg_user_id, 'you'),
                                             mention_markdown_user(opponent), get_belly_formatted(lose_amount),
                                             user.get_bounty_formatted())

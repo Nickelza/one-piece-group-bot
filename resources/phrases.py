@@ -641,6 +641,7 @@ CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by
 
 STEP_REQUIRES_TEXT = 'Please send a valid text'
 ITEM_NOT_FOUND = 'Item not found. If you think this is a mistake, please contact an Admin'
+ITEM_IN_WRONG_STATUS = 'Item in wrong status'
 INLINE_QUERY_ITEM_NOT_FOUND_TITLE = 'Item not found'
 INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION = 'Restart the Bot to retrieve a valid url'
 INLINE_QUERY_ITEM_NOT_FOUND_MESSAGE = 'Error'
@@ -699,7 +700,7 @@ BOUNTY_GIFT_NO_AMOUNT = 'You need to specify the amount of belly you want to gif
 BOUNTY_GIFT_REQUEST = 'Are you sure you want to gift ฿*{}* to {}?' \
                       '\n\nTax: ฿{} \\({}%\\)' \
                       '\nTotal: ฿*{}*'
-BOUNTY_GIFT_CONFIRMED = 'You have gifted ฿*{}* to {}' \
+BOUNTY_GIFT_CONFIRMED = '_You have gifted ฿*{}* to {}' \
                         '\n\nTax: ฿{} \\({}%\\)' \
                         '\nTotal: ฿*{}*'
 BOUNTY_GIFT_CANCELLED = 'Gift cancelled'

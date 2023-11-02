@@ -62,5 +62,13 @@ class DocQGame(BaseModel):
                 .order_by(DocQGame.belly.desc())
                 .first())
 
+    def get_status(self) -> GameStatus:
+        """
+        Get the status of the game
+        :return: The status of the game
+        """
+
+        return GameStatus(self.status)
+
 
 DocQGame.create_table()

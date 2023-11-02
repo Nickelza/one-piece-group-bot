@@ -129,5 +129,13 @@ class Fight(BaseModel):
         # Warns that the return type is ForeignKeyField
         return self.challenger if self.challenger != user else self.opponent
 
+    def get_status(self) -> GameStatus:
+        """
+        Get the status of the game
+        :return: The status of the game
+        """
+
+        return GameStatus(self.status)
+
 
 Fight.create_table()

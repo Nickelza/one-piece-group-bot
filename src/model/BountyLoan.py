@@ -100,5 +100,12 @@ class BountyLoan(BaseModel):
 
         self.save()
 
+    def get_status(self) -> BountyLoanStatus:
+        """
+        Get the status
+        :return: The status
+        """
+        return BountyLoanStatus(self.status)
+
 
 BountyLoan.create_table()

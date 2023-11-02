@@ -95,6 +95,11 @@ async def validate_play(update: Update, context: ContextTypes.DEFAULT_TYPE, user
     # Delete all previous pending games
     previous_games: list[DocQGame] = DocQGame.select().where((DocQGame.user == user) &
                                                              (DocQGame.status == GameStatus.IN_PROGRESS))
+
+    # Wrong status
+    if doc_q_game is not None and doc_q_game.get_status() is not GameStatus.IN_PROGRESS:
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
+
     for previous_game in previous_games:
         if previous_game != doc_q_game:
             await delete_game(context, previous_game)
@@ -225,7 +230,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         if str(keyboard.info[DocQReservedKeys.CHOICE_INDEX]) in correct_choices_index:
             # Increase user's bounty
             await add_or_remove_bounty(user, win_amount, update=update, tax_event_type=IncomeTaxEventType.DOC_Q_GAME,
-                                       event_id=doc_q_game.id)
+                                       event_id=doc_q_game.id, should_save=True)
 
             # Update game status
             doc_q_game.status = GameStatus.WON
@@ -237,7 +242,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
                                                     user.get_bounty_formatted())
         else:  # User chose wrong option
             # Decrease user's bounty
-            await add_or_remove_bounty(user, lose_amount, add=False, update=update)
+            await add_or_remove_bounty(user, lose_amount, add=False, update=update, should_save=True)
 
             # Update game status
             doc_q_game.status = GameStatus.LOST

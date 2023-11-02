@@ -16,6 +16,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
+from src.model.error.GroupChatError import GroupChatException, GroupChatError
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
     get_transaction_tax, add_or_remove_bounty
@@ -112,6 +113,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, loaner: U
         await full_message_send(context, phrases.BOUNTY_LOAN_MAX_DURATION_EXCEEDED, update=update,
                                 add_delete_button=True)
         return False
+
+    # Wrong status
+    if loan is not None and loan.get_status() not in BountyLoanStatus.get_not_confirmed_statuses():
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     return True
 
@@ -273,15 +278,14 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     loan.save()
 
     # Update loaner
-    await add_or_remove_bounty(loaner, total_amount, add=False, update=update)
     loaner.bounty_gift_tax += Env.BOUNTY_GIFT_TAX_INCREASE.get_int()
     loaner.bounty_loan_issue_cool_down_end_date = get_datetime_in_future_hours(
         Env.BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION.get_int())
-    loaner.save()
+    await add_or_remove_bounty(loaner, total_amount, add=False, update=update, should_save=True)
 
     # Update receiver
     await add_or_remove_bounty(user, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_LOAN,
-                               event_id=loan.id)
+                               event_id=loan.id, should_save=True)
 
     # Send message
     ot_text = get_text(loan, tax_amount, total_amount)
