@@ -78,10 +78,10 @@ class GameStatus(IntEnum):
 
         raise ValueError('Status with no opposite: ' + str(self))
 
-    def only_challenger_wager(self):
+    def no_wager_was_collected(self):
         """
-        Check if only the challenger has staked belly.
-        :return: True if only the challenger has staked belly, False otherwise
+        Check if no wager was collected.
+        :return: True if no wager was collected, False otherwise
         """
 
         return self in (GameStatus.AWAITING_SELECTION, GameStatus.AWAITING_OPPONENT_CONFIRMATION)
