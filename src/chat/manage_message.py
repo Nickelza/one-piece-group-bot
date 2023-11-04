@@ -546,8 +546,8 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
                   else Env.ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT.get_int())
 
     if len(past_messages_date_list) >= spam_limit:
-        # In case spam limit was just reached, send warning message
-        if len(past_messages_date_list) == spam_limit:
+        # In case spam limit was just reached, send warning message just in private chat
+        if len(past_messages_date_list) == spam_limit and message_source is MessageSource.PRIVATE:
             past_messages_date_list.append(now)
             set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list,
                              inner_key=inner_key)
