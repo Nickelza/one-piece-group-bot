@@ -297,7 +297,8 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
 
             if user.pending_bounty < 0 and previous_pending_bounty >= 0:
                 try:
-                    raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty} after removing'
+                    raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty}'
+                                     f'(previous was {previous_pending_bounty} after removing'
                                      f' {amount} pending bounty in event '
                                      f'{update.to_dict() if update is not None else "None"}')
                 except ValueError as ve:
