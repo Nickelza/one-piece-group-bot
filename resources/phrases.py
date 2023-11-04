@@ -398,8 +398,6 @@ GUESS_OR_LIFE_GAME_NAME = 'Guess or Life'
 GUESS_OR_LIFE_GAME_DESCRIPTION = 'Guess the missing letters of the One Piece related word, any wrong guess will cost ' \
                                  'a life.' \
                                  '\nA new life will be issued every {} seconds.'
-GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED = f'{Emoji.WARNING} You have already used this letter'
-GUESS_OR_LIFE_GAME_NO_MORE_LIVES = f'{Emoji.WARNING} You have no more lives left'
 GUESS_OR_LIFE_GAME_CORRECT_LETTER = f'{Emoji.CORRECT} Correct letter!'
 GUESS_OR_LIFE_GAME_WRONG_LETTER = f'{Emoji.LOG_NEGATIVE} Wrong letter'
 GUESS_OR_LIFE_GAME_WORD_LIVES = '{}' \
@@ -411,8 +409,6 @@ GUESS_OR_LIFE_GAME_NAME_WORD_LIVES = '*{}*' \
 GUESS_OR_LIFE_GAME_REMAINING_USED_LETTERS = '\n\nRemaining letters: {}' \
                                             '\n\nUsed letters: {}'
 GUESS_OR_LIFE_GAME_PRIVATE_RECAP = '{}\n\n{}'
-GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER = f'{Emoji.WARNING}Please send only one letter at a time'
-GUESS_OR_LIFE_GAME_INPUT_CAPTION_LETTER_ONLY = f'{Emoji.WARNING}Please send only letters (no numbers or symbols)'
 
 PUNK_RECORDS_GAME_NAME = 'Punk Records'
 PUNK_RECORDS_GAME_DESCRIPTION = 'Guess the One Piece related character from details about them. ' \

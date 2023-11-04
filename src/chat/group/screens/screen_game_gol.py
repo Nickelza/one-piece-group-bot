@@ -239,34 +239,21 @@ async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ga
         return
 
     guess_or_life: GuessOrLife = get_board(game)
-    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
 
     # More than one letter sent
     if len(letter) > 1:
-        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-            phrases.GUESS_OR_LIFE_GAME_INPUT_CAPTION_ONE_LETTER, specific_text)
-        await full_message_send(context, ot_text, update=update)
         return
 
     # Not a letter
     if not letter.isalpha():
-        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-            phrases.GUESS_OR_LIFE_GAME_INPUT_CAPTION_LETTER_ONLY, specific_text)
-        await full_message_send(context, ot_text, update=update)
         return
 
     # Letter already used
     if guess_or_life.has_used_letter(get_player_type(game, user), letter):
-        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-            phrases.GUESS_OR_LIFE_GAME_LETTER_ALREADY_USED, specific_text)
-        await full_message_send(context, ot_text, update=update)
         return
 
     # No more lives remaining
     if guess_or_life.get_player_info(get_player_type(game, user)).lives == 0:
-        ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
-            phrases.GUESS_OR_LIFE_GAME_NO_MORE_LIVES, specific_text)
-        await full_message_send(context, ot_text, update=update)
         return
 
     # Add letter to used letters and refresh specific text

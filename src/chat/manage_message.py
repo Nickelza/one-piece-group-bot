@@ -212,7 +212,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
 
     # Check for spam only if a valid command or private chat
     if command != Command.ND or message_source is MessageSource.PRIVATE:
-        if await is_spam(update, context, message_source):
+        if await is_spam(update, context, message_source, command):
             logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
             return
 
@@ -504,12 +504,14 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
     return group_chat
 
 
-async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_source: MessageSource) -> bool:
+async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_source: MessageSource,
+                  command: Command) -> bool:
     """
     Check if the message is spam, which would cause flooding
     :param update: Telegram update
     :param context: Telegram context
     :param message_source: The message source
+    :param command: The command
     :return: True if the message is spam
     """
 
@@ -521,6 +523,10 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
         inner_key = str(update.effective_chat.id)
     else:
         return False  # Not managing spam for other message sources
+
+    # Game input, don't check for spam
+    if command is Command.PVT_GAME_GUESS_INPUT:
+        return False
 
     # Get past messages date list
     try:
