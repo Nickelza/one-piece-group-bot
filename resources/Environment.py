@@ -605,7 +605,8 @@ BOUNTY_LOAN_MAX_DURATION_DAYS = Environment('BOUNTY_LOAN_MAX_DURATION_DAYS', def
 BOUNTY_LOAN_FORGIVENESS_DAYS = Environment('BOUNTY_LOAN_FORGIVENESS_DAYS', default_value='7')
 # How long a user has to wait before issuing a new loan in hours. Default: 24
 BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION = Environment('BOUNTY_LOAN_ISSUE_COOLDOWN_DURATION', default_value='24')
-
+# How much interest on the loan before it is considered predatory. Default: 100%
+BOUNTY_LOAN_PREDATORY_INTEREST_THRESHOLD = Environment('BOUNTY_LOAN_PREDATORY_INTEREST_THRESHOLD', default_value='100')
 # How much percent should be removed from taxes for exchanges from Pirate King. Default: 50%
 PIRATE_KING_TRANSACTION_TAX_DISCOUNT = Environment('PIRATE_KING_TRANSACTION_TAX_DISCOUNT', default_value='50')
 

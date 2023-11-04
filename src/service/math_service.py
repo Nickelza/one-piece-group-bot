@@ -51,6 +51,18 @@ def get_percentage_from_value(value: float, total: float, add_decimal=True) -> f
         return 0
 
 
+def get_interest_percentage_from_value(value: float, total: float, add_decimal=True) -> float:
+    """
+    Gets a percentage from a value
+    :param value: The value to get the percentage from
+    :param total: The total value
+    :param add_decimal: True if the percentage should have a decimals, False otherwise
+    :return: The percentage from the value
+    """
+
+    return get_percentage_from_value(value, total, add_decimal) - 100
+
+
 def add_percentage_to_value(value: float, percentage: float) -> float:
     """
     Adds a percentage to a value

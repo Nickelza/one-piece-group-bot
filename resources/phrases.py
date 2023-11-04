@@ -764,7 +764,11 @@ BOUNTY_LOAN_REQUEST = '*New Loan*' \
                       + BOUNTY_LOAN_STATUS \
                       + BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX \
                       + BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER \
-                      + '\n\n_To manage or pay this loan, go to Private Chat -> /start -> Loan_'
+                      + '{}' \
+                        '\n\n_To manage or pay this loan, go to Private Chat -> /start -> Loan_'
+BOUNTY_LOAN_REQUEST_PREDATORY_WARNING = f'\n\n{Emoji.WARNING_STRONG}Warning, this is a predatory loan with a ' \
+                                        '*{}%* interest rate.'
+
 # Bounty loan - Private Chat
 BOUNTY_LOAN_ITEM_TEXT = '{} ฿{} {} {}'
 BOUNTY_LOAN_ITEM_TEXT_FILL_IN = 'Loan'

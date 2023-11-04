@@ -23,7 +23,7 @@ from src.service.bounty_service import get_amount_from_string, validate_amount, 
 from src.service.date_service import validate_duration, get_duration_from_string, convert_seconds_to_duration, \
     datetime_is_before, get_datetime_in_future_hours
 from src.service.devil_fruit_service import get_ability_value
-from src.service.math_service import get_value_from_percentage
+from src.service.math_service import get_value_from_percentage, get_interest_percentage_from_value
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 
 
@@ -182,6 +182,11 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
     loaner: User = loan.loaner
     borrower: User = loan.borrower
 
+    predatory_loan_warning_text = ''
+    loan_interest = get_interest_percentage_from_value(loan.repay_amount, loan.amount, add_decimal=False)
+    if loan_interest > Env.BOUNTY_LOAN_PREDATORY_INTEREST_THRESHOLD.get_int():
+        predatory_loan_warning_text = phrases.BOUNTY_LOAN_REQUEST_PREDATORY_WARNING.format(loan_interest)
+
     return phrases.BOUNTY_LOAN_REQUEST.format(loaner.get_markdown_mention(),
                                               borrower.get_markdown_mention(),
                                               get_belly_formatted(loan.amount),
@@ -193,7 +198,8 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
                                               BountyLoanStatus(loan.status).get_description(),
                                               Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get(),
                                               borrower.get_markdown_mention(),
-                                              loaner.get_markdown_mention())
+                                              loaner.get_markdown_mention(),
+                                              predatory_loan_warning_text)
 
 
 async def get_amounts(sender: User, receiver: User, command: Command = None, loan: BountyLoan = None
