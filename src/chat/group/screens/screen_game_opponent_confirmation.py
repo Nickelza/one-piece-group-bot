@@ -3,6 +3,7 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.chat.group.screens.screen_game_gol import manage as manage_gol
 from src.chat.group.screens.screen_game_pr import manage as manage_pr
@@ -14,10 +15,12 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
+from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.game_service import delete_game, validate_game
 from src.service.message_service import mention_markdown_user, full_media_send, full_message_send
 
@@ -75,7 +78,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
             return
 
     # Challenger clicked on confirm button
-    if user == game.challenger:
+    challenger: User = game.challenger
+    if user == challenger:
         await full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update=update, show_alert=True)
         return
 
@@ -83,8 +87,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     if game.get_status() is not GameStatus.AWAITING_OPPONENT_CONFIRMATION:
         raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
+    # Remove bounty from opponent
     await add_or_remove_bounty(user, game.wager, add=False, update=update, should_affect_pending_bounty=True,
                                should_save=True)
+
+    # Remove bounty from challenger and set cooldown
+    await add_or_remove_bounty(challenger, game.wager, add=False, should_affect_pending_bounty=True, update=update)
+    challenger.game_cooldown_end_date = get_ability_adjusted_datetime(
+        user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
+    challenger.save()
+
     game.wager += game.wager
     game.status = GameStatus.IN_PROGRESS
     game.opponent = user

@@ -30,8 +30,8 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
-from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
-from src.service.date_service import convert_seconds_to_duration
+from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty, validate_amount
+from src.service.date_service import convert_seconds_to_duration, get_remaining_duration
 from src.service.message_service import mention_markdown_user, delete_message, full_media_send, get_message_url, \
     full_message_send
 from src.service.notification_service import send_notification
@@ -223,15 +223,29 @@ async def validate_game(update: Update, context: ContextTypes.DEFAULT_TYPE, inbo
     if game is None:
         game = get_game_from_keyboard(inbound_keyboard)
 
-    if game.status == GameStatus.FORCED_END:
+    status: GameStatus = game.get_status()
+
+    if status is GameStatus.FORCED_END:
         await full_media_send(context, caption=phrases.GAME_FORCED_END, update=update,
                               edit_only_caption_and_keyboard=True)
         return None
 
-    if GameStatus(game.status).is_finished():
+    if status.is_finished():
         await full_media_send(context, caption=phrases.GAME_ENDED, update=update, answer_callback=True, show_alert=True,
                               edit_only_caption_and_keyboard=True)
         return None
+
+    if status in (GameStatus.AWAITING_SELECTION, GameStatus.AWAITING_OPPONENT_CONFIRMATION):
+        challenger: User = game.challenger
+        # Challenger does not have enough bounty
+        if not await validate_amount(update, context, challenger, game.wager, Env.GAME_MIN_WAGER.get_int()):
+            return None
+
+        # Challenger in cooldown
+        if challenger.game_cooldown_end_date and challenger.game_cooldown_end_date > datetime.now():
+            ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_duration(challenger.game_cooldown_end_date))
+            await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
+                                  authorized_users=[challenger, game.opponent], edit_only_caption_and_keyboard=True)
 
     return game
 

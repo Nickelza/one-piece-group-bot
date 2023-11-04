@@ -561,7 +561,8 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
                                              add_delete_button: bool = False, authorized_users: list = None,
                                              answer_callback: bool = False, show_alert: bool = False,
                                              inbound_keyboard: Keyboard = None, previous_screens: list[Screen] = None,
-                                             from_exception: bool = False) -> Message:
+                                             from_exception: bool = False,
+                                             previous_screen_list_keyboard_info: dict = None) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -582,6 +583,8 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
     :param from_exception: True if the message is sent from an exception
+    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
+            keyboard info to add to the back button
     :return: Message
     """
 
@@ -592,7 +595,8 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
                                        disable_web_page_preview=disable_web_page_preview,
                                        add_delete_button=add_delete_button, authorized_users=authorized_users,
                                        inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
-                                       from_exception=from_exception)
+                                       from_exception=from_exception,
+                                       previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
     except BadRequest:
         return await full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
                                      parse_mode=parse_mode, add_delete_button=add_delete_button,

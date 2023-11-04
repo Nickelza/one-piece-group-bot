@@ -34,7 +34,7 @@ from src.service.income_tax_service import get_tax_amount, get_tax_deductions, a
     user_has_complete_tax_deduction
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, full_message_or_media_send_or_edit
 from src.service.string_service import get_unit_value_from_string, object_to_json_string
 from src.service.user_service import get_boss_type, user_is_boss
 
@@ -496,26 +496,26 @@ async def validate_amount(update: Update, context: ContextTypes.DEFAULT_TYPE, us
         try:
             wager: int = get_amount_from_string(wager_str, user)
         except ValueError:
-            await full_message_send(context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update,
-                                    add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                    previous_screens=previous_screens,
-                                    previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+            await full_message_or_media_send_or_edit(
+                context, phrases.ACTION_INVALID_WAGER_AMOUNT, update=update, add_delete_button=add_delete_button,
+                inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
+                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
             return False
 
     # User does not have enough bounty
     if should_validate_user_has_amount and user.bounty < wager:
-        await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
-                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+        await full_message_or_media_send_or_edit(
+            context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, add_delete_button=add_delete_button,
+            inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
+            previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 
     # Wager less than minimum required
     if required_belly is not None and wager < required_belly:
         ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
-        await full_message_send(context, ot_text, update=update, add_delete_button=add_delete_button,
-                                inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+        await full_message_or_media_send_or_edit(
+            context, ot_text, update=update, add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
+            previous_screens=previous_screens, previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
         return False
 
     return True
