@@ -23,6 +23,7 @@ from src.model.enums.ContextDataKey import ContextDataType, ContextDataKey
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import CommandValidationException, NavigationLimitReachedException
 from src.model.error.GroupChatError import GroupChatException
@@ -526,6 +527,10 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
 
     # Game input, don't check for spam
     if command is Command.PVT_GAME_GUESS_INPUT:
+        return False
+
+    # Russian roulette, don't check for spam
+    if command.screen is Screen.GRP_RUSSIAN_ROULETTE_GAME:
         return False
 
     # Get past messages date list
