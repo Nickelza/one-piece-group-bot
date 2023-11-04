@@ -195,12 +195,6 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_del
         if should_delete_message:
             await delete_message(context=context, group_chat=game.group_chat, message_id=game.message_id)
 
-    # Return wager to challenger
-    challenger: User = game.challenger
-    challenger.game_cooldown_end_date = None
-    await add_or_remove_bounty(challenger, game.wager, should_affect_pending_bounty=True, update=update)
-    challenger.save()
-
     # Delete game
     game.delete_instance()
 
