@@ -530,7 +530,7 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
         return False
 
     # Russian roulette, don't check for spam
-    if command.screen is Screen.GRP_RUSSIAN_ROULETTE_GAME:
+    if command is not None and command.screen is Screen.GRP_RUSSIAN_ROULETTE_GAME:
         return False
 
     # Get past messages date list
