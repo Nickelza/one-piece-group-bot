@@ -132,13 +132,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         target_user_rank,
         escape_valid_markdown_chars(location_name))
 
+    # Add Crew if in one
+    if target_user.is_crew_member():
+        crew = target_user.crew
+        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
+
     # Extra info visible only if checking own status or being checked by a boss
     if own_status or user_is_boss(user, group_chat=group_chat):
-        # Add Crew if in one
-        if target_user.is_crew_member():
-            crew = target_user.crew
-            message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
-
         # Remaining sentence if arrested
         if target_user.is_arrested():
             if not user.impel_down_is_permanent:
