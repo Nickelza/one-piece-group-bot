@@ -295,4 +295,4 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # Send message
     ot_text = get_text(loan, tax_amount, total_amount)
-    await full_message_send(context, ot_text, update=update, add_delete_button=True, authorized_users=[loaner, user])
+    await full_message_send(context, ot_text, update=update)
