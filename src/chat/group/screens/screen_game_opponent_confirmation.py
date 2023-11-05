@@ -61,14 +61,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
                 context, caption=ot_text, update=update, add_delete_button=True,
                 authorized_users=[game.challenger, game.opponent], edit_only_caption_and_keyboard=True)
 
-        await delete_game(context, game, should_delete_message=should_delete_message, update=update)
+        await delete_game(context, game, should_delete_message=should_delete_message)
         user.should_update_model = False
         return
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
         if game.opponent is not None:
-            await delete_game(context, game, should_delete_message=False, update=update)
+            await delete_game(context, game, should_delete_message=False)
             await full_media_send(context, caption=phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
                                   add_delete_button=True, edit_only_caption_and_keyboard=True)
             user.should_update_model = False

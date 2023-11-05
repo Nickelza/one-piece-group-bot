@@ -64,7 +64,6 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
     challenger: User = game.challenger
     opponent: User = game.opponent
     half_wager: int = game.wager / 2
-    previous_status: GameStatus = GameStatus(game.status)
 
     bounty_for_challenger = bounty_for_opponent = 0
     pending_bounty_for_challenger = pending_bounty_for_opponent = game.wager / 2
@@ -82,14 +81,13 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
         bounty_for_opponent = half_wager
         game.status = GameStatus.FORCED_END if is_forced_end else GameStatus.DRAW
 
-    if previous_status.no_wager_was_collected():
-        await add_or_remove_bounty(challenger, bounty_for_challenger,
-                                   pending_belly_amount=pending_bounty_for_challenger, update=update,
-                                   tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
+    await add_or_remove_bounty(challenger, bounty_for_challenger,
+                               pending_belly_amount=pending_bounty_for_challenger, update=update,
+                               tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
-        if opponent is not None:
-            await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
-                                       update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
+    if opponent is not None:
+        await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
+                                   update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
     # Refresh
     game.challenger = challenger
@@ -173,14 +171,13 @@ def get_text(game: Game, is_finished: bool, game_outcome: GameOutcome = None, us
 
 
 async def delete_game(context: ContextTypes.DEFAULT_TYPE, game: Game, should_delete_message: bool = True,
-                      show_timeout_message: bool = False, update: Update = None) -> None:
+                      show_timeout_message: bool = False) -> None:
     """
     Delete game
     :param context: The context
     :param game: The game
     :param should_delete_message: If the message should be deleted
     :param show_timeout_message: If the message should be edited showing timeout
-    :param update: The update
     :return: None
     """
 
@@ -334,7 +331,7 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game, u
 
     # Check if the game is still in the same state
     if GameStatus(updated_game.status) == GameStatus.AWAITING_OPPONENT_CONFIRMATION:
-        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True, update=update)
+        await delete_game(context, updated_game, should_delete_message=False, show_timeout_message=True)
 
 
 def get_players(game: Game) -> Tuple[User, User]:

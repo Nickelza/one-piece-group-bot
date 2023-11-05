@@ -42,7 +42,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
-        await delete_game(context, game, update=update)
+        await delete_game(context, game)
         user.should_update_model = False
         return
 
