@@ -154,14 +154,14 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, loane
     loan.save()
 
     # Keyboard
-    # Delete button can't be replaced by add_delete_button because bounty_loan have to be deleted
     inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(loaner, screen=Screen.GRP_BOUNTY_LOAN,
                                                                  primary_key=loan.id)]
 
     ot_text = get_text(loan, tax_amount, total_amount)
 
     try:
-        message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+        message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
+                                                   add_delete_button=True)
         loan.message_id = message.message_id
         loan.save()
     except TelegramError as e:
@@ -276,7 +276,7 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
 
         inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(borrower, screen=Screen.GRP_BOUNTY_LOAN,
                                                                      primary_key=loan.id)]
-        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, add_delete_button=True)
         return
 
     loan.status = BountyLoanStatus.ACTIVE
@@ -295,4 +295,4 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # Send message
     ot_text = get_text(loan, tax_amount, total_amount)
-    await full_message_send(context, ot_text, update=update, add_delete_button=True)
+    await full_message_send(context, ot_text, update=update, add_delete_button=True, authorized_users=[loaner, user])
