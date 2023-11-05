@@ -21,7 +21,7 @@ class Crew(BaseModel):
     disband_date = DateTimeField(null=True)
     chest_amount = BigIntegerField(default=0)
     powerup_counter = IntegerField(default=0)
-    max_abilities = IntegerField(default=0)
+    max_abilities = IntegerField(default=1)
 
     class Meta:
         db_table = 'crew'
