@@ -110,7 +110,7 @@ async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Create and send local leaderboards
     for group in groups:
-        await create_and_send_leaderboard(context, group, global_leaderboard)
+        context.application.create_task(create_and_send_leaderboard(context, group, global_leaderboard))
 
 
 async def create_and_send_leaderboard(context: ContextTypes, group: Group = None, global_leaderboard: Leaderboard = None

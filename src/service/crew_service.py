@@ -192,11 +192,7 @@ def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
     """
 
     # Latest N leaderboards
-    query: list[Leaderboard] = (Leaderboard.select()
-                                .order_by(Leaderboard.year.desc(), Leaderboard.week.desc())
-                                .limit(latest_leaderboard_appearance)
-                                .execute())
-    latest_leaderboards: list[Leaderboard] = list(query)
+    latest_leaderboards: list[Leaderboard] = Leaderboard.get_latest_n(n=latest_leaderboard_appearance)
 
     # Captains of Crews that appeared in the latest N leaderboards in the required role
     query: list[User] = (User.select()

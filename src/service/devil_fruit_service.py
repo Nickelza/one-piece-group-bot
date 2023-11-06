@@ -410,12 +410,7 @@ def get_inactive_users_with_eaten_devil_fruits(latest_leaderboard_appearance: in
     :return: The inactive captains
     """
 
-    # Latest N leaderboards
-    query: list[Leaderboard] = (Leaderboard.select()
-                                .order_by(Leaderboard.year.desc(), Leaderboard.week.desc())
-                                .limit(latest_leaderboard_appearance)
-                                .execute())
-    latest_leaderboards: list[Leaderboard] = list(query)
+    latest_leaderboards: list[Leaderboard] = Leaderboard.get_latest_n(n=latest_leaderboard_appearance)
 
     # Eaten Devil Fruits with owners that have appeared in the latest N leaderboards
     query: list[DevilFruit] = (DevilFruit.select().distinct()
