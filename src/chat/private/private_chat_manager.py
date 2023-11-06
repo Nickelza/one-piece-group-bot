@@ -107,6 +107,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
     if screen is not Screen.UNKNOWN:
 
+        # Always add start as first screen
+        if (inbound_keyboard is not None
+                and Screen.PVT_START not in inbound_keyboard.previous_screen_list
+                and inbound_keyboard.screen is not Screen.PVT_START):
+            inbound_keyboard.previous_screen_list.insert(0, Screen.PVT_START)
+
         # No longer in Edit mode
         if ((screen is not user.get_current_private_screen() or inbound_keyboard is not None)
                 and (inbound_keyboard is not None and ReservedKeyboardKeys.SCREEN_STEP not in inbound_keyboard.info)):
@@ -132,9 +138,6 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
         else:
             # Back to start, IDE non recognizing from_deeplink means inbound_keyboard is not None so have to check
             if inbound_keyboard is not None and from_deeplink:
-                if Screen.PVT_START not in inbound_keyboard.previous_screen_list:  # Add start screen
-                    inbound_keyboard.previous_screen_list.insert(0, Screen.PVT_START)
-
                 user.update_private_screen_list(screen, previous_screen_list=inbound_keyboard.previous_screen_list)
             else:
                 user.update_private_screen_list(screen)
