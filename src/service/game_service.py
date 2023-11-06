@@ -64,6 +64,7 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
     challenger: User = game.challenger
     opponent: User = game.opponent
     half_wager: int = game.wager / 2
+    previous_status: GameStatus = game.get_status()
 
     bounty_for_challenger = bounty_for_opponent = 0
     pending_bounty_for_challenger = pending_bounty_for_opponent = game.wager / 2
@@ -81,13 +82,14 @@ async def end_game(game: Game, game_outcome: GameOutcome, is_forced_end: bool = 
         bounty_for_opponent = half_wager
         game.status = GameStatus.FORCED_END if is_forced_end else GameStatus.DRAW
 
-    await add_or_remove_bounty(challenger, bounty_for_challenger,
-                               pending_belly_amount=pending_bounty_for_challenger, update=update,
-                               tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
+    if not previous_status.no_wager_was_collected():
+        await add_or_remove_bounty(challenger, bounty_for_challenger,
+                                   pending_belly_amount=pending_bounty_for_challenger, update=update,
+                                   tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
-    if opponent is not None:
-        await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
-                                   update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
+        if opponent is not None:
+            await add_or_remove_bounty(opponent, bounty_for_opponent, pending_belly_amount=pending_bounty_for_opponent,
+                                       update=update, tax_event_type=IncomeTaxEventType.GAME, event_id=game.id)
 
     # Refresh
     game.challenger = challenger

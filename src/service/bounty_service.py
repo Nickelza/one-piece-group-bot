@@ -1,5 +1,6 @@
 import datetime
 import logging
+import traceback
 from math import ceil
 
 from peewee import Case, fn
@@ -281,12 +282,10 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                 user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
 
             if user.bounty < 0 and previous_bounty >= 0:
-                try:
-                    raise ValueError(f'User {user.id} has negative bounty: {user.bounty} after removing '
-                                     f'{amount} bounty in event '
-                                     f'{update.to_dict() if update is not None else "None"}')
-                except ValueError as ve:
-                    logging.exception(ve)
+                logging.exception(f'User {user.id} has negative bounty: {user.bounty} after removing '
+                                  f'{amount} bounty in event '
+                                  f'{update.to_dict() if update is not None else "None"}'
+                                  f'\n{traceback.print_stack()}')
 
             if should_save:
                 user.save()
@@ -296,13 +295,11 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
             user.pending_bounty -= (amount if pending_belly_amount is None else pending_belly_amount)
 
             if user.pending_bounty < 0 and previous_pending_bounty >= 0:
-                try:
-                    raise ValueError(f'User {user.id} has negative pending bounty: {user.pending_bounty}'
-                                     f'(previous was {previous_pending_bounty} after removing'
-                                     f' {amount} pending bounty in event '
-                                     f'{update.to_dict() if update is not None else "None"}')
-                except ValueError as ve:
-                    logging.exception(ve)
+                logging.exception(f'User {user.id} has negative pending bounty: {user.pending_bounty}'
+                                  f'(previous was {previous_pending_bounty} after removing'
+                                  f' {amount} pending bounty in event '
+                                  f'{update.to_dict() if update is not None else "None"}'
+                                  f'\n{traceback.print_stack()}')
 
             if should_save:
                 user.save()
