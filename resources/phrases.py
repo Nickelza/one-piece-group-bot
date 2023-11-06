@@ -2,6 +2,16 @@ import resources.Environment as Env
 import src.model.enums.Command as Command
 from src.model.enums.Emoji import Emoji
 
+
+def surround_with_arrows(text: str) -> str:
+    """
+    Surround the text with left and right arrows
+    :param text: The text
+    :return: The text surrounded with left and right arrows
+    """
+    return Emoji.RIGHT_ARROW + text + Emoji.LEFT_ARROW
+
+
 ANTI_SPAM_WARNING = 'Too many messages sent, please slow down...'
 
 COMMAND_NOT_IN_REPLY_ERROR = 'This command can only be used in a reply to a message'
@@ -759,11 +769,10 @@ BOUNTY_LOAN_REQUEST = '*New Loan*' \
                       + BOUNTY_LOAN_TOTAL \
                       + BOUNTY_LOAN_STATUS \
                       + BOUNTY_LOAN_EXPIRED_ACTION_WARNING_PREFIX \
-                      + BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER \
-                      + '{}' \
-                        '\n\n_To manage or pay this loan, go to Private Chat -> /start -> Loan_'
+                      + BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER
 BOUNTY_LOAN_REQUEST_PREDATORY_WARNING = f'\n\n{Emoji.WARNING_STRONG}Warning, this is a predatory loan with a ' \
                                         '*{}%* interest rate.'
+BOUNTY_LOAN_REQUEST_MANAGE_TEXT = '\n\n' + surround_with_arrows('[Click here to manage this loan]({})')
 
 # Bounty loan - Private Chat
 BOUNTY_LOAN_ITEM_TEXT = '{} ฿{} {} {}'

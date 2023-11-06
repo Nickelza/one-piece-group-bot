@@ -11,6 +11,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import convert_seconds_to_duration, default_datetime_format
@@ -62,7 +63,7 @@ class BountyLoanListPage(ListPage):
 
     def get_item_detail_text(self) -> str:
         if self.user != self.object.loaner and self.user != self.object.borrower:
-            return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
+            raise UnauthorizedToViewItemException()
 
         ot_text = ''
         # Loaner or borrower

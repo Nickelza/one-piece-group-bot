@@ -148,6 +148,9 @@ COMMANDS.append(PVT_DEVIL_FRUIT_DETAIL)
 PVT_SETTINGS_TIMEZONE = Command('', Screen.PVT_SETTINGS_TIMEZONE, allow_deeplink=True)
 COMMANDS.append(PVT_SETTINGS_TIMEZONE)
 
+PVT_BOUNTY_LOAN_DETAIL = Command('', Screen.PVT_BOUNTY_LOAN_DETAIL, allow_deeplink=True)
+COMMANDS.append(PVT_BOUNTY_LOAN_DETAIL)
+
 # To set required location
 PVT_LOGS_TYPE_STATS = Command('', Screen.PVT_LOGS_TYPE_STATS, required_location=Location.get_by_level(
     Env.REQUIRED_LOCATION_LEVEL_LOG_STATS.get_int()))

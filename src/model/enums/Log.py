@@ -27,6 +27,7 @@ from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
 from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
+from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import default_datetime_format
@@ -208,7 +209,7 @@ class FightLog(Log):
 
     def get_item_detail_text(self) -> str:
         if self.user != self.object.challenger and self.user != self.object.opponent:
-            return phrases.LOG_ITEM_DETAIL_NO_PERMISSION
+            raise UnauthorizedToViewItemException()
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = default_datetime_format(self.object.date, self.user)

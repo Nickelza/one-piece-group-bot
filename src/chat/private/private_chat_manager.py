@@ -62,6 +62,7 @@ from src.model.SystemUpdateUser import SystemUpdateUser
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, get_message_url, escape_valid_markdown_chars
@@ -79,7 +80,11 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     :return: None
     """
 
-    await dispatch_screens(update, context, command, user, inbound_keyboard)
+    try:
+        await dispatch_screens(update, context, command, user, inbound_keyboard)
+    except UnauthorizedToViewItemException:
+        await full_message_send(context, phrases.LOG_ITEM_DETAIL_NO_PERMISSION, update=update,
+                                previous_screens=[Screen.PVT_START])
 
 
 async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
