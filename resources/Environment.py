@@ -263,9 +263,9 @@ SHOULD_LOG_TIMER_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
 SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
     'SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE', default_value='False')
 
-# Schedule Devil Fruit Zoan release. Default: Every sunday at midnight
+# Schedule Devil Fruit Zoan release. Default: Every sunday at 00:10, to make sure inactive ones were already revoked
 CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
-    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='0 0 * * Sun')
+    'CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='10 0 * * Sun')
 ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     'ENABLE_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE', default_value='True')
 SHOULD_LOG_TIMER_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
