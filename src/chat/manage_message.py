@@ -249,6 +249,11 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         except BadRequest:
             await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update,
                                                      previous_screens=previous_screens, from_exception=True)
+    except BadRequest as bre:
+        if 'Message is not modified' in str(bre):
+            logging.error(f'Updated message same as previous in chat {update.effective_chat.id}')
+        else:
+            raise bre
     except NavigationLimitReachedException:
         await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
                                 show_alert=True)
