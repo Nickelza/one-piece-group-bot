@@ -12,6 +12,7 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Command import Command
+from src.model.enums.Emoji import Emoji
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
@@ -182,6 +183,14 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
     loaner: User = loan.loaner
     borrower: User = loan.borrower
 
+    match loan.get_status():
+        case BountyLoanStatus.AWAITING_LOANER_CONFIRMATION:
+            status_emoji = Emoji.RED
+        case BountyLoanStatus.AWAITING_BORROWER_CONFIRMATION:
+            status_emoji = Emoji.YELLOW
+        case _:
+            status_emoji = Emoji.GREEN
+
     ot_text = phrases.BOUNTY_LOAN_REQUEST.format(loaner.get_markdown_mention(),
                                                  borrower.get_markdown_mention(),
                                                  get_belly_formatted(loan.amount),
@@ -190,7 +199,8 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
                                                  get_belly_formatted(tax_amount),
                                                  loan.tax_percentage,
                                                  get_belly_formatted(total_amount),
-                                                 BountyLoanStatus(loan.status).get_description(),
+                                                 status_emoji,
+                                                 loan.get_status().get_description(),
                                                  Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get(),
                                                  borrower.get_markdown_mention(),
                                                  loaner.get_markdown_mention())
@@ -299,6 +309,10 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     # Update receiver
     await add_or_remove_bounty(user, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_LOAN,
                                event_id=loan.id, should_save=True)
+
+    # 0 repay amount, pay immediately
+    if repay_amount == 0:
+        await loan.pay(0, update=update)
 
     # Send message
     ot_text = get_text(loan, tax_amount, total_amount)

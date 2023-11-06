@@ -93,7 +93,8 @@ class BountyLoanListPage(ListPage):
             ot_text += phrases.BOUNTY_LOAN_TOTAL.format(get_belly_formatted(total_amount))
 
         # Status
-        ot_text += phrases.BOUNTY_LOAN_STATUS.format(BountyLoanStatus(self.object.status).get_description())
+        ot_text += phrases.BOUNTY_LOAN_STATUS.format(
+            self.log_emoji, BountyLoanStatus(self.object.status).get_description())
 
         # If expired, show warning that all new gained bounty will be transferred to the loaner
         if self.object.status == BountyLoanStatus.EXPIRED:

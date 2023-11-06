@@ -43,6 +43,9 @@ class BountyLoan(BaseModel):
         :param update: The update object
         :return: None
         """
+        if amount > self.get_remaining_amount():
+            raise ValueError('Amount is greater than remaining amount')
+
         self.amount_repaid += amount
         self.last_payment_date = datetime.now()
 

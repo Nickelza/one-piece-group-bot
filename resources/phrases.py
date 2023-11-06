@@ -735,7 +735,7 @@ BOUNTY_LOAN_DURATION = '\nDuration: *{}*'
 BOUNTY_LOAN_DEADLINE_DATE = '\nDeadline: *{}*'
 BOUNTY_LOAN_TAX = '\nTax: ฿{} \\({}%\\)'
 BOUNTY_LOAN_TOTAL = '\nTotal: ฿*{}*'
-BOUNTY_LOAN_STATUS = '\n\nStatus: *{}*'
+BOUNTY_LOAN_STATUS = '\n\nStatus: {}*{}*'
 BOUNTY_LOAN_CANCELLED = 'Loan cancelled'
 BOUNTY_LOAN_NOT_ENOUGH_BOUNTY = 'You do not have enough belly to loan' \
                                 '\n\nAvailable belly: ฿{}' \

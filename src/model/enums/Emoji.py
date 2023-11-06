@@ -58,6 +58,9 @@ class Emoji(StrEnum):
     NULL = ''
     DICE = '🎲'
     WARNING_STRONG = '‼'
+    RED = '🔴'
+    YELLOW = '🟡'
+    GREEN = '🟢'
 
     # Game
     WINNER = '🏆'
