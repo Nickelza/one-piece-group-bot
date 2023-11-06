@@ -322,8 +322,13 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
                 if command.required_location.is_first_new_world():
                     raise CommandValidationException(phrases.COMMAND_FOR_NEW_WORLD_USERS_ERROR)
 
-                raise CommandValidationException(
-                    phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR.format(command.required_location.name))
+                text = phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR.format(
+                    escape_valid_markdown_chars(command.required_location.name),
+                    escape_valid_markdown_chars(user.get_location_name()))
+                if not user.is_crew_member() and user.can_join_crew:
+                    text += phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW
+
+                raise CommandValidationException(text)
 
         # Can only be used in reply to a message
         if command.only_in_reply:

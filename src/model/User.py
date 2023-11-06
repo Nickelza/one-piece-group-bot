@@ -335,6 +335,14 @@ class User(BaseModel):
 
         return get_by_level(int(str(self.location_level)))
 
+    def get_location_name(self) -> str:
+        """
+        Returns the location name of the user
+        :return: The location name of the user
+        """
+
+        return self.get_location().name
+
     def has_bounty_gain_limitations(self) -> bool:
         """
         Returns True if the user has bounty gain limitations

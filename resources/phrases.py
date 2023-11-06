@@ -20,7 +20,9 @@ COMMAND_IN_REPLY_TO_ERROR = "This command can't be used in a reply to your own m
 COMMAND_NOT_ACTIVE_ERROR = "This command is no longer available"
 COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR = COMMAND_NOT_ACTIVE_ERROR + '. ' + 'Please Use {} instead'
 COMMAND_FOR_NEW_WORLD_USERS_ERROR = 'This command is only available for users in the New World'
-COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached {}'
+COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for users who have reached *{}*.' \
+                                         '\n\nCurrent location: *{}*'
+COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW = '\n\n_Join a Crew to quickly level up your location!_'
 COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
 COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
