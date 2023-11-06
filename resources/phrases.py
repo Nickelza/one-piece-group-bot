@@ -95,8 +95,11 @@ DOC_Q_GAME_NOT_FOUND = 'Doc Q game not found'
 DOC_Q_GAME_CANCEL = 'See you next time!'
 DOC_Q_GAME_WIN = "You're...haha...cough! cough! a really lucky one {}." \
                  "\nLet's go, Stronger...agh..!" + '\n\n{}' + GAME_WIN_STATUS
-DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...better luck next time." \
-                  "\nLet's go, Stronger...agh..!" + '\n\n{}' + GAME_LOSE_STATUS
+DOC_Q_GAME_LOSE = "Seems like today wasn't your lucky day {}...cough!...only the *{}°* apple wasn't rigged haha..." \
+                  "\nDon't be so reckless or you won't survive long in these treacherous seas!" \
+                  "\nLet's go, Stronger...agh..!" + \
+                  '\n\n{}' \
+                  + GAME_LOSE_STATUS
 
 # Error messages
 USER_NOT_FOUND = 'User not found'

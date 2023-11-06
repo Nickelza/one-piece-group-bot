@@ -2,6 +2,7 @@ import datetime
 
 from peewee import *
 
+import constants as c
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -69,6 +70,14 @@ class DocQGame(BaseModel):
         """
 
         return GameStatus(self.status)
+
+    def get_correct_apple_number(self) -> int:
+        """
+        Get the correct apple number
+        :return: The correct apple number
+        """
+
+        return int((str(self.correct_choices_index).split(c.STANDARD_SPLIT_CHAR))[0]) + 1
 
 
 DocQGame.create_table()

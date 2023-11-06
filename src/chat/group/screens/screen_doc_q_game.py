@@ -248,7 +248,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
             doc_q_game.status = GameStatus.LOST
             doc_q_game.belly = lose_amount
 
+            correct_apple = doc_q_game.get_correct_apple_number()
             ot_text = phrases.DOC_Q_GAME_LOSE.format(mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                                                     correct_apple,
                                                      Emoji.DOC_Q_GAME_LOSE,
                                                      get_belly_formatted(lose_amount),
                                                      user.get_bounty_formatted())

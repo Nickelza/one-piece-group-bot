@@ -290,7 +290,7 @@ class DocQGameLog(Log):
 
     def get_item_detail_text(self) -> str:
         date = default_datetime_format(self.object.date, self.user)
-        correct_apple = int((str(self.object.correct_choices_index).split(c.STANDARD_SPLIT_CHAR))[0]) + 1
+        correct_apple = self.object.get_correct_apple_number()
         won = GameStatus(self.object.status) is GameStatus.WON
         outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
             (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
