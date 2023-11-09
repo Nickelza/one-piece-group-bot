@@ -46,6 +46,9 @@ def get_belly_formatted(belly: int) -> str:
     :param belly: The belly to format e.g. 1000000
     :return: The formatted belly e.g. 1,000,000
     """
+    if belly is None:
+        logging.info("Get belly formatted with belly None, returning 0")
+        return '0'
 
     return '{0:,}'.format(int(belly))
 
