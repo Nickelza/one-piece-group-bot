@@ -12,3 +12,4 @@ class LogType(IntEnum):
     NEW_WORLD_PIRATE = 6
     LEADERBOARD_RANK = 7
     INCOME_TAX_EVENT = 8
+    WARLORD = 9

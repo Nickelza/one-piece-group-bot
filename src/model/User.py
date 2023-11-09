@@ -59,6 +59,7 @@ class User(BaseModel):
     is_active = BooleanField(default=True)
     prediction_creation_cooldown_end_date = DateTimeField(null=True)
     bounty_loan_issue_cool_down_end_date = DateTimeField(null=True)
+    is_exempt_from_global_leaderboard_requirements = BooleanField(default=False)  # For Legendary Pirate
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen
@@ -552,6 +553,23 @@ class User(BaseModel):
         """
 
         return self.get_crew_role().get_description()
+
+    def is_legendary_pirate(self) -> bool:
+        """
+        Returns True if the user is a Legendary Pirate
+        :return: True if the user is a Legendary Pirate
+        """
+
+        return self.legendary_pirates.count() > 0
+
+    def is_warlord(self) -> bool:
+        """
+        Returns True if the user is a Warlord
+        :return: True if the user is a Warlord
+        """
+        from src.model.Warlord import Warlord
+
+        return self.warlords.where(Warlord.end_date > datetime.datetime.now()).count() > 0
 
 
 User.create_table()

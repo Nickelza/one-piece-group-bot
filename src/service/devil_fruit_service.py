@@ -425,12 +425,13 @@ def get_inactive_users_with_eaten_devil_fruits(latest_leaderboard_appearance: in
     # Inactive Devil Fruits
     # Have to first get inactive ones else, by using "not in", it will return records for previous leaderboards too
     # since the user might have been in a leaderboard before N, so it will not be in the latest N leaderboards
-    # Exclude admins
+    # Exclude admins and those exempt from global leaderboard requirement
     inactive_devil_fruits: list[DevilFruit] = (
         DevilFruit.select().distinct()
         .join(User)
         .where((DevilFruit.status == DevilFruitStatus.EATEN)
-               & (User.is_admin == 0)
+               & (User.is_admin == False)
+               & (User.is_exempt_from_global_leaderboard_requirements == False)
                & (DevilFruit.id.not_in([df.id for df in eaten_active_devil_fruits])))
         .execute())
 

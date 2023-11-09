@@ -13,7 +13,9 @@ from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
+from src.model.Warlord import Warlord
 from src.model.enums.Feature import Feature
+from src.model.enums.LeaderboardRank import LeaderboardRankIndex
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
@@ -39,6 +41,10 @@ def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
         leaderboard_user: LeaderboardUser = leaderboard_user
         user: User = leaderboard_user.user
+
+        # Special rank, don't show in leaderboard
+        if LeaderboardRankIndex(leaderboard_user.rank_index).is_special():
+            continue
 
         content_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
                                                        get_leaderboard_rank_message(leaderboard_user.rank_index),
@@ -189,6 +195,17 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     leaderboard_users: list[LeaderboardUser] = []
     position = 1
 
+    # If global leaderboard, exclude users that are exempted from global leaderboard requirements
+    excluded_user_ids: list[int] = []
+    if group is None:
+        excluded_user_ids: list[int] = list(User
+                                            .select(User.id)
+                                            .where(User.is_exempt_from_global_leaderboard_requirements == True)
+                                            .execute())
+
+        # Add warlords
+        excluded_user_ids.extend(Warlord.get_active_user_ids())
+
     # Get previous leaderboard users who were Emperors or higher
     previous_leaderboard: Leaderboard = get_leaderboard(1, group)
     if previous_leaderboard is None:
@@ -211,7 +228,8 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
                                        .where((User.location_level >= get_first_new_world().level)
                                               & (User.get_is_not_arrested_statement_condition())
                                               & (User.is_admin == False)
-                                              & (User.id.in_(eligible_leaderboard_user_ids)))
+                                              & (User.id.in_(eligible_leaderboard_user_ids))
+                                              & (User.id.not_in(excluded_user_ids)))
                                        .order_by(User.bounty.desc()))
 
     # Save Pirate King, if available
@@ -252,7 +270,8 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
                                       .where((User.location_level <= get_last_paradise().level)
                                              & (User.get_is_not_arrested_statement_condition())
                                              & (User.is_admin == False)
-                                             & (User.id.in_(eligible_leaderboard_user_ids)))
+                                             & (User.id.in_(eligible_leaderboard_user_ids))
+                                             & (User.id.not_in(excluded_user_ids)))
                                       .order_by(User.bounty.desc()))
 
     # Save Supernovas, next 11 users
@@ -267,7 +286,14 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
             if added_users_count == 11:
                 break
 
-    return leaderboard_users
+    # Save Warlords, if global leaderboard
+    if group is None:
+        for index, warlord in enumerate(Warlord.get_active_order_by_bounty()):
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, warlord.user, index + 1,
+                                                                      LeaderboardRank.WARLORD)
+            leaderboard_users.append(leaderboard_user)
+
+        return leaderboard_users
 
 
 def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, rank: LeaderboardRank.LeaderboardRank
@@ -350,3 +376,26 @@ def get_current_leaderboard_rank(user: User, group_chat: GroupChat = None) -> Le
 
     leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user, group_chat=group_chat)
     return LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_user)
+
+
+def get_highest_active_rank(user: User, group_chat: GroupChat) -> LeaderboardRank:
+    """
+    Get the highest active rank for a given user
+    If the user has a special rank, the special rank is returned if it's higher than the user's leaderboard rank
+    :param user: User
+    :param group_chat: Group chat
+    :return: Leaderboard rank
+    """
+    # Get current leaderboard user
+    leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user, group_chat=group_chat)
+
+    # Get current leaderboard rank
+    leaderboard_rank: LeaderboardRank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_user)
+
+    # Get special rank
+    special_rank: LeaderboardRank = LeaderboardRank.get_special_rank(user)
+
+    if special_rank is None or leaderboard_rank.is_higher(special_rank):
+        return leaderboard_rank
+
+    return special_rank

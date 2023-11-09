@@ -12,6 +12,7 @@ from src.model.Crew import Crew
 from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.Warlord import Warlord
 from src.model.enums import Location
 from src.model.enums.Emoji import Emoji
 from src.model.enums.MessageSource import MessageSource
@@ -24,7 +25,7 @@ from src.service.crew_service import get_crew_abilities_text
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.income_tax_service import user_has_complete_tax_deduction
-from src.service.leaderboard_service import get_current_leaderboard_user
+from src.service.leaderboard_service import get_current_leaderboard_user, get_highest_active_rank
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
     get_start_with_command_url, escape_valid_markdown_chars, message_is_reply
 from src.service.user_service import user_is_boss
@@ -69,22 +70,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if target_user is None:
         raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
 
-    leaderboard_target_user = get_current_leaderboard_user(target_user, group_chat=group_chat)
-    leaderboard_target_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_target_user)
+    leaderboard_target_user_rank = get_highest_active_rank(target_user, group_chat=group_chat)
 
     # If used in reply to a message, verify that requesting user ranks above the user being replied to
     if in_reply_to_message and not target_user.is_arrested():  # Arrested users are always viewable
         # Add the requested user to the list of users that can delete the message
         can_delete_users.append(target_user.tg_user_id)
 
-        requesting_user_leaderboard_user = get_current_leaderboard_user(user, group_chat=group_chat)
+        requesting_user_leaderboard_user_rank = get_highest_active_rank(user, group_chat=group_chat)
 
-        if not user_is_boss(user, group_chat=group_chat) and (requesting_user_leaderboard_user is None or (
-                leaderboard_target_user is not None
-                and requesting_user_leaderboard_user.position >= leaderboard_target_user.position)):
-            requesting_user_leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
-                requesting_user_leaderboard_user)
-
+        if not requesting_user_leaderboard_user_rank.is_higher(leaderboard_target_user_rank):
             ot_text = phrases.NOT_ALLOWED_TO_VIEW_REPLIED_STATUS.format(
                 mention_markdown_v2(user.tg_user_id, 'Your'),
                 requesting_user_leaderboard_user_rank.get_emoji_and_rank_message(),
@@ -160,6 +155,11 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             # Get remaining time
             remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
             message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
+
+        # Add warlord remaining time if available
+        if target_user.is_warlord():
+            remaining_time = get_remaining_duration(Warlord.get_latest_active_by_user(target_user).end_date)
+            message_text += phrases.SHOW_USER_STATUS_WARLORD_REMAINING_TIME.format(remaining_time)
 
         # BOUNTY BONUSES
         has_bounty_bonus = False

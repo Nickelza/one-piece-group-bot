@@ -18,6 +18,9 @@ class Emoji(StrEnum):
     LEADERBOARD_FIRST_MATE = '🥇'
     LEADERBOARD_SUPERNOVA = '🌟'
     LEADERBOARD_ROOKIE = '👤'
+    LEADERBOARD_ADMIN = '🎖️'
+    LEADERBOARD_LEGENDARY_PIRATE = '💎'
+    LEADERBOARD_WARLORD = '⚔'
 
     # Fight
     FIGHT = '⚔'

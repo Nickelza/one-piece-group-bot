@@ -45,6 +45,7 @@ SHOW_USER_STATUS_REMAINING_SENTENCE = '\nRemaining sentence: {}'
 SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = 'Permanent'
 SHOW_USER_STATUS_FIGHT_IMMUNITY = '\nFight immunity: {}'
 SHOW_USER_STATUS_FIGHT_COOLDOWN = '\nFight cooldown: {}'
+SHOW_USER_STATUS_WARLORD_REMAINING_TIME = '\nWarlord remaining time: {}'
 SHOW_USER_STATUS_CREW = '\nCrew: {}'
 SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = '\n\n*Daily Bounty Bonus*'
 SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = '\n{}{} \\({}%\\)'
@@ -1052,6 +1053,14 @@ LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT = '*{}*' \
                                         '\nEpithet: {}' \
                                         '\n\n*Reason*: {}'
 
+# Logs - Warlord
+WARLORD_LOG_KEY = 'Warlords'
+WARLORD_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'Warlord'
+WARLORD_LOG_ITEM_TEXT = '{}'
+WARLORD_LOG_ITEM_DETAIL_TEXT = '*{}*' \
+                               '\nEpithet: {}' \
+                               '\n\n*Reason*: {}'
+
 # Logs - New World Pirate
 NEW_WORLD_PIRATE_LOG_KEY = 'New World Pirates'
 NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN = 'New World Pirate'
@@ -1074,6 +1083,7 @@ LEADERBOARD_RANK_LOG_STATS_TEXT = '*Total appearances*: {}' \
                                   '\n*Appearances as Emperor*: {} \\({}%\\)' \
                                   '\n*Appearances as First Mate*: {} \\({}%\\)' \
                                   '\n*Appearances as Supernova*: {} \\({}%\\)' \
+                                  '\n*Appearances as Warlord*: {} \\({}%\\)' \
                                   '\n*Max rank*: [{} \\({}°\\)]({})' \
                                   '\n*Max bounty*: [฿{} \\({}°\\)]({})'
 

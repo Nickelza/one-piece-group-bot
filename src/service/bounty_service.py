@@ -584,7 +584,8 @@ def get_transaction_tax(sender: User, receiver: User, base_tax: float) -> float:
         # Admins and legendary pirates, no tax
         if boss_type in (BossType.ADMIN, BossType.LEGENDARY_PIRATE):
             return 0
-        elif boss_type is BossType.PIRATE_KING and user_is_boss(sender):
+        # Pirate King and Warlord
+        elif boss_type in [BossType.PIRATE_KING, BossType.WARLORD] and user_is_boss(sender):
             tax = subtract_percentage_from_value(base_tax, Env.PIRATE_KING_TRANSACTION_TAX_DISCOUNT.get_float())
 
     # Send and receiver in same crew, percentage deduction

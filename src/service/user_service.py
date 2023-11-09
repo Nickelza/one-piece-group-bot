@@ -9,7 +9,6 @@ from telegram.ext import ContextTypes
 import constants as c
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
-from src.model.LegendaryPirate import LegendaryPirate
 from src.model.UnmutedUser import UnmutedUser
 from src.model.User import User
 from src.model.enums.BossType import BossType
@@ -51,11 +50,14 @@ def get_boss_type(user: User, group_chat: GroupChat = None) -> BossType | None:
     if user.is_admin:
         return BossType.ADMIN
 
-    if LegendaryPirate.get_or_none(LegendaryPirate.user == user) is not None:
+    if user.is_legendary_pirate():
         return BossType.LEGENDARY_PIRATE
 
     if get_current_leaderboard_rank(user, group_chat) == PIRATE_KING:
         return BossType.PIRATE_KING
+
+    if user.is_warlord():
+        return BossType.WARLORD
 
     if group_chat is not None:
         # Check for Pirate King in global leaderboard

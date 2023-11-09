@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from datetime import datetime
 
 import constants as c
 import resources.phrases as phrases
@@ -13,6 +14,7 @@ from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
 from src.model.User import User
+from src.model.Warlord import Warlord
 from src.model.enums.BountyGiftRole import BountyGiftRole
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
@@ -41,6 +43,7 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.BOUNTY_GIFT: phrases.BOUNTY_GIFT_LOG_KEY,
     LogType.LEGENDARY_PIRATE: phrases.LEGENDARY_PIRATE_LOG_KEY,
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_KEY,
+    LogType.WARLORD: phrases.WARLORD_LOG_KEY,
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_KEY,
     LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_KEY,
 }
@@ -54,6 +57,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.NEW_WORLD_PIRATE: phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.WARLORD: phrases.WARLORD_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 
@@ -650,6 +654,8 @@ class LeaderboardRankLog(Log):
         appearances_as_supernova = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.SUPERNOVA)
         appearances_as_supernova_percentage = int(get_percentage_from_value(appearances_as_supernova,
                                                                             total_appearances))
+        appearances_as_warlord = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.WARLORD)
+        appearances_as_warlord_percentage = int(get_percentage_from_value(appearances_as_warlord, total_appearances))
         max_by_rank: LeaderboardUser = self.object.get_max_rank_attained(self.user)
         max_by_bounty: LeaderboardUser = self.object.get_max_bounty_attained(self.user)
 
@@ -663,6 +669,8 @@ class LeaderboardRankLog(Log):
             appearances_as_first_mate_percentage,
             appearances_as_supernova,
             appearances_as_supernova_percentage,
+            appearances_as_warlord,
+            appearances_as_warlord_percentage,
             get_rank_by_leaderboard_user(max_by_rank).get_emoji_and_rank_message(),
             max_by_rank.position,
             self.get_deeplink(max_by_rank.id),
@@ -774,8 +782,50 @@ class IncomeTaxEventLog(Log):
             breakdown_text)
 
 
+class WarlordLog(Log):
+    """Class for warlord logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.WARLORD, has_stats=False)
+
+        self.object: Warlord = Warlord()
+        self.user: User = User()
+
+    def set_object(self, object_id: int) -> None:
+        self.object: Warlord = Warlord.get(Warlord.id == object_id)
+        self.user: User = self.object.user
+
+    def get_items(self, page) -> list[Warlord]:
+        return (self.object
+                .select()
+                .where(Warlord.end_date >= datetime.now())
+                .order_by(Warlord.date.desc())
+                .paginate(page, c.STANDARD_LIST_SIZE))
+
+    def get_total_items_count(self) -> int:
+        return (self.object
+                .select()
+                .where(Warlord.end_date >= datetime.now())
+                .order_by(Warlord.date.desc())
+                .count())
+
+    def get_item_text(self) -> str:
+        return phrases.WARLORD_LOG_ITEM_TEXT.format(mention_markdown_v2(self.user.tg_user_id,
+                                                                        self.object.epithet))
+
+    def get_item_detail_text(self) -> str:
+        return phrases.WARLORD_LOG_ITEM_DETAIL_TEXT.format(self.user.get_markdown_mention(),
+                                                           self.object.epithet,
+                                                           self.object.reason)
+
+
 LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),
-        LeaderboardRankLog(), IncomeTaxEventLog()]
+        LeaderboardRankLog(), IncomeTaxEventLog(), WarlordLog()]
 
 
 def get_log_by_type(log_type: LogType) -> Log:
