@@ -23,7 +23,8 @@ from src.service.date_service import default_date_format
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
-from src.service.message_service import mention_markdown_v2, full_message_send, get_message_url
+from src.service.message_service import mention_markdown_v2, full_message_send, get_message_url, \
+    escape_valid_markdown_chars
 
 
 def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message_id: int = None) -> str:
@@ -36,31 +37,41 @@ def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message
 
     from src.service.bounty_service import get_next_bounty_reset_time
     from src.service.date_service import get_remaining_duration
+    from src.model.enums.LogType import LogType
+    from src.model.enums.Log import Log
 
     content_text = ""
+    warlords_text = ""
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
         leaderboard_user: LeaderboardUser = leaderboard_user
         user: User = leaderboard_user.user
 
-        # Special rank, don't show in leaderboard
-        if LeaderboardRankIndex(leaderboard_user.rank_index).is_special():
-            continue
-
-        content_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
-                                                       get_leaderboard_rank_message(leaderboard_user.rank_index),
-                                                       mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                       user.get_bounty_formatted())
+        # Warlords
+        if LeaderboardRankIndex(leaderboard_user.rank_index) is LeaderboardRankIndex.WARLORD:
+            warlord: Warlord = Warlord.get_latest_active_by_user(user)
+            warlords_text += phrases.LEADERBOARD_WARLORD_ROW.format(
+                escape_valid_markdown_chars(warlord.epithet), Log.get_deeplink_by_type(LogType.WARLORD, warlord.id))
+        else:
+            content_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
+                                                           get_leaderboard_rank_message(leaderboard_user.rank_index),
+                                                           mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                                                           user.get_bounty_formatted())
 
     next_bounty_reset_time = get_next_bounty_reset_time()
+
     local_global_text = phrases.LEADERBOARD_GLOBAL if leaderboard.group is None else phrases.LEADERBOARD_LOCAL
     if global_leaderboard_message_id is not None:
         view_global_leaderboard_text = phrases.LEADERBOARD_VIEW_GLOBAL_LEADERBOARD.format(
             get_message_url(message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHANNEL_ID.get()))
     else:
         view_global_leaderboard_text = ""
+
+    if warlords_text != "":
+        warlords_text = phrases.LEADERBOARD_WARLORDS + warlords_text
+
     return phrases.LEADERBOARD.format(local_global_text, leaderboard.week, leaderboard.year,
-                                      leaderboard.leaderboard_users.count(), content_text, view_global_leaderboard_text,
-                                      default_date_format(next_bounty_reset_time),
+                                      leaderboard.leaderboard_users.count(), content_text, warlords_text,
+                                      view_global_leaderboard_text, default_date_format(next_bounty_reset_time),
                                       get_remaining_duration(next_bounty_reset_time))
 
 

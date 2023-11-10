@@ -35,8 +35,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     if await validate(update, context, log, user):
         # For deep linking
         if Screen.PVT_LOGS_TYPE not in inbound_keyboard.previous_screen_list:
-            # From deep linking, go back to stats
-            inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS_TYPE_STATS)
+            # From deep linking, go back to type
+            inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS_TYPE)
 
         log.user = user
         log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))

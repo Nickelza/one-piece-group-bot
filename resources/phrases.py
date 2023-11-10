@@ -69,11 +69,14 @@ BOUNTY_RESET = 'Bounties have been reset'
 LEADERBOARD = '*{}* Leaderboard for week *{}* of *{}*\n\nHere are the top {} users with the most bounties:' \
               '{}' \
               '{}' \
+              '{}' \
               '\n\n_Next bounty reset on {} \\(in {}\\)_'
 LEADERBOARD_ROW = '\n\n{}°: {}\n{} - ฿*{}*'
 LEADERBOARD_LOCAL = 'Local'
 LEADERBOARD_GLOBAL = 'Global'
 LEADERBOARD_VIEW_GLOBAL_LEADERBOARD = '\n\n\n' + Emoji.GLOBE + '[Global Leaderboard]({})'
+LEADERBOARD_WARLORDS = '\n\n\n' + Emoji.LEADERBOARD_WARLORD + ' *Warlords*'
+LEADERBOARD_WARLORD_ROW = '\n• [{}]({})'
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = 'This command can only be used in a reply to a media message'
 SAVED_MEDIA_UNKNOWN_TYPE = 'Unknown media type. Available types are: *{}*'
