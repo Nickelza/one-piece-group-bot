@@ -14,7 +14,9 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.Warlord import Warlord
 from src.model.enums import Location
+from src.model.enums.BossType import BossType
 from src.model.enums.Emoji import Emoji
+from src.model.enums.LeaderboardRank import LeaderboardRank
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
@@ -28,7 +30,7 @@ from src.service.income_tax_service import user_has_complete_tax_deduction
 from src.service.leaderboard_service import get_current_leaderboard_user, get_highest_active_rank
 from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
     get_start_with_command_url, escape_valid_markdown_chars, message_is_reply
-from src.service.user_service import user_is_boss
+from src.service.user_service import user_is_boss, get_boss_type
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, original_user: User,
@@ -241,10 +243,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
-    if (not in_reply_to_message
-            and (user_is_boss(target_user, group_chat=group_chat) or target_user.bounty_poster_limit > 0)
-            and not target_user.is_arrested()):
-        await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
+
+    if should_send_poster(target_user, group_chat, own_status):
+        await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id, target_user_rank)
 
         # Reduce bounty poster limit by 1 if it is not None
         if not user_is_boss(target_user, group_chat=group_chat):
@@ -259,7 +260,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 
 
 async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update, user: User, caption: str = None,
-                             reply_to_message_id: int = None, send_in_private_chat=False) -> None:
+                             reply_to_message_id: int = None, send_in_private_chat=False, rank: LeaderboardRank = None
+                             ) -> None:
     poster_path = await get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO)
     poster.media_id = open(poster_path, 'rb')
@@ -267,3 +269,28 @@ async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update,
     await full_media_send(context, saved_media=poster, update=update, caption=caption,
                           reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,
                           send_in_private_chat=send_in_private_chat)
+
+
+def should_send_poster(user: User, group_chat: GroupChat, is_own_status: bool) -> bool:
+    """
+    Returns True if the user should send a bounty poster
+    :param user: The user
+    :param group_chat: The group chat
+    :param is_own_status: True if the status is the user's own status
+    :return: True if the user should send a bounty poster
+    """
+
+    if not is_own_status:
+        return False
+
+    if user.is_arrested():
+        return False
+
+    boss_type = get_boss_type(user, group_chat=group_chat)
+    if boss_type in (BossType.ADMIN, BossType.PIRATE_KING, BossType.LEGENDARY_PIRATE):
+        return True
+
+    if user.bounty_poster_limit <= 0:
+        return False
+
+    return True

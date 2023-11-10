@@ -118,9 +118,9 @@ LEGENDARY_PIRATE = LeaderboardRank(LeaderboardRankIndex.LEGENDARY_PIRATE, 'Legen
                                    Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
 
 WARLORD = LeaderboardRank(LeaderboardRankIndex.WARLORD, 'Warlord', Emoji.LEADERBOARD_WARLORD, None, None,
-                          Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
-                          Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
-                          Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
+                          Env.BOUNTY_POSTER_LIMIT_WARLORD.get_int(),
+                          Env.FIGHT_MAX_WIN_PROBABILITY_EMPEROR.get_float(),
+                          Env.FIGHT_MIN_WIN_PROBABILITY_EMPEROR.get_float())
 
 LEADERBOARD_RANKS = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE, ADMIN, LEGENDARY_PIRATE, WARLORD]
 
