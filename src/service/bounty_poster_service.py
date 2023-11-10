@@ -1,20 +1,21 @@
 from telegram import Update
-from wantedposter.wantedposter import WantedPoster, VerticalAlignment, CaptureCondition
+from wantedposter.wantedposter import WantedPoster, VerticalAlignment, CaptureCondition, Effect, Stamp
 
 import constants as c
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, LeaderboardRankIndex
 from src.service.devil_fruit_service import user_has_eaten_devil_fruit
 from src.service.download_service import generate_temp_file_path
 
 
-async def get_bounty_poster(update: Update, user: User) -> str:
+async def get_bounty_poster(update: Update, user: User, rank: LeaderboardRank) -> str:
     """
     Gets the bounty poster of a user
     :param update: Telegram update
     :param user: The user to get the poster of
+    :param rank: The rank of the user
     :return: The path to the poster
     """
 
@@ -26,6 +27,8 @@ async def get_bounty_poster(update: Update, user: User) -> str:
                                  bounty=user.bounty)
 
     capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE
+    effects: list[Effect] = []
+    stamp: Stamp | None = None
 
     if user_has_eaten_devil_fruit(user):
         capture_condition = CaptureCondition.ONLY_ALIVE
@@ -33,8 +36,14 @@ async def get_bounty_poster(update: Update, user: User) -> str:
     if user_is_boss(user):
         capture_condition = CaptureCondition.ONLY_DEAD
 
+    # Warlord, add frost effect and warlord stamp
+    if rank.index == LeaderboardRankIndex.WARLORD:
+        effects.append(Effect.FROST)
+        stamp = Stamp.WARLORD
+
     return wanted_poster.generate(output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),
-                                  portrait_vertical_align=VerticalAlignment.TOP, capture_condition=capture_condition)
+                                  portrait_vertical_align=VerticalAlignment.TOP, capture_condition=capture_condition,
+                                  effects=effects, stamp=stamp)
 
 
 def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:

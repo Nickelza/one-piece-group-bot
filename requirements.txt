@@ -9,7 +9,7 @@ pymysql~=1.1.0
 pytz==2023.3
 cryptography==41.0.3
 requests==2.31.0
-one-piece-wanted-poster>=0.0.10
+one-piece-wanted-poster>=0.0.11
 geopy~=2.4.0
 timezonefinder~=6.2.0
 parsedatetime~=2.6

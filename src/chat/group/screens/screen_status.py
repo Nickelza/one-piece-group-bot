@@ -245,7 +245,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
 
     if should_send_poster(target_user, group_chat, own_status):
-        await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id, target_user_rank)
+        await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id,
+                                 rank=leaderboard_target_user_rank)
 
         # Reduce bounty poster limit by 1 if it is not None
         if not user_is_boss(target_user, group_chat=group_chat):
@@ -262,7 +263,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
 async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update, user: User, caption: str = None,
                              reply_to_message_id: int = None, send_in_private_chat=False, rank: LeaderboardRank = None
                              ) -> None:
-    poster_path = await get_bounty_poster(update, user)
+    poster_path = await get_bounty_poster(update, user, rank)
     poster: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO)
     poster.media_id = open(poster_path, 'rb')
 
