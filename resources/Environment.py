@@ -142,10 +142,10 @@ UPDATES_CHANNEL_ID = Environment('UPDATES_CHANNEL_ID')
 TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
 
 # ANTI SPAM
-# How many messages can be sent in private chat before spam is detected. Default: 10
-ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT', default_value='10')
-# How many messages can be sent in group chat before spam is detected. Default: 15
-ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT', default_value='15')
+# How many messages can be sent in private chat before spam is detected. Default: 30
+ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT', default_value='30')
+# How many messages can be sent in group chat before spam is detected. Default: 20
+ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT = Environment('ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT', default_value='20')
 # Time interval in seconds to check for spam. Default: 60
 ANTI_SPAM_TIME_INTERVAL_SECONDS = Environment('ANTI_SPAM_TIME_INTERVAL_SECONDS', default_value='60')
 
