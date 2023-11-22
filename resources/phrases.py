@@ -811,6 +811,7 @@ NOTIFICATION_CATEGORY_IMPEL_DOWN = 'Impel Down'
 NOTIFICATION_CATEGORY_LOCATION = 'Location'
 NOTIFICATION_CATEGORY_PREDICTION = 'Prediction'
 NOTIFICATION_CATEGORY_DEVIL_FRUIT = 'Devil Fruit'
+NOTIFICATION_CATEGORY_WARLORD = 'Warlord'
 
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
@@ -957,6 +958,28 @@ BOUNTY_LOAN_EXPIRED_NOTIFICATION = 'Your loan of ฿{} from {} has expired.' \
                                    + BOUNTY_LOAN_EXPIRED_ACTION_BORROWER
 BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION = 'If to be notified when your loan expires'
 BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY = 'Bounty loan expired'
+# Notification - Warlord appointment
+WARLORD_APPOINTMENT_NOTIFICATION = \
+    'Congratulations, you have been appointed as a Warlord!' \
+    '\n\n*Epithet*: {}' \
+    '\n*Duration*: {}' \
+    '\n*Reason*: {}' \
+    '\n\n*Privileges*' \
+    f'\n• {Env.PIRATE_KING_TRANSACTION_TAX_DISCOUNT.get_int()}% off tax on gifts and loans' \
+    '\n• Immunity from Crew disbandment \\(if Captain\\) and Devil Fruit revocation for not ' \
+    f'appearing in the latest {Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards' \
+    '\n• View inferior ranks status \\(Emperor and below\\)' \
+    f'\n• Custom Bounty Poster {Env.BOUNTY_POSTER_LIMIT_WARLORD.get_int()} times a day' \
+    f'\n• View New World users in logs' \
+    f'\n\n_You will appear in the weekly leaderboard exclusively with Warlord rank' \
+    f' \\(only for the global leaderboard\\)_'
+WARLORD_APPOINTMENT_NOTIFICATION_DESCRIPTION = 'If to be notified when you are appointed as a Warlord'
+WARLORD_APPOINTMENT_NOTIFICATION_KEY = 'Warlord appointment'
+# Notification - Warlord revocation
+WARLORD_REVOCATION_NOTIFICATION = 'Your Warlord status has been revoked' \
+                                  '\n\n*Reason*: {}'
+WARLORD_REVOCATION_NOTIFICATION_DESCRIPTION = 'If to be notified when your Warlord status is revoked'
+WARLORD_REVOCATION_NOTIFICATION_KEY = 'Warlord revocation'
 
 # List
 LIST_OVERVIEW = 'Select' + ' {} *{}* from the list below\n{}'  # In the chunk to avoid IDE recognizing it as SQL

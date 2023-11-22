@@ -94,6 +94,15 @@ def convert_seconds_to_duration(seconds: int) -> str:
     return result
 
 
+def convert_days_to_duration(days: int) -> str:
+    """
+    Converts days to days, hours, minutes, seconds
+    :param days: Days to convert
+    :return: Days, hours e.g. 1 day 2 hours 5 minutes
+    """
+    return convert_seconds_to_duration(days * 86400)
+
+
 def cron_datetime_difference(cron_expression: str, start_datetime: datetime = None) -> str:
     """
     Get the difference between the next run time and the current datetime

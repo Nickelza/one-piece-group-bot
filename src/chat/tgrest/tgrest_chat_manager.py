@@ -5,7 +5,8 @@ from telegram.ext import ContextTypes
 
 from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.tgrest.screens.screen_send_private_message import manage as manage_screen_send_private_message
-from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced, DevilFruitAwardedNotification
+from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced, DevilFruitAwardedNotification, \
+    WarlordAppointmentNotification, WarlordRevocationNotification
 from src.model.enums.Notification import ImpelDownNotificationRestrictionRemoved
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.error.CustomException import DevilFruitValidationException
@@ -15,6 +16,8 @@ from src.model.tgrest.TgRestImpelDownNotification import TgRestImpelDownNotifica
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
 from src.model.tgrest.TgRestPrediction import TgRestPrediction
 from src.model.tgrest.TgRestPrivateMessage import TgRestPrivateMessage
+from src.model.tgrest.TgRestWarlordAppointment import TgRestWarlordAppointment
+from src.model.tgrest.TgRestWarlordRevocation import TgRestWarlordRevocation
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.notification_service import send_notification
@@ -84,6 +87,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 # Send notification
                 notification = DevilFruitAwardedNotification(tg_rest_dfa.devil_fruit, tg_rest_dfa.reason)
                 await send_notification(context, tg_rest_dfa.user, notification)
+
+            case TgRestObjectType.WARLORD_APPOINTMENT:
+                tg_rest_wa = TgRestWarlordAppointment(**tg_rest_dict)
+
+                # Send notification
+                notification = WarlordAppointmentNotification(tg_rest_wa.warlord, tg_rest_wa.days)
+                await send_notification(context, tg_rest_wa.user, notification)
+
+            case TgRestObjectType.WARLORD_REVOCATION:
+                tg_rest_wr = TgRestWarlordRevocation(**tg_rest_dict)
+
+                # Send notification
+                notification = WarlordRevocationNotification(tg_rest_wr.warlord)
+                await send_notification(context, tg_rest_wr.user, notification)
 
             case _:
                 raise TgRestException("Unknown object type")

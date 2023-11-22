@@ -11,6 +11,7 @@ from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
+from src.model.Warlord import Warlord
 from src.model.enums.Emoji import Emoji
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -18,7 +19,7 @@ from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyActi
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import default_datetime_format
+from src.service.date_service import default_datetime_format, convert_days_to_duration
 from src.service.date_service import get_remaining_duration
 from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
     get_message_url
@@ -36,6 +37,7 @@ class NotificationCategory(IntEnum):
     BOUNTY_GIFT = 7
     DEVIL_FRUIT = 8
     BOUNTY_LOAN = 9
+    WARLORD = 10
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -47,7 +49,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.DELETED_MESSAGE: phrases.NOTIFICATION_CATEGORY_DELETED_MESSAGE,
     NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT,
     NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT,
-    NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN
+    NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN,
+    NotificationCategory.WARLORD: phrases.NOTIFICATION_CATEGORY_WARLORD
 }
 
 
@@ -75,6 +78,8 @@ class NotificationType(IntEnum):
     BOUNTY_LOAN_PAYMENT = 19
     BOUNTY_LOAN_FORGIVEN = 20
     BOUNTY_LOAN_EXPIRED = 21
+    WARLORD_APPOINTMENT = 22
+    WARLORD_REVOCATION = 23
 
 
 class Notification:
@@ -720,6 +725,51 @@ class BountyLoanExpiredNotification(Notification):
                                 loaner.get_markdown_mention())
 
 
+class WarlordAppointmentNotification(Notification):
+    """Class for warlord appointment notifications."""
+
+    def __init__(self, warlord: Warlord = None, days: int = None):
+        """
+        Constructor
+
+        :param warlord: The warlord
+        """
+
+        self.warlord = warlord
+        self.days = days
+
+        super().__init__(NotificationCategory.WARLORD, NotificationType.WARLORD_APPOINTMENT,
+                         phrases.WARLORD_APPOINTMENT_NOTIFICATION,
+                         phrases.WARLORD_APPOINTMENT_NOTIFICATION_DESCRIPTION,
+                         phrases.WARLORD_APPOINTMENT_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        return self.text.format(escape_valid_markdown_chars(self.warlord.epithet),
+                                convert_days_to_duration(self.days),
+                                escape_valid_markdown_chars(self.warlord.reason))
+
+
+class WarlordRevocationNotification(Notification):
+    """Class for warlord revocation notifications."""
+
+    def __init__(self, warlord: Warlord = None):
+        """
+        Constructor
+
+        :param warlord: The warlord
+        """
+
+        self.warlord = warlord
+
+        super().__init__(NotificationCategory.WARLORD, NotificationType.WARLORD_REVOCATION,
+                         phrases.WARLORD_REVOCATION_NOTIFICATION,
+                         phrases.WARLORD_REVOCATION_NOTIFICATION_DESCRIPTION,
+                         phrases.WARLORD_REVOCATION_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        return self.text.format(escape_valid_markdown_chars(self.warlord.revoke_reason))
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
@@ -727,7 +777,8 @@ NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisb
                  DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
                  BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification(),
                  DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification(), BountyLoanPaymentNotification(),
-                 BountyLoanForgivenNotification(), BountyLoanExpiredNotification()]
+                 BountyLoanForgivenNotification(), BountyLoanExpiredNotification(), WarlordAppointmentNotification(),
+                 WarlordRevocationNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

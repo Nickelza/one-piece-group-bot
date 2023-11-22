@@ -16,6 +16,8 @@ class Warlord(BaseModel):
     reason = CharField(max_length=999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
     end_date = DateTimeField()
+    original_end_date = DateTimeField()  # In case it was ended early
+    revoke_reason = CharField(max_length=999, null=True)
 
     class Meta:
         db_table = 'warlord'
@@ -56,7 +58,7 @@ class Warlord(BaseModel):
     @staticmethod
     def get_latest_active_by_user(user: User) -> 'Warlord':
         """
-        Get latest active warlord by user
+        Get the latest active warlord by user
         :param user: The user
         :return: The warlord
         """
