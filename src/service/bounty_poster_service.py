@@ -5,21 +5,21 @@ import constants as c
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index, LeaderboardRankIndex
+from src.model.enums.BossType import BossType
+from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
 from src.service.devil_fruit_service import user_has_eaten_devil_fruit
 from src.service.download_service import generate_temp_file_path
 
 
-async def get_bounty_poster(update: Update, user: User, rank: LeaderboardRank) -> str:
+async def get_bounty_poster(update: Update, user: User) -> str:
     """
     Gets the bounty poster of a user
     :param update: Telegram update
     :param user: The user to get the poster of
-    :param rank: The rank of the user
     :return: The path to the poster
     """
 
-    from src.service.user_service import get_user_profile_photo, user_is_boss
+    from src.service.user_service import get_user_profile_photo, get_boss_type
 
     wanted_poster = WantedPoster(portrait=await get_user_profile_photo(update),
                                  first_name=user.tg_first_name,
@@ -33,13 +33,27 @@ async def get_bounty_poster(update: Update, user: User, rank: LeaderboardRank) -
     if user_has_eaten_devil_fruit(user):
         capture_condition = CaptureCondition.ONLY_ALIVE
 
-    if user_is_boss(user):
+    boss_type: BossType = get_boss_type(user)
+    if boss_type not in [None, BossType.WARLORD]:
         capture_condition = CaptureCondition.ONLY_DEAD
 
     # Warlord, add frost effect and warlord stamp
-    if rank.index == LeaderboardRankIndex.WARLORD:
-        effects.append(Effect.FROST)
-        stamp = Stamp.WARLORD
+    match boss_type:
+        # Warlord, add frost effect and warlord stamp
+        case BossType.WARLORD:  # Frost effect and warlord stamp
+            effects.append(Effect.FROST)
+            stamp = Stamp.WARLORD
+
+        # Admin, Pirate King or Legendary Pirate, add lightning effect
+        case BossType.ADMIN | BossType.PIRATE_KING | BossType.LEGENDARY_PIRATE:
+            effects.append(Effect.LIGHTNING)
+
+            # Admin, add "Flee on sight" stamp
+            if boss_type is BossType.ADMIN:
+                stamp = Stamp.FLEE_ON_SIGHT
+            # Pirate King and Legendary Pirate, add "Do not engage" stamp
+            else:
+                stamp = Stamp.DO_NOT_ENGAGE
 
     return wanted_poster.generate(output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),
                                   portrait_vertical_align=VerticalAlignment.TOP, capture_condition=capture_condition,
