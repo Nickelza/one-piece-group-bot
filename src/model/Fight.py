@@ -61,10 +61,10 @@ class Fight(BaseModel):
         return: The total amount of belly
         """
 
-        return (Fight.select(fn.SUM(Fight.belly)).where((Fight.challenger == user)
-                                                        & (Fight.status == status))
+        return ((Fight.select(fn.SUM(Fight.belly)).where((Fight.challenger == user)
+                                                         & (Fight.status == status))).scalar()
                 + (Fight.select(fn.SUM(Fight.belly)).where((Fight.opponent == user)
-                                                           & (Fight.status == status.get_opposite_status())))).scalar()
+                                                           & (Fight.status == status.get_opposite_status()))).scalar())
 
     @staticmethod
     def get_max_won_or_lost(user: User, status: GameStatus) -> 'Fight':

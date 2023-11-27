@@ -89,10 +89,10 @@ class Game(BaseModel):
         return: The total amount of belly
         """
 
-        return (Game.select(fn.SUM(Game.wager)).where((Game.challenger == user)
-                                                      & (Game.status == status))
+        return ((Game.select(fn.SUM(Game.wager)).where((Game.challenger == user)
+                                                       & (Game.status == status))).scalar()
                 + (Game.select(fn.SUM(Game.wager)).where((Game.opponent == user)
-                                                         & (Game.status == status.get_opposite_status())))).scalar()
+                                                         & (Game.status == status.get_opposite_status()))).scalar())
 
     @staticmethod
     def get_max_won_or_lost(user: User, status: GameStatus) -> 'Game':
