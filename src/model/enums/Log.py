@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from datetime import datetime
+from typing import Any
 
 import constants as c
 import resources.phrases as phrases
@@ -168,6 +169,15 @@ class Log(ListPage):
         """
 
         return LOG_TYPE_DETAIL_TEXT_FILL_IN[self.type]
+
+    def get_is_admin_condition_stmt(self) -> Any:
+        """
+        Get the is admin condition statement for the log
+
+        :return: The is admin condition statement
+        """
+
+        return True if self.user.is_admin else (User.is_admin == False)
 
 
 class FightLog(Log):
@@ -570,7 +580,8 @@ class NewWorldPirateLog(Log):
         return (self.object
                 .select()
                 .where((User.location_level >= get_first_new_world().level)
-                       & (User.get_is_not_arrested_statement_condition()))
+                       & (User.get_is_not_arrested_statement_condition())
+                       & (self.get_is_admin_condition_stmt()))
                 .order_by(User.bounty.desc())
                 .paginate(page, c.STANDARD_LIST_SIZE))
 
@@ -578,7 +589,8 @@ class NewWorldPirateLog(Log):
         return (self.object
                 .select()
                 .where((User.location_level >= get_first_new_world().level)
-                       & (User.get_is_not_arrested_statement_condition()))
+                       & (User.get_is_not_arrested_statement_condition())
+                       & (self.get_is_admin_condition_stmt()))
                 .count())
 
     def get_item_text(self) -> str:
