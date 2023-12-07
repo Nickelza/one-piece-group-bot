@@ -336,9 +336,9 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, d
     buyer.save()
 
     # Add the belly to the seller
-    devil_fruit_trade.giver.save()
     await add_or_remove_bounty(devil_fruit_trade.giver, amount, update=update,
-                               tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL, event_id=devil_fruit_trade.id)
+                               tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL, event_id=devil_fruit_trade.id,
+                               should_save=True)
 
     list_page: DevilFruitListPage = DevilFruitListPage()
     list_page.object = devil_fruit
