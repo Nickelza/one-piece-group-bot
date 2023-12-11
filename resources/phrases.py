@@ -835,6 +835,13 @@ CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = \
     f'{Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive leaderboards.' \
     f'\nApplicable only if you are the Captain of the Crew.'
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = 'Crew disband warning'
+# Notification - Crew ability activated
+CREW_ABILITY_ACTIVATED_NOTIFICATION = 'The following ability has been activated in your Crew:' \
+                                      '\n\n*Ability*: {} \\({}%\\)' \
+                                      '\n*Duration*: {}'
+CREW_ABILITY_ACTIVATED_NOTIFICATION_DESCRIPTION = 'If to be notified when an ability is activated in your Crew.'
+CREW_ABILITY_ACTIVATED_NOTIFICATION_KEY = 'Crew ability activated'
+
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \
                          f'\n\n[{Emoji.RIGHT_ARROW}Click here to view the game{Emoji.LEFT_ARROW}]' + '({})'

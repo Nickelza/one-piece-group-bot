@@ -5,6 +5,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
 from src.model.BountyLoan import BountyLoan
+from src.model.CrewAbility import CrewAbility
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
 from src.model.Prediction import Prediction
@@ -80,6 +81,7 @@ class NotificationType(IntEnum):
     BOUNTY_LOAN_EXPIRED = 21
     WARLORD_APPOINTMENT = 22
     WARLORD_REVOCATION = 23
+    CREW_ABILITY_ACTIVATED = 24
 
 
 class Notification:
@@ -770,6 +772,30 @@ class WarlordRevocationNotification(Notification):
         return self.text.format(escape_valid_markdown_chars(self.warlord.revoke_reason))
 
 
+class CrewAbilityActivatedNotification(Notification):
+    """Class for crew ability activated notifications."""
+
+    def __init__(self, crew_ability: CrewAbility = None):
+        """
+        Constructor
+
+        :param crew_ability: The crew ability
+        """
+
+        self.crew_ability = crew_ability
+
+        super().__init__(NotificationCategory.CREW, NotificationType.CREW_ABILITY_ACTIVATED,
+                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION,
+                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_DESCRIPTION,
+                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_KEY)
+
+    def build(self) -> str:
+        return self.text.format(
+            escape_valid_markdown_chars(self.crew_ability.get_description()),
+            self.crew_ability.get_value_with_sign(),
+            get_remaining_duration(self.crew_ability.expiration_date, self.crew_ability.acquired_date))
+
+
 NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
                  CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
                  ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
@@ -778,7 +804,7 @@ NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisb
                  BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification(),
                  DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification(), BountyLoanPaymentNotification(),
                  BountyLoanForgivenNotification(), BountyLoanExpiredNotification(), WarlordAppointmentNotification(),
-                 WarlordRevocationNotification()]
+                 WarlordRevocationNotification(), CrewAbilityActivatedNotification()]
 
 
 def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:

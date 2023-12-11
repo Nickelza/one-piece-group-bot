@@ -13,7 +13,7 @@ from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import CrewDisbandNotification, CrewDisbandWarningNotification, \
-    CrewLeaveNotification, CrewMemberRemoveNotification, Notification
+    CrewLeaveNotification, CrewMemberRemoveNotification, Notification, CrewAbilityActivatedNotification
 from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewRole import CrewRole
@@ -278,8 +278,8 @@ def get_crew_abilities_text(crew: Crew = None, active_abilities: list[CrewAbilit
     return abilities_text
 
 
-def notify_crew_members(context: ContextTypes.DEFAULT_TYPE, crew: Crew, notification: Notification,
-                        exclude_user: User = None) -> None:
+async def notify_crew_members(context: ContextTypes.DEFAULT_TYPE, crew: Crew, notification: Notification,
+                              exclude_user: User = None) -> None:
     """
     Notifies crew members
 
@@ -292,7 +292,7 @@ def notify_crew_members(context: ContextTypes.DEFAULT_TYPE, crew: Crew, notifica
 
     for member in crew.get_members():
         if member.id != exclude_user.id:
-            send_notification(context, member, notification)
+            await send_notification(context, member, notification)
 
 
 async def add_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew: Crew, ability_type: DevilFruitAbilityType,
@@ -309,17 +309,19 @@ async def add_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew: Crew, abili
     :return: The crew ability
     """
 
+    now = datetime.now()
     ability: CrewAbility = CrewAbility()
     ability.crew = crew
     ability.ability_type = ability_type
     ability.value = ability_value
     ability.acquired_method = acquired_method
     ability.acquired_user = acquired_user
-    ability.expiration_date = get_datetime_in_future_days(Env.CREW_ABILITY_DURATION_DAYS.get_int())
+    ability.acquired_date = now
+    ability.expiration_date = get_datetime_in_future_days(Env.CREW_ABILITY_DURATION_DAYS.get_int(), start_time=now)
     ability.save()
 
     # Notify crew members
-    # TODO build notification
+    await notify_crew_members(context, crew, CrewAbilityActivatedNotification(ability), exclude_user=acquired_user)
 
 
 async def remove_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew_ability: CrewAbility) -> None:

@@ -118,10 +118,11 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
     return convert_seconds_to_duration((next_run - start_datetime).total_seconds())
 
 
-def get_remaining_duration(end_datetime: datetime) -> str:
+def get_remaining_duration(end_datetime: datetime, start_datetime: datetime.datetime = datetime.datetime.now()) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
+    :param start_datetime: The start datetime. If None, the current datetime is used
     :return: The remaining time in days and hours e.g. 1 day 2h hours
     """
     if end_datetime is None:
@@ -129,7 +130,7 @@ def get_remaining_duration(end_datetime: datetime) -> str:
 
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
-    return convert_seconds_to_duration((end_datetime - datetime.datetime.now()).total_seconds())
+    return convert_seconds_to_duration((end_datetime - start_datetime).total_seconds())
 
 
 def get_elapsed_duration(start_datetime: datetime) -> str:
@@ -204,24 +205,26 @@ def get_datetime_in_future_seconds(seconds: int, start_time: datetime.datetime =
     return start_time + datetime.timedelta(seconds=int(seconds))
 
 
-def get_datetime_in_future_hours(hours: float) -> datetime:
+def get_datetime_in_future_hours(hours: float, start_time: datetime.datetime = None) -> datetime:
     """
     Get the datetime in the future
     :param hours: The number of hours in the future
+    :param start_time: The start time. If None, the current datetime is used
     :return: The datetime in the future
     """
 
-    return get_datetime_in_future_seconds(int(hours * 3600))
+    return get_datetime_in_future_seconds(int(hours * 3600), start_time)
 
 
-def get_datetime_in_future_days(days: int) -> datetime:
+def get_datetime_in_future_days(days: int, start_time: datetime.datetime = None) -> datetime:
     """
     Get the datetime in the future
     :param days: The number of days in the future
+    :param start_time: The start time. If None, the current datetime is used
     :return: The datetime in the future
     """
 
-    return get_datetime_in_future_hours(days * 24)
+    return get_datetime_in_future_hours(days * 24, start_time)
 
 
 def get_random_time_between(start_datetime: datetime, end_datetime: datetime) -> datetime:
