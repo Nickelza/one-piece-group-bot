@@ -25,6 +25,7 @@ COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = 'This command is only available for use
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW = '\n\n_Join a Crew to quickly level up your location!_'
 COMMAND_WHILE_ARRESTED_ERROR = 'This command is not available while you are arrested'
 COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR = 'This command is only available to Crew Captains'
+COMMAND_ONLY_BY_CREW_CAPTAIN_OR_FIRST_MATE_ERROR = 'This command is only available to Crew Captains and First Mates'
 COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR = 'This command can only be used in reply to a message from a Crew Member'
 COMMAND_ONLY_BY_BOSS_ERROR = 'This command can only be used by an Admin, the Pirate King or a Legendary Pirate'
 COMMAND_IN_REPLY_TO_ARRESTED_ERROR = "This command can't be used in reply to a message from an arrested user"
@@ -207,6 +208,8 @@ PVT_KEY_CREW_LEAVE = 'Leave'
 PVT_KEY_CREW_EDIT_NAME = 'Edit name'
 PVT_KEY_CREW_DISBAND = 'Disband'
 PVT_KEY_CREW_MEMBER_REMOVE = 'Expel'
+PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = 'Promote to First Mate'
+PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = 'Demote from First Mate'
 PVT_KEY_CREW_ABILITY = 'Abilities'
 PVT_KEY_CREW_ABILITY_ACTIVATE = 'Activate'
 PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + ' Random'
@@ -607,12 +610,15 @@ CREW_USER_NOT_IN_CREW = f'You are not in a Crew. Head over a Chat Group to the t
                         f'\n\nIf you create a Crew, you must appear at least once every ' \
                         f'{CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX} or else your Crew will be disbanded.'
 CREW_OVERVIEW = '*{}*' \
-                '\n\n*Formation date*: {} \\({}\\)' \
+                '\n\n*Captain*: {}' \
+                '{}' \
+                '\n*Formation date*: {} \\({}\\)' \
                 '\n*Members*: {} \\(Max. {}\\)' \
                 '\n\n*Treasure Chest*: ฿{}' \
                 '\n\n*Abilities*' \
                 '{}' \
                 '{}'
+CREW_OVERVIEW_FIRST_MATE = '\n*First Mate*: {}'
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = '\n\n_No new members allowed until the next weekly leaderboard in {}_'
 CREW_MEMBER_ITEM_TEXT = '{}'
 CREW_MEMBER_ITEM_ROLE = ' \\({}\\)'
@@ -633,13 +639,16 @@ CREW_CREATE_NAME_TOO_LONG = f'Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH
 CREW_CREATE_SUCCESS = 'You are now Captain of the *{}*.' + \
                       f'\n\nHead over to a Chat Group to start recruiting members!'
 CREW_NAME_EDIT_SUCCESS = 'Crew name updated successfully'
+CREW_ROLE_CAPTAIN = 'Captain'
+CREW_ROLE_FIRST_MATE = 'First Mate'
 
 # Crew - Join request
 CREW_JOIN_REQUEST_CREW_FULL = 'The Crew is full'
 CREW_NOT_FOUND = 'Crew not found'
 CREW_JOIN_REQUEST_CAPTION = 'My name is {}!!! I do not know who you are, but I ask you!!' \
                             '\nLet me ride on your ship!!' \
-                            '\n\n_Only the [Captain](tg://user?id={}) can accept or reject this request_'
+                            '\n\n_Only the [Captain]({}) or [First Mate]({}) can accept or reject this ' \
+                            'request_'
 CREW_JOIN_REQUEST_ACCEPTED = "{} is now a member of {}!"
 CREW_JOIN_REQUEST_REJECTED = "[Your](tg://user?id={}) request to join the *{}* has been rejected, but don't give up!!"
 CREW_JOIN_REQUEST_CREW_CANNOT_ACCEPT_USER = 'The User cannot join this Crew'
@@ -678,12 +687,30 @@ CREW_REMOVE_MEMBER_CONFIRMATION = 'Are you sure you want to expel {} from the Cr
                                   '\nYou will not be able accept new members until the next weekly leaderboard in {}'
 CREW_REMOVE_MEMBER_SUCCESS = '{} has been expelled from the Crew'
 
+# Crew - Promote to First Mate
+CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE = 'The Crew already has a First Mate'
+CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD = 'You cannot promote a member to First Mate until ' \
+                                                                   'the next weekly leaderboard in {}'
+CREW_FIRST_MATE_PRIVILEGES = '\n• Accept new members' \
+                             '\n• Activate Crew Abilities'
+CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION = 'Are you sure you want to promote {} to First Mate?' \
+                                          '\nThey will gain the following privileges:' \
+                                          + CREW_FIRST_MATE_PRIVILEGES
+CREW_PROMOTE_TO_FIRST_MATE_SUCCESS = '{} has been promoted to First Mate'
+
+# Crew - Demote from First Mate
+CREW_DEMOTE_FROM_FIRST_MATE_IS_NOT_FIRST_MATE = '{} is not a First Mate'
+CREW_DEMOTE_FROM_FIRST_MATE_CONFIRMATION = 'Are you sure you want to demote {} from First Mate?' \
+                                           '\nYou will not be able to promote another member to First Mate until ' \
+                                           'the next weekly leaderboard in {}'
+CREW_DEMOTE_FROM_FIRST_MATE_SUCCESS = '{} has been demoted from First Mate'
+
 # Crew abilities
 CREW_ABILITIES = '*Crew Abilities*' \
                  '\n\nAbilities mimic the effects of Devil Fruits and are extended to all members of the Crew.' + \
                  f'\nEach ability doubles the price of the next one and lasts ' \
                  f'{Env.CREW_ABILITY_DURATION_DAYS.get_int()} days.' \
-                 f'\nOnly the Crew Captain can activate an ability.' + \
+                 f'\nOnly the Crew Captain or First Mate can activate an ability.' + \
                  '\n{}' \
                  '\n\nNext ability cost: ฿*{}*' \
                  '\nCrew chest: ฿{}'
@@ -816,7 +843,7 @@ NOTIFICATION_CATEGORY_WARLORD = 'Warlord'
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = '{} has left the Crew'
 CREW_LEAVE_NOTIFICATION_DESCRIPTION = 'If to be notified when a member leaves the Crew. ' \
-                                      '\nApplicable only if you are the Captain of the Crew.'
+                                      '\nApplicable only if you are the Captain or First Mate of the Crew.'
 CREW_LEAVE_NOTIFICATION_KEY = 'Crew leave'
 # Notification - Crew Member removed
 CREW_MEMBER_REMOVE_NOTIFICATION = 'You have been expelled from the Crew'
@@ -841,6 +868,18 @@ CREW_ABILITY_ACTIVATED_NOTIFICATION = 'The following ability has been activated 
                                       '\n*Duration*: {}'
 CREW_ABILITY_ACTIVATED_NOTIFICATION_DESCRIPTION = 'If to be notified when an ability is activated in your Crew.'
 CREW_ABILITY_ACTIVATED_NOTIFICATION_KEY = 'Crew ability activated'
+# Notification - Crew first mate promotion
+CREW_FIRST_MATE_PROMOTION_NOTIFICATION = 'Congratulations! You have been promoted to First Mate of the Crew.' \
+                                         '\n\nPrivileges:' \
+                                         + CREW_FIRST_MATE_PRIVILEGES
+CREW_FIRST_MATE_PROMOTION_NOTIFICATION_DESCRIPTION = 'If to be notified when you are promoted to First Mate of the ' \
+                                                     'Crew.'
+CREW_FIRST_MATE_PROMOTION_NOTIFICATION_KEY = 'First Mate promotion'
+# Notification - Crew first mate demotion
+CREW_FIRST_MATE_DEMOTION_NOTIFICATION = 'You have been demoted from First Mate of the Crew.'
+CREW_FIRST_MATE_DEMOTION_NOTIFICATION_DESCRIPTION = 'If to be notified when you are demoted from First Mate of the ' \
+                                                    'Crew.'
+CREW_FIRST_MATE_DEMOTION_NOTIFICATION_KEY = 'First Mate demotion'
 
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = "It's your turn to play in {} against {}." \

@@ -210,6 +210,25 @@ class User(BaseModel):
 
         return False
 
+    def is_crew_first_mate(self):
+        """
+        Returns True if the user is the first mate of a Crew
+        :return: True if the user is the first mate of a Crew
+        """
+
+        if self.is_crew_member() and self.crew_role is not None:
+            return CrewRole(self.crew_role) is CrewRole.FIRST_MATE
+
+        return False
+
+    def is_crew_captain_or_first_mate(self):
+        """
+        Returns True if the user is the captain or first mate of a Crew
+        :return: True if the user is the captain or first mate of a Crew
+        """
+
+        return self.is_crew_captain() or self.is_crew_first_mate()
+
     @staticmethod
     def get_by_tg_id(tg_user_id: str) -> 'User':
         """
@@ -570,6 +589,14 @@ class User(BaseModel):
         from src.model.Warlord import Warlord
 
         return self.warlords.where(Warlord.end_date > datetime.datetime.now()).count() > 0
+
+    def get_mention_url(self) -> str:
+        """
+        Returns the mention url of the user
+        :return: The mention url of the user
+        """
+
+        return f'tg://user?id={self.tg_user_id}'
 
 
 User.create_table()

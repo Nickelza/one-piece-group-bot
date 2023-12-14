@@ -104,17 +104,18 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user:
 
     validate(user, crew, specific_user_error=True)
 
-    # Get captain
+    # Get captain and first mate
     captain: User = crew.get_captain()
+    first_mate: User = crew.get_first_mate()
 
-    caption = phrases.CREW_JOIN_REQUEST_CAPTION.format(mention_markdown_user(user), captain.tg_user_id)
+    caption = phrases.CREW_JOIN_REQUEST_CAPTION.format(mention_markdown_user(user), captain.get_mention_url(),
+                                                       (first_mate.get_mention_url() if first_mate is not None else ""))
 
     # Keyboard
     extra_keys = {CrewReservedKeys.REQUESTING_USER_ID: user.id}
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(captain, screen=Screen.GRP_CREW_JOIN,
-                                                                 yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                 no_text=phrases.KEYBOARD_OPTION_REJECT,
-                                                                 primary_key=crew.id, extra_keys=extra_keys)]
+    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(
+        screen=Screen.GRP_CREW_JOIN, yes_text=phrases.KEYBOARD_OPTION_ACCEPT, no_text=phrases.KEYBOARD_OPTION_REJECT,
+        primary_key=crew.id, extra_keys=extra_keys, authorized_users=[captain, first_mate])]
 
     # Get SavedMedia
     await full_media_send(context, saved_media_name=SavedMediaName.CREW_JOIN, update=update, caption=caption,

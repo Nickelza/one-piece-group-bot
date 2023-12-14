@@ -24,7 +24,8 @@ class Command:
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
                  only_by_boss: bool = False, allow_reply_to_arrested: bool = False, answer_callback: bool = False,
                  show_alert: bool = True, only_by_chat_admin: bool = False, send_message_if_error: bool = True,
-                 feature: Feature = None, allow_deeplink: bool = False):
+                 feature: Feature = None, allow_deeplink: bool = False, only_by_crew_captain_or_first_mate: bool = False
+                 ):
         """
         Constructor
         :param name: The name of the command
@@ -52,6 +53,7 @@ class Command:
         :param feature: The feature the command belongs to. If provided, the command will only be allowed in chats
                         that have the feature enabled
         :param allow_deeplink: Allow accessing the command screen via deeplink
+        :param only_by_crew_captain_or_first_mate: True if the command can only be used by a Crew Captain or First Mate
         """
         self.name = name
         self.active = active
@@ -74,6 +76,7 @@ class Command:
         self.send_message_if_error = send_message_if_error
         self.feature = feature
         self.allow_deeplink = allow_deeplink
+        self.only_by_crew_captain_or_first_mate = only_by_crew_captain_or_first_mate
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True
@@ -160,6 +163,13 @@ PVT_PREDICTION_CREATE = Command('', Screen.PVT_PREDICTION_CREATE, required_locat
     Env.REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE.get_int()))
 COMMANDS.append(PVT_PREDICTION_CREATE)
 
+# To set limitations
+PVT_CREW_ABILITY_ACTIVATE = Command('', Screen.PVT_CREW_ABILITY_ACTIVATE, only_by_crew_captain_or_first_mate=True)
+COMMANDS.append(PVT_CREW_ABILITY_ACTIVATE)
+PVT_CREW_ABILITY_ACTIVATE_CONFIRM = Command('', Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM,
+                                            only_by_crew_captain_or_first_mate=True)
+COMMANDS.append(PVT_CREW_ABILITY_ACTIVATE_CONFIRM)
+
 GRP_GAME_OPPONENT_CONFIRMATION = Command(
     '', Screen.GRP_GAME_OPPONENT_CONFIRMATION, answer_callback=True,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()))
@@ -204,7 +214,8 @@ COMMANDS.append(GRP_PREDICTION_BET_STATUS)
 GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True, feature=Feature.CREW)
 COMMANDS.append(GRP_CREW_JOIN)
 
-GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True, feature=Feature.CREW)
+GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True, feature=Feature.CREW,
+                          only_by_crew_captain_or_first_mate=True)
 COMMANDS.append(GRP_CREW_INVITE)
 
 GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True, feature=Feature.SILENCE)

@@ -19,7 +19,7 @@ from src.model.enums.LeaderboardRank import LeaderboardRankIndex
 from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
-from src.service.date_service import default_date_format
+from src.service.date_service import default_date_format, get_remaining_time_from_next_cron
 from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
     warn_inactive_users_with_eaten_devil_fruit
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
@@ -92,8 +92,8 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Reset can join crew flag
     User.update(can_join_crew=True).execute()
 
-    # Rest crew can accept new members flag
-    Crew.update(can_accept_new_members=True).execute()
+    # Reset crew can accept new members and promote First Mate flag
+    Crew.update(can_accept_new_members=True, can_promote_first_mate=True).execute()
 
     # Reset bounty if last leaderboard of the month
     if should_reset_bounty(datetime.datetime.now(datetime.timezone.utc)):
@@ -410,3 +410,12 @@ def get_highest_active_rank(user: User, group_chat: GroupChat) -> LeaderboardRan
         return leaderboard_rank
 
     return special_rank
+
+
+def get_remaining_time_to_next_leaderboard() -> str:
+    """
+    Gets the remaining time to the next leaderboard description
+    :return: The remaining time to the next leaderboard description
+    """
+
+    return get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())

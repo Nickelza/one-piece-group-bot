@@ -41,8 +41,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             no_new_members_allowed_text = phrases.CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED.format(
                 get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))
 
+        first_mate: User = crew.get_first_mate()
+        first_mate_text = ""
+        if first_mate is not None:
+            first_mate_text = phrases.CREW_OVERVIEW_FIRST_MATE.format(first_mate.get_markdown_mention())
+
+        captain: User = crew.get_captain()
         ot_text = phrases.CREW_OVERVIEW.format(
             escape_valid_markdown_chars(crew.name),
+            captain.get_markdown_mention(),
+            first_mate_text,
             user.get_date_formatted(crew.creation_date),
             get_elapsed_duration(crew.creation_date),
             len(crew.get_members()),

@@ -80,6 +80,11 @@ async def remove_member(crew_member, context: ContextTypes.DEFAULT_TYPE = None,
     if send_notification_to_captain:
         await send_notification(context, crew.get_captain(), CrewLeaveNotification(crew_member))
 
+        # Send notification to first mate
+        first_mate = crew.get_first_mate()
+        if first_mate is not None:
+            await send_notification(context, first_mate, CrewLeaveNotification(crew_member))
+
     # User was removed
     if send_notification_to_member:
         await send_notification(context, crew_member, CrewMemberRemoveNotification(crew_member))
@@ -322,22 +327,6 @@ async def add_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew: Crew, abili
 
     # Notify crew members
     await notify_crew_members(context, crew, CrewAbilityActivatedNotification(ability), exclude_user=acquired_user)
-
-
-async def remove_crew_ability(context: ContextTypes.DEFAULT_TYPE, crew_ability: CrewAbility) -> None:
-    """
-    Removes a crew ability
-
-    :param context: The context
-    :param crew_ability: The crew ability
-    :return: None
-    """
-
-    crew_ability.expiration_date = datetime.now()
-    crew_ability.was_removed = True
-    crew_ability.save()
-
-    # TODO build notification
 
 
 def add_powerup(crew: Crew, acquired_user: User) -> None:

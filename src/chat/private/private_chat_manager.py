@@ -21,6 +21,10 @@ from src.chat.private.screens.screen_crew_disband import manage as manage_screen
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
 from src.chat.private.screens.screen_crew_member_detail import manage as manage_screen_crew_member_detail
+from src.chat.private.screens.screen_crew_member_detail_first_mate_demote import \
+    manage as manage_screen_crew_member_detail_first_mate_demote
+from src.chat.private.screens.screen_crew_member_detail_first_mate_promote import \
+    manage as manage_screen_crew_member_detail_first_mate_promote
 from src.chat.private.screens.screen_crew_member_detail_remove import manage as manage_screen_crew_member_detail_remove
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
@@ -186,6 +190,12 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_CREW_MEMBER_DETAIL_REMOVE:  # Crew Member Remove
                 await manage_screen_crew_member_detail_remove(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_PROMOTE:  # Crew Member First Mate Promote
+                await manage_screen_crew_member_detail_first_mate_promote(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_DEMOTE:  # Crew Member First Mate Demote
+                await manage_screen_crew_member_detail_first_mate_demote(update, context, inbound_keyboard, user)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
                 await manage_screen_settings_notifications(update, context, inbound_keyboard)

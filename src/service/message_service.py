@@ -688,7 +688,8 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
                         yes_is_back_button: bool = False, no_is_back_button: bool = False,
                         yes_is_delete_button: bool = False, no_is_delete_button: bool = False,
                         add_inbound_key_info: bool = False, keys_to_exclude: list[str] = None,
-                        exclude_yes_button: bool = False, exclude_no_button: bool = False, ) -> list[Keyboard]:
+                        exclude_yes_button: bool = False, exclude_no_button: bool = False,
+                        authorized_users: list[User] = None) -> list[Keyboard]:
     """
     Create a yes/no keyboard
 
@@ -712,8 +713,18 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
     :param keys_to_exclude: List of keys to exclude from the copy of info dict
     :param exclude_yes_button: True if the yes button should be excluded
     :param exclude_no_button: True if the no button should be excluded
+    :param authorized_users: List of users that can operate the keyboard
     :return: The yes and no keyboard
     """
+
+    if authorized_users is None:
+        authorized_users = []
+    else:
+        # Remove None users
+        authorized_users = [u for u in authorized_users if u is not None]
+
+    if user is not None:
+        authorized_users.append(user)
 
     if screen is None and (yes_screen is None or no_screen is None):
         if inbound_keyboard is not None:
@@ -751,7 +762,7 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
             keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text, user=user,
                                                  info=default_keyboard_data))
         elif yes_is_delete_button:
-            keyboard_line.append(get_delete_button([user.tg_user_id], button_text=yes_text))
+            keyboard_line.append(get_delete_button([u.tg_user_id for u in authorized_users], button_text=yes_text))
         else:
             # If screen is being changed, discard yes key value
             keyboard_data_yes: dict = default_keyboard_data | (
@@ -761,8 +772,8 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
                     keyboard_data_yes[key] = value
 
             yes_screen = screen if yes_screen is None else yes_screen
-            keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen, authorized_users=[user],
-                                          inherit_authorized_users=False))
+            keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen,
+                                          authorized_users=authorized_users, inherit_authorized_users=False))
 
     # No
     if not exclude_no_button:
@@ -770,7 +781,7 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
             keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text, user=user,
                                                  info=default_keyboard_data))
         elif no_is_delete_button:
-            keyboard_line.append(get_delete_button([user.tg_user_id], button_text=no_text))
+            keyboard_line.append(get_delete_button([u.tg_user_id for u in authorized_users], button_text=no_text))
         else:
             # If screen is being changed, discard no key value
             keyboard_data_no: dict = default_keyboard_data | (
@@ -779,8 +790,8 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
                 for key, value in no_extra_keys.items():
                     keyboard_data_no[key] = value
             no_screen = screen if no_screen is None else no_screen
-            keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen, authorized_users=[user],
-                                          inherit_authorized_users=False))
+            keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen,
+                                          authorized_users=authorized_users, inherit_authorized_users=False))
 
     return keyboard_line
 

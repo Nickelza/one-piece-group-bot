@@ -32,7 +32,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     inline_keyboard: list[list[Keyboard]] = []
 
-    if user.is_crew_captain() and len(active_abilities) < crew.max_abilities:
+    if user.is_crew_captain_or_first_mate() and len(active_abilities) < crew.max_abilities:
         # Activate ability button
         inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY_ACTIVATE,
                                          screen=Screen.PVT_CREW_ABILITY_ACTIVATE)])

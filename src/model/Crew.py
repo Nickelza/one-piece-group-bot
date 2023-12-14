@@ -22,6 +22,7 @@ class Crew(BaseModel):
     chest_amount = BigIntegerField(default=0)
     powerup_counter = IntegerField(default=0)
     max_abilities = IntegerField(default=1)
+    can_promote_first_mate = BooleanField(default=True)
 
     class Meta:
         db_table = 'crew'
@@ -96,6 +97,23 @@ class Crew(BaseModel):
 
         from src.model.User import User
         return self.crew_members.select().where(User.crew_role == CrewRole.CAPTAIN).get()
+
+    def get_first_mate(self) -> Any:
+        """
+        Returns the crew first mate
+        :return: The crew first mate
+        """
+
+        from src.model.User import User
+        return self.crew_members.select().where(User.crew_role == CrewRole.FIRST_MATE).get_or_none()
+
+    def has_first_mate(self) -> bool:
+        """
+        Returns True if the crew has a first mate
+        :return: True if the crew has a first mate
+        """
+
+        return self.get_first_mate() is not None
 
     def get_member_count(self) -> int:
         """

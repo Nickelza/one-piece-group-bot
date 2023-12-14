@@ -368,6 +368,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             if not user.is_crew_captain():
                 raise CommandValidationException(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_ERROR)
 
+        # Can only be used by a Crew Captain or First Mate
+        if command.only_by_crew_captain_or_first_mate:
+            if not user.is_crew_captain_or_first_mate():
+                raise CommandValidationException(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_OR_FIRST_MATE_ERROR)
+
         # Can only be used by a boss
         if command.only_by_boss:
             if not user_is_boss(user):
