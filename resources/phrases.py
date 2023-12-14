@@ -140,6 +140,7 @@ TEXT_TOPIC = 'Topic'
 TEXT_GROUP = 'Group'
 TEXT_NOT_SET = 'Not set'
 TEXT_RANDOM = 'Random'
+TEXT_WHAT_TO_MODIFY = 'What would you like to modify?'
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = 'chat_id is None and update.effective_chat.id is None'
 EXCEPTION_NO_EDIT_MESSAGE = 'new_message is False but update.callback_query is None'
@@ -193,6 +194,7 @@ KEY_SHARE = Emoji.SHARE + ' Share'
 KEY_SEND_TO_GROUP = Emoji.GROUP + ' Send to group'
 KEY_SET_RESULT = 'Set result'
 KEY_CONFIRM = 'Confirm'
+KEY_MODIFY = 'Modify'
 
 # Private chat
 PVT_TXT_START = f'Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!' \

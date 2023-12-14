@@ -54,4 +54,4 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     # Send success message
     ot_text = phrases.CREW_DISBAND_SUCCESS
-    await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)
+    await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard, back_screen_index=1)

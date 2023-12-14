@@ -26,6 +26,7 @@ from src.chat.private.screens.screen_crew_member_detail_first_mate_demote import
 from src.chat.private.screens.screen_crew_member_detail_first_mate_promote import \
     manage as manage_screen_crew_member_detail_first_mate_promote
 from src.chat.private.screens.screen_crew_member_detail_remove import manage as manage_screen_crew_member_detail_remove
+from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
 from src.chat.private.screens.screen_devil_fruit_detail_discard \
@@ -175,6 +176,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, c
 
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
                 await manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_MODIFY:  # Crew Edit
+                await manage_screen_crew_edit(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_LEAVE:  # Crew Leave
                 await manage_screen_crew_leave(update, context, inbound_keyboard, user)
