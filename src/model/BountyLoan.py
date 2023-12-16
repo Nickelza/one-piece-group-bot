@@ -54,7 +54,8 @@ class BountyLoan(BaseModel):
 
         # Subtract from borrower's bounty
         # noinspection PyTypeChecker
-        await add_or_remove_bounty(self.borrower, amount, add=False, update=update)
+        await add_or_remove_bounty(self.borrower, amount, add=False, update=update,
+                                   raise_error_if_negative_bounty=False)
 
         # Add to loaner's bounty
         # noinspection PyTypeChecker

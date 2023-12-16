@@ -241,6 +241,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
+        user.should_update_model = False
         previous_screens = (user.get_private_screen_list()[:-1]
                             if message_source is MessageSource.PRIVATE else None)
         try:

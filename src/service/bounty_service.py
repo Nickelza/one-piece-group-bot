@@ -27,6 +27,7 @@ from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributionType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
+from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run
 from src.service.devil_fruit_service import get_ability_value
@@ -238,7 +239,7 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
                                pending_belly_amount: int = None, from_message: bool = False, add: bool = True,
                                should_save: bool = False, should_affect_pending_bounty: bool = False,
                                check_for_loan: bool = True, tax_event_type: IncomeTaxEventType = None,
-                               event_id: int = None) -> None:
+                               event_id: int = None, raise_error_if_negative_bounty: bool = True) -> None:
     """
     Adds a bounty to a user
     :param context: Telegram context
@@ -255,6 +256,7 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
     :param tax_event_type: The tax event type
     :param event_id: The event id
+    :param raise_error_if_negative_bounty: Whether to raise an error if the user has negative bounty after the update
 
     :return: The updated user
     """
@@ -266,9 +268,6 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     if (tax_event_type is not None or event_id is not None) and (tax_event_type is None or event_id is None):
         raise ValueError('Tax event type and event id must be specified together')
 
-    previous_bounty = user.bounty
-    previous_pending_bounty = user.pending_bounty
-
     if pending_belly_amount is not None and pending_belly_amount > 0:
         should_affect_pending_bounty = True
     elif should_affect_pending_bounty:
@@ -278,17 +277,25 @@ async def add_or_remove_bounty(user: User, amount: int = None, context: ContextT
     db = init()
 
     with db.atomic():
+        # Refresh user, only bounty and pending bounty is needed
+        refreshed_user: User = User.get_by_id(user.id)
+        user.bounty, user.pending_bounty = refreshed_user.bounty, refreshed_user.pending_bounty
+        previous_pending_bounty = user.pending_bounty
+
         # Should remove bounty
         if not add:
             user.bounty -= amount
             if should_affect_pending_bounty:
                 user.pending_bounty += (amount if pending_belly_amount is None else pending_belly_amount)
 
-            if user.bounty < 0 and previous_bounty >= 0:
+            if user.bounty < 0:
                 logging.exception(f'User {user.id} has negative bounty: {user.bounty} after removing '
                                   f'{amount} bounty in event '
                                   f'{update.to_dict() if update is not None else "None"}'
                                   f'\n{traceback.print_stack()}')
+
+                if raise_error_if_negative_bounty:
+                    raise CommonChatException("Negative bounty after requested action")
 
             if should_save:
                 user.save()
