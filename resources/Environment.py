@@ -167,6 +167,24 @@ SUPABASE_REST_URL = Environment('SUPABASE_REST_URL')
 # Supabase API key
 SUPABASE_API_KEY = Environment('SUPABASE_API_KEY')
 
+# SENTRY
+# Enable Sentry
+SENTRY_ENABLED = Environment('SENTRY_ENABLED', default_value='False')
+# Sentry DSN
+SENTRY_DSN = Environment('SENTRY_DSN', can_be_empty=True)
+# Sentry environment
+SENTRY_ENVIRONMENT = Environment('SENTRY_ENVIRONMENT', default_value='default')
+# Sentry enable tracing
+SENTRY_ENABLE_TRACING = Environment('SENTRY_ENABLE_TRACING', default_value='False')
+# Sentry traces sample rate (0-1). Higher is more frequent but less performant. Default: 1.0
+SENTRY_TRACES_SAMPLE_RATE = Environment('SENTRY_TRACES_SAMPLE_RATE', default_value='1.0')
+# Sentry profiles sample rate (0-1). Higher is more frequent but less performant. Default: 1.0
+SENTRY_PROFILES_SAMPLE_RATE = Environment('SENTRY_PROFILES_SAMPLE_RATE', default_value='1.0')
+# Sentry log level. Default: INFO
+SENTRY_LOG_LEVEL = Environment('SENTRY_LOG_LEVEL', default_value='INFO')
+# Sentry log event level. Default: INFO
+SENTRY_LOG_EVENT_LEVEL = Environment('SENTRY_LOG_EVENT_LEVEL', default_value='INFO')
+
 # TIMERS
 # Check for files to clean up. Default: 12 hours
 CRON_TEMP_DIR_CLEANUP = Environment('CRON_TEMP_DIR_CLEANUP', default_value='0 */12 * * *')

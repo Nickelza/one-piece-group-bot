@@ -71,6 +71,25 @@ def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO, stream=sys.stdout)
 
+    # Sentry
+    if Env.SENTRY_ENABLED.get_bool():
+        import sentry_sdk
+        from sentry_sdk.integrations.logging import LoggingIntegration
+
+        sentry_sdk.init(
+            dsn=Env.SENTRY_DSN.get(),
+            environment=Env.SENTRY_ENVIRONMENT.get(),
+            enable_tracing=Env.SENTRY_ENABLE_TRACING.get_bool(),
+            traces_sample_rate=Env.SENTRY_TRACES_SAMPLE_RATE.get_float(),
+            profiles_sample_rate=Env.SENTRY_PROFILES_SAMPLE_RATE.get_float(),
+            integrations=[
+                LoggingIntegration(
+                    level=logging.getLevelName(Env.SENTRY_LOG_LEVEL.get()),
+                    event_level=logging.getLevelName(Env.SENTRY_LOG_EVENT_LEVEL.get())
+                ),
+            ],
+        )
+
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
     application = (Application
