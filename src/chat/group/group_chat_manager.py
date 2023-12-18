@@ -97,6 +97,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if command is Command.ND:
         await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
                                    should_update_location=True, from_message=True)
+        return
 
     await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
 
@@ -118,85 +119,84 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
     :return: None
     """
 
-    if command is not Command.ND:
-        match command.screen:
-            case Screen.GRP_USER_STATUS:  # User status
-                await manage_screen_show_status(update, context, command, user, group_chat=group_chat)
+    match command.screen:
+        case Screen.GRP_USER_STATUS:  # User status
+            await manage_screen_show_status(update, context, command, user, group_chat=group_chat)
 
-            case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
-                await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)
+        case Screen.GRP_DOC_Q_GAME:  # Doc Q Game
+            await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)
 
-            case Screen.GRP_CHANGE_REGION:  # Change region
-                await manage_screen_change_region(update, context, user, keyboard=inbound_keyboard, command=command)
+        case Screen.GRP_CHANGE_REGION:  # Change region
+            await manage_screen_change_region(update, context, user, keyboard=inbound_keyboard, command=command)
 
-            case Screen.GRP_FIGHT:  # Fight
-                await manage_screen_fight(update, context, user, inbound_keyboard, group_chat)
+        case Screen.GRP_FIGHT:  # Fight
+            await manage_screen_fight(update, context, user, inbound_keyboard, group_chat)
 
-            case Screen.GRP_GAME:  # Game
-                await manage_screen_game(update, context, user, command, group_chat)
+        case Screen.GRP_GAME:  # Game
+            await manage_screen_game(update, context, user, command, group_chat)
 
-            case Screen.GRP_GAME_SELECTION:  # Game selection
-                await manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)
+        case Screen.GRP_GAME_SELECTION:  # Game selection
+            await manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)
 
-            case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
-                await manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=inbound_keyboard)
+        case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
+            await manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=inbound_keyboard)
 
-            case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game Rock Paper Scissors
-                await manage_screen_game_rps(update, context, user, inbound_keyboard=inbound_keyboard)
+        case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game Rock Paper Scissors
+            await manage_screen_game_rps(update, context, user, inbound_keyboard=inbound_keyboard)
 
-            case Screen.GRP_RUSSIAN_ROULETTE_GAME:  # Game Russian Roulette
-                await manage_screen_game_rr(update, context, user, inbound_keyboard=inbound_keyboard)
+        case Screen.GRP_RUSSIAN_ROULETTE_GAME:  # Game Russian Roulette
+            await manage_screen_game_rr(update, context, user, inbound_keyboard=inbound_keyboard)
 
-            case Screen.GRP_PREDICTION_BET:  # Prediction bet
-                await manage_screen_prediction_bet(update, context, user, command, group_chat)
+        case Screen.GRP_PREDICTION_BET:  # Prediction bet
+            await manage_screen_prediction_bet(update, context, user, command, group_chat)
 
-            case Screen.GRP_PREDICTION_BET_REMOVE:  # Prediction bet remove
-                await manage_screen_prediction_bet_remove(update, context, user, command, group_chat)
+        case Screen.GRP_PREDICTION_BET_REMOVE:  # Prediction bet remove
+            await manage_screen_prediction_bet_remove(update, context, user, command, group_chat)
 
-            case Screen.GRP_PREDICTION_BET_STATUS:  # Prediction bet status
-                await manage_screen_prediction_bet_status(update, context, user, group_chat)
+        case Screen.GRP_PREDICTION_BET_STATUS:  # Prediction bet status
+            await manage_screen_prediction_bet_status(update, context, user, group_chat)
 
-            case Screen.GRP_CREW_JOIN:  # Crew join
-                await manage_screen_crew_join(update, context, user, inbound_keyboard, target_user)
+        case Screen.GRP_CREW_JOIN:  # Crew join
+            await manage_screen_crew_join(update, context, user, inbound_keyboard, target_user)
 
-            case Screen.GRP_CREW_INVITE:  # Crew invite
-                await manage_screen_crew_invite(update, context, user, inbound_keyboard, target_user)
+        case Screen.GRP_CREW_INVITE:  # Crew invite
+            await manage_screen_crew_invite(update, context, user, inbound_keyboard, target_user)
 
-            case Screen.GRP_SILENCE:  # Silence
-                await manage_screen_silence(update, context, group_chat)
+        case Screen.GRP_SILENCE:  # Silence
+            await manage_screen_silence(update, context, group_chat)
 
-            case Screen.GRP_SILENCE_END:  # Silence end
-                await manage_screen_silence_end(update, context, group_chat)
+        case Screen.GRP_SILENCE_END:  # Silence end
+            await manage_screen_silence_end(update, context, group_chat)
 
-            case Screen.GRP_SPEAK:  # Speak
-                await manage_screen_speak(update, context, target_user, group_chat)
+        case Screen.GRP_SPEAK:  # Speak
+            await manage_screen_speak(update, context, target_user, group_chat)
 
-            case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
-                await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
-                                                group_chat)
+        case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
+            await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
+                                            group_chat)
 
-            case Screen.GRP_SETTINGS:  # Settings
-                await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
+        case Screen.GRP_SETTINGS:  # Settings
+            await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
 
-            case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
-                await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
-                                                     group_chat)
+        case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
+            await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
+                                                 group_chat)
 
-            case Screen.GRP_BOUNTY_LOAN:  # Bounty loan
-                await manage_screen_bounty_loan(update, context, user, inbound_keyboard, target_user, command,
-                                                group_chat)
+        case Screen.GRP_BOUNTY_LOAN:  # Bounty loan
+            await manage_screen_bounty_loan(update, context, user, inbound_keyboard, target_user, command,
+                                            group_chat)
 
-            case _:  # Unknown screen
-                if update.callback_query is not None:
-                    raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
+        case _:  # Unknown screen
+            if update.callback_query is not None:
+                raise GroupChatException(GroupChatError.UNRECOGNIZED_SCREEN)
 
-        if inbound_keyboard is not None:
-            # Setting here to avoid regular messages to be counted as interaction
-            user.last_system_interaction_date = datetime.now()
+    if inbound_keyboard is not None:
+        # Setting here to avoid regular messages to be counted as interaction
+        user.last_system_interaction_date = datetime.now()
 
-            group: Group = group_chat.group
-            if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE) and group.tg_group_username is not None:
-                await release_devil_fruit_to_user(update, context, user, group_chat)
+        group: Group = group_chat.group
+        if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE) and group.tg_group_username is not None:
+            await release_devil_fruit_to_user(update, context, user, group_chat)
 
 
 async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,
