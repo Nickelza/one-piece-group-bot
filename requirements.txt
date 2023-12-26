@@ -1,5 +1,5 @@
 python-dotenv==1.0.0
-python-telegram-bot[rate-limiter]==20.4
+python-telegram-bot[rate-limiter]==20.7
 peewee~=3.16.3
 asyncpraw~=7.7.1
 APScheduler==3.10.4
