@@ -24,7 +24,9 @@ class Command:
                  only_by_crew_captain: bool = False, only_in_reply_to_crew_member: bool = False,
                  only_by_boss: bool = False, allow_reply_to_arrested: bool = False, answer_callback: bool = False,
                  show_alert: bool = True, only_by_chat_admin: bool = False, send_message_if_error: bool = True,
-                 feature: Feature = None, allow_deeplink: bool = False, only_by_crew_captain_or_first_mate: bool = False
+                 feature: Feature = None, allow_deeplink: bool = False,
+                 only_by_crew_captain_or_first_mate: bool = False,
+                 only_by_crew_captain_or_first_mate_keyboard: bool = True
                  ):
         """
         Constructor
@@ -54,6 +56,8 @@ class Command:
                         that have the feature enabled
         :param allow_deeplink: Allow accessing the command screen via deeplink
         :param only_by_crew_captain_or_first_mate: True if the command can only be used by a Crew Captain or First Mate
+        :param only_by_crew_captain_or_first_mate_keyboard: True if the command can only be used by a Crew Captain or
+                        First Mate via keyboard
         """
         self.name = name
         self.active = active
@@ -77,6 +81,7 @@ class Command:
         self.feature = feature
         self.allow_deeplink = allow_deeplink
         self.only_by_crew_captain_or_first_mate = only_by_crew_captain_or_first_mate
+        self.only_by_crew_captain_or_first_mate_keyboard = only_by_crew_captain_or_first_mate_keyboard
 
         if only_in_reply_to_crew_member and not only_in_reply:
             self.only_in_reply = True
@@ -215,7 +220,7 @@ GRP_CREW_JOIN = Command('join', Screen.GRP_CREW_JOIN, only_in_reply_to_crew_memb
 COMMANDS.append(GRP_CREW_JOIN)
 
 GRP_CREW_INVITE = Command('invite', Screen.GRP_CREW_INVITE, only_in_reply=True, feature=Feature.CREW,
-                          only_by_crew_captain_or_first_mate=True)
+                          only_by_crew_captain_or_first_mate=True, only_by_crew_captain_or_first_mate_keyboard=False)
 COMMANDS.append(GRP_CREW_INVITE)
 
 GRP_SILENCE = Command('silence', Screen.GRP_SILENCE, only_by_boss=True, feature=Feature.SILENCE)
