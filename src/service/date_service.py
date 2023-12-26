@@ -118,7 +118,7 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
     return convert_seconds_to_duration((next_run - start_datetime).total_seconds())
 
 
-def get_remaining_duration(end_datetime: datetime, start_datetime: datetime.datetime = datetime.datetime.now()) -> str:
+def get_remaining_duration(end_datetime: datetime, start_datetime: datetime.datetime = None) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
@@ -127,6 +127,9 @@ def get_remaining_duration(end_datetime: datetime, start_datetime: datetime.date
     """
     if end_datetime is None:
         return convert_seconds_to_duration(0)
+
+    if start_datetime is None:
+        start_datetime = datetime.datetime.now()
 
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
