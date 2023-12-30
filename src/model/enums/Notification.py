@@ -263,8 +263,9 @@ class CrewDisbandWarningNotification(Notification):
 
     def build(self) -> str:
         """Builds the notification."""
+        from src.service.bounty_service import get_next_bounty_reset_time
 
-        return self.text.format(Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1)
+        return self.text.format(get_remaining_duration(get_next_bounty_reset_time()))
 
 
 class GameTurnNotification(Notification):

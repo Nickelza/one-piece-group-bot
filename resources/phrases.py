@@ -690,15 +690,9 @@ PREDICTION_SET_RESULT_CONFIRMATION_REQUEST_NO_CORRECT_OPTION = (
 )
 
 # Crew - Private
-CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX = (
-    f"{Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1} global leaderboards"
-)
 CREW_USER_NOT_IN_CREW = (
     "You are not in a Crew. Head over a Chat Group to the to join one or create your"
-    f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}.\n\nIf you create a"
-    " Crew, you must appear at least once every"
-    f" {CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX} or else your Crew will be"
-    " disbanded."
+    f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."
 )
 CREW_OVERVIEW = (
     "*{}* \\(Level *{}*\\)"
@@ -1028,14 +1022,12 @@ CREW_DISBAND_NOTIFICATION_DESCRIPTION = "If to be notified when your Crew is dis
 CREW_DISBAND_NOTIFICATION_KEY = "Crew disband"
 # Notification - Crew disband warning
 CREW_DISBAND_WARNING_NOTIFICATION = (
-    "You have not appeared in the last"
-    f" {CREW_MAINTAIN_LEADERBOARD_REQUIRED_APPEARANCES_SUFFIX}.\nIf you do not appear in the next"
-    " leaderboard, your Crew will be disbanded."
+    "You have not been active in the current Bounty season."
+    "\nIn case of continued inactivity, your Crew will be disbanded on the next bounty reset in {}"
 )
 CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION = (
-    "If to be notified a week before your Crew is disbanded due to not appearing in the global"
-    f" leaderboard for {Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} consecutive"
-    " leaderboards.\nApplicable only if you are the Captain of the Crew."
+    "If to be notified a week before your Crew is disbanded due to inactivity."
+    "\nApplicable only if you are the Captain of the Crew."
 )
 CREW_DISBAND_WARNING_NOTIFICATION_KEY = "Crew disband warning"
 # Notification - Crew ability activated
@@ -1222,9 +1214,8 @@ WARLORD_APPOINTMENT_NOTIFICATION = (
     "Congratulations, you have been appointed as a Warlord!\n\n*Epithet*:"
     " {}\n*Duration*: {}\n*Reason*: {}\n\n*Privileges*\n•"
     f" {Env.PIRATE_KING_TRANSACTION_TAX_DISCOUNT.get_int()}% off tax on gifts and"
-    " loans\n• Immunity from Crew disbandment \\(if Captain\\) and Devil Fruit"
-    " revocation for not appearing in the latest"
-    f" {Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards\n•"
+    " loans\n• Immunity from Devil Fruit revocation for not appearing in the latest"
+    f" {Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()} leaderboards\n•"
     " View inferior ranks status \\(Emperor and below\\)\n• Custom Bounty Poster"
     f" {Env.BOUNTY_POSTER_LIMIT_WARLORD.get_int()} times a day\n• View New World users"
     " in logs\n\n_You will appear in the weekly leaderboard exclusively with Warlord"

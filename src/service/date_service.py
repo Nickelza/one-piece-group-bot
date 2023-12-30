@@ -4,6 +4,7 @@ import random
 import parsedatetime
 import pytz
 from apscheduler.triggers.cron import CronTrigger
+from croniter import croniter
 from geopy.geocoders import Nominatim
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -36,6 +37,21 @@ def get_next_run(
 
     cron_trigger = CronTrigger.from_crontab(cron_expression)
     return cron_trigger.get_next_fire_time(previous_fire_time, start_datetime)
+
+
+def get_previous_run(cron_expression: str, start_datetime: datetime = None) -> datetime:
+    """
+    Get the previous run time
+    :param cron_expression: The cron expression
+    :param start_datetime: The start datetime. If None, the current datetime is used
+    :return: The previous run time
+    """
+
+    if start_datetime is None:
+        start_datetime = datetime.datetime.now(datetime.timezone.utc)
+
+    itr = croniter(cron_expression, start_datetime)
+    return itr.get_prev(datetime.datetime)
 
 
 def convert_seconds_to_duration(seconds: int) -> str:

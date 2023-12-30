@@ -13,7 +13,6 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_next_bounty_reset_time, add_or_remove_bounty
-from src.service.crew_service import warn_inactive_captains
 from src.service.date_service import get_remaining_duration
 from src.service.message_service import (
     full_message_send,
@@ -90,11 +89,6 @@ async def manage(
                             escape_valid_markdown_chars(crew_name)
                         )
 
-                        # Newly created crew, alert user if it will be disbanded if they don't appear in the next
-                        # leaderboard
-                        context.application.create_task(
-                            warn_inactive_captains(context, users=[user])
-                        )
                     else:  # Edit mode
                         # Edit success message
                         ot_text = phrases.CREW_NAME_EDIT_SUCCESS.format(

@@ -8,8 +8,6 @@ from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.CrewChestSpendingRecord import CrewChestSpendingRecord
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
-from src.model.Leaderboard import Leaderboard
-from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import (
@@ -184,66 +182,38 @@ async def disband_inactive_crews(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
 
     # Find captains of a Crew that have not been in the latest required leaderboards
-    inactive_crew_captains = get_inactive_captains(
-        Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int()
-    )
+    inactive_crew_captains = get_inactive_captains()
 
     # Disband inactive crews
     for captain in inactive_crew_captains:
         await disband_crew(context, captain, should_notify_captain=True)
 
 
-async def warn_inactive_captains(
-    context: ContextTypes.DEFAULT_TYPE, users: list[User] = None
-) -> None:
+async def warn_inactive_captains(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Warns inactive captains which Crew will be disbanded in the next leaderboard
 
     :param context: The context object
-    :param users: The users to warn, if None, all inactive captains will be warned
     :return: None
     """
 
-    inactive_captains = get_inactive_captains(
-        Env.CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get_int() - 1
-    )
+    inactive_captains = get_inactive_captains()
 
     for captain in inactive_captains:
-        if users is None or captain in users:
-            await send_notification(context, captain, CrewDisbandWarningNotification())
+        await send_notification(context, captain, CrewDisbandWarningNotification())
 
 
-def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
+def get_inactive_captains() -> list[User]:
     """
-    Find captains of a Crew that have not been in the latest N leaderboards in the required rank
-
-    :param latest_leaderboard_appearance: The latest leaderboard appearance
+    Find captains of a Crew that have not been active since the last bounty reset
     :return: The inactive captains
     """
+    from src.service.bounty_service import get_previous_bounty_reset_time
 
-    # Latest N leaderboards
-    latest_leaderboards: list[Leaderboard] = Leaderboard.get_latest_n(
-        n=latest_leaderboard_appearance
-    )
-
-    # Captains of Crews that appeared in the latest N leaderboards in the required role
-    query: list[User] = (
-        User.select()
-        .join(LeaderboardUser)
-        .join(Leaderboard)
-        .where((User.crew_role == CrewRole.CAPTAIN) & (Leaderboard.id.in_(latest_leaderboards)))
-        .execute()
-    )
-    active_captains: list[User] = list(query)
-
-    # Inactive captains
-    # Have to first get inactive ones else, by using "not in", it will return records for previous
-    # leaderboards too since the user might have been in a leaderboard before N, so it will not be
-    # in the latest N leaderboards
-    # Exclude admins and those exempt from global leaderboard requirement
+    previous_bounty_reset: datetime = get_previous_bounty_reset_time()
     inactive_captains = User.select().where(
         (User.crew_role == CrewRole.CAPTAIN)
-        & (User.id.not_in([captain.id for captain in active_captains]))
+        & (User.last_system_interaction_date < previous_bounty_reset)
         & (User.is_admin == False)
         & (User.is_exempt_from_global_leaderboard_requirements == False)
     )

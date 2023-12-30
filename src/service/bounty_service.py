@@ -29,7 +29,7 @@ from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributi
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_next_run
+from src.service.date_service import get_next_run, get_previous_run
 from src.service.devil_fruit_service import get_ability_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.income_tax_service import (
@@ -181,6 +181,7 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     from src.service.prediction_service import (
         remove_all_bets_from_active_predictions as remove_all_bets,
     )
+    from src.service.crew_service import disband_inactive_crews
 
     # End all active games
     force_end_all_active_games()
@@ -253,6 +254,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
         await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
+
+    # Disband inactive crews
+    context.application.create_task(disband_inactive_crews(context))
 
 
 async def add_or_remove_bounty(
@@ -676,6 +680,25 @@ def get_next_bounty_reset_time() -> datetime.datetime:
         start_datetime = next_run_time + datetime.timedelta(seconds=1)
 
 
+def get_previous_bounty_reset_time() -> datetime.datetime:
+    """
+    Get the previous bounty reset time
+    :return: The previous bounty reset time
+    """
+
+    start_datetime = datetime.datetime.now(datetime.timezone.utc)
+    while True:
+        # Get next previous of leaderboard
+        previous_run_time = get_previous_run(
+            Env.CRON_SEND_LEADERBOARD.get(), start_datetime=start_datetime
+        )
+
+        if should_reset_bounty(previous_run_time):
+            return previous_run_time
+
+        start_datetime = previous_run_time - datetime.timedelta(seconds=1)
+
+
 def should_reset_bounty(run_time: datetime) -> bool:
     """
     Checks if the bounty should be reset given the run time.
@@ -684,8 +707,8 @@ def should_reset_bounty(run_time: datetime) -> bool:
     :param run_time: The run time
     :return: Whether the bounty should be reset
     """
-    # Adding 1 millisecond in case it's exactly midnight, else the next leaderboard will be considered as the
-    # current one
+    # Adding 1 millisecond in case it's exactly midnight, else the next leaderboard will be
+    # considered as the current one
     next_run_time = get_next_run(
         Env.CRON_SEND_LEADERBOARD.get(),
         start_datetime=run_time + datetime.timedelta(milliseconds=1),

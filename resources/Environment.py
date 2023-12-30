@@ -800,10 +800,6 @@ WHITELIST_INLINE_BOTS = Environment("WHITELIST_INLINE_BOTS", default_value="")
 
 # Price to create a crew. Default: 100,000,000
 CREW_CREATE_PRICE = Environment("CREW_CREATE_PRICE", default_value="100000000")
-# How many latest leaderboard user has to be in to be able to maintain a Crew. Default: 4
-CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
-    "CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE", default_value="4"
-)
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment("CREW_MAX_NAME_LENGTH", default_value="50")
 # Default maximum number of Crew members. Default: 10
