@@ -30,11 +30,13 @@ class Environment:
         # Get the environment variable or return None if it is not set
         value = os.environ.get(self.name)
 
-        # If the environment variable is not set and the environment variable can be empty, return None
+        # If the environment variable is not set and the environment variable can be empty,
+        # return None
         if value is None and self.can_be_empty:
             return None
 
-        # If the environment variable is not set and the environment variable can not be empty, raise an exception
+        # If the environment variable is not set and the environment variable can not be empty,
+        # raise an exception
         if value is None:
             raise Exception(f"Environment variable {self.name} is not set")
 
@@ -360,7 +362,8 @@ SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE = Environment(
     "SHOULD_RUN_ON_STARTUP_REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE", default_value="False"
 )
 
-# Schedule Devil Fruit Zoan release. Default: Every sunday at 00:10, to make sure inactive ones were already revoked
+# Schedule Devil Fruit Zoan release. Default: Every sunday at 00:10, to make sure inactive ones
+# were already revoked
 CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE = Environment(
     "CRON_SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE", default_value="10 0 * * Sun"
 )
@@ -434,7 +437,8 @@ TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", "21
 BELLY_BASE_MESSAGE = Environment("BELLY_BASE_MESSAGE", default_value="50000")
 # Multiplier to use for each message. Default: 0.05
 BELLY_CHARACTER_MULTIPLIER = Environment("BELLY_CHARACTER_MULTIPLIER", default_value="0.05")
-# How much multiple of the base message can the multiplier by character be, before it is capped. Default: 2
+# How much multiple of the base message can the multiplier by character be, before it is capped.
+# Default: 2
 BELLY_CHARACTER_MAX_MULTIPLE = Environment("BELLY_CHARACTER_MAX_MULTIPLE", default_value="2")
 # Multiplier for messages in reply to a channel post. Default: 1.3
 BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment(
@@ -453,9 +457,11 @@ BELLY_UPPER_ROUND_AMOUNT = Environment("BELLY_UPPER_ROUND_AMOUNT", default_value
 # Daily base limit of bellys gained from messages. Default: 5,000,000
 BELLY_DAILY_BASE_LIMIT = Environment("BELLY_DAILY_BASE_LIMIT", default_value="5000000")
 
-# After how many days from the last message should a group or group chat be considered inactive. Default: 7
+# After how many days from the last message should a group or group chat be considered inactive.
+# Default: 7
 INACTIVE_GROUP_DAYS = Environment("INACTIVE_GROUP_DAYS", default_value="7")
-# After how many days from the last message should a user be considered inactive in a group. Default: 7
+# After how many days from the last message should a user be considered inactive in a group.
+# Default: 7
 INACTIVE_GROUP_USER_DAYS = Environment("INACTIVE_GROUP_USER_DAYS", default_value="7")
 
 # BOUNTY BONUS
@@ -466,7 +472,8 @@ PARADISE_BOUNTY_BONUS = Environment("PARADISE_BOUNTY_BONUS", default_value="0")
 NEW_WORLD_BOUNTY_BONUS = Environment("NEW_WORLD_BOUNTY_BONUS", default_value="-3")
 # Percentage that bounty is incremented by on timer for Crew members. Default: 2
 CREW_BOUNTY_BONUS = Environment("CREW_BOUNTY_BONUS", default_value="2")
-# Percentage that bounty is incremented by on timer for Crew members with bounty higher than crew average. Default: 1
+# Percentage that bounty is incremented by on timer for Crew members with bounty higher than crew
+# average. Default: 1
 CREW_MVP_BOUNTY_BONUS = Environment("CREW_MVP_BOUNTY_BONUS", default_value="1")
 
 # BOUNTY POSTER
@@ -518,15 +525,18 @@ GAME_MIN_WAGER = Environment("GAME_MIN_WAGER", default_value="10000000")
 GAME_MAX_TOTAL_WAGER_EASY = Environment("GAME_MAX_TOTAL_WAGER_EASY", default_value="50000000")
 # Maximum total wager for medium mode. Default: 200 million
 GAME_MAX_TOTAL_WAGER_MEDIUM = Environment("GAME_MAX_TOTAL_WAGER_MEDIUM", default_value="200000000")
-# After how much time in seconds without action should a user be notified about their turn. Default: 60 seconds
+# After how much time in seconds without action should a user be notified about their turn.
+# Default: 60 seconds
 GAME_TURN_NOTIFICATION_TIME = Environment("GAME_TURN_NOTIFICATION_TIME", default_value="60")
 # Game cooldown duration in hours. Default: 8
 GAME_COOLDOWN_DURATION = Environment("GAME_COOLDOWN_DURATION", default_value="8")
 # How much time to wait for opponent confirmation before timing out. Default: 120 seconds
 GAME_CONFIRMATION_TIMEOUT = Environment("GAME_CONFIRMATION_TIMEOUT", default_value="120")
-# How much time to wait after user has confirmed the game before starting the game. Default: 60 seconds
+# How much time to wait after user has confirmed the game before starting the game.
+# Default: 60 seconds
 GAME_START_WAIT_TIME = Environment("GAME_START_WAIT_TIME", default_value="60")
-# After how much time since the last interaction should a game be considered inactive. Default: 600 seconds
+# After how much time since the last interaction should a game be considered inactive.
+# Default: 600 seconds
 GAME_INACTIVE_TIME = Environment("GAME_INACTIVE_TIME", default_value="600")
 # One Piece Wiki URL
 ONE_PIECE_WIKI_URL = Environment(
@@ -796,7 +806,7 @@ CREW_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
 )
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment("CREW_MAX_NAME_LENGTH", default_value="50")
-# Maximum number of Crew members. Default: 10
+# Default maximum number of Crew members. Default: 10
 CREW_MAX_MEMBERS = Environment("CREW_MAX_MEMBERS", default_value="10")
 # How much percent should be removed from taxes for exchanges between Crew members. Default: 50%
 CREW_TRANSACTION_TAX_DISCOUNT = Environment("CREW_TRANSACTION_TAX_DISCOUNT", default_value="50")
@@ -826,11 +836,13 @@ BOUNTY_GIFT_TAX_INCREASE = Environment("BOUNTY_GIFT_TAX_INCREASE", default_value
 BOUNTY_LOAN_MIN_AMOUNT = Environment("BOUNTY_LOAN_MIN_AMOUNT", default_value="10000000")
 # Tax percentage increase after each Bounty Loan. Default: 1%
 BOUNTY_LOAN_TAX_INCREASE = Environment("BOUNTY_LOAN_TAX_INCREASE", default_value="1")
-# How many percent of newly gained bounty should be used to pay off loan in case of expiration. Default: 50%
+# How many percent of newly gained bounty should be used to pay off loan in case of expiration.
+# Default: 50%
 BOUNTY_LOAN_GARNISH_PERCENTAGE = Environment("BOUNTY_LOAN_GARNISH_PERCENTAGE", default_value="50")
 # Maximum duration of a loan in days. Default: 7
 BOUNTY_LOAN_MAX_DURATION_DAYS = Environment("BOUNTY_LOAN_MAX_DURATION_DAYS", default_value="7")
-# After how many days since expiration should a loan be forgiven if at least double the amount has been paid back.
+# After how many days since expiration should a loan be forgiven if at least double the amount has
+# been paid back.
 # Default: 7
 BOUNTY_LOAN_FORGIVENESS_DAYS = Environment("BOUNTY_LOAN_FORGIVENESS_DAYS", default_value="7")
 # How long a user has to wait before issuing a new loan in hours. Default: 24
@@ -850,7 +862,8 @@ PIRATE_KING_TRANSACTION_TAX_DISCOUNT = Environment(
 DEVIL_FRUIT_EXPIRATION_DAYS = Environment("DEVIL_FRUIT_EXPIRATION_DAYS", default_value="2")
 # After how many hours does a Devil Fruit respawn. Default: 24
 DEVIL_FRUIT_RESPAWN_HOURS = Environment("DEVIL_FRUIT_RESPAWN_HOURS", default_value="24")
-# How many leaderboards back a user has to appear in at least once to maintain an eaten Devil Fruit. Default: 4
+# How many leaderboards back a user has to appear in at least once to maintain an eaten
+# Devil Fruit. Default: 4
 DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
     "DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE", default_value="4"
 )
@@ -862,7 +875,8 @@ DEVIL_FRUIT_SELL_TAX = Environment("DEVIL_FRUIT_SELL_TAX", default_value="50")
 DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT = Environment(
     "DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT", default_value="20"
 )
-# How many Regular Zoan Devil Fruits are should be in circulation for each Ancient Zoan Devil Fruit. Default: 5
+# How many Regular Zoan Devil Fruits are should be in circulation for each Ancient Zoan
+# Devil Fruit. Default: 5
 DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO = Environment(
     "DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO", default_value="5"
 )

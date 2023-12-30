@@ -6,6 +6,7 @@ from peewee import *
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
+from src.model.enums.crew.CrewLevelUpgradeType import CrewLevelUpgradeType
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 
@@ -15,16 +16,17 @@ class Crew(BaseModel):
     Crew class
     """
 
-    id = PrimaryKeyField()
-    name = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int())
-    creation_date = DateTimeField(default=datetime.datetime.now)
-    can_accept_new_members = BooleanField(default=True)
-    is_active = BooleanField(default=True)
-    disband_date = DateTimeField(null=True)
-    chest_amount = BigIntegerField(default=0)
-    level = IntegerField(default=1)
-    max_abilities = IntegerField(default=1)
-    can_promote_first_mate = BooleanField(default=True)
+    id: int = PrimaryKeyField()
+    name: str | CharField = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int())
+    creation_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
+    can_accept_new_members: bool = BooleanField(default=True)
+    is_active: bool = BooleanField(default=True)
+    disband_date: datetime.datetime = DateTimeField(null=True)
+    chest_amount: int = BigIntegerField(default=0)
+    level: int = IntegerField(default=1)
+    max_abilities: int = IntegerField(default=1)
+    can_promote_first_mate: bool = BooleanField(default=True)
+    max_members: int = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
 
     class Meta:
         db_table = "crew"
@@ -85,7 +87,7 @@ class Crew(BaseModel):
         :return: True if the crew is full
         """
 
-        return len(self.get_members()) >= Env.CREW_MAX_MEMBERS.get_int()
+        return len(self.get_members()) >= self.max_members
 
     @staticmethod
     def logical_get(crew_id: int) -> "Crew":
@@ -156,10 +158,10 @@ class Crew(BaseModel):
 
         # Not level up, price is current level * BASE_PRICE
         if reason is not CrewChestSpendingReason.LEVEL_UP:
-            return Env.CREW_POWERUP_BASE_PRICE.get_int() * int(str(self.level))
+            return Env.CREW_POWERUP_BASE_PRICE.get_int() * self.level
 
         # Level up, price is double the previous
-        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (2 ** int(str(self.level - 1)))
+        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (2 ** (self.level - 1))
 
     def get_powerup_price_formatted(self, reason: CrewChestSpendingReason) -> str:
         """
@@ -180,7 +182,7 @@ class Crew(BaseModel):
 
         from src.service.bounty_service import get_belly_formatted
 
-        return get_belly_formatted(int(str(self.chest_amount)))
+        return get_belly_formatted(self.chest_amount)
 
     def get_active_abilities(self) -> list:
         """
@@ -207,6 +209,44 @@ class Crew(BaseModel):
             (CrewAbility.expiration_date > datetime.datetime.now())
             & (CrewAbility.ability_type == ability_type.value)
         )
+
+    def get_next_level_upgrade_type(self):
+        """
+        Returns the next level upgrade type
+        :return: The next level upgrade type
+        """
+
+        return CrewLevelUpgradeType.get_by_level(self.level + 1)
+
+    def get_upgrade_type_count(self, upgrade_type: CrewLevelUpgradeType) -> int:
+        """
+        Returns the number of upgrades of the given type
+        :param upgrade_type: The upgrade type
+        :return: The number of upgrades
+        """
+
+        if upgrade_type is CrewLevelUpgradeType.MEMBER:
+            return self.max_members
+
+        return self.max_abilities
+
+    def level_up(self):
+        """
+        Level up the crew
+        :return: None
+        """
+        # Increase max members or abilities
+        upgrade_type = self.get_next_level_upgrade_type()
+
+        if upgrade_type is CrewLevelUpgradeType.MEMBER:
+            self.max_members += 1
+            self.can_accept_new_members = True
+        elif upgrade_type is CrewLevelUpgradeType.ABILITY:
+            self.max_abilities += 1
+
+        self.level += 1
+
+        self.save()
 
 
 Crew.create_table()

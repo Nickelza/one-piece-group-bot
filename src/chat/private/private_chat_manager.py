@@ -27,6 +27,8 @@ from src.chat.private.screens.screen_crew_ability_activate_confirm import (
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
+from src.chat.private.screens.screen_crew_level import manage as manage_screen_crew_level
+from src.chat.private.screens.screen_crew_level_up import manage as manage_screen_crew_level_up
 from src.chat.private.screens.screen_crew_member import manage as manage_screen_crew_member
 from src.chat.private.screens.screen_crew_member_detail import (
     manage as manage_screen_crew_member_detail,
@@ -206,7 +208,8 @@ async def dispatch_screens(
                 ]
 
         else:
-            # Back to start, IDE non recognizing from_deeplink means inbound_keyboard is not None so have to check
+            # Back to start, IDE non recognizing from_deeplink means inbound_keyboard is not None
+            # so have to check
             if inbound_keyboard is not None and from_deeplink:
                 user.update_private_screen_list(
                     screen, previous_screen_list=inbound_keyboard.previous_screen_list
@@ -248,6 +251,12 @@ async def dispatch_screens(
 
             case Screen.PVT_CREW_POWERUP:  # Crew Powerup
                 await manage_screen_crew_powerup(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_LEVEL:  # Crew Level
+                await manage_screen_crew_level(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_LEVEL_UP:  # Crew Level Up
+                await manage_screen_crew_level_up(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_MODIFY:  # Crew Edit
                 await manage_screen_crew_edit(update, context, inbound_keyboard, user)

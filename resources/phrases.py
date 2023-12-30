@@ -252,6 +252,8 @@ PVT_KEY_CREW_ABILITY = "Abilities"
 PVT_KEY_CREW_ABILITY_ACTIVATE = "Activate"
 PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
 PVT_KEY_CREW_POWERUP = "Power-up"
+PVT_KEY_CREW_LEVEL = "Level"
+PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -699,8 +701,12 @@ CREW_USER_NOT_IN_CREW = (
     " disbanded."
 )
 CREW_OVERVIEW = (
-    "*{}*\n\n*Captain*: {}{}\n*Formation date*: {} \\({}\\)\n*Members*: {} \\(Max."
-    " {}\\)\n\n*Treasure Chest*: ฿{}\n\n*Abilities*{}{}"
+    "*{}* \\(Level *{}*\\)"
+    "\n\n*Captain*: {}{}"
+    "\n*Formation date*: {} \\({}\\)"
+    "\n*Members*: {} \\(Max. {}\\)"
+    "\n\n*Treasure Chest*: ฿{}"
+    "\n\n*Abilities*{}{}"
 )
 CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = (
@@ -816,16 +822,15 @@ CREW_DEMOTE_FROM_FIRST_MATE_SUCCESS = "{} has been demoted from First Mate"
 CREW_ABILITIES = (
     "*Crew Abilities*\n\nAbilities mimic the effects of Devil Fruits and are extended to all"
     " members of the Crew."
-    + "\nEach ability doubles the price of the next one and lasts"
-    f" {Env.CREW_ABILITY_DURATION_DAYS.get_int()} days.\nOnly the Crew Captain or First Mate can"
-    " activate an ability."
+    + "\nEach ability cost depends on the current Crew level and lasts for"
+    f" {Env.CREW_ABILITY_DURATION_DAYS.get_int()} days."
     + "\n{}\n\nNext ability cost: ฿*{}*\nCrew chest: ฿{}"
 )
 CREW_ABILITY_NO_ABILITIES = "\n_No abilities are currently activated in this Crew_"
 CREW_ABILITY_ITEM_TEXT = "\n• {}{} \\({}%\\)"
 CREW_ABILITY_ITEM_TEXT_DURATION = "\nRemaining time: {}"
-CREW_ABILITY_INSUFFICIENT_CREW_CHEST = (
-    "Insufficient Crew Chest\n\nCrew chest: ฿{}\nAbility cost: ฿{}"
+CREW_POWERUP_INSUFFICIENT_CREW_CHEST = (
+    "Insufficient Crew Chest\n\nCrew chest: ฿{}\nPower-up cost: ฿{}"
 )
 CREW_ABILITY_MAX_ABILITIES_REACHED = "Max number of active abilities reached"
 CREW_ABILITY_ACTIVATE_CHOOSE = (
@@ -858,6 +863,25 @@ CREW_POWERUP = (
     "{}"
     "\n\nOnly the Crew Captain or First Mate can enable a power-up"
 )
+
+# Crew level
+CREW_LEVEL_UP_RECAP = "*Upgrade*: +1 {} slot \\({}->{}\\)\n*Cost*: ฿{}"
+CREW_LEVEL = (
+    "*Level*"
+    "\n\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot."
+    "\nEach level doubles the price of the next one."
+    "\n\n*Current level*: {}"
+    "\n*Max members*: {}"
+    "\n*Max abilities*: {}"
+    "\n\n*Next level*: {}"
+    "\n{}"
+    "\nCrew chest: ฿{}"
+)
+CREW_LEVEL_UPGRADE_TYPE_MEMBER = "member"
+CREW_LEVEL_UPGRADE_TYPE_ABILITY = "ability"
+
+CREW_LEVEL_UP_CONFIRMATION_REQUEST = "Are you sure you want to level up the Crew?\n\n{}"
+CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (

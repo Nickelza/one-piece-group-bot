@@ -396,7 +396,7 @@ def add_powerup(
 
     # Level up
     if reason is CrewChestSpendingReason.LEVEL_UP:
-        crew.level += 1
+        crew.level_up()
 
     crew.chest_amount -= price
     crew.save()

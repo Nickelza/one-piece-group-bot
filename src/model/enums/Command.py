@@ -2,7 +2,13 @@ import resources.Environment as Env
 import src.model.enums.Location as Location
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
-from src.model.enums.Screen import Screen
+from src.model.enums.Screen import (
+    Screen,
+    ONLY_BY_CAPTAIN_OR_FIRST_MATE,
+    ALLOW_WHILE_ARRESTED,
+    ALLOW_DEEPLINK,
+    DEPRECATED,
+)
 
 
 def get_formatted_from_string(string: str):
@@ -50,29 +56,34 @@ class Command:
         :param active: True if the command is active
         :param replaced_by: The command that replaces this command
         :param only_in_reply: True if the command can only be used in reply to a message
-        :param allow_self_reply: True if the command can be used in reply to a message sent by the user
-        :param allow_reply_to_bot: True if the command can be used in reply to a message sent by the bot
+        :param allow_self_reply: True if the command can be used in reply to a message sent by the
+        user
+        :param allow_reply_to_bot: True if the command can be used in reply to a message sent by
+        the bot
         :param allow_while_arrested: True if the command can be used while the user is arrested
         :param required_location: The location required to use the command
         :param parameters: The parameters of the command
         :param message_source: The source of the message
         :param only_by_crew_captain: True if the command can only be used by a Crew Captain
-        :param only_in_reply_to_crew_member: True if the command can only be used in reply to a Crew Member.
-                                             Automatically sets only_in_reply to True if True
+        :param only_in_reply_to_crew_member: True if the command can only be used in reply to a
+        Crew Member. Automatically sets only_in_reply to True if True
         :param only_by_boss: True if the command can only be used by a boss
-        :param allow_reply_to_arrested: True if the command can be used in reply to a message sent by an arrested
-                                        user
-        :param answer_callback: True if the command should answer the callback query in case of error instead of
-                                editing the message
-        :param show_alert: True if the command should show an alert when answering the callback query in case of error
+        :param allow_reply_to_arrested: True if the command can be used in reply to a message sent
+        by an arrested user
+        :param answer_callback: True if the command should answer the callback query in case of
+        error instead of editing the message
+        :param show_alert: True if the command should show an alert when answering the callback
+        query in case of error
         :param only_by_chat_admin: True if the command can only be used by a chat admin
-        :param send_message_if_error: True if a message should be sent if the command isn't authorized
-        :param feature: The feature the command belongs to. If provided, the command will only be allowed in chats
-                        that have the feature enabled
+        :param send_message_if_error: True if a message should be sent if the command isn't
+        authorized
+        :param feature: The feature the command belongs to. If provided, the command will only be
+        allowed in chats that have the feature enabled
         :param allow_deeplink: Allow accessing the command screen via deeplink
-        :param only_by_crew_captain_or_first_mate: True if the command can only be used by a Crew Captain or First Mate
-        :param only_by_crew_captain_or_first_mate_keyboard: True if the command can only be used by a Crew Captain or
-                        First Mate via keyboard
+        :param only_by_crew_captain_or_first_mate: True if the command can only be used by a
+        Crew Captain or First Mate
+        :param only_by_crew_captain_or_first_mate_keyboard: True if the command can only be used
+        by a Crew Captain or First Mate via keyboard
         """
         self.name = name
         self.active = active
@@ -138,48 +149,21 @@ PVT_USER_STATUS = Command("status", Screen.PVT_USER_STATUS, allow_while_arrested
 COMMANDS.append(PVT_USER_STATUS)
 
 # Deprecated
-PVT_SETTINGS_LOCATION_UPDATE = Command("", Screen.PVT_SETTINGS_LOCATION_UPDATE, active=False)
-COMMANDS.append(PVT_SETTINGS_LOCATION_UPDATE)
-GRP_DEVIL_FRUIT_COLLECT = Command("", Screen.GRP_DEVIL_FRUIT_COLLECT, active=False)
-COMMANDS.append(GRP_DEVIL_FRUIT_COLLECT)
+for sc in DEPRECATED:
+    COMMANDS.append(Command("", sc, active=False))
 
 # To allow while arrested
-PVT_SETTINGS = Command("", Screen.PVT_SETTINGS, allow_while_arrested=True)
-COMMANDS.append(PVT_SETTINGS)
-
-PVT_SETTINGS_NOTIFICATIONS = Command(
-    "", Screen.PVT_SETTINGS_NOTIFICATIONS, allow_while_arrested=True
-)
-COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS)
-
-PVT_SETTINGS_NOTIFICATIONS_TYPE = Command(
-    "", Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE, allow_while_arrested=True
-)
-COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS_TYPE)
-
-PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT = Command(
-    "", Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT, allow_while_arrested=True
-)
-COMMANDS.append(PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT)
+for sc in ALLOW_WHILE_ARRESTED:
+    COMMANDS.append(Command("", sc, allow_while_arrested=True))
 
 # To allow deeplink
-PVT_PREDICTION_DETAIL = Command("", Screen.PVT_PREDICTION_DETAIL, allow_deeplink=True)
-COMMANDS.append(PVT_PREDICTION_DETAIL)
+for sc in ALLOW_DEEPLINK:
+    COMMANDS.append(Command("", sc, allow_deeplink=True))
 
-PVT_GAME_GUESS_INPUT = Command("", Screen.PVT_GAME_GUESS_INPUT, allow_deeplink=True)
-COMMANDS.append(PVT_GAME_GUESS_INPUT)
-
-PVT_LOGS_TYPE_DETAIL = Command("", Screen.PVT_LOGS_TYPE_DETAIL, allow_deeplink=True)
-COMMANDS.append(PVT_LOGS_TYPE_DETAIL)
-
-PVT_DEVIL_FRUIT_DETAIL = Command("", Screen.PVT_DEVIL_FRUIT_DETAIL, allow_deeplink=True)
-COMMANDS.append(PVT_DEVIL_FRUIT_DETAIL)
-
-PVT_SETTINGS_TIMEZONE = Command("", Screen.PVT_SETTINGS_TIMEZONE, allow_deeplink=True)
-COMMANDS.append(PVT_SETTINGS_TIMEZONE)
-
-PVT_BOUNTY_LOAN_DETAIL = Command("", Screen.PVT_BOUNTY_LOAN_DETAIL, allow_deeplink=True)
-COMMANDS.append(PVT_BOUNTY_LOAN_DETAIL)
+# To set limitations
+# Only by Captain or first mate
+for sc in ONLY_BY_CAPTAIN_OR_FIRST_MATE:
+    COMMANDS.append(Command("", sc, only_by_crew_captain_or_first_mate=True))
 
 # To set required location
 PVT_LOGS_TYPE_STATS = Command(
@@ -197,16 +181,6 @@ PVT_PREDICTION_CREATE = Command(
     ),
 )
 COMMANDS.append(PVT_PREDICTION_CREATE)
-
-# To set limitations
-PVT_CREW_ABILITY_ACTIVATE = Command(
-    "", Screen.PVT_CREW_ABILITY_ACTIVATE, only_by_crew_captain_or_first_mate=True
-)
-COMMANDS.append(PVT_CREW_ABILITY_ACTIVATE)
-PVT_CREW_ABILITY_ACTIVATE_CONFIRM = Command(
-    "", Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM, only_by_crew_captain_or_first_mate=True
-)
-COMMANDS.append(PVT_CREW_ABILITY_ACTIVATE_CONFIRM)
 
 GRP_GAME_OPPONENT_CONFIRMATION = Command(
     "",

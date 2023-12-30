@@ -22,12 +22,12 @@ async def manage(
     """
 
     crew = get_crew(user=user)
-    inline_keyboard: list[list[Keyboard]] = []
-
-    # Abilities button
-    inline_keyboard.append(
-        [Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)]
-    )
+    inline_keyboard: list[list[Keyboard]] = [
+        # Level button
+        [Keyboard(phrases.PVT_KEY_CREW_LEVEL, screen=Screen.PVT_CREW_LEVEL)],
+        # Abilities button
+        [Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)],
+    ]
 
     await full_message_send(
         context,

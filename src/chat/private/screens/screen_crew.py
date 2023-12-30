@@ -54,12 +54,13 @@ async def manage(
         captain: User = crew.get_captain()
         ot_text = phrases.CREW_OVERVIEW.format(
             escape_valid_markdown_chars(crew.name),
+            crew.level,
             captain.get_markdown_mention(),
             first_mate_text,
             user.get_date_formatted(crew.creation_date),
             get_elapsed_duration(crew.creation_date),
             len(crew.get_members()),
-            Env.CREW_MAX_MEMBERS.get_int(),
+            crew.max_members,
             get_belly_formatted(crew.chest_amount),
             get_crew_abilities_text(crew=crew),
             no_new_members_allowed_text,
