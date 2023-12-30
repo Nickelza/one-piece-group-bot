@@ -109,11 +109,14 @@ def get_crew(
 ) -> Crew:
     """
     Get crew
+
     :param user: The target user
     :param crew_id: The crew id
     :param inbound_keyboard: The inbound keyboard
     :param crew_id_key: The crew id key
-    :param validate_against_crew: The crew to validate against and make sure the user is in the same crew
+    :param validate_against_crew: The crew to validate against and make sure the user is in the
+    same crew
+
     :return: The crew
     """
 
@@ -234,8 +237,9 @@ def get_inactive_captains(latest_leaderboard_appearance: int) -> list[User]:
     active_captains: list[User] = list(query)
 
     # Inactive captains
-    # Have to first get inactive ones else, by using "not in", it will return records for previous leaderboards too
-    # since the user might have been in a leaderboard before N, so it will not be in the latest N leaderboards
+    # Have to first get inactive ones else, by using "not in", it will return records for previous
+    # leaderboards too since the user might have been in a leaderboard before N, so it will not be
+    # in the latest N leaderboards
     # Exclude admins and those exempt from global leaderboard requirement
     inactive_captains = User.select().where(
         (User.crew_role == CrewRole.CAPTAIN)
@@ -377,22 +381,28 @@ async def add_crew_ability(
     )
 
 
-def add_powerup(crew: Crew, acquired_user: User) -> None:
+def add_powerup(
+    crew: Crew, acquired_user: User, reason: CrewChestSpendingReason, price: int
+) -> None:
     """
     Adds a powerup to a crew
 
     :param crew: The crew
     :param acquired_user: The user who acquired the powerup
+    :param reason: The reason
+    :param price: The price
     :return: None
     """
 
-    powerup_price = crew.get_powerup_price()
-    crew.chest_amount -= powerup_price
-    crew.powerup_counter += 1
+    # Level up
+    if reason is CrewChestSpendingReason.LEVEL_UP:
+        crew.level += 1
+
+    crew.chest_amount -= price
     crew.save()
 
     # Add spending record
-    add_chest_spending_record(crew, powerup_price, CrewChestSpendingReason.ABILITY, acquired_user)
+    add_chest_spending_record(crew, price, reason, acquired_user)
 
 
 def add_chest_spending_record(

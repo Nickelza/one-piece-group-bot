@@ -8,6 +8,7 @@ from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.User import User
 from src.model.enums.Screen import Screen
+from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
@@ -86,10 +87,11 @@ async def validate(
         active_abilities = crew.get_active_abilities()
 
         # Insufficient crew chest amount
-        if crew.chest_amount < crew.get_powerup_price():
+        if crew.chest_amount < crew.get_powerup_price(CrewChestSpendingReason.ABILITY):
             raise CrewValidationException(
                 phrases.CREW_ABILITY_INSUFFICIENT_CREW_CHEST.format(
-                    crew.get_crew_chest_formatted(), crew.get_powerup_price_formatted()
+                    crew.get_crew_chest_formatted(),
+                    crew.get_powerup_price_formatted(CrewChestSpendingReason.ABILITY),
                 )
             )
 

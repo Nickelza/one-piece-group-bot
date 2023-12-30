@@ -10,9 +10,11 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
+from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew, add_crew_ability, add_powerup
 from src.service.math_service import get_random_int
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -73,14 +75,14 @@ async def manage(
     await add_crew_ability(context, crew, ability_type, ability_value, acquired_method, user)
 
     # Add powerup
-    powerup_price_formatted = crew.get_powerup_price_formatted()
-    add_powerup(crew, user)
+    ability_price = crew.get_powerup_price(CrewChestSpendingReason.ABILITY)
+    add_powerup(crew, user, CrewChestSpendingReason.ABILITY, ability_price)
 
     ot_text = phrases.CREW_ABILITY_ACTIVATE_SUCCESS.format(
         ability_type.get_description(),
         str(ability_value) + "%",
         Env.CREW_ABILITY_DURATION_DAYS.get_int(),
-        powerup_price_formatted,
+        get_belly_formatted(ability_price),
     )
 
     await full_message_send(
@@ -116,7 +118,7 @@ async def request_confirmation(
         ability_name,
         ability_value_text,
         Env.CREW_ABILITY_DURATION_DAYS.get_int(),
-        crew.get_powerup_price_formatted(),
+        crew.get_powerup_price_formatted(CrewChestSpendingReason.ABILITY),
     )
 
     inline_keyboard: list[list[Keyboard]] = [

@@ -251,6 +251,7 @@ PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = "Demote from First Mate"
 PVT_KEY_CREW_ABILITY = "Abilities"
 PVT_KEY_CREW_ABILITY_ACTIVATE = "Activate"
 PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
+PVT_KEY_CREW_POWERUP = "Power-up"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -821,7 +822,7 @@ CREW_ABILITIES = (
     + "\n{}\n\nNext ability cost: ฿*{}*\nCrew chest: ฿{}"
 )
 CREW_ABILITY_NO_ABILITIES = "\n_No abilities are currently activated in this Crew_"
-CREW_ABILITY_ITEM_TEXT = "\n{}{} \\({}%\\)"
+CREW_ABILITY_ITEM_TEXT = "\n• {}{} \\({}%\\)"
 CREW_ABILITY_ITEM_TEXT_DURATION = "\nRemaining time: {}"
 CREW_ABILITY_INSUFFICIENT_CREW_CHEST = (
     "Insufficient Crew Chest\n\nCrew chest: ฿{}\nAbility cost: ฿{}"
@@ -844,6 +845,18 @@ CREW_ABILITY_ACTIVATE_CHOOSE_CONFIRMATION_REQUEST = (
 )
 CREW_ABILITY_ACTIVATE_SUCCESS = (
     "Ability activated successfully" + CREW_ABILITY_ACTIVATE_CHOOSE_RECAP
+)
+
+# Crew power-up
+CREW_POWERUP = (
+    "*Level*"
+    "\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot."
+    "\n\n_*Current level:*_ {}"
+    "\n\n\n*Abilities*"
+    "\nAbilities mimic the effects of Devil Fruits and are extended to all members of the Crew."
+    "\n\n_*Current abilities:*_"
+    "{}"
+    "\n\nOnly the Crew Captain or First Mate can enable a power-up"
 )
 
 # Bounty Gift

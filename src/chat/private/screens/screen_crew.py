@@ -70,9 +70,9 @@ async def manage(
             [Keyboard(phrases.PVT_KEY_CREW_MEMBERS, screen=Screen.PVT_CREW_MEMBER)]
         )
 
-        # Abilities button
+        # Powerup button
         inline_keyboard.append(
-            [Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)]
+            [Keyboard(phrases.PVT_KEY_CREW_POWERUP, screen=Screen.PVT_CREW_POWERUP)]
         )
 
         if user.is_crew_captain():

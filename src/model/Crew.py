@@ -5,6 +5,7 @@ from peewee import *
 
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
+from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 
@@ -21,7 +22,7 @@ class Crew(BaseModel):
     is_active = BooleanField(default=True)
     disband_date = DateTimeField(null=True)
     chest_amount = BigIntegerField(default=0)
-    powerup_counter = IntegerField(default=0)
+    level = IntegerField(default=1)
     max_abilities = IntegerField(default=1)
     can_promote_first_mate = BooleanField(default=True)
 
@@ -146,34 +147,30 @@ class Crew(BaseModel):
             CrewMemberChestContribution.amount.desc()
         )
 
-    def get_powerup_price(self) -> int:
+    def get_powerup_price(self, reason: CrewChestSpendingReason) -> int:
         """
         Returns the next powerup price
+        :param reason: The reason
         :return: The next powerup price
         """
 
-        if self.powerup_counter == 0:
-            return Env.CREW_POWERUP_BASE_PRICE.get_int()
+        # Not level up, price is current level * BASE_PRICE
+        if reason is not CrewChestSpendingReason.LEVEL_UP:
+            return Env.CREW_POWERUP_BASE_PRICE.get_int() * int(str(self.level))
 
-        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (2 ** int(str(self.powerup_counter)))
+        # Level up, price is double the previous
+        return Env.CREW_POWERUP_BASE_PRICE.get_int() * (2 ** int(str(self.level - 1)))
 
-    def get_powerup_price_formatted(self) -> str:
+    def get_powerup_price_formatted(self, reason: CrewChestSpendingReason) -> str:
         """
         Returns the next powerup price formatted
+        :param reason: The reason
         :return: The next powerup price formatted
         """
 
         from src.service.bounty_service import get_belly_formatted
 
-        return get_belly_formatted(self.get_powerup_price())
-
-    def can_powerup(self) -> bool:
-        """
-        Returns True if the crew can powerup
-        :return: True if the crew can powerup
-        """
-
-        return self.chest_amount >= self.get_powerup_price()
+        return get_belly_formatted(self.get_powerup_price(reason))
 
     def get_crew_chest_formatted(self) -> str:
         """

@@ -41,6 +41,7 @@ from src.chat.private.screens.screen_crew_member_detail_remove import (
     manage as manage_screen_crew_member_detail_remove,
 )
 from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
+from src.chat.private.screens.screen_crew_powerup import manage as manage_screen_crew_powerup
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import (
     manage as manage_screen_devil_fruit_detail,
@@ -245,6 +246,9 @@ async def dispatch_screens(
             case Screen.PVT_CREW_CREATE_OR_EDIT:  # Crew Create or Edit
                 await manage_screen_crew_create_or_edit(update, context, inbound_keyboard, user)
 
+            case Screen.PVT_CREW_POWERUP:  # Crew Powerup
+                await manage_screen_crew_powerup(update, context, inbound_keyboard, user)
+
             case Screen.PVT_CREW_MODIFY:  # Crew Edit
                 await manage_screen_crew_edit(update, context, inbound_keyboard, user)
 
@@ -436,7 +440,8 @@ async def send_system_update_message(
     system_update_user.user = user
 
     try:
-        # In try except because it should never prevent from updating the user model which happens at script end
+        # In try except because it should never prevent from updating the user model which happens
+        # at script end
         await full_message_send(
             context, ot_text, update=update, keyboard=inline_keyboard, new_message=True
         )

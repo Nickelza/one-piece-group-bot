@@ -5,6 +5,7 @@ import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.Screen import Screen
+from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew, get_crew_abilities_text
@@ -47,7 +48,9 @@ async def manage(
     abilities_text = get_crew_abilities_text(active_abilities=active_abilities, add_duration=True)
 
     ot_text = phrases.CREW_ABILITIES.format(
-        abilities_text, crew.get_powerup_price_formatted(), crew.get_crew_chest_formatted()
+        abilities_text,
+        crew.get_powerup_price_formatted(CrewChestSpendingReason.ABILITY),
+        crew.get_crew_chest_formatted(),
     )
 
     await full_message_send(
