@@ -24,7 +24,7 @@ class Crew(BaseModel):
     disband_date: datetime.datetime = DateTimeField(null=True)
     chest_amount: int = BigIntegerField(default=0)
     level: int = IntegerField(default=1)
-    max_abilities: int = IntegerField(default=1)
+    max_abilities: int = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
     can_promote_first_mate: bool = BooleanField(default=True)
     max_members: int = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
 
@@ -247,6 +247,34 @@ class Crew(BaseModel):
         self.level += 1
 
         self.save()
+
+    @staticmethod
+    def reset_level() -> None:
+        """
+        Reset the crew level
+        :return: None
+        """
+
+        # Reset level
+        conditions: list[tuple[bool, int]] = [
+            # If level / 2 is higher than allowed after reset, set to max
+            (
+                (Crew.level / 2) > Env.CREW_MAX_LEVEL_AFTER_RESET.get_int(),
+                Env.CREW_MAX_LEVEL_AFTER_RESET.get_int(),
+            ),
+            # If level / 2 is lower than 1 after reset, set to 1
+            ((Crew.level / 2) < 1, 1),
+        ]
+
+        # Else, set to level / 2
+        case_stmt = Case(None, conditions, Crew.level / 2)
+        Crew.update(level=case_stmt).execute()
+
+        # Reset max allowed members and abilities
+        Crew.update(
+            max_members=(Env.CREW_MAX_MEMBERS.get_int() + fn.ROUND((Crew.level - 1) / 2)),
+            max_abilities=(Env.CREW_MAX_ABILITIES.get_int() + fn.FLOOR((Crew.level - 1) / 2)),
+        ).execute()
 
 
 Crew.create_table()

@@ -230,7 +230,8 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     IncomeTaxEvent.delete().execute()
 
     # Erase all crew chests and delete all contributions from previous crew members
-    # For some reason a direct delete query does not work, had to first get all valid contributions and then delete
+    # For some reason a direct delete query does not work, had to first get all valid contributions
+    # and then delete
     Crew.update(chest_amount=0).execute()
 
     # Still valid contributions
@@ -246,8 +247,8 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )).execute()
 
-    # Reset crew powerup counter
-    Crew.update(powerup_counter=0).execute()
+    # Reset level
+    Crew.reset_level()
 
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET

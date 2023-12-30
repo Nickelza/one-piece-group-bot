@@ -430,7 +430,7 @@ SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment(
 )
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
-TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", "21600")
+TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", default_value="21600")
 
 # BOUNTY
 # How much a single message is worth. Default: 50,000
@@ -818,6 +818,8 @@ CREW_ABILITY_DURATION_DAYS = Environment("CREW_ABILITY_DURATION_DAYS", default_v
 CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE = Environment(
     "CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE", default_value="50"
 )
+# Default maximum number of crew abilities. Default: 1
+CREW_MAX_ABILITIES = Environment("CREW_MAX_ABILITIES", default_value="1")
 # Minimum value percentage for crew random ability. Default: 1%
 CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE = Environment(
     "CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE", default_value="1"
@@ -826,6 +828,8 @@ CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE = Environment(
 CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE = Environment(
     "CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE", default_value="99"
 )
+# Maximum allowed level after level reset. Default: 5
+CREW_MAX_LEVEL_AFTER_RESET = Environment("CREW_MAX_LEVEL_AFTER_RESET", default_value="5")
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment("BOUNTY_GIFT_MIN_AMOUNT", default_value="10000000")
