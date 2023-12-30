@@ -8,7 +8,9 @@ from src.model.enums.SavedMediaName import SavedMediaName
 from src.service.message_service import full_media_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat: GroupChat
+) -> None:
     """
     Manage the silence screen
     :param update: The update object
@@ -24,4 +26,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat:
 
     # Confirmation message
     await full_media_send(
-        context, saved_media_name=SavedMediaName.SILENCE, update=update, caption=phrases.SILENCE_ACTIVE)
+        context,
+        saved_media_name=SavedMediaName.SILENCE,
+        update=update,
+        caption=phrases.SILENCE_ACTIVE,
+    )

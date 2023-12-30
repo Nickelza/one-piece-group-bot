@@ -14,8 +14,9 @@ class IncomeTaxEvent(BaseModel):
     """
     IncomeTaxEvent class
     """
+
     id = PrimaryKeyField()
-    user = ForeignKeyField(User, backref='income_tax_events')
+    user = ForeignKeyField(User, backref="income_tax_events")
     event_id = IntegerField()
     event_type = CharField()
     date = DateTimeField(default=datetime.datetime.now)
@@ -26,7 +27,7 @@ class IncomeTaxEvent(BaseModel):
     contribution_list = TextField()
 
     class Meta:
-        db_table = 'income_tax_event'
+        db_table = "income_tax_event"
 
     def get_tax_deduction_list(self) -> list[IncomeTaxDeduction]:
         """

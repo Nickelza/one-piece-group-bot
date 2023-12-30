@@ -30,11 +30,13 @@ class GameOpponentConfirmationReservedKeys(StrEnum):
     The reserved keys for this screen
     """
 
-    GAME_ID = 'a'
-    CANCEL = 'c'
+    GAME_ID = "a"
+    CANCEL = "c"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard
+) -> None:
     """
     Manage the game screen
     :param update: The update object
@@ -50,16 +52,23 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         return
 
     # User clicked on cancel button or opponent rejected
-    if (GameOpponentConfirmationReservedKeys.CANCEL in inbound_keyboard.info
-            or not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]):
+    if (
+        GameOpponentConfirmationReservedKeys.CANCEL in inbound_keyboard.info
+        or not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]
+    ):
         should_delete_message = True
 
         if ReservedKeyboardKeys.CONFIRM in inbound_keyboard.info:  # Opponent rejected
             should_delete_message = False
             ot_text = phrases.GAME_CHALLENGE_REJECTED.format(mention_markdown_user(game.opponent))
             await full_media_send(
-                context, caption=ot_text, update=update, add_delete_button=True,
-                authorized_users=[game.challenger, game.opponent], edit_only_caption_and_keyboard=True)
+                context,
+                caption=ot_text,
+                update=update,
+                add_delete_button=True,
+                authorized_users=[game.challenger, game.opponent],
+                edit_only_caption_and_keyboard=True,
+            )
 
         await delete_game(context, game, should_delete_message=should_delete_message)
         user.should_update_model = False
@@ -69,18 +78,27 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     if user.bounty < game.wager:
         if game.opponent is not None:
             await delete_game(context, game, should_delete_message=False)
-            await full_media_send(context, caption=phrases.ACTION_INSUFFICIENT_BOUNTY, update=update,
-                                  add_delete_button=True, edit_only_caption_and_keyboard=True)
+            await full_media_send(
+                context,
+                caption=phrases.ACTION_INSUFFICIENT_BOUNTY,
+                update=update,
+                add_delete_button=True,
+                edit_only_caption_and_keyboard=True,
+            )
             user.should_update_model = False
             return
         else:  # Open to everyone, alert
-            await full_message_send(context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, show_alert=True)
+            await full_message_send(
+                context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, show_alert=True
+            )
             return
 
     # Challenger clicked on confirm button
     challenger: User = game.challenger
     if user == challenger:
-        await full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update=update, show_alert=True)
+        await full_message_send(
+            context, phrases.KEYBOARD_USE_UNAUTHORIZED, update=update, show_alert=True
+        )
         return
 
     # Wrong status
@@ -88,13 +106,22 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     # Remove bounty from opponent
-    await add_or_remove_bounty(user, game.wager, add=False, update=update, should_affect_pending_bounty=True,
-                               should_save=True)
+    await add_or_remove_bounty(
+        user,
+        game.wager,
+        add=False,
+        update=update,
+        should_affect_pending_bounty=True,
+        should_save=True,
+    )
 
     # Remove bounty from challenger and set cooldown
-    await add_or_remove_bounty(challenger, game.wager, add=False, should_affect_pending_bounty=True, update=update)
+    await add_or_remove_bounty(
+        challenger, game.wager, add=False, should_affect_pending_bounty=True, update=update
+    )
     challenger.game_cooldown_end_date = get_ability_adjusted_datetime(
-        user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int())
+        user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int()
+    )
     challenger.save()
 
     game.wager += game.wager
@@ -105,8 +132,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     await dispatch_game(update, context, user, inbound_keyboard, game)
 
 
-async def dispatch_game(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                        game: Game) -> None:
+async def dispatch_game(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    game: Game,
+) -> None:
     """
     Dispatch game
     :param update: The update

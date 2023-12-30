@@ -8,12 +8,15 @@ class DisabledNotification(BaseModel):
     """
     DisabledNotification class
     """
+
     id = PrimaryKeyField()
-    user = ForeignKeyField(User, backref='disabled_notification_users', on_delete='CASCADE', on_update='CASCADE')
+    user = ForeignKeyField(
+        User, backref="disabled_notification_users", on_delete="CASCADE", on_update="CASCADE"
+    )
     type = SmallIntegerField(null=True)
 
     class Meta:
-        db_table = 'disabled_notification'
+        db_table = "disabled_notification"
 
 
 DisabledNotification.create_table()

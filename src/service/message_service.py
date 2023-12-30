@@ -4,8 +4,20 @@ import logging
 import re
 from uuid import uuid4
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMedia, InputMediaPhoto, \
-    InputMediaVideo, InputMediaAnimation, Chat, InlineQueryResult, InlineQueryResultArticle, InputTextMessageContent
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+    InputMedia,
+    InputMediaPhoto,
+    InputMediaVideo,
+    InputMediaAnimation,
+    Chat,
+    InlineQueryResult,
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+)
 from telegram.error import BadRequest, TelegramError, Forbidden
 from telegram.ext import ContextTypes
 from telegram.helpers import mention_markdown
@@ -35,12 +47,12 @@ def escape_invalid_markdown_chars(text: str) -> str:
     :return: Escaped text
     """
 
-    escape_chars = r'~>#+-=|{}.!'
+    escape_chars = r"~>#+-=|{}.!"
 
-    text = re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+    text = re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
     # Escape eventual quadruple backslashes with a double backslash
-    text = text.replace('\\\\', '\\')
+    text = text.replace("\\\\", "\\")
 
     return text
 
@@ -52,12 +64,14 @@ def escape_valid_markdown_chars(text: str) -> str:
     :return: Escaped text
     """
 
-    escape_chars = r'_*[]()'
+    escape_chars = r"_*[]()"
 
-    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+    return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
 
-def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat: bool = False) -> int:
+def get_chat_id(
+    update: Update = None, chat_id: int = None, send_in_private_chat: bool = False
+) -> int:
     """
     Get chat id
     :param update: Update object. Required if chat_id is None
@@ -78,12 +92,20 @@ def get_chat_id(update: Update = None, chat_id: int = None, send_in_private_chat
     return update.effective_chat.id
 
 
-def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_delete_button: bool = False,
-                 authorized_users_tg_ids: list = None, inbound_keyboard: Keyboard = None,
-                 only_authorized_users_can_interact: bool = True, excluded_keys_from_back_button: list[str] = None,
-                 back_screen_index: int = 0, use_close_delete: bool = False,
-                 should_add_current_user_to_authorized: bool = True, user: User = None, add_back_button: bool = True,
-                 ) -> InlineKeyboardMarkup | None:
+def get_keyboard(
+    keyboard: list[list[Keyboard]],
+    update: Update = None,
+    add_delete_button: bool = False,
+    authorized_users_tg_ids: list = None,
+    inbound_keyboard: Keyboard = None,
+    only_authorized_users_can_interact: bool = True,
+    excluded_keys_from_back_button: list[str] = None,
+    back_screen_index: int = 0,
+    use_close_delete: bool = False,
+    should_add_current_user_to_authorized: bool = True,
+    user: User = None,
+    add_back_button: bool = True,
+) -> InlineKeyboardMarkup | None:
     """
     Get keyboard markup
 
@@ -111,7 +133,10 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
     if authorized_users_tg_ids is None:
         authorized_users_tg_ids = []
     try:
-        if update.effective_user.id not in authorized_users_tg_ids and should_add_current_user_to_authorized:
+        if (
+            update.effective_user.id not in authorized_users_tg_ids
+            and should_add_current_user_to_authorized
+        ):
             authorized_users_tg_ids.append(update.effective_user.id)
     except AttributeError:
         pass
@@ -132,8 +157,11 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                     if button.url is not None:
                         keyboard_row.append(InlineKeyboardButton(button.text, url=button.url))
                     elif button.switch_inline_query is not None:
-                        keyboard_row.append(InlineKeyboardButton(button.text,
-                                                                 switch_inline_query=button.switch_inline_query))
+                        keyboard_row.append(
+                            InlineKeyboardButton(
+                                button.text, switch_inline_query=button.switch_inline_query
+                            )
+                        )
                     else:
                         # Already has some callback_data. If it has no data, nothing should be added
                         # callback_data is a string initialized for an empty dict, so even if empty the string will have
@@ -141,33 +169,61 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
                         # dict is empty.
                         if json.loads(button.callback_data):
                             # Add information about previous screen
-                            if len(button.previous_screen_list) == 0:  # Do not alter if already set
-                                if inbound_keyboard is not None and inbound_keyboard.screen is not None:
-                                    button.previous_screen_list = inbound_keyboard.previous_screen_list.copy()
-                                    if (len(button.previous_screen_list) > 0
-                                            and button.previous_screen_list[-1]
-                                            != inbound_keyboard.screen != button.screen):
+                            if (
+                                len(button.previous_screen_list) == 0
+                            ):  # Do not alter if already set
+                                if (
+                                    inbound_keyboard is not None
+                                    and inbound_keyboard.screen is not None
+                                ):
+                                    button.previous_screen_list = (
+                                        inbound_keyboard.previous_screen_list.copy()
+                                    )
+                                    if (
+                                        len(button.previous_screen_list) > 0
+                                        and button.previous_screen_list[-1]
+                                        != inbound_keyboard.screen
+                                        != button.screen
+                                    ):
                                         button.previous_screen_list.append(inbound_keyboard.screen)
 
                             # Add list of authorized users
                             if button.only_authorized_users_can_interact:
-                                if only_authorized_users_can_interact and button.inherit_authorized_users:
-                                    if update is not None and update.effective_chat.type != Chat.PRIVATE:
-                                        button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = authorized_users_ids
-                                elif not button.inherit_authorized_users and len(button.authorized_users) > 0:
+                                if (
+                                    only_authorized_users_can_interact
+                                    and button.inherit_authorized_users
+                                ):
+                                    if (
+                                        update is not None
+                                        and update.effective_chat.type != Chat.PRIVATE
+                                    ):
+                                        button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = (
+                                            authorized_users_ids
+                                        )
+                                elif (
+                                    not button.inherit_authorized_users
+                                    and len(button.authorized_users) > 0
+                                ):
                                     button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
-                                        u.id for u in button.authorized_users if u is not None]
+                                        u.id for u in button.authorized_users if u is not None
+                                    ]
 
-                            if (ReservedKeyboardKeys.AUTHORIZED_USER in button.info
-                                    and len(button.info[ReservedKeyboardKeys.AUTHORIZED_USER]) == 0):
+                            if (
+                                ReservedKeyboardKeys.AUTHORIZED_USER in button.info
+                                and len(button.info[ReservedKeyboardKeys.AUTHORIZED_USER]) == 0
+                            ):
                                 del button.info[ReservedKeyboardKeys.AUTHORIZED_USER]
 
                             button.refresh_callback_data()
 
                         try:
-                            keyboard_row.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+                            keyboard_row.append(
+                                InlineKeyboardButton(
+                                    button.text, callback_data=button.callback_data
+                                )
+                            )
                         except AttributeError:
-                            logging.error(f'Button {button} does not have a callback_data')
+                            logging.error(f"Button {button} does not have a callback_data")
                             pass
 
                 keyboard_list.append(keyboard_row)
@@ -176,22 +232,36 @@ def get_keyboard(keyboard: list[list[Keyboard]], update: Update = None, add_dele
             if not len(authorized_users_ids) > 0:
                 raise Exception("No authorized users provided for delete button")
 
-            delete_button = get_delete_button(authorized_users_ids, use_close_delete=use_close_delete)
-            keyboard_list.append([InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)])
+            delete_button = get_delete_button(
+                authorized_users_ids, use_close_delete=use_close_delete
+            )
+            keyboard_list.append([
+                InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)
+            ])
 
         if inbound_keyboard is not None and add_back_button:
-            back_button = get_back_button(inbound_keyboard, excluded_keys=excluded_keys_from_back_button,
-                                          back_screen_index=back_screen_index, user=user)
+            back_button = get_back_button(
+                inbound_keyboard,
+                excluded_keys=excluded_keys_from_back_button,
+                back_screen_index=back_screen_index,
+                user=user,
+            )
             back_button.refresh_callback_data()
-            keyboard_list.append([InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)])
+            keyboard_list.append(
+                [InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)]
+            )
 
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
 
     return keyboard_markup
 
 
-def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to_message_id: int = None,
-                            quote_if_group: bool = True) -> int | None:
+def get_reply_to_message_id(
+    update: Update = None,
+    quote: bool = False,
+    reply_to_message_id: int = None,
+    quote_if_group: bool = True,
+) -> int | None:
     """
     Get reply message id
     :param update: Update object. Required if reply_to_message_id is None
@@ -208,7 +278,10 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
     # Group message quote
     try:
         if quote_if_group:
-            if update.effective_chat.type == Chat.GROUP or update.effective_chat.type == Chat.SUPERGROUP:
+            if (
+                update.effective_chat.type == Chat.GROUP
+                or update.effective_chat.type == Chat.SUPERGROUP
+            ):
                 return update.effective_message.message_id
     except AttributeError:
         pass
@@ -222,21 +295,40 @@ def get_reply_to_message_id(update: Update = None, quote: bool = False, reply_to
         return update.effective_message.message_id
 
 
-async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None,
-                            chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
-                            answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
-                            disable_notification: bool = True, reply_to_message_id: int = None,
-                            parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False, quote_if_group: bool = True,
-                            protect_content: bool = False, disable_web_page_preview: bool = True,
-                            allow_sending_without_reply: bool = True, add_delete_button: bool = False,
-                            authorized_users: list = None, inbound_keyboard: Keyboard = None,
-                            send_in_private_chat: bool = False, only_authorized_users_can_interact: bool = True,
-                            edit_message_id: int = None, previous_screens: list[Screen] = None,
-                            excluded_keys_from_back_button: list[str] = None, back_screen_index: int = 0,
-                            previous_screen_list_keyboard_info: dict = None, use_close_delete: bool = False,
-                            group_chat: GroupChat = None, ignore_exception: bool = False,
-                            user: User = None, from_exception: bool = False, add_back_button: bool = True
-                            ) -> Message | bool:
+async def full_message_send(
+    context: ContextTypes.DEFAULT_TYPE,
+    text: str,
+    update: Update = None,
+    chat_id: int | str = None,
+    keyboard: list[list[Keyboard]] = None,
+    answer_callback: bool = False,
+    show_alert: bool = False,
+    new_message: bool = False,
+    disable_notification: bool = True,
+    reply_to_message_id: int = None,
+    parse_mode: str = c.TG_DEFAULT_PARSE_MODE,
+    quote: bool = False,
+    quote_if_group: bool = True,
+    protect_content: bool = False,
+    disable_web_page_preview: bool = True,
+    allow_sending_without_reply: bool = True,
+    add_delete_button: bool = False,
+    authorized_users: list = None,
+    inbound_keyboard: Keyboard = None,
+    send_in_private_chat: bool = False,
+    only_authorized_users_can_interact: bool = True,
+    edit_message_id: int = None,
+    previous_screens: list[Screen] = None,
+    excluded_keys_from_back_button: list[str] = None,
+    back_screen_index: int = 0,
+    previous_screen_list_keyboard_info: dict = None,
+    use_close_delete: bool = False,
+    group_chat: GroupChat = None,
+    ignore_exception: bool = False,
+    user: User = None,
+    from_exception: bool = False,
+    add_back_button: bool = True,
+) -> Message | bool:
     """
     Send a message
 
@@ -292,39 +384,59 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
         chat_id = group.tg_group_id
 
     if previous_screens is not None and (inbound_keyboard is None or from_exception):
-        inbound_keyboard = Keyboard('', previous_screen_list=previous_screens, screen=previous_screens[-1],
-                                    info=previous_screen_list_keyboard_info)
+        inbound_keyboard = Keyboard(
+            "",
+            previous_screen_list=previous_screens,
+            screen=previous_screens[-1],
+            info=previous_screen_list_keyboard_info,
+        )
 
-    chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
-    keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
-                                   authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
-                                   only_authorized_users_can_interact=only_authorized_users_can_interact,
-                                   excluded_keys_from_back_button=excluded_keys_from_back_button,
-                                   back_screen_index=back_screen_index, use_close_delete=use_close_delete,
-                                   user=user, add_back_button=add_back_button)
+    chat_id = get_chat_id(
+        update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat
+    )
+    keyboard_markup = get_keyboard(
+        keyboard,
+        update=update,
+        add_delete_button=add_delete_button,
+        authorized_users_tg_ids=authorized_users,
+        inbound_keyboard=inbound_keyboard,
+        only_authorized_users_can_interact=only_authorized_users_can_interact,
+        excluded_keys_from_back_button=excluded_keys_from_back_button,
+        back_screen_index=back_screen_index,
+        use_close_delete=use_close_delete,
+        user=user,
+        add_back_button=add_back_button,
+    )
 
     # New message
-    if (new_message or update is None or update.callback_query is None) and edit_message_id is None:
+    if (
+        new_message or update is None or update.callback_query is None
+    ) and edit_message_id is None:
         # Message in reply to
-        reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
-                                                      reply_to_message_id=reply_to_message_id,
-                                                      quote_if_group=quote_if_group)
+        reply_to_message_id = get_reply_to_message_id(
+            update=update,
+            quote=quote,
+            reply_to_message_id=reply_to_message_id,
+            quote_if_group=quote_if_group,
+        )
 
         try:
-            message: Message = await context.bot.send_message(text=text,
-                                                              chat_id=chat_id,
-                                                              reply_markup=keyboard_markup,
-                                                              disable_web_page_preview=disable_web_page_preview,
-                                                              parse_mode=parse_mode,
-                                                              disable_notification=disable_notification,
-                                                              reply_to_message_id=reply_to_message_id,
-                                                              allow_sending_without_reply=allow_sending_without_reply,
-                                                              protect_content=protect_content,
-                                                              message_thread_id=topic_id)
+            message: Message = await context.bot.send_message(
+                text=text,
+                chat_id=chat_id,
+                reply_markup=keyboard_markup,
+                disable_web_page_preview=disable_web_page_preview,
+                parse_mode=parse_mode,
+                disable_notification=disable_notification,
+                reply_to_message_id=reply_to_message_id,
+                allow_sending_without_reply=allow_sending_without_reply,
+                protect_content=protect_content,
+                message_thread_id=topic_id,
+            )
             return message
         except TelegramError as e:
             if ignore_exception:
-                logging.error(f'Error while sending message: {e}')
+                logging.error(f"Error while sending message: {e}")
                 return False
             raise e
 
@@ -334,20 +446,29 @@ async def full_message_send(context: ContextTypes.DEFAULT_TYPE, text: str, updat
 
     # Answer callback
     if answer_callback:
-        return await context.bot.answer_callback_query(update.callback_query.id, text=text, show_alert=show_alert)
+        return await context.bot.answer_callback_query(
+            update.callback_query.id, text=text, show_alert=show_alert
+        )
 
     # Edit message
-    edit_message_id = edit_message_id if edit_message_id is not None else update.callback_query.message.message_id
-    return await context.bot.edit_message_text(text=text,
-                                               chat_id=chat_id,
-                                               reply_markup=keyboard_markup,
-                                               parse_mode=parse_mode,
-                                               disable_web_page_preview=disable_web_page_preview,
-                                               message_id=edit_message_id)
+    edit_message_id = (
+        edit_message_id
+        if edit_message_id is not None
+        else update.callback_query.message.message_id
+    )
+    return await context.bot.edit_message_text(
+        text=text,
+        chat_id=chat_id,
+        reply_markup=keyboard_markup,
+        parse_mode=parse_mode,
+        disable_web_page_preview=disable_web_page_preview,
+        message_id=edit_message_id,
+    )
 
 
-def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = None,
-                                     parse_mode: str = c.TG_DEFAULT_PARSE_MODE) -> InputMedia:
+def get_input_media_from_saved_media(
+    saved_media: SavedMedia, caption: str = None, parse_mode: str = c.TG_DEFAULT_PARSE_MODE
+) -> InputMedia:
     """
     Get InputMedia object from SavedMedia object
     :param saved_media: SavedMedia object
@@ -358,28 +479,52 @@ def get_input_media_from_saved_media(saved_media: SavedMedia, caption: str = Non
 
     match saved_media.type:
         case SavedMediaType.PHOTO:
-            return InputMediaPhoto(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
+            return InputMediaPhoto(
+                media=saved_media.media_id, caption=caption, parse_mode=parse_mode
+            )
         case SavedMediaType.VIDEO:
-            return InputMediaVideo(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
+            return InputMediaVideo(
+                media=saved_media.media_id, caption=caption, parse_mode=parse_mode
+            )
         case SavedMediaType.ANIMATION:
-            return InputMediaAnimation(media=saved_media.media_id, caption=caption, parse_mode=parse_mode)
+            return InputMediaAnimation(
+                media=saved_media.media_id, caption=caption, parse_mode=parse_mode
+            )
         case _:
-            raise ValueError(f'Invalid media type: {saved_media.type}')
+            raise ValueError(f"Invalid media type: {saved_media.type}")
 
 
-async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: SavedMedia = None, update: Update = None,
-                          chat_id: int | str = None, caption: str = None, keyboard: list[list[Keyboard]] = None,
-                          answer_callback: bool = False, show_alert: bool = False, new_message: bool = False,
-                          disable_notification: bool = True, reply_to_message_id: int = None,
-                          protect_content: bool = False, parse_mode: str = c.TG_DEFAULT_PARSE_MODE, quote: bool = False,
-                          quote_if_group: bool = True, allow_sending_without_reply: bool = True,
-                          edit_only_keyboard: bool = False, edit_only_caption_and_keyboard: bool = False,
-                          add_delete_button: bool = False, authorized_users: list = None,
-                          inbound_keyboard: Keyboard = None, send_in_private_chat: bool = False,
-                          only_authorized_users_can_interact: bool = True,
-                          saved_media_name: SavedMediaName = None, group_chat: GroupChat = None,
-                          exceptions_to_ignore: list[Exception] = None, ignore_forbidden_exception: bool = False,
-                          edit_message_id: int = None, ignore_bad_request_exception: bool = False) -> Message | bool:
+async def full_media_send(
+    context: ContextTypes.DEFAULT_TYPE,
+    saved_media: SavedMedia = None,
+    update: Update = None,
+    chat_id: int | str = None,
+    caption: str = None,
+    keyboard: list[list[Keyboard]] = None,
+    answer_callback: bool = False,
+    show_alert: bool = False,
+    new_message: bool = False,
+    disable_notification: bool = True,
+    reply_to_message_id: int = None,
+    protect_content: bool = False,
+    parse_mode: str = c.TG_DEFAULT_PARSE_MODE,
+    quote: bool = False,
+    quote_if_group: bool = True,
+    allow_sending_without_reply: bool = True,
+    edit_only_keyboard: bool = False,
+    edit_only_caption_and_keyboard: bool = False,
+    add_delete_button: bool = False,
+    authorized_users: list = None,
+    inbound_keyboard: Keyboard = None,
+    send_in_private_chat: bool = False,
+    only_authorized_users_can_interact: bool = True,
+    saved_media_name: SavedMediaName = None,
+    group_chat: GroupChat = None,
+    exceptions_to_ignore: list[Exception] = None,
+    ignore_forbidden_exception: bool = False,
+    edit_message_id: int = None,
+    ignore_bad_request_exception: bool = False,
+) -> Message | bool:
     """
     Send a media
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -432,17 +577,25 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
 
     # Media id should be saved to avoid re-uploading each time
     should_save_media_id = False
-    if saved_media is not None and saved_media.file_name is not None and not isinstance(saved_media.media_id, str):
+    if (
+        saved_media is not None
+        and saved_media.file_name is not None
+        and not isinstance(saved_media.media_id, str)
+    ):
         # Try to load media id from context bot data
         try:
             if saved_media.name is not None:
-                saved_media.media_id = get_bot_context_data(context, ContextDataKey.SAVED_MEDIA,
-                                                            inner_key=saved_media.name, tolerate_key_exception=False)
+                saved_media.media_id = get_bot_context_data(
+                    context,
+                    ContextDataKey.SAVED_MEDIA,
+                    inner_key=saved_media.name,
+                    tolerate_key_exception=False,
+                )
             else:
                 raise KeyError
         except KeyError:
             # Load media id from file
-            saved_media.media_id = open(saved_media.file_name, 'rb')
+            saved_media.media_id = open(saved_media.file_name, "rb")
             should_save_media_id = saved_media.name is not None
 
     topic_id = None
@@ -451,18 +604,28 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
         group: Group = group_chat.group
         chat_id = group.tg_group_id
 
-    chat_id = get_chat_id(update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat)
-    keyboard_markup = get_keyboard(keyboard, update=update, add_delete_button=add_delete_button,
-                                   authorized_users_tg_ids=authorized_users, inbound_keyboard=inbound_keyboard,
-                                   only_authorized_users_can_interact=only_authorized_users_can_interact)
+    chat_id = get_chat_id(
+        update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat
+    )
+    keyboard_markup = get_keyboard(
+        keyboard,
+        update=update,
+        add_delete_button=add_delete_button,
+        authorized_users_tg_ids=authorized_users,
+        inbound_keyboard=inbound_keyboard,
+        only_authorized_users_can_interact=only_authorized_users_can_interact,
+    )
 
     is_edit = edit_message_id is not None or edit_only_keyboard or edit_only_caption_and_keyboard
     try:
         # New message
         if (new_message or update is None or update.callback_query is None) and not is_edit:
-            reply_to_message_id = get_reply_to_message_id(update=update, quote=quote,
-                                                          reply_to_message_id=reply_to_message_id,
-                                                          quote_if_group=quote_if_group)
+            reply_to_message_id = get_reply_to_message_id(
+                update=update,
+                quote=quote,
+                reply_to_message_id=reply_to_message_id,
+                quote_if_group=quote_if_group,
+            )
 
             match saved_media.type:
                 # Photo
@@ -477,7 +640,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                         reply_to_message_id=reply_to_message_id,
                         allow_sending_without_reply=allow_sending_without_reply,
                         protect_content=protect_content,
-                        message_thread_id=topic_id)
+                        message_thread_id=topic_id,
+                    )
 
                 case SavedMediaType.VIDEO:  # Video
                     message: Message = await context.bot.send_video(
@@ -490,7 +654,8 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                         reply_to_message_id=reply_to_message_id,
                         allow_sending_without_reply=allow_sending_without_reply,
                         protect_content=protect_content,
-                        message_thread_id=topic_id)
+                        message_thread_id=topic_id,
+                    )
 
                 case SavedMediaType.ANIMATION:  # Animation
                     message: Message = await context.bot.send_animation(
@@ -503,14 +668,19 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
                         reply_to_message_id=reply_to_message_id,
                         allow_sending_without_reply=allow_sending_without_reply,
                         protect_content=protect_content,
-                        message_thread_id=topic_id)
+                        message_thread_id=topic_id,
+                    )
                 case _:
-                    raise ValueError(f'Invalid saved media type: {saved_media.type}')
+                    raise ValueError(f"Invalid saved media type: {saved_media.type}")
 
             if should_save_media_id:
                 saved_media.media_id = message.photo[-1].file_id
-                set_bot_context_data(context, ContextDataKey.SAVED_MEDIA, saved_media.media_id,
-                                     inner_key=saved_media.name)
+                set_bot_context_data(
+                    context,
+                    ContextDataKey.SAVED_MEDIA,
+                    saved_media.media_id,
+                    inner_key=saved_media.name,
+                )
 
             return message
 
@@ -520,49 +690,70 @@ async def full_media_send(context: ContextTypes.DEFAULT_TYPE, saved_media: Saved
 
         # Answer callback
         if answer_callback:
-            return await context.bot.answer_callback_query(update.callback_query.id, text=caption,
-                                                           show_alert=show_alert)
+            return await context.bot.answer_callback_query(
+                update.callback_query.id, text=caption, show_alert=show_alert
+            )
 
-        edit_message_id = edit_message_id if edit_message_id is not None else update.callback_query.message.message_id
+        edit_message_id = (
+            edit_message_id
+            if edit_message_id is not None
+            else update.callback_query.message.message_id
+        )
 
         # Edit only keyboard
         if edit_only_keyboard:
-            return await context.bot.edit_message_reply_markup(chat_id=chat_id,
-                                                               message_id=edit_message_id,
-                                                               reply_markup=keyboard_markup)
+            return await context.bot.edit_message_reply_markup(
+                chat_id=chat_id, message_id=edit_message_id, reply_markup=keyboard_markup
+            )
 
         # Edit only caption and keyboard
         if edit_only_caption_and_keyboard:
-            return await context.bot.edit_message_caption(chat_id=chat_id,
-                                                          message_id=edit_message_id,
-                                                          caption=caption,
-                                                          reply_markup=keyboard_markup)
+            return await context.bot.edit_message_caption(
+                chat_id=chat_id,
+                message_id=edit_message_id,
+                caption=caption,
+                reply_markup=keyboard_markup,
+            )
 
         # Edit full media
-        input_media: InputMedia = get_input_media_from_saved_media(saved_media=saved_media, caption=caption)
-        return await context.bot.edit_message_media(chat_id=chat_id,
-                                                    message_id=edit_message_id,
-                                                    media=input_media,
-                                                    reply_markup=keyboard_markup)
+        input_media: InputMedia = get_input_media_from_saved_media(
+            saved_media=saved_media, caption=caption
+        )
+        return await context.bot.edit_message_media(
+            chat_id=chat_id,
+            message_id=edit_message_id,
+            media=input_media,
+            reply_markup=keyboard_markup,
+        )
     except Exception as e:
         for e_to_ignore in exceptions_to_ignore:
             if isinstance(e, e_to_ignore):
-                logging.error(f'Error while sending message: {e}')
+                logging.error(f"Error while sending message: {e}")
                 return False
 
         raise e
 
 
-async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None,
-                                             chat_id: int | str = None, keyboard: list[list[Keyboard]] = None,
-                                             parse_mode: str = c.TG_DEFAULT_PARSE_MODE, protect_content: bool = False,
-                                             disable_web_page_preview: bool = True, edit_only_keyboard: bool = False,
-                                             edit_only_caption_and_keyboard: bool = True,
-                                             add_delete_button: bool = False, authorized_users: list = None,
-                                             answer_callback: bool = False, show_alert: bool = False,
-                                             inbound_keyboard: Keyboard = None, previous_screens: list[Screen] = None,
-                                             from_exception: bool = False,
-                                             previous_screen_list_keyboard_info: dict = None) -> Message:
+async def full_message_or_media_send_or_edit(
+    context: ContextTypes.DEFAULT_TYPE,
+    text: str,
+    update: Update = None,
+    chat_id: int | str = None,
+    keyboard: list[list[Keyboard]] = None,
+    parse_mode: str = c.TG_DEFAULT_PARSE_MODE,
+    protect_content: bool = False,
+    disable_web_page_preview: bool = True,
+    edit_only_keyboard: bool = False,
+    edit_only_caption_and_keyboard: bool = True,
+    add_delete_button: bool = False,
+    authorized_users: list = None,
+    answer_callback: bool = False,
+    show_alert: bool = False,
+    inbound_keyboard: Keyboard = None,
+    previous_screens: list[Screen] = None,
+    from_exception: bool = False,
+    previous_screen_list_keyboard_info: dict = None,
+) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
     :param context: ContextTypes.DEFAULT_TYPE object
@@ -589,22 +780,41 @@ async def full_message_or_media_send_or_edit(context: ContextTypes.DEFAULT_TYPE,
     """
 
     try:
-        return await full_message_send(context, text, update=update, chat_id=chat_id, keyboard=keyboard,
-                                       answer_callback=answer_callback, show_alert=show_alert, parse_mode=parse_mode,
-                                       protect_content=protect_content,
-                                       disable_web_page_preview=disable_web_page_preview,
-                                       add_delete_button=add_delete_button, authorized_users=authorized_users,
-                                       inbound_keyboard=inbound_keyboard, previous_screens=previous_screens,
-                                       from_exception=from_exception,
-                                       previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+        return await full_message_send(
+            context,
+            text,
+            update=update,
+            chat_id=chat_id,
+            keyboard=keyboard,
+            answer_callback=answer_callback,
+            show_alert=show_alert,
+            parse_mode=parse_mode,
+            protect_content=protect_content,
+            disable_web_page_preview=disable_web_page_preview,
+            add_delete_button=add_delete_button,
+            authorized_users=authorized_users,
+            inbound_keyboard=inbound_keyboard,
+            previous_screens=previous_screens,
+            from_exception=from_exception,
+            previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
+        )
     except BadRequest:
-        return await full_media_send(context, caption=text, update=update, chat_id=chat_id, keyboard=keyboard,
-                                     parse_mode=parse_mode, add_delete_button=add_delete_button,
-                                     edit_only_keyboard=edit_only_keyboard,
-                                     edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
-                                     authorized_users=authorized_users, protect_content=protect_content,
-                                     answer_callback=answer_callback, show_alert=show_alert,
-                                     inbound_keyboard=inbound_keyboard)
+        return await full_media_send(
+            context,
+            caption=text,
+            update=update,
+            chat_id=chat_id,
+            keyboard=keyboard,
+            parse_mode=parse_mode,
+            add_delete_button=add_delete_button,
+            edit_only_keyboard=edit_only_keyboard,
+            edit_only_caption_and_keyboard=edit_only_caption_and_keyboard,
+            authorized_users=authorized_users,
+            protect_content=protect_content,
+            answer_callback=answer_callback,
+            show_alert=show_alert,
+            inbound_keyboard=inbound_keyboard,
+        )
 
 
 async def full_inline_query_answer(update: Update, items: list[ContextDataValue]) -> bool:
@@ -626,10 +836,15 @@ async def full_inline_query_answer(update: Update, items: list[ContextDataValue]
             text = item.text
 
         keyboard_markup = get_keyboard(item.keyboard) if item.keyboard is not None else None
-        results.append(InlineQueryResultArticle(
-            id=str(uuid4()), title=item.title, description=item.description,
-            input_message_content=InputTextMessageContent(escape_invalid_markdown_chars(text)),
-            reply_markup=keyboard_markup))
+        results.append(
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title=item.title,
+                description=item.description,
+                input_message_content=InputTextMessageContent(escape_invalid_markdown_chars(text)),
+                reply_markup=keyboard_markup,
+            )
+        )
 
     await update.inline_query.answer(results)
 
@@ -662,34 +877,54 @@ def get_image_preview(image_url: str) -> str:
     """
     Create an image preview
     """
-    return f'[​]({image_url})'
+    return f"[​]({image_url})"
 
 
-def get_delete_button(user_ids: list[int], use_close_delete=False, button_text: str = None) -> Keyboard:
+def get_delete_button(
+    user_ids: list[int], use_close_delete=False, button_text: str = None
+) -> Keyboard:
     """
     Create a delete button
     :param user_ids: List of users ids that can operate the delete button
     :param use_close_delete: True if the close button should be used instead of the delete button
     :param button_text: Text of the button
     """
-    keyboard_data: dict = {ReservedKeyboardKeys.AUTHORIZED_USER: user_ids, ReservedKeyboardKeys.DELETE: True}
+    keyboard_data: dict = {
+        ReservedKeyboardKeys.AUTHORIZED_USER: user_ids,
+        ReservedKeyboardKeys.DELETE: True,
+    }
 
     if button_text is None:
-        button_text = phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
+        button_text = (
+            phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
+        )
 
     return Keyboard(button_text, keyboard_data)
 
 
-def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str = phrases.KEYBOARD_OPTION_YES,
-                        no_text: str = phrases.KEYBOARD_OPTION_NO, primary_key: int = None,
-                        extra_keys: dict = None, yes_screen: Screen = None, no_screen: Screen = None,
-                        yes_extra_keys: dict = None, no_extra_keys: dict = None,
-                        confirm_key: str = ReservedKeyboardKeys.CONFIRM, inbound_keyboard: Keyboard = None,
-                        yes_is_back_button: bool = False, no_is_back_button: bool = False,
-                        yes_is_delete_button: bool = False, no_is_delete_button: bool = False,
-                        add_inbound_key_info: bool = False, keys_to_exclude: list[str] = None,
-                        exclude_yes_button: bool = False, exclude_no_button: bool = False,
-                        authorized_users: list[User] = None) -> list[Keyboard]:
+def get_yes_no_keyboard(
+    user: User = None,
+    screen: Screen = None,
+    yes_text: str = phrases.KEYBOARD_OPTION_YES,
+    no_text: str = phrases.KEYBOARD_OPTION_NO,
+    primary_key: int = None,
+    extra_keys: dict = None,
+    yes_screen: Screen = None,
+    no_screen: Screen = None,
+    yes_extra_keys: dict = None,
+    no_extra_keys: dict = None,
+    confirm_key: str = ReservedKeyboardKeys.CONFIRM,
+    inbound_keyboard: Keyboard = None,
+    yes_is_back_button: bool = False,
+    no_is_back_button: bool = False,
+    yes_is_delete_button: bool = False,
+    no_is_delete_button: bool = False,
+    add_inbound_key_info: bool = False,
+    keys_to_exclude: list[str] = None,
+    exclude_yes_button: bool = False,
+    exclude_no_button: bool = False,
+    authorized_users: list[User] = None,
+) -> list[Keyboard]:
     """
     Create a yes/no keyboard
 
@@ -730,7 +965,7 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
         if inbound_keyboard is not None:
             screen = inbound_keyboard.screen
         else:
-            raise ValueError('screen or yes_screen and no_screen must be specified')
+            raise ValueError("screen or yes_screen and no_screen must be specified")
 
     keys_to_exclude = keys_to_exclude if keys_to_exclude is not None else []
 
@@ -759,45 +994,81 @@ def get_yes_no_keyboard(user: User = None, screen: Screen = None, yes_text: str 
     # Yes
     if not exclude_yes_button:
         if yes_is_back_button:
-            keyboard_line.append(get_back_button(inbound_keyboard, key_text=yes_text, user=user,
-                                                 info=default_keyboard_data))
+            keyboard_line.append(
+                get_back_button(
+                    inbound_keyboard, key_text=yes_text, user=user, info=default_keyboard_data
+                )
+            )
         elif yes_is_delete_button:
-            keyboard_line.append(get_delete_button([u.tg_user_id for u in authorized_users], button_text=yes_text))
+            keyboard_line.append(
+                get_delete_button([u.tg_user_id for u in authorized_users], button_text=yes_text)
+            )
         else:
             # If screen is being changed, discard yes key value
             keyboard_data_yes: dict = default_keyboard_data | (
-                {confirm_key: True} if not (yes_screen is not None and screen is not yes_screen) else {})
+                {confirm_key: True}
+                if not (yes_screen is not None and screen is not yes_screen)
+                else {}
+            )
             if yes_extra_keys is not None:
                 for key, value in yes_extra_keys.items():
                     keyboard_data_yes[key] = value
 
             yes_screen = screen if yes_screen is None else yes_screen
-            keyboard_line.append(Keyboard(yes_text, info=keyboard_data_yes, screen=yes_screen,
-                                          authorized_users=authorized_users, inherit_authorized_users=False))
+            keyboard_line.append(
+                Keyboard(
+                    yes_text,
+                    info=keyboard_data_yes,
+                    screen=yes_screen,
+                    authorized_users=authorized_users,
+                    inherit_authorized_users=False,
+                )
+            )
 
     # No
     if not exclude_no_button:
         if no_is_back_button:
-            keyboard_line.append(get_back_button(inbound_keyboard, key_text=no_text, user=user,
-                                                 info=default_keyboard_data))
+            keyboard_line.append(
+                get_back_button(
+                    inbound_keyboard, key_text=no_text, user=user, info=default_keyboard_data
+                )
+            )
         elif no_is_delete_button:
-            keyboard_line.append(get_delete_button([u.tg_user_id for u in authorized_users], button_text=no_text))
+            keyboard_line.append(
+                get_delete_button([u.tg_user_id for u in authorized_users], button_text=no_text)
+            )
         else:
             # If screen is being changed, discard no key value
             keyboard_data_no: dict = default_keyboard_data | (
-                {confirm_key: False} if not (no_screen is not None and screen is not no_screen) else {})
+                {confirm_key: False}
+                if not (no_screen is not None and screen is not no_screen)
+                else {}
+            )
             if no_extra_keys is not None:
                 for key, value in no_extra_keys.items():
                     keyboard_data_no[key] = value
             no_screen = screen if no_screen is None else no_screen
-            keyboard_line.append(Keyboard(no_text, info=keyboard_data_no, screen=no_screen,
-                                          authorized_users=authorized_users, inherit_authorized_users=False))
+            keyboard_line.append(
+                Keyboard(
+                    no_text,
+                    info=keyboard_data_no,
+                    screen=no_screen,
+                    authorized_users=authorized_users,
+                    inherit_authorized_users=False,
+                )
+            )
 
     return keyboard_line
 
 
-def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None, back_screen_index: int = 0,
-                    key_text: str = phrases.KEYBOARD_OPTION_BACK, user: User = None, info: dict = None) -> Keyboard:
+def get_back_button(
+    inbound_keyboard: Keyboard,
+    excluded_keys: list[str] = None,
+    back_screen_index: int = 0,
+    key_text: str = phrases.KEYBOARD_OPTION_BACK,
+    user: User = None,
+    info: dict = None,
+) -> Keyboard:
     """
     Create a back button
 
@@ -828,7 +1099,9 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
 
         previous_screen_list = inbound_keyboard.previous_screen_list
     else:
-        previous_screen_list = [Screen(s) for s in user.private_screen_list.split(c.STANDARD_SPLIT_CHAR)]
+        previous_screen_list = [
+            Screen(s) for s in user.private_screen_list.split(c.STANDARD_SPLIT_CHAR)
+        ]
 
     if inbound_keyboard is not None and len(inbound_keyboard.previous_screen_list) == 0:
         return Keyboard(key_text, screen=Screen.PVT_START, inbound_info=info_copy)
@@ -865,12 +1138,21 @@ def get_back_button(inbound_keyboard: Keyboard, excluded_keys: list[str] = None,
         except (AttributeError, KeyError, TypeError, IndexError):
             pass
 
-    return Keyboard(key_text, screen=screen, previous_screen_list=previous_screen_list[:previous_screen_end_index],
-                    inbound_info=info_copy)
+    return Keyboard(
+        key_text,
+        screen=screen,
+        previous_screen_list=previous_screen_list[:previous_screen_end_index],
+        inbound_info=info_copy,
+    )
 
 
-async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: int = None,
-                         message_id: int = None, group_chat: GroupChat = None):
+async def delete_message(
+    update: Update = None,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    chat_id: int = None,
+    message_id: int = None,
+    group_chat: GroupChat = None,
+):
     """
     Delete a message with the best effort method
     :param update: Update object
@@ -885,7 +1167,9 @@ async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TY
         chat_id = group.tg_group_id
 
     if update is None and (context is None or chat_id is None or message_id is None):
-        logging.error('update or context and chat_id and message_id must be specified to delete message')
+        logging.error(
+            "update or context and chat_id and message_id must be specified to delete message"
+        )
         return
 
     try:
@@ -894,7 +1178,7 @@ async def delete_message(update: Update = None, context: ContextTypes.DEFAULT_TY
         else:
             await context.bot.delete_message(chat_id, message_id)
     except TelegramError:
-        logging.error(f'Failed to delete message {message_id} in chat {chat_id}')
+        logging.error(f"Failed to delete message {message_id} in chat {chat_id}")
         pass
 
 
@@ -927,10 +1211,12 @@ def get_start_with_command_url(command: str) -> str:
     :param command: Command
     :return: Start with command url
     """
-    return f'https://t.me/{Env.BOT_USERNAME.get()}?start={command}'
+    return f"https://t.me/{Env.BOT_USERNAME.get()}?start={command}"
 
 
-def get_deeplink(info: dict | str = None, screen: Screen = None, previous_screens: list[Screen] = None) -> str:
+def get_deeplink(
+    info: dict | str = None, screen: Screen = None, previous_screens: list[Screen] = None
+) -> str:
     """
     Get the deeplink
     :param info: Info dict
@@ -949,10 +1235,10 @@ def get_deeplink(info: dict | str = None, screen: Screen = None, previous_screen
         if previous_screens is not None:
             info[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [s[1:] for s in previous_screens]
 
-        info = json.dumps(info, separators=(',', ':'))
+        info = json.dumps(info, separators=(",", ":"))
 
-    encoded_bytes = info.encode('utf-8')
-    encoded_string = base64.b64encode(encoded_bytes).decode('utf-8')
+    encoded_bytes = info.encode("utf-8")
+    encoded_string = base64.b64encode(encoded_bytes).decode("utf-8")
 
     return get_start_with_command_url(encoded_string)
 
@@ -969,7 +1255,11 @@ def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[b
     should_validate_input = True
     should_ignore_input = False
 
-    if inbound_keyboard is None and user.private_screen_step is None and user.private_screen_in_edit_id is None:
+    if (
+        inbound_keyboard is None
+        and user.private_screen_step is None
+        and user.private_screen_in_edit_id is None
+    ):
         should_ignore_input = True
     else:
         if user.private_screen_in_edit_id is not None:
@@ -980,7 +1270,9 @@ def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[b
     return should_ignore_input, should_create_item, should_validate_input
 
 
-async def log_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None) -> Message:
+async def log_error(
+    context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None
+) -> Message:
     """
     Send an error to the error log chat
     :param context: Context object
@@ -988,8 +1280,10 @@ async def log_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Updat
     :param update: Update object
     """
 
-    text = f'Error: {text}'.upper()
-    return await full_message_send(context, text, update=update, chat_id=Env.ERROR_LOG_CHAT_ID.get_int())
+    text = f"Error: {text}".upper()
+    return await full_message_send(
+        context, text, update=update, chat_id=Env.ERROR_LOG_CHAT_ID.get_int()
+    )
 
 
 def message_is_reply(update: Update) -> bool:
@@ -1001,8 +1295,10 @@ def message_is_reply(update: Update) -> bool:
     """
 
     try:
-        return (update.effective_message.reply_to_message is not None
-                and update.effective_message.reply_to_message.forum_topic_created is None)
+        return (
+            update.effective_message.reply_to_message is not None
+            and update.effective_message.reply_to_message.forum_topic_created is None
+        )
     except AttributeError:
         return False
 
@@ -1017,7 +1313,7 @@ def get_message_url(message_id: int, group_chat: GroupChat = None, chat_id: str 
     """
 
     if chat_id is None and group_chat is None:
-        raise ValueError('chat_id or group_chat must be specified')
+        raise ValueError("chat_id or group_chat must be specified")
 
     tg_chat_id = chat_id
 
@@ -1025,12 +1321,12 @@ def get_message_url(message_id: int, group_chat: GroupChat = None, chat_id: str 
         group: Group = group_chat.group
         tg_chat_id = str(group.tg_group_id)
 
-    tg_chat_id = tg_chat_id.replace('-100', '')
+    tg_chat_id = tg_chat_id.replace("-100", "")
 
     url = f"https://t.me/c/{tg_chat_id}/{message_id}"
 
     # If tg_chat_id is not a number, it is a username so remove the /c/ part
     if not tg_chat_id.isnumeric():
-        url = url.replace('/c/', '/')
+        url = url.replace("/c/", "/")
 
     return url

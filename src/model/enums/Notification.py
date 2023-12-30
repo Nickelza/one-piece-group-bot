@@ -22,8 +22,12 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import default_datetime_format, convert_days_to_duration
 from src.service.date_service import get_remaining_duration
-from src.service.message_service import get_image_preview, escape_valid_markdown_chars, mention_markdown_user, \
-    get_message_url
+from src.service.message_service import (
+    get_image_preview,
+    escape_valid_markdown_chars,
+    mention_markdown_user,
+    get_message_url,
+)
 
 
 class NotificationCategory(IntEnum):
@@ -51,7 +55,7 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.BOUNTY_GIFT: phrases.NOTIFICATION_CATEGORY_BOUNTY_GIFT,
     NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT,
     NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN,
-    NotificationCategory.WARLORD: phrases.NOTIFICATION_CATEGORY_WARLORD
+    NotificationCategory.WARLORD: phrases.NOTIFICATION_CATEGORY_WARLORD,
 }
 
 
@@ -89,9 +93,19 @@ class NotificationType(IntEnum):
 class Notification:
     """Class for notifications."""
 
-    def __init__(self, category: NotificationCategory, notification_type: NotificationType, text: str, description: str,
-                 button_text: str, disable_web_page_preview: bool = True, disable_notification: bool = True,
-                 item_screen: Screen = None, item_info: dict = None, go_to_item_button_text: str = None):
+    def __init__(
+        self,
+        category: NotificationCategory,
+        notification_type: NotificationType,
+        text: str,
+        description: str,
+        button_text: str,
+        disable_web_page_preview: bool = True,
+        disable_notification: bool = True,
+        item_screen: Screen = None,
+        item_info: dict = None,
+        go_to_item_button_text: str = None,
+    ):
         """
         Constructor
 
@@ -126,10 +140,16 @@ class Notification:
     def get_go_to_item_keyboard(self) -> list[Keyboard]:
         """Gets the go to item keyboard."""
 
-        if self.item_screen is None or self.item_info is None or self.to_to_item_button_text is None:
+        if (
+            self.item_screen is None
+            or self.item_info is None
+            or self.to_to_item_button_text is None
+        ):
             return []
 
-        return [Keyboard(self.to_to_item_button_text, screen=self.item_screen, info=self.item_info)]
+        return [
+            Keyboard(self.to_to_item_button_text, screen=self.item_screen, info=self.item_info)
+        ]
 
 
 class CrewLeaveNotification(Notification):
@@ -141,10 +161,13 @@ class CrewLeaveNotification(Notification):
         """
 
         self.crew_member = crew_member
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_LEAVE,
-                         phrases.CREW_LEAVE_NOTIFICATION,
-                         phrases.CREW_LEAVE_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_LEAVE_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_LEAVE,
+            phrases.CREW_LEAVE_NOTIFICATION,
+            phrases.CREW_LEAVE_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_LEAVE_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -163,11 +186,14 @@ class LocationUpdateNotification(Notification):
 
         self.user = user
         self.location = location
-        super().__init__(NotificationCategory.LOCATION, NotificationType.LOCATION_UPDATE,
-                         phrases.LOCATION_UPDATE_NOTIFICATION,
-                         phrases.LOCATION_UPDATE_NOTIFICATION_DESCRIPTION,
-                         phrases.LOCATION_UPDATE_NOTIFICATION_KEY,
-                         disable_web_page_preview=False)
+        super().__init__(
+            NotificationCategory.LOCATION,
+            NotificationType.LOCATION_UPDATE,
+            phrases.LOCATION_UPDATE_NOTIFICATION,
+            phrases.LOCATION_UPDATE_NOTIFICATION_DESCRIPTION,
+            phrases.LOCATION_UPDATE_NOTIFICATION_KEY,
+            disable_web_page_preview=False,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -176,26 +202,29 @@ class LocationUpdateNotification(Notification):
 
         location: Location = self.location
         # Determine preposition to use for the location
-        if 'island' in location.name.lower() or 'archipelago' in location.name.lower():
-            preposition = 'on'
-            if location.name.lower().startswith('island'):
-                preposition += ' the'
+        if "island" in location.name.lower() or "archipelago" in location.name.lower():
+            preposition = "on"
+            if location.name.lower().startswith("island"):
+                preposition += " the"
         else:
-            preposition = 'in'
+            preposition = "in"
 
         # Determine text suffix
         try:
             next_location = Location.get_by_level(location.level + 1)
             text_suffix = phrases.LOCATION_NEXT_LEVEL_REQUIREMENT.format(
-                get_belly_formatted(next_location.required_bounty))
+                get_belly_formatted(next_location.required_bounty)
+            )
         except ValueError:
             text_suffix = phrases.LOCATION_CURRENT_LEVEL_MAX
 
-        return self.text.format(get_image_preview(location.image_url),
-                                mention_markdown_user(self.user),
-                                preposition,
-                                escape_valid_markdown_chars(location.name),
-                                text_suffix)
+        return self.text.format(
+            get_image_preview(location.image_url),
+            mention_markdown_user(self.user),
+            preposition,
+            escape_valid_markdown_chars(location.name),
+            text_suffix,
+        )
 
 
 class CrewDisbandNotification(Notification):
@@ -204,10 +233,13 @@ class CrewDisbandNotification(Notification):
     def __init__(self):
         """Constructor"""
 
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_DISBAND,
-                         phrases.CREW_DISBAND_NOTIFICATION,
-                         phrases.CREW_DISBAND_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_DISBAND_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_DISBAND,
+            phrases.CREW_DISBAND_NOTIFICATION,
+            phrases.CREW_DISBAND_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_DISBAND_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -221,10 +253,13 @@ class CrewDisbandWarningNotification(Notification):
     def __init__(self):
         """Constructor"""
 
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_DISBAND_WARNING,
-                         phrases.CREW_DISBAND_WARNING_NOTIFICATION,
-                         phrases.CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_DISBAND_WARNING_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_DISBAND_WARNING,
+            phrases.CREW_DISBAND_WARNING_NOTIFICATION,
+            phrases.CREW_DISBAND_WARNING_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_DISBAND_WARNING_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -244,18 +279,23 @@ class GameTurnNotification(Notification):
 
         self.game = game
         self.opponent = opponent
-        super().__init__(NotificationCategory.GAME, NotificationType.GAME_TURN,
-                         phrases.GAME_TURN_NOTIFICATION,
-                         phrases.GAME_TURN_NOTIFICATION_DESCRIPTION,
-                         phrases.GAME_TURN_NOTIFICATION_KEY,
-                         disable_notification=False)
+        super().__init__(
+            NotificationCategory.GAME,
+            NotificationType.GAME_TURN,
+            phrases.GAME_TURN_NOTIFICATION,
+            phrases.GAME_TURN_NOTIFICATION_DESCRIPTION,
+            phrases.GAME_TURN_NOTIFICATION_KEY,
+            disable_notification=False,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
 
-        return self.text.format(GameType(self.game.type).get_name(),
-                                mention_markdown_user(self.opponent),
-                                get_message_url(self.game.message_id, self.game.group_chat))
+        return self.text.format(
+            GameType(self.game.type).get_name(),
+            mention_markdown_user(self.opponent),
+            get_message_url(self.game.message_id, self.game.group_chat),
+        )
 
 
 class CrewMemberRemoveNotification(Notification):
@@ -268,10 +308,13 @@ class CrewMemberRemoveNotification(Notification):
         """
 
         self.crew_member = crew_member
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_MEMBER_REMOVE,
-                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION,
-                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_MEMBER_REMOVE_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_MEMBER_REMOVE,
+            phrases.CREW_MEMBER_REMOVE_NOTIFICATION,
+            phrases.CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_MEMBER_REMOVE_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification"""
@@ -282,8 +325,13 @@ class CrewMemberRemoveNotification(Notification):
 class ImpelDownNotificationRestrictionPlaced(Notification):
     """Class for impel down restriction place notifications."""
 
-    def __init__(self, sentence_type: ImpelDownSentenceType = None, release_date_time: datetime = None,
-                 bounty_action: ImpelDownBountyAction = None, reason: str = None):
+    def __init__(
+        self,
+        sentence_type: ImpelDownSentenceType = None,
+        release_date_time: datetime = None,
+        bounty_action: ImpelDownBountyAction = None,
+        reason: str = None,
+    ):
         """
         Constructor
 
@@ -298,16 +346,19 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
         self.bounty_action = bounty_action
         self.reason = reason
 
-        super().__init__(NotificationCategory.IMPEL_DOWN, NotificationType.IMPEL_DOWN_RESTRICTION_PLACED,
-                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION,
-                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION,
-                         phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.IMPEL_DOWN,
+            NotificationType.IMPEL_DOWN_RESTRICTION_PLACED,
+            phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION,
+            phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION,
+            phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification"""
 
-        restriction_text = ''
-        duration_text = ''
+        restriction_text = ""
+        duration_text = ""
 
         # Bounty action
         if self.bounty_action is ImpelDownBountyAction.HALVE:
@@ -320,10 +371,14 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
             restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION
 
             duration_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION.format(
-                get_remaining_duration(self.release_date_time) if self.sentence_type is ImpelDownSentenceType.TEMPORARY
-                else phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT)
+                get_remaining_duration(self.release_date_time)
+                if self.sentence_type is ImpelDownSentenceType.TEMPORARY
+                else phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT
+            )
 
-        return self.text.format(escape_valid_markdown_chars(self.reason), restriction_text, duration_text)
+        return self.text.format(
+            escape_valid_markdown_chars(self.reason), restriction_text, duration_text
+        )
 
 
 class ImpelDownNotificationRestrictionRemoved(Notification):
@@ -332,17 +387,26 @@ class ImpelDownNotificationRestrictionRemoved(Notification):
     def __init__(self):
         """Constructor"""
 
-        super().__init__(NotificationCategory.IMPEL_DOWN, NotificationType.IMPEL_DOWN_RESTRICTION_REMOVED,
-                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION,
-                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION,
-                         phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.IMPEL_DOWN,
+            NotificationType.IMPEL_DOWN_RESTRICTION_REMOVED,
+            phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION,
+            phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION,
+            phrases.IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY,
+        )
 
 
 class PredictionResultNotification(Notification):
     """Class for prediction result notifications."""
 
-    def __init__(self, prediction: Prediction = None, prediction_options: list[PredictionOption] = None,
-                 correct_prediction_options: list[PredictionOption] = None, total_win: int = None, user: User = None):
+    def __init__(
+        self,
+        prediction: Prediction = None,
+        prediction_options: list[PredictionOption] = None,
+        correct_prediction_options: list[PredictionOption] = None,
+        total_win: int = None,
+        user: User = None,
+    ):
         """
         Constructor
 
@@ -359,10 +423,13 @@ class PredictionResultNotification(Notification):
         self.total_win = total_win
         self.user = user
 
-        super().__init__(NotificationCategory.PREDICTION, NotificationType.PREDICTION_RESULT,
-                         phrases.PREDICTION_RESULT_NOTIFICATION,
-                         phrases.PREDICTION_RESULT_NOTIFICATION_DESCRIPTION,
-                         phrases.PREDICTION_RESULT_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.PREDICTION,
+            NotificationType.PREDICTION_RESULT,
+            phrases.PREDICTION_RESULT_NOTIFICATION,
+            phrases.PREDICTION_RESULT_NOTIFICATION_DESCRIPTION,
+            phrases.PREDICTION_RESULT_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification"""
@@ -374,58 +441,86 @@ class PredictionResultNotification(Notification):
         result_text = phrases.TEXT_WON if self.total_win >= 0 else phrases.TEXT_LOST
 
         # User prediction options
-        user_prediction_options_list = ''
+        user_prediction_options_list = ""
         for option in self.prediction_options:
             option_emoji = Emoji.LOG_POSITIVE if option.is_correct else Emoji.LOG_NEGATIVE
             user_prediction_options_list += phrases.PREDICTION_RESULT_NOTIFICATION_OPTION.format(
-                option_emoji, escape_valid_markdown_chars(option.option))
-        phrase_to_use = (phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTION
-                         if len(self.prediction_options) == 1
-                         else phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTIONS)
+                option_emoji, escape_valid_markdown_chars(option.option)
+            )
+        phrase_to_use = (
+            phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTION
+            if len(self.prediction_options) == 1
+            else phrases.PREDICTION_RESULT_NOTIFICATION_YOUR_OPTIONS
+        )
         user_prediction_options_text = phrase_to_use.format(user_prediction_options_list)
 
         prediction_has_correct_options = len(self.correct_prediction_options) > 0
         # Correct prediction options
-        prediction_has_multiple_options = len(self.correct_prediction_options) > 0 or len(self.prediction_options) > 0
-        user_got_the_only_correct_option = len(self.correct_prediction_options) == 1 and len(
-            [option for option in self.prediction_options if option.is_correct]) == 1
+        prediction_has_multiple_options = (
+            len(self.correct_prediction_options) > 0 or len(self.prediction_options) > 0
+        )
+        user_got_the_only_correct_option = (
+            len(self.correct_prediction_options) == 1
+            and len([option for option in self.prediction_options if option.is_correct]) == 1
+        )
 
         # Show correct options list if:
         # - Prediction has at least one correct option
         # - Prediction has multiple options or didn't get the only correct option
-        correct_prediction_options_text = ''
-        if prediction_has_correct_options and (prediction_has_multiple_options
-                                               and not user_got_the_only_correct_option):
-            correct_prediction_options_list = ''
+        correct_prediction_options_text = ""
+        if prediction_has_correct_options and (
+            prediction_has_multiple_options and not user_got_the_only_correct_option
+        ):
+            correct_prediction_options_list = ""
             for option in self.correct_prediction_options:
-                correct_prediction_options_list += phrases.PREDICTION_RESULT_NOTIFICATION_OPTION_NO_EMOJI.format(
-                    escape_valid_markdown_chars(option.option))
-            correct_prediction_options_text = phrases.PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTIONS.format(
-                correct_prediction_options_list)
+                correct_prediction_options_list += (
+                    phrases.PREDICTION_RESULT_NOTIFICATION_OPTION_NO_EMOJI.format(
+                        escape_valid_markdown_chars(option.option)
+                    )
+                )
+            correct_prediction_options_text = (
+                phrases.PREDICTION_RESULT_NOTIFICATION_CORRECT_OPTIONS.format(
+                    correct_prediction_options_list
+                )
+            )
 
         # Wager refunded notice
-        wager_refunded_text = ''
+        wager_refunded_text = ""
         if not prediction_has_correct_options:
-            wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS
+            wager_refunded_text = (
+                phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_NO_CORRECT_OPTIONS
+            )
         elif self.prediction.refund_wager:
             max_refund_wager = get_max_wager_refund(prediction=self.prediction, user=self.user)
             # User lost more than the refundable amount
             if self.total_win < 0 and abs(self.total_win) > max_refund_wager:  #
-                wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL.format(
-                    get_belly_formatted(max_refund_wager))
+                wager_refunded_text = (
+                    phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED_PARTIAL.format(
+                        get_belly_formatted(max_refund_wager)
+                    )
+                )
             else:
                 wager_refunded_text = phrases.PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED
 
-        return self.text.format(result_text, get_belly_formatted(abs(self.total_win)),
-                                escape_valid_markdown_chars(self.prediction.question), user_prediction_options_text,
-                                correct_prediction_options_text, wager_refunded_text)
+        return self.text.format(
+            result_text,
+            get_belly_formatted(abs(self.total_win)),
+            escape_valid_markdown_chars(self.prediction.question),
+            user_prediction_options_text,
+            correct_prediction_options_text,
+            wager_refunded_text,
+        )
 
 
 class PredictionBetInvalidNotification(Notification):
     """Class for invalid prediction bet notifications."""
 
-    def __init__(self, prediction: Prediction = None, prediction_options_user: list[PredictionOptionUser] = None,
-                 total_refund: int = None):
+    def __init__(
+        self,
+        prediction: Prediction = None,
+        prediction_options_user: list[PredictionOptionUser] = None,
+        total_refund: int = None,
+    ):
         """
         Constructor
 
@@ -438,10 +533,13 @@ class PredictionBetInvalidNotification(Notification):
         self.prediction_options_user = prediction_options_user
         self.total_refund = total_refund
 
-        super().__init__(NotificationCategory.PREDICTION, NotificationType.PREDICTION_BET_INVALID,
-                         phrases.PREDICTION_BET_INVALID_NOTIFICATION,
-                         phrases.PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION,
-                         phrases.PREDICTION_BET_INVALID_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.PREDICTION,
+            NotificationType.PREDICTION_BET_INVALID,
+            phrases.PREDICTION_BET_INVALID_NOTIFICATION,
+            phrases.PREDICTION_BET_INVALID_NOTIFICATION_DESCRIPTION,
+            phrases.PREDICTION_BET_INVALID_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
@@ -453,16 +551,24 @@ class PredictionBetInvalidNotification(Notification):
             bet_has = phrases.PREDICTION_BET_INVALID_BETS_HAVE
             it_was = phrases.TEXT_THEY_WERE
 
-        invalid_prediction_options_list = ''
+        invalid_prediction_options_list = ""
         for prediction_option_user in self.prediction_options_user:
             prediction_option: PredictionOption = prediction_option_user.prediction_option
-            invalid_prediction_options_list += phrases.PREDICTION_BET_INVALID_NOTIFICATION_OPTION.format(
-                escape_valid_markdown_chars(prediction_option.option),
-                default_datetime_format(prediction_option_user.date))
+            invalid_prediction_options_list += (
+                phrases.PREDICTION_BET_INVALID_NOTIFICATION_OPTION.format(
+                    escape_valid_markdown_chars(prediction_option.option),
+                    default_datetime_format(prediction_option_user.date),
+                )
+            )
 
-        return self.text.format(bet_has, it_was, escape_valid_markdown_chars(self.prediction.question),
-                                default_datetime_format(self.prediction.cut_off_date), invalid_prediction_options_list,
-                                get_belly_formatted(self.total_refund))
+        return self.text.format(
+            bet_has,
+            it_was,
+            escape_valid_markdown_chars(self.prediction.question),
+            default_datetime_format(self.prediction.cut_off_date),
+            invalid_prediction_options_list,
+            get_belly_formatted(self.total_refund),
+        )
 
 
 class DeletedMessageArrestNotification(Notification):
@@ -471,11 +577,14 @@ class DeletedMessageArrestNotification(Notification):
     def __init__(self):
         """Constructor"""
 
-        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_ARREST,
-                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION,
-                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION,
-                         phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_KEY,
-                         disable_notification=False)
+        super().__init__(
+            NotificationCategory.DELETED_MESSAGE,
+            NotificationType.DELETED_MESSAGE_ARREST,
+            phrases.DELETED_MESSAGE_ARREST_NOTIFICATION,
+            phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_DESCRIPTION,
+            phrases.DELETED_MESSAGE_ARREST_NOTIFICATION_KEY,
+            disable_notification=False,
+        )
 
 
 class DeletedMessageMuteNotification(Notification):
@@ -484,11 +593,14 @@ class DeletedMessageMuteNotification(Notification):
     def __init__(self):
         """Constructor"""
 
-        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_MUTE,
-                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION,
-                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION,
-                         phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_KEY,
-                         disable_notification=False)
+        super().__init__(
+            NotificationCategory.DELETED_MESSAGE,
+            NotificationType.DELETED_MESSAGE_MUTE,
+            phrases.DELETED_MESSAGE_MUTE_NOTIFICATION,
+            phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_DESCRIPTION,
+            phrases.DELETED_MESSAGE_MUTE_NOTIFICATION_KEY,
+            disable_notification=False,
+        )
 
 
 class DeletedMessageLocationNotification(Notification):
@@ -505,17 +617,22 @@ class DeletedMessageLocationNotification(Notification):
         self.user = user
         self.required_location_level = required_location_level
 
-        super().__init__(NotificationCategory.DELETED_MESSAGE, NotificationType.DELETED_MESSAGE_LOCATION,
-                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION,
-                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION,
-                         phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY,
-                         disable_notification=False)
+        super().__init__(
+            NotificationCategory.DELETED_MESSAGE,
+            NotificationType.DELETED_MESSAGE_LOCATION,
+            phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION,
+            phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_DESCRIPTION,
+            phrases.DELETED_MESSAGE_LOCATION_NOTIFICATION_KEY,
+            disable_notification=False,
+        )
 
     def build(self) -> str:
         current_location: Location = Location.get_by_level(self.user.location_level)
         required_location: Location = Location.get_by_level(self.required_location_level)
-        return self.text.format(escape_valid_markdown_chars(current_location.name),
-                                escape_valid_markdown_chars(required_location.name), )
+        return self.text.format(
+            escape_valid_markdown_chars(current_location.name),
+            escape_valid_markdown_chars(required_location.name),
+        )
 
 
 class BountyGiftReceivedNotification(Notification):
@@ -532,15 +649,20 @@ class BountyGiftReceivedNotification(Notification):
         self.sender = sender
         self.amount = amount
 
-        super().__init__(NotificationCategory.BOUNTY_GIFT, NotificationType.BOUNTY_GIFT_RECEIVED,
-                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION,
-                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION,
-                         phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.BOUNTY_GIFT,
+            NotificationType.BOUNTY_GIFT_RECEIVED,
+            phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION,
+            phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION,
+            phrases.BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
 
-        return self.text.format(get_belly_formatted(self.amount), self.sender.get_markdown_mention())
+        return self.text.format(
+            get_belly_formatted(self.amount), self.sender.get_markdown_mention()
+        )
 
 
 class DevilFruitAwardedNotification(Notification):
@@ -558,17 +680,22 @@ class DevilFruitAwardedNotification(Notification):
         self.reason = reason
 
         item_id = devil_fruit.id if devil_fruit is not None else None
-        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_AWARDED,
-                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION,
-                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION,
-                         phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY,
-                         item_screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
-                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         go_to_item_button_text=phrases.KEY_MANAGE)
+        super().__init__(
+            NotificationCategory.DEVIL_FRUIT,
+            NotificationType.DEVIL_FRUIT_AWARDED,
+            phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION,
+            phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_DESCRIPTION,
+            phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
+            item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+            go_to_item_button_text=phrases.KEY_MANAGE,
+        )
 
     def build(self) -> str:
-        return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()),
-                                escape_valid_markdown_chars(self.reason))
+        return self.text.format(
+            escape_valid_markdown_chars(self.devil_fruit.get_full_name()),
+            escape_valid_markdown_chars(self.reason),
+        )
 
 
 class DevilFruitExpiredNotification(Notification):
@@ -583,10 +710,13 @@ class DevilFruitExpiredNotification(Notification):
 
         self.devil_fruit = devil_fruit
 
-        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_EXPIRED,
-                         phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION,
-                         phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION_DESCRIPTION,
-                         phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.DEVIL_FRUIT,
+            NotificationType.DEVIL_FRUIT_EXPIRED,
+            phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION,
+            phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION_DESCRIPTION,
+            phrases.DEVIL_FRUIT_EXPIRED_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         return self.text.format(escape_valid_markdown_chars(self.devil_fruit.get_full_name()))
@@ -604,10 +734,13 @@ class DevilFruitRevokeNotification(Notification):
 
         self.devil_fruit = devil_fruit
 
-        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_REVOKE,
-                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION,
-                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_DESCRIPTION,
-                         phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.DEVIL_FRUIT,
+            NotificationType.DEVIL_FRUIT_REVOKE,
+            phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION,
+            phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_DESCRIPTION,
+            phrases.DEVIL_FRUIT_REVOKE_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -627,10 +760,13 @@ class DevilFruitRevokeWarningNotification(Notification):
 
         self.devil_fruit = devil_fruit
 
-        super().__init__(NotificationCategory.DEVIL_FRUIT, NotificationType.DEVIL_FRUIT_REVOKE_WARNING,
-                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION,
-                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION,
-                         phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.DEVIL_FRUIT,
+            NotificationType.DEVIL_FRUIT_REVOKE_WARNING,
+            phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION,
+            phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION,
+            phrases.DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         """Builds the notification."""
@@ -653,20 +789,22 @@ class BountyLoanPaymentNotification(Notification):
         self.amount = amount
 
         item_id = loan.id if loan is not None else None
-        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_PAYMENT,
-                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION,
-                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_DESCRIPTION,
-                         phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY,
-                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
-                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+        super().__init__(
+            NotificationCategory.BOUNTY_LOAN,
+            NotificationType.BOUNTY_LOAN_PAYMENT,
+            phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION,
+            phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_DESCRIPTION,
+            phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+            item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+        )
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
 
         borrower: User = self.loan.borrower
-        return self.text.format(get_belly_formatted(self.amount),
-                                borrower.get_markdown_mention())
+        return self.text.format(get_belly_formatted(self.amount), borrower.get_markdown_mention())
 
 
 class BountyLoanForgivenNotification(Notification):
@@ -682,20 +820,24 @@ class BountyLoanForgivenNotification(Notification):
         self.loan = loan
 
         item_id = loan.id if loan is not None else None
-        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_FORGIVEN,
-                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION,
-                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_DESCRIPTION,
-                         phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY,
-                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
-                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+        super().__init__(
+            NotificationCategory.BOUNTY_LOAN,
+            NotificationType.BOUNTY_LOAN_FORGIVEN,
+            phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION,
+            phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_DESCRIPTION,
+            phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+            item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+        )
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
 
         loaner: User = self.loan.loaner
-        return self.text.format(get_belly_formatted(self.loan.amount),
-                                loaner.get_markdown_mention())
+        return self.text.format(
+            get_belly_formatted(self.loan.amount), loaner.get_markdown_mention()
+        )
 
 
 class BountyLoanExpiredNotification(Notification):
@@ -711,22 +853,27 @@ class BountyLoanExpiredNotification(Notification):
         self.loan = loan
 
         item_id = loan.id if loan is not None else None
-        super().__init__(NotificationCategory.BOUNTY_LOAN, NotificationType.BOUNTY_LOAN_EXPIRED,
-                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION,
-                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION,
-                         phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY,
-                         item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
-                         item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                         go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format())
+        super().__init__(
+            NotificationCategory.BOUNTY_LOAN,
+            NotificationType.BOUNTY_LOAN_EXPIRED,
+            phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION,
+            phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_DESCRIPTION,
+            phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+            item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+        )
 
     def build(self) -> str:
         from src.service.bounty_service import get_belly_formatted
 
         loaner: User = self.loan.loaner
-        return self.text.format(get_belly_formatted(self.loan.amount),
-                                loaner.get_markdown_mention(),
-                                Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get(),
-                                loaner.get_markdown_mention())
+        return self.text.format(
+            get_belly_formatted(self.loan.amount),
+            loaner.get_markdown_mention(),
+            Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get(),
+            loaner.get_markdown_mention(),
+        )
 
 
 class WarlordAppointmentNotification(Notification):
@@ -742,15 +889,20 @@ class WarlordAppointmentNotification(Notification):
         self.warlord = warlord
         self.days = days
 
-        super().__init__(NotificationCategory.WARLORD, NotificationType.WARLORD_APPOINTMENT,
-                         phrases.WARLORD_APPOINTMENT_NOTIFICATION,
-                         phrases.WARLORD_APPOINTMENT_NOTIFICATION_DESCRIPTION,
-                         phrases.WARLORD_APPOINTMENT_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.WARLORD,
+            NotificationType.WARLORD_APPOINTMENT,
+            phrases.WARLORD_APPOINTMENT_NOTIFICATION,
+            phrases.WARLORD_APPOINTMENT_NOTIFICATION_DESCRIPTION,
+            phrases.WARLORD_APPOINTMENT_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
-        return self.text.format(escape_valid_markdown_chars(self.warlord.epithet),
-                                convert_days_to_duration(self.days),
-                                escape_valid_markdown_chars(self.warlord.reason))
+        return self.text.format(
+            escape_valid_markdown_chars(self.warlord.epithet),
+            convert_days_to_duration(self.days),
+            escape_valid_markdown_chars(self.warlord.reason),
+        )
 
 
 class WarlordRevocationNotification(Notification):
@@ -765,10 +917,13 @@ class WarlordRevocationNotification(Notification):
 
         self.warlord = warlord
 
-        super().__init__(NotificationCategory.WARLORD, NotificationType.WARLORD_REVOCATION,
-                         phrases.WARLORD_REVOCATION_NOTIFICATION,
-                         phrases.WARLORD_REVOCATION_NOTIFICATION_DESCRIPTION,
-                         phrases.WARLORD_REVOCATION_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.WARLORD,
+            NotificationType.WARLORD_REVOCATION,
+            phrases.WARLORD_REVOCATION_NOTIFICATION,
+            phrases.WARLORD_REVOCATION_NOTIFICATION_DESCRIPTION,
+            phrases.WARLORD_REVOCATION_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         return self.text.format(escape_valid_markdown_chars(self.warlord.revoke_reason))
@@ -786,16 +941,22 @@ class CrewAbilityActivatedNotification(Notification):
 
         self.crew_ability = crew_ability
 
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_ABILITY_ACTIVATED,
-                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION,
-                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_ABILITY_ACTIVATED,
+            phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION,
+            phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_ABILITY_ACTIVATED_NOTIFICATION_KEY,
+        )
 
     def build(self) -> str:
         return self.text.format(
             escape_valid_markdown_chars(self.crew_ability.get_description()),
             self.crew_ability.get_value_with_sign(),
-            get_remaining_duration(self.crew_ability.expiration_date, self.crew_ability.acquired_date))
+            get_remaining_duration(
+                self.crew_ability.expiration_date, self.crew_ability.acquired_date
+            ),
+        )
 
 
 class CrewFirstMatePromotionNotification(Notification):
@@ -806,10 +967,13 @@ class CrewFirstMatePromotionNotification(Notification):
         Constructor
         """
 
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_FIRST_MATE_PROMOTION,
-                         phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION,
-                         phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_FIRST_MATE_PROMOTION,
+            phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION,
+            phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_FIRST_MATE_PROMOTION_NOTIFICATION_KEY,
+        )
 
 
 class CrewFirstMateDemotionNotification(Notification):
@@ -820,25 +984,48 @@ class CrewFirstMateDemotionNotification(Notification):
         Constructor
         """
 
-        super().__init__(NotificationCategory.CREW, NotificationType.CREW_FIRST_MATE_DEMOTION,
-                         phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION,
-                         phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION_DESCRIPTION,
-                         phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION_KEY)
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_FIRST_MATE_DEMOTION,
+            phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION,
+            phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_FIRST_MATE_DEMOTION_NOTIFICATION_KEY,
+        )
 
 
-NOTIFICATIONS = [CrewLeaveNotification(), LocationUpdateNotification(), CrewDisbandNotification(),
-                 CrewDisbandWarningNotification(), GameTurnNotification(), CrewMemberRemoveNotification(),
-                 ImpelDownNotificationRestrictionPlaced(), ImpelDownNotificationRestrictionRemoved(),
-                 PredictionResultNotification(), PredictionBetInvalidNotification(), DeletedMessageArrestNotification(),
-                 DeletedMessageMuteNotification(), DeletedMessageLocationNotification(),
-                 BountyGiftReceivedNotification(), DevilFruitAwardedNotification(), DevilFruitExpiredNotification(),
-                 DevilFruitRevokeNotification(), DevilFruitRevokeWarningNotification(), BountyLoanPaymentNotification(),
-                 BountyLoanForgivenNotification(), BountyLoanExpiredNotification(), WarlordAppointmentNotification(),
-                 WarlordRevocationNotification(), CrewAbilityActivatedNotification(),
-                 CrewFirstMatePromotionNotification(), CrewFirstMateDemotionNotification()]
+NOTIFICATIONS = [
+    CrewLeaveNotification(),
+    LocationUpdateNotification(),
+    CrewDisbandNotification(),
+    CrewDisbandWarningNotification(),
+    GameTurnNotification(),
+    CrewMemberRemoveNotification(),
+    ImpelDownNotificationRestrictionPlaced(),
+    ImpelDownNotificationRestrictionRemoved(),
+    PredictionResultNotification(),
+    PredictionBetInvalidNotification(),
+    DeletedMessageArrestNotification(),
+    DeletedMessageMuteNotification(),
+    DeletedMessageLocationNotification(),
+    BountyGiftReceivedNotification(),
+    DevilFruitAwardedNotification(),
+    DevilFruitExpiredNotification(),
+    DevilFruitRevokeNotification(),
+    DevilFruitRevokeWarningNotification(),
+    BountyLoanPaymentNotification(),
+    BountyLoanForgivenNotification(),
+    BountyLoanExpiredNotification(),
+    WarlordAppointmentNotification(),
+    WarlordRevocationNotification(),
+    CrewAbilityActivatedNotification(),
+    CrewFirstMatePromotionNotification(),
+    CrewFirstMateDemotionNotification(),
+]
 
 
-def get_notifications_by_category(notification_category: NotificationCategory) -> list[Notification]:
+def get_notifications_by_category(
+    notification_category: NotificationCategory,
+) -> list[Notification]:
     """
     Get all notifications by category
 
@@ -847,7 +1034,10 @@ def get_notifications_by_category(notification_category: NotificationCategory) -
     """
 
     return [
-        notification for notification in NOTIFICATIONS if notification.category is notification_category]
+        notification
+        for notification in NOTIFICATIONS
+        if notification.category is notification_category
+    ]
 
 
 def get_notification_by_type(notification_type: NotificationType) -> Notification:
@@ -858,4 +1048,6 @@ def get_notification_by_type(notification_type: NotificationType) -> Notificatio
     :return: The notification
     """
 
-    return next(notification for notification in NOTIFICATIONS if notification.type is notification_type)
+    return next(
+        notification for notification in NOTIFICATIONS if notification.type is notification_type
+    )

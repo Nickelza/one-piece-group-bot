@@ -17,12 +17,20 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.SupabaseRest import SupabaseRest
-from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game
+from src.service.game_service import (
+    set_user_private_screen,
+    guess_game_countdown_to_start,
+    save_game,
+)
 from src.service.message_service import full_media_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
-                 ) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    inbound_keyboard: Keyboard,
+    game: Game = None,
+) -> None:
     """
     Manage the Who's Who screen
     :param update: The update object
@@ -45,7 +53,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         game.status = GameStatus.COUNTDOWN_TO_START
         game.save()
         context.application.create_task(
-            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game))
+            guess_game_countdown_to_start(
+                update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game
+            )
+        )
         return
 
 
@@ -72,8 +83,13 @@ def get_board(game: Game) -> WhosWho:
     return WhosWho(character=char, **json_dict)
 
 
-async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
-                   should_send_to_all_players: bool = True, schedule_next_send: bool = True) -> None:
+async def run_game(
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    send_to_user: User = None,
+    should_send_to_all_players: bool = True,
+    schedule_next_send: bool = True,
+) -> None:
     """
     Send the blurred image
     :param context: The context object
@@ -85,10 +101,10 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     """
 
     if send_to_user is not None and should_send_to_all_players:
-        raise ValueError('Cannot send to user and all players')
+        raise ValueError("Cannot send to user and all players")
 
     if not should_send_to_all_players and schedule_next_send:
-        raise ValueError('Cannot schedule next send if not sending to all players')
+        raise ValueError("Cannot schedule next send if not sending to all players")
 
     if send_to_user is not None:
         users: list[User] = [send_to_user]
@@ -101,25 +117,35 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     whos_who = get_board(game)
 
     # Send the image
-    saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=whos_who.latest_blurred_image)
+    saved_media: SavedMedia = SavedMedia(
+        media_type=SavedMediaType.PHOTO, file_name=whos_who.latest_blurred_image
+    )
     caption = phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION
     if should_send_to_all_players:
         if whos_who.level > 1:
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
-                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int()
+            )
         elif whos_who.revealed_letters_count >= 1:
             # Add hint
-            hint = whos_who.character.name[:whos_who.revealed_letters_count]
+            hint = whos_who.character.name[: whos_who.revealed_letters_count]
             caption += phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
 
         if whos_who.level == 1 and not whos_who.have_revealed_all_letters():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
-                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int())
+                Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int()
+            )
 
     for user in users:
         context.application.create_task(
-            full_media_send(context, saved_media=saved_media, chat_id=user.tg_user_id, caption=caption,
-                            ignore_forbidden_exception=True))
+            full_media_send(
+                context,
+                saved_media=saved_media,
+                chat_id=user.tg_user_id,
+                caption=caption,
+                ignore_forbidden_exception=True,
+            )
+        )
 
         # Set private screen for input
         context.application.create_task(set_user_private_screen(user, game))

@@ -10,7 +10,7 @@ class GameDifficulty(IntEnum):
     HARD = 3
 
     @staticmethod
-    def get_from_total_wager(total_wager: int) -> 'GameDifficulty':
+    def get_from_total_wager(total_wager: int) -> "GameDifficulty":
         """
         Get the game level from the total wager
         :param total_wager: The total wager

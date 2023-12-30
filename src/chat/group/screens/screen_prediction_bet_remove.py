@@ -11,12 +11,22 @@ from src.model.enums.Command import Command
 from src.model.enums.PredictionStatus import PredictionStatus
 from src.model.error.CustomException import PredictionException
 from src.service.message_service import full_message_send
-from src.service.prediction_service import refresh, get_prediction_options_user, delete_prediction_option_user, \
-    delete_prediction_option_for_user, get_prediction_from_message_id
+from src.service.prediction_service import (
+    refresh,
+    get_prediction_options_user,
+    delete_prediction_option_user,
+    delete_prediction_option_for_user,
+    get_prediction_from_message_id,
+)
 
 
-async def validate(update: Update, user: User, command: Command = None, prediction_option: PredictionOption = None,
-                   group_chat: GroupChat = None) -> tuple[Prediction, PredictionOption, list[PredictionOptionUser]]:
+async def validate(
+    update: Update,
+    user: User,
+    command: Command = None,
+    prediction_option: PredictionOption = None,
+    group_chat: GroupChat = None,
+) -> tuple[Prediction, PredictionOption, list[PredictionOptionUser]]:
     """
     Validate the prediction bet
     :param update: The update object
@@ -36,7 +46,9 @@ async def validate(update: Update, user: User, command: Command = None, predicti
             raise PredictionException(phrases.PREDICTION_BET_REMOVE_INVALID_FORMAT)
 
         # Get prediction from message id
-        prediction: Prediction = get_prediction_from_message_id(group_chat, update.message.reply_to_message.message_id)
+        prediction: Prediction = get_prediction_from_message_id(
+            group_chat, update.message.reply_to_message.message_id
+        )
         if prediction is None:
             raise PredictionException(phrases.PREDICTION_NOT_FOUND_IN_REPLY)
     else:
@@ -51,7 +63,9 @@ async def validate(update: Update, user: User, command: Command = None, predicti
         raise PredictionException(phrases.PREDICTION_CLOSED_FOR_BETS_REMOVAL)
 
     prediction_options: list[PredictionOption] = prediction.prediction_options
-    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
+    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(
+        prediction, user
+    )
 
     # User has not bet on this prediction
     if len(prediction_options_user) == 0:
@@ -62,24 +76,40 @@ async def validate(update: Update, user: User, command: Command = None, predicti
         # Option specified
         if len(command.parameters) == 1:
             # Option is not valid
-            prediction_option = [prediction_option for prediction_option in prediction_options if
-                                 str(prediction_option.number) == command.parameters[0]]
+            prediction_option = [
+                prediction_option
+                for prediction_option in prediction_options
+                if str(prediction_option.number) == command.parameters[0]
+            ]
             if len(prediction_option) == 0:
-                raise PredictionException(phrases.PREDICTION_OPTION_NOT_FOUND.format(command.parameters[0]))
+                raise PredictionException(
+                    phrases.PREDICTION_OPTION_NOT_FOUND.format(command.parameters[0])
+                )
 
             prediction_option = prediction_option[0]
 
     if prediction_option is not None:
         # User did not bet on this option
-        if len([prediction_option_user for prediction_option_user in prediction_options_user if
-                prediction_option_user.prediction_option == prediction_option]) == 0:
+        if (
+            len([
+                prediction_option_user
+                for prediction_option_user in prediction_options_user
+                if prediction_option_user.prediction_option == prediction_option
+            ])
+            == 0
+        ):
             raise PredictionException(phrases.PREDICTION_OPTION_NOT_BET_ON)
 
     return prediction, prediction_option, prediction_options_user
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command,
-                 group_chat: GroupChat) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -106,13 +136,19 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         for prediction_option_user in prediction_options_user:
             await delete_prediction_option_user(user, prediction_option_user)
 
-        await full_message_send(context, phrases.PREDICTION_BET_REMOVE_ALL_SUCCESS, update=update,
-                                add_delete_button=True)
+        await full_message_send(
+            context,
+            phrases.PREDICTION_BET_REMOVE_ALL_SUCCESS,
+            update=update,
+            add_delete_button=True,
+        )
     else:
         # Remove bet on this prediction option
         await delete_prediction_option_for_user(user, prediction_option)
 
-        await full_message_send(context, phrases.PREDICTION_BET_REMOVE_SUCCESS, update=update, add_delete_button=True)
+        await full_message_send(
+            context, phrases.PREDICTION_BET_REMOVE_SUCCESS, update=update, add_delete_button=True
+        )
 
     # Update prediction text
     await refresh(context, prediction, group_chat=group_chat)

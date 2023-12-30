@@ -10,11 +10,17 @@ from src.model.enums.crew.CrewRole import CrewRole
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
-from src.service.message_service import full_message_send, get_yes_no_keyboard, mention_markdown_user
+from src.service.message_service import (
+    full_message_send,
+    get_yes_no_keyboard,
+    mention_markdown_user,
+)
 from src.service.notification_service import send_notification
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the Crew First Mate promote screen
     :param update: The update object
@@ -32,26 +38,44 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
         # Crew already has a First Mate
         if crew.has_first_mate():
-            raise CrewValidationException(phrases.CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE)
+            raise CrewValidationException(
+                phrases.CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE
+            )
 
         # Crew cannot promote First Mate
         if not crew.can_promote_first_mate:
-            raise CrewValidationException(phrases.CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD)
+            raise CrewValidationException(
+                phrases.CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD
+            )
 
     except CrewValidationException as cve:
-        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
+        )
         return
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         # Send promote to First Mate confirmation request
-        ot_text = phrases.CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION.format(mention_markdown_user(member))
-        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=inbound_keyboard.screen,
-                                                                     primary_key=member.id,
-                                                                     inbound_keyboard=inbound_keyboard,
-                                                                     no_is_back_button=True)]
+        ot_text = phrases.CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION.format(
+            mention_markdown_user(member)
+        )
+        inline_keyboard: list[list[Keyboard]] = [
+            get_yes_no_keyboard(
+                user,
+                screen=inbound_keyboard.screen,
+                primary_key=member.id,
+                inbound_keyboard=inbound_keyboard,
+                no_is_back_button=True,
+            )
+        ]
 
-        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            ot_text,
+            update=update,
+            keyboard=inline_keyboard,
+            inbound_keyboard=inbound_keyboard,
+        )
         return
 
     # Appoint to First Mate

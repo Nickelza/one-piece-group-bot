@@ -25,8 +25,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         context_data = get_user_context_data(context, ContextDataKey.INLINE_QUERY, inner_key=query)
     except CommonChatException:
-        context_data = ContextDataValue(phrases.INLINE_QUERY_ITEM_NOT_FOUND_TITLE,
-                                        phrases.INLINE_QUERY_ITEM_NOT_FOUND_MESSAGE,
-                                        description=phrases.INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION)
+        context_data = ContextDataValue(
+            phrases.INLINE_QUERY_ITEM_NOT_FOUND_TITLE,
+            phrases.INLINE_QUERY_ITEM_NOT_FOUND_MESSAGE,
+            description=phrases.INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION,
+        )
 
     await full_inline_query_answer(update, [context_data])

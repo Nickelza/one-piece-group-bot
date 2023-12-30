@@ -9,13 +9,14 @@ class RedditGroupPost(BaseModel):
     """
     RedditGroupPost class
     """
+
     id = PrimaryKeyField()
     short_link = CharField(max_length=99, unique=True)
     date = DateTimeField(default=datetime.datetime.now)
     message_id = BigIntegerField()
 
     class Meta:
-        db_table = 'reddit_group_post'
+        db_table = "reddit_group_post"
 
 
 RedditGroupPost.create_table()

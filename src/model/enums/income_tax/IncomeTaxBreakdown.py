@@ -10,7 +10,7 @@ class IncomeTaxBreakdown:
         self.tax_amount = tax_amount
 
     @staticmethod
-    def from_string(breakdown_list: str) -> list['IncomeTaxBreakdown']:
+    def from_string(breakdown_list: str) -> list["IncomeTaxBreakdown"]:
         """
         Get the tax breakdown list from a string
         :param breakdown_list: The string
@@ -23,7 +23,7 @@ class IncomeTaxBreakdown:
         return [IncomeTaxBreakdown(**breakdown) for breakdown in breakdown_list_json]
 
     @staticmethod
-    def get_amount_from_list(tax_breakdown: list['IncomeTaxBreakdown']) -> int:
+    def get_amount_from_list(tax_breakdown: list["IncomeTaxBreakdown"]) -> int:
         """
         Get the tax from a tax breakdown
 
@@ -33,8 +33,9 @@ class IncomeTaxBreakdown:
         return sum([tax.tax_amount for tax in tax_breakdown])
 
     @staticmethod
-    def get_amount_with_deduction_from_list(tax_breakdown: list['IncomeTaxBreakdown'],
-                                            deduction_list: list[IncomeTaxDeduction]) -> int:
+    def get_amount_with_deduction_from_list(
+        tax_breakdown: list["IncomeTaxBreakdown"], deduction_list: list[IncomeTaxDeduction]
+    ) -> int:
         """
         Get the tax from a tax breakdown
 

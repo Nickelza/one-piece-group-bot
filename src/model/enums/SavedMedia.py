@@ -8,8 +8,13 @@ class SavedMedia:
     SavedMedia class
     """
 
-    def __init__(self, media_type: SavedMediaType = None, media_id: str = None, name: SavedMediaName = None,
-                 file_name: str = None):
+    def __init__(
+        self,
+        media_type: SavedMediaType = None,
+        media_id: str = None,
+        name: SavedMediaName = None,
+        file_name: str = None,
+    ):
         """
         Constructor
         :param media_type: Media type
@@ -23,7 +28,7 @@ class SavedMedia:
         self.file_name: str = file_name
 
     @staticmethod
-    def get_by_name(name: SavedMediaName) -> 'SavedMedia':
+    def get_by_name(name: SavedMediaName) -> "SavedMedia":
         """
         Get a SavedMedia by name
         :param name: Name of the SavedMedia
@@ -36,57 +41,84 @@ SAVED_MEDIA_DICT = {}
 
 # noinspection DuplicatedCode
 CREW_INVITE = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.CREW_INVITE, file_name=AssetPath.CREW_INVITE)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.CREW_INVITE,
+    file_name=AssetPath.CREW_INVITE,
+)
 SAVED_MEDIA_DICT[SavedMediaName.CREW_INVITE] = CREW_INVITE
 
 CREW_JOIN = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.CREW_JOIN, file_name=AssetPath.CREW_JOIN)
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.CREW_JOIN, file_name=AssetPath.CREW_JOIN
+)
 SAVED_MEDIA_DICT[SavedMediaName.CREW_JOIN] = CREW_JOIN
 
 DEVIL_FRUIT_NEW = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.DEVIL_FRUIT_NEW, file_name=AssetPath.DEVIL_FRUIT_NEW)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.DEVIL_FRUIT_NEW,
+    file_name=AssetPath.DEVIL_FRUIT_NEW,
+)
 SAVED_MEDIA_DICT[SavedMediaName.DEVIL_FRUIT_NEW] = DEVIL_FRUIT_NEW
 
 DOC_Q = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.DOC_Q, file_name=AssetPath.DOC_Q)
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.DOC_Q, file_name=AssetPath.DOC_Q
+)
 SAVED_MEDIA_DICT[SavedMediaName.DOC_Q] = DOC_Q
 
 FIGHT = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.FIGHT, file_name=AssetPath.FIGHT)
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.FIGHT, file_name=AssetPath.FIGHT
+)
 SAVED_MEDIA_DICT[SavedMediaName.FIGHT] = FIGHT
 
 GAME = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME, file_name=AssetPath.GAME)
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME, file_name=AssetPath.GAME
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME] = GAME
 
 # noinspection DuplicatedCode
 GAME_ROCK_PAPER_SCISSORS = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
-    file_name=AssetPath.GAME_ROCK_PAPER_SCISSORS)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
+    file_name=AssetPath.GAME_ROCK_PAPER_SCISSORS,
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_ROCK_PAPER_SCISSORS] = GAME_ROCK_PAPER_SCISSORS
 
 GAME_RUSSIAN_ROULETTE = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_RUSSIAN_ROULETTE,
-    file_name=AssetPath.GAME_RUSSIAN_ROULETTE)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_RUSSIAN_ROULETTE,
+    file_name=AssetPath.GAME_RUSSIAN_ROULETTE,
+)
 
 SAVED_MEDIA_DICT[SavedMediaName.GAME_RUSSIAN_ROULETTE] = GAME_RUSSIAN_ROULETTE
 
 GAME_WHOS_WHO = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_WHOS_WHO, file_name=AssetPath.GAME_WHOS_WHO)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_WHOS_WHO,
+    file_name=AssetPath.GAME_WHOS_WHO,
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_WHOS_WHO] = GAME_WHOS_WHO
 
 GAME_SHAMBLES = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_SHAMBLES, file_name=AssetPath.GAME_SHAMBLES)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_SHAMBLES,
+    file_name=AssetPath.GAME_SHAMBLES,
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_SHAMBLES] = GAME_SHAMBLES
 
 GAME_GUESS_OR_LIFE = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_GUESS_OR_LIFE, file_name=AssetPath.GAME_GUESS_OR_LIFE)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_GUESS_OR_LIFE,
+    file_name=AssetPath.GAME_GUESS_OR_LIFE,
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_GUESS_OR_LIFE] = GAME_GUESS_OR_LIFE
 
 PUNK_RECORDS = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME_PUNK_RECORDS, file_name=AssetPath.GAME_PUNK_RECORDS)
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.GAME_PUNK_RECORDS,
+    file_name=AssetPath.GAME_PUNK_RECORDS,
+)
 SAVED_MEDIA_DICT[SavedMediaName.GAME_PUNK_RECORDS] = PUNK_RECORDS
 
 SILENCE = SavedMedia(
-    media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE)
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE
+)
 SAVED_MEDIA_DICT[SavedMediaName.SILENCE] = SILENCE

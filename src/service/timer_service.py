@@ -8,16 +8,23 @@ import src.model.enums.Timer as Timer
 from src.chat.manage_message import init, end
 from src.service.bounty_loan_service import set_expired_bounty_loans
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import add_region_bounty_bonus, add_crew_bounty_bonus, add_crew_mvp_bounty_bonus, \
-    reset_bounty_message_limit
+from src.service.bounty_service import (
+    add_region_bounty_bonus,
+    add_crew_bounty_bonus,
+    add_crew_mvp_bounty_bonus,
+    reset_bounty_message_limit,
+)
 from src.service.devil_fruit_service import schedule_devil_fruit_release, respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import end_inactive_games
 from src.service.group_service import deactivate_inactive_group_chats
 from src.service.leaderboard_service import send_leaderboard
 from src.service.location_service import reset_can_change_region
-from src.service.prediction_service import send_scheduled_predictions, close_scheduled_predictions, \
-    send_prediction_status_change_message_or_refresh_dispatch
+from src.service.prediction_service import (
+    send_scheduled_predictions,
+    close_scheduled_predictions,
+    send_prediction_status_change_message_or_refresh_dispatch,
+)
 from src.service.reddit_service import manage as send_reddit_post
 
 
@@ -31,7 +38,9 @@ def add_to_queue(application: Application, timer: Timer.Timer) -> Job:
     cron_expression_len = len(timer.cron_expression.split())
 
     if cron_expression_len not in [1, 5]:
-        raise ValueError(f'Invalid cron expression for timer {timer.name}: {timer.cron_expression}')
+        raise ValueError(
+            f"Invalid cron expression for timer {timer.name}: {timer.cron_expression}"
+        )
 
     if cron_expression_len == 1:  # Every X seconds
         job = application.job_queue.run_repeating(
@@ -39,14 +48,14 @@ def add_to_queue(application: Application, timer: Timer.Timer) -> Job:
             interval=int(timer.cron_expression),
             first=datetime.min,
             name=timer.name,
-            data=timer
+            data=timer,
         )
     else:
         job = application.job_queue.run_custom(
             callback=run,
             job_kwargs={"trigger": CronTrigger.from_crontab(timer.cron_expression)},
             name=timer.name,
-            data=timer
+            data=timer,
         )
 
     logging.info(f'Next run of "{timer.name}" is {job.next_t}')
@@ -61,7 +70,7 @@ async def set_timers(application: Application) -> None:
     """
     for timer in Timer.TIMERS:
         if not timer.is_enabled:
-            logging.info(f'Timer {timer.name} is disabled')
+            logging.info(f"Timer {timer.name} is disabled")
             continue
 
         job = add_to_queue(application, timer)
@@ -78,7 +87,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     job = context.job
     if not isinstance(job.data, Timer.Timer):
-        logging.error(f'Job {job.name} context is not a Timer')
+        logging.error(f"Job {job.name} context is not a Timer")
         return
 
     timer: Timer.Timer = job.data
@@ -86,7 +95,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
     db = init()
 
     if timer.should_log:
-        logging.info(f'Running timer {job.name}')
+        logging.info(f"Running timer {job.name}")
 
     match timer:
         case Timer.REDDIT_POST_ONE_PIECE | Timer.REDDIT_POST_MEME_PIECE:
@@ -112,7 +121,9 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:
             await close_scheduled_predictions(context)
         case Timer.REFRESH_ACTIVE_PREDICTIONS_GROUP_MESSAGE:
-            await send_prediction_status_change_message_or_refresh_dispatch(context, should_refresh=True)
+            await send_prediction_status_change_message_or_refresh_dispatch(
+                context, should_refresh=True
+            )
         case Timer.SCHEDULE_DEVIL_FRUIT_ZOAN_RELEASE:
             await schedule_devil_fruit_release(context)
         case Timer.RESPAWN_DEVIL_FRUIT:
@@ -124,10 +135,10 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.SET_EXPIRED_BOUNTY_LOANS:
             await set_expired_bounty_loans(context)
         case _:
-            raise ValueError(f'Unknown timer {timer.name}')
+            raise ValueError(f"Unknown timer {timer.name}")
 
     if timer.should_log:
-        logging.info(f'Finished timer {context.job.name}')
+        logging.info(f"Finished timer {context.job.name}")
     end(db)
 
     return

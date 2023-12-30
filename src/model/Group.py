@@ -10,6 +10,7 @@ class Group(BaseModel):
     """
     Group class
     """
+
     id = PrimaryKeyField()
     tg_group_id = CharField(unique=True)
     tg_group_name = CharField()
@@ -23,7 +24,7 @@ class Group(BaseModel):
     is_muted = BooleanField(default=False)
 
     class Meta:
-        db_table = 'group'
+        db_table = "group"
 
     def get_active_users(self) -> list[User]:
         """
@@ -32,7 +33,13 @@ class Group(BaseModel):
         """
         from src.model.GroupUser import GroupUser
 
-        return User().select().join(GroupUser).join(Group).where((Group.id == self.id) & (GroupUser.is_active == True))
+        return (
+            User()
+            .select()
+            .join(GroupUser)
+            .join(Group)
+            .where((Group.id == self.id) & (GroupUser.is_active == True))
+        )
 
     def get_active_users_ids(self) -> list[int]:
         """

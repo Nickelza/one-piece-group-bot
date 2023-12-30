@@ -15,16 +15,28 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.GroupChatError import GroupChatException, GroupChatError
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_amount_from_string, validate_amount, get_belly_formatted, \
-    get_transaction_tax, add_or_remove_bounty
+from src.service.bounty_service import (
+    get_amount_from_string,
+    validate_amount,
+    get_belly_formatted,
+    get_transaction_tax,
+    add_or_remove_bounty,
+)
 from src.service.devil_fruit_service import get_ability_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 target_user: User, command: Command, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    target_user: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Manage the Bounty gift screen
     :param update: The update object
@@ -45,9 +57,14 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     await keyboard_interaction(update, context, user, inbound_keyboard)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
-                   command: Command = None,
-                   bounty_gift: BountyGift = None) -> bool:
+async def validate(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    sender: User,
+    receiver: User,
+    command: Command = None,
+    bounty_gift: BountyGift = None,
+) -> bool:
     """
     Validate the bounty gift request
     :param update: The update object
@@ -62,27 +79,34 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
     # Command does not have wager amount
     if bounty_gift is None:
         if len(command.parameters) == 0:
-            await full_message_send(context, phrases.BOUNTY_GIFT_NO_AMOUNT, update=update, add_delete_button=True)
+            await full_message_send(
+                context, phrases.BOUNTY_GIFT_NO_AMOUNT, update=update, add_delete_button=True
+            )
             return False
 
         # Wager basic validation, error message is sent by validate_wager
-        if not await validate_amount(update, context, sender, command.parameters[0],
-                                     Env.BOUNTY_GIFT_MIN_AMOUNT.get_int()):
+        if not await validate_amount(
+            update, context, sender, command.parameters[0], Env.BOUNTY_GIFT_MIN_AMOUNT.get_int()
+        ):
             return False
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver, command, bounty_gift)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        sender, receiver, command, bounty_gift
+    )
 
     # Sender does not have enough bounty
     if sender.bounty < total_amount:
         # Get max gift amount
         max_amount = int(sender.bounty / (1 + (tax_percentage / 100)))
-        ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(get_belly_formatted(sender.bounty),
-                                                               get_belly_formatted(amount),
-                                                               get_belly_formatted(tax_amount),
-                                                               tax_percentage,
-                                                               get_belly_formatted(total_amount),
-                                                               get_belly_formatted(max_amount))
+        ot_text = phrases.BOUNTY_GIFT_NOT_ENOUGH_BOUNTY.format(
+            get_belly_formatted(sender.bounty),
+            get_belly_formatted(amount),
+            get_belly_formatted(tax_amount),
+            tax_percentage,
+            get_belly_formatted(total_amount),
+            get_belly_formatted(max_amount),
+        )
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return False
 
@@ -93,8 +117,14 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: U
     return True
 
 
-async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, receiver: User,
-                       command: Command, group_chat: GroupChat) -> None:
+async def send_request(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    sender: User,
+    receiver: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Send request to send a bounty gift
     :param update: The update object
@@ -112,9 +142,13 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
     # Get the amounts
     amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver, command)
 
-    ot_text = phrases.BOUNTY_GIFT_REQUEST.format(get_belly_formatted(amount), receiver.get_markdown_mention(),
-                                                 get_belly_formatted(tax_amount), tax_percentage,
-                                                 get_belly_formatted(total_amount))
+    ot_text = phrases.BOUNTY_GIFT_REQUEST.format(
+        get_belly_formatted(amount),
+        receiver.get_markdown_mention(),
+        get_belly_formatted(tax_amount),
+        tax_percentage,
+        get_belly_formatted(total_amount),
+    )
 
     # Save
     bounty_gift: BountyGift = BountyGift()
@@ -127,16 +161,20 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, sende
 
     # Keyboard
     # Delete button can't be replaced by add_delete_button because bounty_gift have to be deleted
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(sender, screen=Screen.GRP_BOUNTY_GIFT,
-                                                                 primary_key=bounty_gift.id)]
+    inline_keyboard: list[list[Keyboard]] = [
+        get_yes_no_keyboard(sender, screen=Screen.GRP_BOUNTY_GIFT, primary_key=bounty_gift.id)
+    ]
 
-    message: Message = await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
+    message: Message = await full_message_send(
+        context, ot_text, update=update, keyboard=inline_keyboard
+    )
     bounty_gift.message_id = message.message_id
     bounty_gift.save()
 
 
-async def get_amounts(sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
-                      ) -> tuple[int, int, int, int]:
+async def get_amounts(
+    sender: User, receiver: User, command: Command = None, bounty_gift: BountyGift = None
+) -> tuple[int, int, int, int]:
     """
     Get the amounts for a bounty gift
     :param sender: The sender
@@ -155,7 +193,9 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
 
     # Apply Devil Fruit ability
     if tax_percentage > 0:
-        tax_percentage = get_ability_value(sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage)
+        tax_percentage = get_ability_value(
+            sender, DevilFruitAbilityType.GIFT_LOAN_TAX, tax_percentage
+        )
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():
@@ -167,8 +207,9 @@ async def get_amounts(sender: User, receiver: User, command: Command = None, bou
     return amount, tax_percentage, tax_amount, total_amount
 
 
-async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User,
-                               inbound_keyboard: Keyboard) -> None:
+async def keyboard_interaction(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, sender: User, inbound_keyboard: Keyboard
+) -> None:
     """
     Keyboard interaction
     :param update: The update object
@@ -178,12 +219,16 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     :return: None
     """
 
-    bounty_gift: BountyGift = BountyGift.get_by_id(inbound_keyboard.get(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
+    bounty_gift: BountyGift = BountyGift.get_by_id(
+        inbound_keyboard.get(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
+    )
 
     # User cancelled the request
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         bounty_gift.delete_instance()
-        await full_message_send(context, phrases.BOUNTY_GIFT_CANCELLED, update=update, add_delete_button=True)
+        await full_message_send(
+            context, phrases.BOUNTY_GIFT_CANCELLED, update=update, add_delete_button=True
+        )
         return
 
     receiver: User = bounty_gift.receiver
@@ -192,8 +237,9 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(sender, receiver,
-                                                                         bounty_gift=bounty_gift)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        sender, receiver, bounty_gift=bounty_gift
+    )
 
     bounty_gift.amount = amount
     bounty_gift.tax_percentage = tax_percentage
@@ -205,13 +251,23 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     await add_or_remove_bounty(sender, total_amount, add=False, update=update, should_save=True)
 
     # Update receiver
-    await add_or_remove_bounty(receiver, amount, update=update, tax_event_type=IncomeTaxEventType.BOUNTY_GIFT,
-                               event_id=bounty_gift.id, should_save=True)
+    await add_or_remove_bounty(
+        receiver,
+        amount,
+        update=update,
+        tax_event_type=IncomeTaxEventType.BOUNTY_GIFT,
+        event_id=bounty_gift.id,
+        should_save=True,
+    )
 
     # Send message
-    ot_text = phrases.BOUNTY_GIFT_CONFIRMED.format(get_belly_formatted(amount), receiver.get_markdown_mention(),
-                                                   get_belly_formatted(tax_amount), tax_percentage,
-                                                   get_belly_formatted(total_amount))
+    ot_text = phrases.BOUNTY_GIFT_CONFIRMED.format(
+        get_belly_formatted(amount),
+        receiver.get_markdown_mention(),
+        get_belly_formatted(tax_amount),
+        tax_percentage,
+        get_belly_formatted(total_amount),
+    )
     await full_message_send(context, ot_text, update=update, add_delete_button=True)
 
     # Send notification to receiver

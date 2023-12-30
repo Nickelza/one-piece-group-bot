@@ -16,13 +16,19 @@ from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_scre
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
-from src.chat.group.screens.screen_game_opponent_confirmation import manage as manage_screen_game_opponent_confirmation
+from src.chat.group.screens.screen_game_opponent_confirmation import (
+    manage as manage_screen_game_opponent_confirmation,
+)
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
 from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
-from src.chat.group.screens.screen_prediction_bet_remove import manage as manage_screen_prediction_bet_remove
-from src.chat.group.screens.screen_prediction_bet_status import manage as manage_screen_prediction_bet_status
+from src.chat.group.screens.screen_prediction_bet_remove import (
+    manage as manage_screen_prediction_bet_remove,
+)
+from src.chat.group.screens.screen_prediction_bet_status import (
+    manage as manage_screen_prediction_bet_status,
+)
 from src.chat.group.screens.screen_settings import manage as manage_screen_settings
 from src.chat.group.screens.screen_silence import manage as manage_screen_silence
 from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
@@ -32,8 +38,11 @@ from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Feature import Feature
-from src.model.enums.Notification import DeletedMessageArrestNotification, DeletedMessageMuteNotification, \
-    DeletedMessageLocationNotification
+from src.model.enums.Notification import (
+    DeletedMessageArrestNotification,
+    DeletedMessageMuteNotification,
+    DeletedMessageLocationNotification,
+)
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -47,8 +56,16 @@ from src.service.notification_service import send_notification
 from src.service.user_service import user_is_muted
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                 keyboard: Keyboard, target_user: User, is_callback: bool, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    command: Command.Command,
+    user: User,
+    keyboard: Keyboard,
+    target_user: User,
+    is_callback: bool,
+    group_chat: GroupChat,
+) -> None:
     """
     Main function for the group chat chat manager
     :param update: Telegram update
@@ -79,7 +96,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     # Insert or update user, with message count
     try:
         # Ignore self bot messages or from linked channel
-        if update.effective_user.is_bot or update.message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int():
+        if (
+            update.effective_user.is_bot
+            or update.message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int()
+        ):
             return
     except AttributeError:
         pass
@@ -90,21 +110,38 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             if not await validate(update, context, user, is_callback, group_chat):
                 return
         elif feature_is_enabled(group_chat, Feature.SILENCE):
-            if not await validate(update, context, user, is_callback, group_chat, check_only_muted=True):
+            if not await validate(
+                update, context, user, is_callback, group_chat, check_only_muted=True
+            ):
                 return
 
     # Update bounty from message gain
     if command is Command.ND:
-        await add_or_remove_bounty(user, get_message_belly(update, user, group_chat), context=context, update=update,
-                                   should_update_location=True, from_message=True)
+        await add_or_remove_bounty(
+            user,
+            get_message_belly(update, user, group_chat),
+            context=context,
+            update=update,
+            should_update_location=True,
+            from_message=True,
+        )
         return
 
-    await dispatch_screens(update, context, user, keyboard, command, target_user, group_chat, added_to_group)
+    await dispatch_screens(
+        update, context, user, keyboard, command, target_user, group_chat, added_to_group
+    )
 
 
-async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                           command: Command.Command, target_user: User, group_chat: GroupChat, added_to_group: bool
-                           ) -> None:
+async def dispatch_screens(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    command: Command.Command,
+    target_user: User,
+    group_chat: GroupChat,
+    added_to_group: bool,
+) -> None:
     """
     Dispatches the different screens
 
@@ -127,7 +164,9 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             await manage_screen_doc_q_game(update, context, user, inbound_keyboard, group_chat)
 
         case Screen.GRP_CHANGE_REGION:  # Change region
-            await manage_screen_change_region(update, context, user, keyboard=inbound_keyboard, command=command)
+            await manage_screen_change_region(
+                update, context, user, keyboard=inbound_keyboard, command=command
+            )
 
         case Screen.GRP_FIGHT:  # Fight
             await manage_screen_fight(update, context, user, inbound_keyboard, group_chat)
@@ -136,10 +175,14 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             await manage_screen_game(update, context, user, command, group_chat)
 
         case Screen.GRP_GAME_SELECTION:  # Game selection
-            await manage_screen_game_selection(update, context, user, inbound_keyboard=inbound_keyboard)
+            await manage_screen_game_selection(
+                update, context, user, inbound_keyboard=inbound_keyboard
+            )
 
         case Screen.GRP_GAME_OPPONENT_CONFIRMATION:  # Game opponent confirmation
-            await manage_screen_game_opponent_confirmation(update, context, user, inbound_keyboard=inbound_keyboard)
+            await manage_screen_game_opponent_confirmation(
+                update, context, user, inbound_keyboard=inbound_keyboard
+            )
 
         case Screen.GRP_ROCK_PAPER_SCISSORS_GAME:  # Game Rock Paper Scissors
             await manage_screen_game_rps(update, context, user, inbound_keyboard=inbound_keyboard)
@@ -172,19 +215,24 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
             await manage_screen_speak(update, context, target_user, group_chat)
 
         case Screen.GRP_BOUNTY_GIFT:  # Bounty gift
-            await manage_screen_bounty_gift(update, context, user, inbound_keyboard, target_user, command,
-                                            group_chat)
+            await manage_screen_bounty_gift(
+                update, context, user, inbound_keyboard, target_user, command, group_chat
+            )
 
         case Screen.GRP_SETTINGS:  # Settings
-            await manage_screen_settings(update, context, inbound_keyboard, group_chat, added_to_group)
+            await manage_screen_settings(
+                update, context, inbound_keyboard, group_chat, added_to_group
+            )
 
         case Screen.GRP_DEVIL_FRUIT_SELL:  # Devil fruit sell
-            await manage_screen_devil_fruit_sell(update, context, user, inbound_keyboard, target_user, command,
-                                                 group_chat)
+            await manage_screen_devil_fruit_sell(
+                update, context, user, inbound_keyboard, target_user, command, group_chat
+            )
 
         case Screen.GRP_BOUNTY_LOAN:  # Bounty loan
-            await manage_screen_bounty_loan(update, context, user, inbound_keyboard, target_user, command,
-                                            group_chat)
+            await manage_screen_bounty_loan(
+                update, context, user, inbound_keyboard, target_user, command, group_chat
+            )
 
         case _:  # Unknown screen
             if update.callback_query is not None:
@@ -195,12 +243,21 @@ async def dispatch_screens(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         user.last_system_interaction_date = datetime.now()
 
         group: Group = group_chat.group
-        if feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE) and group.tg_group_username is not None:
+        if (
+            feature_is_enabled(group_chat, Feature.DEVIL_FRUIT_APPEARANCE)
+            and group.tg_group_username is not None
+        ):
             await release_devil_fruit_to_user(update, context, user, group_chat)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, is_callback: bool,
-                   group_chat: GroupChat, check_only_muted: bool = False) -> bool:
+async def validate(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    is_callback: bool,
+    group_chat: GroupChat,
+    check_only_muted: bool = False,
+) -> bool:
     """
     Validates the message, deleting it if it's not valid
     :param update: Telegram update
@@ -221,49 +278,61 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
 
     # Stickers
     try:
-        if (update.message.sticker is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int(), group_chat)):
+        if update.message.sticker is not None and not await validate_location_level(
+            update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_STICKER.get_int(), group_chat
+        ):
             return False
     except AttributeError:
         pass
 
     # Animations
     try:
-        if (update.message.animation is not None
-                and not await validate_location_level(
-                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int(), group_chat)):
+        if update.message.animation is not None and not await validate_location_level(
+            update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_ANIMATION.get_int(), group_chat
+        ):
             return False
     except AttributeError:
         pass
 
     # Forwarded
     try:
-        if (update.message.forward_from is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(), group_chat,
-                                                      identifier=str(update.message.forward_from.id),
-                                                      allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list())):
+        if update.message.forward_from is not None and not await validate_location_level(
+            update,
+            context,
+            user,
+            Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
+            group_chat,
+            identifier=str(update.message.forward_from.id),
+            allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list(),
+        ):
             return False
     except AttributeError:
         pass
 
     # Dice emoji
     try:
-        if (update.message.dice is not None
-                and not await validate_location_level(
-                    update, context, user, Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int(), group_chat)):
+        if update.message.dice is not None and not await validate_location_level(
+            update,
+            context,
+            user,
+            Env.REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI.get_int(),
+            group_chat,
+        ):
             return False
     except AttributeError:
         pass
 
     # Inline Bot
     try:
-        if (update.message.via_bot is not None
-                and not await validate_location_level(update, context, user,
-                                                      Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(), group_chat,
-                                                      identifier=str(update.message.via_bot.id),
-                                                      allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list())):
+        if update.message.via_bot is not None and not await validate_location_level(
+            update,
+            context,
+            user,
+            Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
+            group_chat,
+            identifier=str(update.message.via_bot.id),
+            allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list(),
+        ):
             return False
     except AttributeError:
         pass
@@ -271,9 +340,15 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     return True
 
 
-async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, location_level: int,
-                                  group_chat: GroupChat, identifier: str = None,
-                                  allowed_identifiers: list[str] = None) -> bool:
+async def validate_location_level(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    location_level: int,
+    group_chat: GroupChat,
+    identifier: str = None,
+    allowed_identifiers: list[str] = None,
+) -> bool:
     """
     Validates the location level of the user
     :param update: Telegram update
@@ -287,7 +362,7 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
     """
 
     if identifier is not None and allowed_identifiers is None:
-        raise ValueError('allowed_identifiers must be not None if identifier is not None')
+        raise ValueError("allowed_identifiers must be not None if identifier is not None")
 
     try:
         if identifier is not None and identifier in allowed_identifiers:
@@ -300,10 +375,14 @@ async def validate_location_level(update: Update, context: ContextTypes.DEFAULT_
             raise GroupMessageValidationException(notification=DeletedMessageMuteNotification())
 
         if user.location_level < location_level:
-            raise GroupMessageValidationException(notification=DeletedMessageLocationNotification(user, location_level))
+            raise GroupMessageValidationException(
+                notification=DeletedMessageLocationNotification(user, location_level)
+            )
 
     except GroupMessageValidationException as e:
-        await send_notification(context, user, e.notification, should_forward_message=True, update=update)
+        await send_notification(
+            context, user, e.notification, should_forward_message=True, update=update
+        )
         await delete_message(update)
         return False
 

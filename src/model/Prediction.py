@@ -11,6 +11,7 @@ class Prediction(BaseModel):
     """
     Prediction class
     """
+
     id = PrimaryKeyField()
     type = CharField(max_length=20, null=False)
     status = SmallIntegerField(default=PredictionStatus.NEW)
@@ -24,14 +25,16 @@ class Prediction(BaseModel):
     allow_multiple_choices = BooleanField(default=True)
     can_withdraw_bet = BooleanField(default=True)
     result_set_date = DateTimeField(null=True)
-    creator = ForeignKeyField(User, null=True, backref='predictions', on_delete='CASCADE', on_update='CASCADE')
+    creator = ForeignKeyField(
+        User, null=True, backref="predictions", on_delete="CASCADE", on_update="CASCADE"
+    )
     is_public = BooleanField(default=False)
 
     options: list[str] = []  # For saving in context when creating a private prediction
     should_save: bool = True
 
     class Meta:
-        db_table = 'prediction'
+        db_table = "prediction"
 
     def is_open(self) -> bool:
         """If the prediction is open for betting"""

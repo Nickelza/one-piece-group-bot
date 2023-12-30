@@ -28,11 +28,15 @@ async def get_user_profile_photo(update: Update) -> str | None:
     photo_path: Optional[Path] = None
     try:
         # More verbose to get IDE hints
-        user_profile_photos: UserProfilePhotos = await update.effective_user.get_profile_photos(limit=1)
+        user_profile_photos: UserProfilePhotos = await update.effective_user.get_profile_photos(
+            limit=1
+        )
         last_set_photos: Sequence[PhotoSize] = user_profile_photos.photos[0]
         last_set_photo: PhotoSize = last_set_photos[-1]
         file: File = await last_set_photo.get_file()
-        photo_path: Path = await file.download_to_drive(generate_temp_file_path(c.TG_PROFILE_PHOTO_EXTENSION))
+        photo_path: Path = await file.download_to_drive(
+            generate_temp_file_path(c.TG_PROFILE_PHOTO_EXTENSION)
+        )
     except (AttributeError, IndexError):
         pass
 
@@ -95,12 +99,19 @@ def user_is_muted(user: User, group_chat: GroupChat) -> bool:
     if not group_chat.is_muted:
         return False
 
-    return (UnmutedUser
-            .get_or_none(UnmutedUser.user == user, UnmutedUser.group_chat == group_chat) is None)
+    return (
+        UnmutedUser.get_or_none(UnmutedUser.user == user, UnmutedUser.group_chat == group_chat)
+        is None
+    )
 
 
-async def get_chat_member(user: User, group_chat: GroupChat, update: Update = None,
-                          context: ContextTypes.DEFAULT_TYPE = None, tg_group_id: str = None) -> ChatMember | None:
+async def get_chat_member(
+    user: User,
+    group_chat: GroupChat,
+    update: Update = None,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    tg_group_id: str = None,
+) -> ChatMember | None:
     """
     Returns the chat member of the user
     :param user: The user
@@ -112,10 +123,10 @@ async def get_chat_member(user: User, group_chat: GroupChat, update: Update = No
     """
 
     if update is None and group_chat is None and tg_group_id is None:
-        raise ValueError('update or group_chat or tg_group_id must be specified')
+        raise ValueError("update or group_chat or tg_group_id must be specified")
 
     if group_chat is not None and context is None:
-        raise ValueError('context must be specified if group_chat is specified')
+        raise ValueError("context must be specified if group_chat is specified")
 
     from telegram.error import Forbidden
 
@@ -128,13 +139,18 @@ async def get_chat_member(user: User, group_chat: GroupChat, update: Update = No
         elif tg_group_id is not None:
             return await context.bot.get_chat_member(tg_group_id, str(user.tg_user_id))
         else:
-            raise ValueError('update or group_chat must be specified')
+            raise ValueError("update or group_chat must be specified")
     except (Forbidden, BadRequest):  # Bot kicked from the group chat or user not found
         return None
 
 
-async def user_is_chat_member(user: User, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None,
-                              group_chat: GroupChat = None, tg_group_id: str = None) -> bool:
+async def user_is_chat_member(
+    user: User,
+    update: Update = None,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    group_chat: GroupChat = None,
+    tg_group_id: str = None,
+) -> bool:
     """
     Returns True if the user is a member of the chat
     :param user: The user
@@ -146,11 +162,19 @@ async def user_is_chat_member(user: User, update: Update = None, context: Contex
     """
 
     chat_member: ChatMember = await get_chat_member(user, group_chat, update, context, tg_group_id)
-    return chat_member is not None and chat_member.status not in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED]
+    return chat_member is not None and chat_member.status not in [
+        ChatMemberStatus.LEFT,
+        ChatMemberStatus.BANNED,
+    ]
 
 
-async def user_is_chat_admin(user: User, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None,
-                             group_chat: GroupChat = None, tg_group_id: str = None) -> bool:
+async def user_is_chat_admin(
+    user: User,
+    update: Update = None,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    group_chat: GroupChat = None,
+    tg_group_id: str = None,
+) -> bool:
     """
     Returns True if the user is an admin of the chat
     :param user: The user
@@ -162,4 +186,7 @@ async def user_is_chat_admin(user: User, update: Update = None, context: Context
     """
 
     chat_member: ChatMember = await get_chat_member(user, group_chat, update, context, tg_group_id)
-    return chat_member is not None and chat_member.status in [ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR]
+    return chat_member is not None and chat_member.status in [
+        ChatMemberStatus.OWNER,
+        ChatMemberStatus.ADMINISTRATOR,
+    ]

@@ -27,13 +27,18 @@ class GameReservedKeys(StrEnum):
     The reserved keys for this screen
     """
 
-    GAME_ID = 'a'
-    GAME_TYPE = 'b'
-    CANCEL = 'c'
+    GAME_ID = "a"
+    GAME_TYPE = "b"
+    CANCEL = "c"
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenger: User, opponent: User,
-                   command: Command) -> bool:
+async def validate(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    challenger: User,
+    opponent: User,
+    command: Command,
+) -> bool:
     """
     Validate the fight request
     :param update: The update object
@@ -46,25 +51,37 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
 
     # Command does not have wager amount
     if len(command.parameters) == 0:
-        await full_message_send(context, phrases.GAME_NO_WAGER_AMOUNT, update=update, add_delete_button=True)
+        await full_message_send(
+            context, phrases.GAME_NO_WAGER_AMOUNT, update=update, add_delete_button=True
+        )
         return False
 
     # Wager basic validation, error message is sent by validate_wager
-    if not await validate_amount(update, context, challenger, command.parameters[0], Env.GAME_MIN_WAGER.get_int()):
+    if not await validate_amount(
+        update, context, challenger, command.parameters[0], Env.GAME_MIN_WAGER.get_int()
+    ):
         return False
 
     # Challenger cannot initiate a game
     if challenger.game_cooldown_end_date and challenger.game_cooldown_end_date > datetime.now():
-        ot_text = phrases.GAME_CANNOT_INITIATE.format(get_remaining_duration(challenger.game_cooldown_end_date))
+        ot_text = phrases.GAME_CANNOT_INITIATE.format(
+            get_remaining_duration(challenger.game_cooldown_end_date)
+        )
 
         outbound_keyboard: list[list[Keyboard]] = [[]]
-        pending_games: list[Game] = Game.select().where((Game.challenger == challenger) &
-                                                        (Game.status.not_in(GameStatus.get_finished())))
+        pending_games: list[Game] = Game.select().where(
+            (Game.challenger == challenger) & (Game.status.not_in(GameStatus.get_finished()))
+        )
         for game in pending_games:
-            outbound_keyboard.append([Keyboard(phrases.GAME_PENDING_KEY,
-                                               url=get_message_url(game.message_id, game.group_chat))])
+            outbound_keyboard.append([
+                Keyboard(
+                    phrases.GAME_PENDING_KEY, url=get_message_url(game.message_id, game.group_chat)
+                )
+            ])
 
-        await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+        await full_message_send(
+            context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True
+        )
         return False
 
     # Opponent validation
@@ -82,15 +99,24 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, challenge
             if ove.message is not None:
                 await full_message_send(context, ove.message, update)
             else:
-                await full_message_send(context, phrases.GAME_CANNOT_CHALLENGE_USER, update=update,
-                                        add_delete_button=True)
+                await full_message_send(
+                    context,
+                    phrases.GAME_CANNOT_CHALLENGE_USER,
+                    update=update,
+                    add_delete_button=True,
+                )
             return False
 
     return True
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command, group_chat: GroupChat
-                 ) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Manage the game screen
     :param update: The update object
@@ -101,7 +127,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     :return: None
     """
     try:
-        opponent: User | None = User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
+        opponent: User | None = User.get_or_none(
+            User.tg_user_id == update.message.reply_to_message.from_user.id
+        )
 
         if opponent is None:
             raise GroupChatException(GroupChatError.USER_NOT_IN_DB)
@@ -136,48 +164,81 @@ async def display_games(game: Game, update: Update, context: ContextTypes.DEFAUL
     inline_keyboard: list[list[Keyboard]] = [[]]
 
     # Guess or Life
-    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.GUESS_OR_LIFE}
-    btn_gol: Keyboard = Keyboard(GameType.GUESS_OR_LIFE.get_name(), info=button_info,
-                                 screen=Screen.GRP_GAME_SELECTION)
+    button_info: dict = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.GUESS_OR_LIFE,
+    }
+    btn_gol: Keyboard = Keyboard(
+        GameType.GUESS_OR_LIFE.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_gol])
 
     # Rock Paper Scissors
-    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.ROCK_PAPER_SCISSORS}
-    btn_rps: Keyboard = Keyboard(GameType.ROCK_PAPER_SCISSORS.get_name(), info=button_info,
-                                 screen=Screen.GRP_GAME_SELECTION)
+    button_info: dict = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.ROCK_PAPER_SCISSORS,
+    }
+    btn_rps: Keyboard = Keyboard(
+        GameType.ROCK_PAPER_SCISSORS.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_rps])
 
     # Punk Records
-    button_info: dict = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.PUNK_RECORDS}
-    btn_pr: Keyboard = Keyboard(GameType.PUNK_RECORDS.get_name(), info=button_info,
-                                screen=Screen.GRP_GAME_SELECTION)
+    button_info: dict = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.PUNK_RECORDS,
+    }
+    btn_pr: Keyboard = Keyboard(
+        GameType.PUNK_RECORDS.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_pr])
 
     # Russian Roulette
-    button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.RUSSIAN_ROULETTE}
-    btn_rr: Keyboard = Keyboard(GameType.RUSSIAN_ROULETTE.get_name(), info=button_info,
-                                screen=Screen.GRP_GAME_SELECTION)
+    button_info = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.RUSSIAN_ROULETTE,
+    }
+    btn_rr: Keyboard = Keyboard(
+        GameType.RUSSIAN_ROULETTE.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_rr])
 
     # Shambles
-    button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.SHAMBLES}
-    btn_shambles: Keyboard = Keyboard(GameType.SHAMBLES.get_name(), info=button_info,
-                                      screen=Screen.GRP_GAME_SELECTION)
+    button_info = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.SHAMBLES,
+    }
+    btn_shambles: Keyboard = Keyboard(
+        GameType.SHAMBLES.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_shambles])
 
     # Who's Who
-    button_info = {GameReservedKeys.GAME_ID: game.id, GameReservedKeys.GAME_TYPE: GameType.WHOS_WHO}
-    btn_ww: Keyboard = Keyboard(GameType.WHOS_WHO.get_name(), info=button_info,
-                                screen=Screen.GRP_GAME_SELECTION)
+    button_info = {
+        GameReservedKeys.GAME_ID: game.id,
+        GameReservedKeys.GAME_TYPE: GameType.WHOS_WHO,
+    }
+    btn_ww: Keyboard = Keyboard(
+        GameType.WHOS_WHO.get_name(), info=button_info, screen=Screen.GRP_GAME_SELECTION
+    )
     inline_keyboard.append([btn_ww])
 
     # Delete button, can't be replaced by add_delete_button because wagers have to be returned
-    inline_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_CANCEL, info={GameReservedKeys.GAME_ID: game.id,
-                                                                           GameReservedKeys.CANCEL: True},
-                                     screen=Screen.GRP_GAME_SELECTION)])
+    inline_keyboard.append([
+        Keyboard(
+            phrases.KEYBOARD_OPTION_CANCEL,
+            info={GameReservedKeys.GAME_ID: game.id, GameReservedKeys.CANCEL: True},
+            screen=Screen.GRP_GAME_SELECTION,
+        )
+    ])
 
     ot_text = phrases.GAME_CHOOSE_GAME
-    message: Message = await full_media_send(context, saved_media_name=SavedMediaName.GAME, caption=ot_text,
-                                             update=update, keyboard=inline_keyboard)
+    message: Message = await full_media_send(
+        context,
+        saved_media_name=SavedMediaName.GAME,
+        caption=ot_text,
+        update=update,
+        keyboard=inline_keyboard,
+    )
     game.message_id = message.message_id
     game.save()

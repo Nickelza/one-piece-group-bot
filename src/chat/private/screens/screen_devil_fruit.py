@@ -24,7 +24,8 @@ class DevilFruitReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    ITEM_ID = 'a'
+
+    ITEM_ID = "a"
 
 
 class DevilFruitListPage(ListPage):
@@ -43,21 +44,25 @@ class DevilFruitListPage(ListPage):
     def get_items(self, page) -> list[DevilFruit]:
         """Get Devil Fruits that are owned by user"""
 
-        return (self.object
-                .select()
-                .where(DevilFruit.owner == self.user)
-                .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(DevilFruit.owner == self.user)
+            .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where(DevilFruit.owner == self.user)
-                .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
-                .count())
+        return (
+            self.object.select()
+            .where(DevilFruit.owner == self.user)
+            .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.DEVIL_FRUIT_ITEM_TEXT.format(escape_valid_markdown_chars(self.object.get_full_name()))
+        return phrases.DEVIL_FRUIT_ITEM_TEXT.format(
+            escape_valid_markdown_chars(self.object.get_full_name())
+        )
 
     def get_item_detail_text(self, from_private_chat: bool = True) -> str:
         """
@@ -65,25 +70,34 @@ class DevilFruitListPage(ListPage):
         :param from_private_chat: If it was called from a private chat
         :return:
         """
-        expiring_date_text = ''
-        sell_command_text = ''
+        expiring_date_text = ""
+        sell_command_text = ""
         if from_private_chat:
             if DevilFruitStatus(self.object.status) is DevilFruitStatus.COLLECTED:
                 if self.object.expiration_date is not None:  # Should always be the case
                     expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-                        get_remaining_duration(self.object.expiration_date))
+                        get_remaining_duration(self.object.expiration_date)
+                    )
                 else:
-                    logging.error('Devil Fruit %s in collected status has no expiration date', self.object.id)
+                    logging.error(
+                        "Devil Fruit %s in collected status has no expiration date", self.object.id
+                    )
 
                 sell_command_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND
 
         abilities_text = get_devil_fruit_abilities_text(self.object, always_show_abilities=False)
         return phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT.format(
-            self.object.get_full_name(), DevilFruitCategory(self.object.category).get_description(), abilities_text,
-            expiring_date_text, sell_command_text)
+            self.object.get_full_name(),
+            DevilFruitCategory(self.object.category).get_description(),
+            abilities_text,
+            expiring_date_text,
+            sell_command_text,
+        )
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the devil_fruit list screen
     :param update: The update
@@ -100,8 +114,12 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     # If no Devil Fruits, show error message
     if items_count == 0:
-        await full_message_send(context, phrases.DEVIL_FRUIT_LIST_NO_ITEMS, update=update,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            phrases.DEVIL_FRUIT_LIST_NO_ITEMS,
+            update=update,
+            inbound_keyboard=inbound_keyboard,
+        )
         return
 
     # If only 1 devil fruit, go directly to the devil fruit detail screen
@@ -110,15 +128,30 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         return
 
     ot_text, items_keyboard = get_items_text_keyboard(
-        inbound_keyboard, devil_fruit_list_page, DevilFruitReservedKeys.ITEM_ID, Screen.PVT_DEVIL_FRUIT_DETAIL,
-        text_fill_in=phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN)
+        inbound_keyboard,
+        devil_fruit_list_page,
+        DevilFruitReservedKeys.ITEM_ID,
+        Screen.PVT_DEVIL_FRUIT_DETAIL,
+        text_fill_in=phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN,
+    )
 
-    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=items_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+    )
 
 
-async def skip_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User,
-                      devil_fruit_list_page: DevilFruitListPage) -> None:
+async def skip_screen(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    inbound_keyboard: Keyboard,
+    user: User,
+    devil_fruit_list_page: DevilFruitListPage,
+) -> None:
     """
     Skip the Devil Fruit list screen and go to devil fruit detail screen
     :param update: The update
@@ -128,7 +161,9 @@ async def skip_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, inboun
     :param devil_fruit_list_page: The devil fruit list page
     :return: None
     """
-    from src.chat.private.screens.screen_devil_fruit_detail import manage as manage_screen_devil_fruit_detail
+    from src.chat.private.screens.screen_devil_fruit_detail import (
+        manage as manage_screen_devil_fruit_detail,
+    )
 
     devil_fruit: DevilFruit = devil_fruit_list_page.get_items(1)[0]
     inbound_keyboard.info[DevilFruitReservedKeys.ITEM_ID] = devil_fruit.id

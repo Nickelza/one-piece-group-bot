@@ -17,10 +17,13 @@ class LogTypeReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    TYPE = 'a'
+
+    TYPE = "a"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the log stats detail screen
     :param update: The update
@@ -39,9 +42,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS_TYPE)
 
         try:
-            await full_message_send(context,
-                                    phrases.LOG_STATS_TEXT.format(log.get_text_fill_in(), log.get_stats_text()),
-                                    update=update, inbound_keyboard=inbound_keyboard)
+            await full_message_send(
+                context,
+                phrases.LOG_STATS_TEXT.format(log.get_text_fill_in(), log.get_stats_text()),
+                update=update,
+                inbound_keyboard=inbound_keyboard,
+            )
         except AttributeError:
-            await full_message_send(context, phrases.LOG_STATS_NOT_ENOUGH_DATA, update=update,
-                                    inbound_keyboard=inbound_keyboard)
+            await full_message_send(
+                context,
+                phrases.LOG_STATS_NOT_ENOUGH_DATA,
+                update=update,
+                inbound_keyboard=inbound_keyboard,
+            )

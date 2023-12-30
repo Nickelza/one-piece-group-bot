@@ -4,12 +4,24 @@ import time
 
 import pytz
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, Defaults, CallbackQueryHandler, \
-    ContextTypes, AIORateLimiter, InlineQueryHandler
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    Defaults,
+    CallbackQueryHandler,
+    ContextTypes,
+    AIORateLimiter,
+    InlineQueryHandler,
+)
 
 import constants as c
 import resources.Environment as Env
-from src.chat.manage_message import manage_regular as manage_regular_message, manage_callback as manage_callback_message
+from src.chat.manage_message import (
+    manage_regular as manage_regular_message,
+    manage_callback as manage_callback_message,
+)
 from src.service.message_service import full_message_send
 from src.service.timer_service import set_timers
 
@@ -61,15 +73,18 @@ def main() -> None:
 
     if Env.DB_LOG_QUERIES.get_bool():
         # Set Peewee logger
-        logger = logging.getLogger('peewee')
+        logger = logging.getLogger("peewee")
         logger.addHandler(logging.StreamHandler())
         logger.setLevel(logging.DEBUG)
 
     # Disable httpx logging info
-    logging.getLogger('httpx').setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        level=logging.INFO, stream=sys.stdout)
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO,
+        stream=sys.stdout,
+    )
 
     # Sentry
     if Env.SENTRY_ENABLED.get_bool():
@@ -85,23 +100,24 @@ def main() -> None:
             integrations=[
                 LoggingIntegration(
                     level=logging.getLevelName(Env.SENTRY_LOG_LEVEL.get()),
-                    event_level=logging.getLevelName(Env.SENTRY_LOG_EVENT_LEVEL.get())
+                    event_level=logging.getLevelName(Env.SENTRY_LOG_EVENT_LEVEL.get()),
                 ),
             ],
         )
 
     defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
 
-    application = (Application
-                   .builder()
-                   .token(Env.BOT_TOKEN.get())
-                   .post_init(post_init)
-                   .defaults(defaults)
-                   .rate_limiter(AIORateLimiter())
-                   .build())
+    application = (
+        Application.builder()
+        .token(Env.BOT_TOKEN.get())
+        .post_init(post_init)
+        .defaults(defaults)
+        .rate_limiter(AIORateLimiter())
+        .build()
+    )
 
     # Chat id handler
-    application.add_handler(CommandHandler('chatid', chat_id))
+    application.add_handler(CommandHandler("chatid", chat_id))
 
     # Regular message handler
     application.add_handler(MessageHandler(filters.ALL, manage_regular_message))
@@ -113,10 +129,10 @@ def main() -> None:
     application.add_handler(InlineQueryHandler(manage_regular_message))
 
     # Activate timers
-    logging.getLogger('apscheduler.executors.default').propagate = False
+    logging.getLogger("apscheduler.executors.default").propagate = False
 
     application.run_polling(drop_pending_updates=Env.BOT_DROP_PENDING_UPDATES.get_bool())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

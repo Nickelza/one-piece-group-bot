@@ -24,19 +24,15 @@ class SupabaseRest:
         :return: The response
         """
 
-        full_path = f'{self.rest_url}{path}'
+        full_path = f"{self.rest_url}{path}"
         # Make request
         response = requests.get(
-            url=full_path,
-            headers={
-                'apikey': self.api_key,
-                'Content-Type': 'application/json'
-            }
+            url=full_path, headers={"apikey": self.api_key, "Content-Type": "application/json"}
         )
 
         # Check response
         if response.status_code != 200:
-            raise Exception(f'Error making request to {full_path}')
+            raise Exception(f"Error making request to {full_path}")
 
         # Return response
         return response.json()
@@ -50,10 +46,10 @@ class SupabaseRest:
         """
 
         # Get a random character
-        response: list[dict] = SupabaseRest().make_get_request('character')
+        response: list[dict] = SupabaseRest().make_get_request("character")
 
         if len(response) == 0:
-            raise WikiException('No characters found')
+            raise WikiException("No characters found")
 
         random.shuffle(response)
 
@@ -61,15 +57,20 @@ class SupabaseRest:
             return Character(**response[0])
 
         for char in response:
-            if char['difficulty'] == difficulty.value:
+            if char["difficulty"] == difficulty.value:
                 return Character(**char)
 
-        raise WikiException(f'No characters found with difficulty {difficulty} or lower')
+        raise WikiException(f"No characters found with difficulty {difficulty} or lower")
 
     @staticmethod
-    def get_random_terminology(max_len: int = None, only_letters: bool = False,
-                               consider_len_without_space: bool = False, allow_spaces: bool = True,
-                               min_unique_characters: int = None, max_unique_characters: int = None) -> Terminology:
+    def get_random_terminology(
+        max_len: int = None,
+        only_letters: bool = False,
+        consider_len_without_space: bool = False,
+        allow_spaces: bool = True,
+        min_unique_characters: int = None,
+        max_unique_characters: int = None,
+    ) -> Terminology:
         """
         Get a random terminology
         :param max_len: The maximum length of the terminology
@@ -82,24 +83,33 @@ class SupabaseRest:
         """
 
         # Get a random terminology
-        response: list[dict] = SupabaseRest().make_get_request('terminology')
+        response: list[dict] = SupabaseRest().make_get_request("terminology")
         random.shuffle(response)
 
         for term in response:
-            if max_len is not None and len(term['name']) > max_len:
-                if not (consider_len_without_space and len(str(term['name']).replace(' ', '')) <= max_len):
+            if max_len is not None and len(term["name"]) > max_len:
+                if not (
+                    consider_len_without_space
+                    and len(str(term["name"]).replace(" ", "")) <= max_len
+                ):
                     continue
 
-            if only_letters and not str(term['name']).isalpha():
-                if not (allow_spaces and str(term['name']).replace(' ', '').isalpha()):
+            if only_letters and not str(term["name"]).isalpha():
+                if not (allow_spaces and str(term["name"]).replace(" ", "").isalpha()):
                     continue
 
-            if min_unique_characters is not None and len(set(term['name'])) < min_unique_characters:
+            if (
+                min_unique_characters is not None
+                and len(set(term["name"])) < min_unique_characters
+            ):
                 continue
 
-            if max_unique_characters is not None and len(set(term['name'])) > max_unique_characters:
+            if (
+                max_unique_characters is not None
+                and len(set(term["name"])) > max_unique_characters
+            ):
                 continue
 
             return Terminology(**term)
 
-        raise WikiException('No terminologies found')
+        raise WikiException("No terminologies found")

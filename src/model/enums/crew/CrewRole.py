@@ -7,6 +7,7 @@ class CrewRole(IntEnum):
     """
     Enum class for Crew Roles
     """
+
     CAPTAIN = 1
     FIRST_MATE = 2
 
@@ -21,5 +22,5 @@ class CrewRole(IntEnum):
 
 CREW_ROLE_NAME_MAP = {
     CrewRole.CAPTAIN: phrases.CREW_ROLE_CAPTAIN,
-    CrewRole.FIRST_MATE: phrases.CREW_ROLE_FIRST_MATE
+    CrewRole.FIRST_MATE: phrases.CREW_ROLE_FIRST_MATE,
 }

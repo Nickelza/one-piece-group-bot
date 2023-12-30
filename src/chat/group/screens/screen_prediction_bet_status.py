@@ -7,12 +7,17 @@ from src.model.Prediction import Prediction
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.service.message_service import full_message_send
-from src.service.prediction_service import get_prediction_options_user, get_user_prediction_status_text, \
-    get_prediction_from_message_id, refresh
+from src.service.prediction_service import (
+    get_prediction_options_user,
+    get_user_prediction_status_text,
+    get_prediction_from_message_id,
+    refresh,
+)
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat = None
-                   ) -> tuple[Prediction, list[PredictionOptionUser]] | tuple[None, None]:
+async def validate(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat = None
+) -> tuple[Prediction, list[PredictionOptionUser]] | tuple[None, None]:
     """
     Validate the prediction bet
     :param update: The update object
@@ -25,17 +30,25 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, user: Use
     error_tuple = None, None
 
     # Get prediction from message id
-    prediction: Prediction = get_prediction_from_message_id(group_chat, update.message.reply_to_message.message_id)
+    prediction: Prediction = get_prediction_from_message_id(
+        group_chat, update.message.reply_to_message.message_id
+    )
     if prediction is None:
-        await full_message_send(context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True)
+        await full_message_send(
+            context, phrases.PREDICTION_NOT_FOUND_IN_REPLY, update=update, add_delete_button=True
+        )
         return error_tuple
 
-    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(prediction, user)
+    prediction_options_user: list[PredictionOptionUser] = get_prediction_options_user(
+        prediction, user
+    )
 
     return prediction, prediction_options_user
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat
+) -> None:
     """
     Manage the change region request
     :param update: The update object

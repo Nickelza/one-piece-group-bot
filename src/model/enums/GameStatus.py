@@ -8,6 +8,7 @@ class GameStatus(IntEnum):
     """
     Enum for the status of a game.
     """
+
     ND = -1
     IN_PROGRESS = 0
     WON = 1
@@ -19,7 +20,7 @@ class GameStatus(IntEnum):
     COUNTDOWN_TO_START = 7
 
     @staticmethod
-    def get_finished() -> list['GameStatus']:
+    def get_finished() -> list["GameStatus"]:
         """
         Get the finished statuses.
         :return: The finished statuses
@@ -49,7 +50,7 @@ class GameStatus(IntEnum):
 
         return Emoji.LOG_NEUTRAL
 
-    def get_status_by_challenger(self, user_is_challenger: bool) -> 'GameStatus':
+    def get_status_by_challenger(self, user_is_challenger: bool) -> "GameStatus":
         """
         Get the status by the challenger.
         :param user_is_challenger: True if user is challenger, False otherwise
@@ -76,7 +77,7 @@ class GameStatus(IntEnum):
         elif self == GameStatus.LOST:
             return GameStatus.WON
 
-        raise ValueError('Status with no opposite: ' + str(self))
+        raise ValueError("Status with no opposite: " + str(self))
 
     def no_wager_was_collected(self):
         """
@@ -96,5 +97,5 @@ GAME_STATUS_DESCRIPTIONS = {
     GameStatus.AWAITING_SELECTION: phrases.GAME_STATUS_AWAITING_SELECTION,
     GameStatus.AWAITING_OPPONENT_CONFIRMATION: phrases.GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION,
     GameStatus.FORCED_END: phrases.GAME_STATUS_FORCED_END,
-    GameStatus.COUNTDOWN_TO_START: phrases.GAME_STATUS_COUNTDOWN_TO_START
+    GameStatus.COUNTDOWN_TO_START: phrases.GAME_STATUS_COUNTDOWN_TO_START,
 }

@@ -11,7 +11,9 @@ from src.service.crew_service import get_crew, get_crew_abilities_text
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the Crew ability screen
     :param update: The update object
@@ -24,7 +26,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     try:
         crew: Crew = get_crew(user=user)
     except CrewValidationException as cve:
-        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
+        )
         return
 
     # Get all active abilities
@@ -34,13 +38,22 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     if user.is_crew_captain_or_first_mate() and len(active_abilities) < crew.max_abilities:
         # Activate ability button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY_ACTIVATE,
-                                         screen=Screen.PVT_CREW_ABILITY_ACTIVATE)])
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_CREW_ABILITY_ACTIVATE, screen=Screen.PVT_CREW_ABILITY_ACTIVATE
+            )
+        ])
 
     abilities_text = get_crew_abilities_text(active_abilities=active_abilities, add_duration=True)
 
-    ot_text = phrases.CREW_ABILITIES.format(abilities_text, crew.get_powerup_price_formatted(),
-                                            crew.get_crew_chest_formatted())
+    ot_text = phrases.CREW_ABILITIES.format(
+        abilities_text, crew.get_powerup_price_formatted(), crew.get_crew_chest_formatted()
+    )
 
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard)
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+    )

@@ -10,12 +10,13 @@ from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew, get_crew_abilities_text
-from src.service.date_service import get_remaining_time_from_next_cron, \
-    get_elapsed_duration
+from src.service.date_service import get_remaining_time_from_next_cron, get_elapsed_duration
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the crew screen
     :param update: The update
@@ -30,7 +31,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         ot_text = phrases.CREW_USER_NOT_IN_CREW
 
         # Create crew button
-        inline_keyboard.append([Keyboard(phrases.KEY_CREATE, screen=Screen.PVT_CREW_CREATE_OR_EDIT)])
+        inline_keyboard.append(
+            [Keyboard(phrases.KEY_CREATE, screen=Screen.PVT_CREW_CREATE_OR_EDIT)]
+        )
     else:
         crew: Crew = get_crew(user=user)
 
@@ -38,12 +41,15 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         no_new_members_allowed_text = ""
         if not crew.can_accept_new_members:
             no_new_members_allowed_text = phrases.CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED.format(
-                get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get()))
+                get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())
+            )
 
         first_mate: User = crew.get_first_mate()
         first_mate_text = ""
         if first_mate is not None:
-            first_mate_text = phrases.CREW_OVERVIEW_FIRST_MATE.format(first_mate.get_markdown_mention())
+            first_mate_text = phrases.CREW_OVERVIEW_FIRST_MATE.format(
+                first_mate.get_markdown_mention()
+            )
 
         captain: User = crew.get_captain()
         ot_text = phrases.CREW_OVERVIEW.format(
@@ -56,21 +62,33 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             Env.CREW_MAX_MEMBERS.get_int(),
             get_belly_formatted(crew.chest_amount),
             get_crew_abilities_text(crew=crew),
-            no_new_members_allowed_text)
+            no_new_members_allowed_text,
+        )
 
         # Members button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_MEMBERS, screen=Screen.PVT_CREW_MEMBER)])
+        inline_keyboard.append(
+            [Keyboard(phrases.PVT_KEY_CREW_MEMBERS, screen=Screen.PVT_CREW_MEMBER)]
+        )
 
         # Abilities button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)])
+        inline_keyboard.append(
+            [Keyboard(phrases.PVT_KEY_CREW_ABILITY, screen=Screen.PVT_CREW_ABILITY)]
+        )
 
         if user.is_crew_captain():
             # Modify button
             inline_keyboard.append([Keyboard(phrases.KEY_MODIFY, screen=Screen.PVT_CREW_MODIFY)])
         else:
             # Leave crew button
-            inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)])
+            inline_keyboard.append(
+                [Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)]
+            )
 
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+    )

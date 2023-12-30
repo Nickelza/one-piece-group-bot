@@ -20,14 +20,22 @@ from src.model.enums.Location import get_first_new_world, get_last_paradise
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.crew_service import disband_inactive_crews, warn_inactive_captains
 from src.service.date_service import default_date_format, get_remaining_time_from_next_cron
-from src.service.devil_fruit_service import revoke_devil_fruit_from_inactive_users, \
-    warn_inactive_users_with_eaten_devil_fruit
+from src.service.devil_fruit_service import (
+    revoke_devil_fruit_from_inactive_users,
+    warn_inactive_users_with_eaten_devil_fruit,
+)
 from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
-from src.service.message_service import mention_markdown_v2, full_message_send, get_message_url, \
-    escape_valid_markdown_chars
+from src.service.message_service import (
+    mention_markdown_v2,
+    full_message_send,
+    get_message_url,
+    escape_valid_markdown_chars,
+)
 
 
-def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message_id: int = None) -> str:
+def get_leaderboard_message(
+    leaderboard: Leaderboard, global_leaderboard_message_id: int = None
+) -> str:
     """
     Gets the leaderboard message
     :param leaderboard: The leaderboard
@@ -50,29 +58,45 @@ def get_leaderboard_message(leaderboard: Leaderboard, global_leaderboard_message
         if LeaderboardRankIndex(leaderboard_user.rank_index) is LeaderboardRankIndex.WARLORD:
             warlord: Warlord = Warlord.get_latest_active_by_user(user)
             warlords_text += phrases.LEADERBOARD_WARLORD_ROW.format(
-                escape_valid_markdown_chars(warlord.epithet), Log.get_deeplink_by_type(LogType.WARLORD, warlord.id))
+                escape_valid_markdown_chars(warlord.epithet),
+                Log.get_deeplink_by_type(LogType.WARLORD, warlord.id),
+            )
         else:
-            content_text += phrases.LEADERBOARD_ROW.format(leaderboard_user.position,
-                                                           get_leaderboard_rank_message(leaderboard_user.rank_index),
-                                                           mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                           user.get_bounty_formatted())
+            content_text += phrases.LEADERBOARD_ROW.format(
+                leaderboard_user.position,
+                get_leaderboard_rank_message(leaderboard_user.rank_index),
+                mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+                user.get_bounty_formatted(),
+            )
 
     next_bounty_reset_time = get_next_bounty_reset_time()
 
-    local_global_text = phrases.LEADERBOARD_GLOBAL if leaderboard.group is None else phrases.LEADERBOARD_LOCAL
+    local_global_text = (
+        phrases.LEADERBOARD_GLOBAL if leaderboard.group is None else phrases.LEADERBOARD_LOCAL
+    )
     if global_leaderboard_message_id is not None:
         view_global_leaderboard_text = phrases.LEADERBOARD_VIEW_GLOBAL_LEADERBOARD.format(
-            get_message_url(message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHANNEL_ID.get()))
+            get_message_url(
+                message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHANNEL_ID.get()
+            )
+        )
     else:
         view_global_leaderboard_text = ""
 
     if warlords_text != "":
         warlords_text = phrases.LEADERBOARD_WARLORDS + warlords_text
 
-    return phrases.LEADERBOARD.format(local_global_text, leaderboard.week, leaderboard.year,
-                                      leaderboard.leaderboard_users.count(), content_text, warlords_text,
-                                      view_global_leaderboard_text, default_date_format(next_bounty_reset_time),
-                                      get_remaining_duration(next_bounty_reset_time))
+    return phrases.LEADERBOARD.format(
+        local_global_text,
+        leaderboard.week,
+        leaderboard.year,
+        leaderboard.leaderboard_users.count(),
+        content_text,
+        warlords_text,
+        view_global_leaderboard_text,
+        default_date_format(next_bounty_reset_time),
+        get_remaining_duration(next_bounty_reset_time),
+    )
 
 
 async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -127,21 +151,29 @@ async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Create and send local leaderboards
     for group in groups:
-        context.application.create_task(create_and_send_leaderboard(context, group, global_leaderboard))
+        context.application.create_task(
+            create_and_send_leaderboard(context, group, global_leaderboard)
+        )
 
 
-async def create_and_send_leaderboard(context: ContextTypes, group: Group = None, global_leaderboard: Leaderboard = None
-                                      ) -> Leaderboard | None:
+async def create_and_send_leaderboard(
+    context: ContextTypes, group: Group = None, global_leaderboard: Leaderboard = None
+) -> Leaderboard | None:
     """
     Creates a leaderboard list and sends it to the group chat
     :return: The leaderboard
     """
 
     if group is not None and global_leaderboard is None:
-        raise ValueError("In order to create a local leaderboard, a global leaderboard must be provided")
+        raise ValueError(
+            "In order to create a local leaderboard, a global leaderboard must be provided"
+        )
 
     # If local leaderboard, check that the group has enough active users
-    if group is not None and len(group.get_active_users()) < Env.LEADERBOARD_MIN_ACTIVE_USERS.get_int():
+    if (
+        group is not None
+        and len(group.get_active_users()) < Env.LEADERBOARD_MIN_ACTIVE_USERS.get_int()
+    ):
         return
 
     leaderboard = Leaderboard()
@@ -155,7 +187,9 @@ async def create_and_send_leaderboard(context: ContextTypes, group: Group = None
         week = datetime.datetime.now().isocalendar()[1]
 
     # Delete the leaderboard if it exists
-    Leaderboard.delete().where(Leaderboard.year == year, Leaderboard.week == week, Leaderboard.group == group).execute()
+    Leaderboard.delete().where(
+        Leaderboard.year == year, Leaderboard.week == week, Leaderboard.group == group
+    ).execute()
 
     # Create a leaderboard for the current week and year and group
     leaderboard.year = datetime.datetime.now().isocalendar()[0]
@@ -169,18 +203,25 @@ async def create_and_send_leaderboard(context: ContextTypes, group: Group = None
 
     # Send message to chats
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
-        ot_text = get_leaderboard_message(leaderboard, (global_leaderboard.global_message_id
-                                                        if global_leaderboard is not None else None))
+        ot_text = get_leaderboard_message(
+            leaderboard,
+            (global_leaderboard.global_message_id if global_leaderboard is not None else None),
+        )
         if group is not None:
-            await broadcast_to_chats_with_feature_enabled_dispatch(context, Feature.LEADERBOARD, ot_text,
-                                                                   filter_by_groups=[group])
+            await broadcast_to_chats_with_feature_enabled_dispatch(
+                context, Feature.LEADERBOARD, ot_text, filter_by_groups=[group]
+            )
         else:
             try:
-                message: Message = await full_message_send(context, ot_text, chat_id=Env.UPDATES_CHANNEL_ID.get())
+                message: Message = await full_message_send(
+                    context, ot_text, chat_id=Env.UPDATES_CHANNEL_ID.get()
+                )
                 leaderboard.global_message_id = message.message_id
                 leaderboard.save()
             except TelegramError:
-                logging.exception(f'Failed to send global leaderboard to {Env.UPDATES_CHANNEL_ID.get()}')
+                logging.exception(
+                    f"Failed to send global leaderboard to {Env.UPDATES_CHANNEL_ID.get()}"
+                )
 
     return leaderboard
 
@@ -195,7 +236,9 @@ def get_leaderboard_rank_message(index: int) -> str:
     return leaderboard_rank.get_emoji_and_rank_message()
 
 
-def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> list[LeaderboardUser]:
+def create_leaderboard_users(
+    leaderboard: Leaderboard, group: Group | None
+) -> list[LeaderboardUser]:
     """
     Creates a leaderboard list
     :param leaderboard: The leaderboard to create the users for
@@ -209,10 +252,11 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     # If global leaderboard, exclude users that are exempted from global leaderboard requirements
     excluded_user_ids: list[int] = []
     if group is None:
-        excluded_user_ids: list[int] = list(User
-                                            .select(User.id)
-                                            .where(User.is_exempt_from_global_leaderboard_requirements == True)
-                                            .execute())
+        excluded_user_ids: list[int] = list(
+            User.select(User.id)
+            .where(User.is_exempt_from_global_leaderboard_requirements == True)
+            .execute()
+        )
 
         # Add warlords
         excluded_user_ids.extend(Warlord.get_active_user_ids())
@@ -228,26 +272,36 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     if group is None:
         eligible_leaderboard_user_ids: list[int] = User.select(User.id)
     else:
-        eligible_leaderboard_user_ids: list[int] = User.select(User.id).where(User.id.in_(group.get_active_users_ids()))
+        eligible_leaderboard_user_ids: list[int] = User.select(User.id).where(
+            User.id.in_(group.get_active_users_ids())
+        )
 
     # Eligible users for Pirate King position - Those who were Emperor or higher in the previous leaderboard
-    eligible_pk_users: list[User] = [leaderboard_user.user for leaderboard_user in previous_leaderboard_users
-                                     if leaderboard_user.rank_index <= LeaderboardRank.EMPEROR.index]
+    eligible_pk_users: list[User] = [
+        leaderboard_user.user
+        for leaderboard_user in previous_leaderboard_users
+        if leaderboard_user.rank_index <= LeaderboardRank.EMPEROR.index
+    ]
 
     # Get current New World users, excluding arrested users and Admins
-    new_world_users: list[User] = list(User.select()
-                                       .where((User.location_level >= get_first_new_world().level)
-                                              & (User.get_is_not_arrested_statement_condition())
-                                              & (User.is_admin == False)
-                                              & (User.id.in_(eligible_leaderboard_user_ids))
-                                              & (User.id.not_in(excluded_user_ids)))
-                                       .order_by(User.bounty.desc()))
+    new_world_users: list[User] = list(
+        User.select()
+        .where(
+            (User.location_level >= get_first_new_world().level)
+            & (User.get_is_not_arrested_statement_condition())
+            & (User.is_admin == False)
+            & (User.id.in_(eligible_leaderboard_user_ids))
+            & (User.id.not_in(excluded_user_ids))
+        )
+        .order_by(User.bounty.desc())
+    )
 
     # Save Pirate King, if available
     for user in new_world_users:
         if user in eligible_pk_users:
-            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
-                                                                      LeaderboardRank.PIRATE_KING)
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(
+                leaderboard, user, position, LeaderboardRank.PIRATE_KING
+            )
             leaderboard_users.append(leaderboard_user)
             position += 1
             break
@@ -256,8 +310,9 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     added_users_count = 0
     for user in new_world_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
-            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
-                                                                      LeaderboardRank.EMPEROR)
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(
+                leaderboard, user, position, LeaderboardRank.EMPEROR
+            )
             leaderboard_users.append(leaderboard_user)
             position += 1
             added_users_count += 1
@@ -268,8 +323,9 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     added_users_count = 0
     for user in new_world_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
-            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
-                                                                      LeaderboardRank.FIRST_MATE)
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(
+                leaderboard, user, position, LeaderboardRank.FIRST_MATE
+            )
             leaderboard_users.append(leaderboard_user)
             position += 1
             added_users_count += 1
@@ -277,20 +333,25 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
                 break
 
     # Get current Paradise users, excluding arrested users and Admins
-    paradise_users: list[User] = list(User.select()
-                                      .where((User.location_level <= get_last_paradise().level)
-                                             & (User.get_is_not_arrested_statement_condition())
-                                             & (User.is_admin == False)
-                                             & (User.id.in_(eligible_leaderboard_user_ids))
-                                             & (User.id.not_in(excluded_user_ids)))
-                                      .order_by(User.bounty.desc()))
+    paradise_users: list[User] = list(
+        User.select()
+        .where(
+            (User.location_level <= get_last_paradise().level)
+            & (User.get_is_not_arrested_statement_condition())
+            & (User.is_admin == False)
+            & (User.id.in_(eligible_leaderboard_user_ids))
+            & (User.id.not_in(excluded_user_ids))
+        )
+        .order_by(User.bounty.desc())
+    )
 
     # Save Supernovas, next 11 users
     added_users_count = 0
     for user in paradise_users:
         if not any(lu for lu in leaderboard_users if lu.user == user):
-            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, user, position,
-                                                                      LeaderboardRank.SUPERNOVA)
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(
+                leaderboard, user, position, LeaderboardRank.SUPERNOVA
+            )
             leaderboard_users.append(leaderboard_user)
             position += 1
             added_users_count += 1
@@ -300,15 +361,17 @@ def create_leaderboard_users(leaderboard: Leaderboard, group: Group | None) -> l
     # Save Warlords, if global leaderboard
     if group is None:
         for index, warlord in enumerate(Warlord.get_active_order_by_bounty()):
-            leaderboard_user: LeaderboardUser = save_leaderboard_user(leaderboard, warlord.user, index + 1,
-                                                                      LeaderboardRank.WARLORD)
+            leaderboard_user: LeaderboardUser = save_leaderboard_user(
+                leaderboard, warlord.user, index + 1, LeaderboardRank.WARLORD
+            )
             leaderboard_users.append(leaderboard_user)
 
         return leaderboard_users
 
 
-def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, rank: LeaderboardRank.LeaderboardRank
-                          ) -> LeaderboardUser:
+def save_leaderboard_user(
+    leaderboard: Leaderboard, user: User, position: int, rank: LeaderboardRank.LeaderboardRank
+) -> LeaderboardUser:
     """
     Saves a leaderboard user
     :param leaderboard: The leaderboard
@@ -327,7 +390,9 @@ def save_leaderboard_user(leaderboard: Leaderboard, user: User, position: int, r
     return leaderboard_user
 
 
-def get_leaderboard(index: int = 0, group: Group = None, group_chat: GroupChat = None) -> Leaderboard | None:
+def get_leaderboard(
+    index: int = 0, group: Group = None, group_chat: GroupChat = None
+) -> Leaderboard | None:
     """
     Gets the current leaderboard
     :param index: The index of the leaderboard to get. Higher the index, older the leaderboard.
@@ -339,17 +404,20 @@ def get_leaderboard(index: int = 0, group: Group = None, group_chat: GroupChat =
     if group_chat is not None:
         group = group_chat.group
 
-    leaderboard: Leaderboard = (Leaderboard.select()
-                                .where(Leaderboard.group == group)
-                                .order_by(Leaderboard.year.desc(),
-                                          Leaderboard.week.desc())
-                                .limit(1)
-                                .offset(index)
-                                .first())
+    leaderboard: Leaderboard = (
+        Leaderboard.select()
+        .where(Leaderboard.group == group)
+        .order_by(Leaderboard.year.desc(), Leaderboard.week.desc())
+        .limit(1)
+        .offset(index)
+        .first()
+    )
     return leaderboard
 
 
-def get_leaderboard_user(user: User, index: int = None, group_chat: GroupChat = None) -> LeaderboardUser | None:
+def get_leaderboard_user(
+    user: User, index: int = None, group_chat: GroupChat = None
+) -> LeaderboardUser | None:
     """
     Gets the leaderboard user for the user
     :param user: The user to get the leaderboard user for
@@ -362,11 +430,15 @@ def get_leaderboard_user(user: User, index: int = None, group_chat: GroupChat = 
     if leaderboard is None and group_chat is not None:
         leaderboard = get_leaderboard(index)
 
-    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(LeaderboardUser.user == user).first()
+    leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(
+        LeaderboardUser.user == user
+    ).first()
     return leaderboard_user
 
 
-def get_current_leaderboard_user(user: User, group_chat: GroupChat = None) -> LeaderboardUser | None:
+def get_current_leaderboard_user(
+    user: User, group_chat: GroupChat = None
+) -> LeaderboardUser | None:
     """
     Gets the current leaderboard user for the user
     :param user: The user to get the leaderboard user for
@@ -377,7 +449,9 @@ def get_current_leaderboard_user(user: User, group_chat: GroupChat = None) -> Le
     return get_leaderboard_user(user, index=0, group_chat=group_chat)
 
 
-def get_current_leaderboard_rank(user: User, group_chat: GroupChat = None) -> LeaderboardRank.LeaderboardRank:
+def get_current_leaderboard_rank(
+    user: User, group_chat: GroupChat = None
+) -> LeaderboardRank.LeaderboardRank:
     """
     Gets the current leaderboard rank for the user
     :param user: The user to get the leaderboard rank for
@@ -401,7 +475,9 @@ def get_highest_active_rank(user: User, group_chat: GroupChat) -> LeaderboardRan
     leaderboard_user: LeaderboardUser = get_current_leaderboard_user(user, group_chat=group_chat)
 
     # Get current leaderboard rank
-    leaderboard_rank: LeaderboardRank = LeaderboardRank.get_rank_by_leaderboard_user(leaderboard_user)
+    leaderboard_rank: LeaderboardRank = LeaderboardRank.get_rank_by_leaderboard_user(
+        leaderboard_user
+    )
 
     # Get special rank
     special_rank: LeaderboardRank = LeaderboardRank.get_special_rank(user)

@@ -18,8 +18,13 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import DevilFruitTradeValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import validate_amount, get_amount_from_string, get_belly_formatted, \
-    get_transaction_tax, add_or_remove_bounty
+from src.service.bounty_service import (
+    validate_amount,
+    get_amount_from_string,
+    get_belly_formatted,
+    get_transaction_tax,
+    add_or_remove_bounty,
+)
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.math_service import get_value_from_percentage
@@ -30,21 +35,30 @@ class DevilFruitSellReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    ITEM_ID = 'a'
-    DEVIL_FRUIT_ID = 'b'
-    STEP = 'c'
+
+    ITEM_ID = "a"
+    DEVIL_FRUIT_ID = "b"
+    STEP = "c"
 
 
 class Step(IntEnum):
     """
     The steps for this screen
     """
+
     SELECT_FRUIT = 0
     BUY = 1
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 target_user: User, command: Command, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    target_user: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Manage the Devil Fruit sell screen
     :param update: The update object
@@ -63,14 +77,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     # Get the Devil Fruit trade
     try:
         devil_fruit_trade: DevilFruitTrade = DevilFruitTrade.get(
-            DevilFruitTrade.id == inbound_keyboard.get(DevilFruitSellReservedKeys.ITEM_ID))
+            DevilFruitTrade.id == inbound_keyboard.get(DevilFruitSellReservedKeys.ITEM_ID)
+        )
     except DevilFruitTrade.DoesNotExist:
         # Custom exception to avoid logging
         raise PrivateChatException(text=phrases.ITEM_NOT_FOUND)
 
     if devil_fruit_trade.devil_fruit is None:
         devil_fruit_trade.devil_fruit = DevilFruit.get(
-            DevilFruit.id == inbound_keyboard.get(DevilFruitSellReservedKeys.DEVIL_FRUIT_ID))
+            DevilFruit.id == inbound_keyboard.get(DevilFruitSellReservedKeys.DEVIL_FRUIT_ID)
+        )
         devil_fruit_trade.save()
 
     devil_fruit: DevilFruit = devil_fruit_trade.devil_fruit
@@ -85,11 +101,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
             return await buy(update, context, user, devil_fruit_trade, devil_fruit)
 
         case _:
-            raise ValueError(f'Invalid step: {inbound_keyboard.get(DevilFruitSellReservedKeys.STEP)}')
+            raise ValueError(
+                f"Invalid step: {inbound_keyboard.get(DevilFruitSellReservedKeys.STEP)}"
+            )
 
 
-async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, command: Command = None,
-                      buyer: User = None) -> tuple[int, float, int, int]:
+async def get_amounts(
+    seller: User,
+    devil_fruit_trade: DevilFruitTrade = None,
+    command: Command = None,
+    buyer: User = None,
+) -> tuple[int, float, int, int]:
     """
     Get the amounts for the trade
     :param seller: The seller
@@ -104,8 +126,11 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     else:
         amount = devil_fruit_trade.price
 
-    tax_percentage = (get_transaction_tax(seller, buyer, Env.DEVIL_FRUIT_SELL_TAX.get_float())
-                      if devil_fruit_trade is None else devil_fruit_trade.tax_percentage)
+    tax_percentage = (
+        get_transaction_tax(seller, buyer, Env.DEVIL_FRUIT_SELL_TAX.get_float())
+        if devil_fruit_trade is None
+        else devil_fruit_trade.tax_percentage
+    )
 
     # Parse to int if tax does not have a decimal
     if float(tax_percentage).is_integer():
@@ -117,8 +142,9 @@ async def get_amounts(seller: User, devil_fruit_trade: DevilFruitTrade = None, c
     return amount, tax_percentage, tax_amount, total_amount
 
 
-async def validate_new_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command
-                               ) -> bool:
+async def validate_new_request(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, command: Command
+) -> bool:
     """
     Validate a new request
     :param update: The update object
@@ -134,13 +160,20 @@ async def validate_new_request(update: Update, context: ContextTypes.DEFAULT_TYP
             raise DevilFruitTradeValidationException(phrases.DEVIL_FRUIT_SELL_NO_AMOUNT)
 
         # Amount basic validation, error message is sent by validate_wager
-        if not await validate_amount(update, context, user, command.parameters[0],
-                                     Env.DEVIL_FRUIT_SELL_MIN_AMOUNT.get_int(), should_validate_user_has_amount=False):
+        if not await validate_amount(
+            update,
+            context,
+            user,
+            command.parameters[0],
+            Env.DEVIL_FRUIT_SELL_MIN_AMOUNT.get_int(),
+            should_validate_user_has_amount=False,
+        ):
             raise DevilFruitTradeValidationException()
 
         # User has no Devil Fruits that can be sold
-        sellable_devil_fruit: list[DevilFruit] = DevilFruit.get_or_none(DevilFruit.owner == user,
-                                                                        DevilFruit.status == DevilFruitStatus.COLLECTED)
+        sellable_devil_fruit: list[DevilFruit] = DevilFruit.get_or_none(
+            DevilFruit.owner == user, DevilFruit.status == DevilFruitStatus.COLLECTED
+        )
         if sellable_devil_fruit is None:
             raise DevilFruitTradeValidationException(phrases.DEVIL_FRUIT_SELL_NO_FRUITS)
 
@@ -152,8 +185,14 @@ async def validate_new_request(update: Update, context: ContextTypes.DEFAULT_TYP
     return True
 
 
-async def send_list_of_fruits(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, target_user: User,
-                              command: Command, group_chat: GroupChat) -> None:
+async def send_list_of_fruits(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    target_user: User,
+    command: Command,
+    group_chat: GroupChat,
+) -> None:
     """
     Send the list of fruits
     :param update: The update object
@@ -168,7 +207,9 @@ async def send_list_of_fruits(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not await validate_new_request(update, context, user, command):
         return
 
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(user, command=command, buyer=target_user)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        user, command=command, buyer=target_user
+    )
 
     # Save the trade
     trade: DevilFruitTrade = DevilFruitTrade()
@@ -183,25 +224,36 @@ async def send_list_of_fruits(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     # Get list of sellable Devil Fruits
     sellable_devil_fruits: list[DevilFruit] = DevilFruit.select().where(
-        DevilFruit.owner == user, DevilFruit.status == DevilFruitStatus.COLLECTED)
+        DevilFruit.owner == user, DevilFruit.status == DevilFruitStatus.COLLECTED
+    )
 
     # Create the keyboard
     outbound_keyboard: list[list[Keyboard]] = []
     for devil_fruit in sellable_devil_fruits:
-        info = {DevilFruitSellReservedKeys.ITEM_ID: trade.id,
-                DevilFruitSellReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id,
-                DevilFruitSellReservedKeys.STEP: Step.SELECT_FRUIT}
-        button: Keyboard = Keyboard(devil_fruit.get_full_name(), info=info, screen=Screen.GRP_DEVIL_FRUIT_SELL)
+        info = {
+            DevilFruitSellReservedKeys.ITEM_ID: trade.id,
+            DevilFruitSellReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id,
+            DevilFruitSellReservedKeys.STEP: Step.SELECT_FRUIT,
+        }
+        button: Keyboard = Keyboard(
+            devil_fruit.get_full_name(), info=info, screen=Screen.GRP_DEVIL_FRUIT_SELL
+        )
         outbound_keyboard.append([button])
 
     ot_text = phrases.DEVIL_FRUIT_SELL_SELECT_FRUIT
 
     # Send the message
-    await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+    await full_message_send(
+        context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True
+    )
 
 
-async def validate_trade(update: Update, context: ContextTypes.DEFAULT_TYPE, devil_fruit_trade: DevilFruitTrade,
-                         devil_fruit: DevilFruit) -> bool:
+async def validate_trade(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    devil_fruit_trade: DevilFruitTrade,
+    devil_fruit: DevilFruit,
+) -> bool:
     """
     Validate the trade
     :param update: The update object
@@ -216,7 +268,8 @@ async def validate_trade(update: Update, context: ContextTypes.DEFAULT_TYPE, dev
         if devil_fruit.owner != devil_fruit_trade.giver:
             giver: User = devil_fruit_trade.giver
             raise DevilFruitTradeValidationException(
-                phrases.DEVIL_FRUIT_SELL_NO_LONGER_OWN.format(giver.get_markdown_mention()))
+                phrases.DEVIL_FRUIT_SELL_NO_LONGER_OWN.format(giver.get_markdown_mention())
+            )
 
         # Devil Fruit is no longer sellable
         if devil_fruit.status != DevilFruitStatus.COLLECTED:
@@ -230,8 +283,13 @@ async def validate_trade(update: Update, context: ContextTypes.DEFAULT_TYPE, dev
     return True
 
 
-async def send_sell_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
-                             devil_fruit_trade: DevilFruitTrade, devil_fruit: DevilFruit) -> None:
+async def send_sell_proposal(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    devil_fruit_trade: DevilFruitTrade,
+    devil_fruit: DevilFruit,
+) -> None:
     """
     Send the sell proposal
     :param update: The update object
@@ -244,9 +302,11 @@ async def send_sell_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
     # Create the keyboard
     outbound_keyboard: list[list[Keyboard]] = []
-    info = {DevilFruitSellReservedKeys.ITEM_ID: devil_fruit_trade.id,
-            DevilFruitSellReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id,
-            DevilFruitSellReservedKeys.STEP: Step.BUY}
+    info = {
+        DevilFruitSellReservedKeys.ITEM_ID: devil_fruit_trade.id,
+        DevilFruitSellReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id,
+        DevilFruitSellReservedKeys.STEP: Step.BUY,
+    }
 
     receiver: User = devil_fruit_trade.receiver
 
@@ -258,30 +318,51 @@ async def send_sell_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE,
         authorized_users = None
 
     button: Keyboard = Keyboard(
-        phrases.GRP_KEY_DEVIL_FRUIT_BUY, info=info, screen=Screen.GRP_DEVIL_FRUIT_SELL, inherit_authorized_users=False,
-        authorized_users=authorized_users, only_authorized_users_can_interact=only_authorized_users_can_interact)
+        phrases.GRP_KEY_DEVIL_FRUIT_BUY,
+        info=info,
+        screen=Screen.GRP_DEVIL_FRUIT_SELL,
+        inherit_authorized_users=False,
+        authorized_users=authorized_users,
+        only_authorized_users_can_interact=only_authorized_users_can_interact,
+    )
 
     outbound_keyboard.append([button])
 
-    ot_text_addendum = (phrases.DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM.format(receiver.get_markdown_mention())
-                        if receiver is not None else "")
+    ot_text_addendum = (
+        phrases.DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM.format(receiver.get_markdown_mention())
+        if receiver is not None
+        else ""
+    )
 
     list_page: DevilFruitListPage = DevilFruitListPage()
     list_page.object = devil_fruit
 
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(user, devil_fruit_trade=devil_fruit_trade,
-                                                                         buyer=receiver)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        user, devil_fruit_trade=devil_fruit_trade, buyer=receiver
+    )
 
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY.format(
-        user.get_markdown_mention(), list_page.get_item_detail_text(from_private_chat=False),
-        get_remaining_duration(devil_fruit.expiration_date), get_belly_formatted(amount),
-        get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount), ot_text_addendum)
+        user.get_markdown_mention(),
+        list_page.get_item_detail_text(from_private_chat=False),
+        get_remaining_duration(devil_fruit.expiration_date),
+        get_belly_formatted(amount),
+        get_belly_formatted(tax_amount),
+        tax_percentage,
+        get_belly_formatted(total_amount),
+        ot_text_addendum,
+    )
 
-    await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+    await full_message_send(
+        context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True
+    )
 
 
-async def validate_buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User,
-                       devil_fruit_trade: DevilFruitTrade) -> bool:
+async def validate_buy(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    buyer: User,
+    devil_fruit_trade: DevilFruitTrade,
+) -> bool:
     """
     Validate the buy action
     :param update: The update object
@@ -291,8 +372,9 @@ async def validate_buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer
     :return: True if the buy is valid, False otherwise
     """
 
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(devil_fruit_trade.giver,
-                                                                         devil_fruit_trade=devil_fruit_trade)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        devil_fruit_trade.giver, devil_fruit_trade=devil_fruit_trade
+    )
     try:
         # Buyer does not have enough belly
         if buyer.bounty < total_amount:
@@ -303,54 +385,76 @@ async def validate_buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer
             raise DevilFruitTradeValidationException(phrases.DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN)
 
     except DevilFruitTradeValidationException as e:
-        await full_message_send(context, e.message, update=update, answer_callback=True, show_alert=True)
+        await full_message_send(
+            context, e.message, update=update, answer_callback=True, show_alert=True
+        )
         return False
 
     return True
 
 
-async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE, buyer: User, devil_fruit_trade: DevilFruitTrade,
-              devil_fruit: DevilFruit) -> None:
+async def buy(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    buyer: User,
+    devil_fruit_trade: DevilFruitTrade,
+    devil_fruit: DevilFruit,
+) -> None:
     """
-        Buy the Devil Fruit
-        :param update: The update object
-        :param context: The context object
-        :param buyer: The buyer
-        :param devil_fruit_trade: The Devil Fruit trade
-        :param devil_fruit: The Devil Fruit
-        :return: None
-        """
+    Buy the Devil Fruit
+    :param update: The update object
+    :param context: The context object
+    :param buyer: The buyer
+    :param devil_fruit_trade: The Devil Fruit trade
+    :param devil_fruit: The Devil Fruit
+    :return: None
+    """
 
     # Validate the buy
     if not await validate_buy(update, context, buyer, devil_fruit_trade):
         return
 
-    give_devil_fruit_to_user(devil_fruit, buyer, DevilFruitSource.USER, devil_fruit_trade=devil_fruit_trade)
+    give_devil_fruit_to_user(
+        devil_fruit, buyer, DevilFruitSource.USER, devil_fruit_trade=devil_fruit_trade
+    )
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(devil_fruit_trade.giver,
-                                                                         devil_fruit_trade=devil_fruit_trade)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        devil_fruit_trade.giver, devil_fruit_trade=devil_fruit_trade
+    )
 
     # Remove the belly from the buyer
     await add_or_remove_bounty(buyer, total_amount, add=False, update=update)
     buyer.save()
 
     # Add the belly to the seller
-    await add_or_remove_bounty(devil_fruit_trade.giver, amount, update=update,
-                               tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL, event_id=devil_fruit_trade.id,
-                               should_save=True)
+    await add_or_remove_bounty(
+        devil_fruit_trade.giver,
+        amount,
+        update=update,
+        tax_event_type=IncomeTaxEventType.DEVIL_FRUIT_SELL,
+        event_id=devil_fruit_trade.id,
+        should_save=True,
+    )
 
     list_page: DevilFruitListPage = DevilFruitListPage()
     list_page.object = devil_fruit
 
     # Get the amounts
-    amount, tax_percentage, tax_amount, total_amount = await get_amounts(devil_fruit_trade.giver,
-                                                                         devil_fruit_trade=devil_fruit_trade)
+    amount, tax_percentage, tax_amount, total_amount = await get_amounts(
+        devil_fruit_trade.giver, devil_fruit_trade=devil_fruit_trade
+    )
 
     seller: User = devil_fruit_trade.giver
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
-        buyer.get_markdown_mention(), seller.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False), get_remaining_duration(devil_fruit.expiration_date),
-        get_belly_formatted(amount), get_belly_formatted(tax_amount), tax_percentage, get_belly_formatted(total_amount))
+        buyer.get_markdown_mention(),
+        seller.get_markdown_mention(),
+        list_page.get_item_detail_text(from_private_chat=False),
+        get_remaining_duration(devil_fruit.expiration_date),
+        get_belly_formatted(amount),
+        get_belly_formatted(tax_amount),
+        tax_percentage,
+        get_belly_formatted(total_amount),
+    )
 
     await full_message_send(context, ot_text, update=update, add_delete_button=True)

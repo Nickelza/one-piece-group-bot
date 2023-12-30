@@ -27,29 +27,31 @@ class Feature(IntEnum):
         return FEATURE_DESCRIPTION_MAP[self]
 
     @staticmethod
-    def get_all() -> list['Feature']:
+    def get_all() -> list["Feature"]:
         """
         Get all the features
 
         :return: All the features
         """
-        return [Feature.BOUNTY_GIFT,
-                Feature.BOUNTY_MESSAGES_GAIN,
-                Feature.CHALLENGE,
-                Feature.CREW,
-                Feature.DEVIL_FRUIT_APPEARANCE,
-                Feature.DOC_Q,
-                Feature.FIGHT,
-                Feature.LEADERBOARD,
-                Feature.MESSAGE_FILTER,
-                Feature.PREDICTION,
-                Feature.SILENCE,
-                Feature.STATUS,
-                Feature.DEVIL_FRUIT_SELL,
-                Feature.BOUNTY_LOAN]
+        return [
+            Feature.BOUNTY_GIFT,
+            Feature.BOUNTY_MESSAGES_GAIN,
+            Feature.CHALLENGE,
+            Feature.CREW,
+            Feature.DEVIL_FRUIT_APPEARANCE,
+            Feature.DOC_Q,
+            Feature.FIGHT,
+            Feature.LEADERBOARD,
+            Feature.MESSAGE_FILTER,
+            Feature.PREDICTION,
+            Feature.SILENCE,
+            Feature.STATUS,
+            Feature.DEVIL_FRUIT_SELL,
+            Feature.BOUNTY_LOAN,
+        ]
 
     @staticmethod
-    def get_restricted() -> list['Feature']:
+    def get_restricted() -> list["Feature"]:
         """
         Get all the features that are restricted to the main group_chat
 
@@ -58,7 +60,7 @@ class Feature(IntEnum):
         return [Feature.BOUNTY_MESSAGES_GAIN, Feature.MESSAGE_FILTER, Feature.SILENCE]
 
     @staticmethod
-    def get_non_restricted() -> list['Feature']:
+    def get_non_restricted() -> list["Feature"]:
         """
         Get all the features that are not restricted to the main group_chat
 
@@ -77,7 +79,7 @@ class Feature(IntEnum):
         return self in Feature.get_restricted()
 
     @staticmethod
-    def get_pinnable() -> list['Feature']:
+    def get_pinnable() -> list["Feature"]:
         """
         Get all the features that can be pinned
 
@@ -110,5 +112,5 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.SILENCE: "Silence",
     Feature.STATUS: "Status",
     Feature.DEVIL_FRUIT_SELL: "Devil Fruit Sell",
-    Feature.BOUNTY_LOAN: "Bounty Loan"
+    Feature.BOUNTY_LOAN: "Bounty Loan",
 }

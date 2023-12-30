@@ -9,7 +9,14 @@ class TgRestDevilFruitAward(TgRest):
     TgRestDevilFruitAward class is used to create a Telegram REST API request.
     """
 
-    def __init__(self, bot_id: str, object_type: TgRestObjectType, user_id: int, devil_fruit_id: int, reason: str):
+    def __init__(
+        self,
+        bot_id: str,
+        object_type: TgRestObjectType,
+        user_id: int,
+        devil_fruit_id: int,
+        reason: str,
+    ):
         """
         Constructor
 

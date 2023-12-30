@@ -16,11 +16,14 @@ class LogTypeReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    TYPE = 'a'
-    ITEM_ID = 'b'
+
+    TYPE = "a"
+    ITEM_ID = "b"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the log type detail screen
     :param update: The update
@@ -41,4 +44,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         log.user = user
         log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
 
-        await full_message_send(context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard
+        )

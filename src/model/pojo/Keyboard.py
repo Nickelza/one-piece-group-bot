@@ -9,10 +9,21 @@ from src.model.enums.Screen import Screen
 
 
 class Keyboard:
-    def __init__(self, text: str, info: dict = None, screen: Screen = None, previous_screen_list: list[Screen] = None,
-                 url: str = None, inherit_authorized_users: bool = True, authorized_users: list[User] = None,
-                 inbound_info: dict = None, from_deeplink: bool = False, is_deeplink: bool = False,
-                 only_authorized_users_can_interact: bool = True, switch_inline_query: str = None):
+    def __init__(
+        self,
+        text: str,
+        info: dict = None,
+        screen: Screen = None,
+        previous_screen_list: list[Screen] = None,
+        url: str = None,
+        inherit_authorized_users: bool = True,
+        authorized_users: list[User] = None,
+        inbound_info: dict = None,
+        from_deeplink: bool = False,
+        is_deeplink: bool = False,
+        only_authorized_users_can_interact: bool = True,
+        switch_inline_query: str = None,
+    ):
         """
         Creates a keyboard object
         :param text: The text to be displayed on the keyboard
@@ -31,11 +42,15 @@ class Keyboard:
         self.text = text
         self.info: dict = info if info is not None else {}
         self.screen: Screen = screen
-        self.previous_screen_list: list[Screen] = previous_screen_list if previous_screen_list is not None else []
+        self.previous_screen_list: list[Screen] = (
+            previous_screen_list if previous_screen_list is not None else []
+        )
         self.url: str = url
         self.callback_data: str = self.create_callback_data()
         self.inherit_authorized_users: bool = inherit_authorized_users
-        self.authorized_users: list[User] = authorized_users if authorized_users is not None else []
+        self.authorized_users: list[User] = (
+            authorized_users if authorized_users is not None else []
+        )
         self.from_deeplink: bool = from_deeplink
         self.is_deeplink: bool = is_deeplink
         self.only_authorized_users_can_interact: bool = only_authorized_users_can_interact
@@ -60,19 +75,25 @@ class Keyboard:
         if self.screen is not None:
             info_with_screen[ReservedKeyboardKeys.SCREEN] = int(self.screen[1:])
 
-        temp_screen_code: int = (info_with_screen[ReservedKeyboardKeys.SCREEN]
-                                 if ReservedKeyboardKeys.SCREEN in info_with_screen else None)
+        temp_screen_code: int = (
+            info_with_screen[ReservedKeyboardKeys.SCREEN]
+            if ReservedKeyboardKeys.SCREEN in info_with_screen
+            else None
+        )
 
         if self.previous_screen_list is not None and len(self.previous_screen_list) > 0:
             info_with_screen[ReservedKeyboardKeys.PREVIOUS_SCREEN] = [
-                int(screen[1:]) for screen in self.previous_screen_list if int(screen[1:]) != temp_screen_code]
+                int(screen[1:])
+                for screen in self.previous_screen_list
+                if int(screen[1:]) != temp_screen_code
+            ]
 
         # Convert boolean to int
         for key, value in info_with_screen.items():
             if isinstance(value, bool):
                 info_with_screen[key] = int(value)
 
-        return json.dumps(info_with_screen, separators=(',', ':'))
+        return json.dumps(info_with_screen, separators=(",", ":"))
 
     def refresh_callback_data(self):
         """
@@ -81,8 +102,12 @@ class Keyboard:
         self.callback_data = self.create_callback_data()
 
     @staticmethod
-    def get_from_callback_query_or_info(message_source: MessageSource, callback_query: CallbackQuery = None,
-                                        info_str: str = None, from_deeplink: bool = False) -> 'Keyboard':
+    def get_from_callback_query_or_info(
+        message_source: MessageSource,
+        callback_query: CallbackQuery = None,
+        info_str: str = None,
+        from_deeplink: bool = False,
+    ) -> "Keyboard":
         """
         Create a Keyboard object from a CallbackQuery object
         :param callback_query: CallbackQuery object
@@ -93,7 +118,7 @@ class Keyboard:
         """
 
         if callback_query is None and info_str is None:
-            raise ValueError('Either callback_query or info must be provided')
+            raise ValueError("Either callback_query or info must be provided")
 
         if info_str is not None:
             info: dict = json.loads(info_str)
@@ -110,14 +135,21 @@ class Keyboard:
 
         if ReservedKeyboardKeys.PREVIOUS_SCREEN in info:
             previous_screen_list = [
-                Screen(message_source + str(screen)) for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]]
+                Screen(message_source + str(screen))
+                for screen in info[ReservedKeyboardKeys.PREVIOUS_SCREEN]
+            ]
         else:
             previous_screen_list = []
 
-        text: str = ''
+        text: str = ""
 
-        return Keyboard(text, info=info, screen=screen, previous_screen_list=previous_screen_list,
-                        from_deeplink=from_deeplink)
+        return Keyboard(
+            text,
+            info=info,
+            screen=screen,
+            previous_screen_list=previous_screen_list,
+            from_deeplink=from_deeplink,
+        )
 
     def get(self, key: str):
         """
@@ -152,6 +184,7 @@ class Keyboard:
         """
 
         from src.service.message_service import get_deeplink
+
         self.url = get_deeplink(self.callback_data)
 
     def set_screen(self, screen: Screen):

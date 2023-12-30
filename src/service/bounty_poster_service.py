@@ -1,5 +1,11 @@
 from telegram import Update
-from wantedposter.wantedposter import WantedPoster, VerticalAlignment, CaptureCondition, Effect, Stamp
+from wantedposter.wantedposter import (
+    WantedPoster,
+    VerticalAlignment,
+    CaptureCondition,
+    Effect,
+    Stamp,
+)
 
 import constants as c
 from src.model.Leaderboard import Leaderboard
@@ -21,10 +27,12 @@ async def get_bounty_poster(update: Update, user: User) -> str:
 
     from src.service.user_service import get_user_profile_photo, get_boss_type
 
-    wanted_poster = WantedPoster(portrait=await get_user_profile_photo(update),
-                                 first_name=user.tg_first_name,
-                                 last_name=user.tg_last_name,
-                                 bounty=user.bounty)
+    wanted_poster = WantedPoster(
+        portrait=await get_user_profile_photo(update),
+        first_name=user.tg_first_name,
+        last_name=user.tg_last_name,
+        bounty=user.bounty,
+    )
 
     capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE
     effects: list[Effect] = []
@@ -55,9 +63,13 @@ async def get_bounty_poster(update: Update, user: User) -> str:
             else:
                 stamp = Stamp.DO_NOT_ENGAGE
 
-    return wanted_poster.generate(output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),
-                                  portrait_vertical_align=VerticalAlignment.TOP, capture_condition=capture_condition,
-                                  effects=effects, stamp=stamp)
+    return wanted_poster.generate(
+        output_poster_path=generate_temp_file_path(c.BOUNTY_POSTER_EXTENSION),
+        portrait_vertical_align=VerticalAlignment.TOP,
+        capture_condition=capture_condition,
+        effects=effects,
+        stamp=stamp,
+    )
 
 
 def get_bounty_poster_limit(leaderboard_user: LeaderboardUser) -> int:
@@ -83,10 +95,13 @@ async def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) ->
     if reset_previous_leaderboard:
         # Reset the limit for users
         previous_leaderboard: Leaderboard = get_leaderboard(1)
-        previous_leaderboard_users_id = LeaderboardUser.select(LeaderboardUser.user) \
-            .where(LeaderboardUser.leaderboard == previous_leaderboard)
+        previous_leaderboard_users_id = LeaderboardUser.select(LeaderboardUser.user).where(
+            LeaderboardUser.leaderboard == previous_leaderboard
+        )
         if previous_leaderboard is not None:
-            User.update(bounty_poster_limit=0).where(User.id.in_(previous_leaderboard_users_id)).execute()
+            User.update(bounty_poster_limit=0).where(
+                User.id.in_(previous_leaderboard_users_id)
+            ).execute()
 
     # Reset the limit for the current leaderboard users
     current_leaderboard: Leaderboard = get_leaderboard()
@@ -94,5 +109,6 @@ async def reset_bounty_poster_limit(reset_previous_leaderboard: bool = False) ->
         for leaderboard_user in current_leaderboard.leaderboard_users:
             leaderboard_user: LeaderboardUser = leaderboard_user
 
-            User.update(bounty_poster_limit=get_bounty_poster_limit(leaderboard_user)) \
-                .where(User.id == leaderboard_user.user).execute()
+            User.update(bounty_poster_limit=get_bounty_poster_limit(leaderboard_user)).where(
+                User.id == leaderboard_user.user
+            ).execute()

@@ -8,11 +8,12 @@ class TgRestPredictionAction(StrEnum):
     """
     Enum for the action of Telegram REST API request.
     """
-    SEND = 'send'
-    CLOSE_BETS = 'close_bets'
-    SET_RESULTS = 'set_results'
-    REFRESH = 'refresh'
-    RESEND = 'resend'
+
+    SEND = "send"
+    CLOSE_BETS = "close_bets"
+    SET_RESULTS = "set_results"
+    REFRESH = "refresh"
+    RESEND = "resend"
 
 
 class TgRestPrediction(TgRest):
@@ -20,7 +21,13 @@ class TgRestPrediction(TgRest):
     TgRestPrediction class is used to create a Telegram REST API request.
     """
 
-    def __init__(self, bot_id: str, object_type: TgRestObjectType, action: TgRestPredictionAction, prediction_id: int):
+    def __init__(
+        self,
+        bot_id: str,
+        object_type: TgRestObjectType,
+        action: TgRestPredictionAction,
+        prediction_id: int,
+    ):
         """
         Constructor
         :param action: The action

@@ -8,14 +8,17 @@ class PredictionOption(BaseModel):
     """
     Prediction option class
     """
+
     id = PrimaryKeyField()
-    prediction = ForeignKeyField(Prediction, backref='prediction_options', on_delete='CASCADE', on_update='CASCADE')
+    prediction = ForeignKeyField(
+        Prediction, backref="prediction_options", on_delete="CASCADE", on_update="CASCADE"
+    )
     number = IntegerField()
     option = CharField(max_length=999)
     is_correct = BooleanField(default=False)
 
     class Meta:
-        db_table = 'prediction_option'
+        db_table = "prediction_option"
 
 
 PredictionOption.create_table()

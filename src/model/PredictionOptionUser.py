@@ -13,21 +13,33 @@ class PredictionOptionUser(BaseModel):
     """
     Prediction option user class
     """
+
     id = PrimaryKeyField()
-    prediction = ForeignKeyField(Prediction, backref='prediction_options_users', on_delete='RESTRICT',
-                                 on_update='RESTRICT')
-    prediction_option = ForeignKeyField(PredictionOption, backref='prediction_options_users', on_delete='RESTRICT',
-                                        on_update='RESTRICT')
-    user = ForeignKeyField(User, backref='prediction_options_users', on_delete='CASCADE', on_update='CASCADE')
+    prediction = ForeignKeyField(
+        Prediction, backref="prediction_options_users", on_delete="RESTRICT", on_update="RESTRICT"
+    )
+    prediction_option = ForeignKeyField(
+        PredictionOption,
+        backref="prediction_options_users",
+        on_delete="RESTRICT",
+        on_update="RESTRICT",
+    )
+    user = ForeignKeyField(
+        User, backref="prediction_options_users", on_delete="CASCADE", on_update="CASCADE"
+    )
     wager = BigIntegerField()
     max_refund_wager_boost = IntegerField(default=0)
     date = DateTimeField(default=datetime.now)
-    prediction_group_chat_message = ForeignKeyField(PredictionGroupChatMessage, null=True,
-                                                    backref='prediction_options_users', on_delete='RESTRICT',
-                                                    on_update='RESTRICT')
+    prediction_group_chat_message = ForeignKeyField(
+        PredictionGroupChatMessage,
+        null=True,
+        backref="prediction_options_users",
+        on_delete="RESTRICT",
+        on_update="RESTRICT",
+    )
 
     class Meta:
-        db_table = 'prediction_option_user'
+        db_table = "prediction_option_user"
 
 
 PredictionOptionUser.create_table()

@@ -5,9 +5,9 @@ from resources import phrases
 
 
 class IncomeTaxDeductionType(StrEnum):
-    ADMIN = 'admin'
-    CREW_ability = 'crew'
-    DEVIL_FRUIT = 'devil_fruit'
+    ADMIN = "admin"
+    CREW_ability = "crew"
+    DEVIL_FRUIT = "devil_fruit"
 
 
 class IncomeTaxDeduction:
@@ -16,7 +16,7 @@ class IncomeTaxDeduction:
         self.percentage = percentage
 
     @staticmethod
-    def from_string(deduction_list: str) -> list['IncomeTaxDeduction']:
+    def from_string(deduction_list: str) -> list["IncomeTaxDeduction"]:
         """
         Get the tax deduction list from a string
         :param deduction_list: The string
@@ -29,7 +29,7 @@ class IncomeTaxDeduction:
         return [IncomeTaxDeduction(**deduction) for deduction in deduction_list_json]
 
     @staticmethod
-    def get_percentage_from_list(deduction_list: list['IncomeTaxDeduction']) -> float:
+    def get_percentage_from_list(deduction_list: list["IncomeTaxDeduction"]) -> float:
         """
         Get the total deduction percentage from a list
         :param deduction_list: The list
@@ -37,7 +37,10 @@ class IncomeTaxDeduction:
         """
 
         from src.service.math_service import get_cumulative_percentage_sum
-        return get_cumulative_percentage_sum([deduction.percentage for deduction in deduction_list])
+
+        return get_cumulative_percentage_sum(
+            [deduction.percentage for deduction in deduction_list]
+        )
 
     def get_description(self) -> str:
         """
@@ -50,5 +53,5 @@ class IncomeTaxDeduction:
 INCOME_TAX_DEDUCTION_TYPE_DESCRIPTIONS = {
     IncomeTaxDeductionType.ADMIN: phrases.INCOME_TAX_DEDUCTION_TYPE_ADMIN,
     IncomeTaxDeductionType.CREW_ability: phrases.INCOME_TAX_DEDUCTION_TYPE_CREW_ABILITY,
-    IncomeTaxDeductionType.DEVIL_FRUIT: phrases.INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT
+    IncomeTaxDeductionType.DEVIL_FRUIT: phrases.INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT,
 }

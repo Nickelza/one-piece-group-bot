@@ -48,8 +48,13 @@ def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:
     :return: True if the feature is enabled, False otherwise
     """
 
-    return GroupChatDisabledFeature.get_or_none((GroupChatDisabledFeature.group_chat == group_chat) &
-                                                (GroupChatDisabledFeature.feature == feature)) is None
+    return (
+        GroupChatDisabledFeature.get_or_none(
+            (GroupChatDisabledFeature.group_chat == group_chat)
+            & (GroupChatDisabledFeature.feature == feature)
+        )
+        is None
+    )
 
 
 def get_group_or_topic_text(group_chat: GroupChat) -> str:
@@ -78,8 +83,11 @@ def allow_unlimited_bounty_from_messages(group_chat: GroupChat) -> bool:
     return feature_is_enabled(group_chat, Feature.BOUNTY_MESSAGES_GAIN)
 
 
-def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: list[Group] = None,
-                                         excluded_group_chats: list[GroupChat] = None) -> list[GroupChat]:
+def get_group_chats_with_feature_enabled(
+    feature: Feature,
+    filter_by_groups: list[Group] = None,
+    excluded_group_chats: list[GroupChat] = None,
+) -> list[GroupChat]:
     """
     Gets the group chats with a feature enabled
     :param feature: The feature
@@ -101,28 +109,36 @@ def get_group_chats_with_feature_enabled(feature: Feature, filter_by_groups: lis
 
     # Would be better to use some join, couldn't get it to work though
     group_chats_disabled_feature: list[GroupChatDisabledFeature] = (
-        GroupChatDisabledFeature
-        .select()
-        .where(GroupChatDisabledFeature.feature == feature))
+        GroupChatDisabledFeature.select().where(GroupChatDisabledFeature.feature == feature)
+    )
 
-    group_chats_with_feature_disabled: list[GroupChat] = [gcf.group_chat for gcf in group_chats_disabled_feature]
+    group_chats_with_feature_disabled: list[GroupChat] = [
+        gcf.group_chat for gcf in group_chats_disabled_feature
+    ]
 
     return (
-        GroupChat.select().distinct()
+        GroupChat.select()
+        .distinct()
         .join(Group, on=(Group.id == GroupChat.group))
-        .where((Group.is_active == True)
-               & (GroupChat.is_active == True)
-               & group_filter
-               & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
-               & (GroupChat.id.not_in([c.id for c in group_chats_with_feature_disabled]))
-               ))
+        .where(
+            (Group.is_active == True)
+            & (GroupChat.is_active == True)
+            & group_filter
+            & (GroupChat.id.not_in([egc.id for egc in excluded_group_chats]))
+            & (GroupChat.id.not_in([c.id for c in group_chats_with_feature_disabled]))
+        )
+    )
 
 
-async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
-                                                           text: str, inline_keyboard: list[list[Keyboard]] = None,
-                                                           excluded_group_chats: list[GroupChat] = None,
-                                                           prediction: Prediction = None,
-                                                           filter_by_groups: list[Group] = None) -> None:
+async def broadcast_to_chats_with_feature_enabled_dispatch(
+    context: ContextTypes.DEFAULT_TYPE,
+    feature: Feature,
+    text: str,
+    inline_keyboard: list[list[Keyboard]] = None,
+    excluded_group_chats: list[GroupChat] = None,
+    prediction: Prediction = None,
+    filter_by_groups: list[Group] = None,
+) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -134,16 +150,28 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(context: ContextTypes
     :param filter_by_groups: The groups to filter by
     """
 
-    context.application.create_task(broadcast_to_chats_with_feature_enabled(
-        context, feature, text, inline_keyboard=inline_keyboard, excluded_group_chats=excluded_group_chats,
-        prediction=prediction, filter_by_groups=filter_by_groups))
+    context.application.create_task(
+        broadcast_to_chats_with_feature_enabled(
+            context,
+            feature,
+            text,
+            inline_keyboard=inline_keyboard,
+            excluded_group_chats=excluded_group_chats,
+            prediction=prediction,
+            filter_by_groups=filter_by_groups,
+        )
+    )
 
 
-async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_TYPE, feature: Feature,
-                                                  text: str, inline_keyboard: list[list[Keyboard]] = None,
-                                                  excluded_group_chats: list[GroupChat] = None,
-                                                  prediction: Prediction = None, filter_by_groups: list[Group] = None
-                                                  ) -> None:
+async def broadcast_to_chats_with_feature_enabled(
+    context: ContextTypes.DEFAULT_TYPE,
+    feature: Feature,
+    text: str,
+    inline_keyboard: list[list[Keyboard]] = None,
+    excluded_group_chats: list[GroupChat] = None,
+    prediction: Prediction = None,
+    filter_by_groups: list[Group] = None,
+) -> None:
     """
     Broadcasts a message to all the chats with a feature enabled
     :param context: The context
@@ -162,32 +190,44 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
         filter_by_groups = []
 
     group_chats: list[GroupChat] = get_group_chats_with_feature_enabled(
-        feature, excluded_group_chats=excluded_group_chats, filter_by_groups=filter_by_groups)
+        feature, excluded_group_chats=excluded_group_chats, filter_by_groups=filter_by_groups
+    )
     feature_is_pinnable = feature.is_pinnable()
 
     # Unpin all previous messages of this feature
     if feature_is_pinnable:
         # Get all messages to unpin to avoid unpinning messages that are just pinned due to async call
-        messages_to_unpin: list[GroupChatFeaturePinMessage] = list(GroupChatFeaturePinMessage.select().where(
-            GroupChatFeaturePinMessage.feature == feature))
+        messages_to_unpin: list[GroupChatFeaturePinMessage] = list(
+            GroupChatFeaturePinMessage.select().where(
+                GroupChatFeaturePinMessage.feature == feature
+            )
+        )
         await unpin_feature_messages_dispatch(context, messages_to_unpin)
 
     for group_chat in group_chats:
         group_chat: GroupChat = group_chat
         try:
-            message: Message = await full_message_send(context, text, keyboard=inline_keyboard, group_chat=group_chat)
+            message: Message = await full_message_send(
+                context, text, keyboard=inline_keyboard, group_chat=group_chat
+            )
 
             if feature is Feature.PREDICTION:  # Save Prediction Group Chat Message
-                prediction_group_chat_message: PredictionGroupChatMessage = PredictionGroupChatMessage()
+                prediction_group_chat_message: PredictionGroupChatMessage = (
+                    PredictionGroupChatMessage()
+                )
                 prediction_group_chat_message.prediction = prediction
                 prediction_group_chat_message.group_chat = group_chat
                 prediction_group_chat_message.message_id = message.message_id
                 prediction_group_chat_message.save()
 
             if feature_is_pinnable:
-                should_pin = GroupChatEnabledFeaturePin.get_or_none(
-                    (GroupChatEnabledFeaturePin.group_chat == group_chat) &
-                    (GroupChatEnabledFeaturePin.feature == feature)) is not None
+                should_pin = (
+                    GroupChatEnabledFeaturePin.get_or_none(
+                        (GroupChatEnabledFeaturePin.group_chat == group_chat)
+                        & (GroupChatEnabledFeaturePin.feature == feature)
+                    )
+                    is not None
+                )
 
                 if should_pin:
                     await message.pin(disable_notification=True)
@@ -201,8 +241,9 @@ async def broadcast_to_chats_with_feature_enabled(context: ContextTypes.DEFAULT_
             save_group_chat_error(group_chat, str(te))
 
 
-async def unpin_feature_messages_dispatch(context: ContextTypes.DEFAULT_TYPE,
-                                          messages_to_unpin: list[GroupChatFeaturePinMessage]) -> None:
+async def unpin_feature_messages_dispatch(
+    context: ContextTypes.DEFAULT_TYPE, messages_to_unpin: list[GroupChatFeaturePinMessage]
+) -> None:
     """
     Unpins the feature messages
     :param context: The context
@@ -212,8 +253,9 @@ async def unpin_feature_messages_dispatch(context: ContextTypes.DEFAULT_TYPE,
     context.application.create_task(unpin_feature_messages(context, messages_to_unpin))
 
 
-async def unpin_feature_messages(context: ContextTypes.DEFAULT_TYPE,
-                                 messages_to_unpin: list[GroupChatFeaturePinMessage]) -> None:
+async def unpin_feature_messages(
+    context: ContextTypes.DEFAULT_TYPE, messages_to_unpin: list[GroupChatFeaturePinMessage]
+) -> None:
     """
     Unpins the feature messages
     :param context: The context
@@ -238,13 +280,17 @@ def deactivate_inactive_group_chats() -> None:
 
     inactive_days = Env.INACTIVE_GROUP_DAYS.get_int()
 
-    (Group.update(is_active=False)
-     .where(Group.last_message_date < datetime.now() - timedelta(days=inactive_days))
-     .execute())
+    (
+        Group.update(is_active=False)
+        .where(Group.last_message_date < datetime.now() - timedelta(days=inactive_days))
+        .execute()
+    )
 
-    (GroupChat.update(is_active=False)
-     .where(GroupChat.last_message_date < datetime.now() - timedelta(days=inactive_days))
-     .execute())
+    (
+        GroupChat.update(is_active=False)
+        .where(GroupChat.last_message_date < datetime.now() - timedelta(days=inactive_days))
+        .execute()
+    )
 
     # Deactivate inactive group users
     deactivate_inactive_group_users()
@@ -257,13 +303,17 @@ def deactivate_inactive_group_users() -> None:
 
     inactive_days = Env.INACTIVE_GROUP_USER_DAYS.get_int()
 
-    (GroupUser.update(is_active=False)
-     .where(GroupUser.last_message_date < datetime.now() - timedelta(days=inactive_days))
-     .execute())
+    (
+        GroupUser.update(is_active=False)
+        .where(GroupUser.last_message_date < datetime.now() - timedelta(days=inactive_days))
+        .execute()
+    )
 
-    (User.update(is_active=False)
-     .where(User.last_message_date < datetime.now() - timedelta(days=inactive_days))
-     .execute())
+    (
+        User.update(is_active=False)
+        .where(User.last_message_date < datetime.now() - timedelta(days=inactive_days))
+        .execute()
+    )
 
 
 def save_group_chat_error(group_chat: GroupChat, error: str) -> None:

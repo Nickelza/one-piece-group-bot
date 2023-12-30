@@ -11,8 +11,13 @@ import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.ContextDataKey import ContextDataKey
-from src.model.enums.Location import get_last_new_world, get_first_new_world, get_by_level, Location, \
-    is_paradise_by_level
+from src.model.enums.Location import (
+    get_last_new_world,
+    get_first_new_world,
+    get_by_level,
+    Location,
+    is_paradise_by_level,
+)
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
 from src.service.bot_service import get_user_context_data, set_user_context_data
@@ -22,6 +27,7 @@ class User(BaseModel):
     """
     User class
     """
+
     id = PrimaryKeyField()
     tg_user_id = CharField(max_length=99, unique=True)
     tg_first_name = CharField(max_length=99)
@@ -29,7 +35,9 @@ class User(BaseModel):
     tg_username = CharField(max_length=99)
     join_date = DateTimeField(default=datetime.datetime.now)
     bounty = BigIntegerField(default=0)
-    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
+    total_gained_bounty = BigIntegerField(
+        default=0, constraints=[Check("total_gained_bounty >= 0")]
+    )
     pending_bounty = BigIntegerField(default=0)
     doc_q_cooldown_end_date = DateTimeField(null=True)
     game_cooldown_end_date = DateTimeField(null=True)
@@ -41,7 +49,7 @@ class User(BaseModel):
     fight_cooldown_end_date = DateTimeField(null=True)
     impel_down_release_date = DateTimeField(null=True)
     impel_down_is_permanent = BooleanField(default=False)
-    crew = ForeignKeyField(Crew, backref='crew_members', null=True)
+    crew = ForeignKeyField(Crew, backref="crew_members", null=True)
     crew_join_date = DateTimeField(null=True)
     crew_role = SmallIntegerField(null=True)
     can_create_crew = BooleanField(default=True)
@@ -59,7 +67,9 @@ class User(BaseModel):
     is_active = BooleanField(default=True)
     prediction_creation_cooldown_end_date = DateTimeField(null=True)
     bounty_loan_issue_cool_down_end_date = DateTimeField(null=True)
-    is_exempt_from_global_leaderboard_requirements = BooleanField(default=False)  # For Legendary Pirate
+    is_exempt_from_global_leaderboard_requirements = BooleanField(
+        default=False
+    )  # For Legendary Pirate
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen
@@ -74,7 +84,7 @@ class User(BaseModel):
     should_update_model: bool = True
 
     class Meta:
-        db_table = 'user'
+        db_table = "user"
 
     def get_bounty_formatted(self) -> str:
         """
@@ -83,7 +93,10 @@ class User(BaseModel):
         """
 
         from src.service.bounty_service import get_belly_formatted
-        return get_belly_formatted(int(str(self.bounty)))  # Double cast to avoid IDE warnings (BigIntegerField type)
+
+        return get_belly_formatted(
+            int(str(self.bounty))
+        )  # Double cast to avoid IDE warnings (BigIntegerField type)
 
     def is_arrested(self):
         """
@@ -91,8 +104,10 @@ class User(BaseModel):
         :return: True if the user is arrested
         """
 
-        return ((self.impel_down_release_date is not None and self.impel_down_release_date > datetime.datetime.now())
-                or self.impel_down_is_permanent)
+        return (
+            self.impel_down_release_date is not None
+            and self.impel_down_release_date > datetime.datetime.now()
+        ) or self.impel_down_is_permanent
 
     @staticmethod
     def get_is_not_arrested_statement_condition() -> Any:
@@ -100,10 +115,14 @@ class User(BaseModel):
         Returns a case statement condition which returns true if the user is not arrested
         :return: The case statement
         """
-        return ((User.impel_down_is_permanent == False) &
-                ((User.impel_down_release_date.is_null()) | (User.impel_down_release_date < datetime.datetime.now())))
+        return (User.impel_down_is_permanent == False) & (
+            (User.impel_down_release_date.is_null())
+            | (User.impel_down_release_date < datetime.datetime.now())
+        )
 
-    def update_private_screen_list(self, screen: Screen, previous_screen_list: list[Screen] = None):
+    def update_private_screen_list(
+        self, screen: Screen, previous_screen_list: list[Screen] = None
+    ):
         """
         Updates the private screen list
         :param screen: The screen
@@ -150,7 +169,9 @@ class User(BaseModel):
         if self.private_screen_list is None:
             return []
 
-        return [Screen(str(screen)) for screen in self.private_screen_list.split(c.STANDARD_SPLIT_CHAR)]
+        return [
+            Screen(str(screen)) for screen in self.private_screen_list.split(c.STANDARD_SPLIT_CHAR)
+        ]
 
     def get_current_private_screen(self) -> Screen:
         """
@@ -230,7 +251,7 @@ class User(BaseModel):
         return self.is_crew_captain() or self.is_crew_first_mate()
 
     @staticmethod
-    def get_by_tg_id(tg_user_id: str) -> 'User':
+    def get_by_tg_id(tg_user_id: str) -> "User":
         """
         Returns the User by the Telegram user id
         :param tg_user_id: The Telegram user id
@@ -247,7 +268,7 @@ class User(BaseModel):
 
         return self.crew is not None
 
-    def in_same_crew(self, user: 'User') -> bool:
+    def in_same_crew(self, user: "User") -> bool:
         """
         Returns True if the user is in the same crew as the given user
         :param user: The user
@@ -276,7 +297,7 @@ class User(BaseModel):
 
         return escape_valid_markdown_chars(str(self.tg_first_name))
 
-    def refresh(self) -> 'User':
+    def refresh(self) -> "User":
         """
         Refreshes the user
         :return: The refreshed user
@@ -302,6 +323,7 @@ class User(BaseModel):
         """
 
         from src.model.enums.Location import is_new_world_by_level
+
         return is_new_world_by_level(int(str(self.location_level)))
 
     def has_higher_bounty_than_crew_average(self) -> bool:
@@ -337,7 +359,9 @@ class User(BaseModel):
         :return: True if the user has the Crew MVP bonus
         """
 
-        return self.has_higher_bounty_than_crew_average() and not self.has_bounty_gain_limitations()
+        return (
+            self.has_higher_bounty_than_crew_average() and not self.has_bounty_gain_limitations()
+        )
 
     def is_in_paradise(self) -> bool:
         """
@@ -371,8 +395,10 @@ class User(BaseModel):
         :return: True if the user has bounty gain limitations
         """
 
-        return ((self.is_in_paradise() and (self.bounty + self.pending_bounty) >= get_first_new_world().required_bounty)
-                or ((self.bounty + self.pending_bounty) >= get_last_new_world().required_bounty))
+        return (
+            self.is_in_paradise()
+            and (self.bounty + self.pending_bounty) >= get_first_new_world().required_bounty
+        ) or ((self.bounty + self.pending_bounty) >= get_last_new_world().required_bounty)
 
     @staticmethod
     def get_has_bounty_gain_limitations_statement_condition() -> Any:
@@ -381,25 +407,30 @@ class User(BaseModel):
         :return: The has bounty gain limitations statement condition
         """
 
-        return (((User.location_level < get_first_new_world().level) &
-                 ((User.bounty + User.pending_bounty) >= get_first_new_world().required_bounty)) |
-                ((User.bounty + User.pending_bounty) >= get_last_new_world().required_bounty))
+        return (
+            (User.location_level < get_first_new_world().level)
+            & ((User.bounty + User.pending_bounty) >= get_first_new_world().required_bounty)
+        ) | ((User.bounty + User.pending_bounty) >= get_last_new_world().required_bounty)
 
-    def get_in_same_crew_statement_condition(self, other_user: 'User') -> Any:
+    def get_in_same_crew_statement_condition(self, other_user: "User") -> Any:
         """
         Returns the in same crew statement condition
         :param other_user: The other user
         :return: The in same crew statement condition
         """
 
-        return (User.select(fn.COUNT(User.id))
-                .where((other_user.crew.is_null(False))
-                       & (other_user.crew == self.crew)
-                       & (other_user == User.id)
-                       ) > 0)
+        return (
+            User.select(fn.COUNT(User.id)).where(
+                (other_user.crew.is_null(False))
+                & (other_user.crew == self.crew)
+                & (other_user == User.id)
+            )
+            > 0
+        )
 
-    async def is_chat_admin(self, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: str = None
-                            ) -> bool:
+    async def is_chat_admin(
+        self, update: Update = None, context: ContextTypes.DEFAULT_TYPE = None, chat_id: str = None
+    ) -> bool:
         """
         Returns True if the user is an admin of the chat
         :param update: The update
@@ -408,6 +439,7 @@ class User(BaseModel):
         :return: True if the user is an admin of the chat
         """
         from src.service.user_service import user_is_chat_admin
+
         return await user_is_chat_admin(self, update=update, context=context, tg_group_id=chat_id)
 
     async def is_chat_member(self, context: ContextTypes.DEFAULT_TYPE, chat_id: str):
@@ -419,11 +451,16 @@ class User(BaseModel):
         """
 
         from src.service.user_service import user_is_chat_member
+
         return await user_is_chat_member(self, context=context, tg_group_id=chat_id)
 
     @staticmethod
-    def get_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey,
-                         tolerate_key_exception: bool = True, inner_key: str = None) -> any:
+    def get_context_data(
+        context: ContextTypes.DEFAULT_TYPE,
+        key: ContextDataKey,
+        tolerate_key_exception: bool = True,
+        inner_key: str = None,
+    ) -> any:
         """
         Get user data from context
         :param context: The context
@@ -433,11 +470,14 @@ class User(BaseModel):
         :return: The value
         """
 
-        return get_user_context_data(context, key, tolerate_key_exception=tolerate_key_exception, inner_key=inner_key)
+        return get_user_context_data(
+            context, key, tolerate_key_exception=tolerate_key_exception, inner_key=inner_key
+        )
 
     @staticmethod
-    def set_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, value: Any,
-                         inner_key: str = None) -> Any:
+    def set_context_data(
+        context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, value: Any, inner_key: str = None
+    ) -> Any:
         """
         Set user data to context
         :param context: The context
@@ -505,7 +545,9 @@ class User(BaseModel):
         from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
         from src.service.math_service import format_percentage_value
 
-        return format_percentage_value(IncomeTaxBracket.get_bracket(int(str(self.total_gained_bounty))).percentage)
+        return format_percentage_value(
+            IncomeTaxBracket.get_bracket(int(str(self.total_gained_bounty))).percentage
+        )
 
     @staticmethod
     def get_active_interactive_users() -> list:
@@ -514,8 +556,11 @@ class User(BaseModel):
         :return: The active interactive users
         """
 
-        return User.select().where(User.last_system_interaction_date > datetime.datetime.now() - datetime.timedelta(
-            days=Env.INACTIVE_GROUP_USER_DAYS.get_int()))
+        return User.select().where(
+            User.last_system_interaction_date
+            > datetime.datetime.now()
+            - datetime.timedelta(days=Env.INACTIVE_GROUP_USER_DAYS.get_int())
+        )
 
     def get_timezone(self) -> pytz.timezone:
         """
@@ -596,7 +641,7 @@ class User(BaseModel):
         :return: The mention url of the user
         """
 
-        return f'tg://user?id={self.tg_user_id}'
+        return f"tg://user?id={self.tg_user_id}"
 
 
 User.create_table()

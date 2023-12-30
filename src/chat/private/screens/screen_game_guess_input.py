@@ -5,8 +5,14 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_game_gol import run_game as run_game_gol, validate_answer as validate_answer_gol
-from src.chat.group.screens.screen_game_pr import run_game as run_game_pr, validate_answer as validate_answer_pr
+from src.chat.group.screens.screen_game_gol import (
+    run_game as run_game_gol,
+    validate_answer as validate_answer_gol,
+)
+from src.chat.group.screens.screen_game_pr import (
+    run_game as run_game_pr,
+    validate_answer as validate_answer_pr,
+)
 from src.chat.group.screens.screen_game_shambles import run_game as run_game_shambles
 from src.chat.group.screens.screen_game_ww import run_game as run_game_ww
 from src.model.Game import Game
@@ -19,7 +25,9 @@ from src.service.game_service import get_game_from_keyboard, guess_game_validate
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the game input screen
     :param update: The update
@@ -61,19 +69,40 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     if inbound_keyboard is not None:  # From deep link
         match game_type:
             case GameType.SHAMBLES:
-                await run_game_shambles(context, game, send_to_user=user, should_send_to_all_players=False,
-                                        schedule_next_send=False)
+                await run_game_shambles(
+                    context,
+                    game,
+                    send_to_user=user,
+                    should_send_to_all_players=False,
+                    schedule_next_send=False,
+                )
             case GameType.WHOS_WHO:
-                await run_game_ww(context, game, send_to_user=user, should_send_to_all_players=False,
-                                  schedule_next_send=False)
+                await run_game_ww(
+                    context,
+                    game,
+                    send_to_user=user,
+                    should_send_to_all_players=False,
+                    schedule_next_send=False,
+                )
 
             case GameType.GUESS_OR_LIFE:
-                await run_game_gol(context, game, send_to_user=user, should_send_to_all_players=False,
-                                   schedule_next_send=False)
+                await run_game_gol(
+                    context,
+                    game,
+                    send_to_user=user,
+                    should_send_to_all_players=False,
+                    schedule_next_send=False,
+                )
 
             case GameType.PUNK_RECORDS:
-                await run_game_pr(context, game, send_to_user=user, should_send_to_all_players=False,
-                                  schedule_next_send=False, is_first_run=False)
+                await run_game_pr(
+                    context,
+                    game,
+                    send_to_user=user,
+                    should_send_to_all_players=False,
+                    schedule_next_send=False,
+                    is_first_run=False,
+                )
 
             case _:
                 raise ValueError(f"Game type {game.type} not supported")

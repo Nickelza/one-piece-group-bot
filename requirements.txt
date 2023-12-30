@@ -1,6 +1,6 @@
 python-dotenv==1.0.0
 python-telegram-bot[rate-limiter]==20.4
-peewee~=3.16.3
+peewee~=3.17.0
 asyncpraw~=7.7.1
 APScheduler==3.10.4
 Pillow>=9.0.0
@@ -14,3 +14,4 @@ geopy~=2.4.0
 timezonefinder~=6.2.0
 parsedatetime~=2.6
 sentry-sdk~=1.39.1
+black~=23.12.1

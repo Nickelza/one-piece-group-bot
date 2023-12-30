@@ -17,13 +17,21 @@ from src.model.game.shambles.Shambles import Shambles
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
-from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game, \
-    get_guess_game_users_to_send_message_to
+from src.service.game_service import (
+    set_user_private_screen,
+    guess_game_countdown_to_start,
+    save_game,
+    get_guess_game_users_to_send_message_to,
+)
 from src.service.message_service import full_media_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
-                 ) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    inbound_keyboard: Keyboard,
+    game: Game = None,
+) -> None:
     """
     Manage the Russian Roulette screen
     :param update: The update object
@@ -46,8 +54,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         game.status = GameStatus.COUNTDOWN_TO_START
         game.save()
         context.application.create_task(
-            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(),
-                                          run_game))
+            guess_game_countdown_to_start(
+                update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game
+            )
+        )
         return
 
 
@@ -61,7 +71,9 @@ def get_board(game: Game) -> Shambles:
     # Create board
     if game.board is None:
         grid_size = Shambles.get_grid_size_by_difficulty(game.get_difficulty())
-        random_terminology: Terminology = SupabaseRest.get_random_terminology(max_len=grid_size, only_letters=True)
+        random_terminology: Terminology = SupabaseRest.get_random_terminology(
+            max_len=grid_size, only_letters=True
+        )
         shambles = Shambles(random_terminology, grid_size=grid_size)
         save_game(game, shambles.get_board_json())
         return shambles
@@ -75,8 +87,13 @@ def get_board(game: Game) -> Shambles:
     return Shambles(terminology=char, **json_dict)
 
 
-async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
-                   should_send_to_all_players: bool = True, schedule_next_send: bool = True) -> None:
+async def run_game(
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    send_to_user: User = None,
+    should_send_to_all_players: bool = True,
+    schedule_next_send: bool = True,
+) -> None:
     """
     Send the blurred image
     :param context: The context object
@@ -87,32 +104,46 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     :return: None
     """
 
-    users = await get_guess_game_users_to_send_message_to(game, send_to_user, should_send_to_all_players,
-                                                          schedule_next_send)
+    users = await get_guess_game_users_to_send_message_to(
+        game, send_to_user, should_send_to_all_players, schedule_next_send
+    )
 
     # Get the board
     shambles = get_board(game)
 
     # Send the image
-    saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=shambles.image_path)
+    saved_media: SavedMedia = SavedMedia(
+        media_type=SavedMediaType.PHOTO, file_name=shambles.image_path
+    )
     caption = phrases.GUESS_TERM_GAME_INPUT_CAPTION
     if should_send_to_all_players:
         if shambles.can_reduce_level():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
-                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())
+                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int()
+            )
         elif shambles.revealed_letters_count >= 1:
             # Add hint
-            hint = shambles.terminology.name[:shambles.revealed_letters_count]
+            hint = shambles.terminology.name[: shambles.revealed_letters_count]
             caption += phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
 
-        if shambles.get_excludable_letters_count() == 0 and not shambles.have_revealed_all_letters():
+        if (
+            shambles.get_excludable_letters_count() == 0
+            and not shambles.have_revealed_all_letters()
+        ):
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
-                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int())
+                Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int()
+            )
 
     for user in users:
         context.application.create_task(
-            full_media_send(context, saved_media=saved_media, chat_id=user.tg_user_id, caption=caption,
-                            ignore_forbidden_exception=True))
+            full_media_send(
+                context,
+                saved_media=saved_media,
+                chat_id=user.tg_user_id,
+                caption=caption,
+                ignore_forbidden_exception=True,
+            )
+        )
 
         # Set private screen for input
         context.application.create_task(set_user_private_screen(user, game))

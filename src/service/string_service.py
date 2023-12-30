@@ -12,20 +12,20 @@ def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
     :return: The value
     """
 
-    unit = ''
+    unit = ""
     for char in reversed(value):
         if not char.isnumeric():
             unit = char + unit
         else:
             break
 
-    value_str = value.strip().replace(',', '').replace('.', '').replace(unit, '')
+    value_str = value.strip().replace(",", "").replace(".", "").replace(unit, "")
 
     # Amount not numeric
     if not value_str.isnumeric():
         raise ValueError
 
-    if unit == '':
+    if unit == "":
         return int(value_str)
 
     # Set magnitude full name
@@ -38,10 +38,10 @@ def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
         raise ValueError
 
     # Replace "," with "." to allow float conversion
-    value_str = value.replace(',', '.').replace(unit, '')
+    value_str = value.replace(",", ".").replace(unit, "")
 
     # More than 1 decimal point
-    if value_str.count('.') > 1:
+    if value_str.count(".") > 1:
         raise ValueError
 
     return int(float(value_str) * unit_multiplier_map[unit_full_name])
@@ -53,4 +53,4 @@ def object_to_json_string(obj: any) -> str:
     :param obj: The object
     :return: The JSON string
     """
-    return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+    return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":"))

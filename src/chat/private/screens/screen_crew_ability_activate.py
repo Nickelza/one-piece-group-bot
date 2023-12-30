@@ -18,10 +18,13 @@ class CrewAbilityActivateReservedKeys(StrEnum):
     """
     The reserved keys for the Crew ability activate screen
     """
-    ABILITY_TYPE = 'a'
+
+    ABILITY_TYPE = "a"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the Crew ability activate choose screen
     :param update: The update object
@@ -34,7 +37,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     try:
         crew: Crew = get_crew(user=user)
     except CrewValidationException as cve:
-        await full_message_send(context, cve.message, update=update, inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
+        )
         return
 
     if not await validate(update, context, inbound_keyboard, crew):
@@ -46,17 +51,28 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     screen = Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM
     for ability_type in allowed_ability_types:
         info = {CrewAbilityActivateReservedKeys.ABILITY_TYPE: ability_type}
-        inline_keyboard.append([Keyboard(ability_type.get_description(), info=info, screen=screen)])
+        inline_keyboard.append(
+            [Keyboard(ability_type.get_description(), info=info, screen=screen)]
+        )
 
     # Add random ability
     info = {CrewAbilityActivateReservedKeys.ABILITY_TYPE: None}
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_ABILITY_RANDOM, info=info, screen=screen)])
+    inline_keyboard.append(
+        [Keyboard(phrases.PVT_KEY_CREW_ABILITY_RANDOM, info=info, screen=screen)]
+    )
 
-    await full_message_send(context, phrases.CREW_ABILITY_ACTIVATE_CHOOSE, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard)
+    await full_message_send(
+        context,
+        phrases.CREW_ABILITY_ACTIVATE_CHOOSE,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+    )
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, crew: Crew) -> bool:
+async def validate(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, crew: Crew
+) -> bool:
     """
     Validate the crew ability add screen
     :param update: The update
@@ -71,9 +87,11 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
 
         # Insufficient crew chest amount
         if crew.chest_amount < crew.get_powerup_price():
-            raise CrewValidationException(phrases.CREW_ABILITY_INSUFFICIENT_CREW_CHEST.format(
-                crew.get_crew_chest_formatted(), crew.get_powerup_price_formatted()
-            ))
+            raise CrewValidationException(
+                phrases.CREW_ABILITY_INSUFFICIENT_CREW_CHEST.format(
+                    crew.get_crew_chest_formatted(), crew.get_powerup_price_formatted()
+                )
+            )
 
         # Abilities limit reached
         if len(active_abilities) >= crew.max_abilities:
@@ -81,8 +99,14 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_k
     except CrewValidationException as e:
 
         # Show alert if callback else send a message
-        await full_message_send(context, str(e), update=update, answer_callback=True, show_alert=True,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            str(e),
+            update=update,
+            answer_callback=True,
+            show_alert=True,
+            inbound_keyboard=inbound_keyboard,
+        )
         return False
 
     return True

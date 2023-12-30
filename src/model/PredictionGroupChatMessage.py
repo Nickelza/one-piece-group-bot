@@ -13,15 +13,23 @@ class PredictionGroupChatMessage(BaseModel):
     """
 
     id = PrimaryKeyField()
-    prediction = ForeignKeyField(Prediction, backref='prediction_group_chat_messages', on_delete='CASCADE',
-                                 on_update='CASCADE')
-    group_chat = ForeignKeyField(GroupChat, backref='prediction_group_chat_messages', on_delete='CASCADE',
-                                 on_update='CASCADE')
+    prediction = ForeignKeyField(
+        Prediction,
+        backref="prediction_group_chat_messages",
+        on_delete="CASCADE",
+        on_update="CASCADE",
+    )
+    group_chat = ForeignKeyField(
+        GroupChat,
+        backref="prediction_group_chat_messages",
+        on_delete="CASCADE",
+        on_update="CASCADE",
+    )
     message_id = BigIntegerField()
     sent_date = DateTimeField(default=datetime.now)
 
     class Meta:
-        db_table = 'prediction_group_chat_message'
+        db_table = "prediction_group_chat_message"
 
 
 PredictionGroupChatMessage.create_table()

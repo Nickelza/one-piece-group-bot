@@ -7,8 +7,13 @@ from src.model.enums.Command import Command
 from src.model.pojo.Keyboard import Keyboard
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command, user: User,
-                 inbound_keyboard: Keyboard) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    command: Command,
+    user: User,
+    inbound_keyboard: Keyboard,
+) -> None:
     """
     Manage the start screen
     :param update: The update

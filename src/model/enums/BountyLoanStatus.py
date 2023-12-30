@@ -32,7 +32,10 @@ class BountyLoanStatus(IntEnum):
         :return: The statuses
         """
 
-        return [BountyLoanStatus.AWAITING_LOANER_CONFIRMATION, BountyLoanStatus.AWAITING_BORROWER_CONFIRMATION]
+        return [
+            BountyLoanStatus.AWAITING_LOANER_CONFIRMATION,
+            BountyLoanStatus.AWAITING_BORROWER_CONFIRMATION,
+        ]
 
     @staticmethod
     def get_ended_statuses() -> list["BountyLoanStatus"]:
@@ -53,10 +56,14 @@ class BountyLoanStatus(IntEnum):
 
 
 BOUNTY_LOAN_STATUS_DESCRIPTIONS = {
-    BountyLoanStatus.AWAITING_LOANER_CONFIRMATION: phrases.BOUNTY_LOAN_STATUS_AWAITING_LOANER_CONFIRMATION,
-    BountyLoanStatus.AWAITING_BORROWER_CONFIRMATION: phrases.BOUNTY_LOAN_STATUS_AWAITING_BORROWER_CONFIRMATION,
+    BountyLoanStatus.AWAITING_LOANER_CONFIRMATION: (
+        phrases.BOUNTY_LOAN_STATUS_AWAITING_LOANER_CONFIRMATION
+    ),
+    BountyLoanStatus.AWAITING_BORROWER_CONFIRMATION: (
+        phrases.BOUNTY_LOAN_STATUS_AWAITING_BORROWER_CONFIRMATION
+    ),
     BountyLoanStatus.ACTIVE: phrases.BOUNTY_LOAN_STATUS_ACTIVE,
     BountyLoanStatus.EXPIRED: phrases.BOUNTY_LOAN_STATUS_EXPIRED,
     BountyLoanStatus.REPAID: phrases.BOUNTY_LOAN_STATUS_REPAID,
-    BountyLoanStatus.FORGIVEN: phrases.BOUNTY_LOAN_STATUS_FORGIVEN
+    BountyLoanStatus.FORGIVEN: phrases.BOUNTY_LOAN_STATUS_FORGIVEN,
 }

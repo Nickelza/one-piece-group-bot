@@ -15,8 +15,12 @@ class BountyLoan(BaseModel):
     """
     BountyLoan class
     """
-    loaner = ForeignKeyField(User, backref='bounty_loaners', on_delete='CASCADE', on_update='CASCADE')
-    borrower = ForeignKeyField(User, backref='bounty_borrowers', on_delete='CASCADE', on_update='CASCADE')
+    loaner = ForeignKeyField(
+        User, backref="bounty_loaners", on_delete="CASCADE", on_update="CASCADE"
+    )
+    borrower = ForeignKeyField(
+        User, backref="bounty_borrowers", on_delete="CASCADE", on_update="CASCADE"
+    )
     amount = BigIntegerField()
     tax_percentage = FloatField()
     repay_amount = BigIntegerField()
@@ -27,12 +31,17 @@ class BountyLoan(BaseModel):
     forgiven_date = DateTimeField(null=True)
     date = DateTimeField(default=datetime.now)
     status = SmallIntegerField(default=BountyLoanStatus.AWAITING_LOANER_CONFIRMATION)
-    group_chat = ForeignKeyField(GroupChat, null=True, backref='bounty_loan_groups_chats', on_delete='RESTRICT',
-                                 on_update='CASCADE')
+    group_chat = ForeignKeyField(
+        GroupChat,
+        null=True,
+        backref="bounty_loan_groups_chats",
+        on_delete="RESTRICT",
+        on_update="CASCADE",
+    )
     message_id = IntegerField(null=True)
 
     class Meta:
-        db_table = 'bounty_loan'
+        db_table = "bounty_loan"
 
     async def pay(self, amount: int, update: Update = None):
         from src.service.bounty_service import add_or_remove_bounty
@@ -44,7 +53,7 @@ class BountyLoan(BaseModel):
         :return: None
         """
         if amount > self.get_remaining_amount():
-            raise ValueError('Amount is greater than remaining amount')
+            raise ValueError("Amount is greater than remaining amount")
 
         self.amount_repaid += amount
         self.last_payment_date = datetime.now()
@@ -54,8 +63,9 @@ class BountyLoan(BaseModel):
 
         # Subtract from borrower's bounty
         # noinspection PyTypeChecker
-        await add_or_remove_bounty(self.borrower, amount, add=False, update=update,
-                                   raise_error_if_negative_bounty=False)
+        await add_or_remove_bounty(
+            self.borrower, amount, add=False, update=update, raise_error_if_negative_bounty=False
+        )
 
         # Add to loaner's bounty
         # noinspection PyTypeChecker
@@ -65,9 +75,12 @@ class BountyLoan(BaseModel):
         self.loaner.save()
 
         # If N days since expiration and at least double the amount repaid, set forgiven
-        if (self.status == BountyLoanStatus.EXPIRED
-                and self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int()) < datetime.now()
-                and self.amount_repaid * 2 <= self.repay_amount):
+        if (
+            self.status == BountyLoanStatus.EXPIRED
+            and self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int())
+            < datetime.now()
+            and self.amount_repaid * 2 <= self.repay_amount
+        ):
             self.forgive()
 
         self.save()

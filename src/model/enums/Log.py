@@ -20,7 +20,11 @@ from src.model.enums.BountyGiftRole import BountyGiftRole
 from src.model.enums.BountyGiftStatus import BountyGiftStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
-from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_leaderboard_user, LeaderboardRankIndex
+from src.model.enums.LeaderboardRank import (
+    LeaderboardRank,
+    get_rank_by_leaderboard_user,
+    LeaderboardRankIndex,
+)
 from src.model.enums.ListPage import ListPage
 from src.model.enums.Location import get_first_new_world
 from src.model.enums.LogType import LogType
@@ -35,7 +39,12 @@ from src.model.game.GameType import GameType
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import default_datetime_format
 from src.service.math_service import get_value_from_percentage, get_percentage_from_value
-from src.service.message_service import mention_markdown_v2, escape_valid_markdown_chars, get_message_url, get_deeplink
+from src.service.message_service import (
+    mention_markdown_v2,
+    escape_valid_markdown_chars,
+    get_message_url,
+    get_deeplink,
+)
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,
@@ -200,26 +209,31 @@ class FightLog(Log):
         self.object = Fight.get(Fight.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
         self.opponent = self.object.get_opponent(self.user)
-        self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
-            self.user_is_challenger)
+        self.effective_status: GameStatus = GameStatus(
+            self.object.status
+        ).get_status_by_challenger(self.user_is_challenger)
 
     def get_items(self, page) -> list[Fight]:
-        return (self.object
-                .select()
-                .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
-                .order_by(Fight.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
+            .order_by(Fight.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
-                .count())
+        return (
+            self.object.select()
+            .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.FIGHT_LOG_ITEM_TEXT.format(self.effective_status.get_log_emoji(),
-                                                  self.opponent.get_markdown_mention(),
-                                                  get_belly_formatted(self.object.belly))
+        return phrases.FIGHT_LOG_ITEM_TEXT.format(
+            self.effective_status.get_log_emoji(),
+            self.opponent.get_markdown_mention(),
+            get_belly_formatted(self.object.belly),
+        )
 
     def get_item_detail_text(self) -> str:
         if self.user != self.object.challenger and self.user != self.object.opponent:
@@ -233,14 +247,21 @@ class FightLog(Log):
             outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
                 (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
                 (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-                get_belly_formatted(self.object.belly))
+                get_belly_formatted(self.object.belly),
+            )
         else:
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
-                GAME_STATUS_DESCRIPTIONS[self.effective_status])
+                GAME_STATUS_DESCRIPTIONS[self.effective_status]
+            )
 
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
-            challenger_text, self.opponent.get_markdown_mention(), date, self.object.get_win_probability(self.user),
-            outcome_text, get_message_url(self.object.message_id, self.object.group_chat))
+            challenger_text,
+            self.opponent.get_markdown_mention(),
+            date,
+            self.object.get_win_probability(self.user),
+            outcome_text,
+            get_message_url(self.object.message_id, self.object.group_chat),
+        )
 
     def get_stats_text(self) -> str:
         total_fights = self.get_total_items_count()
@@ -257,8 +278,12 @@ class FightLog(Log):
             total_wins_percentage,
             total_losses,
             total_losses_percentage,
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)
+            ),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)
+            ),
             get_belly_formatted(max_won_fight.belly),
             max_won_fight.get_opponent(self.user).get_markdown_mention(),
             self.get_deeplink(max_won_fight.id),
@@ -266,7 +291,8 @@ class FightLog(Log):
             max_lost_fight.get_opponent(self.user).get_markdown_mention(),
             self.get_deeplink(max_lost_fight.id),
             most_fought_user.get_markdown_mention(),
-            most_fought_count)
+            most_fought_count,
+        )
 
 
 class DocQGameLog(Log):
@@ -286,21 +312,30 @@ class DocQGameLog(Log):
         self.object = DocQGame.get(DocQGame.id == object_id)
 
     def get_items(self, page) -> list[DocQGame]:
-        return (self.object
-                .select()
-                .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
-                .order_by(DocQGame.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(
+                (DocQGame.user == self.user)
+                & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST]))
+            )
+            .order_by(DocQGame.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where((DocQGame.user == self.user) & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST])))
-                .count())
+        return (
+            self.object.select()
+            .where(
+                (DocQGame.user == self.user)
+                & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST]))
+            )
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.DOC_Q_GAME_LOG_ITEM_TEXT.format(GameStatus(self.object.status).get_log_emoji(),
-                                                       get_belly_formatted(self.object.belly))
+        return phrases.DOC_Q_GAME_LOG_ITEM_TEXT.format(
+            GameStatus(self.object.status).get_log_emoji(), get_belly_formatted(self.object.belly)
+        )
 
     def get_item_detail_text(self) -> str:
         date = default_datetime_format(self.object.date, self.user)
@@ -309,11 +344,15 @@ class DocQGameLog(Log):
         outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
             (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
             (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-            get_belly_formatted(self.object.belly))
+            get_belly_formatted(self.object.belly),
+        )
 
         return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
-            date, correct_apple, outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat))
+            date,
+            correct_apple,
+            outcome_text,
+            get_message_url(self.object.message_id, self.object.group_chat),
+        )
 
     def get_stats_text(self) -> str:
         total_games = self.get_total_items_count()
@@ -330,12 +369,17 @@ class DocQGameLog(Log):
             total_wins_percentage,
             total_losses,
             total_losses_percentage,
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)
+            ),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)
+            ),
             get_belly_formatted(max_won_game.belly),
             self.get_deeplink(max_won_game.id),
             get_belly_formatted(max_lost_game.belly),
-            self.get_deeplink(max_lost_game.id))
+            self.get_deeplink(max_lost_game.id),
+        )
 
 
 class GameLog(Log):
@@ -357,50 +401,69 @@ class GameLog(Log):
         self.object = Game.get(Game.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
         self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
-        self.effective_status: GameStatus = GameStatus(self.object.status).get_status_by_challenger(
-            self.user_is_challenger)
+        self.effective_status: GameStatus = GameStatus(
+            self.object.status
+        ).get_status_by_challenger(self.user_is_challenger)
 
     def get_items(self, page) -> list[Game]:
-        return (self.object
-                .select()
-                .where(((Game.challenger == self.user) | (Game.opponent == self.user)) &
-                       (Game.status != GameStatus.AWAITING_SELECTION))  # Exclude because they don't have a type
-                .order_by(Game.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(
+                ((Game.challenger == self.user) | (Game.opponent == self.user))
+                & (Game.status != GameStatus.AWAITING_SELECTION)
+            )  # Exclude because they don't have a type
+            .order_by(Game.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where(((Game.challenger == self.user) | (Game.opponent == self.user)) &
-                       (Game.status != GameStatus.AWAITING_SELECTION))
-                .count())
+        return (
+            self.object.select()
+            .where(
+                ((Game.challenger == self.user) | (Game.opponent == self.user))
+                & (Game.status != GameStatus.AWAITING_SELECTION)
+            )
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.GAME_LOG_ITEM_TEXT.format(self.effective_status.get_log_emoji(),
-                                                 self.opponent.get_markdown_mention(),
-                                                 get_belly_formatted(self.object.wager))
+        return phrases.GAME_LOG_ITEM_TEXT.format(
+            self.effective_status.get_log_emoji(),
+            self.opponent.get_markdown_mention(),
+            get_belly_formatted(self.object.wager),
+        )
 
     def get_item_detail_text(self) -> str:
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = default_datetime_format(self.object.date, self.user)
-        game_name = (GameType(self.object.type).get_name() if self.object.type is not None
-                     else phrases.GAME_NOT_SELECTED_NAME)
+        game_name = (
+            GameType(self.object.type).get_name()
+            if self.object.type is not None
+            else phrases.GAME_NOT_SELECTED_NAME
+        )
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
             outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
                 (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
                 (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-                get_belly_formatted(self.object.wager))
+                get_belly_formatted(self.object.wager),
+            )
         else:
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
-                GAME_STATUS_DESCRIPTIONS[self.effective_status])
+                GAME_STATUS_DESCRIPTIONS[self.effective_status]
+            )
 
         return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
-            challenger_text, self.opponent.get_markdown_mention(), game_name, date,
-            get_belly_formatted(self.object.wager), outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat))
+            challenger_text,
+            self.opponent.get_markdown_mention(),
+            game_name,
+            date,
+            get_belly_formatted(self.object.wager),
+            outcome_text,
+            get_message_url(self.object.message_id, self.object.group_chat),
+        )
 
     def get_stats_text(self) -> str:
         total_games = self.get_total_items_count()
@@ -412,7 +475,9 @@ class GameLog(Log):
         total_draws_percentage = int(get_percentage_from_value(total_draws, total_games))
         max_won_game = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
         max_lost_game = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
-        most_challenged_user, most_challenged_count = self.object.get_most_challenged_user(self.user)
+        most_challenged_user, most_challenged_count = self.object.get_most_challenged_user(
+            self.user
+        )
         most_played_game, most_played_count = self.object.get_most_played_game(self.user)
 
         return phrases.GAME_LOG_STATS_TEXT.format(
@@ -423,8 +488,12 @@ class GameLog(Log):
             total_losses_percentage,
             total_draws,
             total_draws_percentage,
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)),
-            get_belly_formatted(self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)
+            ),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)
+            ),
             get_belly_formatted(max_won_game.wager),
             max_won_game.get_name(),
             self.get_deeplink(max_won_game.id),
@@ -434,7 +503,8 @@ class GameLog(Log):
             most_challenged_user.get_markdown_mention(),
             most_challenged_count,
             most_played_game.get_name(),
-            most_played_count)
+            most_played_count,
+        )
 
 
 class BountyGiftLog(Log):
@@ -460,55 +530,90 @@ class BountyGiftLog(Log):
         self.log_emoji = Emoji.LOG_NEGATIVE if self.user_is_sender else Emoji.LOG_POSITIVE
 
     def get_items(self, page) -> list[BountyGift]:
-        return (self.object
-                .select()
-                .where(((BountyGift.sender == self.user) | (BountyGift.receiver == self.user)) &
-                       (BountyGift.status == BountyGiftStatus.CONFIRMED))
-                .order_by(BountyGift.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(
+                ((BountyGift.sender == self.user) | (BountyGift.receiver == self.user))
+                & (BountyGift.status == BountyGiftStatus.CONFIRMED)
+            )
+            .order_by(BountyGift.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where(((BountyGift.sender == self.user) | (BountyGift.receiver == self.user)) &
-                       (BountyGift.status == BountyGiftStatus.CONFIRMED))
-                .count())
+        return (
+            self.object.select()
+            .where(
+                ((BountyGift.sender == self.user) | (BountyGift.receiver == self.user))
+                & (BountyGift.status == BountyGiftStatus.CONFIRMED)
+            )
+            .count()
+        )
 
     def get_item_text(self) -> str:
         to_text = phrases.TEXT_TO if self.user_is_sender else phrases.TEXT_FROM
-        return phrases.BOUNTY_GIFT_LOG_ITEM_TEXT.format(self.log_emoji, get_belly_formatted(self.object.amount),
-                                                        to_text, self.other_user.get_markdown_mention())
+        return phrases.BOUNTY_GIFT_LOG_ITEM_TEXT.format(
+            self.log_emoji,
+            get_belly_formatted(self.object.amount),
+            to_text,
+            self.other_user.get_markdown_mention(),
+        )
 
     def get_item_detail_text(self) -> str:
         sender_text = phrases.RECEIVER if self.user_is_sender else phrases.SENDER
         date = default_datetime_format(self.object.date, self.user)
 
-        tax_text = ''
+        tax_text = ""
         if self.user_is_sender:
-            tax_amount = int(get_value_from_percentage(self.object.amount, self.object.tax_percentage))
+            tax_amount = int(
+                get_value_from_percentage(self.object.amount, self.object.tax_percentage)
+            )
             total_amount = self.object.amount + tax_amount
-            tax_text = phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT.format(get_belly_formatted(tax_amount),
-                                                                           self.object.tax_percentage,
-                                                                           get_belly_formatted(total_amount))
+            tax_text = phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TAX_TEXT.format(
+                get_belly_formatted(tax_amount),
+                self.object.tax_percentage,
+                get_belly_formatted(total_amount),
+            )
 
         return phrases.BOUNTY_GIFT_LOG_ITEM_DETAIL_TEXT.format(
-            sender_text, self.other_user.get_markdown_mention(),
-            date, get_belly_formatted(self.object.amount), tax_text,
-            get_message_url(self.object.message_id, self.object.group_chat))
+            sender_text,
+            self.other_user.get_markdown_mention(),
+            date,
+            get_belly_formatted(self.object.amount),
+            tax_text,
+            get_message_url(self.object.message_id, self.object.group_chat),
+        )
 
     def get_stats_text(self) -> str:
-        highest_sent_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.SENDER)
-        highest_sent_user, highest_sent_amount = highest_sent_gift.receiver, highest_sent_gift.amount
-        highest_received_gift = self.object.get_highest_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)
-        highest_received_user, highest_received_amount = highest_received_gift.sender, highest_received_gift.amount
-        most_sent_user, most_sent_amount = self.object.get_top_givers_or_receiver(self.user, BountyGiftRole.SENDER)
-        most_received_user, most_received_amount = self.object.get_top_givers_or_receiver(self.user,
-                                                                                          BountyGiftRole.RECEIVER)
+        highest_sent_gift = self.object.get_highest_belly_sent_or_received(
+            self.user, BountyGiftRole.SENDER
+        )
+        highest_sent_user, highest_sent_amount = (
+            highest_sent_gift.receiver,
+            highest_sent_gift.amount,
+        )
+        highest_received_gift = self.object.get_highest_belly_sent_or_received(
+            self.user, BountyGiftRole.RECEIVER
+        )
+        highest_received_user, highest_received_amount = (
+            highest_received_gift.sender,
+            highest_received_gift.amount,
+        )
+        most_sent_user, most_sent_amount = self.object.get_top_givers_or_receiver(
+            self.user, BountyGiftRole.SENDER
+        )
+        most_received_user, most_received_amount = self.object.get_top_givers_or_receiver(
+            self.user, BountyGiftRole.RECEIVER
+        )
 
         return phrases.BOUNTY_GIFT_LOG_STATS_TEXT.format(
             self.get_total_items_count(),
-            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.SENDER)),
-            get_belly_formatted(self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)),
+            get_belly_formatted(
+                self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.SENDER)
+            ),
+            get_belly_formatted(
+                self.object.get_total_belly_sent_or_received(self.user, BountyGiftRole.RECEIVER)
+            ),
             get_belly_formatted(highest_sent_amount),
             highest_sent_user.get_markdown_name(),
             self.get_deeplink(highest_sent_gift.id),
@@ -518,7 +623,8 @@ class BountyGiftLog(Log):
             most_sent_user.get_markdown_mention(),
             get_belly_formatted(most_sent_amount),
             most_received_user.get_markdown_mention(),
-            get_belly_formatted(most_received_amount))
+            get_belly_formatted(most_received_amount),
+        )
 
 
 class LegendaryPirateLog(Log):
@@ -540,24 +646,24 @@ class LegendaryPirateLog(Log):
         self.user: User = self.object.user
 
     def get_items(self, page) -> list[LegendaryPirate]:
-        return (self.object
-                .select()
-                .order_by(LegendaryPirate.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .order_by(LegendaryPirate.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .count())
+        return self.object.select().count()
 
     def get_item_text(self) -> str:
-        return phrases.LEGENDARY_PIRATE_LOG_ITEM_TEXT.format(mention_markdown_v2(self.user.tg_user_id,
-                                                                                 self.object.epithet))
+        return phrases.LEGENDARY_PIRATE_LOG_ITEM_TEXT.format(
+            mention_markdown_v2(self.user.tg_user_id, self.object.epithet)
+        )
 
     def get_item_detail_text(self) -> str:
-        return phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT.format(self.user.get_markdown_mention(),
-                                                                    self.object.epithet,
-                                                                    self.object.reason)
+        return phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT.format(
+            self.user.get_markdown_mention(), self.object.epithet, self.object.reason
+        )
 
 
 class NewWorldPirateLog(Log):
@@ -577,37 +683,48 @@ class NewWorldPirateLog(Log):
         self.object: User = User.get(User.id == object_id)
 
     def get_items(self, page) -> list[User]:
-        return (self.object
-                .select()
-                .where((User.location_level >= get_first_new_world().level)
-                       & (User.get_is_not_arrested_statement_condition())
-                       & (self.get_is_admin_condition_stmt()))
-                .order_by(User.bounty.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(
+                (User.location_level >= get_first_new_world().level)
+                & (User.get_is_not_arrested_statement_condition())
+                & (self.get_is_admin_condition_stmt())
+            )
+            .order_by(User.bounty.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where((User.location_level >= get_first_new_world().level)
-                       & (User.get_is_not_arrested_statement_condition())
-                       & (self.get_is_admin_condition_stmt()))
-                .count())
+        return (
+            self.object.select()
+            .where(
+                (User.location_level >= get_first_new_world().level)
+                & (User.get_is_not_arrested_statement_condition())
+                & (self.get_is_admin_condition_stmt())
+            )
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.NEW_WORLD_PIRATE_LOG_ITEM_TEXT.format(self.object.get_markdown_mention(),
-                                                             get_belly_formatted(self.object.bounty))
+        return phrases.NEW_WORLD_PIRATE_LOG_ITEM_TEXT.format(
+            self.object.get_markdown_mention(), get_belly_formatted(self.object.bounty)
+        )
 
     def get_item_detail_text(self) -> str:
         if self.object.is_crew_member():
             crew: Crew = self.object.crew
             crew_text = phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_CREW_TEXT.format(
-                escape_valid_markdown_chars(crew.name))
+                escape_valid_markdown_chars(crew.name)
+            )
         else:
-            crew_text = ''
+            crew_text = ""
 
         return phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_TEXT.format(
-            self.object.get_markdown_mention(), get_belly_formatted(self.object.bounty),
-            escape_valid_markdown_chars(self.object.get_location().name), crew_text)
+            self.object.get_markdown_mention(),
+            get_belly_formatted(self.object.bounty),
+            escape_valid_markdown_chars(self.object.get_location().name),
+            crew_text,
+        )
 
 
 class LeaderboardRankLog(Log):
@@ -629,45 +746,70 @@ class LeaderboardRankLog(Log):
         self.leaderboard: Leaderboard = self.object.leaderboard
 
     def get_items(self, page) -> list[LeaderboardUser]:
-        return (self.object
-                .select().join(Leaderboard)
-                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
-                .order_by(LeaderboardUser.id.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .join(Leaderboard)
+            .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
+            .order_by(LeaderboardUser.id.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select().join(Leaderboard)
-                .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
-                .count())
+        return (
+            self.object.select()
+            .join(Leaderboard)
+            .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
+            .count()
+        )
 
     def get_item_text(self) -> str:
         return phrases.LEADERBOARD_RANK_LOG_ITEM_TEXT.format(
-            self.leaderboard.week, self.leaderboard.year,
-            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)))
+            self.leaderboard.week,
+            self.leaderboard.year,
+            LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)),
+        )
 
     def get_item_detail_text(self) -> str:
         return phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT.format(
-            self.leaderboard.week, self.leaderboard.year,
+            self.leaderboard.week,
+            self.leaderboard.year,
             self.object.position,
             LeaderboardRank.get_emoji_and_rank_message(get_rank_by_leaderboard_user(self.object)),
-            get_belly_formatted(self.object.bounty))
+            get_belly_formatted(self.object.bounty),
+        )
 
     def get_stats_text(self) -> str:
         total_appearances = self.get_total_items_count()
-        appearances_as_pirate_king = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.PIRATE_KING)
-        appearances_as_pirate_king_percentage = int(get_percentage_from_value(appearances_as_pirate_king,
-                                                                              total_appearances))
-        appearances_as_emperor = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.EMPEROR)
-        appearances_as_emperor_percentage = int(get_percentage_from_value(appearances_as_emperor, total_appearances))
-        appearances_as_first_mate = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.FIRST_MATE)
-        appearances_as_first_mate_percentage = int(get_percentage_from_value(appearances_as_first_mate,
-                                                                             total_appearances))
-        appearances_as_supernova = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.SUPERNOVA)
-        appearances_as_supernova_percentage = int(get_percentage_from_value(appearances_as_supernova,
-                                                                            total_appearances))
-        appearances_as_warlord = self.object.get_appearances_as_rank(self.user, LeaderboardRankIndex.WARLORD)
-        appearances_as_warlord_percentage = int(get_percentage_from_value(appearances_as_warlord, total_appearances))
+        appearances_as_pirate_king = self.object.get_appearances_as_rank(
+            self.user, LeaderboardRankIndex.PIRATE_KING
+        )
+        appearances_as_pirate_king_percentage = int(
+            get_percentage_from_value(appearances_as_pirate_king, total_appearances)
+        )
+        appearances_as_emperor = self.object.get_appearances_as_rank(
+            self.user, LeaderboardRankIndex.EMPEROR
+        )
+        appearances_as_emperor_percentage = int(
+            get_percentage_from_value(appearances_as_emperor, total_appearances)
+        )
+        appearances_as_first_mate = self.object.get_appearances_as_rank(
+            self.user, LeaderboardRankIndex.FIRST_MATE
+        )
+        appearances_as_first_mate_percentage = int(
+            get_percentage_from_value(appearances_as_first_mate, total_appearances)
+        )
+        appearances_as_supernova = self.object.get_appearances_as_rank(
+            self.user, LeaderboardRankIndex.SUPERNOVA
+        )
+        appearances_as_supernova_percentage = int(
+            get_percentage_from_value(appearances_as_supernova, total_appearances)
+        )
+        appearances_as_warlord = self.object.get_appearances_as_rank(
+            self.user, LeaderboardRankIndex.WARLORD
+        )
+        appearances_as_warlord_percentage = int(
+            get_percentage_from_value(appearances_as_warlord, total_appearances)
+        )
         max_by_rank: LeaderboardUser = self.object.get_max_rank_attained(self.user)
         max_by_bounty: LeaderboardUser = self.object.get_max_bounty_attained(self.user)
 
@@ -688,7 +830,8 @@ class LeaderboardRankLog(Log):
             self.get_deeplink(max_by_rank.id),
             get_belly_formatted(max_by_bounty.bounty),
             max_by_bounty.position,
-            self.get_deeplink(max_by_bounty.id))
+            self.get_deeplink(max_by_bounty.id),
+        )
 
 
 class IncomeTaxEventLog(Log):
@@ -710,21 +853,20 @@ class IncomeTaxEventLog(Log):
         self.user: User = self.object.user
 
     def get_items(self, page) -> list[IncomeTaxEvent]:
-        return (self.object
-                .select()
-                .where((IncomeTaxEvent.user == self.user))
-                .order_by(IncomeTaxEvent.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where((IncomeTaxEvent.user == self.user))
+            .order_by(IncomeTaxEvent.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where((IncomeTaxEvent.user == self.user))
-                .count())
+        return self.object.select().where((IncomeTaxEvent.user == self.user)).count()
 
     def get_item_text(self) -> str:
-        return phrases.INCOME_TAX_EVENT_LOG_ITEM_TEXT.format(self.object.get_event_type_description(),
-                                                             get_belly_formatted(self.object.amount))
+        return phrases.INCOME_TAX_EVENT_LOG_ITEM_TEXT.format(
+            self.object.get_event_type_description(), get_belly_formatted(self.object.amount)
+        )
 
     def get_item_detail_text(self) -> str:
         from src.service.message_service import get_deeplink
@@ -732,7 +874,7 @@ class IncomeTaxEventLog(Log):
         # Build url to event log
         event_type = self.object.get_event_type()
         log_type: LogType = event_type.get_log_type()
-        event_log_url = ''
+        event_log_url = ""
 
         if log_type is not None:
             event_log_url = Log.get_deeplink_by_type(log_type, self.object.event_id)
@@ -741,45 +883,61 @@ class IncomeTaxEventLog(Log):
             item_id = self.object.event_id
             match event_type:
                 case IncomeTaxEventType.BOUNTY_LOAN:
-                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                                                 screen=Screen.PVT_BOUNTY_LOAN_DETAIL)
+                    event_log_url = get_deeplink(
+                        {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                        screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+                    )
 
                 case IncomeTaxEventType.PREDICTION:
-                    event_log_url = get_deeplink({ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-                                                 screen=Screen.PVT_PREDICTION_DETAIL)
+                    event_log_url = get_deeplink(
+                        {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                        screen=Screen.PVT_PREDICTION_DETAIL,
+                    )
 
         breakdown_list = IncomeTaxBreakdown.from_string(self.object.breakdown_list)
         deduction_list = IncomeTaxDeduction.from_string(self.object.deduction_list)
         contribution_list = IncomeTaxContribution.from_string(self.object.contribution_list)
 
-        total_tax = IncomeTaxBreakdown.get_amount_with_deduction_from_list(breakdown_list, deduction_list)
-        total_tax_percentage = int(get_percentage_from_value(total_tax, self.object.amount, add_decimal=False))
+        total_tax = IncomeTaxBreakdown.get_amount_with_deduction_from_list(
+            breakdown_list, deduction_list
+        )
+        total_tax_percentage = int(
+            get_percentage_from_value(total_tax, self.object.amount, add_decimal=False)
+        )
         net_income = self.object.amount - total_tax
 
-        deduction_text = ''
+        deduction_text = ""
         if len(deduction_list) > 0:
             deduction_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION
             for deduction in deduction_list:
-                deduction_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM.format(
-                    deduction.get_description(),
-                    deduction.percentage)
+                deduction_text += (
+                    phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_DEDUCTION_ITEM.format(
+                        deduction.get_description(), deduction.percentage
+                    )
+                )
 
-        contribution_text = ''
+        contribution_text = ""
         if len(contribution_list) > 0:
             contribution_text = phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION
             for contribution in contribution_list:
-                contribution_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM.format(
-                    contribution.get_description(),
-                    get_belly_formatted(int(get_value_from_percentage(total_tax, contribution.percentage))),
-                    contribution.percentage)
+                contribution_text += (
+                    phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_CONTRIBUTION_ITEM.format(
+                        contribution.get_description(),
+                        get_belly_formatted(
+                            int(get_value_from_percentage(total_tax, contribution.percentage))
+                        ),
+                        contribution.percentage,
+                    )
+                )
 
-        breakdown_text = ''
+        breakdown_text = ""
         for breakdown in breakdown_list:
             breakdown_text += phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM.format(
                 get_belly_formatted(breakdown.taxable_amount),
                 get_belly_formatted(breakdown.taxable_amount - breakdown.tax_amount),
                 get_belly_formatted(breakdown.tax_amount),
-                int(get_percentage_from_value(breakdown.tax_amount, breakdown.taxable_amount)))
+                int(get_percentage_from_value(breakdown.tax_amount, breakdown.taxable_amount)),
+            )
 
         return phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT.format(
             self.object.get_event_type_description(),
@@ -791,7 +949,8 @@ class IncomeTaxEventLog(Log):
             total_tax_percentage,
             deduction_text,
             contribution_text,
-            breakdown_text)
+            breakdown_text,
+        )
 
 
 class WarlordLog(Log):
@@ -813,31 +972,43 @@ class WarlordLog(Log):
         self.user: User = self.object.user
 
     def get_items(self, page) -> list[Warlord]:
-        return (self.object
-                .select()
-                .where(Warlord.end_date >= datetime.now())
-                .order_by(Warlord.date.desc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .where(Warlord.end_date >= datetime.now())
+            .order_by(Warlord.date.desc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .where(Warlord.end_date >= datetime.now())
-                .order_by(Warlord.date.desc())
-                .count())
+        return (
+            self.object.select()
+            .where(Warlord.end_date >= datetime.now())
+            .order_by(Warlord.date.desc())
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.WARLORD_LOG_ITEM_TEXT.format(mention_markdown_v2(self.user.tg_user_id,
-                                                                        self.object.epithet))
+        return phrases.WARLORD_LOG_ITEM_TEXT.format(
+            mention_markdown_v2(self.user.tg_user_id, self.object.epithet)
+        )
 
     def get_item_detail_text(self) -> str:
-        return phrases.WARLORD_LOG_ITEM_DETAIL_TEXT.format(self.user.get_markdown_mention(),
-                                                           self.object.epithet,
-                                                           self.object.reason)
+        return phrases.WARLORD_LOG_ITEM_DETAIL_TEXT.format(
+            self.user.get_markdown_mention(), self.object.epithet, self.object.reason
+        )
 
 
-LOGS = [FightLog(), DocQGameLog(), GameLog(), BountyGiftLog(), LegendaryPirateLog(), NewWorldPirateLog(),
-        LeaderboardRankLog(), IncomeTaxEventLog(), WarlordLog()]
+LOGS = [
+    FightLog(),
+    DocQGameLog(),
+    GameLog(),
+    BountyGiftLog(),
+    LegendaryPirateLog(),
+    NewWorldPirateLog(),
+    LeaderboardRankLog(),
+    IncomeTaxEventLog(),
+    WarlordLog(),
+]
 
 
 def get_log_by_type(log_type: LogType) -> Log:

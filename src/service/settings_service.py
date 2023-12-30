@@ -4,7 +4,7 @@ from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 
 
-def get_current_setting_text(enabled: bool, prefix: str = '') -> str:
+def get_current_setting_text(enabled: bool, prefix: str = "") -> str:
     """
     Get the current setting text
     :param enabled: The enabled/disabled status
@@ -17,7 +17,7 @@ def get_current_setting_text(enabled: bool, prefix: str = '') -> str:
     else:
         enabled_disabled_text = phrases.CURRENT_SETTING.format(phrases.DISABLED)
 
-    return prefix + '\n\n' + enabled_disabled_text
+    return prefix + "\n\n" + enabled_disabled_text
 
 
 def get_toggle_keyboard(enabled: bool, screen: Screen, inbound_keyboard: Keyboard) -> Keyboard:
@@ -33,6 +33,6 @@ def get_toggle_keyboard(enabled: bool, screen: Screen, inbound_keyboard: Keyboar
 
     return Keyboard(
         (phrases.KEY_DISABLE if enabled else phrases.KEY_ENABLE),
-        info=default_keyboard_data | {ReservedKeyboardKeys.TOGGLE: (not enabled)},
-        screen=screen
+        info=default_keyboard_data | {ReservedKeyboardKeys.TOGGLE: not enabled},
+        screen=screen,
     )

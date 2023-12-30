@@ -12,8 +12,16 @@ class TgRestImpelDownNotification(TgRest):
     TgRestImpelDownNotification class is used to create a Telegram REST API request.
     """
 
-    def __init__(self, bot_id: str, object_type: TgRestObjectType, user_id: int, sentence_type: ImpelDownSentenceType,
-                 release_date_time: str, bounty_action: ImpelDownBountyAction, reason: str):
+    def __init__(
+        self,
+        bot_id: str,
+        object_type: TgRestObjectType,
+        user_id: int,
+        sentence_type: ImpelDownSentenceType,
+        release_date_time: str,
+        bounty_action: ImpelDownBountyAction,
+        reason: str,
+    ):
         """
         Constructor
 
@@ -28,7 +36,7 @@ class TgRestImpelDownNotification(TgRest):
 
         self.user = User.get(User.id == user_id)
         self.sentence_type: ImpelDownSentenceType = ImpelDownSentenceType(sentence_type)
-        self.release_date_time = datetime.strptime(release_date_time, '%Y-%m-%d %H:%M:%S')
+        self.release_date_time = datetime.strptime(release_date_time, "%Y-%m-%d %H:%M:%S")
         self.bounty_action: ImpelDownBountyAction = ImpelDownBountyAction(bounty_action)
         self.reason: str = reason
 
@@ -38,4 +46,7 @@ class TgRestImpelDownNotification(TgRest):
 
         :return: True if the restrictions are removed
         """
-        return self.sentence_type == ImpelDownSentenceType.NONE and self.bounty_action == ImpelDownBountyAction.NONE
+        return (
+            self.sentence_type == ImpelDownSentenceType.NONE
+            and self.bounty_action == ImpelDownBountyAction.NONE
+        )

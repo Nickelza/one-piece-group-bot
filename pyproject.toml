@@ -1,0 +1,6 @@
+[tool.black]
+line-length = 99
+# To fix long lines not being wrapped: https://github.com/psf/black/issues/1802
+# Remove after first release of black in 2024
+# https://github.com/psf/black/issues/1802#issuecomment-1580967937
+preview = true

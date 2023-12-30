@@ -23,13 +23,23 @@ def get_navigation_buttons(inbound_keyboard: Keyboard, current_page: int) -> lis
 
     # Previous page
     previous_page_button_info = {ReservedKeyboardKeys.PAGE: current_page - 1}
-    keyboard_line.append(Keyboard(phrases.PVT_KEY_PREVIOUS_PAGE, info=previous_page_button_info,
-                                  inbound_info=inbound_keyboard.info))
+    keyboard_line.append(
+        Keyboard(
+            phrases.PVT_KEY_PREVIOUS_PAGE,
+            info=previous_page_button_info,
+            inbound_info=inbound_keyboard.info,
+        )
+    )
 
     # Next page
     next_page_button_info = {ReservedKeyboardKeys.PAGE: current_page + 1}
-    keyboard_line.append(Keyboard(phrases.PVT_KEY_NEXT_PAGE, info=next_page_button_info,
-                                  inbound_info=inbound_keyboard.info))
+    keyboard_line.append(
+        Keyboard(
+            phrases.PVT_KEY_NEXT_PAGE,
+            info=next_page_button_info,
+            inbound_info=inbound_keyboard.info,
+        )
+    )
 
     return keyboard_line
 
@@ -51,7 +61,9 @@ def get_page(inbound_keyboard: Keyboard) -> int:
     return 1
 
 
-def get_items_paginate(inbound_keyboard: Keyboard, list_page: ListPage) -> [list[BaseModel], int, int, int, int]:
+def get_items_paginate(
+    inbound_keyboard: Keyboard, list_page: ListPage
+) -> [list[BaseModel], int, int, int, int]:
     """
     Get the items, page, start number, end number and the total number of items
 
@@ -81,9 +93,14 @@ def get_items_paginate(inbound_keyboard: Keyboard, list_page: ListPage) -> [list
     return items, page, start_number, end_number, total_items
 
 
-def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, item_detail_key: StrEnum,
-                            item_detail_screen: Screen, text_fill_in: str = None, text_overview: str = None
-                            ) -> tuple[str, list[list[Keyboard]]]:
+def get_items_text_keyboard(
+    inbound_keyboard: Keyboard,
+    list_page: ListPage,
+    item_detail_key: StrEnum,
+    item_detail_screen: Screen,
+    text_fill_in: str = None,
+    text_overview: str = None,
+) -> tuple[str, list[list[Keyboard]]]:
     """
     Get the items text and keyboard
 
@@ -97,10 +114,12 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
     """
 
     # Get the items
-    items, page, start_number, end_number, total_count = get_items_paginate(inbound_keyboard, list_page)
+    items, page, start_number, end_number, total_count = get_items_paginate(
+        inbound_keyboard, list_page
+    )
 
     # Get the text
-    items_text = ''
+    items_text = ""
     inline_keyboard: list[list[Keyboard]] = []
     keyboard_line: list[Keyboard] = []
 
@@ -114,8 +133,12 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
         items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
 
         button_info = {item_detail_key: item.id}
-        button = Keyboard(str(current_number), screen=item_detail_screen, info=button_info,
-                          inbound_info=inbound_keyboard.info)
+        button = Keyboard(
+            str(current_number),
+            screen=item_detail_screen,
+            info=button_info,
+            inbound_info=inbound_keyboard.info,
+        )
         keyboard_line.append(button)
 
         # Add new keyboard line if needed
@@ -136,6 +159,8 @@ def get_items_text_keyboard(inbound_keyboard: Keyboard, list_page: ListPage, ite
     if text_fill_in is None:
         items_text = list_overview.format(items_text)
     else:
-        items_text = list_overview.format(determine_article(text_fill_in), text_fill_in, items_text)
+        items_text = list_overview.format(
+            determine_article(text_fill_in), text_fill_in, items_text
+        )
 
     return items_text, inline_keyboard

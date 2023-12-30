@@ -12,19 +12,20 @@ class CrewAbility(BaseModel):
     """
     CrewAbility class
     """
+
     id = PrimaryKeyField()
-    crew = ForeignKeyField(Crew, backref='crew_abilities')
+    crew = ForeignKeyField(Crew, backref="crew_abilities")
     ability_type = SmallIntegerField()
     value = SmallIntegerField()
     acquired_method = SmallIntegerField()
-    acquired_user = ForeignKeyField(User, backref='crew_abilities_acquired', null=True)
+    acquired_user = ForeignKeyField(User, backref="crew_abilities_acquired", null=True)
     acquired_date = DateTimeField(default=datetime.datetime.now)
     expiration_date = DateTimeField(null=True)
     was_removed = BooleanField(default=False)
-    removed_user = ForeignKeyField(User, backref='crew_abilities_removed', null=True)
+    removed_user = ForeignKeyField(User, backref="crew_abilities_removed", null=True)
 
     class Meta:
-        db_table = 'crew_ability'
+        db_table = "crew_ability"
 
     def get_ability_type(self):
         """
@@ -62,8 +63,11 @@ class CrewAbility(BaseModel):
         Returns the allowed ability types
         :return: The allowed ability types
         """
-        return [ability_type for ability_type in DevilFruitAbilityType if ability_type not in
-                CrewAbility.get_not_allowed_ability_types()]
+        return [
+            ability_type
+            for ability_type in DevilFruitAbilityType
+            if ability_type not in CrewAbility.get_not_allowed_ability_types()
+        ]
 
 
 CrewAbility.create_table()

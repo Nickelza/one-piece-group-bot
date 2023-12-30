@@ -16,10 +16,13 @@ class LogReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    TYPE = 'a'
+
+    TYPE = "a"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the logs screen
     :param update: The update
@@ -35,8 +38,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     for log_type, button_text in logs_sorted.items():
         log: Log = get_log_by_type(log_type)
         if not log.only_by_boss or user_is_boss(user):
-            inline_keyboard.append([Keyboard(button_text, screen=Screen.PVT_LOGS_TYPE,
-                                             info={LogReservedKeys.TYPE: log_type})])
+            inline_keyboard.append([
+                Keyboard(
+                    button_text, screen=Screen.PVT_LOGS_TYPE, info={LogReservedKeys.TYPE: log_type}
+                )
+            ])
 
-    await full_message_send(context, phrases.PVT_TXT_LOGS, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard)
+    await full_message_send(
+        context,
+        phrases.PVT_TXT_LOGS,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+    )

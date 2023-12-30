@@ -8,7 +8,9 @@ from src.model.User import User
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, target_user: User, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, target_user: User, group_chat: GroupChat
+) -> None:
     """
     Manage the speak screen
     :param update: The update object

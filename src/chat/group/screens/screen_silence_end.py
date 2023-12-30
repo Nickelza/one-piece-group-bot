@@ -7,7 +7,9 @@ from src.model.UnmutedUser import UnmutedUser
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat: GroupChat) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, group_chat: GroupChat
+) -> None:
     """
     Manage the silence end screen
     :param update: The update object

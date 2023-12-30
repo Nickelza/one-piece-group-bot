@@ -28,9 +28,11 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
     """
 
     # Create connection
-    connection: Reddit = asyncpraw.Reddit(client_id=Env.REDDIT_CLIENT_ID.get(),
-                                          client_secret=Env.REDDIT_CLIENT_SECRET.get(),
-                                          user_agent=Env.REDDIT_USER_AGENT.get())
+    connection: Reddit = asyncpraw.Reddit(
+        client_id=Env.REDDIT_CLIENT_ID.get(),
+        client_secret=Env.REDDIT_CLIENT_SECRET.get(),
+        user_agent=Env.REDDIT_USER_AGENT.get(),
+    )
 
     # Get first 10 hot posts
     subreddit: Subreddit = await connection.subreddit(subreddit_name)
@@ -59,20 +61,25 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
         author_url = c.REDDIT_USER_URL_PREFIX + post.author.name
         subreddit_url = c.REDDIT_SUBREDDIT_URL_PREFIX + post.subreddit.display_name
 
-        caption = '[{}]({})'.format(escape_valid_markdown_chars(post.title), post.shortlink)
-        caption += '\n\n'
-        caption += '_Posted by [u/{}]({}) on [r/{}]({})_' \
-            .format(escape_valid_markdown_chars(author_name), author_url,
-                    escape_valid_markdown_chars(post.subreddit.display_name), subreddit_url)
+        caption = "[{}]({})".format(escape_valid_markdown_chars(post.title), post.shortlink)
+        caption += "\n\n"
+        caption += "_Posted by [u/{}]({}) on [r/{}]({})_".format(
+            escape_valid_markdown_chars(author_name),
+            author_url,
+            escape_valid_markdown_chars(post.subreddit.display_name),
+            subreddit_url,
+        )
 
         # Send in group_chat
         try:
             # Send only media
-            if post.url.startswith('https://i.redd.it') or post.url.startswith('https://v.redd.it'):
+            if post.url.startswith("https://i.redd.it") or post.url.startswith(
+                "https://v.redd.it"
+            ):
                 saved_media: SavedMedia = SavedMedia()
-                if post.url.startswith('https://v.redd.it'):
+                if post.url.startswith("https://v.redd.it"):
                     saved_media.type = SavedMediaType.VIDEO
-                elif post.url.endswith('.gif'):
+                elif post.url.endswith(".gif"):
                     saved_media.type = SavedMediaType.ANIMATION
                 else:
                     saved_media.type = SavedMediaType.PHOTO
@@ -82,33 +89,42 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
                     # If video, download to local
                     if saved_media.type == SavedMediaType.VIDEO:
                         try:
-                            url = post.media['reddit_video']['fallback_url']
+                            url = post.media["reddit_video"]["fallback_url"]
                             url = url.split("?")[0]
-                            saved_media.media_id = open(download_temp_file(url), 'rb')
+                            saved_media.media_id = open(download_temp_file(url), "rb")
                         except KeyError:
-                            logging.error('Reddit post {} has no video'.format(post.shortlink))
+                            logging.error("Reddit post {} has no video".format(post.shortlink))
                             continue
 
                     # Send media
-                    message: Message = await full_media_send(context, saved_media, caption=caption,
-                                                             chat_id=Env.OPD_GROUP_ID.get_int())
+                    message: Message = await full_media_send(
+                        context, saved_media, caption=caption, chat_id=Env.OPD_GROUP_ID.get_int()
+                    )
                 except BadRequest as exceptionBadRequest:
                     # Resize if type is image
                     if saved_media.type == SavedMediaType.PHOTO:
-                        logging.error('Error sending image {}. Trying to resize it.'.format(post.url))
+                        logging.error(
+                            "Error sending image {}. Trying to resize it.".format(post.url)
+                        )
 
                         # Try resending with a smaller image
-                        image_path = compress_image(post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY)
-                        saved_media.media_id = open(image_path, 'rb')
-                        message: Message = await full_media_send(context, saved_media, caption=caption,
-                                                                 chat_id=Env.OPD_GROUP_ID.get_int())
+                        image_path = compress_image(
+                            post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY
+                        )
+                        saved_media.media_id = open(image_path, "rb")
+                        message: Message = await full_media_send(
+                            context,
+                            saved_media,
+                            caption=caption,
+                            chat_id=Env.OPD_GROUP_ID.get_int(),
+                        )
 
                         try:
                             # Delete the temporary image
                             os.remove(image_path)
                         except OSError:
                             # Ignore, will be deleted by auto-cleanup timer
-                            logging.warning('Error deleting temporary image {}'.format(image_path))
+                            logging.warning("Error deleting temporary image {}".format(image_path))
                             pass
                     else:
                         raise exceptionBadRequest
@@ -121,15 +137,19 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
 
                 # If saved posts > 20, delete all but the last 20
                 if RedditGroupPost.select().count() > 20:
-                    last_n_posts = list(RedditGroupPost.select().order_by(RedditGroupPost.id.desc()).limit(20))
-                    (RedditGroupPost.delete()
-                     .where(RedditGroupPost.id.not_in([p.id for p in last_n_posts]))
-                     .execute())
+                    last_n_posts = list(
+                        RedditGroupPost.select().order_by(RedditGroupPost.id.desc()).limit(20)
+                    )
+                    (
+                        RedditGroupPost.delete()
+                        .where(RedditGroupPost.id.not_in([p.id for p in last_n_posts]))
+                        .execute()
+                    )
 
                 break
         except BadRequest as bad_request:  # Try again if BadRequest
-            logging.error('Error sending reddit post {}: {}'.format(post.shortlink, bad_request))
+            logging.error("Error sending reddit post {}: {}".format(post.shortlink, bad_request))
             continue
         except Exception as e:  # Stop if any other error
-            logging.error('Error sending reddit post {}: {}'.format(post.shortlink, e))
+            logging.error("Error sending reddit post {}: {}".format(post.shortlink, e))
             raise e

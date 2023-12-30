@@ -11,14 +11,15 @@ class CrewMemberChestContribution(BaseModel):
     """
     CrewMemberChestContribution class
     """
+
     id = PrimaryKeyField()
-    crew = ForeignKeyField(Crew, backref='crew_member_chest_contributions')
-    user = ForeignKeyField(User, backref='crew_member_chest_contributions')
+    crew = ForeignKeyField(Crew, backref="crew_member_chest_contributions")
+    user = ForeignKeyField(User, backref="crew_member_chest_contributions")
     amount = BigIntegerField(default=0)
     last_contribution_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
-        db_table = 'crew_member_chest_contribution'
+        db_table = "crew_member_chest_contribution"
 
 
 CrewMemberChestContribution.create_table()

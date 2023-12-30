@@ -22,7 +22,9 @@ def compress_image(path: str, quality: int) -> str:
         path = download_temp_file(path)
 
     image = Image.open(path)
-    compressed_image_path = os.path.join(os.path.dirname(path), f"compressed_{os.path.basename(path)}")
+    compressed_image_path = os.path.join(
+        os.path.dirname(path), f"compressed_{os.path.basename(path)}"
+    )
     image.save(compressed_image_path, quality=quality, optimize=True)
 
     return compressed_image_path

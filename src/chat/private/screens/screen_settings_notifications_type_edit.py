@@ -14,11 +14,13 @@ from src.service.settings_service import get_current_setting_text, get_toggle_ke
 
 
 class NotificationTypeEditReservedKeys(StrEnum):
-    CATEGORY = 'a'
-    TYPE = 'b'
+    CATEGORY = "a"
+    TYPE = "b"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the notification type edit screen
     :param update: The update
@@ -30,15 +32,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     # Get the notification
     notification: Notification = get_notification_by_type(
-        NotificationType(inbound_keyboard.info[NotificationTypeEditReservedKeys.TYPE]))
+        NotificationType(inbound_keyboard.info[NotificationTypeEditReservedKeys.TYPE])
+    )
 
     # Toggle set
     if ReservedKeyboardKeys.TOGGLE in inbound_keyboard.info:
 
         # Turn on - Delete record from DisabledNotification
         if inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]:
-            DisabledNotification.delete().where((DisabledNotification.user == user) &
-                                                (DisabledNotification.type == notification.type)).execute()
+            DisabledNotification.delete().where(
+                (DisabledNotification.user == user)
+                & (DisabledNotification.type == notification.type)
+            ).execute()
         else:  # Turn off - Create record in DisabledNotification
             disabled_notification = DisabledNotification()
             disabled_notification.user = user
@@ -47,9 +52,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
 
     # Get toggle keyboard
     enabled = is_notification_enabled(user, notification)
-    inline_keyboard: list[list[Keyboard]] = [[get_toggle_keyboard(enabled, inbound_keyboard.screen, inbound_keyboard)]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [get_toggle_keyboard(enabled, inbound_keyboard.screen, inbound_keyboard)]
+    ]
 
     ot_text = get_current_setting_text(enabled, notification.description)
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[NotificationTypeEditReservedKeys.TYPE])
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[NotificationTypeEditReservedKeys.TYPE],
+    )

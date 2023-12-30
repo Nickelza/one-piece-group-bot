@@ -12,8 +12,8 @@ class Error:
         self.source = source
 
     def __str__(self):
-        result = f'Error ' + self.source + str(self.code) + ': ' + self.message
-        result += '. Please forward this message to an Admin.'
+        result = f"Error " + self.source + str(self.code) + ": " + self.message
+        result += ". Please forward this message to an Admin."
 
         return result
 

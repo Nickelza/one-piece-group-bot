@@ -22,8 +22,9 @@ class PredictionRemoveBetReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    PREDICTION_ID = 'a'
-    PREDICTION_OPTION_ID = 'b'
+
+    PREDICTION_ID = "a"
+    PREDICTION_OPTION_ID = "b"
 
 
 class PredictionRemoveBetListPage(ListPage):
@@ -43,29 +44,44 @@ class PredictionRemoveBetListPage(ListPage):
     def get_items(self, page) -> list[PredictionOption]:
         """Get prediction options that are bet on by the user"""
 
-        return (self.object
-                .select()
-                .join(PredictionOptionUser)
-                .where((PredictionOptionUser.prediction == self.prediction) & (PredictionOptionUser.user == self.user))
-                .order_by(PredictionOption.number.asc())
-                .paginate(page, c.STANDARD_LIST_SIZE))
+        return (
+            self.object.select()
+            .join(PredictionOptionUser)
+            .where(
+                (PredictionOptionUser.prediction == self.prediction)
+                & (PredictionOptionUser.user == self.user)
+            )
+            .order_by(PredictionOption.number.asc())
+            .paginate(page, c.STANDARD_LIST_SIZE)
+        )
 
     def get_total_items_count(self) -> int:
-        return (self.object
-                .select()
-                .join(PredictionOptionUser)
-                .where((PredictionOptionUser.prediction == self.prediction) & (PredictionOptionUser.user == self.user))
-                .count())
+        return (
+            self.object.select()
+            .join(PredictionOptionUser)
+            .where(
+                (PredictionOptionUser.prediction == self.prediction)
+                & (PredictionOptionUser.user == self.user)
+            )
+            .count()
+        )
 
     def get_item_text(self) -> str:
-        return phrases.PREDICTION_REMOVE_BET_TEXT.format(escape_valid_markdown_chars(self.object.option))
+        return phrases.PREDICTION_REMOVE_BET_TEXT.format(
+            escape_valid_markdown_chars(self.object.option)
+        )
 
     def get_item_detail_text(self) -> str:
         """No detail screen"""
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User,
-                 called_from_remove_confirm: bool = False) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    inbound_keyboard: Keyboard,
+    user: User,
+    called_from_remove_confirm: bool = False,
+) -> None:
     """
     Manage the prediction detail screen
     :param update: The update
@@ -77,11 +93,16 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     :return: None
     """
 
-    from src.chat.private.screens.screen_prediction_detail_remove_bet_confirm import validate_and_delete
+    from src.chat.private.screens.screen_prediction_detail_remove_bet_confirm import (
+        validate_and_delete,
+    )
 
     prediction: Prediction = Prediction.get(
-        Prediction.id == inbound_keyboard.get(PredictionRemoveBetReservedKeys.PREDICTION_ID))
-    prediction_remove_bet_list_page: PredictionRemoveBetListPage = PredictionRemoveBetListPage(prediction)
+        Prediction.id == inbound_keyboard.get(PredictionRemoveBetReservedKeys.PREDICTION_ID)
+    )
+    prediction_remove_bet_list_page: PredictionRemoveBetListPage = PredictionRemoveBetListPage(
+        prediction
+    )
     prediction_remove_bet_list_page.user = user
 
     if called_from_remove_confirm:
@@ -100,8 +121,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         return
 
     ot_text, items_keyboard = get_items_text_keyboard(
-        inbound_keyboard, prediction_remove_bet_list_page, PredictionRemoveBetReservedKeys.PREDICTION_OPTION_ID,
-        Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM, text_overview=phrases.PREDICTION_REMOVE_BET_LIST_OVERVIEW)
+        inbound_keyboard,
+        prediction_remove_bet_list_page,
+        PredictionRemoveBetReservedKeys.PREDICTION_OPTION_ID,
+        Screen.PVT_PREDICTION_DETAIL_REMOVE_BET_CONFIRM,
+        text_overview=phrases.PREDICTION_REMOVE_BET_LIST_OVERVIEW,
+    )
 
-    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=items_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+    )

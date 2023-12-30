@@ -7,8 +7,11 @@ import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_timezone_from_location, get_user_timezone_and_offset_text, \
-    default_datetime_format
+from src.service.date_service import (
+    get_timezone_from_location,
+    get_user_timezone_and_offset_text,
+    default_datetime_format,
+)
 from src.service.message_service import full_message_send
 
 
@@ -20,10 +23,13 @@ class TimezoneReservedKeys(StrEnum):
     """
     The reserved keys for the timezone setting screen
     """
-    RESET = 'a'
+
+    RESET = "a"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the timezone setting screen
     :param update: The update
@@ -42,9 +48,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
             timezone = None
 
         if timezone is None:
-            await full_message_send(context, phrases.PVT_TXT_SETTINGS_TIMEZONE_INVALID, update=update,
-                                    inbound_keyboard=inbound_keyboard,
-                                    previous_screens=user.get_private_screen_list()[:-1])
+            await full_message_send(
+                context,
+                phrases.PVT_TXT_SETTINGS_TIMEZONE_INVALID,
+                update=update,
+                inbound_keyboard=inbound_keyboard,
+                previous_screens=user.get_private_screen_list()[:-1],
+            )
             return
 
         user.timezone = timezone
@@ -56,12 +66,22 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     inline_keyboard: list[list[Keyboard]] = []
     if user.timezone is not None:
         # Reset timezone key
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_SETTINGS_TIMEZONE_RESET,
-                                         screen=Screen.PVT_SETTINGS_TIMEZONE,
-                                         info={TimezoneReservedKeys.RESET: 1})])
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_SETTINGS_TIMEZONE_RESET,
+                screen=Screen.PVT_SETTINGS_TIMEZONE,
+                info={TimezoneReservedKeys.RESET: 1},
+            )
+        ])
 
-    await full_message_send(context, get_text(user), update=update, keyboard=inline_keyboard,
-                            inbound_keyboard=inbound_keyboard, previous_screens=user.get_private_screen_list()[:-1])
+    await full_message_send(
+        context,
+        get_text(user),
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        previous_screens=user.get_private_screen_list()[:-1],
+    )
 
 
 def get_text(user: User) -> str:
@@ -73,4 +93,5 @@ def get_text(user: User) -> str:
 
     timezone_text, offset_text = get_user_timezone_and_offset_text(user)
     return phrases.PVT_TXT_SETTINGS_TIMEZONE.format(
-        default_datetime_format(user.get_current_time()), timezone_text, offset_text)
+        default_datetime_format(user.get_current_time()), timezone_text, offset_text
+    )

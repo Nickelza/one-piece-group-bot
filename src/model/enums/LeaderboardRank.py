@@ -22,7 +22,11 @@ class LeaderboardRankIndex(IntEnum):
         :return: True if the rank is special
         """
 
-        return self in [LeaderboardRankIndex.ADMIN, LeaderboardRankIndex.LEGENDARY_PIRATE, LeaderboardRankIndex.WARLORD]
+        return self in [
+            LeaderboardRankIndex.ADMIN,
+            LeaderboardRankIndex.LEGENDARY_PIRATE,
+            LeaderboardRankIndex.WARLORD,
+        ]
 
 
 RANK_ORDER = [
@@ -33,7 +37,7 @@ RANK_ORDER = [
     LeaderboardRankIndex.EMPEROR,
     LeaderboardRankIndex.FIRST_MATE,
     LeaderboardRankIndex.SUPERNOVA,
-    LeaderboardRankIndex.ROOKIE
+    LeaderboardRankIndex.ROOKIE,
 ]
 
 
@@ -42,8 +46,17 @@ class LeaderboardRank:
     Class for leaderboard ranks.
     """
 
-    def __init__(self, index: int, title: str, emoji: str, leaderboard_start: int | None, leaderboard_end: int | None,
-                 bounty_poster_limit: int, max_win_probability: float, min_win_probability: float) -> None:
+    def __init__(
+        self,
+        index: int,
+        title: str,
+        emoji: str,
+        leaderboard_start: int | None,
+        leaderboard_end: int | None,
+        bounty_poster_limit: int,
+        max_win_probability: float,
+        min_win_probability: float,
+    ) -> None:
         """
         Constructor for leaderboard ranks
         :param index: Index of the leaderboard rank. Lower index means higher rank
@@ -70,59 +83,117 @@ class LeaderboardRank:
         :return: Emoji and rank message
         """
 
-        return self.emoji + ' ' + self.title
+        return self.emoji + " " + self.title
 
-    def is_higher(self, other: 'LeaderboardRank') -> bool:
+    def is_higher(self, other: "LeaderboardRank") -> bool:
         """
         Checks if current rank  higher than the other rank
         :param other: The other rank
         :return: True if the rank is higher than the other rank
         """
-        return RANK_ORDER.index(LeaderboardRankIndex(self.index)) < RANK_ORDER.index(LeaderboardRankIndex(other.index))
+        return RANK_ORDER.index(LeaderboardRankIndex(self.index)) < RANK_ORDER.index(
+            LeaderboardRankIndex(other.index)
+        )
 
 
-PIRATE_KING = LeaderboardRank(LeaderboardRankIndex.PIRATE_KING, 'Pirate King', Emoji.LEADERBOARD_PIRATE_KING, 1, 1,
-                              Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
-                              Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
-                              Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
+PIRATE_KING = LeaderboardRank(
+    LeaderboardRankIndex.PIRATE_KING,
+    "Pirate King",
+    Emoji.LEADERBOARD_PIRATE_KING,
+    1,
+    1,
+    Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float(),
+)
 
-EMPEROR = LeaderboardRank(LeaderboardRankIndex.EMPEROR, 'Emperor', Emoji.LEADERBOARD_EMPEROR, 2, 5,
-                          Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int(),
-                          Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
-                          Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
+EMPEROR = LeaderboardRank(
+    LeaderboardRankIndex.EMPEROR,
+    "Emperor",
+    Emoji.LEADERBOARD_EMPEROR,
+    2,
+    5,
+    Env.BOUNTY_POSTER_LIMIT_EMPEROR.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float(),
+)
 
-FIRST_MATE = LeaderboardRank(LeaderboardRankIndex.FIRST_MATE, 'First Mate', Emoji.LEADERBOARD_FIRST_MATE, 6, 9,
-                             Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int(),
-                             Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
-                             Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float())
+FIRST_MATE = LeaderboardRank(
+    LeaderboardRankIndex.FIRST_MATE,
+    "First Mate",
+    Emoji.LEADERBOARD_FIRST_MATE,
+    6,
+    9,
+    Env.BOUNTY_POSTER_LIMIT_FIRST_MATE.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_FIRST_MATE.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_FIRST_MATE.get_float(),
+)
 
-SUPERNOVA = LeaderboardRank(LeaderboardRankIndex.SUPERNOVA, 'Supernova', Emoji.LEADERBOARD_SUPERNOVA, 10, 20,
-                            Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int(),
-                            Env.FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA.get_float(),
-                            Env.FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA.get_float())
+SUPERNOVA = LeaderboardRank(
+    LeaderboardRankIndex.SUPERNOVA,
+    "Supernova",
+    Emoji.LEADERBOARD_SUPERNOVA,
+    10,
+    20,
+    Env.BOUNTY_POSTER_LIMIT_SUPERNOVA.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_SUPERNOVA.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA.get_float(),
+)
 
-ROOKIE = LeaderboardRank(LeaderboardRankIndex.ROOKIE, 'Rookie', Emoji.LEADERBOARD_ROOKIE, 21, -1,
-                         Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int(),
-                         Env.FIGHT_MAX_WIN_PROBABILITY_ROOKIE.get_float(),
-                         Env.FIGHT_MIN_WIN_PROBABILITY_ROOKIE.get_float())
+ROOKIE = LeaderboardRank(
+    LeaderboardRankIndex.ROOKIE,
+    "Rookie",
+    Emoji.LEADERBOARD_ROOKIE,
+    21,
+    -1,
+    Env.BOUNTY_POSTER_LIMIT_ROOKIE.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_ROOKIE.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_ROOKIE.get_float(),
+)
 
-ADMIN = LeaderboardRank(LeaderboardRankIndex.ADMIN, 'Veteran', Emoji.LEADERBOARD_ADMIN, None, None,
-                        Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
-                        Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
-                        Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
+ADMIN = LeaderboardRank(
+    LeaderboardRankIndex.ADMIN,
+    "Veteran",
+    Emoji.LEADERBOARD_ADMIN,
+    None,
+    None,
+    Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float(),
+)
 
-LEGENDARY_PIRATE = LeaderboardRank(LeaderboardRankIndex.LEGENDARY_PIRATE, 'Legendary Pirate',
-                                   Emoji.LEADERBOARD_LEGENDARY_PIRATE, None, None,
-                                   Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
-                                   Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
-                                   Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float())
+LEGENDARY_PIRATE = LeaderboardRank(
+    LeaderboardRankIndex.LEGENDARY_PIRATE,
+    "Legendary Pirate",
+    Emoji.LEADERBOARD_LEGENDARY_PIRATE,
+    None,
+    None,
+    Env.BOUNTY_POSTER_LIMIT_PIRATE_KING.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_PIRATE_KING.get_float(),
+)
 
-WARLORD = LeaderboardRank(LeaderboardRankIndex.WARLORD, 'Warlord', Emoji.LEADERBOARD_WARLORD, None, None,
-                          Env.BOUNTY_POSTER_LIMIT_WARLORD.get_int(),
-                          Env.FIGHT_MAX_WIN_PROBABILITY_EMPEROR.get_float(),
-                          Env.FIGHT_MIN_WIN_PROBABILITY_EMPEROR.get_float())
+WARLORD = LeaderboardRank(
+    LeaderboardRankIndex.WARLORD,
+    "Warlord",
+    Emoji.LEADERBOARD_WARLORD,
+    None,
+    None,
+    Env.BOUNTY_POSTER_LIMIT_WARLORD.get_int(),
+    Env.FIGHT_MAX_WIN_PROBABILITY_EMPEROR.get_float(),
+    Env.FIGHT_MIN_WIN_PROBABILITY_EMPEROR.get_float(),
+)
 
-LEADERBOARD_RANKS = [PIRATE_KING, EMPEROR, FIRST_MATE, SUPERNOVA, ROOKIE, ADMIN, LEGENDARY_PIRATE, WARLORD]
+LEADERBOARD_RANKS = [
+    PIRATE_KING,
+    EMPEROR,
+    FIRST_MATE,
+    SUPERNOVA,
+    ROOKIE,
+    ADMIN,
+    LEGENDARY_PIRATE,
+    WARLORD,
+]
 
 
 def get_rank_by_index(index: int) -> LeaderboardRank:
@@ -135,7 +206,7 @@ def get_rank_by_index(index: int) -> LeaderboardRank:
         if index == rank.index:
             return rank
 
-    raise ValueError('Invalid index')
+    raise ValueError("Invalid index")
 
 
 def get_rank_by_leaderboard_user(leaderboard_user: LeaderboardUser | None) -> LeaderboardRank:
@@ -157,11 +228,12 @@ def get_rank_by_leaderboard_position(leaderboard_position: int) -> LeaderboardRa
     :return: Leaderboard rank
     """
     for rank in LEADERBOARD_RANKS:
-        if rank.leaderboard_start <= leaderboard_position <= rank.leaderboard_end \
-                or (leaderboard_position >= rank.leaderboard_start and rank.leaderboard_end == -1):
+        if rank.leaderboard_start <= leaderboard_position <= rank.leaderboard_end or (
+            leaderboard_position >= rank.leaderboard_start and rank.leaderboard_end == -1
+        ):
             return rank
 
-    raise ValueError('Invalid leaderboard position')
+    raise ValueError("Invalid leaderboard position")
 
 
 def get_special_rank(user: User) -> LeaderboardRank | None:

@@ -20,8 +20,9 @@ from src.service.message_service import full_message_send, escape_valid_markdown
 from src.service.string_service import get_unit_value_from_string
 
 
-def get_next_run(cron_expression: str, start_datetime: datetime = None, previous_fire_time: datetime = None
-                 ) -> datetime:
+def get_next_run(
+    cron_expression: str, start_datetime: datetime = None, previous_fire_time: datetime = None
+) -> datetime:
     """
     Get the next run time
     :param cron_expression: The cron expression
@@ -48,48 +49,48 @@ def convert_seconds_to_duration(seconds: int) -> str:
     hours = int((seconds % 86400) // 3600)
     minutes = int((seconds % 3600) // 60)
 
-    result = ''
+    result = ""
     if weeks > 0:
         if weeks == 1:
-            result += f'{weeks} week'
+            result += f"{weeks} week"
         else:
-            result += f'{weeks} weeks'
+            result += f"{weeks} weeks"
 
     # Show days only in last week
     if days > 0 and weeks == 0:
         if days == 1:
-            result += f'{days} day'
+            result += f"{days} day"
         else:
-            result += f'{days} days'
+            result += f"{days} days"
 
     # Show hours only in last 2 days
     if hours > 0 and days <= 1 and weeks == 0:
         if len(result) > 0:
-            result += ' '
+            result += " "
         if hours == 1:
-            result += f'{hours} hour'
+            result += f"{hours} hour"
         else:
-            result += f'{hours} hours'
+            result += f"{hours} hours"
 
     # Show minutes only in last 24 hours
     if minutes > 0 and hours < 24 and days == 0 and weeks == 0:
         if len(result) > 0:
-            result += ' '
+            result += " "
         if minutes > 0 and seconds > 60:
             if minutes == 1:
-                result += f'{minutes} minute'
+                result += f"{minutes} minute"
             else:
-                result += f'{minutes} minutes'
+                result += f"{minutes} minutes"
 
     # Show seconds only in last minute
     if seconds >= 0 and minutes <= 1 and hours == 0 and days == 0 and weeks == 0:
         if len(result) > 0:
-            result += ' '
+            result += " "
         if seconds > 0:
             if seconds == 1:
-                result += f'{seconds} second'
+                result += f"{seconds} second"
             else:
-                result += f'{seconds} seconds'
+                result += f"{seconds} seconds"
 
     return result
 
@@ -118,7 +119,9 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
     return convert_seconds_to_duration((next_run - start_datetime).total_seconds())
 
 
-def get_remaining_duration(end_datetime: datetime.datetime, start_datetime: datetime.datetime = None) -> str:
+def get_remaining_duration(
+    end_datetime: datetime.datetime, start_datetime: datetime.datetime = None
+) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
@@ -147,10 +150,14 @@ def get_elapsed_duration(start_datetime: datetime) -> str:
 
     # Remove offset awareness from start_datetime
     start_datetime = start_datetime.replace(tzinfo=None)
-    return convert_seconds_to_duration(int((datetime.datetime.now() - start_datetime).total_seconds()))
+    return convert_seconds_to_duration(
+        int((datetime.datetime.now() - start_datetime).total_seconds())
+    )
 
 
-def get_remaining_time_from_next_cron(cron_expression: str, start_datetime: datetime = None) -> str:
+def get_remaining_time_from_next_cron(
+    cron_expression: str, start_datetime: datetime = None
+) -> str:
     """
     Get the remaining time until the next cron run
     :param cron_expression: The cron expression
@@ -239,7 +246,8 @@ def get_random_time_between(start_datetime: datetime, end_datetime: datetime) ->
     """
 
     return start_datetime + datetime.timedelta(
-        seconds=random.randint(0, int((end_datetime - start_datetime).total_seconds())))
+        seconds=random.randint(0, int((end_datetime - start_datetime).total_seconds()))
+    )
 
 
 def get_random_time_between_by_cron(cron_expression: str) -> datetime:
@@ -249,7 +257,9 @@ def get_random_time_between_by_cron(cron_expression: str) -> datetime:
     :return: The random datetime
     """
 
-    return get_random_time_between(datetime.datetime.now(datetime.timezone.utc), get_next_run(cron_expression))
+    return get_random_time_between(
+        datetime.datetime.now(datetime.timezone.utc), get_next_run(cron_expression)
+    )
 
 
 def get_random_time_between_by_hours(hours: int) -> datetime:
@@ -269,7 +279,9 @@ def get_random_time_between_by_seconds(seconds: int) -> datetime:
     :return: The random datetime
     """
 
-    return get_random_time_between(datetime.datetime.now(), get_datetime_in_future_seconds(seconds))
+    return get_random_time_between(
+        datetime.datetime.now(), get_datetime_in_future_seconds(seconds)
+    )
 
 
 def default_datetime_format(date_time: datetime, user: User = None) -> str:
@@ -367,10 +379,15 @@ def get_duration_from_string(duration: str) -> int:
         return get_unit_value_from_string(duration, c.DURATION_UNIT_TO_SECONDS)
 
 
-async def validate_duration(update: Update, context: ContextTypes.DEFAULT_TYPE, duration: str,
-                            add_delete_button: bool = True, inbound_keyboard: Keyboard = None,
-                            previous_screens: list[Screen] = None, previous_screen_list_keyboard_info: dict = None
-                            ) -> bool:
+async def validate_duration(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    duration: str,
+    add_delete_button: bool = True,
+    inbound_keyboard: Keyboard = None,
+    previous_screens: list[Screen] = None,
+    previous_screen_list_keyboard_info: dict = None,
+) -> bool:
     """
     Validates the duration
     :param update: Telegram update
@@ -387,14 +404,21 @@ async def validate_duration(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         get_duration_from_string(duration)
         return True
     except ValueError:
-        await full_message_send(context, phrases.ACTION_INVALID_DURATION, update=update,
-                                add_delete_button=add_delete_button, inbound_keyboard=inbound_keyboard,
-                                previous_screens=previous_screens,
-                                previous_screen_list_keyboard_info=previous_screen_list_keyboard_info)
+        await full_message_send(
+            context,
+            phrases.ACTION_INVALID_DURATION,
+            update=update,
+            add_delete_button=add_delete_button,
+            inbound_keyboard=inbound_keyboard,
+            previous_screens=previous_screens,
+            previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
+        )
         return False
 
 
-def datetime_is_before(dt: datetime, starting_date: datetime = None, tz: pytz.tzinfo = None) -> bool:
+def datetime_is_before(
+    dt: datetime, starting_date: datetime = None, tz: pytz.tzinfo = None
+) -> bool:
     """
     Check if the datetime is before the current datetime
     :param dt: The datetime
@@ -455,8 +479,11 @@ def get_user_timezone_and_offset_text(user: User) -> (str, str):
     :return: The user timezone and offset text
     """
 
-    timezone_text = escape_valid_markdown_chars(
-        user.timezone) if user.timezone is not None else phrases.PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN
+    timezone_text = (
+        escape_valid_markdown_chars(user.timezone)
+        if user.timezone is not None
+        else phrases.PVT_TXT_SETTINGS_TIMEZONE_UNKNOWN
+    )
     offset_text = get_utc_offset(user.timezone)
 
     return timezone_text, offset_text

@@ -5,6 +5,7 @@ class DevilFruitCategory(IntEnum):
     """
     Enum for the category of a devil fruit
     """
+
     ZOAN = 3
     ANCIENT_ZOAN = 4
     MYTHICAL_ZOAN = 5
@@ -21,5 +22,5 @@ class DevilFruitCategory(IntEnum):
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_MAP = {
     DevilFruitCategory.ZOAN: "Zoan",
     DevilFruitCategory.ANCIENT_ZOAN: "Ancient Zoan",
-    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan"
+    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan",
 }

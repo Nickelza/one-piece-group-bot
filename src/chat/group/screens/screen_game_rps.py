@@ -27,12 +27,17 @@ class GameRPSReservedKeys(StrEnum):
     The reserved keys for this screen
     """
 
-    GAME_ID = 'a'
-    CHOICE = 'b'
+    GAME_ID = "a"
+    CHOICE = "b"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 game: Game = None) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    game: Game = None,
+) -> None:
     """
     Manage the Rock Paper Scissors game screen
     :param update: The update object
@@ -63,8 +68,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         game.save()
 
         # Alert showing choice
-        await full_message_send(context, get_choice_text(rps_choice), update=update, answer_callback=True,
-                                show_alert=True)
+        await full_message_send(
+            context,
+            get_choice_text(rps_choice),
+            update=update,
+            answer_callback=True,
+            show_alert=True,
+        )
 
         # Update turn
         rock_paper_scissors.set_turn()
@@ -76,18 +86,26 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
         user.should_update_model = False
 
         # Send result
-        await full_media_send(context, caption=get_text(game, rock_paper_scissors), update=update,
-                              keyboard=get_outbound_keyboard(game),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
-                              edit_only_caption_and_keyboard=True)
+        await full_media_send(
+            context,
+            caption=get_text(game, rock_paper_scissors),
+            update=update,
+            keyboard=get_outbound_keyboard(game),
+            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            edit_only_caption_and_keyboard=True,
+        )
         return
 
     # Send message
     try:
-        await full_media_send(context, caption=get_text(game, rock_paper_scissors), update=update,
-                              keyboard=get_outbound_keyboard(game),
-                              authorized_users=game_service.get_game_authorized_tg_user_ids(game),
-                              saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS)
+        await full_media_send(
+            context,
+            caption=get_text(game, rock_paper_scissors),
+            update=update,
+            keyboard=get_outbound_keyboard(game),
+            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
+        )
 
         pass
         # Notify user turn. After message send to avoid double notification in case user changes choice
@@ -107,14 +125,29 @@ def get_outbound_keyboard(game: Game) -> list[list[Keyboard]]:
     outbound_keyboard: list[list[Keyboard]] = []
 
     keyboard_line: list[Keyboard] = []
-    button_info_rock = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.ROCK}
-    keyboard_line.append(Keyboard(Emoji.ROCK, info=button_info_rock, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
-    button_info_paper = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.PAPER}
-    keyboard_line.append(Keyboard(Emoji.PAPER, info=button_info_paper,
-                                  screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
-    button_info_scissors = {GameRPSReservedKeys.GAME_ID: game.id, GameRPSReservedKeys.CHOICE: RPSChoice.SCISSORS}
-    keyboard_line.append(Keyboard(Emoji.SCISSORS, info=button_info_scissors,
-                                  screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME))
+    button_info_rock = {
+        GameRPSReservedKeys.GAME_ID: game.id,
+        GameRPSReservedKeys.CHOICE: RPSChoice.ROCK,
+    }
+    keyboard_line.append(
+        Keyboard(Emoji.ROCK, info=button_info_rock, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME)
+    )
+    button_info_paper = {
+        GameRPSReservedKeys.GAME_ID: game.id,
+        GameRPSReservedKeys.CHOICE: RPSChoice.PAPER,
+    }
+    keyboard_line.append(
+        Keyboard(Emoji.PAPER, info=button_info_paper, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME)
+    )
+    button_info_scissors = {
+        GameRPSReservedKeys.GAME_ID: game.id,
+        GameRPSReservedKeys.CHOICE: RPSChoice.SCISSORS,
+    }
+    keyboard_line.append(
+        Keyboard(
+            Emoji.SCISSORS, info=button_info_scissors, screen=Screen.GRP_ROCK_PAPER_SCISSORS_GAME
+        )
+    )
     outbound_keyboard.append(keyboard_line)
 
     return outbound_keyboard
@@ -154,28 +187,37 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors) -> str:
         else:
             added_ot_text = phrases.GAME_RESULT_DRAW
 
-        choices_text = phrases.ROCK_PAPER_SCISSORS_CHOICES.format(mention_markdown_user(game.challenger),
-                                                                  get_choice_emoji(
-                                                                      rock_paper_scissors.challenger_choice),
-                                                                  mention_markdown_user(game.opponent),
-                                                                  get_choice_emoji(rock_paper_scissors.opponent_choice))
+        choices_text = phrases.ROCK_PAPER_SCISSORS_CHOICES.format(
+            mention_markdown_user(game.challenger),
+            get_choice_emoji(rock_paper_scissors.challenger_choice),
+            mention_markdown_user(game.opponent),
+            get_choice_emoji(rock_paper_scissors.opponent_choice),
+        )
         added_ot_text = choices_text + added_ot_text
     else:
-        if rock_paper_scissors.challenger_choice == RPSChoice.NONE and \
-                rock_paper_scissors.opponent_choice == RPSChoice.NONE:
+        if (
+            rock_paper_scissors.challenger_choice == RPSChoice.NONE
+            and rock_paper_scissors.opponent_choice == RPSChoice.NONE
+        ):
             added_ot_text = phrases.GAME_STATUS_AWAITING_CHOICE
         elif rock_paper_scissors.challenger_choice == RPSChoice.NONE:
-            added_ot_text = phrases.GAME_STATUS_AWAITING_USER_CHOICE.format(mention_markdown_user(game.challenger))
+            added_ot_text = phrases.GAME_STATUS_AWAITING_USER_CHOICE.format(
+                mention_markdown_user(game.challenger)
+            )
         else:
-            added_ot_text = phrases.GAME_STATUS_AWAITING_USER_CHOICE.format(mention_markdown_user(game.opponent))
+            added_ot_text = phrases.GAME_STATUS_AWAITING_USER_CHOICE.format(
+                mention_markdown_user(game.opponent)
+            )
 
-    return phrases.GAME_TEXT.format(phrases.ROCK_PAPER_SCISSORS_GAME_NAME,
-                                    phrases.ROCK_PAPER_SCISSORS_GAME_DESCRIPTION,
-                                    mention_markdown_user(game.challenger),
-                                    mention_markdown_user(game.opponent),
-                                    get_belly_formatted(game.wager),
-                                    '',
-                                    added_ot_text)
+    return phrases.GAME_TEXT.format(
+        phrases.ROCK_PAPER_SCISSORS_GAME_NAME,
+        phrases.ROCK_PAPER_SCISSORS_GAME_DESCRIPTION,
+        mention_markdown_user(game.challenger),
+        mention_markdown_user(game.opponent),
+        get_belly_formatted(game.wager),
+        "",
+        added_ot_text,
+    )
 
 
 def get_choice_text(rps_choice: RPSChoice) -> str:
@@ -187,14 +229,20 @@ def get_choice_text(rps_choice: RPSChoice) -> str:
 
     match rps_choice:
         case RPSChoice.ROCK:
-            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(phrases.ROCK_PAPER_SCISSORS_CHOICE_ROCK)
+            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(
+                phrases.ROCK_PAPER_SCISSORS_CHOICE_ROCK
+            )
         case RPSChoice.PAPER:
-            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(phrases.ROCK_PAPER_SCISSORS_CHOICE_PAPER)
+            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(
+                phrases.ROCK_PAPER_SCISSORS_CHOICE_PAPER
+            )
         case RPSChoice.SCISSORS:
-            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(phrases.ROCK_PAPER_SCISSORS_CHOICE_SCISSORS)
+            return phrases.ROCK_PAPER_SCISSORS_CHOICE_ALERT.format(
+                phrases.ROCK_PAPER_SCISSORS_CHOICE_SCISSORS
+            )
 
         case _:
-            raise ValueError(f'Unknown Rock Paper Scissors choice: {rps_choice}')
+            raise ValueError(f"Unknown Rock Paper Scissors choice: {rps_choice}")
 
 
 def get_choice_emoji(rps_choice: RPSChoice) -> str:
@@ -213,4 +261,4 @@ def get_choice_emoji(rps_choice: RPSChoice) -> str:
             return Emoji.SCISSORS
 
         case _:
-            raise ValueError(f'Unknown Rock Paper Scissors choice: {rps_choice}')
+            raise ValueError(f"Unknown Rock Paper Scissors choice: {rps_choice}")

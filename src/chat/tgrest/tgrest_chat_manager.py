@@ -4,9 +4,15 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_prediction
-from src.chat.tgrest.screens.screen_send_private_message import manage as manage_screen_send_private_message
-from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced, DevilFruitAwardedNotification, \
-    WarlordAppointmentNotification, WarlordRevocationNotification
+from src.chat.tgrest.screens.screen_send_private_message import (
+    manage as manage_screen_send_private_message,
+)
+from src.model.enums.Notification import (
+    ImpelDownNotificationRestrictionPlaced,
+    DevilFruitAwardedNotification,
+    WarlordAppointmentNotification,
+    WarlordRevocationNotification,
+)
 from src.model.enums.Notification import ImpelDownNotificationRestrictionRemoved
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.error.CustomException import DevilFruitValidationException
@@ -37,8 +43,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             # Try parsing object
             try:
                 # If starts with "Error" or "Request", ignore
-                if (update.effective_message.text.startswith("Error")
-                        or update.effective_message.text.startswith("Request")):
+                if update.effective_message.text.startswith(
+                    "Error"
+                ) or update.effective_message.text.startswith("Request"):
                     return
             except AttributeError:
                 return
@@ -70,22 +77,31 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         tg_rest_impel_down_notification.sentence_type,
                         tg_rest_impel_down_notification.release_date_time,
                         tg_rest_impel_down_notification.bounty_action,
-                        tg_rest_impel_down_notification.reason)
+                        tg_rest_impel_down_notification.reason,
+                    )
 
-                await send_notification(context, tg_rest_impel_down_notification.user, notification)
+                await send_notification(
+                    context, tg_rest_impel_down_notification.user, notification
+                )
 
             case TgRestObjectType.DEVIL_FRUIT_AWARD:
                 tg_rest_dfa = TgRestDevilFruitAward(**tg_rest_dict)
 
                 # Give devil fruit to user
                 try:
-                    give_devil_fruit_to_user(tg_rest_dfa.devil_fruit, tg_rest_dfa.user, DevilFruitSource.ADMIN,
-                                             reason=tg_rest_dfa.reason)
+                    give_devil_fruit_to_user(
+                        tg_rest_dfa.devil_fruit,
+                        tg_rest_dfa.user,
+                        DevilFruitSource.ADMIN,
+                        reason=tg_rest_dfa.reason,
+                    )
                 except DevilFruitValidationException as e:
                     raise TgRestException(str(e))
 
                 # Send notification
-                notification = DevilFruitAwardedNotification(tg_rest_dfa.devil_fruit, tg_rest_dfa.reason)
+                notification = DevilFruitAwardedNotification(
+                    tg_rest_dfa.devil_fruit, tg_rest_dfa.reason
+                )
                 await send_notification(context, tg_rest_dfa.user, notification)
 
             case TgRestObjectType.WARLORD_APPOINTMENT:
@@ -106,5 +122,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 raise TgRestException("Unknown object type")
         await full_message_send(context, "Request received", update=update, quote=True)
     except TgRestException as e:
-        await full_message_send(context, "Error: " + escape_valid_markdown_chars(e.message), update=update, quote=True)
+        await full_message_send(
+            context, "Error: " + escape_valid_markdown_chars(e.message), update=update, quote=True
+        )
         return

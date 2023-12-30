@@ -20,5 +20,9 @@ class DevilFruitStatus(IntEnum):
         Get the statuses that are released
         :return: The statuses that are released
         """
-        return [DevilFruitStatus.SCHEDULED, DevilFruitStatus.RELEASED, DevilFruitStatus.COLLECTED,
-                DevilFruitStatus.EATEN]
+        return [
+            DevilFruitStatus.SCHEDULED,
+            DevilFruitStatus.RELEASED,
+            DevilFruitStatus.COLLECTED,
+            DevilFruitStatus.EATEN,
+        ]

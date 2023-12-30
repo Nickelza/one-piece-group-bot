@@ -8,12 +8,15 @@ class GroupChatEnabledFeaturePin(BaseModel):
     """
     GroupChat Enabled Feature Pin class
     """
+
     id = PrimaryKeyField()
-    group_chat = ForeignKeyField(GroupChat, backref='enabled_features_pin', on_delete='CASCADE', on_update='CASCADE')
+    group_chat = ForeignKeyField(
+        GroupChat, backref="enabled_features_pin", on_delete="CASCADE", on_update="CASCADE"
+    )
     feature = SmallIntegerField()
 
     class Meta:
-        db_table = 'group_chat_enabled_feature_pin'
+        db_table = "group_chat_enabled_feature_pin"
 
 
 GroupChatEnabledFeaturePin.create_table()

@@ -6,8 +6,12 @@ from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice a
 
 
 class RockPaperScissors:
-    def __init__(self, game_turn: GameTurn = GameTurn.CHALLENGER, challenger_choice: RPSChoice = RPSChoice.NONE,
-                 opponent_choice: RPSChoice = RPSChoice.NONE):
+    def __init__(
+        self,
+        game_turn: GameTurn = GameTurn.CHALLENGER,
+        challenger_choice: RPSChoice = RPSChoice.NONE,
+        opponent_choice: RPSChoice = RPSChoice.NONE,
+    ):
         self.game_turn = game_turn
         self.challenger_choice: RPSChoice = challenger_choice
         self.opponent_choice: RPSChoice = opponent_choice
@@ -38,7 +42,10 @@ class RockPaperScissors:
         if self.challenger_choice == RPSChoice.PAPER and self.opponent_choice == RPSChoice.ROCK:
             return GameOutcome.CHALLENGER_WON
 
-        if self.challenger_choice == RPSChoice.SCISSORS and self.opponent_choice == RPSChoice.PAPER:
+        if (
+            self.challenger_choice == RPSChoice.SCISSORS
+            and self.opponent_choice == RPSChoice.PAPER
+        ):
             return GameOutcome.CHALLENGER_WON
 
         return GameOutcome.OPPONENT_WON
@@ -49,11 +56,15 @@ class RockPaperScissors:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
+        )
 
     def set_turn(self):
         """
         Sets the turn
         """
 
-        self.game_turn = GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
+        self.game_turn = (
+            GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
+        )

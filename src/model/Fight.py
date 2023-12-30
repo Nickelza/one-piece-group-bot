@@ -12,19 +12,29 @@ class Fight(BaseModel):
     """
     Fight class
     """
+
     id = PrimaryKeyField()
-    challenger = ForeignKeyField(User, backref='fight_challengers', on_delete='CASCADE', on_update='CASCADE')
-    opponent = ForeignKeyField(User, backref='fight_opponents', on_delete='CASCADE', on_update='CASCADE')
+    challenger = ForeignKeyField(
+        User, backref="fight_challengers", on_delete="CASCADE", on_update="CASCADE"
+    )
+    opponent = ForeignKeyField(
+        User, backref="fight_opponents", on_delete="CASCADE", on_update="CASCADE"
+    )
     win_probability = FloatField()
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.IN_PROGRESS)
-    group_chat = ForeignKeyField(GroupChat, null=True, backref='fight_groups_chats', on_delete='RESTRICT',
-                                 on_update='CASCADE')
+    group_chat = ForeignKeyField(
+        GroupChat,
+        null=True,
+        backref="fight_groups_chats",
+        on_delete="RESTRICT",
+        on_update="CASCADE",
+    )
     message_id = IntegerField(null=True)
     belly = BigIntegerField(null=True)
 
     class Meta:
-        db_table = 'fight'
+        db_table = "fight"
 
     def get_win_probability(self, user: User) -> float:
         """
@@ -48,9 +58,13 @@ class Fight(BaseModel):
         return: The total amount of wins or losses
         """
 
-        return (Fight().select().where((Fight.challenger == user) & (Fight.status == status)).count()
-                + Fight().select().where((Fight.opponent == user) & (Fight.status == status.get_opposite_status()))
-                .count())
+        return (
+            Fight().select().where((Fight.challenger == user) & (Fight.status == status)).count()
+            + Fight()
+            .select()
+            .where((Fight.opponent == user) & (Fight.status == status.get_opposite_status()))
+            .count()
+        )
 
     @staticmethod
     def get_total_belly_won_or_lost(user: User, status: GameStatus) -> int:
@@ -61,13 +75,18 @@ class Fight(BaseModel):
         return: The total amount of belly
         """
 
-        return ((Fight.select(fn.SUM(Fight.belly)).where((Fight.challenger == user)
-                                                         & (Fight.status == status))).scalar()
-                + (Fight.select(fn.SUM(Fight.belly)).where((Fight.opponent == user)
-                                                           & (Fight.status == status.get_opposite_status()))).scalar())
+        return (
+            Fight.select(fn.SUM(Fight.belly)).where(
+                (Fight.challenger == user) & (Fight.status == status)
+            )
+        ).scalar() + (
+            Fight.select(fn.SUM(Fight.belly)).where(
+                (Fight.opponent == user) & (Fight.status == status.get_opposite_status())
+            )
+        ).scalar()
 
     @staticmethod
-    def get_max_won_or_lost(user: User, status: GameStatus) -> 'Fight':
+    def get_max_won_or_lost(user: User, status: GameStatus) -> "Fight":
         """
         Get the fight with the max belly won or lost
         param user: The user
@@ -76,17 +95,22 @@ class Fight(BaseModel):
         """
 
         # Max fight as challenger
-        max_fight_as_challenger: Fight = (Fight().select()
-                                          .where((Fight.challenger == user) & (Fight.status == status))
-                                          .order_by(Fight.belly.desc())
-                                          .first())
+        max_fight_as_challenger: Fight = (
+            Fight()
+            .select()
+            .where((Fight.challenger == user) & (Fight.status == status))
+            .order_by(Fight.belly.desc())
+            .first()
+        )
 
         # Max fight as opponent
-        max_fight_as_opponent: Fight = (Fight().select()
-                                        .where((Fight.opponent == user)
-                                               & (Fight.status == status.get_opposite_status()))
-                                        .order_by(Fight.belly.desc())
-                                        .first())
+        max_fight_as_opponent: Fight = (
+            Fight()
+            .select()
+            .where((Fight.opponent == user) & (Fight.status == status.get_opposite_status()))
+            .order_by(Fight.belly.desc())
+            .first()
+        )
 
         # The max fight
         return max(max_fight_as_challenger, max_fight_as_opponent, key=lambda f: f.belly)
@@ -99,18 +123,24 @@ class Fight(BaseModel):
         return: The most fought user and the amount of fights
         """
 
-        most_fought_user_as_challenger = (Fight().select(Fight.opponent, fn.COUNT(Fight.opponent).alias('count'))
-                                          .where(Fight.challenger == user)
-                                          .group_by(Fight.opponent)
-                                          .order_by(SQL('count').desc())
-                                          .first())
+        most_fought_user_as_challenger = (
+            Fight()
+            .select(Fight.opponent, fn.COUNT(Fight.opponent).alias("count"))
+            .where(Fight.challenger == user)
+            .group_by(Fight.opponent)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_challenger = most_fought_user_as_challenger.count
 
-        most_fought_user_as_opponent = (Fight().select(Fight.challenger, fn.COUNT(Fight.challenger).alias('count'))
-                                        .where(Fight.opponent == user)
-                                        .group_by(Fight.challenger)
-                                        .order_by(SQL('count').desc())
-                                        .first())
+        most_fought_user_as_opponent = (
+            Fight()
+            .select(Fight.challenger, fn.COUNT(Fight.challenger).alias("count"))
+            .where(Fight.opponent == user)
+            .group_by(Fight.challenger)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_opponent = most_fought_user_as_opponent.count
 
         if amount_as_opponent > amount_as_challenger:

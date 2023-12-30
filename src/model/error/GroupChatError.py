@@ -11,7 +11,9 @@ class GroupChatError(Error):
     SAVED_MEDIA_NOT_FOUND = Error(3, phrases.SAVED_MEDIA_NOT_FOUND, source)
     DOC_Q_GAME_NOT_FOUND = Error(4, phrases.DOC_Q_GAME_NOT_FOUND, source)
     KEYBOARD_NOT_FOUND = Error(5, phrases.KEYBOARD_NOT_FOUND, source)
-    INVALID_CHANGE_REGION_REQUEST = Error(6, phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST, source)
+    INVALID_CHANGE_REGION_REQUEST = Error(
+        6, phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST, source
+    )
     FIGHT_NOT_FOUND = Error(7, phrases.FIGHT_NOT_FOUND, source)
     FIGHT_OPPONENT_NOT_FOUND = Error(8, phrases.FIGHT_OPPONENT_NOT_FOUND, source)
     GAME_NOT_FOUND = Error(9, phrases.GAME_NOT_FOUND, source)

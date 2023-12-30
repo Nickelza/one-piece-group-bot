@@ -5,7 +5,7 @@ from resources import phrases
 
 
 class IncomeTaxContributionType(StrEnum):
-    CREW_CHEST = 'crew_chest'
+    CREW_CHEST = "crew_chest"
 
 
 class IncomeTaxContribution:
@@ -14,7 +14,7 @@ class IncomeTaxContribution:
         self.percentage = percentage
 
     @staticmethod
-    def from_string(contribution_list: str) -> list['IncomeTaxContribution']:
+    def from_string(contribution_list: str) -> list["IncomeTaxContribution"]:
         """
         Get the tax contribution list from a string
         :param contribution_list: The string

@@ -11,9 +11,16 @@ from src.service.message_service import full_message_send
 from src.service.notification_service import send_notification
 
 
-async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None, update: Update = None,
-                          cap_to_paradise: bool = True, region: Region = None, requested_by_user: bool = False,
-                          can_scale_down: bool = False, should_passive_update: bool = False) -> None:
+async def update_location(
+    user: User,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    update: Update = None,
+    cap_to_paradise: bool = True,
+    region: Region = None,
+    requested_by_user: bool = False,
+    can_scale_down: bool = False,
+    should_passive_update: bool = False,
+) -> None:
     """
     Refresh the location of the user
     :param user: The user object
@@ -27,7 +34,9 @@ async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None,
     :return: The user object
     """
 
-    from src.chat.group.screens.screen_change_region import send_proposal as send_new_world_proposal
+    from src.chat.group.screens.screen_change_region import (
+        send_proposal as send_new_world_proposal,
+    )
 
     # Get location that corresponds to the user current bounty
     new_location: Location = Location.get_by_bounty(user.get_max_bounty())
@@ -37,29 +46,45 @@ async def update_location(user: User, context: ContextTypes.DEFAULT_TYPE = None,
         effective_location: Location = new_location
 
         # Cap the location level to Paradise max
-        if region is Region.PARADISE or (Location.is_paradise_by_level(user.location_level)
-                                         and Location.is_new_world_by_level(new_location.level) and cap_to_paradise):
+        if region is Region.PARADISE or (
+            Location.is_paradise_by_level(user.location_level)
+            and Location.is_new_world_by_level(new_location.level)
+            and cap_to_paradise
+        ):
             effective_location: Location = Location.get_last_paradise()
 
         if user.location_level != effective_location.level and not should_passive_update:
-            location_update_notification: LocationUpdateNotification = LocationUpdateNotification(user,
-                                                                                                  effective_location)
+            location_update_notification: LocationUpdateNotification = LocationUpdateNotification(
+                user, effective_location
+            )
             if requested_by_user:  # Update after region change, edit group_chat message
-                await full_message_send(context, location_update_notification.build(), update=update,
-                                        disable_web_page_preview=False, add_delete_button=True)
-            elif Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool():  # Update after bounty change, send notification
+                await full_message_send(
+                    context,
+                    location_update_notification.build(),
+                    update=update,
+                    disable_web_page_preview=False,
+                    add_delete_button=True,
+                )
+            elif (
+                Env.SEND_MESSAGE_LOCATION_UPDATE.get_bool()
+            ):  # Update after bounty change, send notification
                 await send_notification(context, user, location_update_notification)
 
         # Update user location
         user.location_level = effective_location.level
 
     # Move to New World proposal
-    if (not should_passive_update  # Update not from user interaction in group_chat
-            and new_location.region == Region.NEW_WORLD  # Location relative to bounty is in New World
-            and user.location_level == Location.get_last_paradise().level  # Capped location is last of Paradise
-            and user.should_propose_new_world  # User has not been proposed to move to New World yet
-            and (requested_by_user  # User requested the update
-                 or Env.SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL.get_bool())):  # Auto proposal enabled
+    if (
+        not should_passive_update  # Update not from user interaction in group_chat
+        and new_location.region == Region.NEW_WORLD  # Location relative to bounty is in New World
+        and user.location_level
+        == Location.get_last_paradise().level  # Capped location is last of Paradise
+        and user.should_propose_new_world  # User has not been proposed to move to New World yet
+        and (
+            requested_by_user  # User requested the update
+            or Env.SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL.get_bool()
+        )
+    ):  # Auto proposal enabled
         await send_new_world_proposal(update, context, user, Region.NEW_WORLD)
         user.should_propose_new_world = False
 
@@ -78,7 +103,9 @@ def reset_location() -> None:
     User.update(location_level=case_stmt).execute()
 
     # Reset new world proposal
-    User.update(should_propose_new_world=True).where(User.should_propose_new_world is False).execute()
+    User.update(should_propose_new_world=True).where(
+        User.should_propose_new_world is False
+    ).execute()
 
 
 def reset_can_change_region() -> None:

@@ -13,7 +13,9 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the devil_fruit detail screen
     :param update: The update
@@ -26,7 +28,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     devil_fruit_list_page = DevilFruitListPage()
 
     devil_fruit_list_page.user = user
-    devil_fruit_list_page.set_object(inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
+    devil_fruit_list_page.set_object(
+        inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
+    )
 
     devil_fruit: DevilFruit = devil_fruit_list_page.object
     inline_keyboard: list[list[Keyboard]] = []
@@ -40,9 +44,13 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     # Show eat and trade buttons if the user have not eaten the Devil Fruit
     if devil_fruit_status is DevilFruitStatus.COLLECTED:
         # Eat button
-        inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
-                                         screen=Screen.PVT_DEVIL_FRUIT_DETAIL_EAT,
-                                         info=button_info)])
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
+                screen=Screen.PVT_DEVIL_FRUIT_DETAIL_EAT,
+                info=button_info,
+            )
+        ])
 
         # Trade button
         # inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
@@ -50,9 +58,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         #                                  info=button_info)])
 
     # Discard button
-    inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
-                                     screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
-                                     info=button_info)])
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
+            screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
+            info=button_info,
+        )
+    ])
 
-    await full_message_send(context, devil_fruit_list_page.get_item_detail_text(), update=update,
-                            keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard)
+    await full_message_send(
+        context,
+        devil_fruit_list_page.get_item_detail_text(),
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+    )

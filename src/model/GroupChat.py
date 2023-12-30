@@ -10,10 +10,13 @@ class GroupChat(BaseModel):
     """
     Group Chat class
     """
+
     id = PrimaryKeyField()
-    group = ForeignKeyField(Group, backref='group_chats', on_delete='CASCADE', on_update='CASCADE')
+    group = ForeignKeyField(Group, backref="group_chats", on_delete="CASCADE", on_update="CASCADE")
     tg_topic_id = IntegerField(null=True)  # Nullable for general group_chat
-    tg_topic_name = CharField(null=True)  # Only for topics, it's the first name of the topic (even if it's changed)
+    tg_topic_name = CharField(
+        null=True
+    )  # Only for topics, it's the first name of the topic (even if it's changed)
     last_message_date = DateTimeField(default=datetime.datetime.now)
     last_error_date = DateTimeField(null=True)
     last_error_message = CharField(null=True)
@@ -21,7 +24,7 @@ class GroupChat(BaseModel):
     is_muted = BooleanField(default=False)
 
     class Meta:
-        db_table = 'group_chat'
+        db_table = "group_chat"
 
     def get_full_name(self):
         """Get the full name of the group chat"""

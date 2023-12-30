@@ -5,19 +5,35 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
-from src.model.game.russianroulette.RussianRouletteChamberStatus import RussianRouletteChamberStatus as RRChamberStatus
+from src.model.game.russianroulette.RussianRouletteChamberStatus import (
+    RussianRouletteChamberStatus as RRChamberStatus,
+)
 
 
 class RussianRoulette:
-    def __init__(self, rows: int = 3, columns: int = 3, cylinder: list = None, bullet_x: int = -1, bullet_y: int = -1,
-                 game_turn: GameTurn = GameTurn.CHALLENGER):
+    def __init__(
+        self,
+        rows: int = 3,
+        columns: int = 3,
+        cylinder: list = None,
+        bullet_x: int = -1,
+        bullet_y: int = -1,
+        game_turn: GameTurn = GameTurn.CHALLENGER,
+    ):
         self.rows = rows
         self.columns = columns
-        self.cylinder: list[[RRChamberStatus]] = cylinder if cylinder is not None else [
-            [RRChamberStatus.NOT_FIRED for _ in range(self.columns)] for _ in range(self.rows)]
+        self.cylinder: list[[RRChamberStatus]] = (
+            cylinder
+            if cylinder is not None
+            else [
+                [RRChamberStatus.NOT_FIRED for _ in range(self.columns)] for _ in range(self.rows)
+            ]
+        )
         self.bullet_x: int = bullet_x
         self.bullet_y: int = bullet_y
-        self.game_turn: GameTurn = GameTurn(game_turn) if not isinstance(game_turn, GameTurn) else game_turn
+        self.game_turn: GameTurn = (
+            GameTurn(game_turn) if not isinstance(game_turn, GameTurn) else game_turn
+        )
 
         # Initialize only on first creation, not json loading
         if self.bullet_x == -1 or self.bullet_y == -1:
@@ -50,7 +66,9 @@ class RussianRoulette:
         not_fired_count = 0
         for row_index, row in enumerate(self.cylinder):
             for chamber_index, chamber in enumerate(row):
-                if chamber == RRChamberStatus.NOT_FIRED and not self.is_chamber_center(row_index, chamber_index):
+                if chamber == RRChamberStatus.NOT_FIRED and not self.is_chamber_center(
+                    row_index, chamber_index
+                ):
                     not_fired_count += 1
 
         return not_fired_count == 1
@@ -84,7 +102,9 @@ class RussianRoulette:
         Sets the turn
         """
 
-        self.game_turn = GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
+        self.game_turn = (
+            GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
+        )
 
     def get_outcome(self) -> GameOutcome:
         """

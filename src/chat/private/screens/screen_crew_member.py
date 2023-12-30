@@ -43,7 +43,9 @@ class CrewMemberListPage(ListPage):
         if self.object.crew_role is None:
             return ot_text
 
-        return ot_text + phrases.CREW_MEMBER_ITEM_ROLE.format(self.object.get_crew_role_description())
+        return ot_text + phrases.CREW_MEMBER_ITEM_ROLE.format(
+            self.object.get_crew_role_description()
+        )
 
     def get_item_detail_text(self) -> str:
 
@@ -56,8 +58,10 @@ class CrewMemberListPage(ListPage):
 
         # Get chest contribution and relative order
         chest_contributions = crew.get_chest_contributions()  # Already ordered by contribution
-        member_contribution = CrewMemberChestContribution.get_or_none((CrewMemberChestContribution.crew == crew) &
-                                                                      (CrewMemberChestContribution.user == member))
+        member_contribution = CrewMemberChestContribution.get_or_none(
+            (CrewMemberChestContribution.crew == crew)
+            & (CrewMemberChestContribution.user == member)
+        )
         member_contribution_amount = 0
         if member_contribution is None:
             member_chest_order = len(chest_contributions) + 1
@@ -66,15 +70,21 @@ class CrewMemberListPage(ListPage):
             member_chest_order = list(chest_contributions).index(member_contribution) + 1
 
         ot_text = phrases.CREW_MEMBER_ITEM_DETAIL.format(
-            member.get_markdown_mention(), member.get_bounty_formatted(),
-            default_date_format(member.crew_join_date, member), member_join_order,
-            get_belly_formatted(member_contribution_amount), member_chest_order,
-            (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO))
+            member.get_markdown_mention(),
+            member.get_bounty_formatted(),
+            default_date_format(member.crew_join_date, member),
+            member_join_order,
+            get_belly_formatted(member_contribution_amount),
+            member_chest_order,
+            (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO),
+        )
 
         return ot_text
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the Crew member screen
     :param update: The update object
@@ -89,8 +99,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     crew_member_list_page.crew = user.crew
 
     ot_text, items_keyboard = get_items_text_keyboard(
-        inbound_keyboard, crew_member_list_page, ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
-        Screen.PVT_CREW_MEMBER_DETAIL, text_fill_in=phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN)
+        inbound_keyboard,
+        crew_member_list_page,
+        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
+        Screen.PVT_CREW_MEMBER_DETAIL,
+        text_fill_in=phrases.CREW_MEMBER_ITEM_TEXT_FILL_IN,
+    )
 
-    await full_message_send(context, ot_text, update=update, keyboard=items_keyboard, inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE])
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=items_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+    )

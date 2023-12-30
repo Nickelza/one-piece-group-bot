@@ -11,12 +11,22 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member, get_crew
-from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send, \
-    full_message_or_media_send_or_edit, escape_valid_markdown_chars
+from src.service.message_service import (
+    mention_markdown_user,
+    get_yes_no_keyboard,
+    full_media_send,
+    full_message_or_media_send_or_edit,
+    escape_valid_markdown_chars,
+)
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, inbound_keyboard: Keyboard,
-                 target_user: User) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    target_user: User,
+) -> None:
     """
     Manage the Crew invite screen
     :param update: The update object
@@ -28,7 +38,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     """
 
     try:
-        crew: Crew = get_crew(user=user, inbound_keyboard=inbound_keyboard, crew_id_key=CrewReservedKeys.CREW_ID)
+        crew: Crew = get_crew(
+            user=user, inbound_keyboard=inbound_keyboard, crew_id_key=CrewReservedKeys.CREW_ID
+        )
 
         # Invite to a Crew
         if inbound_keyboard is None:
@@ -37,11 +49,18 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
 
         await keyboard_interaction(update, context, user, crew, inbound_keyboard)
     except CrewValidationException as cve:
-        await full_message_or_media_send_or_edit(context, cve.message, update=update, add_delete_button=True)
+        await full_message_or_media_send_or_edit(
+            context, cve.message, update=update, add_delete_button=True
+        )
 
 
-async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, captain: User, target_user: User,
-                       crew: Crew) -> None:
+async def send_request(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    captain: User,
+    target_user: User,
+    crew: Crew,
+) -> None:
     """
     Send request to invite a user to a Crew
     :param update: The update object
@@ -54,23 +73,41 @@ async def send_request(update: Update, context: ContextTypes.DEFAULT_TYPE, capta
 
     validate(target_user, crew, specific_crew_error=True)
 
-    caption = phrases.CREW_INVITE_REQUEST_CAPTION.format(mention_markdown_user(captain),
-                                                         mention_markdown_user(target_user))
+    caption = phrases.CREW_INVITE_REQUEST_CAPTION.format(
+        mention_markdown_user(captain), mention_markdown_user(target_user)
+    )
 
     # Keyboard
     extra_keys = {CrewReservedKeys.CAPTAIN_USER_ID: captain.id}
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(target_user, screen=Screen.GRP_CREW_INVITE,
-                                                                 yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                 no_text=phrases.KEYBOARD_OPTION_REJECT,
-                                                                 primary_key=crew.id, extra_keys=extra_keys)]
+    inline_keyboard: list[list[Keyboard]] = [
+        get_yes_no_keyboard(
+            target_user,
+            screen=Screen.GRP_CREW_INVITE,
+            yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+            no_text=phrases.KEYBOARD_OPTION_REJECT,
+            primary_key=crew.id,
+            extra_keys=extra_keys,
+        )
+    ]
 
     # Get SavedMedia
-    await full_media_send(context, saved_media_name=SavedMediaName.CREW_INVITE, update=update, caption=caption,
-                          keyboard=inline_keyboard, add_delete_button=True)
+    await full_media_send(
+        context,
+        saved_media_name=SavedMediaName.CREW_INVITE,
+        update=update,
+        caption=caption,
+        keyboard=inline_keyboard,
+        add_delete_button=True,
+    )
 
 
-async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, invited_user: User, crew: Crew,
-                               inbound_keyboard: Keyboard) -> None:
+async def keyboard_interaction(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    invited_user: User,
+    crew: Crew,
+    inbound_keyboard: Keyboard,
+) -> None:
     """
     Keyboard interaction
     :param update: The update object
@@ -85,11 +122,17 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # User clicked on reject button
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
-        ot_text = phrases.CREW_INVITE_REQUEST_REJECTED.format(escape_valid_markdown_chars(crew.name),
-                                                              mention_markdown_user(invited_user))
-        await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                              authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
-                              edit_only_caption_and_keyboard=True)
+        ot_text = phrases.CREW_INVITE_REQUEST_REJECTED.format(
+            escape_valid_markdown_chars(crew.name), mention_markdown_user(invited_user)
+        )
+        await full_media_send(
+            context,
+            caption=ot_text,
+            update=update,
+            add_delete_button=True,
+            authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+            edit_only_caption_and_keyboard=True,
+        )
         return
 
     validate(invited_user, crew, specific_user_error=True)
@@ -98,8 +141,14 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
     await add_member(invited_user, crew)
 
     # Accepted message
-    ot_text = phrases.CREW_INVITE_REQUEST_ACCEPTED.format(mention_markdown_user(invited_user),
-                                                          escape_valid_markdown_chars(crew.name))
-    await full_media_send(context, caption=ot_text, update=update, add_delete_button=True,
-                          authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
-                          edit_only_caption_and_keyboard=True)
+    ot_text = phrases.CREW_INVITE_REQUEST_ACCEPTED.format(
+        mention_markdown_user(invited_user), escape_valid_markdown_chars(crew.name)
+    )
+    await full_media_send(
+        context,
+        caption=ot_text,
+        update=update,
+        add_delete_button=True,
+        authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+        edit_only_caption_and_keyboard=True,
+    )

@@ -5,8 +5,14 @@ from src.model.User import User
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
-from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributionType, IncomeTaxContribution
-from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction, IncomeTaxDeductionType
+from src.model.enums.income_tax.IncomeTaxContribution import (
+    IncomeTaxContributionType,
+    IncomeTaxContribution,
+)
+from src.model.enums.income_tax.IncomeTaxDeduction import (
+    IncomeTaxDeduction,
+    IncomeTaxDeductionType,
+)
 from src.service.math_service import get_cumulative_percentage_sum, get_value_from_percentage
 from src.service.string_service import object_to_json_string
 
@@ -26,9 +32,13 @@ def get_tax_deductions(user: User) -> list[IncomeTaxDeduction]:
         return deductions
 
     # Devil Fruit
-    tax_ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(user, DevilFruitAbilityType.INCOME_TAX)
+    tax_ability: DevilFruitAbility = DevilFruitAbility.get_user_ability(
+        user, DevilFruitAbilityType.INCOME_TAX
+    )
     if tax_ability is not None:
-        deductions.append(IncomeTaxDeduction(IncomeTaxDeductionType.DEVIL_FRUIT, tax_ability.value))
+        deductions.append(
+            IncomeTaxDeduction(IncomeTaxDeductionType.DEVIL_FRUIT, tax_ability.value)
+        )
 
     return deductions
 
@@ -58,8 +68,12 @@ def get_tax_amount(user: User, amount: int) -> int:
     return int(total_tax_amount)
 
 
-def add_contribution(contribution_type: IncomeTaxContributionType, tax_amount: int, tax_event: IncomeTaxEvent = None,
-                     user: User = None) -> None:
+def add_contribution(
+    contribution_type: IncomeTaxContributionType,
+    tax_amount: int,
+    tax_event: IncomeTaxEvent = None,
+    user: User = None,
+) -> None:
     """
     Add a tax contribution
 
@@ -72,7 +86,7 @@ def add_contribution(contribution_type: IncomeTaxContributionType, tax_amount: i
     from src.service.crew_service import add_to_crew_chest
 
     if tax_event is None and user is None:
-        raise ValueError('Either tax_event or user must be provided')
+        raise ValueError("Either tax_event or user must be provided")
 
     if tax_event is not None and user is None:
         user = tax_event.user
@@ -83,16 +97,20 @@ def add_contribution(contribution_type: IncomeTaxContributionType, tax_amount: i
             contribution_amount = get_value_from_percentage(tax_amount, contribution_percentage)
             add_to_crew_chest(user, int(contribution_amount))
         case _:
-            raise ValueError(f'Invalid contribution type: {contribution_type}')
+            raise ValueError(f"Invalid contribution type: {contribution_type}")
 
     if tax_event is None:
         return
 
     # Add contribution to tax event
-    contribution: IncomeTaxContribution = IncomeTaxContribution(contribution_type, contribution_percentage)
+    contribution: IncomeTaxContribution = IncomeTaxContribution(
+        contribution_type, contribution_percentage
+    )
 
     # Get existing contribution list
-    contribution_list: list[IncomeTaxContribution] = IncomeTaxContribution.from_string(tax_event.contribution_list)
+    contribution_list: list[IncomeTaxContribution] = IncomeTaxContribution.from_string(
+        tax_event.contribution_list
+    )
     contribution_list.append(contribution)
 
     # Update tax event

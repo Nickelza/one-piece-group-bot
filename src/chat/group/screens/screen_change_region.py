@@ -16,18 +16,25 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import cron_datetime_difference
 from src.service.location_service import update_location
-from src.service.message_service import full_message_send, mention_markdown_v2, get_image_preview, get_yes_no_keyboard
+from src.service.message_service import (
+    full_message_send,
+    mention_markdown_v2,
+    get_image_preview,
+    get_yes_no_keyboard,
+)
 
 
 class ChangeRegionReservedKeys(StrEnum):
     """
     The reserved keys for this screen
     """
-    REGION = 'a'
+
+    REGION = "a"
 
 
-async def validate_move_request(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
-                                destination_region: Region) -> bool:
+async def validate_move_request(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, destination_region: Region
+) -> bool:
     """
     Validate the move request
     :param update: The update
@@ -46,7 +53,8 @@ async def validate_move_request(update: Update, context: ContextTypes.DEFAULT_TY
     # User cannot change region
     if not user.can_change_region:
         ot_text = phrases.LOCATION_CANNOT_CHANGE_REGION.format(
-            cron_datetime_difference(Env.CRON_RESET_CAN_CHANGE_REGION.get()))
+            cron_datetime_difference(Env.CRON_RESET_CAN_CHANGE_REGION.get())
+        )
         await full_message_send(context, ot_text, update, add_delete_button=True)
         return False
 
@@ -55,7 +63,8 @@ async def validate_move_request(update: Update, context: ContextTypes.DEFAULT_TY
         first_new_world_location: Location = Location.get_first_new_world()
         if user.get_max_bounty() < first_new_world_location.required_bounty:
             ot_text = phrases.LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY.format(
-                get_belly_formatted(first_new_world_location.required_bounty))
+                get_belly_formatted(first_new_world_location.required_bounty)
+            )
             await full_message_send(context, ot_text, update=update, add_delete_button=True)
             return False
 
@@ -63,7 +72,7 @@ async def validate_move_request(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 def get_region_text(region: Region) -> str:
-    return 'Paradise' if region == region.PARADISE else 'the New World'
+    return "Paradise" if region == region.PARADISE else "the New World"
 
 
 def get_region_image_preview(region: Region) -> str:
@@ -72,10 +81,12 @@ def get_region_image_preview(region: Region) -> str:
     elif region == Region.NEW_WORLD:
         return get_image_preview(Env.LOCATION_NEW_WORLD_IMAGE_URL.get())
     else:
-        return ''
+        return ""
 
 
-async def send_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, region: Region) -> None:
+async def send_proposal(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, region: Region
+) -> None:
     """
     Send proposal for region change
     :param update: The update object
@@ -88,21 +99,39 @@ async def send_proposal(update: Update, context: ContextTypes.DEFAULT_TYPE, user
     if region is Region.ND:
         raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
 
-    ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL.format(get_region_image_preview(region),
-                                                             mention_markdown_v2(user.tg_user_id, user.tg_first_name),
-                                                             get_region_text(region))
+    ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL.format(
+        get_region_image_preview(region),
+        mention_markdown_v2(user.tg_user_id, user.tg_first_name),
+        get_region_text(region),
+    )
     # Keyboard
-    inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.GRP_CHANGE_REGION,
-                                                                 yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                                                                 no_text=phrases.KEYBOARD_OPTION_REJECT,
-                                                                 primary_key=region)]
+    inline_keyboard: list[list[Keyboard]] = [
+        get_yes_no_keyboard(
+            user,
+            screen=Screen.GRP_CHANGE_REGION,
+            yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+            no_text=phrases.KEYBOARD_OPTION_REJECT,
+            primary_key=region,
+        )
+    ]
 
-    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard, disable_web_page_preview=False,
-                            new_message=(update.callback_query is not None))
+    await full_message_send(
+        context,
+        ot_text,
+        update=update,
+        keyboard=inline_keyboard,
+        disable_web_page_preview=False,
+        new_message=(update.callback_query is not None),
+    )
 
 
-async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard,
-                               region: Region) -> None:
+async def keyboard_interaction(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    keyboard: Keyboard,
+    region: Region,
+) -> None:
     """
     Keyboard interaction
     :param update: The update
@@ -120,25 +149,36 @@ async def keyboard_interaction(update: Update, context: ContextTypes.DEFAULT_TYP
             return
 
         # Refresh location
-        await update_location(user, context, update, cap_to_paradise=False, region=region, requested_by_user=True)
+        await update_location(
+            user, context, update, cap_to_paradise=False, region=region, requested_by_user=True
+        )
         user.can_change_region = False
 
         return
 
     else:  # User rejected
-        command: Command.Command = Command.GRP_CHANGE_REGION_PARADISE if region == Region.PARADISE else \
-            Command.GRP_CHANGE_REGION_NEW_WORLD
+        command: Command.Command = (
+            Command.GRP_CHANGE_REGION_PARADISE
+            if region == Region.PARADISE
+            else Command.GRP_CHANGE_REGION_NEW_WORLD
+        )
         ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL_REJECTED.format(
             get_region_image_preview(region),
             mention_markdown_v2(user.tg_user_id, user.tg_first_name),
             get_region_text(region),
-            command.get_formatted())
+            command.get_formatted(),
+        )
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None,
-                 command: Command.Command = None) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    keyboard: Keyboard = None,
+    command: Command.Command = None,
+) -> None:
     """
     Manage the change region request
     :param update: The update object
@@ -153,7 +193,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, user: User,
     if keyboard is not None:
         region = Region(keyboard.info[ChangeRegionReservedKeys.REGION])
     elif command is not None:
-        region = Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
+        region = (
+            Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
+        )
     else:
         raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
 

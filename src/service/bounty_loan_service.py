@@ -17,7 +17,8 @@ async def set_expired_bounty_loans(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Get all expired bounty loans
     expired_bounty_loans: list[BountyLoan] = BountyLoan.select().where(
         (BountyLoan.status == BountyLoanStatus.ACTIVE)
-        & (BountyLoan.deadline_date < datetime.now()))
+        & (BountyLoan.deadline_date < datetime.now())
+    )
 
     for expired_bounty_loan in expired_bounty_loans:
         # Set expired
@@ -25,5 +26,8 @@ async def set_expired_bounty_loans(context: ContextTypes.DEFAULT_TYPE) -> None:
         expired_bounty_loan.save()
 
         # Send notification to the borrower
-        await send_notification(context, expired_bounty_loan.borrower,
-                                BountyLoanExpiredNotification(expired_bounty_loan))
+        await send_notification(
+            context,
+            expired_bounty_loan.borrower,
+            BountyLoanExpiredNotification(expired_bounty_loan),
+        )

@@ -5,13 +5,13 @@ from src.model.enums.LogType import LogType
 
 
 class IncomeTaxEventType(StrEnum):
-    BOUNTY_GIFT = 'bounty_gift'
-    BOUNTY_LOAN = 'bounty_loan'
-    DEVIL_FRUIT_SELL = 'devil_fruit_sell'
-    DOC_Q_GAME = 'doc_q_game'
-    FIGHT = 'fight'
-    GAME = 'game'
-    PREDICTION = 'prediction'
+    BOUNTY_GIFT = "bounty_gift"
+    BOUNTY_LOAN = "bounty_loan"
+    DEVIL_FRUIT_SELL = "devil_fruit_sell"
+    DOC_Q_GAME = "doc_q_game"
+    FIGHT = "fight"
+    GAME = "game"
+    PREDICTION = "prediction"
 
     def get_description(self) -> str:
         """
@@ -47,5 +47,5 @@ INCOME_TAX_EVENT_TYPE_LOG_TYPE = {
     IncomeTaxEventType.BOUNTY_GIFT: LogType.BOUNTY_GIFT,
     IncomeTaxEventType.DOC_Q_GAME: LogType.DOC_Q_GAME,
     IncomeTaxEventType.FIGHT: LogType.FIGHT,
-    IncomeTaxEventType.GAME: LogType.GAME
+    IncomeTaxEventType.GAME: LogType.GAME,
 }

@@ -11,11 +11,13 @@ from src.service.message_service import full_message_send
 
 
 class NotificationTypeReservedKeys(StrEnum):
-    CATEGORY = 'a'
-    TYPE = 'b'
+    CATEGORY = "a"
+    TYPE = "b"
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard
+) -> None:
     """
     Manage the settings screen
     :param update: The update
@@ -28,10 +30,20 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     inline_keyboard: list[list[Keyboard]] = []
     category = NotificationCategory(inbound_keyboard.info[NotificationTypeReservedKeys.CATEGORY])
     for notification in get_notifications_by_category(category):
-        inline_keyboard.append([Keyboard(notification.button_text, screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
-                                         info={NotificationTypeReservedKeys.TYPE: notification.type},
-                                         inbound_info=inbound_keyboard.info)])
+        inline_keyboard.append([
+            Keyboard(
+                notification.button_text,
+                screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
+                info={NotificationTypeReservedKeys.TYPE: notification.type},
+                inbound_info=inbound_keyboard.info,
+            )
+        ])
 
-    await full_message_send(context, phrases.PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE, update=update,
-                            keyboard=inline_keyboard, inbound_keyboard=inbound_keyboard,
-                            excluded_keys_from_back_button=[NotificationTypeReservedKeys.CATEGORY])
+    await full_message_send(
+        context,
+        phrases.PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE,
+        update=update,
+        keyboard=inline_keyboard,
+        inbound_keyboard=inbound_keyboard,
+        excluded_keys_from_back_button=[NotificationTypeReservedKeys.CATEGORY],
+    )

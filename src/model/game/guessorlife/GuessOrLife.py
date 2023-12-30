@@ -23,9 +23,13 @@ class PlayerType(IntEnum):
 
 
 class GuessOrLife:
-    def __init__(self, terminology: Terminology, challenger_info: PlayerInfo = None, opponent_info: PlayerInfo = None,
-                 issued_lives: int = None):
-
+    def __init__(
+        self,
+        terminology: Terminology,
+        challenger_info: PlayerInfo = None,
+        opponent_info: PlayerInfo = None,
+        issued_lives: int = None,
+    ):
         """
         Constructor
         :param terminology: The terminology
@@ -54,7 +58,9 @@ class GuessOrLife:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
+        )
 
     def get_plain_word(self) -> str:
         """
@@ -62,7 +68,7 @@ class GuessOrLife:
         :return: str
         """
 
-        return re.sub(r'\W', '', self.terminology.name)
+        return re.sub(r"\W", "", self.terminology.name)
 
     def has_used_letter(self, player_type: PlayerType, letter: str) -> bool:
         """
@@ -96,7 +102,9 @@ class GuessOrLife:
         if player_type is not None:
             return self.player_has_guessed(player_type)
 
-        return self.player_has_guessed(PlayerType.CHALLENGER) or self.player_has_guessed(PlayerType.OPPONENT)
+        return self.player_has_guessed(PlayerType.CHALLENGER) or self.player_has_guessed(
+            PlayerType.OPPONENT
+        )
 
     def player_has_guessed(self, player_type: PlayerType):
         """
@@ -119,7 +127,7 @@ class GuessOrLife:
         """
 
         if not self.is_finished(player_type):
-            raise ValueError('Game is not finished')
+            raise ValueError("Game is not finished")
 
         if player_type is PlayerType.CHALLENGER:
             return GameOutcome.CHALLENGER_WON
@@ -153,7 +161,7 @@ class GuessOrLife:
         """
 
         if not self.can_issue_live():
-            raise ValueError('Cannot issue live')
+            raise ValueError("Cannot issue live")
 
         self.challenger_info.lives += 1
         self.opponent_info.lives += 1
@@ -174,7 +182,7 @@ class GuessOrLife:
         # Order the letters
         letters.sort()
 
-        return str(', '.join(letters)).upper()
+        return str(", ".join(letters)).upper()
 
     def get_remaining_letters(self, player_type: PlayerType):
         """
@@ -184,7 +192,9 @@ class GuessOrLife:
         """
 
         used_letters = self.get_used_letters_formatted(player_type)
-        return ', '.join([chr(i) for i in range(ord('A'), ord('Z') + 1) if chr(i) not in used_letters])
+        return ", ".join(
+            [chr(i) for i in range(ord("A"), ord("Z") + 1) if chr(i) not in used_letters]
+        )
 
     def get_word_with_blanks(self, player_type: PlayerType, show_guessed_letters: bool = True):
         """
@@ -194,25 +204,35 @@ class GuessOrLife:
         :return: str
         """
 
-        word = ''
+        word = ""
         word_list = []
-        letter_template = ' {} '
+        letter_template = " {} "
 
         for index, letter in enumerate(self.terminology.name):
             # Guessed, show letter
             letter_to_append = letter
             if letter.lower() in self.get_player_info(player_type).used_letters:
-                word += letter_template.format(letter) if show_guessed_letters else letter_template.format('*')
+                word += (
+                    letter_template.format(letter)
+                    if show_guessed_letters
+                    else letter_template.format("*")
+                )
             # Space, show space
-            elif letter == ' ':
+            elif letter == " ":
                 word += letter_template.format(letter)
             # Not guessed, but it's a special character and the character before it is guessed, show letter
-            elif letter.isalpha() is False and len(word_list) > 0 and word_list[index - 1].isalpha():
-                word += letter_template.format(letter) if show_guessed_letters else letter_template.format('*')
+            elif (
+                letter.isalpha() is False and len(word_list) > 0 and word_list[index - 1].isalpha()
+            ):
+                word += (
+                    letter_template.format(letter)
+                    if show_guessed_letters
+                    else letter_template.format("*")
+                )
             # Not guessed, show blank
             else:
-                word += letter_template.format('_')
-                letter_to_append = '_'
+                word += letter_template.format("_")
+                letter_to_append = "_"
 
             word_list.append(letter_to_append)
 
@@ -262,7 +282,7 @@ class GuessOrLife:
                 return None
 
             case _:
-                raise ValueError('Invalid difficulty')
+                raise ValueError("Invalid difficulty")
 
     @staticmethod
     def get_min_unique_characters_by_difficulty(difficulty: GameDifficulty) -> int or None:
@@ -283,4 +303,4 @@ class GuessOrLife:
                 return Env.GUESS_OR_LIFE_MAX_UNIQUE_CHARACTERS_MEDIUM.get_int() + 1
 
             case _:
-                raise ValueError('Invalid difficulty')
+                raise ValueError("Invalid difficulty")

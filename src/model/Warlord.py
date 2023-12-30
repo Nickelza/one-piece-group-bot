@@ -10,8 +10,9 @@ class Warlord(BaseModel):
     """
     Warlord class
     """
+
     id = PrimaryKeyField()
-    user = ForeignKeyField(User, backref='warlords', on_delete='CASCADE', on_update='CASCADE')
+    user = ForeignKeyField(User, backref="warlords", on_delete="CASCADE", on_update="CASCADE")
     epithet = CharField(max_length=99, null=True)
     reason = CharField(max_length=999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
@@ -20,31 +21,30 @@ class Warlord(BaseModel):
     revoke_reason = CharField(max_length=999, null=True)
 
     class Meta:
-        db_table = 'warlord'
+        db_table = "warlord"
 
     @staticmethod
-    def get_active() -> list['Warlord']:
+    def get_active() -> list["Warlord"]:
         """
         Get active warlords
         :return: Active warlords
         """
 
-        return (Warlord
-                .select()
-                .where(Warlord.end_date > datetime.datetime.now()))
+        return Warlord.select().where(Warlord.end_date > datetime.datetime.now())
 
     @staticmethod
-    def get_active_order_by_bounty() -> list['Warlord']:
+    def get_active_order_by_bounty() -> list["Warlord"]:
         """
         Get active warlords
         :return: Active warlords
         """
 
-        return (Warlord
-                .select()
-                .join(User)
-                .where(Warlord.end_date > datetime.datetime.now())
-                .order_by(User.bounty.desc()))
+        return (
+            Warlord.select()
+            .join(User)
+            .where(Warlord.end_date > datetime.datetime.now())
+            .order_by(User.bounty.desc())
+        )
 
     @staticmethod
     def get_active_user_ids() -> list[int]:
@@ -56,18 +56,19 @@ class Warlord(BaseModel):
         return [warlord.user.id for warlord in Warlord.get_active()]
 
     @staticmethod
-    def get_latest_active_by_user(user: User) -> 'Warlord':
+    def get_latest_active_by_user(user: User) -> "Warlord":
         """
         Get the latest active warlord by user
         :param user: The user
         :return: The warlord
         """
 
-        return (Warlord
-                .select()
-                .where((Warlord.user == user) & (Warlord.end_date > datetime.datetime.now()))
-                .order_by(Warlord.end_date.desc())
-                .first())
+        return (
+            Warlord.select()
+            .where((Warlord.user == user) & (Warlord.end_date > datetime.datetime.now()))
+            .order_by(Warlord.end_date.desc())
+            .first()
+        )
 
 
 Warlord.create_table()

@@ -9,14 +9,19 @@ class LeaderboardUser(BaseModel):
     """
     Leaderboard class
     """
-    leaderboard = ForeignKeyField(Leaderboard, backref='leaderboard_users', on_delete='CASCADE', on_update='CASCADE')
-    user = ForeignKeyField(User, backref='leaderboard_users', on_delete='CASCADE', on_update='CASCADE')
+
+    leaderboard = ForeignKeyField(
+        Leaderboard, backref="leaderboard_users", on_delete="CASCADE", on_update="CASCADE"
+    )
+    user = ForeignKeyField(
+        User, backref="leaderboard_users", on_delete="CASCADE", on_update="CASCADE"
+    )
     position = IntegerField()
     bounty = BigIntegerField()
     rank_index = SmallIntegerField()
 
     class Meta:
-        db_table = 'leaderboard_user'
+        db_table = "leaderboard_user"
 
     @staticmethod
     def get_appearances_as_rank(user: User, rank_index: int):
@@ -27,34 +32,51 @@ class LeaderboardUser(BaseModel):
         return: The appearances
         """
 
-        return (LeaderboardUser().select().join(Leaderboard)
-                .where((LeaderboardUser.user == user)
-                       & (Leaderboard.group.is_null())
-                       & (LeaderboardUser.rank_index == rank_index)).count())
+        return (
+            LeaderboardUser()
+            .select()
+            .join(Leaderboard)
+            .where(
+                (LeaderboardUser.user == user)
+                & (Leaderboard.group.is_null())
+                & (LeaderboardUser.rank_index == rank_index)
+            )
+            .count()
+        )
 
     @staticmethod
-    def get_max_rank_attained(user: User) -> 'LeaderboardUser':
+    def get_max_rank_attained(user: User) -> "LeaderboardUser":
         """
         Get the highest rank attained by a user
         param user: The user
         return: The highest rank attained
         """
 
-        return (LeaderboardUser().select().join(Leaderboard)
-                .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
-                .order_by(LeaderboardUser.rank_index.asc()).first())
+        return (
+            LeaderboardUser()
+            .select()
+            .join(Leaderboard)
+            .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
+            .order_by(LeaderboardUser.rank_index.asc())
+            .first()
+        )
 
     @staticmethod
-    def get_max_bounty_attained(user: User) -> 'LeaderboardUser':
+    def get_max_bounty_attained(user: User) -> "LeaderboardUser":
         """
         Get the highest bounty attained by a user
         param user: The user
         return: The highest bounty attained
         """
 
-        return (LeaderboardUser().select().join(Leaderboard)
-                .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
-                .order_by(LeaderboardUser.bounty.desc()).first())
+        return (
+            LeaderboardUser()
+            .select()
+            .join(Leaderboard)
+            .where((LeaderboardUser.user == user) & (Leaderboard.group.is_null()))
+            .order_by(LeaderboardUser.bounty.desc())
+            .first()
+        )
 
 
 LeaderboardUser.create_table()

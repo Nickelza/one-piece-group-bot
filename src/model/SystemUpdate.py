@@ -9,6 +9,7 @@ class SystemUpdate(BaseModel):
     """
     SystemUpdate class
     """
+
     id = PrimaryKeyField()
     title = CharField()
     description = CharField()
@@ -17,7 +18,7 @@ class SystemUpdate(BaseModel):
     message_id = BigIntegerField()
 
     class Meta:
-        db_table = 'system_update'
+        db_table = "system_update"
 
     @staticmethod
     def get_latest_update():

@@ -15,22 +15,31 @@ class Game(BaseModel):
     """
     Game class
     """
+
     id = PrimaryKeyField()
-    challenger = ForeignKeyField(User, backref='game_challengers', on_delete='CASCADE',
-                                 on_update='CASCADE')
-    opponent = ForeignKeyField(User, backref='game_opponents', on_delete='CASCADE', on_update='CASCADE', null=True)
+    challenger = ForeignKeyField(
+        User, backref="game_challengers", on_delete="CASCADE", on_update="CASCADE"
+    )
+    opponent = ForeignKeyField(
+        User, backref="game_opponents", on_delete="CASCADE", on_update="CASCADE", null=True
+    )
     type = SmallIntegerField(null=True)
     board = CharField(max_length=9999, null=True)
     date = DateTimeField(default=datetime.datetime.now)
     status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION)
-    group_chat = ForeignKeyField(GroupChat, null=True, backref='game_groups_chats', on_delete='RESTRICT',
-                                 on_update='CASCADE')
+    group_chat = ForeignKeyField(
+        GroupChat,
+        null=True,
+        backref="game_groups_chats",
+        on_delete="RESTRICT",
+        on_update="CASCADE",
+    )
     message_id = IntegerField(null=True)
     wager = BigIntegerField(null=True)
     last_interaction_date = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
-        db_table = 'game'
+        db_table = "game"
 
     def is_player(self, user: User) -> bool:
         """
@@ -74,9 +83,13 @@ class Game(BaseModel):
         """
 
         if status in (GameStatus.WON, GameStatus.LOST):
-            return (Game().select().where((Game.challenger == user) & (Game.status == status)).count()
-                    + Game().select().where((Game.opponent == user) & (Game.status == status.get_opposite_status()))
-                    .count())
+            return (
+                Game().select().where((Game.challenger == user) & (Game.status == status)).count()
+                + Game()
+                .select()
+                .where((Game.opponent == user) & (Game.status == status.get_opposite_status()))
+                .count()
+            )
 
         return Game().select().where((Game.challenger == user) & (Game.status == status)).count()
 
@@ -89,13 +102,18 @@ class Game(BaseModel):
         return: The total amount of belly
         """
 
-        return ((Game.select(fn.SUM(Game.wager)).where((Game.challenger == user)
-                                                       & (Game.status == status))).scalar()
-                + (Game.select(fn.SUM(Game.wager)).where((Game.opponent == user)
-                                                         & (Game.status == status.get_opposite_status()))).scalar())
+        return (
+            Game.select(fn.SUM(Game.wager)).where(
+                (Game.challenger == user) & (Game.status == status)
+            )
+        ).scalar() + (
+            Game.select(fn.SUM(Game.wager)).where(
+                (Game.opponent == user) & (Game.status == status.get_opposite_status())
+            )
+        ).scalar()
 
     @staticmethod
-    def get_max_won_or_lost(user: User, status: GameStatus) -> 'Game':
+    def get_max_won_or_lost(user: User, status: GameStatus) -> "Game":
         """
         Get the game with the max belly won or lost
         param user: The user
@@ -104,16 +122,22 @@ class Game(BaseModel):
         """
 
         # Max game as challenger
-        max_game_as_challenger: Game = (Game().select()
-                                        .where((Game.challenger == user) & (Game.status == status))
-                                        .order_by(Game.wager.desc())
-                                        .first())
+        max_game_as_challenger: Game = (
+            Game()
+            .select()
+            .where((Game.challenger == user) & (Game.status == status))
+            .order_by(Game.wager.desc())
+            .first()
+        )
 
         # Max game as opponent
-        max_game_as_opponent: Game = (Game().select()
-                                      .where((Game.opponent == user) & (Game.status == status.get_opposite_status()))
-                                      .order_by(Game.wager.desc())
-                                      .first())
+        max_game_as_opponent: Game = (
+            Game()
+            .select()
+            .where((Game.opponent == user) & (Game.status == status.get_opposite_status()))
+            .order_by(Game.wager.desc())
+            .first()
+        )
 
         if max_game_as_challenger is None:
             return max_game_as_opponent
@@ -135,18 +159,22 @@ class Game(BaseModel):
         """
 
         # noinspection DuplicatedCode
-        most_challenged_user_as_challenger = (Game.select(Game.opponent, fn.COUNT(Game.opponent).alias('count'))
-                                              .where(Game.challenger == user)
-                                              .group_by(Game.opponent)
-                                              .order_by(SQL('count').desc())
-                                              .first())
+        most_challenged_user_as_challenger = (
+            Game.select(Game.opponent, fn.COUNT(Game.opponent).alias("count"))
+            .where(Game.challenger == user)
+            .group_by(Game.opponent)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_challenger = most_challenged_user_as_challenger.count
 
-        most_challenged_user_as_opponent = (Game.select(Game.challenger, fn.COUNT(Game.challenger).alias('count'))
-                                            .where(Game.opponent == user)
-                                            .group_by(Game.challenger)
-                                            .order_by(SQL('count').desc())
-                                            .first())
+        most_challenged_user_as_opponent = (
+            Game.select(Game.challenger, fn.COUNT(Game.challenger).alias("count"))
+            .where(Game.opponent == user)
+            .group_by(Game.challenger)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_opponent = most_challenged_user_as_opponent.count
 
         if amount_as_challenger > amount_as_opponent:
@@ -163,18 +191,22 @@ class Game(BaseModel):
         """
 
         # noinspection DuplicatedCode
-        most_played_as_challenger = (Game.select(Game.type, fn.COUNT(Game.type).alias('count'))
-                                     .where(Game.challenger == user)
-                                     .group_by(Game.type)
-                                     .order_by(SQL('count').desc())
-                                     .first())
+        most_played_as_challenger = (
+            Game.select(Game.type, fn.COUNT(Game.type).alias("count"))
+            .where(Game.challenger == user)
+            .group_by(Game.type)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_challenger = most_played_as_challenger.count
 
-        most_played_as_opponent = (Game.select(Game.type, fn.COUNT(Game.type).alias('count'))
-                                   .where(Game.opponent == user)
-                                   .group_by(Game.type)
-                                   .order_by(SQL('count').desc())
-                                   .first())
+        most_played_as_opponent = (
+            Game.select(Game.type, fn.COUNT(Game.type).alias("count"))
+            .where(Game.opponent == user)
+            .group_by(Game.type)
+            .order_by(SQL("count").desc())
+            .first()
+        )
         amount_as_opponent = most_played_as_opponent.count
 
         if amount_as_challenger > amount_as_opponent:

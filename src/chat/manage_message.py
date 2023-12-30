@@ -25,15 +25,25 @@ from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CommonChatError import CommonChatException
-from src.model.error.CustomException import CommandValidationException, NavigationLimitReachedException
+from src.model.error.CustomException import (
+    CommandValidationException,
+    NavigationLimitReachedException,
+)
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bot_service import get_context_data, set_context_data
 from src.service.date_service import get_datetime_in_future_seconds
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
-from src.service.message_service import full_message_send, is_command, delete_message, get_message_source, \
-    full_message_or_media_send_or_edit, message_is_reply, escape_valid_markdown_chars
+from src.service.message_service import (
+    full_message_send,
+    is_command,
+    delete_message,
+    get_message_source,
+    full_message_or_media_send_or_edit,
+    message_is_reply,
+    escape_valid_markdown_chars,
+)
 from src.service.user_service import user_is_boss, user_is_muted
 
 
@@ -106,7 +116,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
             pass
 
 
-async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool) -> None:
+async def manage_after_db(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback: bool
+) -> None:
     """
     Manage a regular message after the database is initialized
     :param update: The update
@@ -122,7 +134,10 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
         user: User = get_user(update.effective_user, should_save=False)
 
         # Check if the user is authorized
-        if Env.LIMIT_TO_AUTHORIZED_USERS.get_bool() and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list():
+        if (
+            Env.LIMIT_TO_AUTHORIZED_USERS.get_bool()
+            and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list()
+        ):
             return
 
         # Check if user in authorized groups
@@ -130,9 +145,12 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             group_ids = Env.AUTHORIZED_GROUPS.get_list()
 
             # Group not authorized
-            if message_source is MessageSource.GROUP and str(update.effective_chat.id) not in group_ids:
+            if (
+                message_source is MessageSource.GROUP
+                and str(update.effective_chat.id) not in group_ids
+            ):
                 # Leave chat
-                logging.error(f'Unauthorized group {update.effective_chat.id}: Leaving chat')
+                logging.error(f"Unauthorized group {update.effective_chat.id}: Leaving chat")
                 await update.effective_chat.leave()
                 return
 
@@ -150,7 +168,7 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
         if str(update.effective_chat.id) != Env.UPDATES_CHANNEL_ID.get():
-            logging.error(f'Unknown message source for {update.effective_chat.id}: Leaving chat')
+            logging.error(f"Unknown message source for {update.effective_chat.id}: Leaving chat")
             await update.effective_chat.leave()
         return
 
@@ -158,39 +176,44 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     # noinspection PyTypeChecker
     group_chat = None
     if message_source is MessageSource.GROUP:
-        group: Group = await add_or_update_group(update, (user if update.effective_user is not None else None))
+        group: Group = await add_or_update_group(
+            update, (user if update.effective_user is not None else None)
+        )
         group_chat: GroupChat = add_or_update_group_chat(update, group)
 
     command: Command.Command = Command.ND
     keyboard = None
     try:
         if is_command(update.message.text):
-            if '/start ' in update.message.text:  # Start with parameter
-                start_parameter = update.message.text.replace('/start ', '')
+            if "/start " in update.message.text:  # Start with parameter
+                start_parameter = update.message.text.replace("/start ", "")
                 try:
-                    parameter_decoded = base64.b64decode(start_parameter).decode('utf-8')
-                    keyboard = Keyboard.get_from_callback_query_or_info(message_source, info_str=str(parameter_decoded),
-                                                                        from_deeplink=True)
+                    parameter_decoded = base64.b64decode(start_parameter).decode("utf-8")
+                    keyboard = Keyboard.get_from_callback_query_or_info(
+                        message_source, info_str=str(parameter_decoded), from_deeplink=True
+                    )
                     command = Command.get_by_screen(keyboard.screen)
                     command_name = command.name
                 except (UnicodeDecodeError, ValueError):
                     command_name = start_parameter
             else:
-                command_name = (update.message.text.split(' ')[0])[1:].lower()
-                command_name = command_name.replace('@' + Env.BOT_USERNAME.get(), '')
+                command_name = (update.message.text.split(" ")[0])[1:].lower()
+                command_name = command_name.replace("@" + Env.BOT_USERNAME.get(), "")
 
             if keyboard is None:
-                if command_name.strip() != '':
+                if command_name.strip() != "":
                     command = Command.get_by_name(command_name, message_source)
 
                 try:
-                    command.parameters = update.message.text.split(' ')[1:]
+                    command.parameters = update.message.text.split(" ")[1:]
                 except IndexError:
                     pass
 
     except (AttributeError, ValueError):
         if is_callback:
-            keyboard = Keyboard.get_from_callback_query_or_info(message_source, update.callback_query)
+            keyboard = Keyboard.get_from_callback_query_or_info(
+                message_source, update.callback_query
+            )
 
             if not keyboard.info:
                 # No provided info, do nothing
@@ -214,12 +237,21 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
     # Check for spam only if a valid command or private chat
     if command != Command.ND or message_source is MessageSource.PRIVATE:
         if await is_spam(update, context, message_source, command, user):
-            logging.warning(f'Spam detected for chat {update.effective_chat.id}: Ignoring message')
+            logging.warning(f"Spam detected for chat {update.effective_chat.id}: Ignoring message")
             return
 
     if command != Command.ND or is_callback:
-        if not await validate(update, context, command, user, keyboard, target_user, is_callback, message_source,
-                              group_chat):
+        if not await validate(
+            update,
+            context,
+            command,
+            user,
+            keyboard,
+            target_user,
+            is_callback,
+            message_source,
+            group_chat,
+        ):
             return
 
     if command != Command.ND:
@@ -230,42 +262,70 @@ async def manage_after_db(update: Update, context: ContextTypes.DEFAULT_TYPE, is
             case MessageSource.PRIVATE:
                 await manage_private_chat(update, context, command, user, keyboard)
             case MessageSource.GROUP:
-                await manage_group_chat(update, context, command, user, keyboard, target_user, is_callback, group_chat)
+                await manage_group_chat(
+                    update, context, command, user, keyboard, target_user, is_callback, group_chat
+                )
             case MessageSource.TG_REST:
                 await manage_tgrest_chat(update, context)
             case MessageSource.INLINE_QUERY:
                 await manage_inline_query(update, context)
             case _:
-                raise ValueError('Invalid message source')
+                raise ValueError("Invalid message source")
     except DoesNotExist:
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         user.should_update_model = False
-        previous_screens = (user.get_private_screen_list()[:-1]
-                            if message_source is MessageSource.PRIVATE else None)
+        previous_screens = (
+            user.get_private_screen_list()[:-1]
+            if message_source is MessageSource.PRIVATE
+            else None
+        )
         try:
-            await full_message_send(context, escape_valid_markdown_chars(str(ce)), update=update,
-                                    previous_screens=previous_screens, from_exception=True)
+            await full_message_send(
+                context,
+                escape_valid_markdown_chars(str(ce)),
+                update=update,
+                previous_screens=previous_screens,
+                from_exception=True,
+            )
         except BadRequest:
-            await full_message_or_media_send_or_edit(context, escape_valid_markdown_chars(str(ce)), update=update,
-                                                     previous_screens=previous_screens, from_exception=True)
+            await full_message_or_media_send_or_edit(
+                context,
+                escape_valid_markdown_chars(str(ce)),
+                update=update,
+                previous_screens=previous_screens,
+                from_exception=True,
+            )
     except BadRequest as bre:
-        if 'Message is not modified' in str(bre):
-            logging.error(f'Updated message same as previous in chat {update.effective_chat.id}')
+        if "Message is not modified" in str(bre):
+            logging.error(f"Updated message same as previous in chat {update.effective_chat.id}")
         else:
             raise bre
     except NavigationLimitReachedException:
-        await full_message_send(context, phrases.NAVIGATION_LIMIT_REACHED, update=update, answer_callback=True,
-                                show_alert=True)
+        await full_message_send(
+            context,
+            phrases.NAVIGATION_LIMIT_REACHED,
+            update=update,
+            answer_callback=True,
+            show_alert=True,
+        )
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()
 
 
-async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, user: User,
-                   inbound_keyboard: Keyboard, target_user: User, is_callback: bool, message_source: MessageSource,
-                   group_chat: GroupChat) -> bool:
+async def validate(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    command: Command.Command,
+    user: User,
+    inbound_keyboard: Keyboard,
+    target_user: User,
+    is_callback: bool,
+    message_source: MessageSource,
+    group_chat: GroupChat,
+) -> bool:
     """
     Validate the command
     :param update: Telegram update
@@ -282,9 +342,16 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
 
     # Validate keyboard interaction
     if is_callback and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
-        if int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]:  # Unauthorized
-            await full_message_send(context, phrases.KEYBOARD_USE_UNAUTHORIZED, update, answer_callback=True,
-                                    show_alert=True)
+        if (
+            int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]
+        ):  # Unauthorized
+            await full_message_send(
+                context,
+                phrases.KEYBOARD_USE_UNAUTHORIZED,
+                update,
+                answer_callback=True,
+                show_alert=True,
+            )
             return False
 
         # Delete request, best effort
@@ -301,16 +368,21 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         if not command.active:
             if command.replaced_by is not None:
                 raise CommandValidationException(
-                    phrases.COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR.format(command.get_replaced_by_formatted()))
+                    phrases.COMMAND_NOT_ACTIVE_WITH_REPLACEMENT_ERROR.format(
+                        command.get_replaced_by_formatted()
+                    )
+                )
 
             raise CommandValidationException(phrases.COMMAND_NOT_ACTIVE_ERROR)
 
         # Feature not allowed in group_chat
         if command.feature is not None and message_source is MessageSource.GROUP:
             if not feature_is_enabled(group_chat, command.feature):
-                raise CommandValidationException(phrases.COMMAND_FEATURE_DISABLED_ERROR.format(
-                    get_group_or_topic_text(group_chat)
-                ))
+                raise CommandValidationException(
+                    phrases.COMMAND_FEATURE_DISABLED_ERROR.format(
+                        get_group_or_topic_text(group_chat)
+                    )
+                )
 
         # Cannot be used while arrested
         if not command.allow_while_arrested:
@@ -325,7 +397,8 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
 
                 text = phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR.format(
                     escape_valid_markdown_chars(command.required_location.name),
-                    escape_valid_markdown_chars(user.get_location_name()))
+                    escape_valid_markdown_chars(user.get_location_name()),
+                )
                 if not user.is_crew_member() and user.can_join_crew:
                     text += phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW
 
@@ -334,7 +407,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         # Can only be used in reply to a message
         if command.only_in_reply:
             try:
-                if not _message_is_reply or update.message.reply_to_message is None:  # REPLY_TO_MESSAGE_BUG_FIX
+                if (
+                    not _message_is_reply or update.message.reply_to_message is None
+                ):  # REPLY_TO_MESSAGE_BUG_FIX
                     raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_ERROR)
             except AttributeError:
                 pass
@@ -342,7 +417,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         # Cannot be in reply to yourself
         if not command.allow_self_reply:
             try:
-                if _message_is_reply and update.message.reply_to_message.from_user.id == update.message.from_user.id:
+                if (
+                    _message_is_reply
+                    and update.message.reply_to_message.from_user.id == update.message.from_user.id
+                ):
                     raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_ERROR)
             except AttributeError:
                 pass
@@ -351,7 +429,10 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         if not command.allow_reply_to_bot and not is_callback:
             try:
                 # REPLY_TO_MESSAGE_BUG_FIX
-                if _message_is_reply and update.effective_message.reply_to_message.from_user.is_bot:
+                if (
+                    _message_is_reply
+                    and update.effective_message.reply_to_message.from_user.is_bot
+                ):
                     raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
             except AttributeError:
                 pass
@@ -374,7 +455,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             # Can be used by other users too if it's a callback
             if not (is_callback and not command.only_by_crew_captain_or_first_mate_keyboard):
                 if not user.is_crew_captain_or_first_mate():
-                    raise CommandValidationException(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_OR_FIRST_MATE_ERROR)
+                    raise CommandValidationException(
+                        phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_OR_FIRST_MATE_ERROR
+                    )
 
         # Can only be used by a boss
         if command.only_by_boss:
@@ -391,7 +474,9 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
             if command.only_in_reply_to_crew_member:
                 # AttributeError not managed because it's already managed by only_in_reply
                 if not target_user.is_crew_member():
-                    raise CommandValidationException(phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR)
+                    raise CommandValidationException(
+                        phrases.COMMAND_NOT_IN_REPLY_TO_CREW_MEMBER_ERROR
+                    )
 
         # Can only be used in main group_chat
         if command.feature is not None and message_source is MessageSource.GROUP:
@@ -413,9 +498,14 @@ async def validate(update: Update, context: ContextTypes.DEFAULT_TYPE, command: 
         else:
             if (command.answer_callback and is_callback) or command.send_message_if_error:
                 await full_message_or_media_send_or_edit(
-                    context, str(cve), update=update, add_delete_button=(inbound_keyboard is None),
-                    answer_callback=command.answer_callback, show_alert=command.show_alert,
-                    inbound_keyboard=inbound_keyboard)
+                    context,
+                    str(cve),
+                    update=update,
+                    add_delete_button=(inbound_keyboard is None),
+                    answer_callback=command.answer_callback,
+                    show_alert=command.show_alert,
+                    inbound_keyboard=inbound_keyboard,
+                )
         return False
 
     return True
@@ -503,8 +593,9 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
     if update.effective_chat.is_forum and update.effective_message.is_topic_message:
         tg_topic_id = update.effective_message.message_thread_id
 
-    group_chat = GroupChat.get_or_none((GroupChat.group == group) &
-                                       (GroupChat.tg_topic_id == tg_topic_id))
+    group_chat = GroupChat.get_or_none(
+        (GroupChat.group == group) & (GroupChat.tg_topic_id == tg_topic_id)
+    )
 
     if group_chat is None:
         group_chat = GroupChat()
@@ -523,8 +614,13 @@ def add_or_update_group_chat(update, group: Group) -> GroupChat:
     return group_chat
 
 
-async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_source: MessageSource,
-                  command: Command, user: User) -> bool:
+async def is_spam(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    message_source: MessageSource,
+    command: Command,
+    user: User,
+) -> bool:
     """
     Check if the message is spam, which would cause flooding
     :param update: Telegram update
@@ -555,33 +651,57 @@ async def is_spam(update: Update, context: ContextTypes.DEFAULT_TYPE, message_so
     # Get past messages date list
     try:
         past_messages_date_list: list[datetime] = get_context_data(
-            context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, inner_key=inner_key)
+            context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, inner_key=inner_key
+        )
     except CommonChatException:
         past_messages_date_list = []
 
     # Remove old messages
     now = datetime.now()
     past_messages_date_list = [
-        x for x in past_messages_date_list
-        if now < get_datetime_in_future_seconds(Env.ANTI_SPAM_TIME_INTERVAL_SECONDS.get_int(), start_time=x)]
+        x
+        for x in past_messages_date_list
+        if now
+        < get_datetime_in_future_seconds(
+            Env.ANTI_SPAM_TIME_INTERVAL_SECONDS.get_int(), start_time=x
+        )
+    ]
 
     # Check if the message is spam
-    spam_limit = (Env.ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT.get_int() if message_source is MessageSource.PRIVATE
-                  else Env.ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT.get_int())
+    spam_limit = (
+        Env.ANTI_SPAM_PRIVATE_CHAT_MESSAGE_LIMIT.get_int()
+        if message_source is MessageSource.PRIVATE
+        else Env.ANTI_SPAM_GROUP_CHAT_MESSAGE_LIMIT.get_int()
+    )
 
     if len(past_messages_date_list) >= spam_limit:
         # In case spam limit was just reached, send warning message just in private chat
         if len(past_messages_date_list) == spam_limit and message_source is MessageSource.PRIVATE:
             past_messages_date_list.append(now)
-            set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list,
-                             inner_key=inner_key)
-            await full_message_send(context, phrases.ANTI_SPAM_WARNING, update=update, quote_if_group=False,
-                                    new_message=True)
+            set_context_data(
+                context,
+                context_data_type,
+                ContextDataKey.PAST_MESSAGES_DATE,
+                past_messages_date_list,
+                inner_key=inner_key,
+            )
+            await full_message_send(
+                context,
+                phrases.ANTI_SPAM_WARNING,
+                update=update,
+                quote_if_group=False,
+                new_message=True,
+            )
         return True
 
     # Add the message to the list
     past_messages_date_list.append(now)
-    set_context_data(context, context_data_type, ContextDataKey.PAST_MESSAGES_DATE, past_messages_date_list,
-                     inner_key=inner_key)
+    set_context_data(
+        context,
+        context_data_type,
+        ContextDataKey.PAST_MESSAGES_DATE,
+        past_messages_date_list,
+        inner_key=inner_key,
+    )
 
     return False

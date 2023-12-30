@@ -28,13 +28,25 @@ from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.income_tax_service import user_has_complete_tax_deduction
 from src.service.leaderboard_service import get_current_leaderboard_user, get_highest_active_rank
-from src.service.message_service import full_message_send, full_media_send, mention_markdown_v2, \
-    get_start_with_command_url, escape_valid_markdown_chars, message_is_reply
+from src.service.message_service import (
+    full_message_send,
+    full_media_send,
+    mention_markdown_v2,
+    get_start_with_command_url,
+    escape_valid_markdown_chars,
+    message_is_reply,
+)
 from src.service.user_service import user_is_boss, get_boss_type
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Command.Command, original_user: User,
-                 inbound_keyboard: Keyboard = None, group_chat: GroupChat = None) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    command: Command.Command,
+    original_user: User,
+    inbound_keyboard: Keyboard = None,
+    group_chat: GroupChat = None,
+) -> None:
     """
     Displays a user's status
     :param update: Telegram update
@@ -58,11 +70,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
     if in_reply_to_message:
         # Used in reply to a bot
         if update.effective_message.reply_to_message.from_user.is_bot:
-            await full_message_send(context, phrases.COMMAND_IN_REPLY_TO_BOT_ERROR, update=update,
-                                    add_delete_button=True)
+            await full_message_send(
+                context,
+                phrases.COMMAND_IN_REPLY_TO_BOT_ERROR,
+                update=update,
+                add_delete_button=True,
+            )
             return
 
-        target_user: User = User.get_or_none(User.tg_user_id == update.effective_message.reply_to_message.from_user.id)
+        target_user: User = User.get_or_none(
+            User.tg_user_id == update.effective_message.reply_to_message.from_user.id
+        )
         own_status = False
     else:
         target_user: User = user
@@ -79,16 +97,21 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         # Add the requested user to the list of users that can delete the message
         can_delete_users.append(target_user.tg_user_id)
 
-        requesting_user_leaderboard_user_rank = get_highest_active_rank(user, group_chat=group_chat)
+        requesting_user_leaderboard_user_rank = get_highest_active_rank(
+            user, group_chat=group_chat
+        )
 
         if not requesting_user_leaderboard_user_rank.is_higher(leaderboard_target_user_rank):
             ot_text = phrases.NOT_ALLOWED_TO_VIEW_REPLIED_STATUS.format(
-                mention_markdown_v2(user.tg_user_id, 'Your'),
+                mention_markdown_v2(user.tg_user_id, "Your"),
                 requesting_user_leaderboard_user_rank.get_emoji_and_rank_message(),
                 mention_markdown_v2(target_user.tg_user_id, target_user.tg_first_name),
-                leaderboard_target_user_rank.get_emoji_and_rank_message())
+                leaderboard_target_user_rank.get_emoji_and_rank_message(),
+            )
 
-            await full_message_send(context, ot_text, update, add_delete_button=True, authorized_users=can_delete_users)
+            await full_message_send(
+                context, ot_text, update, add_delete_button=True, authorized_users=can_delete_users
+            )
             return
 
     # Allowed only in private chat (Rookie or Prisoner)
@@ -97,21 +120,39 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             leaderboard_user_rank = leaderboard_target_user_rank
         else:
             leaderboard_user_rank = LeaderboardRank.get_rank_by_leaderboard_user(
-                get_current_leaderboard_user(user, group_chat=group_chat))
-        if (command.message_source is not MessageSource.PRIVATE
-                and ((leaderboard_user_rank is LeaderboardRank.ROOKIE and not user_is_boss(user, group_chat=group_chat))
-                     or user.is_arrested())):
+                get_current_leaderboard_user(user, group_chat=group_chat)
+            )
+        if command.message_source is not MessageSource.PRIVATE and (
+            (
+                leaderboard_user_rank is LeaderboardRank.ROOKIE
+                and not user_is_boss(user, group_chat=group_chat)
+            )
+            or user.is_arrested()
+        ):
             outbound_keyboard: list[list[Keyboard]] = [[
-                Keyboard(phrases.STATUS_PRIVATE_CHAT_KEY,
-                         url=get_start_with_command_url(Command.GRP_USER_STATUS.name))]]
+                Keyboard(
+                    phrases.STATUS_PRIVATE_CHAT_KEY,
+                    url=get_start_with_command_url(Command.GRP_USER_STATUS.name),
+                )
+            ]]
 
-            ot_text = (phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY if user.is_arrested()
-                       else phrases.ROOKIE_STATUS_PRIVATE_CHAT_ONLY)
-            await full_message_send(context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True)
+            ot_text = (
+                phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY
+                if user.is_arrested()
+                else phrases.ROOKIE_STATUS_PRIVATE_CHAT_ONLY
+            )
+            await full_message_send(
+                context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True
+            )
             return
 
-    pending_bounty_addendum = '' if target_user.pending_bounty == 0 else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
-        bounty_service.get_belly_formatted(target_user.pending_bounty))
+    pending_bounty_addendum = (
+        ""
+        if target_user.pending_bounty == 0
+        else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
+            bounty_service.get_belly_formatted(target_user.pending_bounty)
+        )
+    )
 
     bounty_string = target_user.get_bounty_formatted()
     if target_user.is_arrested():
@@ -127,12 +168,15 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
         bounty_string,
         pending_bounty_addendum,
         target_user_rank,
-        escape_valid_markdown_chars(location_name))
+        escape_valid_markdown_chars(location_name),
+    )
 
     # Add Crew if in one
     if target_user.is_crew_member():
         crew = target_user.crew
-        message_text += phrases.SHOW_USER_STATUS_CREW.format(escape_valid_markdown_chars(crew.name))
+        message_text += phrases.SHOW_USER_STATUS_CREW.format(
+            escape_valid_markdown_chars(crew.name)
+        )
 
     # Extra info visible only if checking own status or being checked by a boss
     if own_status or user_is_boss(user, group_chat=group_chat):
@@ -145,22 +189,28 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
 
         # Add fight immunity if active
-        if target_user.fight_immunity_end_date is not None and \
-                target_user.fight_immunity_end_date > datetime.datetime.now():
+        if (
+            target_user.fight_immunity_end_date is not None
+            and target_user.fight_immunity_end_date > datetime.datetime.now()
+        ):
             # Get remaining time
             remaining_time = get_remaining_duration(target_user.fight_immunity_end_date)
             message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
 
         # Add fight cooldown if active
-        if target_user.fight_cooldown_end_date is not None and \
-                target_user.fight_cooldown_end_date > datetime.datetime.now():
+        if (
+            target_user.fight_cooldown_end_date is not None
+            and target_user.fight_cooldown_end_date > datetime.datetime.now()
+        ):
             # Get remaining time
             remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
             message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
         # Add warlord remaining time if available
         if target_user.is_warlord():
-            remaining_time = get_remaining_duration(Warlord.get_latest_active_by_user(target_user).end_date)
+            remaining_time = get_remaining_duration(
+                Warlord.get_latest_active_by_user(target_user).end_date
+            )
             message_text += phrases.SHOW_USER_STATUS_WARLORD_REMAINING_TIME.format(remaining_time)
 
         # BOUNTY BONUSES
@@ -172,23 +222,34 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
                 Emoji.LOG_POSITIVE if Env.CREW_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
                 phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
-                Env.CREW_BOUNTY_BONUS.get_int())
+                Env.CREW_BOUNTY_BONUS.get_int(),
+            )
             has_bounty_bonus = True
 
         # Crew MVP Bounty Bonus
         if target_user.has_crew_mvp_bonus():
             bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-                Emoji.LOG_POSITIVE if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+                (
+                    Emoji.LOG_POSITIVE
+                    if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0
+                    else Emoji.LOG_NEGATIVE
+                ),
                 phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
-                Env.CREW_MVP_BOUNTY_BONUS.get_int())
+                Env.CREW_MVP_BOUNTY_BONUS.get_int(),
+            )
             has_bounty_bonus = True
 
         # New World Bounty Bonus
         if target_user.has_new_world_bonus():
             bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-                Emoji.LOG_POSITIVE if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0 else Emoji.LOG_NEGATIVE,
+                (
+                    Emoji.LOG_POSITIVE
+                    if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0
+                    else Emoji.LOG_NEGATIVE
+                ),
                 phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD,
-                Env.NEW_WORLD_BOUNTY_BONUS.get_int())
+                Env.NEW_WORLD_BOUNTY_BONUS.get_int(),
+            )
             has_bounty_bonus = True
 
         if has_bounty_bonus:
@@ -203,7 +264,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
                 Emoji.LOG_NEGATIVE,
                 phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
-                (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()))
+                (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()),
+            )
             has_bounty_deduction = True
 
         # Income tax
@@ -211,7 +273,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
                 Emoji.LOG_NEGATIVE,
                 phrases.SHOW_USER_STATUS_INCOME_TAX,
-                (-1 * target_user.get_income_tax_percentage()))
+                (-1 * target_user.get_income_tax_percentage()),
+            )
             has_bounty_deduction = True
 
         if has_bounty_deduction:
@@ -224,7 +287,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             if eaten_devil_fruit is not None:
                 message_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
                     eaten_devil_fruit.get_full_name(),
-                    get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False))
+                    get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False),
+                )
 
             # Crew abilities
             if target_user.is_crew_member():
@@ -232,14 +296,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
                 crew_active_abilities = crew.get_active_abilities()
                 if len(crew_active_abilities) > 0:
                     message_text += phrases.SHOW_USER_STATUS_CREW_ABILITIES.format(
-                        get_crew_abilities_text(active_abilities=crew_active_abilities, add_emoji=True))
+                        get_crew_abilities_text(
+                            active_abilities=crew_active_abilities, add_emoji=True
+                        )
+                    )
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None
     if in_reply_to_message:
         message_text += "\n\n" + phrases.SHOW_USER_STATUS_ADD_REPLY.format(
-            mention_markdown_v2(update.effective_user.id,
-                                update.effective_user.first_name))
+            mention_markdown_v2(update.effective_user.id, update.effective_user.first_name)
+        )
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
@@ -254,20 +321,39 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, command: Co
             original_user.should_update_model = False
 
     else:  # Send regular message
-        await full_message_send(context, message_text, update, reply_to_message_id=reply_to_message_id,
-                                add_delete_button=(inbound_keyboard is None), authorized_users=can_delete_users,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            message_text,
+            update,
+            reply_to_message_id=reply_to_message_id,
+            add_delete_button=(inbound_keyboard is None),
+            authorized_users=can_delete_users,
+            inbound_keyboard=inbound_keyboard,
+        )
 
 
-async def send_bounty_poster(context: ContextTypes.DEFAULT_TYPE, update: Update, user: User, caption: str = None,
-                             reply_to_message_id: int = None, send_in_private_chat=False) -> None:
+async def send_bounty_poster(
+    context: ContextTypes.DEFAULT_TYPE,
+    update: Update,
+    user: User,
+    caption: str = None,
+    reply_to_message_id: int = None,
+    send_in_private_chat=False,
+) -> None:
     poster_path = await get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO)
-    poster.media_id = open(poster_path, 'rb')
+    poster.media_id = open(poster_path, "rb")
 
-    await full_media_send(context, saved_media=poster, update=update, caption=caption,
-                          reply_to_message_id=reply_to_message_id, new_message=True, add_delete_button=True,
-                          send_in_private_chat=send_in_private_chat)
+    await full_media_send(
+        context,
+        saved_media=poster,
+        update=update,
+        caption=caption,
+        reply_to_message_id=reply_to_message_id,
+        new_message=True,
+        add_delete_button=True,
+        send_in_private_chat=send_in_private_chat,
+    )
 
 
 def should_send_poster(user: User, group_chat: GroupChat, is_own_status: bool) -> bool:

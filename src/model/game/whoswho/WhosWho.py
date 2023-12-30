@@ -7,8 +7,14 @@ from src.service.download_service import generate_temp_file_path, download_temp_
 
 
 class WhosWho:
-    def __init__(self, character: Character, image_path: str = None, level: int = 5, latest_blurred_image: str = None,
-                 revealed_letters_count: int = 0):
+    def __init__(
+        self,
+        character: Character,
+        image_path: str = None,
+        level: int = 5,
+        latest_blurred_image: str = None,
+        revealed_letters_count: int = 0,
+    ):
         """
         Constructor
         :param character: The character
@@ -29,9 +35,9 @@ class WhosWho:
                 with Image.open(self.image_path):
                     pass
             except FileNotFoundError:
-                self.image_path = download_temp_file(self.character.anime_image_url, 'jpg')
+                self.image_path = download_temp_file(self.character.anime_image_url, "jpg")
         else:
-            self.image_path = download_temp_file(self.character.anime_image_url, 'jpg')
+            self.image_path = download_temp_file(self.character.anime_image_url, "jpg")
 
         # Reset the blurred image if it doesn't exist because it was deleted
         if self.latest_blurred_image is not None:
@@ -50,7 +56,9 @@ class WhosWho:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
+        )
 
     def set_blurred_image(self):
         """
@@ -59,9 +67,9 @@ class WhosWho:
         """
 
         with Image.open(self.image_path) as image:
-            image = image.convert('RGB')
+            image = image.convert("RGB")
             image = image.filter(ImageFilter.GaussianBlur((self.level - 1) * 10))
-            save_path = generate_temp_file_path('jpg')
+            save_path = generate_temp_file_path("jpg")
             image.save(save_path)
             self.latest_blurred_image = save_path
 

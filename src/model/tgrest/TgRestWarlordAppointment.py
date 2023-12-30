@@ -9,7 +9,9 @@ class TgRestWarlordAppointment(TgRest):
     TgRestWarlordAppointment class is used to create a Telegram REST API request.
     """
 
-    def __init__(self, bot_id: str, object_type: TgRestObjectType, user_id: int, warlord_id: int, days: int):
+    def __init__(
+        self, bot_id: str, object_type: TgRestObjectType, user_id: int, warlord_id: int, days: int
+    ):
         """
         Constructor
 

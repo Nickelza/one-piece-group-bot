@@ -8,12 +8,15 @@ class GroupChatDisabledFeature(BaseModel):
     """
     GroupChat Disabled Feature class
     """
+
     id = PrimaryKeyField()
-    group_chat = ForeignKeyField(GroupChat, backref='disabled_features', on_delete='CASCADE', on_update='CASCADE')
+    group_chat = ForeignKeyField(
+        GroupChat, backref="disabled_features", on_delete="CASCADE", on_update="CASCADE"
+    )
     feature = SmallIntegerField()
 
     class Meta:
-        db_table = 'group_chat_disabled_feature'
+        db_table = "group_chat_disabled_feature"
 
 
 GroupChatDisabledFeature.create_table()

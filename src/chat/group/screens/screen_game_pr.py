@@ -16,13 +16,25 @@ from src.model.game.punkrecords.PunkRecords import PunkRecords, RevealedDetail
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.SupabaseRest import SupabaseRest
-from src.service.game_service import set_user_private_screen, guess_game_countdown_to_start, save_game, \
-    get_terminology_from_game, validate_game, get_players, end_game, end_text_based_game
+from src.service.game_service import (
+    set_user_private_screen,
+    guess_game_countdown_to_start,
+    save_game,
+    get_terminology_from_game,
+    validate_game,
+    get_players,
+    end_game,
+    end_text_based_game,
+)
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, game: Game = None
-                 ) -> None:
+async def manage(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    inbound_keyboard: Keyboard,
+    game: Game = None,
+) -> None:
     """
     Manage the Punk Records screen
     :param update: The update object
@@ -45,7 +57,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         game.status = GameStatus.COUNTDOWN_TO_START
         game.save()
         context.application.create_task(
-            guess_game_countdown_to_start(update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game))
+            guess_game_countdown_to_start(
+                update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game
+            )
+        )
         return
 
 
@@ -72,8 +87,12 @@ def get_board(game: Game) -> PunkRecords:
     return PunkRecords(character=char, **json_dict)
 
 
-def get_recap_details(punk_records: PunkRecords, last_detail: RevealedDetail = None, all_details_are_new: bool = False,
-                      add_instructions: bool = False) -> str:
+def get_recap_details(
+    punk_records: PunkRecords,
+    last_detail: RevealedDetail = None,
+    all_details_are_new: bool = False,
+    add_instructions: bool = False,
+) -> str:
     """
     Get the specific text
     :param punk_records: The board
@@ -95,31 +114,45 @@ def get_recap_details(punk_records: PunkRecords, last_detail: RevealedDetail = N
 
         if isinstance(values, str):
             ot_text_detail = phrases.PUNK_RECORDS_GAME_RECAP_DETAIL.format(
-                (Emoji.NEW if detail_is_last_detail(name, values, last_detail) or all_details_are_new else ''),
-                name, escape_valid_markdown_chars(values))
+                (
+                    Emoji.NEW
+                    if detail_is_last_detail(name, values, last_detail) or all_details_are_new
+                    else ""
+                ),
+                name,
+                escape_valid_markdown_chars(values),
+            )
         else:
             list_details = []
             for value in values:
-                item_detail = (Emoji.NEW
-                               if detail_is_last_detail(name, value, last_detail) or all_details_are_new
-                               else '') + value
+                item_detail = (
+                    Emoji.NEW
+                    if detail_is_last_detail(name, value, last_detail) or all_details_are_new
+                    else ""
+                ) + value
                 list_details.append(item_detail)
             ot_text_detail = phrases.PUNK_RECORDS_GAME_RECAP_DETAIL_LIST.format(
-                name, escape_valid_markdown_chars('\n'.join(list_details)))
+                name, escape_valid_markdown_chars("\n".join(list_details))
+            )
 
         ot_text_list.append(ot_text_detail)
 
-    ot_text = '\n'.join(ot_text_list)
+    ot_text = "\n".join(ot_text_list)
 
     if add_instructions:
-        ot_text += '\n\n_' + phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION + '_'
+        ot_text += "\n\n_" + phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION + "_"
 
     return ot_text
 
 
-async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user: User = None,
-                   should_send_to_all_players: bool = True, schedule_next_send: bool = True,
-                   is_first_run: bool = True) -> None:
+async def run_game(
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    send_to_user: User = None,
+    should_send_to_all_players: bool = True,
+    schedule_next_send: bool = True,
+    is_first_run: bool = True,
+) -> None:
     """
     Send the details box
     :param context: The context object
@@ -132,10 +165,10 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     """
 
     if send_to_user is not None and should_send_to_all_players:
-        raise ValueError('Cannot send to user and all players')
+        raise ValueError("Cannot send to user and all players")
 
     if not should_send_to_all_players and schedule_next_send:
-        raise ValueError('Cannot schedule next send if not sending to all players')
+        raise ValueError("Cannot schedule next send if not sending to all players")
 
     if send_to_user is not None:
         users: list[User] = [send_to_user]
@@ -148,8 +181,8 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     punk_records = get_board(game)
 
     # If detail can be revealed, add new revealed detail to text
-    recap_text = ''
-    new_detail_text = ''
+    recap_text = ""
+    new_detail_text = ""
     new_detail = None
     # First iteration, do not reveal new detail or hint
     if not is_first_run:
@@ -162,27 +195,34 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
                 punk_records.revealed_letters_count += 1
 
         # Add hint, goes on bottom of text just before time remaining to next hint
-        hint = punk_records.character.name[:punk_records.revealed_letters_count]
-        recap_text = '\n' + phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
+        hint = punk_records.character.name[: punk_records.revealed_letters_count]
+        recap_text = "\n" + phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
 
     save_game(game, punk_records.get_board_json())
 
     # Time remaining text, always after everything else
     if punk_records.can_reveal_detail():
-        recap_text += '\n' + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL.format(
-            Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int())
+        recap_text += "\n" + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL.format(
+            Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int()
+        )
     elif not punk_records.have_revealed_all_letters():
-        recap_text += '\n' + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
-            Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int())
+        recap_text += "\n" + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(
+            Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int()
+        )
 
     # Refresh board
     punk_records = get_board(game)
 
     ot_text = new_detail_text + phrases.PUNK_RECORDS_GAME_RECAP.format(
         get_recap_details(
-            punk_records, new_detail, add_instructions=True, all_details_are_new=is_first_run), recap_text)
+            punk_records, new_detail, add_instructions=True, all_details_are_new=is_first_run
+        ),
+        recap_text,
+    )
     for user in users:
-        context.application.create_task(full_message_send(context, ot_text, chat_id=user.tg_user_id))
+        context.application.create_task(
+            full_message_send(context, ot_text, chat_id=user.tg_user_id)
+        )
 
         # Set private screen for input
         context.application.create_task(set_user_private_screen(user, game))
@@ -204,8 +244,9 @@ async def run_game(context: ContextTypes.DEFAULT_TYPE, game: Game, send_to_user:
     await run_game(context, game, is_first_run=False)
 
 
-async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, user: User
-                          ) -> None:
+async def validate_answer(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, user: User
+) -> None:
     """
     Validate the answer
     :param update: The update object
@@ -227,12 +268,14 @@ async def validate_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ga
 
     # End game
     challenger, opponent = get_players(game)
-    outcome: GameOutcome = GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
+    outcome: GameOutcome = (
+        GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
+    )
     await end_game(game, outcome, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
-    details_text = phrases.PUNK_RECORDS_GAME_RECAP.format(get_recap_details(get_board(game)), '')
+    details_text = phrases.PUNK_RECORDS_GAME_RECAP.format(get_recap_details(get_board(game)), "")
     winner_text = phrases.GUESS_GAME_CORRECT_ANSWER.format(details_text)
     loser_text: str = phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(details_text)
 

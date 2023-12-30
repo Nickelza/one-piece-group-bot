@@ -12,10 +12,16 @@ from src.service.download_service import generate_temp_file_path
 
 
 class Shambles:
-    def __init__(self, terminology: Terminology, grid_size: int, grid: list[list[str]] = None,
-                 word_coordinates: list[tuple[int, int]] = None, excluded_coordinates: list[tuple[int, int]] = None,
-                 image_path: str = None, revealed_letters_count: int = 0):
-
+    def __init__(
+        self,
+        terminology: Terminology,
+        grid_size: int,
+        grid: list[list[str]] = None,
+        word_coordinates: list[tuple[int, int]] = None,
+        excluded_coordinates: list[tuple[int, int]] = None,
+        image_path: str = None,
+        revealed_letters_count: int = 0,
+    ):
         """
         Constructor
         :param terminology: The terminology
@@ -31,7 +37,9 @@ class Shambles:
         self.grid_size = grid_size
         self.grid = grid
         self.word_coordinates = word_coordinates
-        self.excluded_coordinates = excluded_coordinates if excluded_coordinates is not None else []
+        self.excluded_coordinates = (
+            excluded_coordinates if excluded_coordinates is not None else []
+        )
         self.image_path = image_path
         self.revealed_letters_count = revealed_letters_count
 
@@ -55,7 +63,9 @@ class Shambles:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
+        )
 
     def create_grid(self):
         """
@@ -63,28 +73,28 @@ class Shambles:
         :return: None
         """
 
-        word = self.terminology.name.replace(' ', '')
+        word = self.terminology.name.replace(" ", "")
         grid_size = self.grid_size
 
         # Check if the word length is larger than the grid size
         if len(word) > self.grid_size:
-            raise ValueError('The length of the word cannot be larger than the grid size')
+            raise ValueError("The length of the word cannot be larger than the grid size")
 
         # Convert the word to uppercase
         word = word.upper()
 
         # Define the grid for the crossword puzzle.
-        grid = [[' ' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        grid = [[" " for _ in range(self.grid_size)] for _ in range(self.grid_size)]
 
         # Select a random direction for the word (either horizontal, vertical, or diagonal).
-        direction = random.choice(['horizontal', 'vertical', 'diagonal'])
+        direction = random.choice(["horizontal", "vertical", "diagonal"])
 
         # Determine the number of cells in the grid that the word will occupy based on its length and direction.
         word_len = len(word)
-        if direction == 'horizontal':
+        if direction == "horizontal":
             max_start_x = self.grid_size - word_len
             max_start_y = self.grid_size - 1
-        elif direction == 'vertical':
+        elif direction == "vertical":
             max_start_x = self.grid_size - 1
             max_start_y = self.grid_size - word_len
         else:
@@ -96,8 +106,8 @@ class Shambles:
 
         # Place the word in the selected direction starting from the chosen starting point.
         for i in range(word_len):
-            x = start_x + i if direction in ['horizontal', 'diagonal'] else start_x
-            y = start_y + i if direction in ['vertical', 'diagonal'] else start_y
+            x = start_x + i if direction in ["horizontal", "diagonal"] else start_x
+            y = start_y + i if direction in ["vertical", "diagonal"] else start_y
 
             grid[y][x] = word[i]
 
@@ -106,14 +116,16 @@ class Shambles:
         alphabet = string.ascii_uppercase
         for y in range(grid_size):
             for x in range(grid_size):
-                if grid[y][x] == ' ':
+                if grid[y][x] == " ":
                     grid[y][x] = random.choice(alphabet)
 
         # Save the coordinates of the word in the grid
         word_coordinates = []
         for i in range(word_len):
-            word_coordinates.append((start_x + i * (direction == 'horizontal') + i * (direction == 'diagonal'),
-                                     start_y + i * (direction == 'vertical') + i * (direction == 'diagonal')))
+            word_coordinates.append((
+                start_x + i * (direction == "horizontal") + i * (direction == "diagonal"),
+                start_y + i * (direction == "vertical") + i * (direction == "diagonal"),
+            ))
 
         self.grid = grid
         self.word_coordinates = word_coordinates
@@ -147,7 +159,7 @@ class Shambles:
                 for x in range(self.grid_size):
                     letter = self.grid[y][x]
 
-                    if letter != ' ':
+                    if letter != " ":
                         # Calculate the position of the letter on the image
                         x_pos = x * cell_width + cell_width / 2
                         y_pos = y * cell_height + cell_height / 2
@@ -159,17 +171,23 @@ class Shambles:
                         x_pos -= letter_width / 2
                         y_pos -= letter_height / 2
 
-                        fill_color = 'white'
+                        fill_color = "white"
                         if highlight_answer and [x, y] in self.word_coordinates:
-                            fill_color = '#39FF14'  # Neon green
+                            fill_color = "#39FF14"  # Neon green
 
                         # Draw the letter on the image
                         draw = ImageDraw.Draw(image)
-                        draw.text((x_pos, y_pos), letter, font=font, fill=fill_color, stroke_width=stroke_width,
-                                  stroke_fill='black')
+                        draw.text(
+                            (x_pos, y_pos),
+                            letter,
+                            font=font,
+                            fill=fill_color,
+                            stroke_width=stroke_width,
+                            stroke_fill="black",
+                        )
 
             # Save the image
-            save_path = generate_temp_file_path('jpg')
+            save_path = generate_temp_file_path("jpg")
             image.save(save_path)
             self.image_path = save_path
 
@@ -206,7 +224,7 @@ class Shambles:
         """
 
         if not self.can_reduce_level():
-            raise ValueError('Cannot reduce level')
+            raise ValueError("Cannot reduce level")
 
         # Coordinates of non-excluded letters that are not part of the word
         non_excluded_coordinates = []
@@ -219,7 +237,7 @@ class Shambles:
         coordinate = random.choice(non_excluded_coordinates)
 
         # Remove the letter from the grid
-        self.grid[coordinate[1]][coordinate[0]] = '·'
+        self.grid[coordinate[1]][coordinate[0]] = "·"
 
         # Add the coordinate to the excluded coordinates
         self.excluded_coordinates.append(coordinate)
@@ -252,4 +270,4 @@ class Shambles:
                 return Env.SHAMBLES_GRID_SIZE_HARD.get_int()
 
             case _:
-                raise ValueError('Invalid difficulty')
+                raise ValueError("Invalid difficulty")

@@ -14,7 +14,9 @@ from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
 
 
-async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User) -> None:
+async def manage(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+) -> None:
     """
     Manage the bounty loan detail forgiveness screen
     :param update: The update
@@ -24,11 +26,17 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
     :return: None
     """
 
-    loan: BountyLoan = BountyLoan.get_by_id(inbound_keyboard.get(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
+    loan: BountyLoan = BountyLoan.get_by_id(
+        inbound_keyboard.get(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
+    )
 
     if not loan.is_active():
-        await full_message_send(context, phrases.BOUNTY_LOAN_ITEM_NOT_ACTIVE, update=update,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            phrases.BOUNTY_LOAN_ITEM_NOT_ACTIVE,
+            update=update,
+            inbound_keyboard=inbound_keyboard,
+        )
         return
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
@@ -36,27 +44,42 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_key
         ot_text = phrases.BOUNTY_LOAN_ITEM_FORGIVE_CONFIRMATION_REQUEST.format(
             get_belly_formatted(loan.repay_amount),
             get_belly_formatted(loan.amount_repaid),
-            get_belly_formatted(loan.get_remaining_amount()))
+            get_belly_formatted(loan.get_remaining_amount()),
+        )
 
-        inline_keyboard: list[list[Keyboard]] = [get_yes_no_keyboard(user, screen=Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE,
-                                                                     primary_key=loan.id,
-                                                                     inbound_keyboard=inbound_keyboard,
-                                                                     no_is_back_button=True)]
+        inline_keyboard: list[list[Keyboard]] = [
+            get_yes_no_keyboard(
+                user,
+                screen=Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE,
+                primary_key=loan.id,
+                inbound_keyboard=inbound_keyboard,
+                no_is_back_button=True,
+            )
+        ]
 
-        await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard,
-                                inbound_keyboard=inbound_keyboard)
+        await full_message_send(
+            context,
+            ot_text,
+            update=update,
+            keyboard=inline_keyboard,
+            inbound_keyboard=inbound_keyboard,
+        )
         return
 
     # Forgive loan
     loan.forgive()
 
     # Send notification to the borrower
-    await send_notification(context, loan.borrower, BountyLoanForgivenNotification(loan), update=update)
+    await send_notification(
+        context, loan.borrower, BountyLoanForgivenNotification(loan), update=update
+    )
 
     ot_text = phrases.BOUNTY_LOAN_ITEM_FORGIVE_SUCCESS
     # Show callback alert
     await full_message_send(context, ot_text, update=update, answer_callback=True, show_alert=True)
 
     # Go back to loan detail
-    await manage_bounty_loan_detail(update, context, inbound_keyboard, user, called_from_another_screen=True)
+    await manage_bounty_loan_detail(
+        update, context, inbound_keyboard, user, called_from_another_screen=True
+    )
     return

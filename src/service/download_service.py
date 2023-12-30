@@ -49,13 +49,15 @@ def cleanup_temp_dir() -> None:
             file_path = os.path.join(c.TEMP_DIR, file)
             try:
                 pathinfo = os.stat(file_path)
-                if pathinfo.st_ctime < current_time - time_limit or True:  # File is older than x time
+                if (
+                    pathinfo.st_ctime < current_time - time_limit or True
+                ):  # File is older than x time
                     if os.path.isfile(file_path):  # Is a file
                         os.unlink(file_path)
                     else:
                         shutil.rmtree(file_path)  # Is a folder
             except Exception as e:
-                logging.error('Error while deleting temp path: %s', e)
+                logging.error("Error while deleting temp path: %s", e)
 
 
 def generate_temp_file_path(extension: str) -> str:
@@ -67,7 +69,7 @@ def generate_temp_file_path(extension: str) -> str:
     """
 
     # File name
-    file_name = uuid.uuid4().hex + ('.' if not extension.startswith('.') else '') + extension
+    file_name = uuid.uuid4().hex + ("." if not extension.startswith(".") else "") + extension
 
     # File path
     return os.path.join(c.TEMP_DIR, file_name)
@@ -81,7 +83,9 @@ def get_random_string(length: int = 10) -> str:
     """
 
     # Define the characters you want to include in the random string
-    characters = string.ascii_letters + string.digits  # includes uppercase letters, lowercase letters, and digits
+    characters = (
+        string.ascii_letters + string.digits
+    )  # includes uppercase letters, lowercase letters, and digits
 
     # Generate a random string of length 10
-    return ''.join(random.choice(characters) for _ in range(length))
+    return "".join(random.choice(characters) for _ in range(length))

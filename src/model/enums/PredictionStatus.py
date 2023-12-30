@@ -12,7 +12,7 @@ PREDICTION_STATUS_NAME_MAP = {
     PredictionStatus.NEW: "New",
     PredictionStatus.SENT: "Open",
     PredictionStatus.BETS_CLOSED: "Bets closed",
-    PredictionStatus.RESULT_SET: "Result set"
+    PredictionStatus.RESULT_SET: "Result set",
 }
 
 
@@ -25,12 +25,17 @@ def get_all_prediction_status_names() -> list[str]:
 
 
 def get_active_prediction_status_names() -> list[str]:
-    return [get_prediction_status_name_by_key(status) for status in PredictionStatus
-            if status is not PredictionStatus.RESULT_SET]
+    return [
+        get_prediction_status_name_by_key(status)
+        for status in PredictionStatus
+        if status is not PredictionStatus.RESULT_SET
+    ]
 
 
 def get_prediction_status_by_name(name: str) -> PredictionStatus:
-    return list(PREDICTION_STATUS_NAME_MAP.keys())[list(PREDICTION_STATUS_NAME_MAP.values()).index(name)]
+    return list(PREDICTION_STATUS_NAME_MAP.keys())[
+        list(PREDICTION_STATUS_NAME_MAP.values()).index(name)
+    ]
 
 
 def get_prediction_status_by_list_of_names(names: list[str]) -> list[PredictionStatus]:

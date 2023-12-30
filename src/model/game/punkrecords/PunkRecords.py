@@ -14,12 +14,14 @@ class RevealedDetail:
 
 
 class PunkRecords:
-    def __init__(self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0):
+    def __init__(
+        self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0
+    ):
         """
         Constructor
 
         :param character: The character
-        :param revealed_details: The revealed details, a dictionary with the key being the name of the revealed detail 
+        :param revealed_details: The revealed details, a dictionary with the key being the name of the revealed detail
                                 and the value being the indexes of the values that have been revealed
         :param revealed_letters_count: The revealed letters count
         """
@@ -42,7 +44,9 @@ class PunkRecords:
         :return: string
         """
 
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+        return json.dumps(
+            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
+        )
 
     def is_correct(self, answer: str) -> bool:
         """
@@ -96,11 +100,16 @@ class PunkRecords:
                 return RevealedDetail(_name, self.character.info_box["Statistics"][_name])
 
             # If detail is list, return a random value that has not already been revealed
-            indexes_to_pick_from = [i for i in range(len(self.character.info_box["Statistics"][_name]))
-                                    if i not in self.revealed_details[_name]]
+            indexes_to_pick_from = [
+                i
+                for i in range(len(self.character.info_box["Statistics"][_name]))
+                if i not in self.revealed_details[_name]
+            ]
 
-            return RevealedDetail(_name,
-                                  self.character.info_box["Statistics"][_name][random.choice(indexes_to_pick_from)])
+            return RevealedDetail(
+                _name,
+                self.character.info_box["Statistics"][_name][random.choice(indexes_to_pick_from)],
+            )
 
         # First, iterate all revealable details. If a new key is found, return a random value of it
         for name in REVEALABLE_DETAILS:
@@ -120,8 +129,11 @@ class PunkRecords:
                 else:
                     # If a list, amount of revealed values is the length of the revealed values and total amount of
                     # values is the length of the list
-                    tuples_list.append((name, len(self.revealed_details[name]),
-                                        len(self.character.info_box["Statistics"][name])))
+                    tuples_list.append((
+                        name,
+                        len(self.revealed_details[name]),
+                        len(self.character.info_box["Statistics"][name]),
+                    ))
 
         # Sort the list by the amount of revealed values
         tuples_list.sort(key=lambda x: x[1])
@@ -143,7 +155,9 @@ class PunkRecords:
         if isinstance(self.character.info_box["Statistics"][name], str):
             return self.character.info_box["Statistics"][name]
 
-        return [self.character.info_box["Statistics"][name][i] for i in self.revealed_details[name]]
+        return [
+            self.character.info_box["Statistics"][name][i] for i in self.revealed_details[name]
+        ]
 
     def set_revealed_detail(self, detail: RevealedDetail) -> None:
         """
@@ -157,4 +171,5 @@ class PunkRecords:
         else:
             # List, add index of revealed value
             self.revealed_details[detail.name].append(
-                self.character.info_box["Statistics"][detail.name].index(detail.value))
+                self.character.info_box["Statistics"][detail.name].index(detail.value)
+            )

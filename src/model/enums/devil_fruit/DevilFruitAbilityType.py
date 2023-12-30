@@ -6,8 +6,8 @@ class Sign(StrEnum):
     Enum for the sign of an ability.
     """
 
-    POSITIVE = '+'
-    NEGATIVE = '-'
+    POSITIVE = "+"
+    NEGATIVE = "-"
 
 
 class DevilFruitAbilityType(IntEnum):
@@ -41,13 +41,14 @@ class DevilFruitAbilityType(IntEnum):
         return DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP[self]
 
     @staticmethod
-    def get_random() -> 'DevilFruitAbilityType':
+    def get_random() -> "DevilFruitAbilityType":
         """
         Get a random devil fruit ability type
         :return: A random devil fruit ability type
         """
 
         from random import choice
+
         return choice(list(DevilFruitAbilityType))
 
 
@@ -59,7 +60,7 @@ DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {
     DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: "Fight Defense Boost",
     DevilFruitAbilityType.PREDICTION_WAGER_REFUND: "Prediction wager fund max refund",
     DevilFruitAbilityType.GIFT_LOAN_TAX: "Gift and Loan Tax",
-    DevilFruitAbilityType.INCOME_TAX: "Income Tax"
+    DevilFruitAbilityType.INCOME_TAX: "Income Tax",
 }
 
 DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP = {
@@ -70,5 +71,5 @@ DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP = {
     DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: Sign.POSITIVE,
     DevilFruitAbilityType.PREDICTION_WAGER_REFUND: Sign.POSITIVE,
     DevilFruitAbilityType.GIFT_LOAN_TAX: Sign.NEGATIVE,
-    DevilFruitAbilityType.INCOME_TAX: Sign.NEGATIVE
+    DevilFruitAbilityType.INCOME_TAX: Sign.NEGATIVE,
 }

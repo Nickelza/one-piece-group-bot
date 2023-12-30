@@ -15,4 +15,4 @@ class Terminology:
         :return: The markdown mention of the character
         """
 
-        return f'[{escape_valid_markdown_chars(self.name)}]({escape_valid_markdown_chars(self.info_url)})'
+        return f"[{escape_valid_markdown_chars(self.name)}]({escape_valid_markdown_chars(self.info_url)})"
