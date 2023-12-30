@@ -398,6 +398,10 @@ def add_powerup(
     if reason is CrewChestSpendingReason.LEVEL_UP:
         crew.level_up()
 
+        # Reduce tax bracket
+        for member in crew.get_members():
+            member.reduce_tax_bracket()
+
     crew.chest_amount -= price
     crew.save()
 

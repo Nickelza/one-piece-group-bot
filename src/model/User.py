@@ -20,6 +20,7 @@ from src.model.enums.Location import (
 )
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
+from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
 from src.service.bot_service import get_user_context_data, set_user_context_data
 
 
@@ -28,46 +29,49 @@ class User(BaseModel):
     User class
     """
 
-    id = PrimaryKeyField()
-    tg_user_id = CharField(max_length=99, unique=True)
-    tg_first_name = CharField(max_length=99)
-    tg_last_name = CharField(max_length=99)
-    tg_username = CharField(max_length=99)
-    join_date = DateTimeField(default=datetime.datetime.now)
-    bounty = BigIntegerField(default=0)
-    total_gained_bounty = BigIntegerField(
+    id: int = PrimaryKeyField()
+    tg_user_id: str = CharField(max_length=99, unique=True)
+    tg_first_name: str = CharField(max_length=99)
+    tg_last_name: str = CharField(max_length=99)
+    tg_username: str = CharField(max_length=99)
+    join_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
+    bounty: int = BigIntegerField(default=0)
+    total_gained_bounty: int = BigIntegerField(
         default=0, constraints=[Check("total_gained_bounty >= 0")]
     )
-    pending_bounty = BigIntegerField(default=0)
-    doc_q_cooldown_end_date = DateTimeField(null=True)
-    game_cooldown_end_date = DateTimeField(null=True)
-    bounty_poster_limit = SmallIntegerField(default=0)
-    location_level = SmallIntegerField(default=0)
-    should_propose_new_world = BooleanField(default=True)
-    can_change_region = BooleanField(default=True)
-    fight_immunity_end_date = DateTimeField(null=True)
-    fight_cooldown_end_date = DateTimeField(null=True)
-    impel_down_release_date = DateTimeField(null=True)
-    impel_down_is_permanent = BooleanField(default=False)
-    crew = ForeignKeyField(Crew, backref="crew_members", null=True)
-    crew_join_date = DateTimeField(null=True)
-    crew_role = SmallIntegerField(null=True)
-    can_create_crew = BooleanField(default=True)
-    can_join_crew = BooleanField(default=True)
-    last_message_date = DateTimeField(default=datetime.datetime.now)
-    last_system_interaction_date = DateTimeField(null=True)
-    private_screen_list = CharField(max_length=99)
-    private_screen_step = SmallIntegerField()
-    private_screen_in_edit_id = IntegerField(null=True)
-    bounty_gift_tax = IntegerField(default=0)
-    is_admin = BooleanField(default=False)
-    devil_fruit_collection_cooldown_end_date = DateTimeField(null=True)
-    bounty_message_limit = BigIntegerField(default=0)
-    timezone = CharField(max_length=99, null=True)
-    is_active = BooleanField(default=True)
-    prediction_creation_cooldown_end_date = DateTimeField(null=True)
-    bounty_loan_issue_cool_down_end_date = DateTimeField(null=True)
-    is_exempt_from_global_leaderboard_requirements = BooleanField(
+    total_gained_bounty_unmodified: int = BigIntegerField(
+        default=0, constraints=[Check("total_gained_bounty_unmodified >= 0")]
+    )
+    pending_bounty: int = BigIntegerField(default=0)
+    doc_q_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
+    game_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
+    bounty_poster_limit: int = SmallIntegerField(default=0)
+    location_level: int = SmallIntegerField(default=0)
+    should_propose_new_world: bool = BooleanField(default=True)
+    can_change_region: bool = BooleanField(default=True)
+    fight_immunity_end_date: datetime.datetime = DateTimeField(null=True)
+    fight_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
+    impel_down_release_date: datetime.datetime = DateTimeField(null=True)
+    impel_down_is_permanent: bool = BooleanField(default=False)
+    crew: Crew = ForeignKeyField(Crew, backref="crew_members", null=True)
+    crew_join_date: datetime.datetime = DateTimeField(null=True)
+    crew_role: int = SmallIntegerField(null=True)
+    can_create_crew: bool = BooleanField(default=True)
+    can_join_crew: bool = BooleanField(default=True)
+    last_message_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
+    last_system_interaction_date: datetime.datetime = DateTimeField(null=True)
+    private_screen_list: str | None = CharField(max_length=99)
+    private_screen_step: int | None = SmallIntegerField()
+    private_screen_in_edit_id: int | None = IntegerField(null=True)
+    bounty_gift_tax: int = IntegerField(default=0)
+    is_admin: bool = BooleanField(default=False)
+    devil_fruit_collection_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
+    bounty_message_limit: int = BigIntegerField(default=0)
+    timezone: str = CharField(max_length=99, null=True)
+    is_active: bool = BooleanField(default=True)
+    prediction_creation_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
+    bounty_loan_issue_cool_down_end_date: datetime.datetime = DateTimeField(null=True)
+    is_exempt_from_global_leaderboard_requirements: bool = BooleanField(
         default=False
     )  # For Legendary Pirate
 
@@ -94,9 +98,7 @@ class User(BaseModel):
 
         from src.service.bounty_service import get_belly_formatted
 
-        return get_belly_formatted(
-            int(str(self.bounty))
-        )  # Double cast to avoid IDE warnings (BigIntegerField type)
+        return get_belly_formatted(self.bounty)
 
     def is_arrested(self):
         """
@@ -285,7 +287,7 @@ class User(BaseModel):
 
         from src.service.message_service import mention_markdown_v2
 
-        return mention_markdown_v2(str(self.tg_user_id), str(self.tg_first_name))
+        return mention_markdown_v2(self.tg_user_id, self.tg_first_name)
 
     def get_markdown_name(self):
         """
@@ -295,7 +297,7 @@ class User(BaseModel):
 
         from src.service.message_service import escape_valid_markdown_chars
 
-        return escape_valid_markdown_chars(str(self.tg_first_name))
+        return escape_valid_markdown_chars(self.tg_first_name)
 
     def refresh(self) -> "User":
         """
@@ -312,9 +314,9 @@ class User(BaseModel):
         """
 
         if self.is_crew_member():
-            return max(int(str(self.bounty)), self.crew.get_average_bounty())
+            return max(self.bounty, self.crew.get_average_bounty())
 
-        return int(str(self.bounty))
+        return self.bounty
 
     def in_new_world(self):
         """
@@ -324,7 +326,7 @@ class User(BaseModel):
 
         from src.model.enums.Location import is_new_world_by_level
 
-        return is_new_world_by_level(int(str(self.location_level)))
+        return is_new_world_by_level(self.location_level)
 
     def has_higher_bounty_than_crew_average(self) -> bool:
         """
@@ -333,7 +335,7 @@ class User(BaseModel):
         """
 
         if self.is_crew_member():
-            return int(str(self.bounty)) > self.crew.get_average_bounty()
+            return self.bounty > self.crew.get_average_bounty()
 
         return False
 
@@ -369,7 +371,7 @@ class User(BaseModel):
         :return: True if the user is in Paradise
         """
 
-        return is_paradise_by_level(int(str(self.location_level)))
+        return is_paradise_by_level(self.location_level)
 
     def get_location(self) -> Location:
         """
@@ -377,7 +379,7 @@ class User(BaseModel):
         :return: The location of the user
         """
 
-        return get_by_level(int(str(self.location_level)))
+        return get_by_level(self.location_level)
 
     def get_location_name(self) -> str:
         """
@@ -526,7 +528,7 @@ class User(BaseModel):
         :return: The bounty plus the pending bounty
         """
 
-        return int(str(self.bounty)) + int(str(self.pending_bounty))
+        return self.bounty + self.pending_bounty
 
     def has_income_tax(self):
         """
@@ -536,17 +538,32 @@ class User(BaseModel):
 
         return self.get_income_tax_percentage() > 0
 
+    def reduce_tax_bracket(self, levels_down: int = 1) -> None:
+        """
+        Reduces the tax bracket by the given amount
+        :param levels_down: The number of levels down
+        :return: None
+        """
+
+        # Get previous tax bracket
+        previous_tax_bracket = IncomeTaxBracket.get_previous_bracket(
+            self.total_gained_bounty, levels_down
+        )
+
+        # Update user
+        self.total_gained_bounty = previous_tax_bracket.min_amount
+        self.save()
+
     def get_income_tax_percentage(self) -> float:
         """
         Returns the income tax percentage
         :return: The income tax percentage
         """
 
-        from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
         from src.service.math_service import format_percentage_value
 
         return format_percentage_value(
-            IncomeTaxBracket.get_bracket(int(str(self.total_gained_bounty))).percentage
+            IncomeTaxBracket.get_bracket(self.total_gained_bounty).percentage
         )
 
     @staticmethod

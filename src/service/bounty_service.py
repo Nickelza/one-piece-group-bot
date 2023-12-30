@@ -313,7 +313,10 @@ async def add_or_remove_bounty(
     with db.atomic():
         # Refresh user, only bounty and pending bounty is needed
         refreshed_user: User = User.get_by_id(user.id)
-        user.bounty, user.pending_bounty = refreshed_user.bounty, refreshed_user.pending_bounty
+        user.bounty = refreshed_user.bounty
+        user.pending_bounty = refreshed_user.pending_bounty
+        user.total_gained_bounty = refreshed_user.total_gained_bounty
+        user.total_gained_bounty_unmodified = refreshed_user.total_gained_bounty_unmodified
         previous_pending_bounty = user.pending_bounty
 
         # Should remove bounty
@@ -406,6 +409,7 @@ async def add_or_remove_bounty(
                     )
 
             user.total_gained_bounty += net_amount_after_tax
+            user.total_gained_bounty_unmodified += net_amount_after_tax
 
             if check_for_loan:
                 # If user has an expired bounty loan, use n% of the bounty to repay the loan

@@ -72,6 +72,23 @@ class IncomeTaxBracket:
         return TAX_BRACKETS[-1]  # Return last bracket
 
     @staticmethod
+    def get_previous_bracket(amount: int, levels_down: int = 1) -> "IncomeTaxBracket":
+        """
+        Get the previous tax bracket
+        :param amount: The amount
+        :param levels_down: The number of levels down
+        :return: The previous tax bracket
+        """
+
+        current_bracket = IncomeTaxBracket.get_bracket(amount)
+        current_bracket_index = TAX_BRACKETS.index(current_bracket)
+
+        if current_bracket_index - levels_down >= 0:
+            return TAX_BRACKETS[current_bracket_index - levels_down]
+
+        return TAX_BRACKETS[0]
+
+    @staticmethod
     def get_tax(starting_amount: int, amount: int) -> int:
         """
         Get the tax

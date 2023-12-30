@@ -175,7 +175,7 @@ async def manage(
     if target_user.is_crew_member():
         crew = target_user.crew
         message_text += phrases.SHOW_USER_STATUS_CREW.format(
-            escape_valid_markdown_chars(crew.name)
+            escape_valid_markdown_chars(crew.name), crew.level
         )
 
     # Extra info visible only if checking own status or being checked by a boss

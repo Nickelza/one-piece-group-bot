@@ -59,7 +59,7 @@ SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = "Permanent"
 SHOW_USER_STATUS_FIGHT_IMMUNITY = "\nFight immunity: {}"
 SHOW_USER_STATUS_FIGHT_COOLDOWN = "\nFight cooldown: {}"
 SHOW_USER_STATUS_WARLORD_REMAINING_TIME = "\nWarlord remaining time: {}"
-SHOW_USER_STATUS_CREW = "\nCrew: {}"
+SHOW_USER_STATUS_CREW = "\nCrew: {} \\(Lv. {}\\)"
 SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = "\n\n*Daily Bounty Bonus*"
 SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = "\n{}{} \\({}%\\)"
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW = "Crew"
@@ -855,7 +855,8 @@ CREW_ABILITY_ACTIVATE_SUCCESS = (
 # Crew power-up
 CREW_POWERUP = (
     "*Level*"
-    "\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot."
+    "\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot"
+    " and reduce income tax for the members."
     "\n\n_*Current level:*_ {}"
     "\n\n\n*Abilities*"
     "\nAbilities mimic the effects of Devil Fruits and are extended to all members of the Crew."
@@ -865,10 +866,11 @@ CREW_POWERUP = (
 )
 
 # Crew level
-CREW_LEVEL_UP_RECAP = "*Upgrade*: +1 {} slot \\({}->{}\\)\n*Cost*: ฿{}"
+CREW_LEVEL_UP_RECAP = "*Upgrade*: +1 {} slot \\({}->{}\\)\n*Income Tax*: -1 Bracket\n*Cost*: ฿{}"
 CREW_LEVEL = (
     "*Level*"
-    "\n\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot."
+    "\n\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot"
+    " and reduce income tax for the members."
     "\nEach level doubles the price of the next one."
     "\n\n*Current level*: {}"
     "\n*Max members*: {}"
