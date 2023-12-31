@@ -17,7 +17,7 @@ def get_current_setting_text(enabled: bool, prefix: str = "") -> str:
     else:
         enabled_disabled_text = phrases.CURRENT_SETTING.format(phrases.DISABLED)
 
-    return prefix + "\n\n" + enabled_disabled_text
+    return (prefix + "\n\n" + enabled_disabled_text).strip()
 
 
 def get_toggle_keyboard(enabled: bool, screen: Screen, inbound_keyboard: Keyboard) -> Keyboard:
@@ -36,3 +36,13 @@ def get_toggle_keyboard(enabled: bool, screen: Screen, inbound_keyboard: Keyboar
         info=default_keyboard_data | {ReservedKeyboardKeys.TOGGLE: not enabled},
         screen=screen,
     )
+
+
+def get_enabled_emoji(enabled: bool) -> str:
+    """
+    Get the enabled emoji
+    :param enabled: The enabled/disabled current status
+    :return: The enabled emoji
+    """
+
+    return "✅" if enabled else "❌"

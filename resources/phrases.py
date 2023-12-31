@@ -158,7 +158,6 @@ TEXT_TOPIC = "Topic"
 TEXT_GROUP = "Group"
 TEXT_NOT_SET = "Not set"
 TEXT_RANDOM = "Random"
-TEXT_WHAT_TO_MODIFY = "What would you like to modify?"
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = "chat_id is None and update.effective_chat.id is None"
 EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is None"
@@ -227,6 +226,7 @@ KEY_SEND_TO_GROUP = Emoji.GROUP + " Send to group"
 KEY_SET_RESULT = "Set result"
 KEY_CONFIRM = "Confirm"
 KEY_MODIFY = "Modify"
+KEY_RESET = "Reset"
 
 # Private chat
 PVT_TXT_START = (
@@ -243,8 +243,10 @@ PVT_TXT_SETTINGS_LOCATION_UPDATE = (
 PVT_KEY_CREW = Emoji.CREW + " Crew"
 PVT_KEY_CREW_MEMBERS = "Members"
 PVT_KEY_CREW_LEAVE = "Leave"
-PVT_KEY_CREW_EDIT_NAME = "Edit name"
-PVT_KEY_CREW_DISBAND = "Disband"
+PVT_KEY_CREW_EDIT_NAME = "Name"
+PVT_KEY_CREW_EDIT_DESCRIPTION = "Description"
+PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY = "Required bounty"
+PVT_KEY_CREW_DISBAND = Emoji.DELETE + " Disband"
 PVT_KEY_CREW_MEMBER_REMOVE = "Expel"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = "Promote to First Mate"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = "Demote from First Mate"
@@ -254,6 +256,8 @@ PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
 PVT_KEY_CREW_POWERUP = "Power-up"
 PVT_KEY_CREW_LEVEL = "Level"
 PVT_KEY_CREW_LEVEL_UP = "Level up"
+PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
+PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -696,6 +700,7 @@ CREW_USER_NOT_IN_CREW = (
 )
 CREW_OVERVIEW = (
     "*{}* \\(Level *{}*\\)"
+    "\n\n_{}_"
     "\n\n*Captain*: {}{}"
     "\n*Formation date*: {} \\({}\\)"
     "\n*Members*: {} \\(Max. {}\\)"
@@ -706,6 +711,7 @@ CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = (
     "\n\n_No new members allowed until the next weekly leaderboard in {}_"
 )
+CREW_OVERVIEW_DESCRIPTION_NOT_SET = "No description set"
 CREW_MEMBER_ITEM_TEXT = "{}"
 CREW_MEMBER_ITEM_ROLE = " \\({}\\)"
 # Crew - Member
@@ -722,13 +728,33 @@ CREW_CANNOT_CREATE_CREW = "You can create a Crew in {}"
 CREW_CREATE_REQUEST_NAME = "Send the name of your Crew"
 CREW_CREATE_NAME_ALREADY_EXISTS = "A Crew with this name already exists"
 CREW_CREATE_NAME_TOO_LONG = (
-    f"Crew name must be exceed {Env.CREW_NAME_MAX_LENGTH.get_int()} characters"
+    f"Crew name must not exceed {Env.CREW_NAME_MAX_LENGTH.get_int()} characters"
 )
 CREW_CREATE_SUCCESS = (
     "You are now Captain of the *{}*."
     + f"\n\nHead over to a Chat Group to start recruiting members!"
 )
-CREW_NAME_EDIT_SUCCESS = "Crew name updated successfully"
+CREW_EDIT_NAME_SUCCESS = "Crew name updated successfully"
+CREW_EDIT_REQUEST_DESCRIPTION = (
+    f"Send the new description of your Crew \\(max. {Env.CREW_DESCRIPTION_MAX_LENGTH}"
+    " characters\\)"
+)
+CREW_EDIT_DESCRIPTION_TOO_LONG = (
+    f"Crew description must not exceed {Env.CREW_DESCRIPTION_MAX_LENGTH.get_int()} characters"
+)
+CREW_EDIT_DESCRIPTION_SUCCESS = "Crew description updated successfully"
+CREW_EDIT_REQUEST_REQUIRED_BOUNTY = "Send the minimum bounty required to join your Crew"
+CREW_EDIT_REQUIRED_BOUNTY_SUCCESS = "Required bounty updated successfully"
+CREW_MODIFY = (
+    "*Name*: {}"
+    "\n\n*Description*: {}"
+    "\n\n*Required bounty*: ฿{}"
+    "\n\nAllow users to find the Crew from search"
+    "\n_{}_"
+    "\n\nAllow users to request to join the Crew from search"
+    "\n_{}_"
+    "\n\n What would you like to modify?"
+)
 CREW_ROLE_CAPTAIN = "Captain"
 CREW_ROLE_FIRST_MATE = "First Mate"
 

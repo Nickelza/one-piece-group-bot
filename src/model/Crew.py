@@ -27,6 +27,10 @@ class Crew(BaseModel):
     max_abilities: int = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
     can_promote_first_mate: bool = BooleanField(default=True)
     max_members: int = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
+    description: str = CharField(max_length=Env.CREW_DESCRIPTION_MAX_LENGTH.get_int(), null=True)
+    required_bounty: int = BigIntegerField(default=0)
+    allow_view_in_search: bool = BooleanField(default=True)
+    allow_join_from_search = BooleanField(default=True)
 
     class Meta:
         db_table = "crew"
@@ -275,6 +279,36 @@ class Crew(BaseModel):
             max_members=(Env.CREW_MAX_MEMBERS.get_int() + fn.ROUND((Crew.level - 1) / 2)),
             max_abilities=(Env.CREW_MAX_ABILITIES.get_int() + fn.FLOOR((Crew.level - 1) / 2)),
         ).execute()
+
+    def get_name_escaped(self) -> str:
+        """
+        Returns the crew name escaped
+        :return: The crew name escaped
+        """
+
+        from src.service.message_service import escape_valid_markdown_chars
+
+        return escape_valid_markdown_chars(self.name)
+
+    def get_description_escaped(self) -> str:
+        """
+        Returns the crew description escaped
+        :return: The crew description escaped
+        """
+
+        from src.service.message_service import escape_valid_markdown_chars
+
+        return escape_valid_markdown_chars(self.description)
+
+    def get_required_bounty_formatted(self) -> str:
+        """
+        Returns the crew required bounty formatted
+        :return: The crew required bounty formatted
+        """
+
+        from src.service.bounty_service import get_belly_formatted
+
+        return get_belly_formatted(self.required_bounty)
 
 
 Crew.create_table()

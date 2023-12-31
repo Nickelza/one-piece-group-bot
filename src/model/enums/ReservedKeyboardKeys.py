@@ -11,6 +11,7 @@ class ReservedKeyboardKeys(StrEnum):
     PAGE = "w"
     CONFIRM = "v"
     AUTHORIZED_USER = "u"
+    RESET = "t"
 
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"

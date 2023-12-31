@@ -54,7 +54,7 @@ class User(BaseModel):
     impel_down_release_date: datetime.datetime = DateTimeField(null=True)
     impel_down_is_permanent: bool = BooleanField(default=False)
     crew: Crew = ForeignKeyField(Crew, backref="crew_members", null=True)
-    crew_join_date: datetime.datetime = DateTimeField(null=True)
+    crew_join_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     crew_role: int = SmallIntegerField(null=True)
     can_create_crew: bool = BooleanField(default=True)
     can_join_crew: bool = BooleanField(default=True)
@@ -82,6 +82,8 @@ class User(BaseModel):
     private_screen_stay: bool = False
     # Step to go back to
     private_screen_stay_step: int | None = None
+    # If to force going back to previous screen
+    private_screen_force_go_back: bool = False
 
     # If the model should be updated at script end. Sometimes the model is updated in functions where it can not be
     # passed as a parameter, so updating it at the end of the script would overwrite the changes

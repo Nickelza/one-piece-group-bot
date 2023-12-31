@@ -11,7 +11,7 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew, get_crew_abilities_text
 from src.service.date_service import get_remaining_time_from_next_cron, get_elapsed_duration
-from src.service.message_service import full_message_send, escape_valid_markdown_chars
+from src.service.message_service import full_message_send
 
 
 async def manage(
@@ -53,8 +53,13 @@ async def manage(
 
         captain: User = crew.get_captain()
         ot_text = phrases.CREW_OVERVIEW.format(
-            escape_valid_markdown_chars(crew.name),
+            crew.get_name_escaped(),
             crew.level,
+            (
+                crew.get_description_escaped()
+                if crew.description is not None
+                else phrases.CREW_OVERVIEW_DESCRIPTION_NOT_SET
+            ),
             captain.get_markdown_mention(),
             first_mate_text,
             user.get_date_formatted(crew.creation_date),

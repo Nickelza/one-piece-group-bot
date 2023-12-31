@@ -714,7 +714,7 @@ class NewWorldPirateLog(Log):
         if self.object.is_crew_member():
             crew: Crew = self.object.crew
             crew_text = phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_CREW_TEXT.format(
-                escape_valid_markdown_chars(crew.name)
+                crew.get_name_escaped()
             )
         else:
             crew_text = ""

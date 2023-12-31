@@ -881,7 +881,7 @@ def get_image_preview(image_url: str) -> str:
 
 
 def get_delete_button(
-    user_ids: list[int], use_close_delete=False, button_text: str = None
+    user_ids: list[str], use_close_delete=False, button_text: str = None
 ) -> Keyboard:
     """
     Create a delete button
@@ -1112,13 +1112,20 @@ def get_back_button(
     elif user is not None:
         private_screen_step = user.private_screen_previous_step
 
-    if user is not None and user.private_screen_stay:
+    force_back_to_previous_screen = user.private_screen_force_go_back if user else False
+    if user is not None and user.private_screen_stay and not force_back_to_previous_screen:
         # Stay on same screen
         previous_screen_end_index = None
         screen: Screen = user.get_private_screen_list()[-1]
         if user.private_screen_stay_step:
             info_copy[ReservedKeyboardKeys.SCREEN_STEP] = user.private_screen_stay_step
-    elif private_screen_step is not None and private_screen_step > 0:
+    elif (
+        private_screen_step is not None
+        and private_screen_step > 0
+        and not force_back_to_previous_screen
+        and user
+        and user.private_screen_step is not None
+    ):
         # Go back to previous step on same screen
         previous_screen_end_index = None  # Do not exclude last screen
         screen: Screen = previous_screen_list[-1]

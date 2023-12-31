@@ -91,6 +91,9 @@ class Environment:
 
         return "{0:,}".format(self.get_int())
 
+    def __str__(self) -> str:
+        return self.get()
+
 
 load_dotenv(sys.argv[1])
 
@@ -802,6 +805,8 @@ WHITELIST_INLINE_BOTS = Environment("WHITELIST_INLINE_BOTS", default_value="")
 CREW_CREATE_PRICE = Environment("CREW_CREATE_PRICE", default_value="100000000")
 # Maximum length of Crew name. Default: 50
 CREW_NAME_MAX_LENGTH = Environment("CREW_MAX_NAME_LENGTH", default_value="50")
+# Maximum length of Crew description. Default 200
+CREW_DESCRIPTION_MAX_LENGTH = Environment("CREW_DESCRIPTION_MAX_LENGTH", default_value="200")
 # Default maximum number of Crew members. Default: 10
 CREW_MAX_MEMBERS = Environment("CREW_MAX_MEMBERS", default_value="10")
 # How much percent should be removed from taxes for exchanges between Crew members. Default: 50%

@@ -16,7 +16,6 @@ from src.service.message_service import (
     get_yes_no_keyboard,
     full_media_send,
     full_message_or_media_send_or_edit,
-    escape_valid_markdown_chars,
 )
 
 
@@ -123,7 +122,7 @@ async def keyboard_interaction(
     # User clicked on reject button
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_INVITE_REQUEST_REJECTED.format(
-            escape_valid_markdown_chars(crew.name), mention_markdown_user(invited_user)
+            crew.get_name_escaped(), mention_markdown_user(invited_user)
         )
         await full_media_send(
             context,
@@ -142,7 +141,7 @@ async def keyboard_interaction(
 
     # Accepted message
     ot_text = phrases.CREW_INVITE_REQUEST_ACCEPTED.format(
-        mention_markdown_user(invited_user), escape_valid_markdown_chars(crew.name)
+        mention_markdown_user(invited_user), crew.get_name_escaped()
     )
     await full_media_send(
         context,

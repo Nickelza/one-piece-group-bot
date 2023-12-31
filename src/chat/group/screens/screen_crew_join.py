@@ -23,7 +23,6 @@ from src.service.message_service import (
     get_yes_no_keyboard,
     full_media_send,
     full_message_or_media_send_or_edit,
-    escape_valid_markdown_chars,
 )
 
 
@@ -199,7 +198,7 @@ async def keyboard_interaction(
     # Captain clicked on reject button
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
         ot_text = phrases.CREW_JOIN_REQUEST_REJECTED.format(
-            requesting_user.tg_user_id, escape_valid_markdown_chars(crew.name)
+            requesting_user.tg_user_id, crew.get_name_escaped()
         )
         await full_media_send(
             context,
@@ -218,7 +217,7 @@ async def keyboard_interaction(
 
     # Accepted message
     ot_text = phrases.CREW_JOIN_REQUEST_ACCEPTED.format(
-        mention_markdown_user(requesting_user), escape_valid_markdown_chars(crew.name)
+        mention_markdown_user(requesting_user), crew.get_name_escaped()
     )
     await full_media_send(
         context,
