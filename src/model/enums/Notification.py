@@ -198,7 +198,7 @@ class LocationUpdateNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         location: Location = self.location
         # Determine preposition to use for the location
@@ -435,7 +435,7 @@ class PredictionResultNotification(Notification):
     def build(self) -> str:
         """Builds the notification"""
 
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
         from src.service.prediction_service import get_max_wager_refund
 
         # Result text
@@ -543,7 +543,7 @@ class PredictionBetInvalidNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         if len(self.prediction_options_user) == 1:
             bet_has = phrases.PREDICTION_BET_INVALID_BET_HAS
@@ -659,7 +659,7 @@ class BountyGiftReceivedNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         return self.text.format(
             get_belly_formatted(self.amount), self.sender.get_markdown_mention()
@@ -802,7 +802,7 @@ class BountyLoanPaymentNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         borrower: User = self.loan.borrower
         return self.text.format(get_belly_formatted(self.amount), borrower.get_markdown_mention())
@@ -833,7 +833,7 @@ class BountyLoanForgivenNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         loaner: User = self.loan.loaner
         return self.text.format(
@@ -866,7 +866,7 @@ class BountyLoanExpiredNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         loaner: User = self.loan.loaner
         return self.text.format(

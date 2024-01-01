@@ -7,9 +7,9 @@ from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted
 from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
+from src.service.string_service import get_belly_formatted
 
 
 async def manage(

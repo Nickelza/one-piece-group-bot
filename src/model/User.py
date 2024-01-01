@@ -98,7 +98,7 @@ class User(BaseModel):
         :return: The formatted string e.g. 1,000,000
         """
 
-        from src.service.bounty_service import get_belly_formatted
+        from src.service.string_service import get_belly_formatted
 
         return get_belly_formatted(self.bounty)
 

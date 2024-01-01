@@ -26,7 +26,7 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import PredictionException
 from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import round_belly_up, add_or_remove_bounty, get_belly_formatted
+from src.service.bounty_service import round_belly_up, add_or_remove_bounty
 from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_ability_value
 from src.service.download_service import get_random_string
@@ -41,6 +41,7 @@ from src.service.math_service import (
 )
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 from src.service.notification_service import send_notification
+from src.service.string_service import get_belly_formatted
 
 
 async def send(

@@ -18,8 +18,8 @@ from src.model.game.GameOutcome import GameOutcome
 from src.model.game.rps.RockPaperScissors import RockPaperScissors
 from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, mention_markdown_user, full_media_send
+from src.service.string_service import get_belly_formatted
 
 
 class GameRPSReservedKeys(StrEnum):

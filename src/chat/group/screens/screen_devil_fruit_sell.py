@@ -21,7 +21,6 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import (
     validate_amount,
     get_amount_from_string,
-    get_belly_formatted,
     get_transaction_tax,
     add_or_remove_bounty,
 )
@@ -29,6 +28,7 @@ from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import give_devil_fruit_to_user
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
+from src.service.string_service import get_belly_formatted
 
 
 class DevilFruitSellReservedKeys(StrEnum):

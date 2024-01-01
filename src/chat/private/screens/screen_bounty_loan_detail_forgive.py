@@ -9,9 +9,9 @@ from src.model.enums.Notification import BountyLoanForgivenNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
+from src.service.string_service import get_belly_formatted
 
 
 async def manage(

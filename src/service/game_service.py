@@ -30,7 +30,7 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
-from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty, validate_amount
+from src.service.bounty_service import add_or_remove_bounty, validate_amount
 from src.service.date_service import convert_seconds_to_duration, get_remaining_duration
 from src.service.message_service import (
     mention_markdown_user,
@@ -40,6 +40,7 @@ from src.service.message_service import (
     full_message_send,
 )
 from src.service.notification_service import send_notification
+from src.service.string_service import get_belly_formatted
 
 
 def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:

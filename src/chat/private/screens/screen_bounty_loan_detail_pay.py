@@ -15,13 +15,14 @@ from src.model.enums.Screen import Screen
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import BountyLoanValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import validate_amount, get_belly_formatted, get_amount_from_string
+from src.service.bounty_service import validate_amount, get_amount_from_string
 from src.service.message_service import (
     full_message_send,
     get_create_or_edit_status,
     get_yes_no_keyboard,
 )
 from src.service.notification_service import send_notification
+from src.service.string_service import get_belly_formatted
 
 
 class Step(IntEnum):

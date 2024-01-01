@@ -18,7 +18,6 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import (
     get_amount_from_string,
     validate_amount,
-    get_belly_formatted,
     get_transaction_tax,
     add_or_remove_bounty,
 )
@@ -26,6 +25,7 @@ from src.service.devil_fruit_service import get_ability_value
 from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
+from src.service.string_service import get_belly_formatted
 
 
 async def manage(

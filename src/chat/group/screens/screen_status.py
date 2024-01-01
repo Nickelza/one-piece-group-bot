@@ -7,7 +7,6 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
-import src.service.bounty_service as bounty_service
 from src.model.Crew import Crew
 from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
@@ -36,6 +35,7 @@ from src.service.message_service import (
     escape_valid_markdown_chars,
     message_is_reply,
 )
+from src.service.string_service import get_belly_formatted
 from src.service.user_service import user_is_boss, get_boss_type
 
 
@@ -150,7 +150,7 @@ async def manage(
         ""
         if target_user.pending_bounty == 0
         else phrases.SHOW_USER_STATUS_PENDING_BOUNTY.format(
-            bounty_service.get_belly_formatted(target_user.pending_bounty)
+            get_belly_formatted(target_user.pending_bounty)
         )
     )
 

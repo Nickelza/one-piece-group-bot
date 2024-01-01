@@ -41,21 +41,12 @@ from src.service.income_tax_service import (
 from src.service.location_service import reset_location
 from src.service.math_service import subtract_percentage_from_value
 from src.service.message_service import full_message_send, full_message_or_media_send_or_edit
-from src.service.string_service import get_unit_value_from_string, object_to_json_string
+from src.service.string_service import (
+    get_unit_value_from_string,
+    object_to_json_string,
+    get_belly_formatted,
+)
 from src.service.user_service import get_boss_type, user_is_boss
-
-
-def get_belly_formatted(belly: int) -> str:
-    """
-    Returns a formatted string of the belly
-    :param belly: The belly to format e.g. 1000000
-    :return: The formatted belly e.g. 1,000,000
-    """
-    if belly is None:
-        logging.info("Get belly formatted with belly None, returning 0")
-        return "0"
-
-    return "{0:,}".format(int(belly))
 
 
 def get_message_belly(update: Update, user: User, group_chat: GroupChat) -> int:

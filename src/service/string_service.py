@@ -1,4 +1,5 @@
 import json
+import logging
 
 
 def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
@@ -54,3 +55,16 @@ def object_to_json_string(obj: any) -> str:
     :return: The JSON string
     """
     return json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":"))
+
+
+def get_belly_formatted(belly: int) -> str:
+    """
+    Returns a formatted string of the belly
+    :param belly: The belly to format e.g. 1000000
+    :return: The formatted belly e.g. 1,000,000
+    """
+    if belly is None:
+        logging.info("Get belly formatted with belly None, returning 0")
+        return "0"
+
+    return "{0:,}".format(int(belly))

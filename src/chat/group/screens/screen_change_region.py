@@ -13,7 +13,6 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import cron_datetime_difference
 from src.service.location_service import update_location
 from src.service.message_service import (
@@ -22,6 +21,7 @@ from src.service.message_service import (
     get_image_preview,
     get_yes_no_keyboard,
 )
+from src.service.string_service import get_belly_formatted
 
 
 class ChangeRegionReservedKeys(StrEnum):

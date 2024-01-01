@@ -19,7 +19,7 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted, add_or_remove_bounty
+from src.service.bounty_service import add_or_remove_bounty
 from src.service.date_service import convert_seconds_to_duration
 from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.devil_fruit_service import get_ability_value
@@ -34,6 +34,7 @@ from src.service.message_service import (
     full_message_or_media_send_or_edit,
     delete_message,
 )
+from src.service.string_service import get_belly_formatted
 
 
 class FightReservedKeys(StrEnum):
