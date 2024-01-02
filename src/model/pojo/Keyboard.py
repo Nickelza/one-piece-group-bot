@@ -31,12 +31,14 @@ class Keyboard:
         :param screen: The screen to transition to
         :param previous_screen_list: The previous screens list
         :param url: The url to be displayed on the keyboard
-        :param inherit_authorized_users: If the authorized users list should be inherited from the default value
+        :param inherit_authorized_users: If the authorized users list should be inherited from the
+        default value
         :param authorized_users: The authorized users list
         :param inbound_info: The inbound info to be added to the keyboard info
         :param from_deeplink: If the keyboard is being created from a deeplink
         :param is_deeplink: If the keyboard is a deeplink, generate the deeplink url
-        :param only_authorized_users_can_interact: If only authorized users can interact with the keyboard
+        :param only_authorized_users_can_interact: If only authorized users can interact with the
+        keyboard
         :param switch_inline_query: The switch inline query
         """
         self.text = text
@@ -55,6 +57,7 @@ class Keyboard:
         self.is_deeplink: bool = is_deeplink
         self.only_authorized_users_can_interact: bool = only_authorized_users_can_interact
         self.switch_inline_query: str = switch_inline_query
+        self.is_simulated: bool = False
 
         if inbound_info is not None:
             self.info = inbound_info | self.info

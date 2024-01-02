@@ -4,7 +4,7 @@ from typing import Any
 from peewee import *
 
 import resources.Environment as Env
-from src.model.BaseModel import BaseModel
+from src.model.BaseModel import BaseModel, db_obj
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewLevelUpgradeType import CrewLevelUpgradeType
 from src.model.enums.crew.CrewRole import CrewRole
@@ -16,21 +16,25 @@ class Crew(BaseModel):
     Crew class
     """
 
-    id: int = PrimaryKeyField()
+    id: int | PrimaryKeyField = PrimaryKeyField()
     name: str | CharField = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int())
-    creation_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
-    can_accept_new_members: bool = BooleanField(default=True)
-    is_active: bool = BooleanField(default=True)
-    disband_date: datetime.datetime = DateTimeField(null=True)
-    chest_amount: int = BigIntegerField(default=0)
-    level: int = IntegerField(default=1)
-    max_abilities: int = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
+    creation_date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    can_accept_new_members: bool | BooleanField = BooleanField(default=True)
+    is_active: bool | BooleanField = BooleanField(default=True)
+    disband_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    chest_amount: int | BigIntegerField = BigIntegerField(default=0)
+    total_gained_chest_amount: int | BigIntegerField = BigIntegerField(default=0)
+    level: int | IntegerField = IntegerField(default=1)
+    max_abilities: int | IntegerField = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
     can_promote_first_mate: bool = BooleanField(default=True)
-    max_members: int = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
-    description: str = CharField(max_length=Env.CREW_DESCRIPTION_MAX_LENGTH.get_int(), null=True)
-    required_bounty: int = BigIntegerField(default=0)
-    allow_view_in_search: bool = BooleanField(default=True)
-    allow_join_from_search = BooleanField(default=True)
+    max_members: int | IntegerField = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
+    description: str | CharField = CharField(
+        max_length=Env.CREW_DESCRIPTION_MAX_LENGTH.get_int(), null=True
+    )
+    required_bounty: int | BigIntegerField = BigIntegerField(default=0)
+    allow_view_in_search: bool | BooleanField = BooleanField(default=True)
+    allow_join_from_search: bool | BooleanField = BooleanField(default=True)
+    is_full: bool | BooleanField = BooleanField(default=False)
 
     class Meta:
         db_table = "crew"
@@ -84,14 +88,6 @@ class Crew(BaseModel):
         """
 
         return Crew.get_or_none((Crew.name**name) & (Crew.is_active == True))
-
-    def is_full(self) -> bool:
-        """
-        Returns True if the crew is full
-        :return: True if the crew is full
-        """
-
-        return len(self.get_members()) >= self.max_members
 
     @staticmethod
     def logical_get(crew_id: int) -> "Crew":
@@ -245,6 +241,7 @@ class Crew(BaseModel):
         if upgrade_type is CrewLevelUpgradeType.MEMBER:
             self.max_members += 1
             self.can_accept_new_members = True
+            self.set_is_full()
         elif upgrade_type is CrewLevelUpgradeType.ABILITY:
             self.max_abilities += 1
 
@@ -280,6 +277,9 @@ class Crew(BaseModel):
             max_abilities=(Env.CREW_MAX_ABILITIES.get_int() + fn.FLOOR((Crew.level - 1) / 2)),
         ).execute()
 
+        # Reset is full attribute
+        Crew.set_is_full_for_all_crews()
+
     def get_name_escaped(self) -> str:
         """
         Returns the crew name escaped
@@ -309,6 +309,33 @@ class Crew(BaseModel):
         from src.service.string_service import get_belly_formatted
 
         return get_belly_formatted(self.required_bounty)
+
+    def set_is_full(self) -> None:
+        """
+        Set the crew as full
+        :return: None
+        """
+        if self.get_member_count() >= self.max_members:
+            self.is_full = True
+        else:
+            self.is_full = False
+
+        self.save()
+
+    @staticmethod
+    def set_is_full_for_all_crews() -> None:
+        """
+        Set the crew as full for all crews
+        :return: None
+        """
+
+        raw_query = (
+            "update crew"
+            " set is_full = IF(((select count(*) from user where crew_id = crew.id) <"
+            " crew.max_members), 0, 1)"
+            " where true;"
+        )
+        db_obj.get_db().execute_sql(raw_query)
 
 
 Crew.create_table()

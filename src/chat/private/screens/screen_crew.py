@@ -1,17 +1,14 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import get_crew, get_crew_abilities_text
-from src.service.date_service import get_remaining_time_from_next_cron, get_elapsed_duration
+from src.service.crew_service import get_crew, get_crew_overview_text
 from src.service.message_service import full_message_send
-from src.service.string_service import get_belly_formatted
 
 
 async def manage(
@@ -37,39 +34,7 @@ async def manage(
     else:
         crew: Crew = get_crew(user=user)
 
-        # No new members allowed
-        no_new_members_allowed_text = ""
-        if not crew.can_accept_new_members:
-            no_new_members_allowed_text = phrases.CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED.format(
-                get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())
-            )
-
-        first_mate: User = crew.get_first_mate()
-        first_mate_text = ""
-        if first_mate is not None:
-            first_mate_text = phrases.CREW_OVERVIEW_FIRST_MATE.format(
-                first_mate.get_markdown_mention()
-            )
-
-        captain: User = crew.get_captain()
-        ot_text = phrases.CREW_OVERVIEW.format(
-            crew.get_name_escaped(),
-            crew.level,
-            (
-                crew.get_description_escaped()
-                if crew.description is not None
-                else phrases.CREW_OVERVIEW_DESCRIPTION_NOT_SET
-            ),
-            captain.get_markdown_mention(),
-            first_mate_text,
-            user.get_date_formatted(crew.creation_date),
-            get_elapsed_duration(crew.creation_date),
-            len(crew.get_members()),
-            crew.max_members,
-            get_belly_formatted(crew.chest_amount),
-            get_crew_abilities_text(crew=crew),
-            no_new_members_allowed_text,
-        )
+        ot_text = get_crew_overview_text(crew, user, from_search=False)
 
         # Members button
         inline_keyboard.append(
@@ -89,6 +54,11 @@ async def manage(
             inline_keyboard.append(
                 [Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)]
             )
+
+        # Search button
+        inline_keyboard.append(
+            [Keyboard(phrases.PVT_KEY_CREW_SEARCH, screen=Screen.PVT_CREW_SEARCH)]
+        )
 
     await full_message_send(
         context,

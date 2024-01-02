@@ -19,7 +19,8 @@ def get_context_data(
     :param data_type: The type
     :param key: The key
     :param inner_key: The inner key
-    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of
+    KeyError
     :return: The data
     """
 
@@ -86,7 +87,7 @@ def remove_context_data(
 
     data = context.bot_data if data_type is ContextDataType.BOT else context.user_data
 
-    if key not in context.bot_data:
+    if key not in data:
         return
 
     if inner_key is not None:
@@ -106,7 +107,8 @@ def get_bot_context_data(
     :param context: The context
     :param key: The key
     :param inner_key: The inner key
-    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of
+    KeyError
     :return: The data
     """
 
@@ -139,7 +141,8 @@ def get_user_context_data(
     :param context: The context
     :param key: The key
     :param inner_key: The inner key
-    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+    :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of
+    KeyError
     :return: The data
     """
 

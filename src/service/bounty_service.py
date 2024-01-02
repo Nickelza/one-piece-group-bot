@@ -59,7 +59,8 @@ def get_message_belly(update: Update, user: User, group_chat: GroupChat) -> int:
     """
     should_allow_unlimited_bounty_from_messages = allow_unlimited_bounty_from_messages(group_chat)
 
-    # Unlimited bounty from messages not allowed and user have consumed all their bounty from messages, no belly
+    # Unlimited bounty from messages not allowed and user have consumed all their bounty from
+    # messages, no belly
     if not should_allow_unlimited_bounty_from_messages and user.bounty_message_limit <= 0:
         return 0
 
@@ -224,7 +225,7 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Erase all crew chests and delete all contributions from previous crew members
     # For some reason a direct delete query does not work, had to first get all valid contributions
     # and then delete
-    Crew.update(chest_amount=0).execute()
+    Crew.update(chest_amount=0, total_gained_chest_amount=0).execute()
 
     # Still valid contributions
     valid_contributions = CrewMemberChestContribution.select().where(
@@ -273,8 +274,8 @@ async def add_or_remove_bounty(
     :param amount: The amount to add to the bounty
     :param update: Telegram update
     :param should_update_location: Whether to update the user's location
-    :param pending_belly_amount: How much of the amount is from pending belly, so not newly acquired. Will be used to
-                                 calculate eventual taxes
+    :param pending_belly_amount: How much of the amount is from pending belly, so not newly
+    acquired. Will be used to calculate eventual taxes
     :param from_message: Whether the bounty is gained from a message
     :param add: Whether to add or remove the bounty
     :param should_save: Whether to save the user
@@ -282,7 +283,8 @@ async def add_or_remove_bounty(
     :param check_for_loan: Whether to check for an expired bounty loan when adding bounty
     :param tax_event_type: The tax event type
     :param event_id: The event id
-    :param raise_error_if_negative_bounty: Whether to raise an error if the user has negative bounty after the update
+    :param raise_error_if_negative_bounty: Whether to raise an error if the user has negative
+    bounty after the update
 
     :return: The updated user
     """
@@ -428,7 +430,8 @@ async def add_or_remove_bounty(
 
             user.bounty += amount_to_add
 
-            # If the bounty is gained from a message, subtract the amount from the bounty message limit
+            # If the bounty is gained from a message, subtract the amount from the bounty message
+            # limit
             if from_message:
                 user.bounty_message_limit -= amount
 
@@ -578,7 +581,8 @@ async def validate_amount(
     should_validate_user_has_amount: bool = True,
 ) -> bool:
     """
-    Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if the wager is
+    Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if
+    the wager is
     higher than the required belly
     :param update: Telegram update
     :param context: Telegram context
@@ -588,7 +592,8 @@ async def validate_amount(
     :param add_delete_button: Whether to add a delete button to the keyboard
     :param inbound_keyboard: The inbound keyboard
     :param previous_screens: The previous screens, for the back button if in private chat
-    :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back button if in private
+    :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back
+    button if in private
     :param should_validate_user_has_amount: Whether to validate that the user has the amount
     :return: Whether the wager is valid
     """
@@ -752,8 +757,10 @@ def reset_bounty_message_limit() -> None:
     Reset the amount of bounty a user can gain from messages in a day
     """
 
-    # If user location level is higher than 0, set their bounty_message_limit to Env.BELLY_DAILY_BASE_LIMIT +
-    # a percentage corresponding to their location level (e.g. 10% for location level 1, 20% for location level 2, etc.)
+    # If user location level is higher than 0,
+    # set their bounty_message_limit to Env.BELLY_DAILY_BASE_LIMIT +
+    # a percentage corresponding to their location level
+    # (e.g. 10% for location level 1, 20% for location level 2, etc.)
     belly_daily_base_limit = Env.BELLY_DAILY_BASE_LIMIT.get_int()
     condition: tuple[bool, int] = (
         (User.location_level > 0),

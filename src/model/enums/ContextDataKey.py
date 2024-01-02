@@ -7,6 +7,8 @@ class ContextDataKey(StrEnum):
     CREATED_PREDICTION = "created_prediction"
     INLINE_QUERY = "inline_query"
     PAST_MESSAGES_DATE = "past_messages_date"
+    FILTER = "filter"
+    INBOUND_KEYBOARD = "inbound_keyboard"
 
 
 class ContextDataType(StrEnum):

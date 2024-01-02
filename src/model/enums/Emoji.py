@@ -64,6 +64,7 @@ class Emoji(StrEnum):
     RED = "🔴"
     YELLOW = "🟡"
     GREEN = "🟢"
+    SEARCH = "🔍"
 
     # Game
     WINNER = "🏆"

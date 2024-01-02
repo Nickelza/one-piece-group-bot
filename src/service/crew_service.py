@@ -2,8 +2,7 @@ from datetime import datetime
 
 from telegram.ext import ContextTypes
 
-import resources.Environment as Env
-from resources import phrases as phrases
+from resources import phrases as phrases, Environment as Env
 from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.CrewChestSpendingRecord import CrewChestSpendingRecord
@@ -18,14 +17,22 @@ from src.model.enums.Notification import (
     Notification,
     CrewAbilityActivatedNotification,
 )
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_remaining_duration, get_datetime_in_future_days
+from src.service.bounty_service import get_belly_formatted
+from src.service.date_service import (
+    get_remaining_duration,
+    get_datetime_in_future_days,
+    get_elapsed_duration,
+)
 from src.service.location_service import update_location
+from src.service.message_service import get_deeplink
 from src.service.notification_service import send_notification
 
 
@@ -45,6 +52,7 @@ async def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> No
     await update_location(crew_member, should_passive_update=True)
 
     crew_member.save()
+    crew.set_is_full()
 
 
 async def remove_member(
@@ -79,6 +87,7 @@ async def remove_member(
     await update_location(crew_member, should_passive_update=True, can_scale_down=True)
 
     crew_member.save()
+    crew.set_is_full()
 
     if disable_crew_can_accept_new_members:
         crew.can_accept_new_members = False
@@ -235,6 +244,7 @@ def add_to_crew_chest(user: User, amount: int) -> None:
 
     crew: Crew = user.crew
     crew.chest_amount += amount
+    crew.total_gained_chest_amount += amount
     crew.save()
 
     # Save contribution
@@ -400,3 +410,92 @@ def add_chest_spending_record(
     record.by_user = by_user
     record.to_user = to_user
     record.save()
+
+
+def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> str:
+    """
+    Get the crew overview text
+
+    :param crew: The crew
+    :param user: The user
+    :param from_search: Whether the crew overview is from search, if so show basic info only
+    :return: The crew overview text
+    """
+    from src.service.leaderboard_service import get_remaining_time_to_next_leaderboard
+
+    # If from search
+    active_abilities_count_text = ""
+
+    # If not from search
+    first_mate_text = ""
+    treasure_chest_text = ""
+    active_abilities_text = ""
+    no_new_members_allowed_text = ""
+
+    if from_search:
+        if not crew.allow_view_in_search:
+            return phrases.CREW_SEARCH_NOT_ALLOWED_TO_VIEW
+
+        active_abilities_count_text = phrases.CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT.format(
+            len(crew.get_active_abilities()), crew.max_abilities
+        )
+    else:
+        first_mate: User = crew.get_first_mate()
+        if first_mate is not None:
+            first_mate_text = phrases.CREW_OVERVIEW_FIRST_MATE.format(
+                first_mate.get_markdown_mention()
+            )
+
+        treasure_chest_text = phrases.CREW_OVERVIEW_TREASURE_CHEST.format(
+            get_belly_formatted(crew.chest_amount)
+        )
+        active_abilities_text = phrases.CREW_OVERVIEW_ACTIVE_ABILITIES.format(
+            get_crew_abilities_text(crew=crew)
+        )
+
+        # No new members allowed
+        if not crew.can_accept_new_members:
+            no_new_members_allowed_text = phrases.CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED.format(
+                get_remaining_time_to_next_leaderboard()
+            )
+
+    captain: User = crew.get_captain()
+
+    ot_text = phrases.CREW_OVERVIEW.format(
+        crew.get_name_escaped(),
+        crew.level,
+        (
+            crew.get_description_escaped()
+            if crew.description is not None
+            else phrases.CREW_OVERVIEW_DESCRIPTION_NOT_SET
+        ),
+        captain.get_markdown_mention(),
+        first_mate_text,
+        user.get_date_formatted(crew.creation_date),
+        get_elapsed_duration(crew.creation_date),
+        len(crew.get_members()),
+        crew.max_members,
+        active_abilities_count_text,
+        treasure_chest_text,
+        active_abilities_text,
+        no_new_members_allowed_text,
+    )
+
+    return ot_text
+
+
+def get_crew_name_with_deeplink(crew: Crew) -> str:
+    """
+    Get the crew name with deeplink
+
+    :param crew: The crew
+    :return: The crew name with deeplink
+    """
+    return phrases.CREW_NAME_WITH_LEVEL_DEEPLINK.format(
+        crew.get_name_escaped(),
+        get_deeplink(
+            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew.id},
+            screen=Screen.PVT_CREW_SEARCH_DETAIL,
+        ),
+        crew.level,
+    )

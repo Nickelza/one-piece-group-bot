@@ -10,7 +10,7 @@ import constants as c
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
-from src.model.enums.ContextDataKey import ContextDataKey
+from src.model.enums.ContextDataKey import ContextDataKey, ContextDataType
 from src.model.enums.Location import (
     get_last_new_world,
     get_first_new_world,
@@ -21,7 +21,11 @@ from src.model.enums.Location import (
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
-from src.service.bot_service import get_user_context_data, set_user_context_data
+from src.service.bot_service import (
+    get_user_context_data,
+    set_user_context_data,
+    remove_context_data,
+)
 
 
 class User(BaseModel):
@@ -29,51 +33,60 @@ class User(BaseModel):
     User class
     """
 
-    id: int = PrimaryKeyField()
-    tg_user_id: str = CharField(max_length=99, unique=True)
-    tg_first_name: str = CharField(max_length=99)
-    tg_last_name: str = CharField(max_length=99)
-    tg_username: str = CharField(max_length=99)
-    join_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
-    bounty: int = BigIntegerField(default=0)
-    total_gained_bounty: int = BigIntegerField(
+    id: int | PrimaryKeyField = PrimaryKeyField()
+    tg_user_id: str | CharField = CharField(max_length=99, unique=True)
+    tg_first_name: str | CharField = CharField(max_length=99)
+    tg_last_name: str | CharField = CharField(max_length=99)
+    tg_username: str | CharField = CharField(max_length=99)
+    join_date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    bounty: int | BigIntegerField = BigIntegerField(default=0)
+    total_gained_bounty: int | BigIntegerField = BigIntegerField(
         default=0, constraints=[Check("total_gained_bounty >= 0")]
     )
-    total_gained_bounty_unmodified: int = BigIntegerField(
+    total_gained_bounty_unmodified: int | BigIntegerField = BigIntegerField(
         default=0, constraints=[Check("total_gained_bounty_unmodified >= 0")]
     )
-    pending_bounty: int = BigIntegerField(default=0)
-    doc_q_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
-    game_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
-    bounty_poster_limit: int = SmallIntegerField(default=0)
-    location_level: int = SmallIntegerField(default=0)
-    should_propose_new_world: bool = BooleanField(default=True)
-    can_change_region: bool = BooleanField(default=True)
-    fight_immunity_end_date: datetime.datetime = DateTimeField(null=True)
-    fight_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
-    impel_down_release_date: datetime.datetime = DateTimeField(null=True)
-    impel_down_is_permanent: bool = BooleanField(default=False)
-    crew: Crew = ForeignKeyField(Crew, backref="crew_members", null=True)
+    pending_bounty: int | BigIntegerField = BigIntegerField(default=0)
+    doc_q_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    game_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    bounty_poster_limit: int | SmallIntegerField = SmallIntegerField(default=0)
+    location_level: int | SmallIntegerField = SmallIntegerField(default=0)
+    should_propose_new_world: bool | BooleanField = BooleanField(default=True)
+    can_change_region: bool | BooleanField = BooleanField(default=True)
+    fight_immunity_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    fight_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    impel_down_release_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    impel_down_is_permanent: bool | BooleanField = BooleanField(default=False)
+    crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="crew_members", null=True)
     crew_join_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
-    crew_role: int = SmallIntegerField(null=True)
-    can_create_crew: bool = BooleanField(default=True)
-    can_join_crew: bool = BooleanField(default=True)
-    last_message_date: datetime.datetime = DateTimeField(default=datetime.datetime.now)
-    last_system_interaction_date: datetime.datetime = DateTimeField(null=True)
-    private_screen_list: str | None = CharField(max_length=99)
-    private_screen_step: int | None = SmallIntegerField()
-    private_screen_in_edit_id: int | None = IntegerField(null=True)
-    bounty_gift_tax: int = IntegerField(default=0)
-    is_admin: bool = BooleanField(default=False)
-    devil_fruit_collection_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
-    bounty_message_limit: int = BigIntegerField(default=0)
-    timezone: str = CharField(max_length=99, null=True)
-    is_active: bool = BooleanField(default=True)
-    prediction_creation_cooldown_end_date: datetime.datetime = DateTimeField(null=True)
-    bounty_loan_issue_cool_down_end_date: datetime.datetime = DateTimeField(null=True)
-    is_exempt_from_global_leaderboard_requirements: bool = BooleanField(
+    crew_role: int | SmallIntegerField = SmallIntegerField(null=True)
+    can_create_crew: bool | BooleanField = BooleanField(default=True)
+    can_join_crew: bool | BooleanField = BooleanField(default=True)
+    last_message_date: datetime.datetime | DateTimeField = DateTimeField(
+        default=datetime.datetime.now
+    )
+    last_system_interaction_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    private_screen_list: str | CharField | None = CharField(max_length=99)
+    private_screen_step: int | SmallIntegerField | None = SmallIntegerField()
+    private_screen_in_edit_id: int | IntegerField | None = IntegerField(null=True)
+    bounty_gift_tax: int | IntegerField = IntegerField(default=0)
+    is_admin: bool | BooleanField = BooleanField(default=False)
+    devil_fruit_collection_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(
+        null=True
+    )
+    bounty_message_limit: int | BigIntegerField = BigIntegerField(default=0)
+    timezone: str | CharField = CharField(max_length=99, null=True)
+    is_active: bool | BooleanField = BooleanField(default=True)
+    prediction_creation_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(
+        null=True
+    )
+    bounty_loan_issue_cool_down_end_date: datetime.datetime | DateTimeField = DateTimeField(
+        null=True
+    )
+    # For Legendary Pirate
+    is_exempt_from_global_leaderboard_requirements: bool | BooleanField = BooleanField(
         default=False
-    )  # For Legendary Pirate
+    )
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen
@@ -85,8 +98,9 @@ class User(BaseModel):
     # If to force going back to previous screen
     private_screen_force_go_back: bool = False
 
-    # If the model should be updated at script end. Sometimes the model is updated in functions where it can not be
-    # passed as a parameter, so updating it at the end of the script would overwrite the changes
+    # If the model should be updated at script end. Sometimes the model is updated in functions
+    # where it can not be passed as a parameter, so updating it at the end of the script would
+    # overwrite the changes
     should_update_model: bool = True
 
     class Meta:
@@ -394,8 +408,8 @@ class User(BaseModel):
     def has_bounty_gain_limitations(self) -> bool:
         """
         Returns True if the user has bounty gain limitations
-        This occurs when the user is in Paradise but has enough bounty to be in the New World, or their bounty is
-        higher than that required to reach the final location
+        This occurs when the user is in Paradise but has enough bounty to be in the New World, or
+        their bounty is higher than that required to reach the final location
         :return: True if the user has bounty gain limitations
         """
 
@@ -469,7 +483,8 @@ class User(BaseModel):
         Get user data from context
         :param context: The context
         :param key: The key
-        :param tolerate_key_exception: If the key is not found, raise CommonChatException instead of KeyError
+        :param tolerate_key_exception: If the key is not found, raise CommonChatException instead
+        of KeyError
         :param inner_key: The inner key
         :return: The value
         """
@@ -477,6 +492,24 @@ class User(BaseModel):
         return get_user_context_data(
             context, key, tolerate_key_exception=tolerate_key_exception, inner_key=inner_key
         )
+
+    @staticmethod
+    def get_context_data_or_none(
+        context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, inner_key: str = None
+    ) -> any:
+        """
+        Get user data from context or None
+        :param context: The context
+        :param key: The key
+        :param inner_key: The inner key
+        :return: The value
+        """
+        try:
+            return get_user_context_data(
+                context, key, tolerate_key_exception=False, inner_key=inner_key
+            )
+        except KeyError:
+            return None
 
     @staticmethod
     def set_context_data(
@@ -493,17 +526,31 @@ class User(BaseModel):
         return set_user_context_data(context, key, value, inner_key=inner_key)
 
     @staticmethod
-    def remove_context_data(context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey):
+    def remove_context_data(
+        context: ContextTypes.DEFAULT_TYPE, key: ContextDataKey, inner_key: str = None
+    ):
         """
         Remove user data from context
         :param context: The context
         :param key: The key
+        :param inner_key: The inner key
         """
 
         try:
-            del context.user_data[key]
+            remove_context_data(context, ContextDataType.USER, key, inner_key=inner_key)
         except KeyError:
             pass
+
+    @staticmethod
+    def clear_context_filters(context: ContextTypes.DEFAULT_TYPE):
+        """
+        Clear the context filters
+        :param context: The context
+        """
+
+        # Clear context filters
+        remove_context_data(context, ContextDataType.USER, ContextDataKey.FILTER)
+        remove_context_data(context, ContextDataType.USER, ContextDataKey.INBOUND_KEYBOARD)
 
     def get_expired_bounty_loans(self) -> list:
         """

@@ -12,6 +12,7 @@ class ReservedKeyboardKeys(StrEnum):
     CONFIRM = "v"
     AUTHORIZED_USER = "u"
     RESET = "t"
+    FILTER = "s"
 
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"

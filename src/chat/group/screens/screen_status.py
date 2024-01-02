@@ -22,7 +22,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_poster_service import get_bounty_poster
-from src.service.crew_service import get_crew_abilities_text
+from src.service.crew_service import get_crew_abilities_text, get_crew_name_with_deeplink
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.income_tax_service import user_has_complete_tax_deduction
@@ -92,7 +92,8 @@ async def manage(
 
     leaderboard_target_user_rank = get_highest_active_rank(target_user, group_chat=group_chat)
 
-    # If used in reply to a message, verify that requesting user ranks above the user being replied to
+    # If used in reply to a message, verify that requesting user ranks above the user being replied
+    # to
     if in_reply_to_message and not target_user.is_arrested():  # Arrested users are always viewable
         # Add the requested user to the list of users that can delete the message
         can_delete_users.append(target_user.tg_user_id)
@@ -173,8 +174,9 @@ async def manage(
 
     # Add Crew if in one
     if target_user.is_crew_member():
-        crew = target_user.crew
-        message_text += phrases.SHOW_USER_STATUS_CREW.format(crew.get_name_escaped(), crew.level)
+        message_text += phrases.SHOW_USER_STATUS_CREW.format(
+            get_crew_name_with_deeplink(target_user.crew)
+        )
 
     # Extra info visible only if checking own status or being checked by a boss
     if own_status or user_is_boss(user, group_chat=group_chat):
@@ -307,7 +309,8 @@ async def manage(
         )
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
-    # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0 and user is not jailed
+    # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0
+    # and user is not jailed
 
     if should_send_poster(target_user, group_chat, own_status):
         await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)

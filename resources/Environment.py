@@ -48,7 +48,7 @@ class Environment:
         :return: The environment variable
         """
         value = self.get_or_none()
-        if value is None:
+        if value is None and not self.can_be_empty:
             raise Exception(f"Environment variable {self.name} is not set")
 
         return value

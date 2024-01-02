@@ -44,6 +44,10 @@ from src.chat.private.screens.screen_crew_member_detail_remove import (
 )
 from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
 from src.chat.private.screens.screen_crew_powerup import manage as manage_screen_crew_powerup
+from src.chat.private.screens.screen_crew_search import manage as manage_screen_crew_search
+from src.chat.private.screens.screen_crew_search_detail import (
+    manage as manage_screen_crew_search_detail,
+)
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import (
     manage as manage_screen_devil_fruit_detail,
@@ -106,8 +110,9 @@ from src.chat.private.screens.screen_status import manage as manage_screen_statu
 from src.model.SystemUpdate import SystemUpdate
 from src.model.SystemUpdateUser import SystemUpdateUser
 from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
-from src.model.enums.Screen import Screen
+from src.model.enums.Screen import Screen, ALLOW_SEARCH_INPUT, HAS_CONTEXT_FILTER
 from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -219,8 +224,15 @@ async def dispatch_screens(
 
                 if command is Command.ND or command.name == "":
                     # Text message but not in edit mode and screen is not start, return
-                    if not user.in_edit_mode():
+                    if not user.in_edit_mode() and screen not in ALLOW_SEARCH_INPUT:
                         return
+
+        # Remove context filters if current screen and none of previous manage filters
+        if ContextDataKey.FILTER in context.user_data and inbound_keyboard is not None:
+            if screen not in HAS_CONTEXT_FILTER and not any(
+                sc in inbound_keyboard.previous_screen_list for sc in HAS_CONTEXT_FILTER
+            ):
+                user.clear_context_filters(context)
 
         match screen:
             case Screen.PVT_START:  # Start
@@ -289,6 +301,12 @@ async def dispatch_screens(
                 await manage_screen_crew_member_detail_first_mate_demote(
                     update, context, inbound_keyboard, user
                 )
+
+            case Screen.PVT_CREW_SEARCH:  # Crew Search
+                await manage_screen_crew_search(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_SEARCH_DETAIL:  # Crew Search Detail
+                await manage_screen_crew_search_detail(update, context, inbound_keyboard, user)
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
                 await manage_screen_settings_notifications(update, context, inbound_keyboard)

@@ -59,7 +59,7 @@ SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = "Permanent"
 SHOW_USER_STATUS_FIGHT_IMMUNITY = "\nFight immunity: {}"
 SHOW_USER_STATUS_FIGHT_COOLDOWN = "\nFight cooldown: {}"
 SHOW_USER_STATUS_WARLORD_REMAINING_TIME = "\nWarlord remaining time: {}"
-SHOW_USER_STATUS_CREW = "\nCrew: {} \\(Lv. {}\\)"
+SHOW_USER_STATUS_CREW = "\nCrew: {}"
 SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = "\n\n*Daily Bounty Bonus*"
 SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = "\n{}{} \\({}%\\)"
 SHOW_USER_STATUS_BOUNTY_BONUS_CREW = "Crew"
@@ -243,6 +243,7 @@ PVT_TXT_SETTINGS_LOCATION_UPDATE = (
 PVT_KEY_CREW = Emoji.CREW + " Crew"
 PVT_KEY_CREW_MEMBERS = "Members"
 PVT_KEY_CREW_LEAVE = "Leave"
+PVT_KEY_CREW_SEARCH = Emoji.SEARCH + " Search"
 PVT_KEY_CREW_EDIT_NAME = "Name"
 PVT_KEY_CREW_EDIT_DESCRIPTION = "Description"
 PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY = "Required bounty"
@@ -299,6 +300,7 @@ PVT_KEY_VIEW = "View"
 PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + " Loan"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = "Pay"
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
+PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in this {}?"
@@ -694,20 +696,38 @@ PREDICTION_SET_RESULT_CONFIRMATION_REQUEST_NO_CORRECT_OPTION = (
 )
 
 # Crew - Private
+CREW_SEARCH_ITEM_TEXT = "{} \\(Lv. {}\\)"
+CREW_SEARCH_ITEM_TEXT_FILL_IN = "Crew"
+CREW_SEARCH_ITEM_LEGEND_CAN_JOIN = "Can join"
+CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
+CREW_SEARCH_FILTER_ONLY_CAN_JOIN = "Only joinable"
+CREW_SEARCH_FILTER_NAME = "Crew name"
+CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
+    "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"
+    " to find the Crew from search` option under `Crew->Modify`"
+)
 CREW_USER_NOT_IN_CREW = (
     "You are not in a Crew. Head over a Chat Group to the to join one or create your"
     f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."
 )
+CREW_NAME_WITH_LEVEL_DEEPLINK = "[{}]({}) \\(Lv. {}\\)"
 CREW_OVERVIEW = (
-    "*{}* \\(Level *{}*\\)"
+    "*{}* \\(Lv. *{}*\\)"
     "\n\n_{}_"
-    "\n\n*Captain*: {}{}"
+    "\n\n*Captain*: {}"
+    "{}"  # First Mate
     "\n*Formation date*: {} \\({}\\)"
     "\n*Members*: {} \\(Max. {}\\)"
-    "\n\n*Treasure Chest*: ฿{}"
-    "\n\n*Abilities*{}{}"
+    "{}"  # Active abilities count
+    "{}"  # Treasure chest
+    "{}"  # Abilities
+    "{}"  # No new members allowed
 )
 CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
+CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT = "\n*Active abilities*: {} \\(Max. {}\\)"
+CREW_OVERVIEW_TREASURE_CHEST = "\n\n*Treasure Chest*: ฿{}"
+CREW_OVERVIEW_ACTIVE_ABILITIES = "\n\n*Abilities*{}"
+
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = (
     "\n\n_No new members allowed until the next weekly leaderboard in {}_"
 )
@@ -991,9 +1011,7 @@ BOUNTY_LOAN_REQUEST = (
 BOUNTY_LOAN_REQUEST_PREDATORY_WARNING = (
     f"\n\n{Emoji.WARNING_STRONG}Warning, this is a predatory loan with a *{{}}%* interest rate."
 )
-BOUNTY_LOAN_REQUEST_MANAGE_TEXT = "\n\n" + surround_with_arrows(
-    "[Click here to manage this loan]({})"
-)
+BOUNTY_LOAN_REQUEST_MANAGE_TEXT = "\n\n" + surround_with_arrows("[Manage Loan]({})")
 
 # Bounty loan - Private Chat
 BOUNTY_LOAN_ITEM_TEXT = "{} ฿{} {} {}"
@@ -1265,6 +1283,12 @@ LIST_OVERVIEW = (
 LIST_OVERVIEW_NO_ITEMS = "No {} found"
 LIST_ITEM_TEXT = "\n*{}*. {}"
 LIST_FOOTER = "\n\n_Showing {}-{} of {} items_"
+LIST_EMOJI_LEGEND = "\n\n_*Legend*{}_"
+LIST_EMOJI_LEGEND_ITEM = "\n{} {}"
+LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} the restrict the search__"
+LIST_FILTER_ACTIVE_FILTERS = "\n\n_*Active filters*:{}_"
+LIST_FILTER_ITEM = "\n• {}"
+LIST_FILTER_ITEM_CONTAINS = "{} contains '{}'"
 NAVIGATION_LIMIT_REACHED = "Limit reached"
 
 # Logs

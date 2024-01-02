@@ -1,9 +1,15 @@
 from enum import StrEnum
 
+from telegram import Update
+from telegram.ext import ContextTypes
+
 import constants as c
 import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
-from src.model.enums.ListPage import ListPage
+from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataKey
+from src.model.enums.Emoji import Emoji
+from src.model.enums.ListPage import ListPage, ListFilter, ListFilterType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import NavigationLimitReachedException
@@ -100,6 +106,10 @@ def get_items_text_keyboard(
     item_detail_screen: Screen,
     text_fill_in: str = None,
     text_overview: str = None,
+    context: ContextTypes.DEFAULT_TYPE = None,
+    user: User = None,
+    update: Update = None,
+    allow_string_filter: bool = False,
 ) -> tuple[str, list[list[Keyboard]]]:
     """
     Get the items text and keyboard
@@ -110,8 +120,43 @@ def get_items_text_keyboard(
     :param item_detail_screen: The item detail screen
     :param text_fill_in: The text fill in
     :param text_overview: The text overview
+    :param context: The context
+    :param user: The user
+    :param update: The update
+    :param allow_string_filter: Whether to allow string filter
     :return: The text and keyboard
     """
+
+    # Add string filter to context data
+    if allow_string_filter:
+
+        # Simulate always having an inbound keyboard
+        if inbound_keyboard is not None:
+            user.set_context_data(context, ContextDataKey.INBOUND_KEYBOARD, inbound_keyboard)
+        else:
+            inbound_keyboard = user.get_context_data(context, ContextDataKey.INBOUND_KEYBOARD)
+            inbound_keyboard.is_simulated = True
+
+        try:
+            if not inbound_keyboard.is_simulated:
+                raise AttributeError
+
+            list_page.string_filter = update.effective_message.text
+            user.set_context_data(
+                context,
+                ContextDataKey.FILTER,
+                list_page.string_filter,
+                list_page.get_string_filter_key(),
+            )
+        except AttributeError:
+            list_page.string_filter = user.get_context_data_or_none(
+                context, ContextDataKey.FILTER, list_page.get_string_filter_key()
+            )
+
+    # Set active filters
+    list_page.filter_list_active = get_active_filter_list(
+        inbound_keyboard, list_page, context, user
+    )
 
     # Get the items
     items, page, start_number, end_number, total_count = get_items_paginate(
@@ -125,42 +170,179 @@ def get_items_text_keyboard(
 
     if total_count == 0:
         items_text = phrases.LIST_OVERVIEW_NO_ITEMS.format(text_fill_in)
-        return items_text, inline_keyboard
-
-    for index, item in enumerate(items):
-        current_number = start_number + index
-        list_page.set_object(item.id)
-        items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
-
-        button_info = {item_detail_key: item.id}
-        button = Keyboard(
-            str(current_number),
-            screen=item_detail_screen,
-            info=button_info,
-            inbound_info=inbound_keyboard.info,
-        )
-        keyboard_line.append(button)
-
-        # Add new keyboard line if needed
-        if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
-            inline_keyboard.append(keyboard_line)
-            keyboard_line = []
-
-    # Add the last keyboard line if needed
-    if len(keyboard_line) > 0:
-        inline_keyboard.append(keyboard_line)
-
-    # Add list text footer and navigation buttons if needed
-    if total_count > c.STANDARD_LIST_SIZE:
-        items_text += phrases.LIST_FOOTER.format(start_number, end_number, total_count)
-        inline_keyboard.append(get_navigation_buttons(inbound_keyboard, page))
-
-    list_overview = text_overview if text_overview is not None else phrases.LIST_OVERVIEW
-    if text_fill_in is None:
-        items_text = list_overview.format(items_text)
     else:
-        items_text = list_overview.format(
-            determine_article(text_fill_in), text_fill_in, items_text
-        )
+        for index, item in enumerate(items):
+            current_number = start_number + index
+            list_page.set_object(item.id)
+            items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
+
+            button_info = {item_detail_key: item.id}
+            button = Keyboard(
+                str(current_number),
+                screen=item_detail_screen,
+                info=button_info,
+                inbound_info=inbound_keyboard.info,
+            )
+            keyboard_line.append(button)
+
+            # Add new keyboard line if needed
+            if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
+                inline_keyboard.append(keyboard_line)
+                keyboard_line = []
+
+        # Add the last keyboard line if needed
+        if len(keyboard_line) > 0:
+            inline_keyboard.append(keyboard_line)
+
+        # Add navigation buttons if needed
+        if total_count > c.STANDARD_LIST_SIZE:
+            inline_keyboard.append(get_navigation_buttons(inbound_keyboard, page))
+
+    # Add filters button
+    string_filter: ListFilter | None = None
+    for index, list_filter in enumerate(list_page.get_filter_list()):
+        key = list_page.get_filter_key(index)
+        if list_filter.filter_type is ListFilterType.BOOLEAN:
+            current_value: bool = get_boolean_filter_value(inbound_keyboard, key)
+            inline_keyboard.append([
+                Keyboard(
+                    (Emoji.ENABLED if current_value else "") + list_filter.description,
+                    screen=inbound_keyboard.screen,
+                    info={key: not current_value},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ])
+        elif list_filter.filter_type is ListFilterType.STRING:
+            string_filter = list_filter
+            current_value: str = get_string_filter_value(context, key, user)
+            if current_value is not None:
+                # Add remove filter button
+                inline_keyboard.append([
+                    Keyboard(
+                        phrases.PVT_KEY_STRING_FILTER_REMOVE.format(list_filter.description),
+                        screen=inbound_keyboard.screen,
+                        info={key: False},
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ])
+
+    # Add string filter suggestion
+    if string_filter is not None:
+        items_text += phrases.LIST_FILTER_SEND_PART_OF_STRING.format(string_filter.description)
+
+    # Add active filters recap
+    active_filters = get_active_filter_list(inbound_keyboard, list_page, context, user)
+    if len(active_filters) > 0:
+        active_filters_text = ""
+        for active_filter in active_filters:
+
+            if active_filter.filter_type is ListFilterType.STRING:
+                inner_text = phrases.LIST_FILTER_ITEM_CONTAINS.format(
+                    active_filter.description, active_filter.value
+                )
+            else:
+                inner_text = active_filter.description
+
+            active_filters_text += phrases.LIST_FILTER_ITEM.format(inner_text)
+
+        items_text += phrases.LIST_FILTER_ACTIVE_FILTERS.format(active_filters_text)
+
+    if total_count > 0:
+        # Add Emoji legend if available
+        if len(list_page.emoji_legend_list) > 0:
+            items_text += list_page.get_emoji_legend_list_text()
+
+        # Add list text footer if needed
+        if total_count > c.STANDARD_LIST_SIZE:
+            items_text += phrases.LIST_FOOTER.format(start_number, end_number, total_count)
+
+        list_overview = text_overview if text_overview is not None else phrases.LIST_OVERVIEW
+        if text_fill_in is None:
+            items_text = list_overview.format(items_text)
+        else:
+            items_text = list_overview.format(
+                determine_article(text_fill_in), text_fill_in, items_text
+            )
 
     return items_text, inline_keyboard
+
+
+def get_boolean_filter_value(inbound_keyboard: Keyboard, key: str) -> bool:
+    """
+    Get the boolean filter value from the inbound keyboard
+    :param inbound_keyboard: The inbound keyboard
+    :param key: The key
+    :return: The boolean filter value
+    """
+
+    value = get_filter_value(inbound_keyboard, key)
+    return value if value is not None else False
+
+
+def get_string_filter_value(context: ContextTypes.DEFAULT_TYPE, key: str, user: User) -> str:
+    """
+    Get the string filter value from the context
+    :param context: The context
+    :param key: The key
+    :param user: The user
+    :return: The string filter value
+    """
+
+    # Get value from context
+    return user.get_context_data_or_none(context, ContextDataKey.FILTER, inner_key=key)
+
+
+def get_filter_value(inbound_keyboard: Keyboard, key: str) -> any:
+    """
+    Get the filter value from the inbound keyboard
+    :param inbound_keyboard: The inbound keyboard
+    :param key: The key
+    :return: The filter value
+    """
+
+    if key in inbound_keyboard.info:
+        return inbound_keyboard.info[key]
+
+    return None
+
+
+def get_active_filter_list(
+    inbound_keyboard: Keyboard, list_page: ListPage, context: ContextTypes.DEFAULT_TYPE, user: User
+) -> list[ListFilter]:
+    """
+    Get the active filter list
+    :param inbound_keyboard: The inbound keyboard
+    :param list_page: The list page
+    :param context: The context
+    :param user: The user
+    :return: The active filter list
+    """
+
+    active_filter_list: list[ListFilter] = []
+
+    if inbound_keyboard is not None and not inbound_keyboard.is_simulated:
+        for index, list_filter in enumerate(list_page.get_filter_list()):
+            key = list_page.get_filter_key(index)
+            if key in inbound_keyboard.info:
+                value = inbound_keyboard.info[key]
+                if value:
+                    # Add to context
+                    user.set_context_data(context, ContextDataKey.FILTER, value, inner_key=key)
+                else:
+                    # Remove from context and inbound keyboard
+                    user.remove_context_data(context, ContextDataKey.FILTER, inner_key=key)
+                    inbound_keyboard.info.pop(key)
+                    continue
+
+    # Get active filters from context
+    for index, list_filter in enumerate(list_page.get_filter_list()):
+        key = list_page.get_filter_key(index)
+        value = user.get_context_data_or_none(context, ContextDataKey.FILTER, inner_key=key)
+
+        if value is None:
+            continue
+
+        list_filter.value = value
+        active_filter_list.append(list_filter)
+
+    return active_filter_list
