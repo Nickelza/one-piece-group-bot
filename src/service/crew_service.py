@@ -425,6 +425,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
 
     # If from search
     active_abilities_count_text = ""
+    required_bounty_text = ""
 
     # If not from search
     first_mate_text = ""
@@ -435,6 +436,11 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
     if from_search:
         if not crew.allow_view_in_search:
             return phrases.CREW_SEARCH_NOT_ALLOWED_TO_VIEW
+
+        if crew.required_bounty > 0:
+            required_bounty_text = phrases.CREW_OVERVIEW_REQUIRED_BOUNTY.format(
+                get_belly_formatted(crew.required_bounty)
+            )
 
         active_abilities_count_text = phrases.CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT.format(
             len(crew.get_active_abilities()), crew.max_abilities
@@ -476,6 +482,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         len(crew.get_members()),
         crew.max_members,
         active_abilities_count_text,
+        required_bounty_text,
         treasure_chest_text,
         active_abilities_text,
         no_new_members_allowed_text,

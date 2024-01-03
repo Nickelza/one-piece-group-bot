@@ -1,9 +1,11 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from resources import phrases
 from src.chat.private.screens.screen_crew_search import CrewSearchListPage
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
@@ -25,9 +27,19 @@ async def manage(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
 
+    inline_keyboard: list[list[Keyboard]] = [[
+        Keyboard(
+            phrases.PVT_KEY_CREW_SEARCH_JOIN,
+            screen=Screen.PVT_CREW_SEARCH_DETAIL_JOIN,
+            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew_search_list_page.object.id},
+            inbound_info=inbound_keyboard.info,
+        )
+    ]]
+
     await full_message_send(
         context,
         crew_search_list_page.get_item_detail_text(),
         update=update,
         inbound_keyboard=inbound_keyboard,
+        keyboard=inline_keyboard,
     )

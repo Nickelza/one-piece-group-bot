@@ -242,8 +242,10 @@ PVT_TXT_SETTINGS_LOCATION_UPDATE = (
 )
 PVT_KEY_CREW = Emoji.CREW + " Crew"
 PVT_KEY_CREW_MEMBERS = "Members"
+PVT_KEY_CREW_MEMBER_VIEW = "View member"
 PVT_KEY_CREW_LEAVE = "Leave"
 PVT_KEY_CREW_SEARCH = Emoji.SEARCH + " Search"
+PVT_KEY_CREW_SEARCH_JOIN = "Join"
 PVT_KEY_CREW_EDIT_NAME = "Name"
 PVT_KEY_CREW_EDIT_DESCRIPTION = "Description"
 PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY = "Required bounty"
@@ -706,8 +708,29 @@ CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"
     " to find the Crew from search` option under `Crew->Modify`"
 )
+CREW_SEARCH_JOIN_NOT_ALLOWED = "The Crew does not allow join requests from search"
+CREW_SEARCH_JOIN_CONFIRMATION_REQUEST = (
+    "Are you sure you want to send a request to join *{}*?\nYou can request to join a maximum of"
+    f" {Env.CREW_JOIN_REQUESTS_PER_COOLDOWN} Crews every"
+    f" {Env.CREW_JOIN_REQUEST_COOLDOWN_DURATION} hours and can request to join the same Crew every"
+    f" {Env.CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION} days."
+    "\n\nYour current bounty will be shared with the Crew Captain"
+)
+CREW_SEARCH_JOIN_SUCCESS = (
+    "Request to join *{}* sent successfully, you will be notified when it is accepted"
+)
+CREW_SEARCH_JOIN_CAPTAIN_REQUEST = (
+    "Hi, I'm {} and I would like to join your Crew!\n\nCurrent bounty: ฿{}"
+)
+CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED = "{} is now a member of your Crew"
+CREW_SEARCH_JOIN_CAPTAIN_REJECTED = "You have rejected {}'s request to join your Crew"
+CREW_SEARCH_JOIN_CAPTAIN_ERROR = "Error while sending request to Crew Captain"
+CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_PER_COOLDOWN = "You can request to join another Crew in {}"
+CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_SAME_CREW_PER_COOLDOWN = (
+    "You can request to join this Crew again in {}"
+)
 CREW_USER_NOT_IN_CREW = (
-    "You are not in a Crew. Head over a Chat Group to the to join one or create your"
+    "You are not in a Crew. Search for one or create your"
     f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."
 )
 CREW_NAME_WITH_LEVEL_DEEPLINK = "[{}]({}) \\(Lv. {}\\)"
@@ -719,6 +742,7 @@ CREW_OVERVIEW = (
     "\n*Formation date*: {} \\({}\\)"
     "\n*Members*: {} \\(Max. {}\\)"
     "{}"  # Active abilities count
+    "{}"  # Required bounty
     "{}"  # Treasure chest
     "{}"  # Abilities
     "{}"  # No new members allowed
@@ -727,6 +751,7 @@ CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT = "\n*Active abilities*: {} \\(Max. {}\\)"
 CREW_OVERVIEW_TREASURE_CHEST = "\n\n*Treasure Chest*: ฿{}"
 CREW_OVERVIEW_ACTIVE_ABILITIES = "\n\n*Abilities*{}"
+CREW_OVERVIEW_REQUIRED_BOUNTY = "\n\n*Required bounty*: ฿{}"
 
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = (
     "\n\n_No new members allowed until the next weekly leaderboard in {}_"
@@ -1098,6 +1123,20 @@ CREW_FIRST_MATE_DEMOTION_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are demoted from First Mate of the Crew."
 )
 CREW_FIRST_MATE_DEMOTION_NOTIFICATION_KEY = "First Mate demotion"
+# Notification - Crew join request accepted
+CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION = (
+    "Congratulations! Your request to join *{}* has been accepted"
+)
+CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when your request to join a Crew is accepted."
+)
+CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_KEY = "Join request accepted"
+# Notification - Crew join request rejected
+CREW_JOIN_REQUEST_REJECTED_NOTIFICATION = "Your request to join *{}* has been rejected"
+CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when your request to join a Crew is rejected."
+)
+CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY = "Join request rejected"
 
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (

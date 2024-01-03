@@ -5,6 +5,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Location as Location
 from src.model.BountyLoan import BountyLoan
+from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
@@ -88,6 +89,8 @@ class NotificationType(IntEnum):
     CREW_ABILITY_ACTIVATED = 24
     CREW_FIRST_MATE_PROMOTION = 25
     CREW_FIRST_MATE_DEMOTION = 26
+    CREW_JOIN_REQUEST_ACCEPTED = 27
+    CREW_JOIN_REQUEST_REJECTED = 28
 
 
 class Notification:
@@ -605,7 +608,9 @@ class DeletedMessageMuteNotification(Notification):
 
 
 class DeletedMessageLocationNotification(Notification):
-    """Class for deleted messages because user has not reached the required location notifications."""
+    """
+    Class for deleted messages because user has not reached the required location notifications.
+    """
 
     def __init__(self, user: User = None, required_location_level: int = None):
         """
@@ -994,6 +999,48 @@ class CrewFirstMateDemotionNotification(Notification):
         )
 
 
+class CrewJoinRequestAcceptedNotification(Notification):
+    """Class for crew join request accepted notifications."""
+
+    def __init__(self, crew: Crew = None):
+        """
+        Constructor
+        """
+
+        self.crew: Crew = crew
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_JOIN_REQUEST_ACCEPTED,
+            phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION,
+            phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(escape_valid_markdown_chars(self.crew.get_name_escaped()))
+
+
+class CrewJoinRequestRejectedNotification(Notification):
+    """Class for crew join request rejected notifications."""
+
+    def __init__(self, crew: Crew = None):
+        """
+        Constructor
+        """
+
+        self.crew: Crew = crew
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_JOIN_REQUEST_REJECTED,
+            phrases.CREW_JOIN_REQUEST_REJECTED_NOTIFICATION,
+            phrases.CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(escape_valid_markdown_chars(self.crew.get_name_escaped()))
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1021,6 +1068,8 @@ NOTIFICATIONS = [
     CrewAbilityActivatedNotification(),
     CrewFirstMatePromotionNotification(),
     CrewFirstMateDemotionNotification(),
+    CrewJoinRequestAcceptedNotification(),
+    CrewJoinRequestRejectedNotification(),
 ]
 
 

@@ -101,6 +101,7 @@ def validate(
             )
 
         # Target crew has reached the maximum number of members
+        crew.set_is_full()  # Should not be necessary, but better to be safe
         if crew.is_full:
             raise CrewJoinValidationCrewException(
                 phrases.CREW_JOIN_REQUEST_CREW_FULL if specific_crew_error else None

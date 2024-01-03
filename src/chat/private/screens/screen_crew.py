@@ -55,10 +55,8 @@ async def manage(
                 [Keyboard(phrases.PVT_KEY_CREW_LEAVE, screen=Screen.PVT_CREW_LEAVE)]
             )
 
-        # Search button
-        inline_keyboard.append(
-            [Keyboard(phrases.PVT_KEY_CREW_SEARCH, screen=Screen.PVT_CREW_SEARCH)]
-        )
+    # Search button
+    inline_keyboard.append([Keyboard(phrases.PVT_KEY_CREW_SEARCH, screen=Screen.PVT_CREW_SEARCH)])
 
     await full_message_send(
         context,

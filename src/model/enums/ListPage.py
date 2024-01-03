@@ -182,4 +182,4 @@ class ListPage(ABC):
         :return: The filter list
         """
 
-        pass
+        return []

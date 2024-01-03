@@ -831,6 +831,16 @@ CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE = Environment(
 )
 # Maximum allowed level after level reset. Default: 5
 CREW_MAX_LEVEL_AFTER_RESET = Environment("CREW_MAX_LEVEL_AFTER_RESET", default_value="5")
+# How many Crews a user can request to join every n hours. Default: 3
+CREW_JOIN_REQUESTS_PER_COOLDOWN = Environment("CREW_JOIN_REQUESTS_PER_COOLDOWN", default_value="3")
+# How long a user has to wait before requesting to join another Crew in hours. Default: 24
+CREW_JOIN_REQUEST_COOLDOWN_DURATION = Environment(
+    "CREW_JOIN_REQUEST_COOLDOWN_DURATION", default_value="24"
+)
+# How long a user has to wait before requesting to join the same Crew again in days. Default: 7
+CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION = Environment(
+    "CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION", default_value="7"
+)
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment("BOUNTY_GIFT_MIN_AMOUNT", default_value="10000000")

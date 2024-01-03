@@ -26,6 +26,9 @@ from src.chat.private.screens.screen_crew_ability_activate_confirm import (
 )
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
+from src.chat.private.screens.screen_crew_join_request_received import (
+    manage as manage_screen_crew_join_request_received,
+)
 from src.chat.private.screens.screen_crew_leave import manage as manage_screen_crew_leave
 from src.chat.private.screens.screen_crew_level import manage as manage_screen_crew_level
 from src.chat.private.screens.screen_crew_level_up import manage as manage_screen_crew_level_up
@@ -47,6 +50,9 @@ from src.chat.private.screens.screen_crew_powerup import manage as manage_screen
 from src.chat.private.screens.screen_crew_search import manage as manage_screen_crew_search
 from src.chat.private.screens.screen_crew_search_detail import (
     manage as manage_screen_crew_search_detail,
+)
+from src.chat.private.screens.screen_crew_search_detail_join import (
+    manage as manage_screen_crew_search_detail_join,
 )
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import (
@@ -307,6 +313,16 @@ async def dispatch_screens(
 
             case Screen.PVT_CREW_SEARCH_DETAIL:  # Crew Search Detail
                 await manage_screen_crew_search_detail(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_SEARCH_DETAIL_JOIN:  # Crew Search Detail Join
+                await manage_screen_crew_search_detail_join(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_CREW_JOIN_REQUEST_RECEIVED:  # Crew Join Request Received
+                await manage_screen_crew_join_request_received(
+                    update, context, inbound_keyboard, user
+                )
 
             case Screen.PVT_SETTINGS_NOTIFICATIONS:  # Notifications
                 await manage_screen_settings_notifications(update, context, inbound_keyboard)
