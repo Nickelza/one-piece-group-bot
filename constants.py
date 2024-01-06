@@ -50,3 +50,5 @@ DURATION_UNIT_TO_SECONDS = {
     "months": 2628000,
     "years": 31536000,
 }
+
+CURRENT_REQUESTS = {}

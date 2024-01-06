@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 from datetime import datetime
@@ -7,6 +8,7 @@ from telegram import Update, User as TelegramUser
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
+import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
@@ -101,6 +103,15 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     :return: None
     """
     db = init()
+
+    now = datetime.now()
+    current_tg_user_id = (
+        str(update.effective_user.id) if update.effective_user is not None else None
+    )
+    if current_tg_user_id is not None:
+        await check_current_requests(current_tg_user_id)
+        add_current_request(current_tg_user_id, now)
+
     try:
         await manage_after_db(update, context, is_callback)
     except Exception as e:
@@ -114,6 +125,9 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
             await update.callback_query.answer()
         except BadRequest:
             pass
+
+    if current_tg_user_id is not None:
+        remove_current_request(current_tg_user_id, now)
 
 
 async def manage_after_db(
@@ -705,3 +719,63 @@ async def is_spam(
     )
 
     return False
+
+
+async def check_current_requests(tg_user_id: str) -> None:
+    """
+    Make sure that there are no request currently being processed for a user before processing
+    the next one
+    If there is, check every 1 second for 5 times and if after the fifth time there is still a
+    request being processed, delete it and add the new request
+    :return: None
+    """
+    if tg_user_id not in c.CURRENT_REQUESTS:
+        return
+
+    # Request being processed, log and wait
+    logging.info(
+        f"Request for user {tg_user_id} is being processed since {c.CURRENT_REQUESTS[tg_user_id]},"
+        " ignoring for now"
+    )
+
+    # Check 5 times every 1 second
+    for i in range(5):
+        await asyncio.sleep(1)
+        if tg_user_id not in c.CURRENT_REQUESTS:
+            return
+
+        # Stale request, delete it
+        try:
+            c.CURRENT_REQUESTS.pop(tg_user_id)
+            logging.warning(
+                f"Removed stale request for user {tg_user_id} being processed since"
+                f" {c.CURRENT_REQUESTS[tg_user_id]}"
+            )
+        except KeyError:
+            pass
+
+
+def add_current_request(tg_user_id: str, now: datetime) -> None:
+    """
+    Add a new request to the dictionary
+    :param tg_user_id: The user ID
+    :param now: The datetime
+    :return: None
+    """
+
+    c.CURRENT_REQUESTS[tg_user_id] = now
+
+
+def remove_current_request(tg_user_id: str, inserted_time: datetime) -> None:
+    """
+    Remove a request from the dictionary, if it's of the given datetime
+    :param tg_user_id: The user ID
+    :param inserted_time: The datetime
+    :return: None
+    """
+
+    if tg_user_id in c.CURRENT_REQUESTS and c.CURRENT_REQUESTS[tg_user_id] == inserted_time:
+        try:
+            c.CURRENT_REQUESTS.pop(tg_user_id)
+        except KeyError:
+            pass
