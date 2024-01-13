@@ -3,7 +3,6 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.chat.private.screens.screen_prediction_detail import manage as manage_prediction_detail
 from src.model.Prediction import Prediction
@@ -41,7 +40,7 @@ class PredictionRemoveBetListPage(ListPage):
     def set_object(self, object_id: int) -> None:
         self.object = PredictionOption.get(PredictionOption.id == object_id)
 
-    def get_items(self, page) -> list[PredictionOption]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[PredictionOption]:
         """Get prediction options that are bet on by the user"""
 
         return (
@@ -52,7 +51,7 @@ class PredictionRemoveBetListPage(ListPage):
                 & (PredictionOptionUser.user == self.user)
             )
             .order_by(PredictionOption.number.asc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -88,8 +87,8 @@ async def manage(
     :param context: The context
     :param inbound_keyboard: The inbound keyboard
     :param user: The user
-    :param called_from_remove_confirm: Whether this screen was called from the remove confirm screen. If so,
-            the user won't be redirected to the prediction detail screen
+    :param called_from_remove_confirm: Whether this screen was called from the remove confirm
+    screen. If so, the user won't be redirected to the prediction detail screen
     :return: None
     """
 

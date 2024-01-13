@@ -3,7 +3,6 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
@@ -39,14 +38,14 @@ class PredictionPlaceBetListPage(ListPage):
     def set_object(self, object_id: int) -> None:
         self.object = PredictionOption.get(PredictionOption.id == object_id)
 
-    def get_items(self, page) -> list[PredictionOption]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[PredictionOption]:
         """Get prediction options for the prediction"""
 
         return (
             self.object.select()
             .where(PredictionOption.prediction == self.prediction)
             .order_by(PredictionOption.number)
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:

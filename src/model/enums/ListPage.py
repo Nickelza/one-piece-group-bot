@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 from enum import StrEnum
 
+import constants as c
 from resources import phrases
 from src.model.BaseModel import BaseModel
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.error.CustomException import UnauthorizedToViewItemException
 
 
 class EmojiLegend:
@@ -54,6 +56,8 @@ class ListFilter:
 class ListPage(ABC):
     """Abstract class for list pages."""
 
+    DEFAULT_LIMIT = c.STANDARD_LIST_SIZE
+
     def __init__(self):
         """
         Constructor
@@ -64,6 +68,7 @@ class ListPage(ABC):
         self.emoji_legend_list: list[EmojiLegend] = []
         self.filter_list_active: list[ListFilter] = []
         self.string_filter: str | None = None
+        self.default_limit = c.STANDARD_LIST_SIZE
 
     @abstractmethod
     def set_object(self, object_id: int) -> None:
@@ -76,11 +81,12 @@ class ListPage(ABC):
         pass
 
     @abstractmethod
-    def get_items(self, page: int) -> list[BaseModel]:
+    def get_items(self, page: int, limit: int = DEFAULT_LIMIT) -> list[BaseModel]:
         """
         Get a list item for the log
 
         :param page: The page
+        :param limit: The limit
         :return: The list item
         """
         pass
@@ -93,6 +99,15 @@ class ListPage(ABC):
         :return: The total number of items
         """
         pass
+
+    def get_all_items(self):
+        """
+        Get all items for the log
+
+        :return: The list item
+        """
+
+        return self.get_items(1, self.get_total_items_count())
 
     @abstractmethod
     def get_item_text(self) -> str:
@@ -110,7 +125,10 @@ class ListPage(ABC):
 
         :return: The details
         """
-        pass
+        if self.object not in self.get_all_items():
+            raise UnauthorizedToViewItemException()
+
+        return ""
 
     def get_emoji_legend(self) -> EmojiLegend:
         """

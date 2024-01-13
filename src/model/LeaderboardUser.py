@@ -10,6 +10,7 @@ class LeaderboardUser(BaseModel):
     Leaderboard class
     """
 
+    id: int | PrimaryKeyField = PrimaryKeyField()
     leaderboard = ForeignKeyField(
         Leaderboard, backref="leaderboard_users", on_delete="CASCADE", on_update="CASCADE"
     )

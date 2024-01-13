@@ -8,7 +8,6 @@ from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
-from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send
 
@@ -34,9 +33,6 @@ async def manage(
 
     devil_fruit: DevilFruit = devil_fruit_list_page.object
     inline_keyboard: list[list[Keyboard]] = []
-
-    if devil_fruit.owner != user:
-        raise UnauthorizedToViewItemException()
 
     devil_fruit_status: DevilFruitStatus = DevilFruitStatus(devil_fruit.status)
     button_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id}

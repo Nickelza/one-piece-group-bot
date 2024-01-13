@@ -4,7 +4,6 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.User import User
@@ -41,14 +40,14 @@ class DevilFruitListPage(ListPage):
     def set_object(self, object_id: int) -> None:
         self.object = DevilFruit.get(DevilFruit.id == object_id)
 
-    def get_items(self, page) -> list[DevilFruit]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[DevilFruit]:
         """Get Devil Fruits that are owned by user"""
 
         return (
             self.object.select()
             .where(DevilFruit.owner == self.user)
             .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -70,6 +69,8 @@ class DevilFruitListPage(ListPage):
         :param from_private_chat: If it was called from a private chat
         :return:
         """
+        super().get_item_detail_text()
+
         expiring_date_text = ""
         sell_command_text = ""
         if from_private_chat:

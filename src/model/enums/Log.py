@@ -2,7 +2,6 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import Any
 
-import constants as c
 import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
 from src.model.BountyGift import BountyGift
@@ -34,7 +33,6 @@ from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
 from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
-from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.game.GameType import GameType
 from src.service.date_service import default_datetime_format
 from src.service.math_service import get_value_from_percentage, get_percentage_from_value
@@ -101,11 +99,12 @@ class Log(ListPage):
         pass
 
     @abstractmethod
-    def get_items(self, page: int) -> list[BaseModel]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[BaseModel]:
         """
         Get a list item for the log
 
         :param page: The page
+        :param limit: The limit
         :return: The list item
         """
         pass
@@ -135,7 +134,7 @@ class Log(ListPage):
 
         :return: The details
         """
-        pass
+        return super().get_item_detail_text()
 
     def get_stats_text(self) -> str:
         """
@@ -213,12 +212,12 @@ class FightLog(Log):
             self.object.status
         ).get_status_by_challenger(self.user_is_challenger)
 
-    def get_items(self, page) -> list[Fight]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Fight]:
         return (
             self.object.select()
             .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
             .order_by(Fight.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -236,8 +235,7 @@ class FightLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
-        if self.user != self.object.challenger and self.user != self.object.opponent:
-            raise UnauthorizedToViewItemException()
+        super().get_item_detail_text()
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = default_datetime_format(self.object.date, self.user)
@@ -311,7 +309,7 @@ class DocQGameLog(Log):
     def set_object(self, object_id: int) -> None:
         self.object = DocQGame.get(DocQGame.id == object_id)
 
-    def get_items(self, page) -> list[DocQGame]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[DocQGame]:
         return (
             self.object.select()
             .where(
@@ -319,7 +317,7 @@ class DocQGameLog(Log):
                 & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST]))
             )
             .order_by(DocQGame.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -338,6 +336,8 @@ class DocQGameLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         date = default_datetime_format(self.object.date, self.user)
         correct_apple = self.object.get_correct_apple_number()
         won = GameStatus(self.object.status) is GameStatus.WON
@@ -405,7 +405,7 @@ class GameLog(Log):
             self.object.status
         ).get_status_by_challenger(self.user_is_challenger)
 
-    def get_items(self, page) -> list[Game]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Game]:
         return (
             self.object.select()
             .where(
@@ -413,7 +413,7 @@ class GameLog(Log):
                 & (Game.status != GameStatus.AWAITING_SELECTION)
             )  # Exclude because they don't have a type
             .order_by(Game.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -434,6 +434,7 @@ class GameLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
 
         challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
         date = default_datetime_format(self.object.date, self.user)
@@ -529,7 +530,7 @@ class BountyGiftLog(Log):
         self.other_user = self.object.receiver if self.user_is_sender else self.object.sender
         self.log_emoji = Emoji.LOG_NEGATIVE if self.user_is_sender else Emoji.LOG_POSITIVE
 
-    def get_items(self, page) -> list[BountyGift]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[BountyGift]:
         return (
             self.object.select()
             .where(
@@ -537,7 +538,7 @@ class BountyGiftLog(Log):
                 & (BountyGift.status == BountyGiftStatus.CONFIRMED)
             )
             .order_by(BountyGift.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -560,6 +561,8 @@ class BountyGiftLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         sender_text = phrases.RECEIVER if self.user_is_sender else phrases.SENDER
         date = default_datetime_format(self.object.date, self.user)
 
@@ -645,12 +648,8 @@ class LegendaryPirateLog(Log):
         self.object: LegendaryPirate = LegendaryPirate.get(LegendaryPirate.id == object_id)
         self.user: User = self.object.user
 
-    def get_items(self, page) -> list[LegendaryPirate]:
-        return (
-            self.object.select()
-            .order_by(LegendaryPirate.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
-        )
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[LegendaryPirate]:
+        return self.object.select().order_by(LegendaryPirate.date.desc()).paginate(page, limit)
 
     def get_total_items_count(self) -> int:
         return self.object.select().count()
@@ -661,6 +660,8 @@ class LegendaryPirateLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         return phrases.LEGENDARY_PIRATE_LOG_ITEM_DETAIL_TEXT.format(
             self.user.get_markdown_mention(), self.object.epithet, self.object.reason
         )
@@ -682,7 +683,7 @@ class NewWorldPirateLog(Log):
     def set_object(self, object_id: int) -> None:
         self.object: User = User.get(User.id == object_id)
 
-    def get_items(self, page) -> list[User]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[User]:
         return (
             self.object.select()
             .where(
@@ -691,7 +692,7 @@ class NewWorldPirateLog(Log):
                 & (self.get_is_admin_condition_stmt())
             )
             .order_by(User.bounty.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -711,6 +712,8 @@ class NewWorldPirateLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         if self.object.is_crew_member():
             crew: Crew = self.object.crew
             crew_text = phrases.NEW_WORLD_PIRATE_LOG_ITEM_DETAIL_CREW_TEXT.format(
@@ -745,13 +748,13 @@ class LeaderboardRankLog(Log):
         self.object: LeaderboardUser = LeaderboardUser.get(LeaderboardUser.id == object_id)
         self.leaderboard: Leaderboard = self.object.leaderboard
 
-    def get_items(self, page) -> list[LeaderboardUser]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[LeaderboardUser]:
         return (
             self.object.select()
             .join(Leaderboard)
             .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
             .order_by(LeaderboardUser.id.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -770,6 +773,8 @@ class LeaderboardRankLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         return phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT.format(
             self.leaderboard.week,
             self.leaderboard.year,
@@ -852,12 +857,12 @@ class IncomeTaxEventLog(Log):
         self.object: IncomeTaxEvent = IncomeTaxEvent.get(IncomeTaxEvent.id == object_id)
         self.user: User = self.object.user
 
-    def get_items(self, page) -> list[IncomeTaxEvent]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[IncomeTaxEvent]:
         return (
             self.object.select()
             .where((IncomeTaxEvent.user == self.user))
             .order_by(IncomeTaxEvent.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -869,6 +874,8 @@ class IncomeTaxEventLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         from src.service.message_service import get_deeplink
 
         # Build url to event log
@@ -971,12 +978,12 @@ class WarlordLog(Log):
         self.object: Warlord = Warlord.get(Warlord.id == object_id)
         self.user: User = self.object.user
 
-    def get_items(self, page) -> list[Warlord]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Warlord]:
         return (
             self.object.select()
             .where(Warlord.end_date >= datetime.now())
             .order_by(Warlord.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -993,6 +1000,8 @@ class WarlordLog(Log):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         return phrases.WARLORD_LOG_ITEM_DETAIL_TEXT.format(
             self.user.get_markdown_mention(), self.object.epithet, self.object.reason
         )

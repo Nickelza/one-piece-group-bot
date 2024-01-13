@@ -3,7 +3,6 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.model.GroupUser import GroupUser
 from src.model.Prediction import Prediction
@@ -46,7 +45,7 @@ class PredictionListPage(ListPage):
     def set_object(self, object_id: int) -> None:
         self.object = Prediction.get(Prediction.id == object_id)
 
-    def get_items(self, page) -> list[Prediction]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Prediction]:
         """
         Get predictions that are open or closed/result set but user bet on them,
         or user created them,
@@ -57,7 +56,7 @@ class PredictionListPage(ListPage):
         return (
             self.get_select_items_statement()
             .order_by(Prediction.creation_date.desc(), Prediction.send_date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -105,6 +104,8 @@ class PredictionListPage(ListPage):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         return phrases.PREDICTION_ITEM_DETAIL_TEXT.format(
             get_prediction_text(self.object, add_bets_command=False, user=self.user),
             get_user_prediction_status_text(self.object, self.user, add_bets_command=False),

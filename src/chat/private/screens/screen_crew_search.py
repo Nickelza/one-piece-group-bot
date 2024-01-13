@@ -3,7 +3,6 @@ from enum import StrEnum
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.User import User
@@ -43,7 +42,7 @@ class CrewSearchListPage(ListPage):
 
         self.emoji_legend_list = self.get_emoji_legend_list()
 
-    def get_items(self, page) -> list[User]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[User]:
         return (
             self.object.select()
             .where(
@@ -52,7 +51,7 @@ class CrewSearchListPage(ListPage):
                 & (self.get_active_filter_list_condition())
             )
             .order_by(Crew.level.desc(), Crew.total_gained_chest_amount.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -72,6 +71,8 @@ class CrewSearchListPage(ListPage):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
         return get_crew_overview_text(self.object, self.user)
 
     def get_emoji_legend_list(self) -> list[EmojiLegend]:

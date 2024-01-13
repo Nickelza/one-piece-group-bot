@@ -1,7 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
@@ -32,8 +31,8 @@ class CrewMemberListPage(ListPage):
         self.object = User.get_by_id(object_id)
         self.crew = get_crew(self.object, validate_against_crew=self.user.crew)
 
-    def get_items(self, page) -> list[User]:
-        return self.crew.get_members(limit=c.STANDARD_LIST_SIZE, page=page)
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[User]:
+        return self.crew.get_members(limit=limit, page=page)
 
     def get_total_items_count(self) -> int:
         return len(self.crew.get_members())
@@ -48,6 +47,7 @@ class CrewMemberListPage(ListPage):
         )
 
     def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
 
         member: User = self.object
         crew: Crew = self.crew

@@ -1,7 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyLoan import BountyLoan
@@ -11,7 +10,6 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import convert_seconds_to_duration, default_datetime_format
 from src.service.list_service import get_items_text_keyboard
@@ -43,7 +41,7 @@ class BountyLoanListPage(ListPage):
             else Emoji.LOG_NEGATIVE
         )
 
-    def get_items(self, page) -> list[BountyLoan]:
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[BountyLoan]:
         """Get bounty loans that are in confirmed or paid status"""
 
         return (
@@ -53,7 +51,7 @@ class BountyLoanListPage(ListPage):
                 & ((BountyLoan.loaner == self.user) | (BountyLoan.borrower == self.user))
             )
             .order_by(BountyLoan.date.desc())
-            .paginate(page, c.STANDARD_LIST_SIZE)
+            .paginate(page, limit)
         )
 
     def get_total_items_count(self) -> int:
@@ -76,8 +74,7 @@ class BountyLoanListPage(ListPage):
         )
 
     def get_item_detail_text(self) -> str:
-        if self.user != self.object.loaner and self.user != self.object.borrower:
-            raise UnauthorizedToViewItemException()
+        super().get_item_detail_text()
 
         ot_text = ""
         # Loaner or borrower
