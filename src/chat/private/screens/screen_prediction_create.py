@@ -527,7 +527,7 @@ async def manage(
             elif user.private_screen_step is not None and go_to_next_step:
                 user.private_screen_step += 1
         except StepValidationException as e:
-            if prediction.id is not None:
+            if prediction and prediction.id is not None:
                 await set_back_button_to_settings(user)
             ot_text = str(e)
 

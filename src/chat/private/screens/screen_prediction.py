@@ -65,10 +65,12 @@ class PredictionListPage(ListPage):
     def get_select_items_statement(self):
         return self.object.select().where(
             (
+                # Is global prediction and it has been sent
                 (Prediction.status == PredictionStatus.SENT)
                 & (Prediction.type != PredictionType.USER)
             )
             | (
+                # It's closed but the user bet on it
                 Prediction.status.in_([PredictionStatus.BETS_CLOSED, PredictionStatus.RESULT_SET])
                 & (
                     Prediction.id.in_(
@@ -78,12 +80,18 @@ class PredictionListPage(ListPage):
                     )
                 )
             )
-            | (Prediction.creator == self.user)
             | (
+                # The user created it
+                Prediction.creator
+                == self.user
+            )
+            | (
+                # A user created prediction that has been sent
                 (Prediction.type == PredictionType.USER)
                 & (Prediction.status == PredictionStatus.SENT)
                 & (
                     (
+                        # It's public and the creator is active in the same group as the user
                         (Prediction.is_public == True)
                         & (
                             GroupUser.get_user_is_active_is_same_group_statement(
@@ -91,7 +99,10 @@ class PredictionListPage(ListPage):
                             )
                         )
                     )
-                    | (self.user.get_in_same_crew_statement_condition(Prediction.creator))
+                    | (
+                        # The user is in the same crew as the creator
+                        self.user.get_in_same_crew_statement_condition(Prediction.creator)
+                    )
                 )
             )
         )

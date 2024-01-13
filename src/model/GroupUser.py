@@ -24,15 +24,17 @@ class GroupUser(BaseModel):
 
     @staticmethod
     def get_user_is_active_is_same_group_statement(user_1, user_2):
-        return GroupUser.select(GroupUser.group).where(
-            GroupUser.user == user_1,
-            GroupUser.is_active == True,
-            GroupUser.group.in_(
-                GroupUser.select(GroupUser.group).where(
-                    GroupUser.user == user_2, GroupUser.is_active == True
-                )
-            ),
-        )
+        return (
+            GroupUser.select(fn.COUNT(GroupUser.group).alias("count_same_group")).where(
+                GroupUser.user == user_1,
+                GroupUser.is_active == True,
+                GroupUser.group.in_(
+                    GroupUser.select(GroupUser.group).where(
+                        GroupUser.user == user_2, GroupUser.is_active == True
+                    )
+                ),
+            )
+        ) > 0
 
     @staticmethod
     def set_no_longer_admin(user, group):
