@@ -57,6 +57,7 @@ class ListPage(ABC):
     """Abstract class for list pages."""
 
     DEFAULT_LIMIT = c.STANDARD_LIST_SIZE
+    MAX_LIMIT = c.MAX_LIMIT
 
     def __init__(self):
         """
@@ -91,15 +92,6 @@ class ListPage(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_total_items_count(self) -> int:
-        """
-        Get the total number of items for the list
-
-        :return: The total number of items
-        """
-        pass
-
     def get_all_items(self):
         """
         Get all items for the log
@@ -107,7 +99,16 @@ class ListPage(ABC):
         :return: The list item
         """
 
-        return self.get_items(1, self.get_total_items_count())
+        return self.get_items(1, ListPage.MAX_LIMIT)
+
+    def get_total_items_count(self) -> int:
+        """
+        Get the total items count
+
+        :return: The total items count
+        """
+
+        return len(self.get_all_items())
 
     @abstractmethod
     def get_item_text(self) -> str:

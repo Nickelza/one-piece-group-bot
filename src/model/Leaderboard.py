@@ -9,11 +9,11 @@ class Leaderboard(BaseModel):
     Leaderboard class
     """
 
-    id = PrimaryKeyField()
-    year = SmallIntegerField()
-    week = SmallIntegerField()
-    group: Group = ForeignKeyField(Group, null=True, backref="leaderboards")
-    global_message_id = IntegerField(null=True)
+    id: int | PrimaryKeyField = PrimaryKeyField()
+    year: int | SmallIntegerField = SmallIntegerField()
+    week: int | SmallIntegerField = SmallIntegerField()
+    group: Group | ForeignKeyField = ForeignKeyField(Group, null=True, backref="leaderboards")
+    global_message_id: int | IntegerField = IntegerField(null=True)
 
     class Meta:
         db_table = "leaderboard"

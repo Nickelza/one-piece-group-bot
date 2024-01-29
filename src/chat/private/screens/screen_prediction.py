@@ -59,9 +59,6 @@ class PredictionListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return self.get_select_items_statement().count()
-
     def get_select_items_statement(self):
         return self.object.select().where(
             (

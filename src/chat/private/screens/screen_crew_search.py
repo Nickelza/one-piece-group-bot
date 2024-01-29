@@ -54,17 +54,6 @@ class CrewSearchListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                (Crew.is_active == True)
-                & (Crew.allow_view_in_search == True)
-                & (self.get_active_filter_list_condition())
-            )
-            .count()
-        )
-
     def get_item_text(self) -> str:
         return self.get_emoji_legend_formatted() + phrases.CREW_SEARCH_ITEM_TEXT.format(
             self.object.get_name_escaped(), self.object.level

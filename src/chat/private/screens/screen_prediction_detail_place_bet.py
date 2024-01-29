@@ -48,9 +48,6 @@ class PredictionPlaceBetListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return self.object.select().where(PredictionOption.prediction == self.prediction).count()
-
     def get_item_text(self) -> str:
         return phrases.PREDICTION_PLACE_BET_TEXT.format(
             escape_valid_markdown_chars(self.object.option)

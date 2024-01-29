@@ -34,9 +34,6 @@ class CrewMemberListPage(ListPage):
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[User]:
         return self.crew.get_members(limit=limit, page=page)
 
-    def get_total_items_count(self) -> int:
-        return len(self.crew.get_members())
-
     def get_item_text(self) -> str:
         ot_text = phrases.CREW_MEMBER_ITEM_TEXT.format(mention_markdown_user(self.object))
         if self.object.crew_role is None:

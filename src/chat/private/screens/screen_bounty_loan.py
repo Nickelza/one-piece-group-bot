@@ -54,16 +54,6 @@ class BountyLoanListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                (BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
-                & ((BountyLoan.loaner == self.user) | (BountyLoan.borrower == self.user))
-            )
-            .count()
-        )
-
     def get_item_text(self) -> str:
         to_text = phrases.TEXT_TO if self.user_is_loaner else phrases.TEXT_FROM
         return phrases.BOUNTY_LOAN_ITEM_TEXT.format(

@@ -54,17 +54,6 @@ class PredictionRemoveBetListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .join(PredictionOptionUser)
-            .where(
-                (PredictionOptionUser.prediction == self.prediction)
-                & (PredictionOptionUser.user == self.user)
-            )
-            .count()
-        )
-
     def get_item_text(self) -> str:
         return phrases.PREDICTION_REMOVE_BET_TEXT.format(
             escape_valid_markdown_chars(self.object.option)

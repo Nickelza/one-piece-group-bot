@@ -50,14 +50,6 @@ class DevilFruitListPage(ListPage):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(DevilFruit.owner == self.user)
-            .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
-            .count()
-        )
-
     def get_item_text(self) -> str:
         return phrases.DEVIL_FRUIT_ITEM_TEXT.format(
             escape_valid_markdown_chars(self.object.get_full_name())

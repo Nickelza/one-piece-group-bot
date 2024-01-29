@@ -110,15 +110,6 @@ class Log(ListPage):
         pass
 
     @abstractmethod
-    def get_total_items_count(self) -> int:
-        """
-        Get the total number of items for the log
-
-        :return: The total number of items
-        """
-        pass
-
-    @abstractmethod
     def get_item_text(self) -> str:
         """
         Get the text for an item in the list
@@ -220,13 +211,6 @@ class FightLog(Log):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
-            .count()
-        )
-
     def get_item_text(self) -> str:
         return phrases.FIGHT_LOG_ITEM_TEXT.format(
             self.effective_status.get_log_emoji(),
@@ -320,16 +304,6 @@ class DocQGameLog(Log):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                (DocQGame.user == self.user)
-                & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST]))
-            )
-            .count()
-        )
-
     def get_item_text(self) -> str:
         return phrases.DOC_Q_GAME_LOG_ITEM_TEXT.format(
             GameStatus(self.object.status).get_log_emoji(), get_belly_formatted(self.object.belly)
@@ -414,16 +388,6 @@ class GameLog(Log):
             )  # Exclude because they don't have a type
             .order_by(Game.date.desc())
             .paginate(page, limit)
-        )
-
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                ((Game.challenger == self.user) | (Game.opponent == self.user))
-                & (Game.status != GameStatus.AWAITING_SELECTION)
-            )
-            .count()
         )
 
     def get_item_text(self) -> str:
@@ -541,16 +505,6 @@ class BountyGiftLog(Log):
             .paginate(page, limit)
         )
 
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                ((BountyGift.sender == self.user) | (BountyGift.receiver == self.user))
-                & (BountyGift.status == BountyGiftStatus.CONFIRMED)
-            )
-            .count()
-        )
-
     def get_item_text(self) -> str:
         to_text = phrases.TEXT_TO if self.user_is_sender else phrases.TEXT_FROM
         return phrases.BOUNTY_GIFT_LOG_ITEM_TEXT.format(
@@ -651,9 +605,6 @@ class LegendaryPirateLog(Log):
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[LegendaryPirate]:
         return self.object.select().order_by(LegendaryPirate.date.desc()).paginate(page, limit)
 
-    def get_total_items_count(self) -> int:
-        return self.object.select().count()
-
     def get_item_text(self) -> str:
         return phrases.LEGENDARY_PIRATE_LOG_ITEM_TEXT.format(
             mention_markdown_v2(self.user.tg_user_id, self.object.epithet)
@@ -693,17 +644,6 @@ class NewWorldPirateLog(Log):
             )
             .order_by(User.bounty.desc())
             .paginate(page, limit)
-        )
-
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(
-                (User.location_level >= get_first_new_world().level)
-                & (User.get_is_not_arrested_statement_condition())
-                & (self.get_is_admin_condition_stmt())
-            )
-            .count()
         )
 
     def get_item_text(self) -> str:
@@ -755,14 +695,6 @@ class LeaderboardRankLog(Log):
             .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
             .order_by(LeaderboardUser.id.desc())
             .paginate(page, limit)
-        )
-
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .join(Leaderboard)
-            .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
-            .count()
         )
 
     def get_item_text(self) -> str:
@@ -864,9 +796,6 @@ class IncomeTaxEventLog(Log):
             .order_by(IncomeTaxEvent.date.desc())
             .paginate(page, limit)
         )
-
-    def get_total_items_count(self) -> int:
-        return self.object.select().where((IncomeTaxEvent.user == self.user)).count()
 
     def get_item_text(self) -> str:
         return phrases.INCOME_TAX_EVENT_LOG_ITEM_TEXT.format(
@@ -984,14 +913,6 @@ class WarlordLog(Log):
             .where(Warlord.end_date >= datetime.now())
             .order_by(Warlord.date.desc())
             .paginate(page, limit)
-        )
-
-    def get_total_items_count(self) -> int:
-        return (
-            self.object.select()
-            .where(Warlord.end_date >= datetime.now())
-            .order_by(Warlord.date.desc())
-            .count()
         )
 
     def get_item_text(self) -> str:
