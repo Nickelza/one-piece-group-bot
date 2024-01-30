@@ -1,6 +1,7 @@
 from enum import IntEnum
 
 import resources.Environment as Env
+import resources.phrases as phrases
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
@@ -98,7 +99,7 @@ class LeaderboardRank:
 
 PIRATE_KING = LeaderboardRank(
     LeaderboardRankIndex.PIRATE_KING,
-    "Pirate King",
+    phrases.LEADERBOARD_RANK_PIRATE_KING,
     Emoji.LEADERBOARD_PIRATE_KING,
     1,
     1,
@@ -109,7 +110,7 @@ PIRATE_KING = LeaderboardRank(
 
 EMPEROR = LeaderboardRank(
     LeaderboardRankIndex.EMPEROR,
-    "Emperor",
+    phrases.LEADERBOARD_RANK_EMPEROR,
     Emoji.LEADERBOARD_EMPEROR,
     2,
     5,
@@ -120,7 +121,7 @@ EMPEROR = LeaderboardRank(
 
 FIRST_MATE = LeaderboardRank(
     LeaderboardRankIndex.FIRST_MATE,
-    "First Mate",
+    phrases.LEADERBOARD_RANK_FIRST_MATE,
     Emoji.LEADERBOARD_FIRST_MATE,
     6,
     9,
@@ -131,7 +132,7 @@ FIRST_MATE = LeaderboardRank(
 
 SUPERNOVA = LeaderboardRank(
     LeaderboardRankIndex.SUPERNOVA,
-    "Supernova",
+    phrases.LEADERBOARD_RANK_SUPERNOVA,
     Emoji.LEADERBOARD_SUPERNOVA,
     10,
     20,
@@ -142,7 +143,7 @@ SUPERNOVA = LeaderboardRank(
 
 ROOKIE = LeaderboardRank(
     LeaderboardRankIndex.ROOKIE,
-    "Rookie",
+    phrases.LEADERBOARD_RANK_ROOKIE,
     Emoji.LEADERBOARD_ROOKIE,
     21,
     -1,
@@ -153,7 +154,7 @@ ROOKIE = LeaderboardRank(
 
 ADMIN = LeaderboardRank(
     LeaderboardRankIndex.ADMIN,
-    "Veteran",
+    phrases.LEADERBOARD_RANK_ADMIN,
     Emoji.LEADERBOARD_ADMIN,
     None,
     None,
@@ -164,7 +165,7 @@ ADMIN = LeaderboardRank(
 
 LEGENDARY_PIRATE = LeaderboardRank(
     LeaderboardRankIndex.LEGENDARY_PIRATE,
-    "Legendary Pirate",
+    phrases.LEADERBOARD_RANK_LEGENDARY_PIRATE,
     Emoji.LEADERBOARD_LEGENDARY_PIRATE,
     None,
     None,
@@ -175,7 +176,7 @@ LEGENDARY_PIRATE = LeaderboardRank(
 
 WARLORD = LeaderboardRank(
     LeaderboardRankIndex.WARLORD,
-    "Warlord",
+    phrases.LEADERBOARD_RANK_WARLORD,
     Emoji.LEADERBOARD_WARLORD,
     None,
     None,

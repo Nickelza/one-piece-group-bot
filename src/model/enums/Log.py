@@ -192,28 +192,30 @@ class FightLog(Log):
 
         self.object: Fight = Fight()
         self.opponent: User = User()
-        self.effective_status: GameStatus = GameStatus.ND
         self.user_is_challenger: bool = False
+        self.effective_status: GameStatus = GameStatus.ND
 
     def set_object(self, object_id: int) -> None:
         self.object = Fight.get(Fight.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
         self.opponent = self.object.get_opponent(self.user)
-        self.effective_status: GameStatus = GameStatus(
-            self.object.status
-        ).get_status_by_challenger(self.user_is_challenger)
+        self.legend = self.get_emoji_legend()
+        self.effective_status = self.legend.get_game_status()
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Fight]:
         return (
             self.object.select()
-            .where((Fight.challenger == self.user) | (Fight.opponent == self.user))
+            .where(
+                ((Fight.challenger == self.user) | (Fight.opponent == self.user))
+                & (self.get_active_filter_list_condition())
+            )
             .order_by(Fight.date.desc())
             .paginate(page, limit)
         )
 
     def get_item_text(self) -> str:
         return phrases.FIGHT_LOG_ITEM_TEXT.format(
-            self.effective_status.get_log_emoji(),
+            self.legend.get_formatted(),
             self.opponent.get_markdown_mention(),
             get_belly_formatted(self.object.belly),
         )
@@ -225,10 +227,13 @@ class FightLog(Log):
         date = default_datetime_format(self.object.date, self.user)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
-            won = self.effective_status is GameStatus.WON
             outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
-                (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
-                (phrases.TEXT_WON if won else phrases.TEXT_LOST),
+                self.legend.get_formatted(),
+                (
+                    phrases.TEXT_WON
+                    if GameStatus(self.legend.status) is GameStatus.WON
+                    else phrases.TEXT_LOST
+                ),
                 get_belly_formatted(self.object.belly),
             )
         else:
@@ -276,6 +281,34 @@ class FightLog(Log):
             most_fought_count,
         )
 
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        return [
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.GAME_STATUS_WON,
+                (
+                    ((Fight.challenger == self.user) & (Fight.status == GameStatus.WON))
+                    | ((Fight.opponent == self.user) & (Fight.status == GameStatus.LOST))
+                ),
+                status=GameStatus.WON,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                phrases.GAME_STATUS_LOST,
+                (
+                    ((Fight.opponent == self.user) & (Fight.status == GameStatus.WON))
+                    | ((Fight.challenger == self.user) & (Fight.status == GameStatus.LOST))
+                ),
+                status=GameStatus.LOST,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEUTRAL,
+                phrases.GAME_STATUS_IN_PROGRESS,
+                (Fight.status == GameStatus.IN_PROGRESS),
+                status=GameStatus.IN_PROGRESS,
+            ),
+        ]
+
 
 class DocQGameLog(Log):
     """Class for DocQGame logs"""
@@ -292,6 +325,7 @@ class DocQGameLog(Log):
 
     def set_object(self, object_id: int) -> None:
         self.object = DocQGame.get(DocQGame.id == object_id)
+        self.legend = self.get_emoji_legend()
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[DocQGame]:
         return (
@@ -299,6 +333,7 @@ class DocQGameLog(Log):
             .where(
                 (DocQGame.user == self.user)
                 & (DocQGame.status.in_([GameStatus.WON, GameStatus.LOST]))
+                & (self.get_active_filter_list_condition())
             )
             .order_by(DocQGame.date.desc())
             .paginate(page, limit)
@@ -306,7 +341,7 @@ class DocQGameLog(Log):
 
     def get_item_text(self) -> str:
         return phrases.DOC_Q_GAME_LOG_ITEM_TEXT.format(
-            GameStatus(self.object.status).get_log_emoji(), get_belly_formatted(self.object.belly)
+            self.legend.get_formatted(), get_belly_formatted(self.object.belly)
         )
 
     def get_item_detail_text(self) -> str:
@@ -355,6 +390,26 @@ class DocQGameLog(Log):
             self.get_deeplink(max_lost_game.id),
         )
 
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend list
+
+        :return: The emoji legend list
+        """
+
+        return [
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.GAME_STATUS_WON,
+                DocQGame.status == GameStatus.WON,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                phrases.GAME_STATUS_LOST,
+                DocQGame.status == GameStatus.LOST,
+            ),
+        ]
+
 
 class GameLog(Log):
     """Class for game logs"""
@@ -375,16 +430,16 @@ class GameLog(Log):
         self.object = Game.get(Game.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
         self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
-        self.effective_status: GameStatus = GameStatus(
-            self.object.status
-        ).get_status_by_challenger(self.user_is_challenger)
+        self.legend = self.get_emoji_legend()
+        self.effective_status = self.legend.get_game_status()
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Game]:
         return (
             self.object.select()
             .where(
                 ((Game.challenger == self.user) | (Game.opponent == self.user))
-                & (Game.status != GameStatus.AWAITING_SELECTION)
+                & (Game.status.in_(GameStatus.get_finished() + [GameStatus.IN_PROGRESS]))
+                & (self.get_active_filter_list_condition())
             )  # Exclude because they don't have a type
             .order_by(Game.date.desc())
             .paginate(page, limit)
@@ -392,7 +447,7 @@ class GameLog(Log):
 
     def get_item_text(self) -> str:
         return phrases.GAME_LOG_ITEM_TEXT.format(
-            self.effective_status.get_log_emoji(),
+            self.legend.get_formatted(),
             self.opponent.get_markdown_mention(),
             get_belly_formatted(self.object.wager),
         )
@@ -470,6 +525,46 @@ class GameLog(Log):
             most_played_game.get_name(),
             most_played_count,
         )
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        return [
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.GAME_STATUS_WON,
+                (
+                    ((Game.challenger == self.user) & (Game.status == GameStatus.WON))
+                    | ((Game.opponent == self.user) & (Game.status == GameStatus.LOST))
+                ),
+                status=GameStatus.WON,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                phrases.GAME_STATUS_LOST,
+                (
+                    ((Game.opponent == self.user) & (Game.status == GameStatus.WON))
+                    | ((Game.challenger == self.user) & (Game.status == GameStatus.LOST))
+                ),
+                status=GameStatus.LOST,
+            ),
+            EmojiLegend(
+                Emoji.LOG_DRAW,
+                phrases.GAME_STATUS_DRAW,
+                (Game.status == GameStatus.DRAW),
+                status=GameStatus.DRAW,
+            ),
+            EmojiLegend(
+                Emoji.LOG_FORCED_END,
+                phrases.GAME_STATUS_FORCED_END,
+                (Game.status == GameStatus.FORCED_END),
+                status=GameStatus.FORCED_END,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEUTRAL,
+                phrases.GAME_STATUS_IN_PROGRESS,
+                (Game.status == GameStatus.IN_PROGRESS),
+                status=GameStatus.IN_PROGRESS,
+            ),
+        ]
 
 
 class BountyGiftLog(Log):
@@ -702,16 +797,22 @@ class LeaderboardRankLog(Log):
 
         self.object: LeaderboardUser = LeaderboardUser()
         self.leaderboard: Leaderboard = Leaderboard()
+        self.show_legend_list = False
 
     def set_object(self, object_id: int) -> None:
         self.object: LeaderboardUser = LeaderboardUser.get(LeaderboardUser.id == object_id)
         self.leaderboard: Leaderboard = self.object.leaderboard
+        self.legend = self.get_emoji_legend()
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[LeaderboardUser]:
         return (
             self.object.select()
             .join(Leaderboard)
-            .where((LeaderboardUser.user == self.user) & (Leaderboard.group.is_null()))
+            .where(
+                (LeaderboardUser.user == self.user)
+                & (Leaderboard.group.is_null())
+                & (self.get_active_filter_list_condition())
+            )
             .order_by(LeaderboardUser.id.desc())
             .paginate(page, limit)
         )
@@ -788,6 +889,35 @@ class LeaderboardRankLog(Log):
             max_by_bounty.position,
             self.get_deeplink(max_by_bounty.id),
         )
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        return [
+            EmojiLegend(
+                Emoji.LEADERBOARD_PIRATE_KING,
+                phrases.LEADERBOARD_RANK_PIRATE_KING,
+                (LeaderboardUser.rank_index == LeaderboardRankIndex.PIRATE_KING),
+            ),
+            EmojiLegend(
+                Emoji.LEADERBOARD_EMPEROR,
+                phrases.LEADERBOARD_RANK_EMPEROR,
+                (LeaderboardUser.rank_index == LeaderboardRankIndex.EMPEROR),
+            ),
+            EmojiLegend(
+                Emoji.LEADERBOARD_FIRST_MATE,
+                phrases.LEADERBOARD_RANK_FIRST_MATE,
+                (LeaderboardUser.rank_index == LeaderboardRankIndex.FIRST_MATE),
+            ),
+            EmojiLegend(
+                Emoji.LEADERBOARD_SUPERNOVA,
+                phrases.LEADERBOARD_RANK_SUPERNOVA,
+                (LeaderboardUser.rank_index == LeaderboardRankIndex.SUPERNOVA),
+            ),
+            EmojiLegend(
+                Emoji.LEADERBOARD_WARLORD,
+                phrases.LEADERBOARD_RANK_WARLORD,
+                (LeaderboardUser.rank_index == LeaderboardRankIndex.WARLORD),
+            ),
+        ]
 
 
 class IncomeTaxEventLog(Log):

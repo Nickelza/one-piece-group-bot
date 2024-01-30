@@ -89,6 +89,15 @@ LEADERBOARD_GLOBAL = "Global"
 LEADERBOARD_VIEW_GLOBAL_LEADERBOARD = "\n\n\n" + Emoji.GLOBE + "[Global Leaderboard]({})"
 LEADERBOARD_WARLORDS = "\n\n\n" + Emoji.LEADERBOARD_WARLORD + " *Warlords*"
 LEADERBOARD_WARLORD_ROW = "\n• [{}]({})"
+LEADERBOARD_RANK_PIRATE_KING = "Pirate King"
+LEADERBOARD_RANK_EMPEROR = "Emperor"
+LEADERBOARD_RANK_FIRST_MATE = "First Mate"
+LEADERBOARD_RANK_SUPERNOVA = "Supernova"
+LEADERBOARD_RANK_ROOKIE = "Rookie"
+LEADERBOARD_RANK_ADMIN = "Veteran"
+LEADERBOARD_RANK_LEGENDARY_PIRATE = "Legendary Pirate"
+LEADERBOARD_RANK_WARLORD = "Warlord"
+
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = "This command can only be used in a reply to a media message"
 SAVED_MEDIA_UNKNOWN_TYPE = "Unknown media type. Available types are: *{}*"
@@ -158,6 +167,7 @@ TEXT_TOPIC = "Topic"
 TEXT_GROUP = "Group"
 TEXT_NOT_SET = "Not set"
 TEXT_RANDOM = "Random"
+TEXT_ONLY = "Only {}"
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = "chat_id is None and update.effective_chat.id is None"
 EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is None"
@@ -702,7 +712,6 @@ CREW_SEARCH_ITEM_TEXT = "{} \\(Lv. {}\\)"
 CREW_SEARCH_ITEM_TEXT_FILL_IN = "Crew"
 CREW_SEARCH_ITEM_LEGEND_CAN_JOIN = "Can join"
 CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
-CREW_SEARCH_FILTER_ONLY_CAN_JOIN = "Only joinable"
 CREW_SEARCH_FILTER_NAME = "Crew name"
 CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"
@@ -1329,7 +1338,7 @@ LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} the restrict the 
 LIST_FILTER_ACTIVE_FILTERS = "\n\n_*Active filters*:{}_"
 LIST_FILTER_ITEM = "\n• {}"
 LIST_FILTER_ITEM_CONTAINS = "{} contains '{}'"
-LIST_FILTER_ONLY = "Only {}"
+LIST_FILTER_ONLY = "Only *{}*"
 NAVIGATION_LIMIT_REACHED = "Limit reached"
 
 # Logs
@@ -1369,6 +1378,7 @@ DOC_Q_GAME_LOG_STATS_TEXT = (  # Logs - Game
     "*Total summons*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Belly won*: ฿{}\n*Belly"
     " lost*: ฿{}\n*Max belly won*: [฿{}]({})\n*Max belly lost*: [฿{}]({})\n"
 )
+
 GAME_LOG_KEY = "Challenges"
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Challenge"
 GAME_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"

@@ -6,6 +6,7 @@ from resources import phrases
 from src.model.BaseModel import BaseModel
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.CustomException import UnauthorizedToViewItemException
 
@@ -13,18 +14,32 @@ from src.model.error.CustomException import UnauthorizedToViewItemException
 class EmojiLegend:
     """Class for emoji legends."""
 
-    def __init__(self, emoji: Emoji, description: str, condition: any):
+    def __init__(self, emoji: Emoji, description: str, condition: any, status: any = None):
         """
         Constructor
 
         :param emoji: The emoji
         :param description: The description
         :param condition: The condition
+        :param status: The status
         """
 
         self.emoji: Emoji = emoji
         self.description: str = description
         self.condition: any = condition
+        self.status: any = status
+
+    def get_formatted(self) -> str:
+        return self.emoji + " "
+
+    def get_game_status(self) -> GameStatus:
+        """
+        Get the game status
+
+        :return: The game status
+        """
+
+        return GameStatus(self.status)
 
 
 class ListFilterType(StrEnum):
@@ -77,6 +92,8 @@ class ListPage(ABC):
         self.filter_list_active: list[ListFilter] = []
         self.string_filter: str | None = None
         self.default_limit = c.STANDARD_LIST_SIZE
+        self.legend: EmojiLegend | None = None
+        self.show_legend_list: bool = True  # If to show legend list if available
 
         # Adding list of all items grouped by legend emoji, as to find out the emoji for each item
         self.legend_filter_results: dict[EmojiLegend, list[BaseModel]] = {}
@@ -172,7 +189,7 @@ class ListPage(ABC):
         :return: The emoji legend formatted
         """
 
-        return self.get_emoji_legend().emoji + " "
+        return self.get_emoji_legend().get_formatted()
 
     def get_emoji_legend_list_text(self) -> str:
         """
@@ -243,7 +260,7 @@ class ListPage(ABC):
                 filter_list.append(
                     ListFilter(
                         ListFilterType.LEGEND,
-                        legend.description.lower(),
+                        legend.description,
                         legend.condition,
                         legend=legend,
                     )

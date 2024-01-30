@@ -244,8 +244,8 @@ def get_items_text_keyboard(
             # Is the filter of which to add the button
             inline_keyboard.append([
                 Keyboard(
-                    list_filter.legend.emoji
-                    + phrases.LIST_FILTER_ONLY.format(list_filter.description),
+                    list_filter.legend.get_formatted()
+                    + phrases.TEXT_ONLY.format(list_filter.description),
                     screen=inbound_keyboard.screen,
                     info={key: True, ReservedKeyboardKeys.PAGE: 1},
                     inbound_info=inbound_keyboard.info,
@@ -267,10 +267,8 @@ def get_items_text_keyboard(
                     )
                 ])
 
-    if total_count > 0:
-        # Add Emoji legend if available
-        if len(list_page.emoji_legend_list) > 0:
-            items_text += list_page.get_emoji_legend_list_text()
+    if total_count > 0 and len(list_page.emoji_legend_list) > 0 and list_page.show_legend_list:
+        items_text += list_page.get_emoji_legend_list_text()
 
     # Add string filter suggestion
     if string_filter is not None:
