@@ -24,7 +24,7 @@ from src.model.enums.LeaderboardRank import (
     get_rank_by_leaderboard_user,
     LeaderboardRankIndex,
 )
-from src.model.enums.ListPage import ListPage
+from src.model.enums.ListPage import ListPage, EmojiLegend
 from src.model.enums.Location import get_first_new_world
 from src.model.enums.LogType import LogType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -486,13 +486,11 @@ class BountyGiftLog(Log):
         self.object: BountyGift = BountyGift()
         self.other_user: User = User()
         self.user_is_sender: bool = False
-        self.log_emoji: Emoji = Emoji.LOG_NEUTRAL
 
     def set_object(self, object_id: int) -> None:
         self.object: BountyGift = BountyGift.get(BountyGift.id == object_id)
         self.user_is_sender = self.object.sender == self.user
         self.other_user = self.object.receiver if self.user_is_sender else self.object.sender
-        self.log_emoji = Emoji.LOG_NEGATIVE if self.user_is_sender else Emoji.LOG_POSITIVE
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[BountyGift]:
         return (
@@ -500,6 +498,7 @@ class BountyGiftLog(Log):
             .where(
                 ((BountyGift.sender == self.user) | (BountyGift.receiver == self.user))
                 & (BountyGift.status == BountyGiftStatus.CONFIRMED)
+                & (self.get_active_filter_list_condition())
             )
             .order_by(BountyGift.date.desc())
             .paginate(page, limit)
@@ -508,7 +507,7 @@ class BountyGiftLog(Log):
     def get_item_text(self) -> str:
         to_text = phrases.TEXT_TO if self.user_is_sender else phrases.TEXT_FROM
         return phrases.BOUNTY_GIFT_LOG_ITEM_TEXT.format(
-            self.log_emoji,
+            self.get_emoji_legend_formatted(),
             get_belly_formatted(self.object.amount),
             to_text,
             self.other_user.get_markdown_mention(),
@@ -582,6 +581,26 @@ class BountyGiftLog(Log):
             most_received_user.get_markdown_mention(),
             get_belly_formatted(most_received_amount),
         )
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend list
+
+        :return: The emoji legend list
+        """
+
+        return [
+            EmojiLegend(
+                Emoji.LOG_BLUE,
+                phrases.BOUNTY_GIFT_LOG_LEGEND_SENT,
+                BountyGift.sender == self.user,
+            ),
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.BOUNTY_GIFT_LOG_LEGEND_RECEIVED,
+                ~(BountyGift.sender == self.user),
+            ),
+        ]
 
 
 class LegendaryPirateLog(Log):

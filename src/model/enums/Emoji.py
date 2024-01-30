@@ -104,6 +104,7 @@ class Emoji(StrEnum):
     LOG_DRAW = "🔵"
     LOG_NEUTRAL = "⚪"
     LOG_FORCED_END = "🟡"
+    LOG_BLUE = "🔵"
 
     # Impel Down
     DISCIPLINARY_ACTION = "⛔"

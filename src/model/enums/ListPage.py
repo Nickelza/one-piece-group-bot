@@ -30,14 +30,20 @@ class EmojiLegend:
 class ListFilterType(StrEnum):
     """Enum for list filter types."""
 
-    BOOLEAN = "b"
     STRING = "s"
+    LEGEND = "l"
 
 
 class ListFilter:
     """Class for list filters."""
 
-    def __init__(self, filter_type: ListFilterType, description: str, condition: any):
+    def __init__(
+        self,
+        filter_type: ListFilterType,
+        description: str,
+        condition: any,
+        legend: EmojiLegend = None,
+    ):
         """
         Constructor
 
@@ -49,6 +55,7 @@ class ListFilter:
         self.filter_type: ListFilterType = filter_type
         self.description: str = description
         self.condition: any = condition
+        self.legend: EmojiLegend = legend
         self.value: any = None
         self.key: any = None
 
@@ -71,6 +78,21 @@ class ListPage(ABC):
         self.string_filter: str | None = None
         self.default_limit = c.STANDARD_LIST_SIZE
 
+        # Adding list of all items grouped by legend emoji, as to find out the emoji for each item
+        self.legend_filter_results: dict[EmojiLegend, list[BaseModel]] = {}
+
+    def init_legend_filter_results(self):
+        """
+        Init the legend filter results
+        """
+
+        for filter_item in [
+            f for f in self.get_filter_list() if f.filter_type is ListFilterType.LEGEND
+        ]:
+            self.filter_list_active = [filter_item]
+            self.legend_filter_results[filter_item.legend] = self.get_all_items()
+        self.filter_list_active = []
+
     @abstractmethod
     def set_object(self, object_id: int) -> None:
         """
@@ -79,6 +101,7 @@ class ListPage(ABC):
         :param object_id: The object id
         :return: None
         """
+
         pass
 
     @abstractmethod
@@ -138,9 +161,9 @@ class ListPage(ABC):
         :return: The emoji legend
         """
 
-        for emoji_legend in self.emoji_legend_list:
-            if emoji_legend.condition:
-                return emoji_legend
+        for legend, results in self.legend_filter_results.items():
+            if self.object in results:
+                return legend
 
     def get_emoji_legend_formatted(self) -> str:
         """
@@ -162,10 +185,21 @@ class ListPage(ABC):
 
         for emoji_legend in self.emoji_legend_list:
             legend_text += phrases.LIST_EMOJI_LEGEND_ITEM.format(
-                emoji_legend.emoji, emoji_legend.description
+                emoji_legend.emoji,
+                emoji_legend.description,
+                len(self.legend_filter_results[emoji_legend]),
             )
 
         return phrases.LIST_EMOJI_LEGEND.format(legend_text)
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend list
+
+        :return: The emoji legend list
+        """
+
+        return []
 
     @staticmethod
     def get_filter_key(index: int) -> str:
@@ -201,4 +235,18 @@ class ListPage(ABC):
         :return: The filter list
         """
 
-        return []
+        # In case of Emoji legend, add list filter for it
+        filter_list = []
+
+        if len(self.emoji_legend_list) > 0:
+            for legend in self.emoji_legend_list:
+                filter_list.append(
+                    ListFilter(
+                        ListFilterType.LEGEND,
+                        legend.description.lower(),
+                        legend.condition,
+                        legend=legend,
+                    )
+                )
+
+        return filter_list

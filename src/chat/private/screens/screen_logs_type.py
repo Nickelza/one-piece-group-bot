@@ -46,6 +46,8 @@ async def manage(
             LogTypeReservedKeys.ITEM_ID,
             Screen.PVT_LOGS_TYPE_DETAIL,
             text_fill_in=LOG_TYPE_DETAIL_TEXT_FILL_IN[log.type],
+            context=context,
+            user=user,
         )
 
         # Stats keyboard

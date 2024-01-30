@@ -40,8 +40,6 @@ class CrewSearchListPage(ListPage):
         if self.object is None:
             raise PrivateChatException(text=phrases.CREW_NOT_FOUND)
 
-        self.emoji_legend_list = self.get_emoji_legend_list()
-
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[User]:
         return (
             self.object.select()
@@ -75,12 +73,12 @@ class CrewSearchListPage(ListPage):
             EmojiLegend(
                 Emoji.LOG_POSITIVE,
                 phrases.CREW_SEARCH_ITEM_LEGEND_CAN_JOIN,
-                self.user_can_join(),
+                self.get_can_join_condition(),
             ),
             EmojiLegend(
                 Emoji.LOG_NEGATIVE,
                 phrases.CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN,
-                not self.user_can_join(),
+                ~(self.get_can_join_condition()),
             ),
         ]
 
@@ -91,17 +89,7 @@ class CrewSearchListPage(ListPage):
         :return: The filter list
         """
 
-        return [
-            ListFilter(
-                ListFilterType.BOOLEAN,
-                phrases.CREW_SEARCH_FILTER_ONLY_CAN_JOIN,
-                (
-                    (Crew.is_full == False)
-                    & (Crew.can_accept_new_members == True)
-                    & (Crew.allow_join_from_search == True)
-                    & (Crew.required_bounty <= self.user.bounty)
-                ),
-            ),
+        return super().get_filter_list() + [
             ListFilter(
                 ListFilterType.STRING,
                 phrases.CREW_SEARCH_FILTER_NAME,
@@ -109,16 +97,16 @@ class CrewSearchListPage(ListPage):
             ),
         ]
 
-    def user_can_join(self):
+    def get_can_join_condition(self):
         """
         Whether the user can join the crew
         """
 
         return (
-            not self.object.is_full
-            and self.object.can_accept_new_members
-            and self.object.allow_join_from_search
-            and self.object.required_bounty <= self.user.bounty
+            (Crew.is_full == False)
+            & (Crew.can_accept_new_members == True)
+            & (Crew.allow_join_from_search == True)
+            & (Crew.required_bounty <= self.user.bounty)
         )
 
 

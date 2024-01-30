@@ -1322,12 +1322,14 @@ LIST_OVERVIEW = (
 LIST_OVERVIEW_NO_ITEMS = "No {} found"
 LIST_ITEM_TEXT = "\n*{}*. {}"
 LIST_FOOTER = "\n\n_Showing {}-{} of {} items_"
+LEGEND = "legend"
 LIST_EMOJI_LEGEND = "\n\n_*Legend*{}_"
-LIST_EMOJI_LEGEND_ITEM = "\n{} {}"
+LIST_EMOJI_LEGEND_ITEM = "\n{} {} \\({}\\)"
 LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} the restrict the search__"
 LIST_FILTER_ACTIVE_FILTERS = "\n\n_*Active filters*:{}_"
 LIST_FILTER_ITEM = "\n• {}"
 LIST_FILTER_ITEM_CONTAINS = "{} contains '{}'"
+LIST_FILTER_ONLY = "Only {}"
 NAVIGATION_LIMIT_REACHED = "Limit reached"
 
 # Logs
@@ -1394,6 +1396,8 @@ BOUNTY_GIFT_LOG_STATS_TEXT = (
     " \\({}\\)]({})\n*Highest received*: [฿{} \\({}\\)]({})\n*Top receiver*: {} \\(฿{}\\)\n*Top"
     " giver*: {} \\(฿{}\\)"
 )
+BOUNTY_GIFT_LOG_LEGEND_SENT = "Sent"
+BOUNTY_GIFT_LOG_LEGEND_RECEIVED = "Received"
 
 # Logs - Legendary Pirate
 LEGENDARY_PIRATE_LOG_KEY = "Legendary Pirates"

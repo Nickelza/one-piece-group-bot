@@ -8,7 +8,6 @@ import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
 from src.model.User import User
 from src.model.enums.ContextDataKey import ContextDataKey
-from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage, ListFilter, ListFilterType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -126,6 +125,9 @@ def get_items_text_keyboard(
     :param allow_string_filter: Whether to allow string filter
     :return: The text and keyboard
     """
+    list_page.emoji_legend_list = list_page.get_emoji_legend_list()
+    if len(list_page.emoji_legend_list) > 0:
+        list_page.init_legend_filter_results()
 
     # Add string filter to context data
     if allow_string_filter:
@@ -154,9 +156,8 @@ def get_items_text_keyboard(
             )
 
     # Set active filters
-    list_page.filter_list_active = get_active_filter_list(
-        inbound_keyboard, list_page, context, user
-    )
+    active_filters = get_active_filter_list(inbound_keyboard, list_page, context, user)
+    list_page.filter_list_active = active_filters
 
     # Get the items
     items, page, start_number, end_number, total_count = get_items_paginate(
@@ -200,18 +201,58 @@ def get_items_text_keyboard(
 
     # Add filters button
     string_filter: ListFilter | None = None
+    add_legend_filter = False
+    has_added_legend_filter = False
+
+    filters = list_page.get_filter_list()
+
+    legend_filters = [f for f in filters if f.filter_type is ListFilterType.LEGEND]
+    active_legend_filters = [f for f in active_filters if f.filter_type is ListFilterType.LEGEND]
+
     for index, list_filter in enumerate(list_page.get_filter_list()):
         key = list_page.get_filter_key(index)
-        if list_filter.filter_type is ListFilterType.BOOLEAN:
-            current_value: bool = get_boolean_filter_value(inbound_keyboard, key)
+        if list_filter.filter_type is ListFilterType.LEGEND:
+            if has_added_legend_filter:
+                continue
+
+            # In case no active legend filters, first one will be added
+            if len(active_legend_filters) > 0:
+                # Legend filter but not current one
+                filter_value = get_legend_filter_value(inbound_keyboard, key)
+                if not filter_value and not add_legend_filter:
+                    continue
+
+                # Current active legend filter, should add button of next filter
+                if filter_value:
+                    inbound_keyboard.info.pop(key)  # Else it will stack
+                    user.remove_context_data(context, ContextDataKey.FILTER, inner_key=key)
+                    add_legend_filter = True
+
+                    # No next filter, add remove button
+                    if list_filter.description == legend_filters[-1].description:
+                        inline_keyboard.append([
+                            Keyboard(
+                                phrases.PVT_KEY_STRING_FILTER_REMOVE.format(phrases.LEGEND),
+                                screen=inbound_keyboard.screen,
+                                info={key: False, ReservedKeyboardKeys.PAGE: 1},
+                                inbound_info=inbound_keyboard.info,
+                            )
+                        ])
+
+                    continue
+
+            # Is the filter of which to add the button
             inline_keyboard.append([
                 Keyboard(
-                    (Emoji.ENABLED if current_value else "") + list_filter.description,
+                    list_filter.legend.emoji
+                    + phrases.LIST_FILTER_ONLY.format(list_filter.description),
                     screen=inbound_keyboard.screen,
-                    info={key: not current_value},
+                    info={key: True, ReservedKeyboardKeys.PAGE: 1},
                     inbound_info=inbound_keyboard.info,
                 )
             ])
+            has_added_legend_filter = True
+
         elif list_filter.filter_type is ListFilterType.STRING:
             string_filter = list_filter
             current_value: str = get_string_filter_value(context, key, user)
@@ -221,17 +262,21 @@ def get_items_text_keyboard(
                     Keyboard(
                         phrases.PVT_KEY_STRING_FILTER_REMOVE.format(list_filter.description),
                         screen=inbound_keyboard.screen,
-                        info={key: False},
+                        info={key: False, ReservedKeyboardKeys.PAGE: 1},
                         inbound_info=inbound_keyboard.info,
                     )
                 ])
+
+    if total_count > 0:
+        # Add Emoji legend if available
+        if len(list_page.emoji_legend_list) > 0:
+            items_text += list_page.get_emoji_legend_list_text()
 
     # Add string filter suggestion
     if string_filter is not None:
         items_text += phrases.LIST_FILTER_SEND_PART_OF_STRING.format(string_filter.description)
 
     # Add active filters recap
-    active_filters = get_active_filter_list(inbound_keyboard, list_page, context, user)
     if len(active_filters) > 0:
         active_filters_text = ""
         for active_filter in active_filters:
@@ -241,17 +286,13 @@ def get_items_text_keyboard(
                     active_filter.description, active_filter.value
                 )
             else:
-                inner_text = active_filter.description
+                inner_text = phrases.LIST_FILTER_ONLY.format(active_filter.description)
 
             active_filters_text += phrases.LIST_FILTER_ITEM.format(inner_text)
 
         items_text += phrases.LIST_FILTER_ACTIVE_FILTERS.format(active_filters_text)
 
     if total_count > 0:
-        # Add Emoji legend if available
-        if len(list_page.emoji_legend_list) > 0:
-            items_text += list_page.get_emoji_legend_list_text()
-
         # Add list text footer if needed
         if total_count > c.STANDARD_LIST_SIZE:
             items_text += phrases.LIST_FOOTER.format(start_number, end_number, total_count)
@@ -267,16 +308,18 @@ def get_items_text_keyboard(
     return items_text, inline_keyboard
 
 
-def get_boolean_filter_value(inbound_keyboard: Keyboard, key: str) -> bool:
+def get_legend_filter_value(inbound_keyboard: Keyboard, key: str) -> bool:
     """
-    Get the boolean filter value from the inbound keyboard
+    Get the legend filter value from the inbound keyboard
     :param inbound_keyboard: The inbound keyboard
     :param key: The key
-    :return: The boolean filter value
+    :return: The list filter value
     """
 
-    value = get_filter_value(inbound_keyboard, key)
-    return value if value is not None else False
+    if key in inbound_keyboard.info:
+        return inbound_keyboard.info[key]
+
+    return False
 
 
 def get_string_filter_value(context: ContextTypes.DEFAULT_TYPE, key: str, user: User) -> str:
@@ -290,20 +333,6 @@ def get_string_filter_value(context: ContextTypes.DEFAULT_TYPE, key: str, user: 
 
     # Get value from context
     return user.get_context_data_or_none(context, ContextDataKey.FILTER, inner_key=key)
-
-
-def get_filter_value(inbound_keyboard: Keyboard, key: str) -> any:
-    """
-    Get the filter value from the inbound keyboard
-    :param inbound_keyboard: The inbound keyboard
-    :param key: The key
-    :return: The filter value
-    """
-
-    if key in inbound_keyboard.info:
-        return inbound_keyboard.info[key]
-
-    return None
 
 
 def get_active_filter_list(
@@ -339,7 +368,7 @@ def get_active_filter_list(
         key = list_page.get_filter_key(index)
         value = user.get_context_data_or_none(context, ContextDataKey.FILTER, inner_key=key)
 
-        if value is None:
+        if not value:
             continue
 
         list_filter.value = value
