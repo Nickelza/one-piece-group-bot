@@ -7,7 +7,7 @@ from src.model.BountyLoan import BountyLoan
 from src.model.User import User
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Emoji import Emoji
-from src.model.enums.ListPage import ListPage
+from src.model.enums.ListPage import ListPage, EmojiLegend
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
@@ -29,17 +29,12 @@ class BountyLoanListPage(ListPage):
         self.object: BountyLoan = BountyLoan()
         self.other_user: User = User()
         self.user_is_loaner = False
-        self.log_emoji = Emoji.LOG_NEUTRAL
 
     def set_object(self, object_id: int) -> None:
         self.object = BountyLoan.get(BountyLoan.id == object_id)
         self.user_is_loaner = self.object.loaner == self.user
         self.other_user = self.object.borrower if self.user_is_loaner else self.object.loaner
-        self.log_emoji = (
-            Emoji.LOG_POSITIVE
-            if BountyLoanStatus(self.object.status).has_ended()
-            else Emoji.LOG_NEGATIVE
-        )
+        self.legend = self.get_emoji_legend()
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[BountyLoan]:
         """Get bounty loans that are in confirmed or paid status"""
@@ -49,6 +44,7 @@ class BountyLoanListPage(ListPage):
             .where(
                 (BountyLoan.status.not_in(BountyLoanStatus.get_not_confirmed_statuses()))
                 & ((BountyLoan.loaner == self.user) | (BountyLoan.borrower == self.user))
+                & (self.get_active_filter_list_condition())
             )
             .order_by(BountyLoan.date.desc())
             .paginate(page, limit)
@@ -57,7 +53,7 @@ class BountyLoanListPage(ListPage):
     def get_item_text(self) -> str:
         to_text = phrases.TEXT_TO if self.user_is_loaner else phrases.TEXT_FROM
         return phrases.BOUNTY_LOAN_ITEM_TEXT.format(
-            self.log_emoji,
+            self.legend.emoji,
             get_belly_formatted(self.object.amount),
             to_text,
             self.other_user.get_markdown_mention(),
@@ -112,7 +108,7 @@ class BountyLoanListPage(ListPage):
 
         # Status
         ot_text += phrases.BOUNTY_LOAN_STATUS.format(
-            self.log_emoji, BountyLoanStatus(self.object.status).get_description()
+            self.legend.emoji, BountyLoanStatus(self.object.status).get_description()
         )
 
         # If expired, show warning that all new gained bounty will be transferred to the loaner
@@ -131,6 +127,36 @@ class BountyLoanListPage(ListPage):
             ot_text += phrases.BOUNTY_LOAN_EXPIRED_ACTION_PREFIX + action_text
 
         return ot_text
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend list
+
+        :return: The emoji legend list
+        """
+
+        return [
+            EmojiLegend(
+                Emoji.LOG_NEUTRAL,
+                phrases.BOUNTY_LOAN_STATUS_ACTIVE,
+                (BountyLoan.status == BountyLoanStatus.ACTIVE),
+            ),
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.BOUNTY_LOAN_STATUS_REPAID,
+                (BountyLoan.status == BountyLoanStatus.REPAID),
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                phrases.BOUNTY_LOAN_STATUS_EXPIRED,
+                (BountyLoan.status == BountyLoanStatus.EXPIRED),
+            ),
+            EmojiLegend(
+                Emoji.LOG_BLUE,
+                phrases.BOUNTY_LOAN_STATUS_FORGIVEN,
+                (BountyLoan.status == BountyLoanStatus.FORGIVEN),
+            ),
+        ]
 
 
 async def manage(
@@ -154,6 +180,8 @@ async def manage(
         ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
         Screen.PVT_BOUNTY_LOAN_DETAIL,
         text_fill_in=phrases.BOUNTY_LOAN_ITEM_TEXT_FILL_IN,
+        context=context,
+        user=user,
     )
 
     await full_message_send(

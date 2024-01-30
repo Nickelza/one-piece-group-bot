@@ -182,6 +182,8 @@ class ListPage(ABC):
             if self.object in results:
                 return legend
 
+        raise ValueError("No emoji legend found for object")
+
     def get_emoji_legend_formatted(self) -> str:
         """
         Get the emoji legend formatted
