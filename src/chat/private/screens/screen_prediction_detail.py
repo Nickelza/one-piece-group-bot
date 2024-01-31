@@ -49,6 +49,7 @@ async def manage(
     prediction_list_page = PredictionListPage()
 
     prediction_list_page.user = user
+    # TODO Add init_legend_filter_results() when legend is implemented
     prediction_list_page.set_object(
         inbound_keyboard.get_int(PredictionDetailReservedKeys.PREDICTION_ID)
     )

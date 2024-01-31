@@ -122,3 +122,8 @@ SILENCE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE
 )
 SAVED_MEDIA_DICT[SavedMediaName.SILENCE] = SILENCE
+
+PLUNDER = SavedMedia(
+    media_type=SavedMediaType.PHOTO, name=SavedMediaName.PLUNDER, file_name=AssetPath.PLUNDER
+)
+SAVED_MEDIA_DICT[SavedMediaName.PLUNDER] = PLUNDER

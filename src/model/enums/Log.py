@@ -13,6 +13,7 @@ from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.LegendaryPirate import LegendaryPirate
+from src.model.Plunder import Plunder
 from src.model.User import User
 from src.model.Warlord import Warlord
 from src.model.enums.BountyGiftRole import BountyGiftRole
@@ -34,7 +35,10 @@ from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributi
 from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameType import GameType
-from src.service.date_service import default_datetime_format
+from src.service.date_service import (
+    default_datetime_format,
+    convert_hours_to_duration,
+)
 from src.service.math_service import get_value_from_percentage, get_percentage_from_value
 from src.service.message_service import (
     mention_markdown_v2,
@@ -54,6 +58,7 @@ LOG_TYPE_BUTTON_TEXTS = {
     LogType.WARLORD: phrases.WARLORD_LOG_KEY,
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_KEY,
     LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_KEY,
+    LogType.PLUNDER: phrases.PLUNDER_LOG_KEY,
 }
 
 LOG_TYPE_DETAIL_TEXT_FILL_IN = {
@@ -66,6 +71,7 @@ LOG_TYPE_DETAIL_TEXT_FILL_IN = {
     LogType.LEADERBOARD_RANK: phrases.LEADERBOARD_RANK_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.INCOME_TAX_EVENT: phrases.INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     LogType.WARLORD: phrases.WARLORD_LOG_ITEM_DETAIL_TEXT_FILL_IN,
+    LogType.PLUNDER: phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 
@@ -179,6 +185,8 @@ class Log(ListPage):
         return True if self.user.is_admin else (User.is_admin == False)
 
 
+# noinspection DuplicatedCode
+# Same as plunder
 class FightLog(Log):
     """Class for fight logs"""
 
@@ -207,6 +215,7 @@ class FightLog(Log):
             self.object.select()
             .where(
                 ((Fight.challenger == self.user) | (Fight.opponent == self.user))
+                & (Fight.status.in_([GameStatus.WON, GameStatus.LOST]))
                 & (self.get_active_filter_list_condition())
             )
             .order_by(Fight.date.desc())
@@ -300,12 +309,6 @@ class FightLog(Log):
                     | ((Fight.challenger == self.user) & (Fight.status == GameStatus.LOST))
                 ),
                 status=GameStatus.LOST,
-            ),
-            EmojiLegend(
-                Emoji.LOG_NEUTRAL,
-                phrases.GAME_STATUS_IN_PROGRESS,
-                (Fight.status == GameStatus.IN_PROGRESS),
-                status=GameStatus.IN_PROGRESS,
             ),
         ]
 
@@ -1077,6 +1080,142 @@ class WarlordLog(Log):
         )
 
 
+# noinspection DuplicatedCode
+# Same as fight
+class PlunderLog(Log):
+    """Class for plunder logs"""
+
+    def __init__(self):
+        """
+        Constructor
+
+        """
+
+        super().__init__(LogType.PLUNDER)
+
+        self.object: Plunder = Plunder()
+        self.opponent: User = User()
+        self.user_is_challenger: bool = False
+        self.effective_status: GameStatus = GameStatus.ND
+
+    def set_object(self, object_id: int) -> None:
+        self.object = Plunder.get(Plunder.id == object_id)
+        self.user_is_challenger = self.object.challenger == self.user
+        self.opponent = self.object.get_opponent(self.user)
+        self.legend = self.get_emoji_legend()
+        self.effective_status = self.legend.get_game_status()
+
+    def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Plunder]:
+        return (
+            self.object.select()
+            .where(
+                ((Plunder.challenger == self.user) | (Plunder.opponent == self.user))
+                & (Plunder.status.in_([GameStatus.WON, GameStatus.LOST]))
+                & (self.get_active_filter_list_condition())
+            )
+            .order_by(Plunder.date.desc())
+            .paginate(page, limit)
+        )
+
+    def get_item_text(self) -> str:
+        return phrases.PLUNDER_LOG_ITEM_TEXT.format(
+            self.legend.get_formatted(),
+            self.opponent.get_markdown_mention(),
+            get_belly_formatted(self.object.belly),
+        )
+
+    def get_item_detail_text(self) -> str:
+        super().get_item_detail_text()
+
+        challenger_text = phrases.OPPONENT if self.user_is_challenger else phrases.CHALLENGER
+        date = default_datetime_format(self.object.date, self.user)
+
+        if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
+            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
+                self.legend.get_formatted(),
+                (
+                    phrases.TEXT_STOLE
+                    if GameStatus(self.legend.status) is GameStatus.WON
+                    else phrases.TEXT_LOST
+                ),
+                get_belly_formatted(self.object.belly),
+            )
+        else:
+            outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
+                GAME_STATUS_DESCRIPTIONS[self.effective_status]
+            )
+
+        if self.effective_status is GameStatus.LOST:
+            outcome_text += phrases.PLUNDER_LOG_ITEM_DETAIL_SENTENCE_DURATION.format(
+                convert_hours_to_duration(self.object.sentence_duration, show_full=True)
+            )
+
+        return phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT.format(
+            challenger_text,
+            self.opponent.get_markdown_mention(),
+            date,
+            self.object.get_win_probability(self.user),
+            outcome_text,
+            get_message_url(self.object.message_id, self.object.group_chat),
+        )
+
+    def get_stats_text(self) -> str:
+        total_plunders = self.get_total_items_count()
+        total_wins = self.object.get_total_win_or_loss(self.user, GameStatus.WON)
+        total_wins_percentage = int(get_percentage_from_value(total_wins, total_plunders))
+        total_losses = self.object.get_total_win_or_loss(self.user, GameStatus.LOST)
+        total_losses_percentage = int(get_percentage_from_value(total_losses, total_plunders))
+        max_won_plunder = self.object.get_max_won_or_lost(self.user, GameStatus.WON)
+        max_lost_plunder = self.object.get_max_won_or_lost(self.user, GameStatus.LOST)
+        most_plundered_user, most_plundered_count = self.object.get_most_plundered_user(self.user)
+        max_sentence = self.object.get_max_sentence(self.user)
+        return phrases.PLUNDER_LOG_STATS_TEXT.format(
+            total_plunders,
+            total_wins,
+            total_wins_percentage,
+            total_losses,
+            total_losses_percentage,
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.WON)
+            ),
+            get_belly_formatted(
+                self.object.get_total_belly_won_or_lost(self.user, GameStatus.LOST)
+            ),
+            get_belly_formatted(max_won_plunder.belly),
+            max_won_plunder.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_won_plunder.id),
+            get_belly_formatted(max_lost_plunder.belly),
+            max_lost_plunder.get_opponent(self.user).get_markdown_mention(),
+            self.get_deeplink(max_lost_plunder.id),
+            convert_hours_to_duration(self.object.sentence_duration, show_full=True),
+            self.get_deeplink(max_sentence.id),
+            most_plundered_user.get_markdown_mention(),
+            most_plundered_count,
+        )
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        return [
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                phrases.GAME_STATUS_WON,
+                (
+                    ((Plunder.challenger == self.user) & (Plunder.status == GameStatus.WON))
+                    | ((Plunder.opponent == self.user) & (Plunder.status == GameStatus.LOST))
+                ),
+                status=GameStatus.WON,
+            ),
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                phrases.GAME_STATUS_LOST,
+                (
+                    ((Plunder.opponent == self.user) & (Plunder.status == GameStatus.WON))
+                    | ((Plunder.challenger == self.user) & (Plunder.status == GameStatus.LOST))
+                ),
+                status=GameStatus.LOST,
+            ),
+        ]
+
+
 LOGS = [
     FightLog(),
     DocQGameLog(),
@@ -1087,6 +1226,7 @@ LOGS = [
     LeaderboardRankLog(),
     IncomeTaxEventLog(),
     WarlordLog(),
+    PlunderLog(),
 ]
 
 

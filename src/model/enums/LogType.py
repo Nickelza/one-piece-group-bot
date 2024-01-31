@@ -13,3 +13,4 @@ class LogType(IntEnum):
     LEADERBOARD_RANK = 7
     INCOME_TAX_EVENT = 8
     WARLORD = 9
+    PLUNDER = 10

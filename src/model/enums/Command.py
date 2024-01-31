@@ -1,5 +1,6 @@
 import resources.Environment as Env
 import src.model.enums.Location as Location
+from src.model.enums.CommandName import CommandName
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.Screen import (
@@ -11,13 +12,6 @@ from src.model.enums.Screen import (
 )
 
 
-def get_formatted_from_string(string: str):
-    """
-    Returns the command formatted for the text display.
-    """
-    return "`/{}`".format(string)
-
-
 class Command:
     """
     Class for Commands
@@ -25,10 +19,10 @@ class Command:
 
     def __init__(
         self,
-        name: str | None,
+        name: CommandName | None,
         screen: Screen,
         active: bool = True,
-        replaced_by: str = None,
+        replaced_by: CommandName = None,
         only_in_reply: bool = False,
         allow_self_reply: bool = False,
         allow_reply_to_bot: bool = False,
@@ -118,13 +112,13 @@ class Command:
         """
         Returns the command formatted for the text display.
         """
-        return get_formatted_from_string(self.name)
+        return self.name.get_formatted()
 
     def get_replaced_by_formatted(self):
         """
         Returns the command formatted for the text display.
         """
-        return get_formatted_from_string(self.replaced_by)
+        return self.replaced_by.get_formatted()
 
     def __eq__(self, other):
         """
@@ -142,39 +136,39 @@ COMMANDS = []
 ND = None
 COMMANDS.append(ND)
 
-PVT_START = Command("start", Screen.PVT_START, allow_while_arrested=True)
+PVT_START = Command(CommandName.START, Screen.PVT_START, allow_while_arrested=True)
 COMMANDS.append(PVT_START)
 
-PVT_USER_STATUS = Command("status", Screen.PVT_USER_STATUS, allow_while_arrested=True)
+PVT_USER_STATUS = Command(CommandName.STATUS, Screen.PVT_USER_STATUS, allow_while_arrested=True)
 COMMANDS.append(PVT_USER_STATUS)
 
 # Deprecated
 for sc in DEPRECATED:
-    COMMANDS.append(Command("", sc, active=False))
+    COMMANDS.append(Command(CommandName.EMPTY, sc, active=False))
 
 # To allow while arrested
 for sc in ALLOW_WHILE_ARRESTED:
-    COMMANDS.append(Command("", sc, allow_while_arrested=True))
+    COMMANDS.append(Command(CommandName.EMPTY, sc, allow_while_arrested=True))
 
 # To allow deeplink
 for sc in ALLOW_DEEPLINK:
-    COMMANDS.append(Command("", sc, allow_deeplink=True))
+    COMMANDS.append(Command(CommandName.EMPTY, sc, allow_deeplink=True))
 
 # To set limitations
 # Only by Captain or first mate
 for sc in ONLY_BY_CAPTAIN_OR_FIRST_MATE:
-    COMMANDS.append(Command("", sc, only_by_crew_captain_or_first_mate=True))
+    COMMANDS.append(Command(CommandName.EMPTY, sc, only_by_crew_captain_or_first_mate=True))
 
 # To set required location
 PVT_LOGS_TYPE_STATS = Command(
-    "",
+    CommandName.EMPTY,
     Screen.PVT_LOGS_TYPE_STATS,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_LOG_STATS.get_int()),
 )
 COMMANDS.append(PVT_LOGS_TYPE_STATS)
 
 PVT_PREDICTION_CREATE = Command(
-    "",
+    CommandName.EMPTY,
     Screen.PVT_PREDICTION_CREATE,
     required_location=Location.get_by_level(
         Env.REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE.get_int()
@@ -183,14 +177,14 @@ PVT_PREDICTION_CREATE = Command(
 COMMANDS.append(PVT_PREDICTION_CREATE)
 
 GRP_GAME_OPPONENT_CONFIRMATION = Command(
-    "",
+    CommandName.EMPTY,
     Screen.GRP_GAME_OPPONENT_CONFIRMATION,
     answer_callback=True,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()),
 )
 
 GRP_DOC_Q_GAME = Command(
-    "docq",
+    CommandName.DOC_Q,
     Screen.GRP_DOC_Q_GAME,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()),
     feature=Feature.DOC_Q,
@@ -198,7 +192,7 @@ GRP_DOC_Q_GAME = Command(
 COMMANDS.append(GRP_DOC_Q_GAME)
 
 GRP_USER_STATUS = Command(
-    "status",
+    CommandName.STATUS,
     Screen.GRP_USER_STATUS,
     allow_while_arrested=True,
     allow_reply_to_arrested=True,
@@ -207,17 +201,17 @@ GRP_USER_STATUS = Command(
 COMMANDS.append(GRP_USER_STATUS)
 
 GRP_CHANGE_REGION_NEW_WORLD = Command(
-    "newworld", Screen.GRP_CHANGE_REGION, required_location=Location.get_last_paradise()
+    CommandName.NEW_WORLD, Screen.GRP_CHANGE_REGION, required_location=Location.get_last_paradise()
 )
 COMMANDS.append(GRP_CHANGE_REGION_NEW_WORLD)
 
 GRP_CHANGE_REGION_PARADISE = Command(
-    "paradise", Screen.GRP_CHANGE_REGION, required_location=Location.get_last_paradise()
+    CommandName.PARADISE, Screen.GRP_CHANGE_REGION, required_location=Location.get_last_paradise()
 )
 COMMANDS.append(GRP_CHANGE_REGION_PARADISE)
 
 GRP_FIGHT = Command(
-    "fight",
+    CommandName.FIGHT,
     Screen.GRP_FIGHT,
     only_in_reply=True,
     feature=Feature.FIGHT,
@@ -226,7 +220,7 @@ GRP_FIGHT = Command(
 COMMANDS.append(GRP_FIGHT)
 
 GRP_GAME = Command(
-    "challenge",
+    CommandName.GAME,
     Screen.GRP_GAME,
     feature=Feature.CHALLENGE,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()),
@@ -234,7 +228,7 @@ GRP_GAME = Command(
 COMMANDS.append(GRP_GAME)
 
 GRP_PREDICTION_BET = Command(
-    "bet",
+    CommandName.PREDICTION_BET,
     Screen.GRP_PREDICTION_BET,
     only_in_reply=True,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_PREDICTION_BET.get_int()),
@@ -243,22 +237,31 @@ GRP_PREDICTION_BET = Command(
 COMMANDS.append(GRP_PREDICTION_BET)
 
 GRP_PREDICTION_BET_REMOVE = Command(
-    "bremove", Screen.GRP_PREDICTION_BET_REMOVE, only_in_reply=True, allow_reply_to_bot=True
+    CommandName.PREDICTION_BET_REMOVE,
+    Screen.GRP_PREDICTION_BET_REMOVE,
+    only_in_reply=True,
+    allow_reply_to_bot=True,
 )
 COMMANDS.append(GRP_PREDICTION_BET_REMOVE)
 
 GRP_PREDICTION_BET_STATUS = Command(
-    "bstatus", Screen.GRP_PREDICTION_BET_STATUS, only_in_reply=True, allow_reply_to_bot=True
+    CommandName.PREDICTION_BET_STATUS,
+    Screen.GRP_PREDICTION_BET_STATUS,
+    only_in_reply=True,
+    allow_reply_to_bot=True,
 )
 COMMANDS.append(GRP_PREDICTION_BET_STATUS)
 
 GRP_CREW_JOIN = Command(
-    "join", Screen.GRP_CREW_JOIN, only_in_reply_to_crew_member=True, feature=Feature.CREW
+    CommandName.CREW_JOIN,
+    Screen.GRP_CREW_JOIN,
+    only_in_reply_to_crew_member=True,
+    feature=Feature.CREW,
 )
 COMMANDS.append(GRP_CREW_JOIN)
 
 GRP_CREW_INVITE = Command(
-    "invite",
+    CommandName.CREW_INVITE,
     Screen.GRP_CREW_INVITE,
     only_in_reply=True,
     feature=Feature.CREW,
@@ -267,37 +270,57 @@ GRP_CREW_INVITE = Command(
 )
 COMMANDS.append(GRP_CREW_INVITE)
 
-GRP_SILENCE = Command("silence", Screen.GRP_SILENCE, only_by_boss=True, feature=Feature.SILENCE)
+GRP_SILENCE = Command(
+    CommandName.SILENCE, Screen.GRP_SILENCE, only_by_boss=True, feature=Feature.SILENCE
+)
 COMMANDS.append(GRP_SILENCE)
 
 GRP_SILENCE_END = Command(
-    "silenceend", Screen.GRP_SILENCE_END, only_by_boss=True, feature=Feature.SILENCE
+    CommandName.SILENCE_END, Screen.GRP_SILENCE_END, only_by_boss=True, feature=Feature.SILENCE
 )
 COMMANDS.append(GRP_SILENCE_END)
 
 GRP_SPEAK = Command(
-    "speak", Screen.GRP_SPEAK, only_by_boss=True, only_in_reply=True, feature=Feature.SILENCE
+    CommandName.SPEAK,
+    Screen.GRP_SPEAK,
+    only_by_boss=True,
+    only_in_reply=True,
+    feature=Feature.SILENCE,
 )
 COMMANDS.append(GRP_SPEAK)
 
 GRP_BOUNTY_GIFT = Command(
-    "gift", Screen.GRP_BOUNTY_GIFT, only_in_reply=True, feature=Feature.BOUNTY_GIFT
+    CommandName.BOUNTY_GIFT,
+    Screen.GRP_BOUNTY_GIFT,
+    only_in_reply=True,
+    feature=Feature.BOUNTY_GIFT,
 )
 COMMANDS.append(GRP_BOUNTY_GIFT)
 
 GRP_BOUNTY_LOAN = Command(
-    "loan", Screen.GRP_BOUNTY_LOAN, only_in_reply=True, feature=Feature.BOUNTY_LOAN
+    CommandName.BOUNTY_LOAN,
+    Screen.GRP_BOUNTY_LOAN,
+    only_in_reply=True,
+    feature=Feature.BOUNTY_LOAN,
 )
 COMMANDS.append(GRP_BOUNTY_LOAN)
 
 GRP_DEVIL_FRUIT_SELL = Command(
-    "dfsell", Screen.GRP_DEVIL_FRUIT_SELL, feature=Feature.DEVIL_FRUIT_SELL
+    CommandName.DEVIL_FRUIT_SELL, Screen.GRP_DEVIL_FRUIT_SELL, feature=Feature.DEVIL_FRUIT_SELL
 )
 COMMANDS.append(GRP_DEVIL_FRUIT_SELL)
 
-# To define limitations
+GRP_PLUNDER = Command(
+    CommandName.PLUNDER,
+    Screen.GRP_PLUNDER,
+    only_in_reply=True,
+    feature=Feature.PLUNDER,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_PLUNDER.get_int()),
+)
+COMMANDS.append(GRP_PLUNDER)
+
 GRP_SETTINGS = Command(
-    "settings",
+    CommandName.SETTINGS,
     Screen.GRP_SETTINGS,
     allow_while_arrested=True,
     only_by_chat_admin=True,

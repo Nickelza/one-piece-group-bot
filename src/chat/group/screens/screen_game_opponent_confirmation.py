@@ -23,6 +23,7 @@ from src.service.bounty_service import add_or_remove_bounty
 from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.game_service import delete_game, validate_game
 from src.service.message_service import mention_markdown_user, full_media_send, full_message_send
+from src.service.string_service import get_belly_formatted
 
 
 class GameOpponentConfirmationReservedKeys(StrEnum):
@@ -80,7 +81,7 @@ async def manage(
             await delete_game(context, game, should_delete_message=False)
             await full_media_send(
                 context,
-                caption=phrases.ACTION_INSUFFICIENT_BOUNTY,
+                caption=phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(game.wager)),
                 update=update,
                 add_delete_button=True,
                 edit_only_caption_and_keyboard=True,
@@ -89,7 +90,10 @@ async def manage(
             return
         else:  # Open to everyone, alert
             await full_message_send(
-                context, phrases.ACTION_INSUFFICIENT_BOUNTY, update=update, show_alert=True
+                context,
+                phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(game.wager)),
+                update=update,
+                show_alert=True,
             )
             return
 

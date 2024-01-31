@@ -8,6 +8,7 @@ from telegram.ext import ContextTypes
 
 import constants as c
 import resources.Environment as Env
+from resources import phrases
 from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.enums.ContextDataKey import ContextDataKey, ContextDataType
@@ -55,6 +56,8 @@ class User(BaseModel):
     can_change_region: bool | BooleanField = BooleanField(default=True)
     fight_immunity_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     fight_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    plunder_immunity_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    plunder_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     impel_down_release_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     impel_down_is_permanent: bool | BooleanField = BooleanField(default=False)
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="crew_members", null=True)
@@ -304,6 +307,16 @@ class User(BaseModel):
         from src.service.message_service import mention_markdown_v2
 
         return mention_markdown_v2(self.tg_user_id, self.tg_first_name)
+
+    def get_you_markdown_mention(self):
+        """
+        Returns the markdown mention of the user
+        :return: The markdown mention of the user
+        """
+
+        from src.service.message_service import mention_markdown_v2
+
+        return mention_markdown_v2(self.tg_user_id, phrases.TEXT_YOU)
 
     def get_markdown_name(self):
         """

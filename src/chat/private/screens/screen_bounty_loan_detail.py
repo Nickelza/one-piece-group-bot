@@ -36,6 +36,7 @@ async def manage(
     bounty_loan_list_page = BountyLoanListPage()
 
     bounty_loan_list_page.user = user
+    bounty_loan_list_page.init_legend_filter_results()
     bounty_loan_list_page.set_object(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )

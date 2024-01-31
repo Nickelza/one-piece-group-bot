@@ -786,6 +786,10 @@ REQUIRED_LOCATION_LEVEL_DEVIL_FRUIT_COLLECT = Environment(
 REQUIRED_LOCATION_LEVEL_LOG_STATS = Environment(
     "REQUIRED_LOCATION_LEVEL_LOG_STATS", default_value="21"
 )
+# Required location to plunder. Default: 10 (Whiskey Peak)
+REQUIRED_LOCATION_LEVEL_PLUNDER = Environment(
+    "REQUIRED_LOCATION_LEVEL_PLUNDER", default_value="10"
+)
 
 # Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
 WHITELIST_FORWARD_MESSAGE = Environment(
@@ -960,3 +964,12 @@ TAX_BRACKET_11_TOTAL_BOUNTY = Environment(
 TAX_BRACKET_11_PERCENTAGE = Environment("TAX_BRACKET_11_PERCENTAGE", default_value="99")
 # What percentage of the tax should go to the crew chest. Default: 50%
 TAX_CREW_CHEST_PERCENTAGE = Environment("TAX_CREW_CHEST_PERCENTAGE", default_value="50")
+
+# Minimum inactive hours to take into consideration for plunder. Default: 1
+PLUNDER_MIN_INACTIVE_HOURS = Environment("PLUNDER_MIN_INACTIVE_HOURS", default_value="1")
+# Maximum inactive hours to take into consideration for plunder. Default: 99
+PLUNDER_MAX_INACTIVE_HOURS = Environment("PLUNDER_MAX_INACTIVE_HOURS", default_value="99")
+# How long plunder immunity lasts in hours. Default: 24 hours
+PLUNDER_IMMUNITY_DURATION = Environment("PLUNDER_IMMUNITY_DURATION", default_value="24")
+# How long a user has to wait before plundering another user in hours. Default: 12 hours
+PLUNDER_COOLDOWN_DURATION = Environment("PLUNDER_COOLDOWN_DURATION", default_value="12")

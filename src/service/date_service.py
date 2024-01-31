@@ -54,16 +54,21 @@ def get_previous_run(cron_expression: str, start_datetime: datetime = None) -> d
     return itr.get_prev(datetime.datetime)
 
 
-def convert_seconds_to_duration(seconds: int) -> str:
+def convert_seconds_to_duration(seconds: int | float, show_full: bool = False) -> str:
     """
     Converts seconds to days, hours, minutes, seconds
     :param seconds: Seconds to convert
+    :param show_full: Whether to show all units when available
     :return: Days, hours e.g. 1 day 2 hours 5 minutes
     """
     weeks = int(seconds // 604800)
-    days = int((seconds % 604800) // 86400)
-    hours = int((seconds % 86400) // 3600)
-    minutes = int((seconds % 3600) // 60)
+    remaining_seconds = seconds % 604800
+    days = int(remaining_seconds // 86400)
+    remaining_seconds = seconds % 86400
+    hours = int(remaining_seconds // 3600)
+    remaining_seconds = seconds % 3600
+    minutes = int(remaining_seconds // 60)
+    remaining_seconds %= 60
 
     result = ""
     if weeks > 0:
@@ -73,14 +78,14 @@ def convert_seconds_to_duration(seconds: int) -> str:
             result += f"{weeks} weeks"
 
     # Show days only in last week
-    if days > 0 and weeks == 0:
+    if days > 0 and (weeks == 0 or show_full):
         if days == 1:
             result += f"{days} day"
         else:
             result += f"{days} days"
 
     # Show hours only in last 2 days
-    if hours > 0 and days <= 1 and weeks == 0:
+    if hours > 0 and ((days <= 1 and weeks == 0) or show_full):
         if len(result) > 0:
             result += " "
         if hours == 1:
@@ -89,35 +94,58 @@ def convert_seconds_to_duration(seconds: int) -> str:
             result += f"{hours} hours"
 
     # Show minutes only in last 24 hours
-    if minutes > 0 and hours < 24 and days == 0 and weeks == 0:
+    if minutes > 0 and ((hours < 24 and days == 0 and weeks == 0) or show_full):
         if len(result) > 0:
             result += " "
-        if minutes > 0 and seconds > 60:
+        if minutes > 0 and remaining_seconds > 60:
             if minutes == 1:
                 result += f"{minutes} minute"
             else:
                 result += f"{minutes} minutes"
 
     # Show seconds only in last minute
-    if seconds >= 0 and minutes <= 1 and hours == 0 and days == 0 and weeks == 0:
+    if remaining_seconds >= 0 and (
+        (minutes <= 1 and hours == 0 and days == 0 and weeks == 0) or show_full
+    ):
         if len(result) > 0:
             result += " "
-        if seconds > 0:
-            if seconds == 1:
-                result += f"{seconds} second"
+        if remaining_seconds > 0:
+            if remaining_seconds == 1:
+                result += f"{remaining_seconds} second"
             else:
-                result += f"{seconds} seconds"
+                result += f"{remaining_seconds} seconds"
 
     return result
 
 
-def convert_days_to_duration(days: int) -> str:
+def convert_minutes_to_duration(minutes: int, show_full: bool = False) -> str:
+    """
+    Converts minutes to days, hours, minutes, seconds
+    :param minutes: Minutes to convert
+    :param show_full: Whether to show all units when available
+    :return: Days, hours e.g. 1 day 2 hours 5 minutes
+    """
+    return convert_seconds_to_duration(minutes * 60, show_full=show_full)
+
+
+def convert_hours_to_duration(hours: int, show_full: bool = False) -> str:
+    """
+    Converts hours to days, hours, minutes, seconds
+    :param hours: Hours to convert
+    :param show_full: Whether to show all units when available
+    :return: Days, hours e.g. 1 day 2 hours 5 minutes
+    """
+    return convert_seconds_to_duration(hours * 3600, show_full=show_full)
+
+
+def convert_days_to_duration(days: int, show_full: bool = False) -> str:
     """
     Converts days to days, hours, minutes, seconds
     :param days: Days to convert
+    :param show_full: Whether to show all units when available
     :return: Days, hours e.g. 1 day 2 hours 5 minutes
     """
-    return convert_seconds_to_duration(days * 86400)
+    return convert_seconds_to_duration(days * 86400, show_full=show_full)
 
 
 def cron_datetime_difference(cron_expression: str, start_datetime: datetime = None) -> str:
@@ -155,20 +183,37 @@ def get_remaining_duration(
     return convert_seconds_to_duration(int((end_datetime - start_datetime).total_seconds()))
 
 
+def get_elapsed_seconds(start_datetime: datetime) -> int:
+    """
+    Get the elapsed time since the start_datetime
+    :param start_datetime: The start datetime
+    :return: The elapsed time in seconds
+    """
+    if start_datetime is None:
+        return 0
+
+    # Remove offset awareness from start_datetime
+    start_datetime = start_datetime.replace(tzinfo=None)
+    return int((datetime.datetime.now() - start_datetime).total_seconds())
+
+
+def get_elapsed_hours(start_datetime: datetime) -> int:
+    """
+    Get the elapsed time since the start_datetime
+    :param start_datetime: The start datetime
+    :return: The elapsed time in hours
+    """
+    return get_elapsed_seconds(start_datetime) // 3600
+
+
 def get_elapsed_duration(start_datetime: datetime) -> str:
     """
     Get the elapsed time since the start_datetime
     :param start_datetime: The start datetime
     :return: The elapsed time in days and hours e.g. 1 day 2h hours
     """
-    if start_datetime is None:
-        return convert_seconds_to_duration(0)
 
-    # Remove offset awareness from start_datetime
-    start_datetime = start_datetime.replace(tzinfo=None)
-    return convert_seconds_to_duration(
-        int((datetime.datetime.now() - start_datetime).total_seconds())
-    )
+    return convert_seconds_to_duration(get_elapsed_seconds(start_datetime))
 
 
 def get_remaining_time_from_next_cron(
@@ -412,7 +457,8 @@ async def validate_duration(
     :param add_delete_button: Whether to add a delete button to the keyboard
     :param inbound_keyboard: The inbound keyboard
     :param previous_screens: The previous screens, for the back button if in private chat
-    :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back button if in private
+    :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back
+     button if in private
     :return: Whether the duration is valid
     """
 

@@ -572,7 +572,7 @@ async def validate_amount(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     user: User,
-    wager_str: str,
+    wager_str: str | int,
     required_belly: int = None,
     add_delete_button: bool = True,
     inbound_keyboard: Keyboard = None,
@@ -619,7 +619,7 @@ async def validate_amount(
     if should_validate_user_has_amount and user.bounty < wager:
         await full_message_or_media_send_or_edit(
             context,
-            phrases.ACTION_INSUFFICIENT_BOUNTY,
+            phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(wager)),
             update=update,
             add_delete_button=add_delete_button,
             inbound_keyboard=inbound_keyboard,

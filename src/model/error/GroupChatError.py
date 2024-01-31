@@ -19,6 +19,7 @@ class GroupChatError(Error):
     GAME_NOT_FOUND = Error(9, phrases.GAME_NOT_FOUND, source)
     INVALID_GAME = Error(10, phrases.GAME_INVALID, source)
     ITEM_IN_WRONG_STATUS = Error(11, phrases.ITEM_IN_WRONG_STATUS, source)
+    ITEM_NOT_FOUND = Error(12, phrases.ITEM_NOT_FOUND_NO_CONTACT, source)
 
 
 class GroupChatException(Exception):

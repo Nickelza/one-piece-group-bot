@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from resources import phrases
+
 
 class Feature(IntEnum):
     BOUNTY_GIFT = 1
@@ -16,6 +18,7 @@ class Feature(IntEnum):
     STATUS = 12
     DEVIL_FRUIT_SELL = 13
     BOUNTY_LOAN = 14
+    PLUNDER = 15
 
     def get_description(self) -> str:
         """
@@ -48,6 +51,7 @@ class Feature(IntEnum):
             Feature.STATUS,
             Feature.DEVIL_FRUIT_SELL,
             Feature.BOUNTY_LOAN,
+            Feature.PLUNDER,
         ]
 
     @staticmethod
@@ -99,18 +103,19 @@ class Feature(IntEnum):
 
 
 FEATURE_DESCRIPTION_MAP = {
-    Feature.BOUNTY_GIFT: "Bounty Gift",
-    Feature.BOUNTY_MESSAGES_GAIN: "Bounty Messages Gain",
-    Feature.CHALLENGE: "Challenge",
-    Feature.CREW: "Crew",
-    Feature.DEVIL_FRUIT_APPEARANCE: "Devil Fruit Appearance",
-    Feature.DOC_Q: "Doc Q",
-    Feature.FIGHT: "Fight",
-    Feature.LEADERBOARD: "Leaderboard",
-    Feature.MESSAGE_FILTER: "Message Filter",
-    Feature.PREDICTION: "Prediction",
-    Feature.SILENCE: "Silence",
-    Feature.STATUS: "Status",
-    Feature.DEVIL_FRUIT_SELL: "Devil Fruit Sell",
-    Feature.BOUNTY_LOAN: "Bounty Loan",
+    Feature.BOUNTY_GIFT: phrases.FEATURE_BOUNTY_GIFT,
+    Feature.BOUNTY_MESSAGES_GAIN: phrases.FEATURE_BOUNTY_MESSAGES_GAIN,
+    Feature.CHALLENGE: phrases.FEATURE_CHALLENGE,
+    Feature.CREW: phrases.FEATURE_CREW,
+    Feature.DEVIL_FRUIT_APPEARANCE: phrases.FEATURE_DEVIL_FRUIT_APPEARANCE,
+    Feature.DOC_Q: phrases.FEATURE_DOC_Q,
+    Feature.FIGHT: phrases.FEATURE_FIGHT,
+    Feature.LEADERBOARD: phrases.FEATURE_LEADERBOARD,
+    Feature.MESSAGE_FILTER: phrases.FEATURE_MESSAGE_FILTER,
+    Feature.PREDICTION: phrases.FEATURE_PREDICTION,
+    Feature.SILENCE: phrases.FEATURE_SILENCE,
+    Feature.STATUS: phrases.FEATURE_STATUS,
+    Feature.DEVIL_FRUIT_SELL: phrases.FEATURE_DEVIL_FRUIT_SELL,
+    Feature.BOUNTY_LOAN: phrases.FEATURE_BOUNTY_LOAN,
+    Feature.PLUNDER: phrases.FEATURE_PLUNDER,
 }

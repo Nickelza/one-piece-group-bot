@@ -202,7 +202,7 @@ async def manage_after_db(
             if "/start " in update.message.text:  # Start with parameter
                 start_parameter = update.message.text.replace("/start ", "")
                 try:
-                    parameter_decoded = base64.b64decode(start_parameter).decode("utf-8")
+                    parameter_decoded = base64.b64decode(start_parameter).decode()
                     keyboard = Keyboard.get_from_callback_query_or_info(
                         message_source, info_str=str(parameter_decoded), from_deeplink=True
                     )
@@ -247,6 +247,11 @@ async def manage_after_db(
                 target_user: User = get_user(update.effective_message.reply_to_message.from_user)
         except AttributeError:
             pass
+
+    # Start command, reset private screen
+    if command is Command.PVT_START:
+        user.private_screen_list = None
+        user.reset_private_screen()
 
     # Check for spam only if a valid command or private chat
     if command != Command.ND or message_source is MessageSource.PRIVATE:

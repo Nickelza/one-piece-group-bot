@@ -102,6 +102,9 @@ class ListPage(ABC):
         """
         Init the legend filter results
         """
+        self.emoji_legend_list = self.get_emoji_legend_list()
+        if len(self.emoji_legend_list) == 0:
+            return
 
         for filter_item in [
             f for f in self.get_filter_list() if f.filter_type is ListFilterType.LEGEND

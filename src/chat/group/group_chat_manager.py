@@ -22,6 +22,7 @@ from src.chat.group.screens.screen_game_opponent_confirmation import (
 from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
 from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
+from src.chat.group.screens.screen_plunder import manage as manage_screen_plunder
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_prediction_bet_remove import (
     manage as manage_screen_prediction_bet_remove,
@@ -233,6 +234,9 @@ async def dispatch_screens(
             await manage_screen_bounty_loan(
                 update, context, user, inbound_keyboard, target_user, command, group_chat
             )
+
+        case Screen.GRP_PLUNDER:  # Plunder
+            await manage_screen_plunder(update, context, user, inbound_keyboard, group_chat)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

@@ -125,9 +125,7 @@ def get_items_text_keyboard(
     :param allow_string_filter: Whether to allow string filter
     :return: The text and keyboard
     """
-    list_page.emoji_legend_list = list_page.get_emoji_legend_list()
-    if len(list_page.emoji_legend_list) > 0:
-        list_page.init_legend_filter_results()
+    list_page.init_legend_filter_results()
 
     # Add string filter to context data
     if allow_string_filter:

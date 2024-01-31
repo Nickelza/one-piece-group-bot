@@ -12,6 +12,7 @@ class IncomeTaxEventType(StrEnum):
     FIGHT = "fight"
     GAME = "game"
     PREDICTION = "prediction"
+    PLUNDER = "plunder"
 
     def get_description(self) -> str:
         """
@@ -41,6 +42,7 @@ INCOME_TAX_EVENT_TYPE_DESCRIPTIONS = {
     IncomeTaxEventType.FIGHT: phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     IncomeTaxEventType.GAME: phrases.GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN,
     IncomeTaxEventType.PREDICTION: phrases.PREDICTION_ITEM_TEXT_FILL_IN,
+    IncomeTaxEventType.PLUNDER: phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT_FILL_IN,
 }
 
 INCOME_TAX_EVENT_TYPE_LOG_TYPE = {
@@ -48,4 +50,5 @@ INCOME_TAX_EVENT_TYPE_LOG_TYPE = {
     IncomeTaxEventType.DOC_Q_GAME: LogType.DOC_Q_GAME,
     IncomeTaxEventType.FIGHT: LogType.FIGHT,
     IncomeTaxEventType.GAME: LogType.GAME,
+    IncomeTaxEventType.PLUNDER: LogType.PLUNDER,
 }

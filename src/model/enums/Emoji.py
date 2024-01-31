@@ -25,6 +25,7 @@ class Emoji(StrEnum):
     # Fight
     FIGHT = "⚔"
     RETREAT = "🏳️"
+    PLUNDER = "🥷️"
 
     # Other
     ACCEPT = "✅"

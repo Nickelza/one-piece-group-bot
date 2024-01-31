@@ -26,6 +26,7 @@ class Screen(StrEnum):
     GRP_SETTINGS = "G20"
     GRP_DEVIL_FRUIT_SELL = "G21"
     GRP_BOUNTY_LOAN = "G22"
+    GRP_PLUNDER = "G23"
 
     PVT_START = "P1"
     PVT_SETTINGS = "P2"

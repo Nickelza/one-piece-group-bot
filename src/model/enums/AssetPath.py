@@ -25,6 +25,7 @@ class AssetPath(StrEnum):
     GAME_GUESS_OR_LIFE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "game_guess_or_life.jpg")
     GAME_PUNK_RECORDS = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "game_punk_records.jpg")
     SILENCE = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "silence.jpg")
+    PLUNDER = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "plunder.jpg")  # FIXME change image
 
     # Other images
     GAME_BACKGROUND = os.path.join(c.ASSETS_IMAGES_DIR, "game_background.jpg")

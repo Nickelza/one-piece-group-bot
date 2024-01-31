@@ -1,5 +1,5 @@
 import resources.Environment as Env
-import src.model.enums.Command as Command
+from src.model.enums.CommandName import CommandName
 from src.model.enums.Emoji import Emoji
 
 
@@ -45,7 +45,7 @@ COMMAND_IN_REPLY_TO_ARRESTED_ERROR = (
 COMMAND_ONLY_BY_CHAT_ADMIN_ERROR = "This command can only be used by a chat admin"
 COMMAND_FEATURE_DISABLED_ERROR = (
     "This feature is currently disabled in this {}.\nYou can ask an Admin to enable via"
-    f" {Command.GRP_SETTINGS.get_formatted()}"
+    f" {CommandName.SETTINGS.get_formatted()}"
 )
 COMMAND_NOT_ALLOWED_FROM_DEEPLINK_ERROR = "This command is not allowed from a deeplink"
 
@@ -58,6 +58,8 @@ SHOW_USER_STATUS_REMAINING_SENTENCE = "\nRemaining sentence: {}"
 SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = "Permanent"
 SHOW_USER_STATUS_FIGHT_IMMUNITY = "\nFight immunity: {}"
 SHOW_USER_STATUS_FIGHT_COOLDOWN = "\nFight cooldown: {}"
+SHOW_USER_STATUS_PLUNDER_IMMUNITY = "\nPlunder immunity: {}"
+SHOW_USER_STATUS_PLUNDER_COOLDOWN = "\nPlunder cooldown: {}"
 SHOW_USER_STATUS_WARLORD_REMAINING_TIME = "\nWarlord remaining time: {}"
 SHOW_USER_STATUS_CREW = "\nCrew: {}"
 SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = "\n\n*Daily Bounty Bonus*"
@@ -150,6 +152,7 @@ KEYBOARD_OPTION_CLOSE = Emoji.CLOSE + " Close"
 KEYBOARD_OPTION_ACCEPT = Emoji.ACCEPT + " Accept"
 KEYBOARD_OPTION_REJECT = Emoji.REJECT + " Reject"
 KEYBOARD_OPTION_FIGHT = Emoji.FIGHT + " Fight"
+KEYBOARD_OPTION_PLUNDER = Emoji.PLUNDER + " Plunder"
 KEYBOARD_OPTION_RETREAT = Emoji.RETREAT + " Retreat"
 KEYBOARD_OPTION_BACK = Emoji.BACK + " Back"
 KEYBOARD_OPTION_YES = Emoji.YES + " Yes"
@@ -168,6 +171,8 @@ TEXT_GROUP = "Group"
 TEXT_NOT_SET = "Not set"
 TEXT_RANDOM = "Random"
 TEXT_ONLY = "Only {}"
+TEXT_YOU = "You"
+TEXT_STOLE = "stole"
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = "chat_id is None and update.effective_chat.id is None"
 EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is None"
@@ -349,7 +354,7 @@ Current time zone: *{}* \\({}\\)
 [Change time zone]({})
 """.strip()
 
-ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty"
+ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty, you need at least ฿*{}*"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
 ACTION_INVALID_WAGER_AMOUNT = (
     "Invalid amount. Make sure it is a number with only '.' or ',' as decimal separator or with a"
@@ -369,7 +374,7 @@ GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
 GAME_CHOOSE_GAME = "Which game would you like to play?"
 GAME_NO_WAGER_AMOUNT = (
     "You need to specify a wager amount.\n\nExample:"
-    f" {Command.GRP_GAME.get_formatted()} 10.000.000"
+    f" {CommandName.GAME.get_formatted()} 10.000.000"
 )
 
 GAME_NOT_FOUND = "Game not found"
@@ -540,26 +545,26 @@ PREDICTION_IS_PUBLIC_DESCRIPTION = (
 )
 PREDICTION_BET_INVALID_FORMAT = (
     "Make sure your bet is in the following"
-    f" format:\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>\n\nExample:"
-    f" {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1"
+    f" format:\n{CommandName.PREDICTION_BET.get_formatted()} <amount> <option number>\n\nExample:"
+    f" {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1"
 )
 PREDICTION_BET_HOW_TO_PLACE_BET = (
     "\n\n_To place a bet, reply to this message with the following"
-    f" command:\n{Command.GRP_PREDICTION_BET.get_formatted()} <amount> <option number>\nExample:"
-    f" {Command.GRP_PREDICTION_BET.get_formatted()} 10.000.000 1_"
+    f" command:\n{CommandName.PREDICTION_BET.get_formatted()} <amount> <option number>\nExample:"
+    f" {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1_"
 )
 PREDICTION_BET_HOW_TO_REMOVE_BET = (
     "\n\n_To remove a bet, reply to the prediction with the following"
-    f" command:\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} <option number>\nExample:"
-    f" {Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} 1_"
+    f" command:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} <option number>\nExample:"
+    f" {CommandName.PREDICTION_BET_REMOVE.get_formatted()} 1_"
 )
 PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS = (
     "\n\n_To remove all bets, reply to the prediction with the following"
-    f" command:\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()}_"
+    f" command:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()}_"
 )
 PREDICTION_BET_HOW_TO_VIEW_BET_STATUS = (
     "\n\n_To view your bet status, reply to the prediction with the following"
-    f" command:\n{Command.GRP_PREDICTION_BET_STATUS.get_formatted()}_"
+    f" command:\n{CommandName.PREDICTION_BET_STATUS.get_formatted()}_"
 )
 
 PREDICTION_CLOSED_FOR_BETS = "This prediction no longer accept bets"
@@ -574,8 +579,8 @@ PREDICTION_BET_SUCCESS = "Bet placed successfully"
 PREDICTION_RESULTS_SET = "The results of this prediction have been set"
 PREDICTION_BET_REMOVE_INVALID_FORMAT = (
     "Make sure your command is in the following"
-    f" format:\n{Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} ]<option number>\n\nExample:"
-    f" {Command.GRP_PREDICTION_BET_REMOVE.get_formatted()} 1"
+    f" format:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} ]<option number>\n\nExample:"
+    f" {CommandName.PREDICTION_BET_REMOVE.get_formatted()} 1"
 )
 PREDICTION_BET_REMOVE_SUCCESS = "Bet removed successfully"
 PREDICTION_BET_USER_HAS_NOT_BET = "You have not bet on this prediction"
@@ -685,7 +690,7 @@ PREDICTION_IN_WRONG_STATUS = "Prediction in wrong status"
 PREDICTION_SEND_TO_GROUP = (
     "You can send this prediction to groups or topics where you are an Admin and users will be"
     " able to bet on it by replying to the message.\nIf you don't find a group, make sure the Bot"
-    f" is a member of the group and use the {Command.PVT_USER_STATUS.get_formatted()} command in"
+    f" is a member of the group and use the {CommandName.STATUS.get_formatted()} command in"
     " the group.\nYou can send only once to each group or topic.{}"
 )
 PREDICTION_SEND_TO_GROUP_NO_GROUPS = "\n\n_No groups found_"
@@ -842,6 +847,7 @@ CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by
 
 STEP_REQUIRES_TEXT = "Please send a valid text"
 ITEM_NOT_FOUND = "Item not found. If you think this is a mistake, please contact an Admin"
+ITEM_NOT_FOUND_NO_CONTACT = "Item not found."
 ITEM_IN_WRONG_STATUS = "Item in wrong status"
 INLINE_QUERY_ITEM_NOT_FOUND_TITLE = "Item not found"
 INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION = "Restart the Bot to retrieve a valid url"
@@ -962,7 +968,7 @@ CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
     "You need to specify the amount of belly you want to gift\n\nExample:"
-    f" {Command.GRP_BOUNTY_GIFT.get_formatted()} 10.000.000"
+    f" {CommandName.BOUNTY_GIFT.get_formatted()} 10.000.000"
 )
 BOUNTY_GIFT_REQUEST = (
     "Are you sure you want to gift ฿*{}* to {}?\n\nTax: ฿{} \\({}%\\)\nTotal: ฿*{}*"
@@ -977,7 +983,7 @@ BOUNTY_GIFT_NOT_ENOUGH_BOUNTY = (
 # Bounty Loan
 BOUNTY_LOAN_INVALID_COMMAND = (
     "You need to specify the amount to loan, the amount to repay and the duration\n\nExample:"
-    f" {Command.GRP_BOUNTY_LOAN.get_formatted()} 100mil 150mil 1day"
+    f" {CommandName.BOUNTY_LOAN.get_formatted()} 100mil 150mil 1day"
 )
 BOUNTY_LOAN_LOANER = "\nLoaner: {}"
 BOUNTY_LOAN_BORROWER = "\nBorrower: {}"
@@ -1251,7 +1257,7 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = "Bounty gift"
 # Notification - Devil Fruit Awarded
 DEVIL_FRUIT_EAT_OR_SELL = (
     "\n\nYou can eat it or sell it with the"
-    f" {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} command in a group"
+    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} command in a group"
 )
 DEVIL_FRUIT_AWARDED_NOTIFICATION = (
     "You have been awarded the following Devil Fruit:\n\n*{}*\nReason: {}"
@@ -1354,6 +1360,7 @@ LOG_ITEM_DETAIL_GO_TO_MESSAGE = (
 LOG_ITEM_DETAIL_NO_PERMISSION = "You are not authorized to view this item"
 LOG_STATS_TEXT = "*{} Statistics*\n\n{}"
 LOG_STATS_NOT_ENOUGH_DATA = "Not enough data to generate statistics for this log"
+
 # Logs - Fight
 FIGHT_LOG_KEY = "Fights"
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Fight"
@@ -1365,6 +1372,26 @@ FIGHT_LOG_STATS_TEXT = (
     "*Total fights*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Belly won*: ฿{}\n*Belly"
     " lost*: ฿{}\n*Max belly won*: [฿{} \\({}\\)]({})\n*Max belly lost*: [฿{} \\({}\\)]({})\n*Most"
     " fought user*: {} \\({}x\\)"
+)
+
+# Logs . Plunder
+PLUNDER_LOG_KEY = "Plunders"
+PLUNDER_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Plunder"
+PLUNDER_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
+PLUNDER_LOG_ITEM_DETAIL_TEXT = (
+    f"*{{}}*: {{}}\n*Date*: {{}}\n*Win probability*: {{}}%\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
+)
+PLUNDER_LOG_ITEM_DETAIL_SENTENCE_DURATION = "\n\n*Impel Down sentence*: {}"
+PLUNDER_LOG_STATS_TEXT = (
+    "*Total plunders*: {}"
+    "\n*Wins*: {} \\({}%\\)"
+    "\n*Losses*: {} \\({}%\\)"
+    "\n*Belly stole*: ฿{}"
+    "\n*Belly lost*: ฿{}"
+    "\n*Max belly stolen*: [฿{} \\({}\\)]({})"
+    "\n*Max belly lost*: [฿{} \\({}\\)]({})"
+    "\n*Max Impel Down sentence*: [{}]({})"
+    "\n*Most plundered user*: {} \\({}x\\)"
 )
 
 # Logs - DocQ
@@ -1479,7 +1506,7 @@ DEVIL_FRUIT_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}{}{}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiring in: {}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
     "\n\nYou can sell this Devil Fruit in the Chat Group with"
-    f" {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} <price> command"
+    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price> command"
 )
 DEVIL_FRUIT_LIST_NO_ITEMS = "You do not have any Devil Fruits"
 DEVIL_FRUIT_NOT_OWNER = "You do not own this Devil Fruit"
@@ -1504,7 +1531,7 @@ DEVIL_FRUIT_RELEASE_MESSAGE_INFO = (
 
 DEVIL_FRUIT_SELL_NO_AMOUNT = (
     "You need to specify the amount of belly you want to sell the Devil Fruit for\n\nExample:"
-    f" {Command.GRP_DEVIL_FRUIT_SELL.get_formatted()} 10.000.000"
+    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} 10.000.000"
 )
 DEVIL_FRUIT_SELL_NO_FRUITS = (
     "You do not have any Devil Fruits that can be sold \\(only collected and non-eaten Devil"
@@ -1542,3 +1569,53 @@ INCOME_TAX_DEDUCTION_TYPE_CREW_ABILITY = "Crew Ability"
 INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT = "Devil Fruit"
 
 INCOME_TAX_CONTRIBUTION_TYPE_CREW_CHEST = "Crew Chest"
+
+FEATURE_BOUNTY_GIFT = "Bounty Gift"
+FEATURE_BOUNTY_MESSAGES_GAIN = "Bounty Messages Gain"
+FEATURE_CHALLENGE = "Challenge"
+FEATURE_CREW = "Crew"
+FEATURE_DEVIL_FRUIT_APPEARANCE = "Devil Fruit Appearance"
+FEATURE_DOC_Q = "Doc Q"
+FEATURE_FIGHT = "Fight"
+FEATURE_LEADERBOARD = "Leaderboard"
+FEATURE_MESSAGE_FILTER = "Message Filter"
+FEATURE_PREDICTION = "Prediction"
+FEATURE_SILENCE = "Silence"
+FEATURE_STATUS = "Status"
+FEATURE_DEVIL_FRUIT_SELL = "Devil Fruit Sell"
+FEATURE_BOUNTY_LOAN = "Bounty Loan"
+FEATURE_PLUNDER = "Plunder"
+
+# Ability
+ABILITY_TYPE_DOC_Q_COOLDOWN_DURATION = "Doc Q Cooldown"
+ABILITY_TYPE_GAME_COOLDOWN_DURATION = "Challenge Cooldown"
+ABILITY_TYPE_FIGHT_COOLDOWN_DURATION = "Fight Cooldown"
+ABILITY_TYPE_FIGHT_IMMUNITY_DURATION = "Fight Immunity"
+ABILITY_TYPE_FIGHT_DEFENSE_BOOST = "Fight Defense Boost"
+ABILITY_TYPE_PREDICTION_WAGER_REFUND = "Prediction wager fund max refund"
+ABILITY_TYPE_GIFT_LOAN_TAX = "Gift and Loan Tax"
+ABILITY_TYPE_INCOME_TAX = "Income Tax"
+ABILITY_TYPE_PLUNDER_COOLDOWN_DURATION = "Plunder Cooldown"
+ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION = "Plunder Immunity"
+ABILITY_TYPE_PLUNDER_SENTENCE_DURATION = "Plunder Sentence"
+
+
+PLUNDER_CANNOT_PLUNDER_CREW_MEMBER = "You cannot plunder a member of your own Crew"
+PLUNDER_CANNOT_PLUNDER_USER = "You cannot plunder this user"
+PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{}*"
+PLUNDER_CONFIRMATION_REQUEST = (
+    "{} are you sure you want to steal from {}?\n"
+    "\nIf you're successful, you will gain ฿*{}*."
+    "\nIf you're caught, you will lose ฿*{}* and be jailed in Impel Down for *{}*!"
+    + "{}\n\n"
+    + GAME_WIN_LOSE_STATUS
+)
+PLUNDER_WIN = (
+    "{} have successfully robbed {}, better run away before they notice!\n\n" + GAME_WIN_STATUS
+)
+PLUNDER_LOSE = (
+    "{} have been caught trying to rob {} and they have handed you over to the Marines."
+    "\nYou will be jailed in Impel Down for *{}*, better luck next time!\n\n"
+    + GAME_LOSE_STATUS
+)
+PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"

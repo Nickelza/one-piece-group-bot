@@ -1,5 +1,7 @@
 from enum import IntEnum, StrEnum
 
+from resources import phrases
+
 
 class Sign(StrEnum):
     """
@@ -23,6 +25,9 @@ class DevilFruitAbilityType(IntEnum):
     PREDICTION_WAGER_REFUND = 6
     GIFT_LOAN_TAX = 7
     INCOME_TAX = 8
+    PLUNDER_COOLDOWN_DURATION = 9
+    PLUNDER_IMMUNITY_DURATION = 10
+    PLUNDER_SENTENCE_DURATION = 11
 
     def get_description(self) -> str:
         """
@@ -53,14 +58,23 @@ class DevilFruitAbilityType(IntEnum):
 
 
 DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {
-    DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION: "Doc Q Cooldown",
-    DevilFruitAbilityType.GAME_COOLDOWN_DURATION: "Challenge Cooldown",
-    DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION: "Fight Cooldown",
-    DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION: "Fight Immunity",
-    DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: "Fight Defense Boost",
-    DevilFruitAbilityType.PREDICTION_WAGER_REFUND: "Prediction wager fund max refund",
-    DevilFruitAbilityType.GIFT_LOAN_TAX: "Gift and Loan Tax",
-    DevilFruitAbilityType.INCOME_TAX: "Income Tax",
+    DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION: phrases.ABILITY_TYPE_DOC_Q_COOLDOWN_DURATION,
+    DevilFruitAbilityType.GAME_COOLDOWN_DURATION: phrases.ABILITY_TYPE_GAME_COOLDOWN_DURATION,
+    DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION: phrases.ABILITY_TYPE_FIGHT_COOLDOWN_DURATION,
+    DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION: phrases.ABILITY_TYPE_FIGHT_IMMUNITY_DURATION,
+    DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: phrases.ABILITY_TYPE_FIGHT_DEFENSE_BOOST,
+    DevilFruitAbilityType.PREDICTION_WAGER_REFUND: phrases.ABILITY_TYPE_PREDICTION_WAGER_REFUND,
+    DevilFruitAbilityType.GIFT_LOAN_TAX: phrases.ABILITY_TYPE_GIFT_LOAN_TAX,
+    DevilFruitAbilityType.INCOME_TAX: phrases.ABILITY_TYPE_INCOME_TAX,
+    DevilFruitAbilityType.PLUNDER_COOLDOWN_DURATION: (
+        phrases.ABILITY_TYPE_PLUNDER_COOLDOWN_DURATION
+    ),
+    DevilFruitAbilityType.PLUNDER_IMMUNITY_DURATION: (
+        phrases.ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION
+    ),
+    DevilFruitAbilityType.PLUNDER_SENTENCE_DURATION: (
+        phrases.ABILITY_TYPE_PLUNDER_SENTENCE_DURATION
+    ),
 }
 
 DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP = {
@@ -72,4 +86,7 @@ DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP = {
     DevilFruitAbilityType.PREDICTION_WAGER_REFUND: Sign.POSITIVE,
     DevilFruitAbilityType.GIFT_LOAN_TAX: Sign.NEGATIVE,
     DevilFruitAbilityType.INCOME_TAX: Sign.NEGATIVE,
+    DevilFruitAbilityType.PLUNDER_COOLDOWN_DURATION: Sign.NEGATIVE,
+    DevilFruitAbilityType.PLUNDER_IMMUNITY_DURATION: Sign.POSITIVE,
+    DevilFruitAbilityType.PLUNDER_SENTENCE_DURATION: Sign.NEGATIVE,
 }

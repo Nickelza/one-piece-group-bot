@@ -42,6 +42,7 @@ async def manage(
             inbound_keyboard.previous_screen_list.append(Screen.PVT_LOGS_TYPE)
 
         log.user = user
+        log.init_legend_filter_results()
         log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
 
         await full_message_send(
