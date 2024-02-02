@@ -288,7 +288,7 @@ async def manage(
                 bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
                     Emoji.LOG_NEGATIVE,
                     phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
-                    (-1 * Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()),
+                    (-1 * target_user.get_expired_bounty_loans_cumulative_percentage()),
                 )
                 has_bounty_deduction = True
 

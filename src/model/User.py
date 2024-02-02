@@ -27,6 +27,7 @@ from src.service.bot_service import (
     set_user_context_data,
     remove_context_data,
 )
+from src.service.math_service import get_cumulative_percentage_sum
 
 
 class User(BaseModel):
@@ -574,7 +575,9 @@ class User(BaseModel):
         from src.model.enums.BountyLoanStatus import BountyLoanStatus
         from src.model.BountyLoan import BountyLoan
 
-        return self.bounty_borrowers.where(BountyLoan.status == BountyLoanStatus.EXPIRED)
+        return self.bounty_borrowers.where(BountyLoan.status == BountyLoanStatus.EXPIRED).order_by(
+            BountyLoan.date.asc()
+        )
 
     def has_expired_bounty_loans(self) -> bool:
         """
@@ -583,6 +586,21 @@ class User(BaseModel):
         """
 
         return len(self.get_expired_bounty_loans()) > 0
+
+    def get_expired_bounty_loans_cumulative_percentage(self) -> int:
+        """
+        Returns the cumulative percentage of the expired bounty loans
+        :return: The cumulative percentage of the expired bounty loans
+        """
+
+        from src.service.math_service import format_percentage_value
+
+        return format_percentage_value(
+            get_cumulative_percentage_sum(
+                [Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()]
+                * len(self.get_expired_bounty_loans())
+            )
+        )
 
     def get_bounty_plus_pending_bounty(self) -> int:
         """

@@ -324,7 +324,7 @@ async def add_or_remove_bounty(
                     amount if pending_belly_amount is None else pending_belly_amount
                 )
 
-            if user.bounty < 0:
+            if user.bounty < 0 and raise_error_if_negative_bounty:
                 logging.exception(
                     f"User {user.id} has negative bounty: {user.bounty} after removing "
                     f"{amount} bounty in event "
@@ -332,8 +332,7 @@ async def add_or_remove_bounty(
                     f"\n{traceback.print_stack()}"
                 )
 
-                if raise_error_if_negative_bounty:
-                    raise CommonChatException("Negative bounty after requested action")
+                raise CommonChatException("Negative bounty after requested action")
 
             if should_save:
                 user.save()
@@ -411,22 +410,20 @@ async def add_or_remove_bounty(
             if check_for_loan:
                 # If user has an expired bounty loan, use n% of the bounty to repay the loan
                 expired_loans = user.get_expired_bounty_loans()
-                if len(expired_loans) > 0:
-                    expired_loan: BountyLoan = expired_loans[0]
-
+                amount_for_loans = net_amount_after_tax
+                for loan in expired_loans:
                     amount_for_repay = subtract_percentage_from_value(
-                        net_amount_after_tax, Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()
+                        amount_for_loans, Env.BOUNTY_LOAN_GARNISH_PERCENTAGE.get_float()
                     )
                     # Cap to remaining amount
-                    amount_for_repay = expired_loan.get_maximum_payable_amount(
-                        int(amount_for_repay)
-                    )
+                    amount_for_repay = loan.get_maximum_payable_amount(int(amount_for_repay))
 
                     # Pay loan
-                    await expired_loan.pay(amount_for_repay, update)
+                    await loan.pay(amount_for_repay, update)
 
                     # Subtract from amount
                     amount_to_add -= amount_for_repay
+                    amount_for_loans -= amount_for_repay
 
             user.bounty += amount_to_add
 
