@@ -883,7 +883,7 @@ def get_image_preview(image_url: str) -> str:
 
 
 def get_delete_button(
-    user_ids: list[str], use_close_delete=False, button_text: str = None
+    user_ids: list[int], use_close_delete=False, button_text: str = None
 ) -> Keyboard:
     """
     Create a delete button
@@ -1003,7 +1003,7 @@ def get_yes_no_keyboard(
             )
         elif yes_is_delete_button:
             keyboard_line.append(
-                get_delete_button([u.tg_user_id for u in authorized_users], button_text=yes_text)
+                get_delete_button([u.id for u in authorized_users], button_text=yes_text)
             )
         else:
             # If screen is being changed, discard yes key value
@@ -1037,7 +1037,7 @@ def get_yes_no_keyboard(
             )
         elif no_is_delete_button:
             keyboard_line.append(
-                get_delete_button([u.tg_user_id for u in authorized_users], button_text=no_text)
+                get_delete_button([u.id for u in authorized_users], button_text=no_text)
             )
         else:
             # If screen is being changed, discard no key value
