@@ -6,8 +6,8 @@ from src.model.ImpelDownLog import ImpelDownLog
 from src.model.User import User
 from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
-from src.model.enums.impel_down.ImpelDownSentenceOrigin import ImpelDownSentenceOrigin
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
+from src.model.enums.impel_down.ImpelDownSource import ImpelDownSource
 from src.service.notification_service import send_notification
 
 
@@ -18,7 +18,7 @@ async def add_sentence(
     bounty_action: ImpelDownBountyAction,
     release_date: datetime,
     reason: str,
-    origin: ImpelDownSentenceOrigin,
+    source: ImpelDownSource,
     external_id: int = None,
     should_send_notification: bool = True,
 ) -> None:
@@ -30,7 +30,7 @@ async def add_sentence(
     :param bounty_action: Bounty action
     :param release_date: Release date
     :param reason: Reason
-    :param origin: Origin
+    :param source: Source
     :param external_id: External id
     :param should_send_notification: If a notification should be sent
     :return:
@@ -42,7 +42,7 @@ async def add_sentence(
     impel_down_log.bounty_action = bounty_action
     impel_down_log.previous_bounty = user.bounty
     impel_down_log.reason = reason
-    impel_down_log.sentence_origin = origin
+    impel_down_log.source = source
     impel_down_log.external_id = external_id
 
     user.impel_down_is_permanent = sentence_type is ImpelDownSentenceType.PERMANENT

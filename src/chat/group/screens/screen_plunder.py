@@ -15,8 +15,8 @@ from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
-from src.model.enums.impel_down.ImpelDownSentenceOrigin import ImpelDownSentenceOrigin
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
+from src.model.enums.impel_down.ImpelDownSource import ImpelDownSource
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
@@ -399,7 +399,7 @@ async def keyboard_interaction(
             ImpelDownBountyAction.NONE,
             get_datetime_in_future_hours(plunder.sentence_duration),
             phrases.PLUNDER_LOSE_SENTENCE_REASON.format(opponent.tg_first_name),
-            ImpelDownSentenceOrigin.PLUNDER,
+            ImpelDownSource.PLUNDER,
             external_id=plunder.id,
         )
 

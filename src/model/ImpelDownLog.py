@@ -16,7 +16,7 @@ class ImpelDownLog(BaseModel):
         User, backref="impel_down_users", on_delete="CASCADE", on_update="CASCADE"
     )
     sentence_type = CharField(max_length=99, null=True)
-    sentence_origin = CharField(max_length=99, null=True)
+    source = CharField(max_length=10, null=True)
     date_time = DateTimeField(default=datetime.now)
     release_date_time = DateTimeField(null=True)
     is_permanent = BooleanField(default=False)
