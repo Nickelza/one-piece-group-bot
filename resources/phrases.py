@@ -318,6 +318,7 @@ PVT_KEY_VIEW = "View"
 PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + " Loan"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = "Pay"
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
+PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL = "Pay all"
 PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
@@ -1062,6 +1063,7 @@ BOUNTY_LOAN_ITEM_PAY_REQUEST = (
     BOUNTY_LOAN_REPAY_AMOUNT.strip()
     + BOUNTY_LOAN_AMOUNT_REPAID
     + BOUNTY_LOAN_AMOUNT_REMAINING_MONOSPACE
+    + "\nCurrent bounty: ฿`{}`"
     + "\n\n_Please send the amount you want to pay \\(send \\* to repay the maximum allowed by"
     " your bounty\\)_"
 )

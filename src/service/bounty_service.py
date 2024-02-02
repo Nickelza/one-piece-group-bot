@@ -28,6 +28,7 @@ from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContributionType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CommonChatError import CommonChatException
+from src.model.error.CustomException import BellyValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run, get_previous_run
 from src.service.devil_fruit_service import get_ability_value
@@ -576,6 +577,8 @@ async def validate_amount(
     previous_screens: list[Screen] = None,
     previous_screen_list_keyboard_info: dict = None,
     should_validate_user_has_amount: bool = True,
+    send_error_message: bool = True,
+    raise_belly_validation_exception: bool = False,
 ) -> bool:
     """
     Validates the wager. Checks if the wager is a valid number, the user has enough belly, and if
@@ -592,51 +595,47 @@ async def validate_amount(
     :param previous_screen_list_keyboard_info: The previous screen list keyboard info, for the back
     button if in private
     :param should_validate_user_has_amount: Whether to validate that the user has the amount
+    :param send_error_message: Whether to send an error message if the wager is invalid
+    :param raise_belly_validation_exception: Whether to raise a BellyValidationException if the
+    wager is invalid
     :return: Whether the wager is valid
     """
 
-    if isinstance(wager_str, int):
-        wager = wager_str
-    else:
-        try:
-            wager: int = get_amount_from_string(wager_str, user)
-        except ValueError:
+    try:
+        if isinstance(wager_str, int):
+            wager = wager_str
+        else:
+            try:
+                wager: int = get_amount_from_string(wager_str, user)
+            except ValueError:
+                raise BellyValidationException(phrases.ACTION_INVALID_WAGER_AMOUNT)
+
+        # User does not have enough bounty
+        if should_validate_user_has_amount and user.bounty < wager:
+            raise BellyValidationException(
+                phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(wager))
+            )
+
+        # Wager less than minimum required
+        if required_belly is not None and wager < required_belly:
+            raise BellyValidationException(
+                phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
+            )
+    except BellyValidationException as e:
+        if send_error_message:
             await full_message_or_media_send_or_edit(
                 context,
-                phrases.ACTION_INVALID_WAGER_AMOUNT,
+                e.message,
                 update=update,
                 add_delete_button=add_delete_button,
                 inbound_keyboard=inbound_keyboard,
                 previous_screens=previous_screens,
                 previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
             )
-            return False
 
-    # User does not have enough bounty
-    if should_validate_user_has_amount and user.bounty < wager:
-        await full_message_or_media_send_or_edit(
-            context,
-            phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(wager)),
-            update=update,
-            add_delete_button=add_delete_button,
-            inbound_keyboard=inbound_keyboard,
-            previous_screens=previous_screens,
-            previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
-        )
-        return False
+        if raise_belly_validation_exception:
+            raise e
 
-    # Wager less than minimum required
-    if required_belly is not None and wager < required_belly:
-        ot_text = phrases.ACTION_WAGER_LESS_THAN_MIN.format(get_belly_formatted(required_belly))
-        await full_message_or_media_send_or_edit(
-            context,
-            ot_text,
-            update=update,
-            add_delete_button=add_delete_button,
-            inbound_keyboard=inbound_keyboard,
-            previous_screens=previous_screens,
-            previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
-        )
         return False
 
     return True

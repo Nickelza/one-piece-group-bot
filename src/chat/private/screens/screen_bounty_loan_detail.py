@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from resources import phrases
 from src.chat.private.screens.screen_bounty_loan import BountyLoanListPage
+from src.chat.private.screens.screen_bounty_loan_detail_pay import Step as StepPay
 from src.model.BountyLoan import BountyLoan
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -24,7 +25,8 @@ async def manage(
     :param context: The context
     :param inbound_keyboard: The inbound keyboard
     :param user: The user
-    :param called_from_another_screen: Whether this screen was called from another screen (pay confirmation or forgive)
+    :param called_from_another_screen: Whether this screen was called from another screen
+    (pay confirmation or forgive)
     :return: None
     """
 
@@ -47,7 +49,10 @@ async def manage(
     if loan.is_active():
         # If borrower, show pay button
         if not bounty_loan_list_page.user_is_loaner:
-            button_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id}
+            button_info = {
+                ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id,
+                ReservedKeyboardKeys.SCREEN_STEP: StepPay.REQUEST_AMOUNT,
+            }
             inline_keyboard.append([
                 Keyboard(
                     phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY,

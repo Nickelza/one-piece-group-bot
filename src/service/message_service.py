@@ -390,6 +390,8 @@ async def full_message_send(
             screen=previous_screens[-1],
             info=previous_screen_list_keyboard_info,
         )
+    elif previous_screen_list_keyboard_info is not None and inbound_keyboard is not None:
+        inbound_keyboard.info |= previous_screen_list_keyboard_info
 
     chat_id = get_chat_id(
         update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat

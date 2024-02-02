@@ -1,11 +1,10 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
-from src.chat.private.screens.screen_bounty_loan_detail import manage as manage_bounty_loan_detail
 from src.model.BountyLoan import BountyLoan
 from src.model.User import User
 from src.model.enums.ContextDataKey import ContextDataKey
@@ -13,7 +12,7 @@ from src.model.enums.Notification import BountyLoanPaymentNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CommonChatError import CommonChatException
-from src.model.error.CustomException import BountyLoanValidationException
+from src.model.error.CustomException import BountyLoanValidationException, BellyValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import validate_amount, get_amount_from_string
 from src.service.message_service import (
@@ -31,6 +30,14 @@ class Step(IntEnum):
     END = 2
 
 
+class BountyLoanDetailActivateReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    PAY_ALL = "b"
+
+
 async def manage(
     update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
 ) -> None:
@@ -42,6 +49,9 @@ async def manage(
     :param user: The user
     :return: None
     """
+    from src.chat.private.screens.screen_bounty_loan_detail import (
+        manage as manage_bounty_loan_detail,
+    )
 
     should_ignore_input, should_create_item, should_validate_input = get_create_or_edit_status(
         user, inbound_keyboard
@@ -56,7 +66,15 @@ async def manage(
         else:
             loan: BountyLoan = BountyLoan.get_by_id(user.private_screen_in_edit_id)
 
-        if not await validate(update, context, user, inbound_keyboard, loan):
+        step = Step(user.private_screen_step if user.private_screen_step else Step.REQUEST_AMOUNT)
+        if not await validate(
+            update,
+            context,
+            user,
+            inbound_keyboard,
+            loan,
+            should_validate_amount=(step is not Step.REQUEST_AMOUNT),
+        ):
             return
 
         user.private_screen_in_edit_id = loan.id
@@ -65,19 +83,40 @@ async def manage(
             user.private_screen_step = Step.REQUEST_AMOUNT
 
         inline_keyboard = [[]]
-        step = Step(user.private_screen_step)
         match step:
             case Step.REQUEST_AMOUNT:
                 ot_text = phrases.BOUNTY_LOAN_ITEM_PAY_REQUEST.format(
                     get_belly_formatted(loan.repay_amount),
                     get_belly_formatted(loan.amount_repaid),
                     get_belly_formatted(loan.get_remaining_amount()),
+                    user.get_bounty_formatted(),
                 )
 
+                # Pay all button
+                inline_keyboard.append([
+                    Keyboard(
+                        phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL,
+                        info={
+                            BountyLoanDetailActivateReservedKeys.PAY_ALL: 1,
+                            ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_CONFIRMATION,
+                        },
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ])
+
             case Step.REQUEST_CONFIRMATION:
-                amount = loan.get_maximum_payable_amount(
-                    get_amount_from_string(update.message.text, user)
-                )
+                if (
+                    inbound_keyboard is not None
+                    and BountyLoanDetailActivateReservedKeys.PAY_ALL in inbound_keyboard.info
+                ):
+                    amount = loan.get_remaining_amount()
+                    if not await validate(update, context, user, None, loan, amount=amount):
+                        return
+                else:
+                    amount = loan.get_maximum_payable_amount(
+                        get_amount_from_string(update.message.text, user)
+                    )
+
                 ot_text = phrases.BOUNTY_LOAN_ITEM_PAY_CONFIRMATION_REQUEST.format(
                     get_belly_formatted(amount)
                 )
@@ -123,6 +162,7 @@ async def manage(
                 # Remove step
                 if ReservedKeyboardKeys.SCREEN_STEP in inbound_keyboard.info:
                     inbound_keyboard.info.pop(ReservedKeyboardKeys.SCREEN_STEP)
+
                 await manage_bounty_loan_detail(
                     update, context, inbound_keyboard, user, called_from_another_screen=True
                 )
@@ -137,6 +177,9 @@ async def manage(
         # Send message
         previous_screens = user.get_private_screen_list()[:-1]
         previous_screen_list_keyboard_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id}
+        if step > 0:
+            previous_screen_list_keyboard_info[ReservedKeyboardKeys.SCREEN_STEP] = step - 1
+
         await full_message_send(
             context,
             str(ot_text),
@@ -153,8 +196,10 @@ async def validate(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     user: User,
-    inbound_keyboard: Keyboard,
+    inbound_keyboard: Keyboard | None,
     loan: BountyLoan,
+    amount: int = None,
+    should_validate_amount: bool = True,
 ) -> bool:
     """
     Validate the bounty loan pay
@@ -164,6 +209,8 @@ async def validate(
     :param user: The user object
     :param loan: The loan
     :param inbound_keyboard: The inbound keyboard
+    :param amount: The amount
+    :param should_validate_amount: Whether to validate the amount
     :return: True if validation succeeded, False otherwise
     """
 
@@ -173,28 +220,35 @@ async def validate(
             raise BountyLoanValidationException(phrases.BOUNTY_LOAN_ITEM_NOT_ACTIVE)
 
         # Validate amount:
-        amount = None
-        if inbound_keyboard is None:
-            try:
-                amount = update.message.text
-            except AttributeError:
-                raise BountyLoanValidationException(phrases.ACTION_INVALID_WAGER_AMOUNT)
-        else:
-            try:
-                amount = user.get_context_data(context, ContextDataKey.BOUNTY_LOAN_REPAY_AMOUNT)
-            except CommonChatException:
-                pass
+        if amount is None:
+            if inbound_keyboard is None:
+                try:
+                    amount = update.message.text
+                except AttributeError:
+                    raise BountyLoanValidationException(phrases.ACTION_INVALID_WAGER_AMOUNT)
+            else:
+                try:
+                    amount = user.get_context_data(
+                        context, ContextDataKey.BOUNTY_LOAN_REPAY_AMOUNT
+                    )
+                except CommonChatException:
+                    pass
 
-        if amount is not None:
+        if amount is not None and should_validate_amount:
             minimum_required = min(
                 loan.get_remaining_amount(), Env.BOUNTY_LOAN_MIN_AMOUNT.get_int()
             )
-            if not await validate_amount(
-                update, context, user, amount, required_belly=minimum_required
-            ):
-                return False  # Error message sent by validate_amount
+            await validate_amount(
+                update,
+                context,
+                user,
+                amount,
+                required_belly=minimum_required,
+                send_error_message=False,
+                raise_belly_validation_exception=True,
+            )
 
-    except BountyLoanValidationException as e:
+    except (BountyLoanValidationException, BellyValidationException) as e:
         # Show alert if callback else send a message
         await full_message_send(
             context,
