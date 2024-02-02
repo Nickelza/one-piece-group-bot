@@ -127,3 +127,17 @@ PLUNDER = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.PLUNDER, file_name=AssetPath.PLUNDER
 )
 SAVED_MEDIA_DICT[SavedMediaName.PLUNDER] = PLUNDER
+
+PLUNDER_SUCCESS = SavedMedia(
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.PLUNDER_SUCCESS,
+    file_name=AssetPath.PLUNDER_SUCCESS,
+)
+SAVED_MEDIA_DICT[SavedMediaName.PLUNDER_SUCCESS] = PLUNDER_SUCCESS
+
+PLUNDER_FAIL = SavedMedia(
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.PLUNDER_FAIL,
+    file_name=AssetPath.PLUNDER_FAIL,
+)
+SAVED_MEDIA_DICT[SavedMediaName.PLUNDER_FAIL] = PLUNDER_FAIL

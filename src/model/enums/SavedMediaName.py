@@ -16,3 +16,5 @@ class SavedMediaName(StrEnum):
     GAME_PUNK_RECORDS = "game_punk_records"
     SILENCE = "silence"
     PLUNDER = "plunder"
+    PLUNDER_SUCCESS = "plunder_success"
+    PLUNDER_FAIL = "plunder_fail"

@@ -379,6 +379,7 @@ async def keyboard_interaction(
             get_belly_formatted(win_amount),
             user.get_bounty_formatted(),
         )
+        saved_media_name: SavedMediaName = SavedMediaName.PLUNDER_SUCCESS
     else:  # Challenger lost
         plunder.status = GameStatus.LOST
 
@@ -414,6 +415,8 @@ async def keyboard_interaction(
             external_id=plunder.id,
         )
 
+        saved_media_name: SavedMediaName = SavedMediaName.PLUNDER_FAIL
+
     # Add plunder immunity to opponent
     opponent.plunder_immunity_end_date = get_ability_adjusted_datetime(
         opponent,
@@ -435,10 +438,10 @@ async def keyboard_interaction(
     # Send message
     await full_media_send(
         context,
+        saved_media_name=saved_media_name,
         caption=caption,
         update=update,
         add_delete_button=True,
-        edit_only_caption_and_keyboard=True,
     )
 
     # Save info
