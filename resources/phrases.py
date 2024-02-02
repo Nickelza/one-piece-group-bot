@@ -173,6 +173,7 @@ TEXT_RANDOM = "Random"
 TEXT_ONLY = "Only {}"
 TEXT_YOU = "You"
 TEXT_STOLE = "stole"
+TEXT_OWE = "[owe]({})"
 
 EXCEPTION_CHAT_ID_NOT_PROVIDED = "chat_id is None and update.effective_chat.id is None"
 EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is None"
@@ -1074,6 +1075,9 @@ BOUNTY_LOAN_ITEM_FORGIVE_CONFIRMATION_REQUEST = (
     " remaining amount"
 )
 BOUNTY_LOAN_ITEM_FORGIVE_SUCCESS = "You have forgiven this loan"
+BOUNTY_LOAN_SOURCE = "\nSource: [{}]({})"
+BOUNTY_LOAN_SOURCE_USER = "Loan"
+BOUNTY_LOAN_SOURCE_PLUNDER = "Plunder"
 
 # Notification - Categories
 NOTIFICATION_CATEGORY_BOUNTY_GIFT = "Bounty Gift"
@@ -1606,16 +1610,17 @@ PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{
 PLUNDER_CONFIRMATION_REQUEST = (
     "{} are you sure you want to steal from {}?\n"
     "\nIf you're successful, you will gain ฿*{}*."
-    "\nIf you're caught, you will lose ฿*{}* and be jailed in Impel Down for *{}*!"
-    + "{}\n\n"
-    + GAME_WIN_LOSE_STATUS
+    "\nIf you're caught, you will owe ฿*{}* and be jailed in Impel Down for *{}*!"
+    + "\n\n_Success chance: *{}%*\nCurrent bounty: ฿*{}*\nFinal bounty if you win:"
+    " ฿*{}*_\n\nIf you"
+    " lose, a loan will be created to repay the penalty"
 )
 PLUNDER_WIN = (
     "{} have successfully robbed {}, better run away before they notice!\n\n" + GAME_WIN_STATUS
 )
 PLUNDER_LOSE = (
     "{} have been caught trying to rob {} and they have handed you over to the Marines."
-    "\nYou will be jailed in Impel Down for *{}*, better luck next time!\n\n"
-    + GAME_LOSE_STATUS
+    "\nYou will be jailed in Impel Down for *{}*, better luck next time!"
+    "\n\nYou now have a [฿*{}* loan]({}) towards {}"
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"

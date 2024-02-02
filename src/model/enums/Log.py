@@ -1136,7 +1136,7 @@ class PlunderLog(Log):
                 (
                     phrases.TEXT_STOLE
                     if GameStatus(self.legend.status) is GameStatus.WON
-                    else phrases.TEXT_LOST
+                    else phrases.TEXT_OWE.format(self.object.get_loan().get_deeplink())
                 ),
                 get_belly_formatted(self.object.belly),
             )

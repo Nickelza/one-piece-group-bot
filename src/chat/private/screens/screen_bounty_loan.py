@@ -5,6 +5,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.BountyLoan import BountyLoan
 from src.model.User import User
+from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage, EmojiLegend
@@ -68,6 +69,13 @@ class BountyLoanListPage(ListPage):
             phrases.BOUNTY_LOAN_BORROWER if self.user_is_loaner else phrases.BOUNTY_LOAN_LOANER
         )
         ot_text += loaner_text.format(self.other_user.get_markdown_mention()).strip()
+
+        # Source if not user
+        source: BountyLoanSource = self.object.get_source()
+        if source is not BountyLoanSource.USER:
+            ot_text += phrases.BOUNTY_LOAN_SOURCE.format(
+                source.get_description(), self.object.get_source_deeplink()
+            )
 
         # Amounts
         ot_text += "\n"

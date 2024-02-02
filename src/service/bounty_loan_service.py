@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from telegram.ext import ContextTypes
 
@@ -59,7 +59,7 @@ def add_loan(
     :param message_id: The message id
     :param tax_percentage: The tax percentage
     :param repay_amount: The repay amount
-    :param duration: The duration. If 0, will set status to EXPIRED
+    :param duration: The duration in seconds. If 0, will set status to EXPIRED
     :param status: The status
     :param external_id: The external id
     :return: The bounty loan
@@ -70,6 +70,9 @@ def add_loan(
     if source is not BountyLoanSource.USER and external_id is None:
         raise ValueError("External id is required for non-user source")
 
+    if repay_amount is None:
+        repay_amount = amount
+
     loan: BountyLoan = BountyLoan()
     loan.loaner = loaner
     loan.borrower = borrower
@@ -77,6 +80,7 @@ def add_loan(
     loan.tax_percentage = tax_percentage
     loan.repay_amount = repay_amount
     loan.duration = duration
+    loan.deadline_date = datetime.now() + timedelta(seconds=duration)
     loan.status = status
     loan.group_chat = group_chat
     loan.message_id = message_id

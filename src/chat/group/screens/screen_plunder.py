@@ -6,9 +6,11 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
+from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.Plunder import Plunder
 from src.model.User import User
+from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
@@ -21,6 +23,7 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_loan_service import add_loan
 from src.service.bounty_service import add_or_remove_bounty, validate_amount
 from src.service.date_service import (
     convert_seconds_to_duration,
@@ -171,14 +174,16 @@ async def validate(
     return True
 
 
-def get_plunder_odds(challenger: User, opponent: User) -> tuple[int, int, float, int, int, int]:
+def get_plunder_odds(
+    challenger: User, opponent: User
+) -> tuple[int, int, int, float, int, int, int]:
     """
     Get the win probability
     :param challenger: The challenger object
     :param opponent: The opponent object
-    :return: list -  [0] - Win probability, [1] - Win amount, [2] - Win percentage
-                [3] - Final bounty if user win, [4] - Final bounty if user lose,
-                [5] - Sentence duration in hours
+    :return: list -  [0] - Win probability, [1] - Win amount, [2] - Lose amount,
+     [3] - Win percentage [4] - Final bounty if user win, [5] - Final bounty if user lose,
+     [6] - Sentence duration in hours
     """
     # Probability of winning - How many hours the opponent has been inactive
     win_probability = get_elapsed_hours(opponent.last_system_interaction_date)
@@ -196,13 +201,15 @@ def get_plunder_odds(challenger: User, opponent: User) -> tuple[int, int, float,
             challenger, DevilFruitAbilityType.PLUNDER_SENTENCE_DURATION, win_percentage
         )
     )
+    lose_amount = int(win_amount * Env.PLUNDER_REPAY_MULTIPLIER.get_float())
 
     final_bounty_if_won = challenger.bounty + win_amount
-    final_bounty_if_lose = challenger.bounty - win_amount
+    final_bounty_if_lose = challenger.bounty - lose_amount
 
     return (
         win_probability,
         win_amount,
+        lose_amount,
         win_percentage,
         final_bounty_if_won,
         final_bounty_if_lose,
@@ -251,6 +258,7 @@ async def send_request(
     (
         win_probability,
         win_amount,
+        lose_amount,
         win_percentage,
         final_bounty_if_win,
         final_bounty_if_lose,
@@ -271,9 +279,9 @@ async def send_request(
         mention_markdown_user(user),
         mention_markdown_user(opponent),
         get_belly_formatted(win_amount),
-        get_belly_formatted(win_amount),
+        get_belly_formatted(lose_amount),
         convert_hours_to_duration(sentence, show_full=True),
-        "",
+        plunder.win_probability,
         user.get_bounty_formatted(),
         get_belly_formatted(final_bounty_if_win),
         get_belly_formatted(final_bounty_if_lose),
@@ -338,6 +346,7 @@ async def keyboard_interaction(
     (
         win_probability,
         win_amount,
+        lose_amount,
         win_percentage,
         final_bounty_if_win,
         final_bounty_if_lose,
@@ -372,23 +381,25 @@ async def keyboard_interaction(
         )
     else:  # Challenger lost
         plunder.status = GameStatus.LOST
-        # Remove bounty from challenger
-        await add_or_remove_bounty(user, win_amount, add=False, update=update, should_save=True)
-        # Add bounty to opponent
-        await add_or_remove_bounty(
+
+        # Create loan for the lost amount
+        loan: BountyLoan = add_loan(
             opponent,
-            win_amount,
-            update=update,
-            tax_event_type=IncomeTaxEventType.PLUNDER,
-            event_id=plunder.id,
-            should_save=True,
+            user,
+            lose_amount,
+            group_chat,
+            BountyLoanSource.PLUNDER,
+            message_id=plunder.message_id,
+            external_id=plunder.id,
         )
+
         caption = phrases.PLUNDER_LOSE.format(
             user.get_you_markdown_mention(),
             mention_markdown_user(opponent),
             convert_hours_to_duration(plunder.sentence_duration, show_full=True),
-            get_belly_formatted(win_amount),
-            user.get_bounty_formatted(),
+            get_belly_formatted(lose_amount),
+            loan.get_deeplink(),
+            opponent.get_markdown_name(),
         )
 
         # Add Impel down sentence

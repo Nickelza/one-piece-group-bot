@@ -973,3 +973,5 @@ PLUNDER_MAX_INACTIVE_HOURS = Environment("PLUNDER_MAX_INACTIVE_HOURS", default_v
 PLUNDER_IMMUNITY_DURATION = Environment("PLUNDER_IMMUNITY_DURATION", default_value="24")
 # How long a user has to wait before plundering another user in hours. Default: 12 hours
 PLUNDER_COOLDOWN_DURATION = Environment("PLUNDER_COOLDOWN_DURATION", default_value="12")
+# How much times bounty more does a user has to repay in case of failed plunder. Default: 2
+PLUNDER_REPAY_MULTIPLIER = Environment("PLUNDER_REPAY_MULTIPLIER", default_value="2")

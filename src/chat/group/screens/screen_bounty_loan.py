@@ -36,7 +36,7 @@ from src.service.date_service import (
 )
 from src.service.devil_fruit_service import get_ability_value
 from src.service.math_service import get_value_from_percentage, get_interest_percentage_from_value
-from src.service.message_service import full_message_send, get_yes_no_keyboard, get_deeplink
+from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.string_service import get_belly_formatted
 
 
@@ -267,12 +267,7 @@ def get_text(loan: BountyLoan, tax_amount: int, total_amount: int) -> str:
 
     # Add manage link
     if loan.get_status() is BountyLoanStatus.ACTIVE:
-        ot_text += phrases.BOUNTY_LOAN_REQUEST_MANAGE_TEXT.format(
-            get_deeplink(
-                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id},
-                screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
-            )
-        )
+        ot_text += phrases.BOUNTY_LOAN_REQUEST_MANAGE_TEXT.format(loan.get_deeplink())
 
     return ot_text
 

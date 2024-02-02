@@ -7,7 +7,10 @@ import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 
 
 class BountyLoan(BaseModel):
@@ -25,7 +28,7 @@ class BountyLoan(BaseModel):
     tax_percentage = FloatField()
     repay_amount = BigIntegerField()
     amount_repaid = BigIntegerField(default=0)
-    duration = IntegerField()
+    duration = IntegerField()  # In seconds
     deadline_date = DateTimeField()
     last_payment_date = DateTimeField(null=True)
     forgiven_date = DateTimeField(null=True)
@@ -40,7 +43,7 @@ class BountyLoan(BaseModel):
     )
     message_id = IntegerField(null=True)
     source = CharField(max_length=10, null=True)
-    external_id = IntegerField(null=True)
+    external_id: int | IntegerField = IntegerField(null=True)
 
     class Meta:
         db_table = "bounty_loan"
@@ -127,6 +130,35 @@ class BountyLoan(BaseModel):
         :return: The status
         """
         return BountyLoanStatus(self.status)
+
+    def get_deeplink(self):
+        """
+        Get the deeplink
+        :return: The deeplink
+        """
+        from src.service.message_service import get_deeplink
+
+        return get_deeplink(
+            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: self.id},
+            screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
+        )
+
+    def get_source(self) -> BountyLoanSource:
+        """
+        Get the source
+        :return: The source
+        """
+        return BountyLoanSource(self.source)
+
+    def get_source_deeplink(self):
+        """
+        Get the source deeplink
+        :return: The source deeplink
+        """
+        if self.external_id is None:
+            raise ValueError("External id is required for deeplink")
+
+        return self.get_source().get_deeplink(self.external_id)
 
 
 BountyLoan.create_table()

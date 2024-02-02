@@ -3,8 +3,10 @@ import datetime
 from peewee import *
 
 from src.model.BaseModel import BaseModel
+from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.GameStatus import GameStatus
 
 
@@ -187,6 +189,16 @@ class Plunder(BaseModel):
         """
 
         return GameStatus(self.status)
+
+    def get_loan(self) -> BountyLoan:
+        """
+        Get the loan
+        :return: The loan
+        """
+
+        return BountyLoan.get(
+            BountyLoan.source == BountyLoanSource.PLUNDER, BountyLoan.external_id == self.id
+        )
 
 
 Plunder.create_table()
