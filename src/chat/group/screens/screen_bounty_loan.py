@@ -10,6 +10,7 @@ import resources.phrases as phrases
 from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.BountyLoanStatus import BountyLoanStatus
 from src.model.enums.Command import Command
 from src.model.enums.Emoji import Emoji
@@ -19,6 +20,7 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.GroupChatError import GroupChatException, GroupChatError
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_loan_service import add_loan
 from src.service.bounty_service import (
     get_amount_from_string,
     validate_amount,
@@ -189,16 +191,17 @@ async def send_request(
     )
 
     # Save
-    loan: BountyLoan = BountyLoan()
-    loan.loaner = loaner
-    loan.borrower = borrower
-    loan.amount = amount
-    loan.tax_percentage = tax_percentage
-    loan.repay_amount = repay_amount
-    loan.duration = duration
-    loan.status = BountyLoanStatus.AWAITING_LOANER_CONFIRMATION
-    loan.group_chat = group_chat
-    loan.save()
+    loan: BountyLoan = add_loan(
+        loaner,
+        borrower,
+        amount,
+        group_chat,
+        source=BountyLoanSource.USER,
+        tax_percentage=tax_percentage,
+        repay_amount=repay_amount,
+        duration=duration,
+        status=BountyLoanStatus.AWAITING_LOANER_CONFIRMATION,
+    )
 
     # Keyboard
     inline_keyboard: list[list[Keyboard]] = [

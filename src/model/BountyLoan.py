@@ -39,12 +39,15 @@ class BountyLoan(BaseModel):
         on_update="CASCADE",
     )
     message_id = IntegerField(null=True)
+    source = CharField(max_length=10, null=True)
+    external_id = IntegerField(null=True)
 
     class Meta:
         db_table = "bounty_loan"
 
     async def pay(self, amount: int, update: Update = None):
         from src.service.bounty_service import add_or_remove_bounty
+        from src.service.date_service import datetime_is_before
 
         """
         Pay the loan
@@ -77,8 +80,9 @@ class BountyLoan(BaseModel):
         # If N days since expiration and at least double the amount repaid, set forgiven
         if (
             self.status == BountyLoanStatus.EXPIRED
-            and self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int())
-            < datetime.now()
+            and datetime_is_before(
+                self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int())
+            )
             and self.amount_repaid * 2 <= self.repay_amount
         ):
             self.forgive()
