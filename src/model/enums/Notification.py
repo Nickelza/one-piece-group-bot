@@ -9,6 +9,7 @@ from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
+from src.model.ImpelDownLog import ImpelDownLog
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
@@ -91,6 +92,7 @@ class NotificationType(IntEnum):
     CREW_FIRST_MATE_DEMOTION = 26
     CREW_JOIN_REQUEST_ACCEPTED = 27
     CREW_JOIN_REQUEST_REJECTED = 28
+    IMPEL_DOWN_BAIL_POSTED = 29
 
 
 class Notification:
@@ -1041,6 +1043,36 @@ class CrewJoinRequestRejectedNotification(Notification):
         return self.text.format(escape_valid_markdown_chars(self.crew.get_name_escaped()))
 
 
+class ImpelDownBailPostedNotification(Notification):
+    """Class for impel down bail posted notifications."""
+
+    def __init__(self, impel_down_log: ImpelDownLog = None):
+        """
+        Constructor
+
+        :param impel_down_log: The impel down log
+        """
+
+        self.impel_down_log: ImpelDownLog = impel_down_log
+
+        super().__init__(
+            NotificationCategory.IMPEL_DOWN,
+            NotificationType.IMPEL_DOWN_BAIL_POSTED,
+            phrases.IMPEL_DOWN_BAIL_POSTED_NOTIFICATION,
+            phrases.IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_DESCRIPTION,
+            phrases.IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        from src.service.string_service import get_belly_formatted
+
+        return self.text.format(
+            self.impel_down_log.bail_payer.get_markdown_mention(),
+            get_belly_formatted(self.impel_down_log.bail_amount),
+            get_remaining_duration(self.impel_down_log.release_date_time),
+        )
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1070,6 +1102,7 @@ NOTIFICATIONS = [
     CrewFirstMateDemotionNotification(),
     CrewJoinRequestAcceptedNotification(),
     CrewJoinRequestRejectedNotification(),
+    ImpelDownBailPostedNotification(),
 ]
 
 

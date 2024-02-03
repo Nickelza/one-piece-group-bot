@@ -1210,6 +1210,13 @@ IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when all restrictions are removed"
 )
 IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = "Restriction removed"
+# Notification - Impel Down bail posted
+IMPEL_DOWN_BAIL_POSTED_NOTIFICATION = (
+    "{} has paid *฿{}* to free you from Impel Down \\({} was left in your sentence\\)"
+)
+IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_DESCRIPTION = "If to be notified when bail is posted"
+IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_KEY = "Bail posted"
+
 # Notification - Prediction result
 PREDICTION_RESULT_NOTIFICATION = 'You *{}* ฿{} in the prediction "*{}*"{}{}{}'
 PREDICTION_RESULT_NOTIFICATION_WAGER_REFUNDED = "_\n\n\\(Your wager was refunded\\)_"

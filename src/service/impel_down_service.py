@@ -5,7 +5,10 @@ from telegram.ext import ContextTypes
 
 from src.model.ImpelDownLog import ImpelDownLog
 from src.model.User import User
-from src.model.enums.Notification import ImpelDownNotificationRestrictionPlaced
+from src.model.enums.Notification import (
+    ImpelDownNotificationRestrictionPlaced,
+    ImpelDownBailPostedNotification,
+)
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.enums.impel_down.ImpelDownSource import ImpelDownSource
@@ -102,7 +105,10 @@ async def post_bail(
     impel_down_log.bail_amount = bail
     impel_down_log.bail_date = datetime.now()
 
-    # TODO Send notification
+    # Send notification to the prisoner
+    await send_notification(
+        context, prisoner, ImpelDownBailPostedNotification(impel_down_log), update=update
+    )
 
     prisoner.save()
     impel_down_log.save()
