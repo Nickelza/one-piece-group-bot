@@ -405,7 +405,11 @@ async def validate(
 
         # Cannot be used while arrested
         if not command.allow_while_arrested:
-            if user.is_arrested():
+            if (
+                user.is_arrested()
+                and not (command.allow_while_arrested_temporary and user.is_arrested_temporary())
+                and not (command.allow_reply_to_arrested and is_callback)
+            ):
                 raise CommandValidationException(phrases.COMMAND_WHILE_ARRESTED_ERROR)
 
         # Required location

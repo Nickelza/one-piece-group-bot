@@ -7,6 +7,7 @@ from src.model.enums.Screen import (
     Screen,
     ONLY_BY_CAPTAIN_OR_FIRST_MATE,
     ALLOW_WHILE_ARRESTED,
+    ALLOW_WHILE_ARRESTED_TEMPORARY,
     ALLOW_DEEPLINK,
     DEPRECATED,
 )
@@ -27,6 +28,7 @@ class Command:
         allow_self_reply: bool = False,
         allow_reply_to_bot: bool = False,
         allow_while_arrested: bool = False,
+        allow_while_arrested_temporary: bool = False,
         required_location: Location.Location = None,
         parameters: list = None,
         message_source: MessageSource = MessageSource.ND,
@@ -55,6 +57,8 @@ class Command:
         :param allow_reply_to_bot: True if the command can be used in reply to a message sent by
         the bot
         :param allow_while_arrested: True if the command can be used while the user is arrested
+        :param allow_while_arrested_temporary: True if the command can be used while the user is
+        arrested temporarily
         :param required_location: The location required to use the command
         :param parameters: The parameters of the command
         :param message_source: The source of the message
@@ -86,6 +90,7 @@ class Command:
         self.allow_self_reply = allow_self_reply
         self.allow_reply_to_bot = allow_reply_to_bot
         self.allow_while_arrested = allow_while_arrested
+        self.allow_while_arrested_temporary = allow_while_arrested_temporary
         self.screen = screen
         self.required_location = required_location
         self.parameters: list[str] = [] if parameters is None else parameters
@@ -142,22 +147,32 @@ COMMANDS.append(PVT_START)
 PVT_USER_STATUS = Command(CommandName.STATUS, Screen.PVT_USER_STATUS, allow_while_arrested=True)
 COMMANDS.append(PVT_USER_STATUS)
 
-# Deprecated
-for sc in DEPRECATED:
-    COMMANDS.append(Command(CommandName.EMPTY, sc, active=False))
+# Merge all lists with limitations
+limitations_list = set(
+    DEPRECATED
+    + ALLOW_WHILE_ARRESTED
+    + ALLOW_WHILE_ARRESTED_TEMPORARY
+    + ALLOW_DEEPLINK
+    + ONLY_BY_CAPTAIN_OR_FIRST_MATE
+)
+for sc in limitations_list:
+    _active = sc not in DEPRECATED
+    _allow_while_arrested = sc in ALLOW_WHILE_ARRESTED
+    _allow_while_arrested_temporary = sc in ALLOW_WHILE_ARRESTED_TEMPORARY
+    _allow_deeplink = sc in ALLOW_DEEPLINK
+    _only_by_crew_captain_or_first_mate = sc in ONLY_BY_CAPTAIN_OR_FIRST_MATE
 
-# To allow while arrested
-for sc in ALLOW_WHILE_ARRESTED:
-    COMMANDS.append(Command(CommandName.EMPTY, sc, allow_while_arrested=True))
-
-# To allow deeplink
-for sc in ALLOW_DEEPLINK:
-    COMMANDS.append(Command(CommandName.EMPTY, sc, allow_deeplink=True))
-
-# To set limitations
-# Only by Captain or first mate
-for sc in ONLY_BY_CAPTAIN_OR_FIRST_MATE:
-    COMMANDS.append(Command(CommandName.EMPTY, sc, only_by_crew_captain_or_first_mate=True))
+    COMMANDS.append(
+        Command(
+            CommandName.EMPTY,
+            sc,
+            active=_active,
+            allow_while_arrested=_allow_while_arrested,
+            allow_while_arrested_temporary=_allow_while_arrested_temporary,
+            allow_deeplink=_allow_deeplink,
+            only_by_crew_captain_or_first_mate=_only_by_crew_captain_or_first_mate,
+        )
+    )
 
 # To set required location
 PVT_LOGS_TYPE_STATS = Command(
