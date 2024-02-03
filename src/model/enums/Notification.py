@@ -365,6 +365,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
 
         restriction_text = ""
         duration_text = ""
+        bail_text = ""
 
         # Bounty action
         if self.bounty_action is ImpelDownBountyAction.HALVE:
@@ -382,8 +383,11 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
                 else phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT
             )
 
+            if self.sentence_type is ImpelDownSentenceType.TEMPORARY:
+                bail_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL
+
         return self.text.format(
-            escape_valid_markdown_chars(self.reason), restriction_text, duration_text
+            escape_valid_markdown_chars(self.reason), restriction_text, duration_text, bail_text
         )
 
 

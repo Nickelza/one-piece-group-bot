@@ -105,6 +105,11 @@ async def validate(
                     get_belly_formatted(bail), user.get_bounty_formatted()
                 )
             )
+
+        # User can't post bail for themselves
+        if user.id == member.id:
+            raise CrewValidationException(phrases.CREW_POST_BAIL_CANNOT_POST_BAIL_FOR_SELF)
+
     except CrewValidationException as cve:
         await full_message_send(context, cve.message, update=update, show_alert=True)
         return False

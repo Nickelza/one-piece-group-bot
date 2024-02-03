@@ -903,6 +903,7 @@ CREW_DEMOTE_FROM_FIRST_MATE_CONFIRMATION = (
 CREW_DEMOTE_FROM_FIRST_MATE_SUCCESS = "{} has been demoted from First Mate"
 CREW_POST_BAIL_MEMBER_NOT_ARRESTED_TEMPORARY = "The member does not have a temporary sentence"
 CREW_POST_BAIL_NOT_ENOUGH_BOUNTY = "You need ฿{} to post bail.\n\nCurrent bounty: ฿{}"
+CREW_POST_BAIL_CANNOT_POST_BAIL_FOR_SELF = "You cannot post bail for yourself"
 CREW_POST_BAIL_CONFIRMATION_REQUEST = (
     "Are you sure you want to post bail for {}?"
     "\nFor each remaining minute in the sentence, "
@@ -1190,7 +1191,7 @@ LOCATION_UPDATE_NOTIFICATION_KEY = "Location update"
 # Notification - Impel Down restriction placed
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION = (
     f"{Emoji.DISCIPLINARY_ACTION}*DISCIPLINARY ACTION*{Emoji.DISCIPLINARY_ACTION}\n\n*Reason*:"
-    " {}\n\n*Restrictions*:{}{}"
+    " {}\n\n*Restrictions*:{}{}{}"
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_HALVED = "\n- Bounty halved"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_ERASED = "\n- Bounty erased"
@@ -1200,6 +1201,11 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION = (
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION = "\n\n*Duration*: {}"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT = "Permanent"
+IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL = (
+    "\n\nA Crew member can post bail for you, at a cost of"
+    f" ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}* for every minute left in your sentence"
+    f" \n\\(`{PVT_KEY_CREW}`->`{PVT_KEY_CREW_MEMBERS}`->Select->`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
+)
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are restricted"
 )
@@ -1641,6 +1647,7 @@ PLUNDER_WIN = (
 PLUNDER_LOSE = (
     "{} have been caught trying to rob {} and they have handed you over to the Marines."
     "\nYou will be jailed in Impel Down for *{}*, better luck next time!"
-    "\n\nYou now have a [฿*{}* loan]({}) towards {}"
+    + IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL
+    + "\n\nYou now have a [฿*{}* loan]({}) towards {}"
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"
