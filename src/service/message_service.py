@@ -368,14 +368,14 @@ async def full_message_send(
     :return: Message
     """
 
+    if show_alert:
+        answer_callback = True
+
     if text is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
         text = escape_invalid_markdown_chars(text)
 
     if send_in_private_chat:
         new_message = True
-
-    if show_alert:
-        answer_callback = True
 
     topic_id = None
     if group_chat is not None:

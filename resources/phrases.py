@@ -269,6 +269,7 @@ PVT_KEY_CREW_DISBAND = Emoji.DELETE + " Disband"
 PVT_KEY_CREW_MEMBER_REMOVE = "Expel"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = "Promote to First Mate"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = "Demote from First Mate"
+PVT_KEY_CREW_MEMBER_POST_BAIL = "Post bail"
 PVT_KEY_CREW_ABILITY = "Abilities"
 PVT_KEY_CREW_ABILITY_ACTIVATE = "Activate"
 PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
@@ -778,8 +779,9 @@ CREW_MEMBER_ITEM_ROLE = " \\({}\\)"
 # Crew - Member
 CREW_MEMBER_ITEM_DETAIL = (
     "*{}*\n\n*Bounty*: ฿{}\n*Join Date*: {} \\({}°\\)\n\nChest contribution: ฿{} \\({}°\\)\nCrew"
-    " MVP Bonus: {}"
+    " MVP Bonus: {}{}"
 )
+CREW_MEMBER_ITEM_DETAIL_ARRESTED = f"\n\n{Emoji.LOG_NEGATIVE}Arrested \\({{}}\\)"
 CREW_MEMBER_ITEM_TEXT_FILL_IN = "Crew Member"
 CREW_USER_ALREADY_IN_CREW = "You are already in a Crew"
 CREW_CREATE_USER_NOT_ENOUGH_BOUNTY = (
@@ -899,7 +901,15 @@ CREW_DEMOTE_FROM_FIRST_MATE_CONFIRMATION = (
     " member to First Mate until the next weekly leaderboard in {}"
 )
 CREW_DEMOTE_FROM_FIRST_MATE_SUCCESS = "{} has been demoted from First Mate"
-
+CREW_POST_BAIL_MEMBER_NOT_ARRESTED_TEMPORARY = "The member does not have a temporary sentence"
+CREW_POST_BAIL_NOT_ENOUGH_BOUNTY = "You need ฿{} to post bail.\n\nCurrent bounty: ฿{}"
+CREW_POST_BAIL_CONFIRMATION_REQUEST = (
+    "Are you sure you want to post bail for {}?"
+    "\nFor each remaining minute in the sentence, "
+    f"you will be charged *฿{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}*"
+    "\n\nTotal bail: *฿{}*"
+)
+CREW_POST_BAIL_SUCCESS = "Bail posted successfully"
 # Crew abilities
 CREW_ABILITIES = (
     "*Crew Abilities*\n\nAbilities mimic the effects of Devil Fruits and are extended to all"
@@ -1080,6 +1090,7 @@ BOUNTY_LOAN_ITEM_FORGIVE_SUCCESS = "You have forgiven this loan"
 BOUNTY_LOAN_SOURCE = "\nSource: [{}]({})"
 BOUNTY_LOAN_SOURCE_USER = "Loan"
 BOUNTY_LOAN_SOURCE_PLUNDER = "Plunder"
+BOUNTY_LOAN_SOURCE_IMPEL_DOWN_BAIL = "Impel Down Bail"
 
 # Notification - Categories
 NOTIFICATION_CATEGORY_BOUNTY_GIFT = "Bounty Gift"

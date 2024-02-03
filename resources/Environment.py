@@ -975,3 +975,6 @@ PLUNDER_IMMUNITY_DURATION = Environment("PLUNDER_IMMUNITY_DURATION", default_val
 PLUNDER_COOLDOWN_DURATION = Environment("PLUNDER_COOLDOWN_DURATION", default_value="12")
 # How much times bounty more does a user has to repay in case of failed plunder. Default: 2
 PLUNDER_REPAY_MULTIPLIER = Environment("PLUNDER_REPAY_MULTIPLIER", default_value="2")
+
+# How much is each remaining minute of the sentence for bail in Impel Down. Default: 100k
+IMPEL_DOWN_BAIL_PER_MINUTE = Environment("IMPEL_DOWN_BAIL_PER_MINUTE", default_value="100000")

@@ -45,6 +45,9 @@ from src.chat.private.screens.screen_crew_member_detail_first_mate_promote impor
 from src.chat.private.screens.screen_crew_member_detail_remove import (
     manage as manage_screen_crew_member_detail_remove,
 )
+from src.chat.private.screens.screen_crew_member_detail_post_bail import (
+    manage as manage_screen_crew_member_detail_post_bail,
+)
 from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
 from src.chat.private.screens.screen_crew_powerup import manage as manage_screen_crew_powerup
 from src.chat.private.screens.screen_crew_search import manage as manage_screen_crew_search
@@ -305,6 +308,11 @@ async def dispatch_screens(
 
             case Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_DEMOTE:  # Crew Member First Mate Demote
                 await manage_screen_crew_member_detail_first_mate_demote(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_CREW_MEMBER_DETAIL_POST_BAIL:  # Crew Member Post Bail
+                await manage_screen_crew_member_detail_post_bail(
                     update, context, inbound_keyboard, user
                 )
 

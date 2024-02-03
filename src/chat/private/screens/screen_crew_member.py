@@ -10,7 +10,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
-from src.service.date_service import default_date_format
+from src.service.date_service import default_date_format, get_remaining_duration
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, mention_markdown_user
 from src.service.string_service import get_belly_formatted
@@ -66,6 +66,14 @@ class CrewMemberListPage(ListPage):
             member_contribution_amount = member_contribution.amount
             member_chest_order = list(chest_contributions).index(member_contribution) + 1
 
+        text_to_add = ""
+        if member.is_arrested():
+            text_to_add = phrases.CREW_MEMBER_ITEM_DETAIL_ARRESTED.format(
+                phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
+                if member.impel_down_is_permanent
+                else get_remaining_duration(member.impel_down_release_date)
+            )
+
         ot_text = phrases.CREW_MEMBER_ITEM_DETAIL.format(
             member.get_markdown_mention(),
             member.get_bounty_formatted(),
@@ -74,6 +82,7 @@ class CrewMemberListPage(ListPage):
             get_belly_formatted(member_contribution_amount),
             member_chest_order,
             (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO),
+            text_to_add,
         )
 
         return ot_text

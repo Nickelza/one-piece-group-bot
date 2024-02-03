@@ -35,6 +35,17 @@ async def manage(
     crew: Crew = get_crew(user=user)
     inline_keyboard: list[list[Keyboard]] = []
 
+    # Arrested user, show Post bail button if it's temporary
+    if member.is_arrested_temporary():
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_CREW_MEMBER_POST_BAIL,
+                screen=Screen.PVT_CREW_MEMBER_DETAIL_POST_BAIL,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                inbound_info=inbound_keyboard.info,
+            )
+        ])
+
     # Captain buttons
     if user.is_crew_captain() and user != member:
         # Promote to First Mate (only Crew does not have a First Mate and can promote one)

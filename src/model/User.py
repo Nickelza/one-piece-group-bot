@@ -131,6 +131,14 @@ class User(BaseModel):
             and self.impel_down_release_date > datetime.datetime.now()
         ) or self.impel_down_is_permanent
 
+    def is_arrested_temporary(self):
+        """
+        Returns True if the user is temporarily arrested
+        :return: True if the user is temporarily arrested
+        """
+
+        return self.is_arrested() and not self.impel_down_is_permanent
+
     @staticmethod
     def get_is_not_arrested_statement_condition() -> Any:
         """
@@ -141,6 +149,27 @@ class User(BaseModel):
             (User.impel_down_release_date.is_null())
             | (User.impel_down_release_date < datetime.datetime.now())
         )
+
+    def get_current_impel_down_log(self) -> "ImpelDownLog":
+        """
+        Returns the current impel down log
+        :return: The current impel down log
+        """
+
+        from src.model.ImpelDownLog import ImpelDownLog
+
+        return ImpelDownLog.get_current_for_user(self)
+
+    def get_current_bail(self) -> int:
+        """
+        Get the bail for the user
+        :return: The impel_down_log
+        """
+        current_impel_down_log = self.get_current_impel_down_log()
+        if current_impel_down_log is None:
+            return 0
+
+        return current_impel_down_log.get_bail()
 
     def update_private_screen_list(
         self, screen: Screen, previous_screen_list: list[Screen] = None

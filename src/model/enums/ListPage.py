@@ -185,7 +185,7 @@ class ListPage(ABC):
             if self.object in results:
                 return legend
 
-        raise ValueError("No emoji legend found for object")
+        raise UnauthorizedToViewItemException()
 
     def get_emoji_legend_formatted(self) -> str:
         """
