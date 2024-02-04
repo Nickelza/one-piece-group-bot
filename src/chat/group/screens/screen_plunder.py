@@ -24,7 +24,7 @@ from src.model.error.CustomException import OpponentValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_loan_service import add_loan
-from src.service.bounty_service import add_or_remove_bounty, validate_amount
+from src.service.bounty_service import add_or_remove_bounty
 from src.service.date_service import (
     convert_seconds_to_duration,
     get_elapsed_hours,
@@ -160,11 +160,6 @@ async def validate(
         )
         ot_text = phrases.PLUNDER_USER_IN_COOLDOWN.format(remaining_time)
         await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
-        return False
-
-    # User does not have enough bounty
-    win_amount = (get_plunder_odds(user, opponent))[1]
-    if not await validate_amount(update, context, user, win_amount):
         return False
 
     # Wrong status
