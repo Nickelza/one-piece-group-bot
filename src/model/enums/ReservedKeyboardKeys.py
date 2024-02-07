@@ -14,6 +14,7 @@ class ReservedKeyboardKeys(StrEnum):
     RESET = "t"
     FILTER = "s"
     NUMBER = "r"
+    DIRECT_ITEM = "q"
 
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"

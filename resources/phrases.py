@@ -322,6 +322,7 @@ PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = "Pay"
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL = "Pay all"
 PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
+PVT_KEY_SHOW_ALL = "Show all"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in this {}?"

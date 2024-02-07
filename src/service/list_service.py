@@ -371,3 +371,17 @@ def get_active_filter_list(
         active_filter_list.append(list_filter)
 
     return active_filter_list
+
+
+def get_show_list_button(inbound_keyboard: Keyboard) -> Keyboard:
+    """
+    Get the show list button
+    :param inbound_keyboard: The inbound keyboard
+    :return: The show list button
+    """
+
+    inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM] = False
+    return Keyboard(
+        phrases.PVT_KEY_SHOW_ALL,
+        inbound_info=inbound_keyboard.info,
+    )

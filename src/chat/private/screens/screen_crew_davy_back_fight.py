@@ -141,6 +141,13 @@ class CrewDavyBackFightListPage(ListPage):
             ),
         ]
 
+    def get_direct_item(self) -> DavyBackFight:
+        """
+        Get active DavyBackFight
+        """
+
+        return self.crew.get_active_davy_back_fight()
+
 
 async def manage(
     update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
@@ -153,10 +160,25 @@ async def manage(
     :param inbound_keyboard: The keyboard object
     :return: None
     """
+    from src.chat.private.screens.screen_crew_davy_back_fight_detail import (
+        manage as manage_davy_back_fight_detail,
+    )
 
     dbf_list_page: CrewDavyBackFightListPage = CrewDavyBackFightListPage()
     dbf_list_page.user = user
     dbf_list_page.crew = user.crew
+
+    if not (
+        ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info
+        and not inbound_keyboard.get_bool(ReservedKeyboardKeys.DIRECT_ITEM)
+    ):
+        # Has active DBF, go directly there
+        direct_item: DavyBackFight = dbf_list_page.get_direct_item()
+        if direct_item is not None:
+            inbound_keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY] = direct_item.id
+            inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM] = True
+            await manage_davy_back_fight_detail(update, context, inbound_keyboard, user)
+            return
 
     ot_text, items_keyboard = get_items_text_keyboard(
         inbound_keyboard,
@@ -174,5 +196,8 @@ async def manage(
         update=update,
         keyboard=items_keyboard,
         inbound_keyboard=inbound_keyboard,
-        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+        excluded_keys_from_back_button=[
+            ReservedKeyboardKeys.PAGE,
+            ReservedKeyboardKeys.DIRECT_ITEM,
+        ],
     )

@@ -272,3 +272,18 @@ class ListPage(ABC):
                 )
 
         return filter_list
+
+    def get_direct_item(self) -> BaseModel | None:
+        """
+        Get the direct item. If it returns not None, instead of showing a list of items,
+        It will show the item detail directly
+        """
+
+        pass
+
+    def has_direct_item(self) -> bool:
+        """
+        Check if the list has direct item
+        """
+
+        return self.get_direct_item() is not None
