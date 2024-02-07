@@ -432,6 +432,17 @@ SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment(
     "SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS", default_value="False"
 )
 
+# Generic task. Default: Every 1 minute
+CRON_GENERIC_TASKS = Environment("CRON_GENERIC_TASKS", default_value="*/1 * * * *")
+ENABLE_TIMER_GENERIC_TASKS = Environment("ENABLE_TIMER_GENERIC_TASKS", default_value="True")
+SHOULD_LOG_TIMER_GENERIC_TASKS = Environment(
+    "SHOULD_LOG_TIMER_GENERIC_TASKS", default_value="False"
+)
+SHOULD_RUN_ON_STARTUP_GENERIC_TASKS = Environment(
+    "SHOULD_RUN_ON_STARTUP_GENERIC_TASKS", default_value="False"
+)
+
+
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", default_value="21600")
 
@@ -845,6 +856,30 @@ CREW_JOIN_REQUEST_COOLDOWN_DURATION = Environment(
 CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION = Environment(
     "CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION", default_value="7"
 )
+# After long in minutes before a Davy Back Fight request expire. Default: 15 minutes
+CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME = Environment(
+    "CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME", default_value="15"
+)
+# How long in minutes after opponent confirmation will the Davy Back Fight start.
+# Default: 15 minutes
+CREW_DAVY_BACK_FIGHT_START_WAIT_TIME = Environment(
+    "CREW_DAVY_BACK_FIGHT_START_WAIT_TIME", default_value="15"
+)
+# How long a Davy Back Fight lasts in hours. Default 24 hours
+CREW_DAVY_BACK_FIGHT_DURATION = Environment("CREW_DAVY_BACK_FIGHT_DURATION", default_value="24")
+# How long before bounty reset can a DBF be initiated in hours. Default: 48 hours
+CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION = Environment(
+    "CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION", default_value="48"
+)
+# How long should the penalty last after losing a DBF in hours. Default: 168 (7 days)
+CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION = Environment(
+    "CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION", default_value="168"
+)
+# Minimum number of members required to start a DBF. Default: 3
+CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS = Environment(
+    "CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS", default_value="3"
+)
+
 
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment("BOUNTY_GIFT_MIN_AMOUNT", default_value="10000000")

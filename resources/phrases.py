@@ -278,6 +278,7 @@ PVT_KEY_CREW_LEVEL = "Level"
 PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
+PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -977,6 +978,38 @@ CREW_LEVEL_UPGRADE_TYPE_ABILITY = "ability"
 
 CREW_LEVEL_UP_CONFIRMATION_REQUEST = "Are you sure you want to level up the Crew?\n\n{}"
 CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_SAME_CREW = "Cannot challenge your own Crew"
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_IN_FIGHT = "Crew already in a Davy Back Fight"
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_PENDING = (
+    "Crew already has a pending Davy Back Fight request"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_IN_PENALTY_PERIOD = (
+    "Crew is in a penalty period and cannot participate in a Davy Back Fight"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_TOO_LATE = (
+    "Davy Back Fight cannot be initiated less than {} hours before bounty reset"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS = (
+    "Crew must have at least {} members to participate in a Davy Back Fight"
+)
+# TODO add info about dbf
+CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
+    "How many members from each Crew will participate in the Davy Back Fight?"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION = (
+    "Are you sure you want to challenge *{}* to a Davy Back Fight with {} members from each Crew?"
+    "\n\nThey will have {} to accept or reject"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_SUCCESS = (
+    "Davy Back Fight challenge to *{}* sent successfully, you will be notified when it is accepted"
+)
+CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
+    "New Davy Back Fight challenge from {}!"
+    "\n\n*Number of participants*: {}"
+    "\n\nYou have {} to accept the challenge"
+)
+CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = "Davy Back Fight against {} accepted"  # TODO
+CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"  # TODO
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1170,6 +1203,25 @@ CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when your request to join a Crew is rejected."
 )
 CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY = "Join request rejected"
+# Notification - Crew Davy Back Fight request accepted
+CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION = (
+    "{} has accepted your Crew's Davy Back Fight challenge"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when your Crew's Davy Back Fight challenge is accepted."
+    "\nApplicable only if you are the Captain of the Crew"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY = "Davy Back Fight accepted"
+# Notification - Crew Davy Back Fight request rejected
+CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION = (
+    "{} has rejected your Crew's Davy Back Fight challenge"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when your Crew's Davy Back Fight challenge is rejected."
+    "\nApplicable only if you are the Captain of the Crew"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY = "Davy Back Fight rejected"
+
 
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (
@@ -1370,7 +1422,7 @@ LIST_FOOTER = "\n\n_Showing {}-{} of {} items_"
 LEGEND = "legend"
 LIST_EMOJI_LEGEND = "\n\n_*Legend*{}_"
 LIST_EMOJI_LEGEND_ITEM = "\n{} {} \\({}\\)"
-LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} the restrict the search__"
+LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} to restrict the search__"
 LIST_FILTER_ACTIVE_FILTERS = "\n\n_*Active filters*:{}_"
 LIST_FILTER_ITEM = "\n• {}"
 LIST_FILTER_ITEM_CONTAINS = "{} contains '{}'"

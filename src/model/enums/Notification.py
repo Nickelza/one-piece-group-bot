@@ -93,6 +93,8 @@ class NotificationType(IntEnum):
     CREW_JOIN_REQUEST_ACCEPTED = 27
     CREW_JOIN_REQUEST_REJECTED = 28
     IMPEL_DOWN_BAIL_POSTED = 29
+    CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED = 30
+    CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED = 31
 
 
 class Notification:
@@ -1023,7 +1025,7 @@ class CrewJoinRequestAcceptedNotification(Notification):
         )
 
     def build(self) -> str:
-        return self.text.format(escape_valid_markdown_chars(self.crew.get_name_escaped()))
+        return self.text.format(self.crew.get_name_with_deeplink())
 
 
 class CrewJoinRequestRejectedNotification(Notification):
@@ -1044,7 +1046,49 @@ class CrewJoinRequestRejectedNotification(Notification):
         )
 
     def build(self) -> str:
-        return self.text.format(escape_valid_markdown_chars(self.crew.get_name_escaped()))
+        return self.text.format(self.crew.get_name_with_deeplink())
+
+
+class CrewDavyBackFightRequestAcceptedNotification(Notification):
+    """Class for crew davy back fight request accepted notifications."""
+
+    def __init__(self, crew: Crew = None):
+        """
+        Constructor
+        """
+
+        self.crew: Crew = crew
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(self.crew.get_name_with_deeplink())
+
+
+class CrewDavyBackFightRequestRejectedNotification(Notification):
+    """Class for crew davy back fight request rejected notifications."""
+
+    def __init__(self, crew: Crew = None):
+        """
+        Constructor
+        """
+
+        self.crew: Crew = crew
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(self.crew.get_name_with_deeplink())
 
 
 class ImpelDownBailPostedNotification(Notification):
@@ -1107,6 +1151,8 @@ NOTIFICATIONS = [
     CrewJoinRequestAcceptedNotification(),
     CrewJoinRequestRejectedNotification(),
     ImpelDownBailPostedNotification(),
+    CrewDavyBackFightRequestAcceptedNotification,
+    CrewDavyBackFightRequestRejectedNotification,
 ]
 
 

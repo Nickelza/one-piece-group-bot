@@ -25,6 +25,12 @@ from src.chat.private.screens.screen_crew_ability_activate_confirm import (
     manage as manage_screen_crew_ability_activate_confirm,
 )
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
+from src.chat.private.screens.screen_crew_davy_back_fight_request import (
+    manage as manage_screen_crew_davy_back_fight_request,
+)
+from src.chat.private.screens.screen_crew_davy_back_fight_request_received import (
+    manage as manage_screen_crew_davy_back_fight_request_received,
+)
 from src.chat.private.screens.screen_crew_disband import manage as manage_screen_crew_disband
 from src.chat.private.screens.screen_crew_join_request_received import (
     manage as manage_screen_crew_join_request_received,
@@ -42,11 +48,11 @@ from src.chat.private.screens.screen_crew_member_detail_first_mate_demote import
 from src.chat.private.screens.screen_crew_member_detail_first_mate_promote import (
     manage as manage_screen_crew_member_detail_first_mate_promote,
 )
-from src.chat.private.screens.screen_crew_member_detail_remove import (
-    manage as manage_screen_crew_member_detail_remove,
-)
 from src.chat.private.screens.screen_crew_member_detail_post_bail import (
     manage as manage_screen_crew_member_detail_post_bail,
+)
+from src.chat.private.screens.screen_crew_member_detail_remove import (
+    manage as manage_screen_crew_member_detail_remove,
 )
 from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
 from src.chat.private.screens.screen_crew_powerup import manage as manage_screen_crew_powerup
@@ -329,6 +335,17 @@ async def dispatch_screens(
 
             case Screen.PVT_CREW_JOIN_REQUEST_RECEIVED:  # Crew Join Request Received
                 await manage_screen_crew_join_request_received(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_CREW_DAVY_BACK_FIGHT_REQUEST:  # Crew Davy Back Fight Request
+                await manage_screen_crew_davy_back_fight_request(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Crew Davy Back Fight Request Received
+            case Screen.PVT_CREW_DAVY_BACK_FIGHT_REQUEST_RECEIVED:
+                await manage_screen_crew_davy_back_fight_request_received(
                     update, context, inbound_keyboard, user
                 )
 

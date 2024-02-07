@@ -17,6 +17,7 @@ from src.service.bounty_service import (
 from src.service.devil_fruit_service import schedule_devil_fruit_release, respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import end_inactive_games
+from src.service.generic_service import run_generic_minute_tasks
 from src.service.group_service import deactivate_inactive_group_chats
 from src.service.leaderboard_service import send_leaderboard
 from src.service.location_service import reset_can_change_region
@@ -134,6 +135,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await end_inactive_games()
         case Timer.SET_EXPIRED_BOUNTY_LOANS:
             await set_expired_bounty_loans(context)
+        case Timer.GENERIC_TASKS:
+            await run_generic_minute_tasks()
         case _:
             raise ValueError(f"Unknown timer {timer.name}")
 

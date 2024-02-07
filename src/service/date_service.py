@@ -22,8 +22,10 @@ from src.service.string_service import get_unit_value_from_string
 
 
 def get_next_run(
-    cron_expression: str, start_datetime: datetime = None, previous_fire_time: datetime = None
-) -> datetime:
+    cron_expression: str,
+    start_datetime: datetime.datetime = None,
+    previous_fire_time: datetime.datetime = None,
+) -> datetime.datetime:
     """
     Get the next run time
     :param cron_expression: The cron expression
@@ -274,6 +276,17 @@ def get_datetime_in_future_seconds(seconds: int, start_time: datetime.datetime =
         start_time = datetime.datetime.now()
 
     return start_time + datetime.timedelta(seconds=int(seconds))
+
+
+def get_datetime_in_future_minutes(minutes: int, start_time: datetime.datetime = None) -> datetime:
+    """
+    Get the datetime in the future
+    :param minutes: The number of minutes in the future
+    :param start_time: The start time. If None, the current datetime is used
+    :return: The datetime in the future
+    """
+
+    return get_datetime_in_future_seconds(minutes * 60, start_time)
 
 
 def get_datetime_in_future_hours(hours: float, start_time: datetime.datetime = None) -> datetime:

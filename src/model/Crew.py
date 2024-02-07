@@ -5,6 +5,7 @@ from peewee import *
 
 import resources.Environment as Env
 from src.model.BaseModel import BaseModel, db_obj
+from src.model.enums.GameStatus import GameStatus
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewLevelUpgradeType import CrewLevelUpgradeType
 from src.model.enums.crew.CrewRole import CrewRole
@@ -336,6 +337,83 @@ class Crew(BaseModel):
             " where true;"
         )
         db_obj.get_db().execute_sql(raw_query)
+
+    def get_active_davy_back_fight(self) -> Any:
+        """
+        Returns the current Davy Back Fight
+        :return: The current Davy Back Fight
+        """
+        from src.model.DavyBackFight import DavyBackFight
+
+        return (
+            DavyBackFight.select()
+            .where(
+                ((DavyBackFight.challenger_crew == self) | (DavyBackFight.opponent_crew == self))
+                & (
+                    (DavyBackFight.status == GameStatus.COUNTDOWN_TO_START)
+                    | (DavyBackFight.status == GameStatus.IN_PROGRESS)
+                )
+            )
+            .get_or_none()
+        )
+
+    def get_pending_davy_back_fight(self) -> Any:
+        """
+        Returns the pending Davy Back Fight as challenger
+        :return: The pending Davy Back Fight
+        """
+
+        from src.model.DavyBackFight import DavyBackFight
+
+        return (
+            self.davy_back_fights_challengers.select()
+            .where(DavyBackFight.status == GameStatus.AWAITING_OPPONENT_CONFIRMATION)
+            .get_or_none()
+        )
+
+    def get_penalty_davy_back_fight(self) -> Any:
+        """
+        Returns the penalty Davy Back Fight
+        :return: The penalty Davy Back Fight
+        """
+
+        from src.model.DavyBackFight import DavyBackFight
+
+        return (
+            DavyBackFight.select()
+            .where(
+                (
+                    (
+                        (DavyBackFight.challenger_crew == self)
+                        & (DavyBackFight.status == GameStatus.LOST)
+                    )
+                    | (
+                        (DavyBackFight.opponent_crew == self)
+                        & (DavyBackFight.status == GameStatus.WON)
+                    )
+                )
+                & (
+                    DavyBackFight.end_date
+                    > (
+                        datetime.datetime.now()
+                        - datetime.timedelta(
+                            hours=Env.CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int()
+                        )
+                    )
+                )
+            )
+            .get_or_none()
+        )
+
+    def get_name_with_deeplink(self):
+        """
+        Returns the crew name with deeplink
+        :return: The crew name with deeplink
+        """
+
+        from src.service.crew_service import get_crew_name_with_deeplink
+
+        return get_crew_name_with_deeplink(self)
 
 
 Crew.create_table()

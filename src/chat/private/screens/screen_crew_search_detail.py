@@ -27,14 +27,29 @@ async def manage(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
 
-    inline_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            phrases.PVT_KEY_CREW_SEARCH_JOIN,
-            screen=Screen.PVT_CREW_SEARCH_DETAIL_JOIN,
-            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew_search_list_page.object.id},
-            inbound_info=inbound_keyboard.info,
-        )
-    ]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [
+            # Join
+            Keyboard(
+                phrases.PVT_KEY_CREW_SEARCH_JOIN,
+                screen=Screen.PVT_CREW_SEARCH_DETAIL_JOIN,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew_search_list_page.object.id},
+                inbound_info=inbound_keyboard.info,
+            )
+        ],
+    ]
+
+    # TODO Don't show DBF button if target crew can't participate
+    # Davy Back Fight, only in case user is crew captain
+    if user.is_crew_captain() and crew_search_list_page.object != user.crew:
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT,
+                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_REQUEST,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew_search_list_page.object.id},
+                inbound_info=inbound_keyboard.info,
+            )
+        ])
 
     await full_message_send(
         context,
