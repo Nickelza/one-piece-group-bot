@@ -25,6 +25,12 @@ from src.chat.private.screens.screen_crew_ability_activate_confirm import (
     manage as manage_screen_crew_ability_activate_confirm,
 )
 from src.chat.private.screens.screen_crew_create import manage as manage_screen_crew_create_or_edit
+from src.chat.private.screens.screen_crew_davy_back_fight import (
+    manage as manage_screen_crew_davy_back_fight,
+)
+from src.chat.private.screens.screen_crew_davy_back_fight_detail import (
+    manage as manage_screen_crew_davy_back_fight_detail,
+)
 from src.chat.private.screens.screen_crew_davy_back_fight_request import (
     manage as manage_screen_crew_davy_back_fight_request,
 )
@@ -446,6 +452,14 @@ async def dispatch_screens(
 
             case Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE:  # Bounty Loan Detail Forgive
                 await manage_screen_bounty_loan_detail_forgive(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_CREW_DAVY_BACK_FIGHT:  # Crew Davy Back Fight
+                await manage_screen_crew_davy_back_fight(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL:  # Crew Davy Back Fight Detail
+                await manage_screen_crew_davy_back_fight_detail(
                     update, context, inbound_keyboard, user
                 )
 

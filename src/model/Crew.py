@@ -405,15 +405,16 @@ class Crew(BaseModel):
             .get_or_none()
         )
 
-    def get_name_with_deeplink(self):
+    def get_name_with_deeplink(self, add_level: bool = True):
         """
         Returns the crew name with deeplink
+        :param add_level: Whether to add the level to the name
         :return: The crew name with deeplink
         """
 
         from src.service.crew_service import get_crew_name_with_deeplink
 
-        return get_crew_name_with_deeplink(self)
+        return get_crew_name_with_deeplink(self, add_level=add_level)
 
     def has_active_davy_back_fight(self) -> bool:
         """

@@ -46,6 +46,11 @@ async def manage(
             [Keyboard(phrases.PVT_KEY_CREW_POWERUP, screen=Screen.PVT_CREW_POWERUP)]
         )
 
+        # Davy back fight button
+        inline_keyboard.append([
+            Keyboard(phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT, screen=Screen.PVT_CREW_DAVY_BACK_FIGHT)
+        ])
+
         if user.is_crew_captain():
             # Modify button
             inline_keyboard.append([Keyboard(phrases.KEY_MODIFY, screen=Screen.PVT_CREW_MODIFY)])

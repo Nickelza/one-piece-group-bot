@@ -509,18 +509,22 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
     return ot_text
 
 
-def get_crew_name_with_deeplink(crew: Crew) -> str:
+def get_crew_name_with_deeplink(crew: Crew, add_level: bool = True) -> str:
     """
     Get the crew name with deeplink
 
     :param crew: The crew
+    :param add_level: Whether to add the level
     :return: The crew name with deeplink
     """
-    return phrases.CREW_NAME_WITH_LEVEL_DEEPLINK.format(
-        crew.get_name_escaped(),
-        get_deeplink(
-            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew.id},
-            screen=Screen.PVT_CREW_SEARCH_DETAIL,
-        ),
-        crew.level,
+
+    deeplink = get_deeplink(
+        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: crew.id},
+        screen=Screen.PVT_CREW_SEARCH_DETAIL,
     )
+    name = crew.get_name_escaped()
+
+    if add_level:
+        return phrases.CREW_NAME_WITH_LEVEL_DEEPLINK.format(name, deeplink, crew.level)
+
+    return phrases.ITEM_LINK.format(name, deeplink)

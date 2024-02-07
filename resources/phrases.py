@@ -358,6 +358,11 @@ Current time zone: *{}* \\({}\\)
 [Change time zone]({})
 """.strip()
 
+DATETIME_REMAINING = "{} remaining"
+DATETIME_REMAINING_PARENTHESIS = f"\\{DATETIME_REMAINING}\\)"
+
+ITEM_LINK = "[{}]({})"
+
 ACTION_INSUFFICIENT_BOUNTY = "Insufficient bounty, you need at least ฿*{}*"
 ACTION_WAGER_LESS_THAN_MIN = "The minimum amount is ฿*{}*"
 ACTION_INVALID_WAGER_AMOUNT = (
@@ -990,6 +995,12 @@ CREW_LEVEL_UPGRADE_TYPE_ABILITY = "ability"
 
 CREW_LEVEL_UP_CONFIRMATION_REQUEST = "Are you sure you want to level up the Crew?\n\n{}"
 CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
+CREW_DAVY_BACK_FIGHT_ITEM_TEXT = "{} vs. {}"
+CREW_DAVY_BACK_FIGHT_ITEM_TEXT_FILL_IN = "Davy Back Fight"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT = (
+    "*{}*: {}\n\n*Start date*: {}\n*End date*: {}{}\n*Participants*: {}\n*Status*: {}"
+)
+
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_SAME_CREW = "Cannot challenge your own Crew"
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_IN_FIGHT = "Crew already in a Davy Back Fight"
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_PENDING = (
@@ -1450,6 +1461,7 @@ LIST_FILTER_ONLY = "Only *{}*"
 NAVIGATION_LIMIT_REACHED = "Limit reached"
 
 # Logs
+LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT = "{} *{}*"
 LOG_ITEM_DETAIL_OUTCOME_TEXT = "{}You *{}*"
 LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = "{}You *{}* ฿{}"
 LOG_ITEM_DETAIL_STATUS_TEXT = "*Status*: {}"

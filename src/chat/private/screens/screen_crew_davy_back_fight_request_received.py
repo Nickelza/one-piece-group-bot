@@ -17,7 +17,10 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
-from src.service.date_service import get_datetime_in_future_minutes
+from src.service.date_service import (
+    get_datetime_in_future_minutes,
+    get_datetime_in_future_hours,
+)
 from src.service.davy_back_fight_service import set_default_participants
 from src.service.message_service import full_message_send
 from src.service.notification_service import send_notification
@@ -95,6 +98,9 @@ async def accept(context: ContextTypes.DEFAULT_TYPE, davy_back_fight: DavyBackFi
         set_default_participants(davy_back_fight.opponent_crew, davy_back_fight)
         davy_back_fight.start_date = get_datetime_in_future_minutes(
             Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
+        )
+        davy_back_fight.end_date = get_datetime_in_future_hours(
+            Env.CREW_DAVY_BACK_FIGHT_DURATION.get_int(), start_time=davy_back_fight.start_date
         )
         davy_back_fight.save()
 
