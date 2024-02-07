@@ -26,6 +26,7 @@ from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import (
     CommandValidationException,
@@ -327,6 +328,15 @@ async def manage_after_db(
             phrases.NAVIGATION_LIMIT_REACHED,
             update=update,
             answer_callback=True,
+            show_alert=True,
+        )
+    except ChatWarning as cw:
+        await full_message_or_media_send_or_edit(
+            context,
+            escape_valid_markdown_chars(str(cw)),
+            update=update,
+            inbound_keyboard=keyboard,
+            from_exception=True,
             show_alert=True,
         )
 

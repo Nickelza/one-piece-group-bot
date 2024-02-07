@@ -99,7 +99,7 @@ def convert_seconds_to_duration(seconds: int | float, show_full: bool = False) -
     if minutes > 0 and ((hours < 24 and days == 0 and weeks == 0) or show_full):
         if len(result) > 0:
             result += " "
-        if minutes > 0 and remaining_seconds > 60:
+        if minutes > 0:
             if minutes == 1:
                 result += f"{minutes} minute"
             else:

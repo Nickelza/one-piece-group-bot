@@ -874,6 +874,12 @@ CREW_DISBAND_CONFIRMATION = (
     " the next bounty reset in {}"
 )
 CREW_DISBAND_SUCCESS = "You have disbanded the Crew"
+CREW_DISBAND_ACTIVE_DAVY_BACK_FIGHT = (
+    "The Crew cannot be disbanded during an active Davy Back Fight"
+)
+CREW_DISBAND_DAVY_BACK_FIGHT_PENALTY = (
+    "The Crew cannot be disbanded during a Davy Back Fight penalty period"
+)
 
 # Crew - Remove member
 CREW_NOT_SAME = "You are not in the same Crew"
@@ -882,6 +888,12 @@ CREW_REMOVE_MEMBER_CONFIRMATION = (
     " until the next weekly leaderboard in {}"
 )
 CREW_REMOVE_MEMBER_SUCCESS = "{} has been expelled from the Crew"
+CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT = (
+    "Members cannot be removed or leave the Crew during an active Davy Back Fight"
+)
+CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY = (
+    "Members cannot be removed or leave the Crew during a Davy Back Fight penalty period"
+)
 
 # Crew - Promote to First Mate
 CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE = "The Crew already has a First Mate"
@@ -1010,6 +1022,13 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = "Davy Back Fight against {} accepted"  # TODO
 CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"  # TODO
+CREW_DAVY_BACK_FIGHT_USER_NOT_MEMBER_OF_PARTICIPATING_CREW = (
+    "User not a member of a participating Crew"
+)
+CREW_DAVY_BACK_FIGHT_USER_ALREADY_PARTICIPANT = "User already a participant"
+CREW_DAVY_BACK_FIGHT_NOT_ENOUGH_MEMBERS = (
+    "Not enough members to participate in the Davy Back Fight"
+)
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1256,7 +1275,8 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT = "Permanent"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL = (
     "\n\nA Crew member can post bail for you, at a cost of"
     f" ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}* for every minute left in your sentence"
-    f" \n\\(`{PVT_KEY_CREW}`->`{PVT_KEY_CREW_MEMBERS}`->Select->`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
+    f" \n\\(`{PVT_KEY_CREW}`->`{PVT_KEY_CREW_MEMBERS}`->"
+    f"Select->`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are restricted"

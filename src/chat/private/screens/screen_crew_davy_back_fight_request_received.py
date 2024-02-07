@@ -14,9 +14,11 @@ from src.model.enums.Notification import (
 )
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.CustomException import CrewValidationException
+from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
 from src.service.date_service import get_datetime_in_future_minutes
+from src.service.davy_back_fight_service import set_default_participants
 from src.service.message_service import full_message_send
 from src.service.notification_service import send_notification
 
@@ -64,7 +66,8 @@ async def manage(
         await send_outcome_notification(context, davy_back_fight, False)
         return
 
-    await send_outcome_notification(context, davy_back_fight, True)
+    # Accept request
+    await accept(context, davy_back_fight)
 
     # Accepted message
     ot_text = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED.format(
@@ -75,6 +78,32 @@ async def manage(
     # TODO: Add this button
 
     await full_message_send(context, ot_text, update=update)
+
+
+async def accept(context: ContextTypes.DEFAULT_TYPE, davy_back_fight: DavyBackFight) -> None:
+    """
+    Accept the Davy Back Fight request
+
+    :param context: The context object
+    :param davy_back_fight: The davy back fight object
+    :return: None
+    """
+
+    try:
+        davy_back_fight.status = GameStatus.COUNTDOWN_TO_START
+        set_default_participants(davy_back_fight.challenger_crew, davy_back_fight)
+        set_default_participants(davy_back_fight.opponent_crew, davy_back_fight)
+        davy_back_fight.start_date = get_datetime_in_future_minutes(
+            Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
+        )
+        davy_back_fight.save()
+
+        await send_outcome_notification(context, davy_back_fight, True)
+    except CrewValidationException as e:
+        await send_outcome_notification(context, davy_back_fight, False)
+        davy_back_fight.delete_instance()
+
+        raise PrivateChatException(text=e.message)
 
 
 async def send_outcome_notification(
@@ -91,11 +120,6 @@ async def send_outcome_notification(
 
     challenger_crew: Crew = davy_back_fight.challenger_crew
     if is_accepted:
-        davy_back_fight.status = GameStatus.COUNTDOWN_TO_START
-        davy_back_fight.start_date = get_datetime_in_future_minutes(
-            Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
-        )
-        davy_back_fight.save()
         return await send_notification(
             context,
             challenger_crew.get_captain(),

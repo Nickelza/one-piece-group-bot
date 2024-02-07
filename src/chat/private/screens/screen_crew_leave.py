@@ -11,7 +11,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import remove_member as remove_member_from_crew, get_crew
+from src.service.crew_service import remove_member, get_crew
 from src.service.date_service import get_remaining_time_from_next_cron
 from src.service.message_service import (
     full_message_send,
@@ -82,7 +82,7 @@ async def manage(
         return
 
     # Leave crew
-    await remove_member_from_crew(
+    await remove_member(
         user, context=context, send_notification_to_captain=True, disable_user_can_join_crew=True
     )
 

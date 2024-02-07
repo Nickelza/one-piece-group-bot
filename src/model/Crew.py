@@ -415,5 +415,21 @@ class Crew(BaseModel):
 
         return get_crew_name_with_deeplink(self)
 
+    def has_active_davy_back_fight(self) -> bool:
+        """
+        Returns True if the crew has an active Davy Back Fight
+        :return: True if the crew has an active Davy Back Fight
+        """
+
+        return self.get_active_davy_back_fight() is not None
+
+    def has_penalty_davy_back_fight(self) -> bool:
+        """
+        Returns True if the crew has a penalty Davy Back Fight
+        :return: True if the crew has a penalty Davy Back Fight
+        """
+
+        return self.get_penalty_davy_back_fight() is not None
+
 
 Crew.create_table()

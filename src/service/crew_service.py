@@ -23,6 +23,7 @@ from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMe
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
@@ -76,6 +77,14 @@ async def remove_member(
     """
 
     crew: Crew = crew_member.crew
+
+    # Crew in an active Davy Back Fight
+    if crew.has_active_davy_back_fight():
+        raise ChatWarning(phrases.CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT)
+
+    # Crew with a Davy Back Fight penalty
+    if crew.has_davy_back_fight_penalty():
+        raise ChatWarning(phrases.CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY)
 
     crew_member.crew = None
     crew_member.crew_role = None
@@ -164,6 +173,15 @@ async def disband_crew(
     """
 
     crew: Crew = captain.crew
+
+    # Crew in an active Davy Back Fight
+    if crew.has_active_davy_back_fight():
+        raise ChatWarning(phrases.CREW_DISBAND_ACTIVE_DAVY_BACK_FIGHT)
+
+    # Crew with a Davy Back Fight penalty
+    if crew.has_davy_back_fight_penalty():
+        raise ChatWarning(phrases.CREW_DISBAND_DAVY_BACK_FIGHT_PENALTY)
+
     crew_members: list[User] = crew.get_members()
     for member in crew_members:
         is_captain = member.id == captain.id
