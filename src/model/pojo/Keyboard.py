@@ -198,3 +198,12 @@ class Keyboard:
 
         self.screen = screen
         self.info[ReservedKeyboardKeys.SCREEN] = int(screen[1:])
+
+    def has_key(self, key: str) -> bool:
+        """
+        Check if the keyboard info has a key
+        :param key: The key
+        :return: If the key exists
+        """
+
+        return key in self.info

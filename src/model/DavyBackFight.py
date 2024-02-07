@@ -56,7 +56,7 @@ class DavyBackFight(BaseModel):
             ),
         ).execute()
 
-    def get_participants(self, crew: Crew = None) -> list[User]:
+    def get_participants(self, crew: Crew = None) -> list[any]:
         """
         Get all the participants of a Davy Back Fight
         :param crew: The crew object
@@ -67,6 +67,26 @@ class DavyBackFight(BaseModel):
             return self.davy_back_fight_participants
 
         return [p for p in self.davy_back_fight_participants if p.crew == crew]
+
+    def get_participants_users(self, crew: Crew = None) -> list[User]:
+        """
+        Get all the participants of a Davy Back Fight
+        :param crew: The crew object
+        :return: The list of participants
+        """
+
+        if crew is None:
+            return [p.user for p in self.davy_back_fight_participants]
+
+        return [p.user for p in self.davy_back_fight_participants if p.crew == crew]
+
+    def get_non_participants_users(self, crew: Crew) -> list[any]:
+        """
+        Get all the non-participants of a Davy Back Fight
+        :param crew: The crew object
+        :return: The list of non-participants
+        """
+        return [m for m in crew.get_members() if m not in self.get_participants_users(crew=crew)]
 
     def get_status(self) -> GameStatus:
         """

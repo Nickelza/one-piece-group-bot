@@ -18,3 +18,4 @@ class ReservedKeyboardKeys(StrEnum):
 
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"
+    DEFAULT_SECONDARY_KEY = "b"

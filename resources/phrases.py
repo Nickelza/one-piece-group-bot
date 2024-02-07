@@ -279,6 +279,7 @@ PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose participants"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -1041,6 +1042,15 @@ CREW_DAVY_BACK_FIGHT_USER_ALREADY_PARTICIPANT = "User already a participant"
 CREW_DAVY_BACK_FIGHT_NOT_ENOUGH_MEMBERS = (
     "Not enough members to participate in the Davy Back Fight"
 )
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_ERROR_ALREADY_STARTED = (
+    "The Davy Back Fight has already started"
+)
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_ERROR_NOT_ENOUGH_MEMBERS = "No extra member to swap with"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT = (
+    "Choose the members you want to participate in the Davy Back Fight.\n\nRemaining time: {}"
+)
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP = "Select the member you want to swap with"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP_SUCCESS = "Participant swapped successfully"
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (

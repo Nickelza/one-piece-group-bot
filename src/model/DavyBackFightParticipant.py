@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -18,6 +20,7 @@ class DavyBackFightParticipant(BaseModel):
     user: User | ForeignKeyField = ForeignKeyField(User, backref="davy_back_fight_participants")
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="davy_back_fight_participants")
     contribution: int | BigIntegerField = BigIntegerField(default=0)
+    date = DateTimeField(default=datetime.now)
 
     class Meta:
         db_table = "davy_back_fight_participant"

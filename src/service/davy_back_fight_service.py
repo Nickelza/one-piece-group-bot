@@ -62,3 +62,24 @@ def set_default_participants(crew: Crew, davy_back_fight: DavyBackFight) -> None
         if index >= davy_back_fight.participants_count:
             break
         add_participant(user=user, davy_back_fight=davy_back_fight)
+
+
+def swap_participant(
+    davy_back_fight: DavyBackFight, old_participant: User, new_participant: User
+) -> None:
+    """
+    Swap a participant
+    :param davy_back_fight: The Davy Back Fight object
+    :param old_participant: The old participant object
+    :param new_participant: The new participant object
+    :return: None
+    """
+
+    # Remove old participant
+    DavyBackFightParticipant.delete().where(
+        (DavyBackFightParticipant.davy_back_fight == davy_back_fight)
+        & (DavyBackFightParticipant.user == old_participant)
+    ).execute()
+
+    # Add new participant
+    add_participant(new_participant, davy_back_fight)
