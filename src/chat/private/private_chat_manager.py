@@ -34,6 +34,9 @@ from src.chat.private.screens.screen_crew_davy_back_fight_detail import (
 from src.chat.private.screens.screen_crew_davy_back_fight_detail_participants_select import (
     manage as manage_screen_crew_davy_back_fight_detail_participants_select,
 )
+from src.chat.private.screens.screen_crew_davy_back_fight_detail_participants_view import (
+    manage as manage_screen_crew_davy_back_fight_detail_participants_view,
+)
 from src.chat.private.screens.screen_crew_davy_back_fight_request import (
     manage as manage_screen_crew_davy_back_fight_request,
 )
@@ -469,6 +472,12 @@ async def dispatch_screens(
             # Crew Davy Back Fight Detail Participants Select
             case Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_SELECT:
                 await manage_screen_crew_davy_back_fight_detail_participants_select(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Crew Davy Back Fight Detail Participants View
+            case Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW:
+                await manage_screen_crew_davy_back_fight_detail_participants_view(
                     update, context, inbound_keyboard, user
                 )
 

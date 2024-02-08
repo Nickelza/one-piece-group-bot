@@ -358,15 +358,23 @@ def get_random_time_between_by_seconds(seconds: int) -> datetime:
     )
 
 
-def default_datetime_format(date_time: datetime, user: User = None) -> str:
+def default_datetime_format(
+    date_time: datetime, user: User = None, add_remaining_time: bool = False
+) -> str:
     """
     Default datetime format
     :param date_time: The datetime
     :param user: The user. If given, the timezone of the user will be used
+    :param add_remaining_time: Whether to add the remaining time
     :return: The formatted datetime
     """
 
-    return get_time_with_timezone(date_time, user).strftime(c.STANDARD_DATE_TIME_FORMAT)
+    text = get_time_with_timezone(date_time, user).strftime(c.STANDARD_DATE_TIME_FORMAT)
+
+    if not add_remaining_time or date_time < datetime.datetime.now():
+        return text
+
+    return text + phrases.DATETIME_REMAINING_PARENTHESIS.format(get_remaining_duration(date_time))
 
 
 def default_date_format(date: datetime, user: User = None) -> str:

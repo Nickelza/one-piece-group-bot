@@ -18,6 +18,8 @@ class GameStatus(IntEnum):
     AWAITING_OPPONENT_CONFIRMATION = 5
     FORCED_END = 6
     COUNTDOWN_TO_START = 7
+    WINNING = 8
+    LOSING = 9
 
     @staticmethod
     def get_finished() -> list["GameStatus"]:
@@ -39,9 +41,9 @@ class GameStatus(IntEnum):
         Get the emoji for the log.
         :return: The emoji
         """
-        if self == GameStatus.WON:
+        if self in [GameStatus.WON, GameStatus.WINNING]:
             return Emoji.LOG_POSITIVE
-        elif self == GameStatus.LOST:
+        elif self in [GameStatus.LOST, GameStatus.LOSING]:
             return Emoji.LOG_NEGATIVE
         elif self == GameStatus.DRAW:
             return Emoji.LOG_DRAW
@@ -98,4 +100,6 @@ GAME_STATUS_DESCRIPTIONS = {
     GameStatus.AWAITING_OPPONENT_CONFIRMATION: phrases.GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION,
     GameStatus.FORCED_END: phrases.GAME_STATUS_FORCED_END,
     GameStatus.COUNTDOWN_TO_START: phrases.GAME_STATUS_COUNTDOWN_TO_START,
+    GameStatus.WINNING: phrases.GAME_STATUS_WINNING,
+    GameStatus.LOSING: phrases.GAME_STATUS_LOSING,
 }

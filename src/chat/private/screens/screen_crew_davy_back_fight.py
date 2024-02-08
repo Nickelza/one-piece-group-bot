@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
+from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus, GAME_STATUS_DESCRIPTIONS
@@ -15,9 +16,11 @@ from src.service.crew_service import get_crew
 from src.service.date_service import (
     get_remaining_duration,
     default_datetime_format,
+    datetime_is_before,
 )
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send
+from src.service.string_service import get_belly_formatted
 
 
 class CrewDavyBackFightListPage(ListPage):
@@ -68,20 +71,61 @@ class CrewDavyBackFightListPage(ListPage):
         super().get_item_detail_text()
 
         challenger_text = phrases.OPPONENT if self.is_challenger else phrases.CHALLENGER
-        start_date = default_datetime_format(self.object.start_date, self.user)
-        end_date = default_datetime_format(self.object.end_date, self.user)
-
-        remaining_time_text = (
-            phrases.DATETIME_REMAINING_PARENTHESIS.format(
-                get_remaining_duration(self.object.end_date)
-            )
-            if self.effective_status is GameStatus.IN_PROGRESS
-            else ""
+        start_date = default_datetime_format(
+            self.object.start_date,
+            self.user,
+            add_remaining_time=(self.effective_status is GameStatus.COUNTDOWN_TO_START),
+        )
+        end_date = default_datetime_format(
+            self.object.end_date,
+            self.user,
+            add_remaining_time=(self.effective_status is GameStatus.IN_PROGRESS),
         )
 
+        # If in progress, show winning/losing/draw status
+        display_status: GameStatus = self.effective_status
+        if self.effective_status is GameStatus.IN_PROGRESS:
+            display_status = self.object.get_in_progress_display_status(self.crew)
+
+        contributions_text = ""
+        if self.effective_status is not GameStatus.COUNTDOWN_TO_START:
+            total_gained = self.object.get_crew_gain(self.crew)
+            total_opponent_gained = self.object.get_crew_gain(self.opponent_crew)
+            top_player: DavyBackFightParticipant = DavyBackFightParticipant.get_top_player(
+                self.object, self.crew
+            )
+            contributions_text = phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONTRIBUTIONS.format(
+                get_belly_formatted(total_gained),
+                get_belly_formatted(total_opponent_gained),
+                top_player.user.get_markdown_mention(),
+                top_player.get_contribution_formatted(),
+            )
+
+        end_text = ""
+        if self.effective_status.is_finished():
+            conscripted_member_text = ""
+            if self.object.conscript is not None:
+                conscripted_member_text = (
+                    phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER.format(
+                        self.object.conscript.get_markdown_mention()
+                    )
+                )
+            end_date_remaining_time = (
+                phrases.DATETIME_REMAINING_PARENTHESIS.format(
+                    get_remaining_duration(self.object.penalty_end_date)
+                )
+                if datetime_is_before(self.object.penalty_end_date)
+                else ""
+            )
+            end_text = phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END.format(
+                default_datetime_format(self.object.penalty_end_date),
+                end_date_remaining_time,
+                conscripted_member_text,
+            )
+
         status_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
-            phrases.LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT.format(
-                self.legend.emoji, GAME_STATUS_DESCRIPTIONS[self.effective_status]
+            phrases.LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT_NO_BOLD.format(
+                display_status.get_log_emoji(), GAME_STATUS_DESCRIPTIONS[display_status]
             )
         )
 
@@ -90,9 +134,10 @@ class CrewDavyBackFightListPage(ListPage):
             self.opponent_crew.get_name_with_deeplink(add_level=False),
             start_date,
             end_date,
-            remaining_time_text,
             self.object.participants_count,
+            contributions_text,
             status_text,
+            end_text,
         )
 
     def get_emoji_legend_list(self) -> list[EmojiLegend]:

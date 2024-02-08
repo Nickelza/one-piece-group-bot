@@ -25,5 +25,47 @@ class DavyBackFightParticipant(BaseModel):
     class Meta:
         db_table = "davy_back_fight_participant"
 
+    @staticmethod
+    def get_top_player(dbf: DavyBackFight, crew: Crew) -> "DavyBackFightParticipant":
+        """
+        Get the top player of a crew in a Davy Back Fight
+        :param dbf: The Davy Back Fight object
+        :param crew: The crew object
+        :return: The DavyBackFightParticipant object
+        """
+        return (
+            DavyBackFightParticipant.select()
+            .where(
+                (DavyBackFightParticipant.davy_back_fight == dbf)
+                & (DavyBackFightParticipant.crew == crew)
+            )
+            .order_by(DavyBackFightParticipant.contribution.desc())
+            .first()
+        )
+
+    def get_contribution_formatted(self):
+        """
+        Get the contribution formatted
+        :return: The contribution formatted
+        """
+
+        from src.service.bounty_service import get_belly_formatted
+
+        return get_belly_formatted(self.contribution)
+
+    @staticmethod
+    def get_participants_by_contribution(dbf: DavyBackFight) -> list["DavyBackFightParticipant"]:
+        """
+        Get the participants by contribution
+        :param dbf: The Davy Back Fight object
+        :return: The list of DavyBackFightParticipant objects
+        """
+
+        return (
+            DavyBackFightParticipant.select()
+            .where(DavyBackFightParticipant.davy_back_fight == dbf)
+            .order_by(DavyBackFightParticipant.contribution.desc())
+        )
+
 
 DavyBackFightParticipant.create_table()

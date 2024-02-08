@@ -46,6 +46,15 @@ async def manage(
             )
         ])
 
+    # View participants button
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW,
+            inbound_info=inbound_keyboard.info,
+            screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW,
+        )
+    ])
+
     if (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info
         and inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM]

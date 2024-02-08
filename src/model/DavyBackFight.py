@@ -34,7 +34,7 @@ class DavyBackFight(BaseModel):
         User, backref="davy_back_fights_conscripts", null=True
     )
     conscript_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
-    conscript_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    penalty_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
 
     class Meta:
         db_table = "davy_back_fight"
@@ -95,6 +95,44 @@ class DavyBackFight(BaseModel):
         """
 
         return GameStatus(self.status)
+
+    def get_crew_gain(self, crew: Crew) -> int:
+        """
+        Get the crew gain
+        :param crew: The crew object
+        :return: The crew gain
+        """
+
+        return sum([p.contribution for p in self.davy_back_fight_participants if p.crew == crew])
+
+    def get_opponent_crew(self, crew: Crew):
+        """
+        Get the opponent crew
+        :param crew: The crew object
+        :return: The opponent crew
+        """
+
+        if crew == self.challenger_crew:
+            return self.opponent_crew
+        return self.challenger_crew
+
+    def get_in_progress_display_status(self, crew: Crew) -> GameStatus:
+        """
+        Get the in progress display status [WINNING, LOSING, DRAW]
+        :param crew: The crew object
+        :return: The in progress display status
+        """
+
+        crew_total = self.get_crew_gain(crew)
+        opponent_total = self.get_crew_gain(self.get_opponent_crew(crew))
+
+        if crew_total > opponent_total:
+            return GameStatus.WINNING
+
+        if crew_total < opponent_total:
+            return GameStatus.LOSING
+
+        return GameStatus.DRAW
 
 
 DavyBackFight.create_table()

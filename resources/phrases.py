@@ -279,7 +279,8 @@ PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
-PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose participants"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose players"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "View players"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -323,7 +324,7 @@ PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = "Pay"
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL = "Pay all"
 PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
-PVT_KEY_SHOW_ALL = "Show all"
+PVT_KEY_SHOW_ALL = "Back to list"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in this {}?"
@@ -361,7 +362,7 @@ Current time zone: *{}* \\({}\\)
 """.strip()
 
 DATETIME_REMAINING = "{} remaining"
-DATETIME_REMAINING_PARENTHESIS = f"\\{DATETIME_REMAINING}\\)"
+DATETIME_REMAINING_PARENTHESIS = f" _\\({DATETIME_REMAINING}\\)_"
 
 ITEM_LINK = "[{}]({})"
 
@@ -432,6 +433,8 @@ GAME_STATUS_AWAITING_SELECTION = "Awaiting game selection"
 GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION = "Awaiting opponent confirmation"
 GAME_STATUS_FORCED_END = "Forced end due to bounty reset"
 GAME_STATUS_COUNTDOWN_TO_START = "Countdown to start"
+GAME_STATUS_WINNING = "Winning"
+GAME_STATUS_LOSING = "Losing"
 GAME_COUNTDOWN = "The game will start in *{}*"
 GAME_STARTED = "Game in progress"
 GAME_TIMEOUT = (
@@ -1000,8 +1003,13 @@ CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
 CREW_DAVY_BACK_FIGHT_ITEM_TEXT = "{} vs. {}"
 CREW_DAVY_BACK_FIGHT_ITEM_TEXT_FILL_IN = "Davy Back Fight"
 CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT = (
-    "*{}*: {}\n\n*Start date*: {}\n*End date*: {}{}\n*Participants*: {}\n*Status*: {}"
+    "*{}*: {}\n\n*Start date*: {}\n*End date*: {}\n*Players*: {}{}\n\n{}{}"
 )
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONTRIBUTIONS = (
+    "\n\n*Total gained*: ฿{}\n*Opponent total gained*: ฿{}\n*Top Crew Player*: {}\\(฿{}\\)"
+)
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END = "\n\nPenalty end: {}{}{}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER = "\nConscripted member: {}"
 
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_SAME_CREW = "Cannot challenge your own Crew"
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_IN_FIGHT = "Crew already in a Davy Back Fight"
@@ -1051,6 +1059,8 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT = (
 )
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP = "Select the member you want to swap with"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP_SUCCESS = "Participant swapped successfully"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS = "*Team Mates*{}\n\n*Opponents*{}"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM = "\n{} - ฿{}"
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1473,6 +1483,7 @@ NAVIGATION_LIMIT_REACHED = "Limit reached"
 
 # Logs
 LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT = "{} *{}*"
+LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT_NO_BOLD = "{} {}"
 LOG_ITEM_DETAIL_OUTCOME_TEXT = "{}You *{}*"
 LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = "{}You *{}* ฿{}"
 LOG_ITEM_DETAIL_STATUS_TEXT = "*Status*: {}"
