@@ -463,6 +463,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
     treasure_chest_text = ""
     active_abilities_text = ""
     no_new_members_allowed_text = ""
+    pending_chest = ""
 
     if from_search:
         if not crew.allow_view_in_search:
@@ -490,6 +491,13 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
             get_crew_abilities_text(crew=crew)
         )
 
+        # Add pending chest if in active DBF
+        dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
+        if dbf is not None:
+            pending_chest = phrases.CREW_OVERVIEW_PENDING_CHEST.format(
+                get_belly_formatted(dbf.get_chest_amount(crew))
+            )
+
         # No new members allowed
         if not crew.can_accept_new_members:
             no_new_members_allowed_text = phrases.CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED.format(
@@ -515,6 +523,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         active_abilities_count_text,
         required_bounty_text,
         treasure_chest_text,
+        pending_chest,
         active_abilities_text,
         no_new_members_allowed_text,
     )

@@ -137,13 +137,13 @@ async def add_contribution(user: User, amount: int, opponent: User = None):
     """
     crew: Crew = user.crew
 
-    active_dbf: DavyBackFight = crew.get_active_davy_back_fight()
+    dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
 
     # Crew not in an active Davy Back Fight
-    if active_dbf is None or active_dbf.get_status() is not GameStatus.IN_PROGRESS:
+    if dbf is None:
         return
 
-    participant: DavyBackFightParticipant = active_dbf.get_participant(user)
+    participant: DavyBackFightParticipant = dbf.get_participant(user)
 
     # User not a participant
     if participant is None:
@@ -160,7 +160,7 @@ async def add_contribution(user: User, amount: int, opponent: User = None):
             return
 
         # Bounty gained from someone that's not a participant is valued at 100%
-        if active_dbf.is_participant(opponent):
+        if dbf.is_participant(opponent):
             amount *= 2
 
     participant.contribution += amount

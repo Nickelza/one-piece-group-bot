@@ -79,12 +79,11 @@ class CrewDavyBackFightListPage(ListPage):
         end_date = default_datetime_format(
             self.object.end_date,
             self.user,
-            add_remaining_time=(self.effective_status is GameStatus.IN_PROGRESS),
         )
 
         # If in progress, show winning/losing/draw status
         display_status: GameStatus = self.effective_status
-        if self.effective_status is GameStatus.IN_PROGRESS:
+        if self.object.in_progress():
             display_status = self.object.get_in_progress_display_status(self.crew)
 
         contributions_text = ""
@@ -121,6 +120,11 @@ class CrewDavyBackFightListPage(ListPage):
                 default_datetime_format(self.object.penalty_end_date),
                 end_date_remaining_time,
                 conscripted_member_text,
+            )
+        else:
+            # Add rules
+            end_text += phrases.CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES.format(
+                self.object.get_remaining_time()
             )
 
         status_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(

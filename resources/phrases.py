@@ -773,12 +773,14 @@ CREW_OVERVIEW = (
     "{}"  # Active abilities count
     "{}"  # Required bounty
     "{}"  # Treasure chest
+    "{}"  # Pending chest
     "{}"  # Abilities
     "{}"  # No new members allowed
 )
 CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT = "\n*Active abilities*: {} \\(Max. {}\\)"
 CREW_OVERVIEW_TREASURE_CHEST = "\n\n*Treasure Chest*: ฿{}"
+CREW_OVERVIEW_PENDING_CHEST = "\n*Pending Chest*: ฿{}"
 CREW_OVERVIEW_ACTIVE_ABILITIES = "\n\n*Abilities*{}"
 CREW_OVERVIEW_REQUIRED_BOUNTY = "\n\n*Required bounty*: ฿{}"
 
@@ -1067,6 +1069,16 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP = "Select the member you want to s
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP_SUCCESS = "Participant swapped successfully"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS = "*Team Mates*{}\n\n*Opponents*{}"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM = "\n{} - ฿{}"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM_POTENTIAL_WIN = "\nPotential win: ฿{}\n"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM_WIN = "\nWin: ฿{}\n"
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES = (
+    "\n\n_Every net bounty gained from challenges, fights and plunders will be considered towards"
+    " the Crew's total gain.\n- Bounty gained from same Crew members are not considered\n- Bounty"
+    " gained from non-players of the opponents Crew are valued half\n- Half of any new Crew chest"
+    " contribution will frozen\n- The players from the winner Crew will receive the frozen chest"
+    " contribution from the opponent Crew, proportionally to their contribution\n\n*Remaining"
+    " time*: {}_"
+)
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1282,8 +1294,9 @@ DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
 )
 DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY = "Challenge rejected"
 # Notification - Davy Back Fight start
-DAVY_BACK_FIGHT_START_NOTIFICATION = (  # TODO add rules
-    "You have been chosen as a Player for a Davy Back Fight against {}"
+DAVY_BACK_FIGHT_START_NOTIFICATION = (
+    "You have been chosen as a Player for a Davy Back Fight against {}!"
+    + CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES
 )
 DAVY_BACK_FIGHT_START_NOTIFICATION_DESCRIPTION = (
     "If to be notified when a Davy Back Fight in which you are a Player starts"

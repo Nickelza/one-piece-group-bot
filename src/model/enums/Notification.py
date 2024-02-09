@@ -116,6 +116,7 @@ class Notification:
         item_screen: Screen = None,
         item_info: dict = None,
         go_to_item_button_text: str = None,
+        item_previous_screens: list[Screen] = None,
     ):
         """
         Constructor
@@ -142,6 +143,7 @@ class Notification:
         self.item_screen = item_screen
         self.item_info = item_info
         self.to_to_item_button_text = go_to_item_button_text
+        self.item_previous_screens = item_previous_screens if item_previous_screens else []
 
     def build(self):
         """Builds the notification."""
@@ -159,7 +161,12 @@ class Notification:
             return []
 
         return [
-            Keyboard(self.to_to_item_button_text, screen=self.item_screen, info=self.item_info)
+            Keyboard(
+                self.to_to_item_button_text,
+                screen=self.item_screen,
+                info=self.item_info,
+                previous_screen_list=self.item_previous_screens,
+            )
         ]
 
 
@@ -1076,6 +1083,7 @@ class DavyBackFightRequestAcceptedNotification(Notification):
                 ReservedKeyboardKeys.DIRECT_ITEM: False,
             },
             go_to_item_button_text=phrases.KEY_MANAGE,
+            item_previous_screens=[Screen.PVT_CREW],
         )
 
     def build(self) -> str:
@@ -1112,6 +1120,7 @@ class DavyBackFightStartNotification(Notification):
         """
 
         self.opponent_crew: Crew = opponent_crew
+        self.davy_back_fight: DavyBackFight = davy_back_fight
         item_id = davy_back_fight.id if davy_back_fight is not None else None
 
         super().__init__(
@@ -1126,10 +1135,14 @@ class DavyBackFightStartNotification(Notification):
                 ReservedKeyboardKeys.DIRECT_ITEM: False,
             },
             go_to_item_button_text=phrases.KEY_VIEW,
+            item_previous_screens=[Screen.PVT_CREW],
         )
 
     def build(self) -> str:
-        return self.text.format(self.opponent_crew.get_name_with_deeplink(add_level=False))
+        return self.text.format(
+            self.opponent_crew.get_name_with_deeplink(add_level=False),
+            self.davy_back_fight.get_remaining_time(),
+        )
 
 
 class ImpelDownBailPostedNotification(Notification):

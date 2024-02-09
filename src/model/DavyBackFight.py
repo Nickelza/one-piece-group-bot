@@ -97,6 +97,13 @@ class DavyBackFight(BaseModel):
 
         return GameStatus(self.status)
 
+    def in_progress(self) -> bool:
+        """
+        Check if the game is in progress
+        :return: True if the game is in progress, False otherwise
+        """
+        return self.get_status() is GameStatus.IN_PROGRESS
+
     def get_crew_gain(self, crew: Crew) -> int:
         """
         Get the crew gain
@@ -162,6 +169,43 @@ class DavyBackFight(BaseModel):
         :return: The contribution events
         """
         return [IncomeTaxEventType.GAME, IncomeTaxEventType.FIGHT, IncomeTaxEventType.PLUNDER]
+
+    def get_chest_amount(self, crew: Crew) -> int:
+        """
+        Get the chest amount
+        :param crew: The crew object
+        :return: The chest amount
+        """
+        if crew == self.challenger_crew:
+            return self.challenger_chest
+        return self.opponent_chest
+
+    def get_opponent_chest_amount(self, crew: Crew) -> int:
+        """
+        Get the chest amount
+        :param crew: The crew object
+        :return: The chest amount
+        """
+
+        return self.get_chest_amount(self.get_opponent_crew(crew))
+
+    def get_winner_crew(self) -> Crew | None:
+        """
+        Get the winner
+        :return: The winner
+        """
+        if self.get_status() not in [GameStatus.WON, GameStatus.LOST]:
+            return None
+
+        if self.get_status() is GameStatus.WON:
+            return self.challenger_crew
+
+        return self.opponent_crew
+
+    def get_remaining_time(self) -> str:
+        from src.service.date_service import get_remaining_duration
+
+        return get_remaining_duration(self.end_date)
 
 
 DavyBackFight.create_table()
