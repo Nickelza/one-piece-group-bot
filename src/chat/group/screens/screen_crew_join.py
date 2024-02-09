@@ -84,6 +84,12 @@ def validate(
     :return: Raise an exception if the request is not valid
     """
     try:
+        # User in same Crew
+        if user.crew == crew:
+            raise CrewJoinValidationUserException(
+                phrases.CREW_USER_ALREADY_IN_SAME_CREW if specific_user_error else None
+            )
+
         # User already in a Crew
         if user.is_crew_member():
             raise CrewJoinValidationUserException(

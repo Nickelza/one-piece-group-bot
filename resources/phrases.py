@@ -231,6 +231,7 @@ INLINE_QUERY_SEND_ITEM = "Send item"
 
 # General
 KEY_MANAGE = "Manage"
+KEY_VIEW = "View"
 KEY_CREATE = Emoji.CREATE + " Create"
 KEY_SAVE = Emoji.SAVE + " Save"
 KEY_ENABLE = Emoji.ENABLED + " Enable"
@@ -280,7 +281,7 @@ PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose players"
-PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "View players"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "Players"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -794,6 +795,7 @@ CREW_MEMBER_ITEM_DETAIL = (
 )
 CREW_MEMBER_ITEM_DETAIL_ARRESTED = f"\n\n{Emoji.LOG_NEGATIVE}Arrested \\({{}}\\)"
 CREW_MEMBER_ITEM_TEXT_FILL_IN = "Crew Member"
+CREW_USER_ALREADY_IN_SAME_CREW = "You are already in this Crew"
 CREW_USER_ALREADY_IN_CREW = "You are already in a Crew"
 CREW_CREATE_USER_NOT_ENOUGH_BOUNTY = (
     f"Insufficient bounty, forming a Crew costs ฿{Env.CREW_CREATE_PRICE.get_belly()}"
@@ -1041,8 +1043,12 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
     "\n\n*Number of participants*: {}"
     "\n\nYou have {} to accept the challenge"
 )
-CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = "Davy Back Fight against {} accepted"  # TODO
-CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"  # TODO
+CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
+    "Davy Back Fight against {} accepted, it will start in"
+    f" {Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
+    " and change the players"
+)
+CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"
 CREW_DAVY_BACK_FIGHT_USER_NOT_MEMBER_OF_PARTICIPATING_CREW = (
     "User not a member of a participating Crew"
 )
@@ -1188,6 +1194,7 @@ NOTIFICATION_CATEGORY_LOCATION = "Location"
 NOTIFICATION_CATEGORY_PREDICTION = "Prediction"
 NOTIFICATION_CATEGORY_DEVIL_FRUIT = "Devil Fruit"
 NOTIFICATION_CATEGORY_WARLORD = "Warlord"
+NOTIFICATION_CATEGORY_DAVY_BACK_FIGHT = "Davy Back Fight"
 
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = "{} has left the Crew"
@@ -1254,25 +1261,34 @@ CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when your request to join a Crew is rejected."
 )
 CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY = "Join request rejected"
-# Notification - Crew Davy Back Fight request accepted
-CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION = (
-    "{} has accepted your Crew's Davy Back Fight challenge"
+# Notification - Davy Back Fight request accepted
+DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION = (
+    "{} has accepted your Crew's Davy Back Fight challenge, it will start in"
+    f" {Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
+    " and change the players"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION = (
+DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when your Crew's Davy Back Fight challenge is accepted."
     "\nApplicable only if you are the Captain of the Crew"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY = "Davy Back Fight accepted"
-# Notification - Crew Davy Back Fight request rejected
+DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY = "Challenge accepted"
+# Notification - Davy Back Fight request rejected
 CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION = (
     "{} has rejected your Crew's Davy Back Fight challenge"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
+DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when your Crew's Davy Back Fight challenge is rejected."
     "\nApplicable only if you are the Captain of the Crew"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY = "Davy Back Fight rejected"
-
+DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY = "Challenge rejected"
+# Notification - Davy Back Fight start
+DAVY_BACK_FIGHT_START_NOTIFICATION = (  # TODO add rules
+    "You have been chosen as a Player for a Davy Back Fight against {}"
+)
+DAVY_BACK_FIGHT_START_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when a Davy Back Fight in which you are a Player starts"
+)
+DAVY_BACK_FIGHT_START_NOTIFICATION_KEY = "Start"
 
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (

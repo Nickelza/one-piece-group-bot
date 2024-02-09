@@ -136,7 +136,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.SET_EXPIRED_BOUNTY_LOANS:
             await set_expired_bounty_loans(context)
         case Timer.GENERIC_TASKS:
-            await run_generic_minute_tasks()
+            await run_generic_minute_tasks(context)
         case _:
             raise ValueError(f"Unknown timer {timer.name}")
 

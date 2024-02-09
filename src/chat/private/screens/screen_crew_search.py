@@ -1,5 +1,3 @@
-from enum import StrEnum
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -15,14 +13,6 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew_overview_text
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send
-
-
-class CrewSearchReservedKeys(StrEnum):
-    """
-    The reserved keys for this screen
-    """
-
-    ONLY_CAN_JOIN = "b"
 
 
 class CrewSearchListPage(ListPage):
@@ -107,6 +97,7 @@ class CrewSearchListPage(ListPage):
             & (Crew.can_accept_new_members == True)
             & (Crew.allow_join_from_search == True)
             & (Crew.required_bounty <= self.user.bounty)
+            & (Crew.id != self.user.crew.id)
         )
 
 

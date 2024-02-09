@@ -7,6 +7,7 @@ import src.model.enums.Location as Location
 from src.model.BountyLoan import BountyLoan
 from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
+from src.model.DavyBackFight import DavyBackFight
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
 from src.model.ImpelDownLog import ImpelDownLog
@@ -45,6 +46,7 @@ class NotificationCategory(IntEnum):
     DEVIL_FRUIT = 8
     BOUNTY_LOAN = 9
     WARLORD = 10
+    DAVY_BACK_FIGHT = 11
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -58,6 +60,7 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.DEVIL_FRUIT: phrases.NOTIFICATION_CATEGORY_DEVIL_FRUIT,
     NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN,
     NotificationCategory.WARLORD: phrases.NOTIFICATION_CATEGORY_WARLORD,
+    NotificationCategory.DAVY_BACK_FIGHT: phrases.NOTIFICATION_CATEGORY_DAVY_BACK_FIGHT,
 }
 
 
@@ -93,8 +96,9 @@ class NotificationType(IntEnum):
     CREW_JOIN_REQUEST_ACCEPTED = 27
     CREW_JOIN_REQUEST_REJECTED = 28
     IMPEL_DOWN_BAIL_POSTED = 29
-    CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED = 30
-    CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED = 31
+    DAVY_BACK_FIGHT_REQUEST_ACCEPTED = 30
+    DAVY_BACK_FIGHT_REQUEST_REJECTED = 31
+    DAVY_BACK_FIGHT_START = 32
 
 
 class Notification:
@@ -1049,29 +1053,37 @@ class CrewJoinRequestRejectedNotification(Notification):
         return self.text.format(self.crew.get_name_with_deeplink())
 
 
-class CrewDavyBackFightRequestAcceptedNotification(Notification):
-    """Class for crew davy back fight request accepted notifications."""
+class DavyBackFightRequestAcceptedNotification(Notification):
+    """Class for davy back fight request accepted notifications."""
 
-    def __init__(self, crew: Crew = None):
+    def __init__(self, crew: Crew = None, davy_back_fight: DavyBackFight = None):
         """
         Constructor
         """
 
         self.crew: Crew = crew
+        item_id = davy_back_fight.id if davy_back_fight is not None else None
+
         super().__init__(
-            NotificationCategory.CREW,
-            NotificationType.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED,
-            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION,
-            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION,
-            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY,
+            NotificationCategory.DAVY_BACK_FIGHT,
+            NotificationType.DAVY_BACK_FIGHT_REQUEST_ACCEPTED,
+            phrases.DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION,
+            phrases.DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION,
+            phrases.DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+            item_info={
+                ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id,
+                ReservedKeyboardKeys.DIRECT_ITEM: False,
+            },
+            go_to_item_button_text=phrases.KEY_MANAGE,
         )
 
     def build(self) -> str:
         return self.text.format(self.crew.get_name_with_deeplink())
 
 
-class CrewDavyBackFightRequestRejectedNotification(Notification):
-    """Class for crew davy back fight request rejected notifications."""
+class DavyBackFightRequestRejectedNotification(Notification):
+    """Class for davy back fight request rejected notifications."""
 
     def __init__(self, crew: Crew = None):
         """
@@ -1080,15 +1092,44 @@ class CrewDavyBackFightRequestRejectedNotification(Notification):
 
         self.crew: Crew = crew
         super().__init__(
-            NotificationCategory.CREW,
-            NotificationType.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED,
+            NotificationCategory.DAVY_BACK_FIGHT,
+            NotificationType.DAVY_BACK_FIGHT_REQUEST_REJECTED,
             phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION,
-            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION,
-            phrases.CREW_DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY,
+            phrases.DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION,
+            phrases.DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY,
         )
 
     def build(self) -> str:
         return self.text.format(self.crew.get_name_with_deeplink())
+
+
+class DavyBackFightStartNotification(Notification):
+    """Class for davy back fight start notifications."""
+
+    def __init__(self, opponent_crew: Crew = None, davy_back_fight: DavyBackFight = None):
+        """
+        Constructor
+        """
+
+        self.opponent_crew: Crew = opponent_crew
+        item_id = davy_back_fight.id if davy_back_fight is not None else None
+
+        super().__init__(
+            NotificationCategory.DAVY_BACK_FIGHT,
+            NotificationType.DAVY_BACK_FIGHT_START,
+            phrases.DAVY_BACK_FIGHT_START_NOTIFICATION,
+            phrases.DAVY_BACK_FIGHT_START_NOTIFICATION_DESCRIPTION,
+            phrases.DAVY_BACK_FIGHT_START_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+            item_info={
+                ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id,
+                ReservedKeyboardKeys.DIRECT_ITEM: False,
+            },
+            go_to_item_button_text=phrases.KEY_VIEW,
+        )
+
+    def build(self) -> str:
+        return self.text.format(self.opponent_crew.get_name_with_deeplink(add_level=False))
 
 
 class ImpelDownBailPostedNotification(Notification):
@@ -1151,8 +1192,9 @@ NOTIFICATIONS = [
     CrewJoinRequestAcceptedNotification(),
     CrewJoinRequestRejectedNotification(),
     ImpelDownBailPostedNotification(),
-    CrewDavyBackFightRequestAcceptedNotification,
-    CrewDavyBackFightRequestRejectedNotification,
+    DavyBackFightRequestAcceptedNotification(),
+    DavyBackFightRequestRejectedNotification(),
+    DavyBackFightStartNotification(),
 ]
 
 

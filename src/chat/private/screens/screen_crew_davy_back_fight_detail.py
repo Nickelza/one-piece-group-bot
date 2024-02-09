@@ -3,9 +3,7 @@ from telegram.ext import ContextTypes
 
 from resources import phrases
 from src.chat.private.screens.screen_crew_davy_back_fight import CrewDavyBackFightListPage
-from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
-from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
@@ -32,29 +30,14 @@ async def manage(
     dbf_list_page.init_legend_filter_results()
     dbf_list_page.set_object(inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
 
-    dbf: DavyBackFight = dbf_list_page.object
-
-    inline_keyboard: list[list[Keyboard]] = []
-
-    # Select participants button, only for Captain if the davy back fight is not started
-    if dbf.get_status() is GameStatus.COUNTDOWN_TO_START and user.is_crew_captain():
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT,
-                inbound_info=inbound_keyboard.info,
-                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_SELECT,
-            )
-        ])
-
     # View participants button
-    inline_keyboard.append([
+    inline_keyboard: list[list[Keyboard]] = [[
         Keyboard(
             phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW,
             inbound_info=inbound_keyboard.info,
             screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW,
         )
-    ])
-
+    ]]
     if (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info
         and inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM]

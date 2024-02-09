@@ -9,10 +9,11 @@ from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Notification import (
-    CrewDavyBackFightRequestAcceptedNotification,
-    CrewDavyBackFightRequestRejectedNotification,
+    DavyBackFightRequestAcceptedNotification,
+    DavyBackFightRequestRejectedNotification,
 )
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -78,9 +79,18 @@ async def manage(
     )
 
     # Manage DBF button
-    # TODO: Add this button
+    inline_keyboard = [[
+        Keyboard(
+            phrases.KEY_MANAGE,
+            screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+            inbound_info={
+                ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: davy_back_fight.id,
+                ReservedKeyboardKeys.DIRECT_ITEM: False,
+            },
+        )
+    ]]
 
-    await full_message_send(context, ot_text, update=update)
+    await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
 
 
 async def accept(context: ContextTypes.DEFAULT_TYPE, davy_back_fight: DavyBackFight) -> None:
@@ -129,7 +139,7 @@ async def send_outcome_notification(
         return await send_notification(
             context,
             challenger_crew.get_captain(),
-            CrewDavyBackFightRequestAcceptedNotification(challenger_crew),
+            DavyBackFightRequestAcceptedNotification(challenger_crew, davy_back_fight),
         )
 
     davy_back_fight.status = GameStatus.FORCED_END
@@ -138,5 +148,5 @@ async def send_outcome_notification(
     return await send_notification(
         context,
         challenger_crew.get_captain(),
-        CrewDavyBackFightRequestRejectedNotification(challenger_crew),
+        DavyBackFightRequestRejectedNotification(challenger_crew),
     )

@@ -40,7 +40,7 @@ class DavyBackFight(BaseModel):
         db_table = "davy_back_fight"
 
     @staticmethod
-    def delete_expired_requests():
+    async def delete_expired_requests():
         """
         Delete expire requests, so requests that are in AWAITING_OPPONENT_CONFIRMATION status and
         were created more than x minutes ago

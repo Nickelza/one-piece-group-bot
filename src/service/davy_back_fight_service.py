@@ -1,10 +1,16 @@
+import datetime
+
+from telegram.ext import CallbackContext, ContextTypes
+
 from resources import phrases
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
 from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.Notification import DavyBackFightStartNotification
 from src.model.error.CustomException import CrewValidationException
+from src.service.notification_service import send_notification
 
 
 def add_participant(user: User, davy_back_fight: DavyBackFight):
@@ -83,3 +89,39 @@ def swap_participant(
 
     # Add new participant
     add_participant(new_participant, davy_back_fight)
+
+
+async def start_all(context: ContextTypes.DEFAULT_TYPE):
+    """
+    Start all the Davy Back Fights
+    :param context: The context object
+    :return: None
+    """
+
+    for davy_back_fight in DavyBackFight.select().where(
+        (DavyBackFight.status == GameStatus.COUNTDOWN_TO_START)
+        & (DavyBackFight.date < datetime.datetime.now())
+    ):
+        context.application.create_task(start(context, davy_back_fight))
+
+
+async def start(context: CallbackContext, davy_back_fight: DavyBackFight):
+    """
+    Start a Davy Back Fight
+    :param context: The context object
+    :param davy_back_fight: The Davy Back Fight object
+    :return: None
+    """
+
+    davy_back_fight.status = GameStatus.IN_PROGRESS
+    davy_back_fight.save()
+
+    # Send notification to players
+    for participant in davy_back_fight.get_participants():
+        await send_notification(
+            context,
+            participant.user,
+            DavyBackFightStartNotification(
+                davy_back_fight.get_opponent_crew(participant.crew), davy_back_fight
+            ),
+        )
