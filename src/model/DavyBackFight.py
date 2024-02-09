@@ -7,6 +7,7 @@ from src.model.BaseModel import BaseModel
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 
 
 class DavyBackFight(BaseModel):
@@ -133,6 +134,34 @@ class DavyBackFight(BaseModel):
             return GameStatus.LOSING
 
         return GameStatus.DRAW
+
+    def get_participant(self, user: User) -> any:
+        """
+        Get the participant
+        :param user: The user object
+        :return: The participant
+        """
+        from src.model.DavyBackFightParticipant import DavyBackFightParticipant
+
+        return self.davy_back_fight_participants.where(
+            DavyBackFightParticipant.user == user
+        ).get_or_none()
+
+    def is_participant(self, user: User) -> bool:
+        """
+        Check if the user is a participant
+        :param user: The user object
+        :return: True if the user is a participant, False otherwise
+        """
+        return self.get_participant(user) is not None
+
+    @staticmethod
+    def get_contribution_events() -> list[IncomeTaxEventType]:
+        """
+        Get the tax events that generate a DBF contribution
+        :return: The contribution events
+        """
+        return [IncomeTaxEventType.GAME, IncomeTaxEventType.FIGHT, IncomeTaxEventType.PLUNDER]
 
 
 DavyBackFight.create_table()

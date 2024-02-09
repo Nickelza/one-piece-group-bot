@@ -60,12 +60,17 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
 
 
 async def end_game(
-    game: Game, game_outcome: GameOutcome, is_forced_end: bool = False, update: Update = None
+    game: Game,
+    game_outcome: GameOutcome,
+    context: ContextTypes.DEFAULT_TYPE,
+    is_forced_end: bool = False,
+    update: Update = None,
 ) -> Game:
     """
     End the game, set the status and return the game
     :param game: The game
     :param game_outcome: The outcome
+    :param context: The context
     :param is_forced_end: If the game was forced to end
     :param update: The update
     :return: The game
@@ -96,20 +101,24 @@ async def end_game(
         await add_or_remove_bounty(
             challenger,
             bounty_for_challenger,
+            context=context,
             pending_belly_amount=pending_bounty_for_challenger,
             update=update,
             tax_event_type=IncomeTaxEventType.GAME,
             event_id=game.id,
+            opponent=opponent,
         )
 
         if opponent is not None:
             await add_or_remove_bounty(
                 opponent,
                 bounty_for_opponent,
+                context=context,
                 pending_belly_amount=pending_bounty_for_opponent,
                 update=update,
                 tax_event_type=IncomeTaxEventType.GAME,
                 event_id=game.id,
+                opponent=challenger,
             )
 
     # Refresh
@@ -124,7 +133,7 @@ async def end_game(
     return game
 
 
-def get_game_authorized_tg_user_ids(game: Game) -> list[int]:
+def get_game_authorized_tg_user_ids(game: Game) -> list[str]:
     """
     Get the authorized tg user ids
     :param game: The game
@@ -325,7 +334,7 @@ def force_end_all_active() -> None:
         game.save()
 
 
-async def end_inactive_games() -> None:
+async def end_inactive_games(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     End inactive games (games which last interaction was more than N seconds ago)
     :return: None
@@ -341,7 +350,7 @@ async def end_inactive_games() -> None:
     )
 
     for game in inactive_games:
-        await end_game(game, GameOutcome.NONE, is_forced_end=True)
+        await end_game(game, GameOutcome.NONE, context, is_forced_end=True)
         logging.info(f"Game {game.id} was ended due to inactivity")
 
 
@@ -372,7 +381,8 @@ async def enqueue_game_turn_notification(
     context: ContextTypes.DEFAULT_TYPE, user: User, opponent: User, game: Game
 ):
     """
-    Enqueue a game turn notification. Waits for N time and if the game board stays unchanged, sends the notification
+    Enqueue a game turn notification. Waits for N time and if the game board stays unchanged,
+    sends the notification
 
     :param context: The context
     :param user: The user
@@ -391,12 +401,12 @@ async def enqueue_game_turn_notification(
         await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
-async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game, update: Update):
+async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
     """
-    Enqueue a game timeout. Waits for N time and if the opponent doesn't accept, the game is deleted
+    Enqueue a game timeout. Waits for N time and if the opponent doesn't accept,
+    the game is deleted
     :param context: The context
     :param game: The game
-    :param update: The update
     :return: None
     """
 
@@ -447,7 +457,8 @@ async def set_user_private_screen(
         private_screen_list = Screen.PVT_GAME_GUESS_INPUT
         private_screen_in_edit_id = game.id
 
-    # Using update instead of save to avoid overwriting other fields, namely bounty and pending_bounty
+    # Using update instead of save to avoid overwriting other fields, namely bounty and
+    # pending_bounty
     User.update(
         private_screen_list=private_screen_list,
         private_screen_in_edit_id=private_screen_in_edit_id,
@@ -477,7 +488,7 @@ def get_guess_game_final_image_path(game: Game) -> str:
             return shambles.image_path
 
         case _:
-            raise ValueError(f"Game type {game.game_type} is not a guess game")
+            raise ValueError(f"Game type {game.type} is not a guess game")
 
 
 def get_guess_game_result_term_text(terminology: Terminology):
@@ -553,7 +564,8 @@ async def guess_game_countdown_to_start(
     except RetryAfter:
         pass
 
-    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise update every 5 seconds
+    # Update every 10 seconds if remaining time is more than 10 seconds, otherwise
+    # update every 5 seconds
     if remaining_seconds > 10:
         await asyncio.sleep(10)
         await guess_game_countdown_to_start(
@@ -630,7 +642,7 @@ async def guess_game_validate_answer(
     outcome: GameOutcome = (
         GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
     )
-    await end_game(game, outcome, update=update)
+    await end_game(game, outcome, context, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 

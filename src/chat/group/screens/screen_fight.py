@@ -143,7 +143,8 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
     :return: list -  [0] - Win probability, [1] - Win amount, [2] - Lose amount
             [3] - Final bounty if user win, [4] - Final bounty if user lose
     """
-    # Probability of winning - How much percent more is the challenger bounty compared to the opponent
+    # Probability of winning - How much percent more is the challenger bounty compared to the
+    # opponent
     win_probability = (challenger.bounty / opponent.get_max_bounty()) * 50
 
     # Cap max probability
@@ -177,7 +178,8 @@ def get_fight_odds(challenger: User, opponent: User) -> tuple[float, int, int, i
 
     # Win amount is the amount from opponent bounty corresponding to lose probability
     win_amount = int(get_value_from_percentage(opponent.bounty, lose_probability))
-    # Lose amount is the amount from challenger bounty corresponding to maximum between win and lose probability
+    # Lose amount is the amount from challenger bounty corresponding to maximum between win and
+    # lose probability
     lose_amount = int(
         get_value_from_percentage(challenger.bounty, max(win_probability, lose_probability))
     )
@@ -330,10 +332,12 @@ async def keyboard_interaction(
         await add_or_remove_bounty(
             user,
             win_amount,
+            context=context,
             update=update,
             tax_event_type=IncomeTaxEventType.FIGHT,
             event_id=fight.id,
             should_save=True,
+            opponent=user,
         )
         # Remove bounty from opponent
         await add_or_remove_bounty(
@@ -354,10 +358,12 @@ async def keyboard_interaction(
         await add_or_remove_bounty(
             opponent,
             lose_amount,
+            context=context,
             update=update,
             tax_event_type=IncomeTaxEventType.FIGHT,
             event_id=fight.id,
             should_save=True,
+            opponent=user,
         )
         caption = phrases.FIGHT_LOSE.format(
             mention_markdown_v2(user.tg_user_id, "you"),

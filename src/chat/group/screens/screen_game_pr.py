@@ -271,7 +271,7 @@ async def validate_answer(
     outcome: GameOutcome = (
         GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
     )
-    await end_game(game, outcome, update=update)
+    await end_game(game, outcome, context, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 

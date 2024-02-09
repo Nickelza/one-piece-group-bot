@@ -112,4 +112,4 @@ async def manage(
     )
 
     # Enqueue the game for timeout
-    context.application.create_task(enqueue_game_timeout(context, game, update))
+    context.application.create_task(enqueue_game_timeout(context, game))

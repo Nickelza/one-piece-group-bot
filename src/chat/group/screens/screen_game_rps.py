@@ -82,7 +82,7 @@ async def manage(
     # Game is finished
     if rock_paper_scissors.is_finished():
         game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
-        game = await game_service.end_game(game, game_outcome, update=update)
+        game = await game_service.end_game(game, game_outcome, context, update=update)
         user.should_update_model = False
 
         # Send result
@@ -108,7 +108,8 @@ async def manage(
         )
 
         pass
-        # Notify user turn. After message send to avoid double notification in case user changes choice
+        # Notify user turn. After message send to avoid double notification in case user changes
+        # choice
         await game_service.notify_game_turn(context, game, rock_paper_scissors.game_turn)
     except BadRequest:
         # Possible when user changes a choice, so the output message stays the same

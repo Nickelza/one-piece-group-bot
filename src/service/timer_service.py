@@ -132,7 +132,7 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
         case Timer.DEACTIVATE_INACTIVE_GROUP_CHATS:
             deactivate_inactive_group_chats()
         case Timer.END_INACTIVE_GAMES:
-            await end_inactive_games()
+            await end_inactive_games(context)
         case Timer.SET_EXPIRED_BOUNTY_LOANS:
             await set_expired_bounty_loans(context)
         case Timer.GENERIC_TASKS:

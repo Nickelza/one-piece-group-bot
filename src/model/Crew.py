@@ -357,6 +357,23 @@ class Crew(BaseModel):
             .get_or_none()
         )
 
+    def get_in_progress_davy_back_fight(self) -> Any:
+        """
+        Returns the in progress Davy Back Fight
+        :return: The in progress Davy Back Fight
+        """
+
+        from src.model.DavyBackFight import DavyBackFight
+
+        return (
+            DavyBackFight.select()
+            .where(
+                ((DavyBackFight.challenger_crew == self) | (DavyBackFight.opponent_crew == self))
+                & (DavyBackFight.status == GameStatus.IN_PROGRESS)
+            )
+            .get_or_none()
+        )
+
     def get_pending_davy_back_fight(self) -> Any:
         """
         Returns the pending Davy Back Fight as challenger

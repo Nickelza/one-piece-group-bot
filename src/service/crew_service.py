@@ -7,6 +7,7 @@ from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.CrewChestSpendingRecord import CrewChestSpendingRecord
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
+from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import (
@@ -261,6 +262,18 @@ def add_to_crew_chest(user: User, amount: int) -> None:
         raise ValueError("User is not a crew member")
 
     crew: Crew = user.crew
+
+    # Crew in an active Davy Back Fight, add half to that
+    dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
+    if dbf is not None:
+        amount //= 2
+
+        if dbf.challenger_crew == crew:
+            dbf.challenger_chest += amount
+        else:
+            dbf.opponent_chest += amount
+        dbf.save()
+
     crew.chest_amount += amount
     crew.total_gained_chest_amount += amount
     crew.save()

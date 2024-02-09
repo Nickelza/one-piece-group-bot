@@ -125,3 +125,43 @@ async def start(context: CallbackContext, davy_back_fight: DavyBackFight):
                 davy_back_fight.get_opponent_crew(participant.crew), davy_back_fight
             ),
         )
+
+
+async def add_contribution(user: User, amount: int, opponent: User = None):
+    """
+    Add contribution to the Davy Back Fight
+    :param user: The user object
+    :param amount: The amount
+    :param opponent: The opponent from which bounty is taken
+    :return: None
+    """
+    crew: Crew = user.crew
+
+    active_dbf: DavyBackFight = crew.get_active_davy_back_fight()
+
+    # Crew not in an active Davy Back Fight
+    if active_dbf is None or active_dbf.get_status() is not GameStatus.IN_PROGRESS:
+        return
+
+    participant: DavyBackFightParticipant = active_dbf.get_participant(user)
+
+    # User not a participant
+    if participant is None:
+        return
+
+    # By default, always valued at 50% apart from case in which opponent is an adversary.
+    # Halving here to preemptively manage cases in which opponent is not provided, for example
+    # Doc Q
+
+    amount //= 2
+    if opponent is not None:
+        # Bounty gained from fellow Crew members is not counted
+        if opponent.crew == crew:
+            return
+
+        # Bounty gained from someone that's not a participant is valued at 100%
+        if active_dbf.is_participant(opponent):
+            amount *= 2
+
+    participant.contribution += amount
+    participant.save()

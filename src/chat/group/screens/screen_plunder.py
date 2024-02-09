@@ -359,10 +359,12 @@ async def keyboard_interaction(
         await add_or_remove_bounty(
             user,
             win_amount,
+            context=context,
             update=update,
             tax_event_type=IncomeTaxEventType.PLUNDER,
             event_id=plunder.id,
             should_save=True,
+            opponent=opponent,
         )
         # Remove bounty from opponent
         await add_or_remove_bounty(

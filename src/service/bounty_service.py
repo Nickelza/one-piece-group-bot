@@ -14,6 +14,7 @@ from src.model.BountyGift import BountyGift
 from src.model.BountyLoan import BountyLoan
 from src.model.Crew import Crew
 from src.model.CrewMemberChestContribution import CrewMemberChestContribution
+from src.model.DavyBackFight import DavyBackFight
 from src.model.GroupChat import GroupChat
 from src.model.IncomeTaxEvent import IncomeTaxEvent
 from src.model.User import User
@@ -31,6 +32,7 @@ from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import BellyValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import get_next_run, get_previous_run
+from src.service.davy_back_fight_service import add_contribution as add_dbf_contribution
 from src.service.devil_fruit_service import get_ability_value
 from src.service.group_service import allow_unlimited_bounty_from_messages
 from src.service.income_tax_service import (
@@ -267,6 +269,7 @@ async def add_or_remove_bounty(
     tax_event_type: IncomeTaxEventType = None,
     event_id: int = None,
     raise_error_if_negative_bounty: bool = True,
+    opponent: User = None,
 ) -> None:
     """
     Adds a bounty to a user
@@ -285,6 +288,8 @@ async def add_or_remove_bounty(
     :param tax_event_type: The tax event type
     :param event_id: The event id
     :param raise_error_if_negative_bounty: Whether to raise an error if the user has negative
+    :param opponent: The opponent from which the bounty is being taken
+    contribution if there is an active challenge
     bounty after the update
 
     :return: The updated user
@@ -435,6 +440,12 @@ async def add_or_remove_bounty(
 
             if should_save:
                 user.save()
+
+            # Active Davy Back Fight, add net amount to participant contribution
+            if tax_event_type in DavyBackFight.get_contribution_events():
+                context.application.create_task(
+                    add_dbf_contribution(user, net_amount_without_pending, opponent)
+                )
 
     # Update the user's location
     if should_update_location:
