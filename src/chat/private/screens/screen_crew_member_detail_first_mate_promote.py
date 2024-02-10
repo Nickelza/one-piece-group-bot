@@ -48,9 +48,19 @@ async def manage(
                 phrases.CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD
             )
 
+        # Crew in a Davy Back Fight or has a Penalty
+        if crew.has_active_davy_back_fight() or crew.has_penalty_davy_back_fight():
+            raise CrewValidationException(
+                phrases.CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_DAVY_BACK_FIGHT
+            )
+
     except CrewValidationException as cve:
         await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
+            context,
+            cve.message,
+            update=update,
+            inbound_keyboard=inbound_keyboard,
+            show_alert=True,
         )
         return
 

@@ -857,27 +857,31 @@ CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION = Environment(
     "CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION", default_value="7"
 )
 # After long in minutes before a Davy Back Fight request expire. Default: 15 minutes
-CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME = Environment(
-    "CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME", default_value="15"
+DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME = Environment(
+    "DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME", default_value="15"
 )
 # How long in minutes after opponent confirmation will the Davy Back Fight start.
 # Default: 15 minutes
-CREW_DAVY_BACK_FIGHT_START_WAIT_TIME = Environment(
-    "CREW_DAVY_BACK_FIGHT_START_WAIT_TIME", default_value="15"
+DAVY_BACK_FIGHT_START_WAIT_TIME = Environment(
+    "DAVY_BACK_FIGHT_START_WAIT_TIME", default_value="15"
 )
 # How long a Davy Back Fight lasts in hours. Default 24 hours
-CREW_DAVY_BACK_FIGHT_DURATION = Environment("CREW_DAVY_BACK_FIGHT_DURATION", default_value="24")
+DAVY_BACK_FIGHT_DURATION = Environment("DAVY_BACK_FIGHT_DURATION", default_value="24")
 # How long before bounty reset can a DBF be initiated in hours. Default: 48 hours
-CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION = Environment(
-    "CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION", default_value="48"
+DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION = Environment(
+    "DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION", default_value="48"
 )
-# How long should the penalty last after losing a DBF in hours. Default: 168 (7 days)
-CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION = Environment(
-    "CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION", default_value="168"
+# How long should the penalty last after losing a DBF in days. Default: 7
+DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION = Environment(
+    "DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION", default_value="7"
 )
 # Minimum number of members required to start a DBF. Default: 3
-CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS = Environment(
-    "CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS", default_value="3"
+DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS = Environment(
+    "DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS", default_value="3"
+)
+# How much percent of Crew chest should be taken from the loser after a DBF. Default: 50%
+DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE = Environment(
+    "DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE", default_value="50"
 )
 
 

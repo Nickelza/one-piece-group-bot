@@ -776,6 +776,7 @@ CREW_OVERVIEW = (
     "{}"  # Pending chest
     "{}"  # Abilities
     "{}"  # No new members allowed
+    "{}"  # Davy Back Fight penalty active
 )
 CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT = "\n*Active abilities*: {} \\(Max. {}\\)"
@@ -786,6 +787,10 @@ CREW_OVERVIEW_REQUIRED_BOUNTY = "\n\n*Required bounty*: ฿{}"
 
 CREW_OVERVIEW_NO_NEW_MEMBERS_ALLOWED = (
     "\n\n_No new members allowed until the next weekly leaderboard in {}_"
+)
+CREW_OVERVIEW_DAVY_BACK_FIGHT_PENALTY_ACTIVE = (
+    f"\n\n_{Emoji.LOG_NEGATIVE}Davy Back Fight penalty active for the next "
+    "*{}*, no member can leave the Crew._"
 )
 CREW_OVERVIEW_DESCRIPTION_NOT_SET = "No description set"
 CREW_MEMBER_ITEM_TEXT = "{}"
@@ -914,7 +919,13 @@ CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE = "The Crew already has a
 CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD = (
     "You cannot promote a member to First Mate until the next weekly leaderboard in {}"
 )
-CREW_FIRST_MATE_PRIVILEGES = "\n• Accept new members \n• Activate Crew Abilities"
+CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_DAVY_BACK_FIGHT = (
+    "You cannot promote a member to First Mate during an active Davy Back Fight or the penalty"
+    " period following a loss"
+)
+CREW_FIRST_MATE_PRIVILEGES = (
+    "\n• Accept new members \n• Activate Crew Abilities\n• Activate Crew Abilities"
+)
 CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION = (
     "Are you sure you want to promote {} to First Mate?\nThey will gain the following privileges:"
     + CREW_FIRST_MATE_PRIVILEGES
@@ -1012,7 +1023,7 @@ CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT = (
 CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONTRIBUTIONS = (
     "\n\n*Total gained*: ฿{}\n*Opponent total gained*: ฿{}\n*Top Crew Player*: {}\\(฿{}\\)"
 )
-CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END = "\n\nPenalty end: {}{}{}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END = "\n\nPenalty end: {}{}"
 CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER = "\nConscripted member: {}"
 
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_SAME_CREW = "Cannot challenge your own Crew"
@@ -1029,9 +1040,23 @@ CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_TOO_LATE = (
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS = (
     "Crew must have at least {} members to participate in a Davy Back Fight"
 )
-# TODO add info about dbf
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
+    "Every net bounty gained from challenges, fights and plunders will be considered towards"
+    " the Crew's total gain.\n- Bounty gained from same Crew members are not considered\n- Bounty"
+    " gained from non-players of the opponents Crew are valued half\n- Half of any new Crew chest"
+    " contribution will frozen\n- The players from the winner Crew will receive the frozen chest"
+    " contribution from the opponent Crew, proportionally to their contribution"
+)
 CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
-    "How many members from each Crew will participate in the Davy Back Fight?"
+    f"A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2"
+    f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n- Winner Crew will receive"
+    f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"
+    f" for a penalty period of {Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()} days\n- Winner"
+    " Crew can recruit any member from the opponent Crew that participated in the challenge"
+    " \\(apart from Captain and First Mate\\), and the new recruit can't leave the Crew until the"
+    " penalty period is over\nDuring the Davy Back Fight and eventual penalty period in case of"
+    " loss, no one can leave the Crew\n\n\nHow many members from each Crew will participate in"
+    " the Davy Back Fight?"
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION = (
     "Are you sure you want to challenge *{}* to a Davy Back Fight with {} members from each Crew?"
@@ -1047,7 +1072,7 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
     "Davy Back Fight against {} accepted, it will start in"
-    f" {Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
+    f" {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
     " and change the players"
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"
@@ -1071,14 +1096,23 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS = "*Team Mates*{}\n\n*Opponents*{}"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM = "\n{} - ฿{}"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM_POTENTIAL_WIN = "\nPotential win: ฿{}\n"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM_WIN = "\nWin: ฿{}\n"
-CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES = (
-    "\n\n_Every net bounty gained from challenges, fights and plunders will be considered towards"
-    " the Crew's total gain.\n- Bounty gained from same Crew members are not considered\n- Bounty"
-    " gained from non-players of the opponents Crew are valued half\n- Half of any new Crew chest"
-    " contribution will frozen\n- The players from the winner Crew will receive the frozen chest"
-    " contribution from the opponent Crew, proportionally to their contribution\n\n*Remaining"
-    " time*: {}_"
+
+CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_WITH_TIME = (
+    f"\n\n_{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}\n\n*Remaining time*: {{}}_"
 )
+CREW_DAVY_BACK_FIGHT_WON = (
+    f"\n\n_For the next *{{}}* days, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
+    " opponent new Crew Chest gain will be given to your Crew.\nFurthermore, your Crew Captain"
+    " can recruit any member of the opponent Crew that participated \\(apart from Captain and"
+    " First Mate\\), who can't leave your Crew until the penalty period is over._"
+)
+CREW_DAVY_BACK_FIGHT_LOST = (
+    f"\n\n_For the next *{{}}* days, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
+    " new Crew Chest gain will be given to the opponent Crew.\nFurthermore, the opponent Crew can"
+    " recruit any member of your Crew that participated \\(apart from Captain and First Mate\\),"
+    " who can't leave the opponent Crew until the penalty period is over._"
+)
+
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1276,7 +1310,7 @@ CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY = "Join request rejected"
 # Notification - Davy Back Fight request accepted
 DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION = (
     "{} has accepted your Crew's Davy Back Fight challenge, it will start in"
-    f" {Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
+    f" {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
     " and change the players"
 )
 DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION = (
@@ -1296,12 +1330,29 @@ DAVY_BACK_FIGHT_REQUEST_REJECTED_NOTIFICATION_KEY = "Challenge rejected"
 # Notification - Davy Back Fight start
 DAVY_BACK_FIGHT_START_NOTIFICATION = (
     "You have been chosen as a Player for a Davy Back Fight against {}!"
-    + CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES
+    + CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_WITH_TIME
 )
 DAVY_BACK_FIGHT_START_NOTIFICATION_DESCRIPTION = (
     "If to be notified when a Davy Back Fight in which you are a Player starts"
 )
 DAVY_BACK_FIGHT_START_NOTIFICATION_KEY = "Start"
+# Notification - Davy Back Fight end
+DAVY_BACK_FIGHT_END_NOTIFICATION = ""
+DAVY_BACK_FIGHT_END_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when a Davy Back Fight in which you are a Player ends"
+)
+DAVY_BACK_FIGHT_END_NOTIFICATION_KEY = "End"
+DAVY_BACK_FIGHT_END_NOTIFICATION_WON = (
+    f"{Emoji.CONFETTI}Congratulations, your Crew has won the Davy Back Fight against "
+    "{}!\n\nYou have earned"
+    " ฿*{}* for contributing to {}% of the total"
+    f" gain.{CREW_DAVY_BACK_FIGHT_WON.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION)}"
+)
+DAVY_BACK_FIGHT_END_NOTIFICATION_LOST = (
+    f"{Emoji.LOG_NEGATIVE}Your Crew has lost the Davy Back Fight against "
+    "{}."
+    f"{CREW_DAVY_BACK_FIGHT_LOST.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION)}"
+)
 
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (

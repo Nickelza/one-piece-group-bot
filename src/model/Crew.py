@@ -414,7 +414,7 @@ class Crew(BaseModel):
                     > (
                         datetime.datetime.now()
                         - datetime.timedelta(
-                            hours=Env.CREW_DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int()
+                            hours=Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int()
                         )
                     )
                 )

@@ -982,6 +982,12 @@ class IncomeTaxEventLog(Log):
                         screen=Screen.PVT_PREDICTION_DETAIL,
                     )
 
+                case IncomeTaxEventType.DAVY_BACK_FIGHT:
+                    event_log_url = get_deeplink(
+                        {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
+                        screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+                    )
+
         breakdown_list = IncomeTaxBreakdown.from_string(self.object.breakdown_list)
         deduction_list = IncomeTaxDeduction.from_string(self.object.deduction_list)
         contribution_list = IncomeTaxContribution.from_string(self.object.contribution_list)

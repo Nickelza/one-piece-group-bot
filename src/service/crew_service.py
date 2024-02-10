@@ -464,6 +464,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
     active_abilities_text = ""
     no_new_members_allowed_text = ""
     pending_chest = ""
+    davy_back_fight_penalty_active = ""
 
     if from_search:
         if not crew.allow_view_in_search:
@@ -504,6 +505,15 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
                 get_remaining_time_to_next_leaderboard()
             )
 
+    # Crew has a Davy Back Fight penalty
+    dbf_penalty: DavyBackFight = crew.get_penalty_davy_back_fight()
+    if dbf_penalty is not None:
+        davy_back_fight_penalty_active = (
+            phrases.CREW_OVERVIEW_DAVY_BACK_FIGHT_PENALTY_ACTIVE.format(
+                get_remaining_duration(dbf_penalty.penalty_end_date)
+            )
+        )
+
     captain: User = crew.get_captain()
 
     ot_text = phrases.CREW_OVERVIEW.format(
@@ -526,6 +536,7 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         pending_chest,
         active_abilities_text,
         no_new_members_allowed_text,
+        davy_back_fight_penalty_active,
     )
 
     return ot_text

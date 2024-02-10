@@ -16,7 +16,7 @@ from src.service.crew_service import get_crew
 from src.service.date_service import (
     get_remaining_duration,
     default_datetime_format,
-    datetime_is_before,
+    datetime_is_after,
 )
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send
@@ -109,21 +109,21 @@ class CrewDavyBackFightListPage(ListPage):
                         self.object.conscript.get_markdown_mention()
                     )
                 )
-            end_date_remaining_time = (
-                phrases.DATETIME_REMAINING_PARENTHESIS.format(
-                    get_remaining_duration(self.object.penalty_end_date)
-                )
-                if datetime_is_before(self.object.penalty_end_date)
-                else ""
-            )
             end_text = phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END.format(
                 default_datetime_format(self.object.penalty_end_date),
-                end_date_remaining_time,
                 conscripted_member_text,
             )
+
+            # Add penalty rules
+            if datetime_is_after(self.object.penalty_end_date):
+                penalty_remaining = get_remaining_duration(self.object.penalty_end_date)
+                if self.crew == self.object.get_winner_crew():
+                    end_text += phrases.CREW_DAVY_BACK_FIGHT_WON.format(penalty_remaining)
+                else:
+                    end_text += phrases.CREW_DAVY_BACK_FIGHT_LOST.format(penalty_remaining)
         else:
             # Add rules
-            end_text += phrases.CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES.format(
+            end_text += phrases.CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_WITH_TIME.format(
                 self.object.get_remaining_time()
             )
 

@@ -104,14 +104,13 @@ async def validate(
 
         # Challenger or opponent crew does not have the minimum required members
         if (
-            challenger_crew.get_member_count()
-            < Env.CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+            challenger_crew.get_member_count() < Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
             or opponent_crew.get_member_count()
-            < Env.CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+            < Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
         ):
             raise CrewValidationException(
                 phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS.format(
-                    Env.CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+                    Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
                 )
             )
 
@@ -144,12 +143,12 @@ async def validate(
         if datetime_is_before(
             get_next_bounty_reset_time(),
             get_datetime_in_future_hours(
-                Env.CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION.get_int()
+                Env.DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION.get_int()
             ),
         ):
             raise CrewValidationException(
                 phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_TOO_LATE.format(
-                    Env.CREW_DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION.get_int()
+                    Env.DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION.get_int()
                 )
             )
 
@@ -184,7 +183,7 @@ async def request_number_of_participants(
     :return: None
     """
 
-    min_participants = Env.CREW_DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+    min_participants = Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
     max_participants = min(challenger_crew.get_member_count(), opponent_crew.get_member_count())
 
     # Create numeric keyboard with all possible values
@@ -244,9 +243,7 @@ async def request_confirmation(
         phrases.CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION.format(
             opponent_crew.get_name_escaped(),
             inbound_keyboard.get(ReservedKeyboardKeys.NUMBER),
-            convert_minutes_to_duration(
-                Env.CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()
-            ),
+            convert_minutes_to_duration(Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
         ),
         update=update,
         keyboard=inline_keyboard,
@@ -281,7 +278,7 @@ async def send_request_to_captain(
     ot_text_for_captain = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST.format(
         challenger_crew.get_name_with_deeplink(),
         participants_count,
-        convert_minutes_to_duration(Env.CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
+        convert_minutes_to_duration(Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
     )
 
     inline_keyboard: list[list[Keyboard]] = [

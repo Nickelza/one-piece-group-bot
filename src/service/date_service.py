@@ -532,6 +532,20 @@ def datetime_is_before(
     return dt < starting_date
 
 
+def datetime_is_after(
+    dt: datetime, starting_date: datetime = None, tz: pytz.tzinfo = None
+) -> bool:
+    """
+    Check if the datetime is after the current datetime
+    :param dt: The datetime
+    :param starting_date: The starting date
+    :param tz: The timezone
+    :return: Whether the datetime is after the current datetime
+    """
+
+    return not datetime_is_before(dt, starting_date, tz)
+
+
 def get_datetime_from_natural_language(text: str, user: User) -> datetime.datetime:
     """
     Get the datetime from a natural language string

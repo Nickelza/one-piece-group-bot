@@ -21,6 +21,7 @@ class DavyBackFightParticipant(BaseModel):
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="davy_back_fight_participants")
     contribution: int | BigIntegerField = BigIntegerField(default=0)
     date = DateTimeField(default=datetime.now)
+    win_amount: int | BigIntegerField = BigIntegerField(null=True)
 
     class Meta:
         db_table = "davy_back_fight_participant"

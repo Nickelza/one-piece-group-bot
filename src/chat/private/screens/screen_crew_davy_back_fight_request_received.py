@@ -107,10 +107,10 @@ async def accept(context: ContextTypes.DEFAULT_TYPE, davy_back_fight: DavyBackFi
         set_default_participants(davy_back_fight.challenger_crew, davy_back_fight)
         set_default_participants(davy_back_fight.opponent_crew, davy_back_fight)
         davy_back_fight.start_date = get_datetime_in_future_minutes(
-            Env.CREW_DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
+            Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
         )
         davy_back_fight.end_date = get_datetime_in_future_hours(
-            Env.CREW_DAVY_BACK_FIGHT_DURATION.get_int(), start_time=davy_back_fight.start_date
+            Env.DAVY_BACK_FIGHT_DURATION.get_int(), start_time=davy_back_fight.start_date
         )
         davy_back_fight.save()
 

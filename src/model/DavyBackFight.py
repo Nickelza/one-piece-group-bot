@@ -8,6 +8,7 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
+from src.model.game.GameOutcome import GameOutcome
 
 
 class DavyBackFight(BaseModel):
@@ -36,6 +37,7 @@ class DavyBackFight(BaseModel):
     )
     conscript_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     penalty_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    penalty_payout: int | BigIntegerField = BigIntegerField(default=0)
 
     class Meta:
         db_table = "davy_back_fight"
@@ -51,9 +53,7 @@ class DavyBackFight(BaseModel):
             DavyBackFight.date
             < (
                 datetime.datetime.now()
-                - datetime.timedelta(
-                    minutes=Env.CREW_DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()
-                )
+                - datetime.timedelta(minutes=Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int())
             ),
         ).execute()
 
@@ -206,6 +206,20 @@ class DavyBackFight(BaseModel):
         from src.service.date_service import get_remaining_duration
 
         return get_remaining_duration(self.end_date)
+
+    def get_outcome(self) -> GameOutcome:
+        """
+        Get the outcome of the game
+        :return: The outcome
+        """
+        from src.model.DavyBackFightParticipant import DavyBackFightParticipant
+
+        if DavyBackFightParticipant.get_total_contributions(
+            self, self.challenger_crew
+        ) >= DavyBackFightParticipant.get_total_contributions(self, self.opponent_crew):
+            return GameOutcome.CHALLENGER_WON
+
+        return GameOutcome.OPPONENT_WON
 
 
 DavyBackFight.create_table()

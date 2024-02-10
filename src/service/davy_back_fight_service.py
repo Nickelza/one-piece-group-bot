@@ -2,14 +2,21 @@ import datetime
 
 from telegram.ext import CallbackContext, ContextTypes
 
+import resources.Environment as Env
 from resources import phrases
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
 from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.Notification import DavyBackFightStartNotification
+from src.model.enums.Notification import (
+    DavyBackFightStartNotification,
+    DavyBackFightEndNotification,
+)
+from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CustomException import CrewValidationException
+from src.model.game.GameOutcome import GameOutcome
+from src.service.date_service import get_datetime_in_future_days
 from src.service.notification_service import send_notification
 
 
@@ -165,3 +172,67 @@ async def add_contribution(user: User, amount: int, opponent: User = None):
 
     participant.contribution += amount
     participant.save()
+
+
+async def end_all(context: ContextTypes.DEFAULT_TYPE):
+    """
+    End all the Davy Back Fights
+    :param context: The context object
+    :return: None
+    """
+
+    for davy_back_fight in DavyBackFight.select().where(
+        (DavyBackFight.status == GameStatus.IN_PROGRESS)
+        & (DavyBackFight.end_date < datetime.datetime.now())
+    ):
+        context.application.create_task(end(context, davy_back_fight))
+
+
+async def end(context: CallbackContext, davy_back_fight: DavyBackFight):
+    """
+    End a Davy Back Fight
+    :param context: The context object
+    :param davy_back_fight: The Davy Back Fight object
+    :return: None
+    """
+    from src.service.bounty_service import add_or_remove_bounty
+
+    outcome: GameOutcome = davy_back_fight.get_outcome()
+    if outcome is GameOutcome.CHALLENGER_WON:
+        winner_crew = davy_back_fight.challenger_crew
+        davy_back_fight.status = GameStatus.WON
+    else:
+        winner_crew = davy_back_fight.opponent_crew
+        davy_back_fight.status = GameStatus.LOST
+
+    davy_back_fight.penalty_end_date = get_datetime_in_future_days(
+        Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int(), start_time=davy_back_fight.end_date
+    )
+    davy_back_fight.save()
+
+    # Send notification to players
+    participants: list[DavyBackFightParticipant] = davy_back_fight.get_participants()
+    for participant in participants:
+        if participant.crew == winner_crew:
+            participant.win_amount = participant.get_win_amount()
+            participant.save()
+
+        # Add amount
+        context.application.create_task(
+            add_or_remove_bounty(
+                participant.user,
+                amount=participant.win_amount,
+                context=context,
+                should_save=True,
+                tax_event_type=IncomeTaxEventType.DAVY_BACK_FIGHT,
+                event_id=davy_back_fight.id,
+            )
+        )
+
+        await send_notification(
+            context,
+            participant.user,
+            DavyBackFightEndNotification(
+                davy_back_fight.get_opponent_crew(participant.crew), participant
+            ),
+        )

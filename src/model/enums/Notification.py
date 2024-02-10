@@ -8,6 +8,7 @@ from src.model.BountyLoan import BountyLoan
 from src.model.Crew import Crew
 from src.model.CrewAbility import CrewAbility
 from src.model.DavyBackFight import DavyBackFight
+from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.DevilFruit import DevilFruit
 from src.model.Game import Game
 from src.model.ImpelDownLog import ImpelDownLog
@@ -25,12 +26,14 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import default_datetime_format, convert_days_to_duration
 from src.service.date_service import get_remaining_duration
+from src.service.math_service import format_percentage_value
 from src.service.message_service import (
     get_image_preview,
     escape_valid_markdown_chars,
     mention_markdown_user,
     get_message_url,
 )
+from src.service.string_service import get_belly_formatted
 
 
 class NotificationCategory(IntEnum):
@@ -99,6 +102,7 @@ class NotificationType(IntEnum):
     DAVY_BACK_FIGHT_REQUEST_ACCEPTED = 30
     DAVY_BACK_FIGHT_REQUEST_REJECTED = 31
     DAVY_BACK_FIGHT_START = 32
+    DAVY_BACK_FIGHT_END = 33
 
 
 class Notification:
@@ -1145,6 +1149,47 @@ class DavyBackFightStartNotification(Notification):
         )
 
 
+class DavyBackFightEndNotification(Notification):
+    """Class for davy back fight end notifications."""
+
+    def __init__(self, opponent_crew: Crew = None, participant: DavyBackFightParticipant = None):
+        """
+        Constructor
+        """
+
+        self.opponent_crew: Crew = opponent_crew
+        self.participant: DavyBackFightParticipant = participant
+        self.davy_back_fight: DavyBackFight = participant.davy_back_fight if participant else None
+        item_id = self.davy_back_fight.id if self.davy_back_fight is not None else None
+
+        super().__init__(
+            NotificationCategory.DAVY_BACK_FIGHT,
+            NotificationType.DAVY_BACK_FIGHT_END,
+            phrases.DAVY_BACK_FIGHT_END_NOTIFICATION,
+            phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_DESCRIPTION,
+            phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+            item_info={
+                ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id,
+                ReservedKeyboardKeys.DIRECT_ITEM: False,
+            },
+            go_to_item_button_text=phrases.KEY_VIEW,
+            item_previous_screens=[Screen.PVT_CREW],
+        )
+
+    def build(self) -> str:
+        if self.participant.in_winner_crew():
+            return phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_WON.format(
+                self.opponent_crew.get_name_with_deeplink(add_level=False),
+                get_belly_formatted(self.participant.win_amount),
+                format_percentage_value(self.participant.get_contribution_percentage()),
+            )
+
+        return phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_LOST.format(
+            self.opponent_crew.get_name_with_deeplink(add_level=False),
+        )
+
+
 class ImpelDownBailPostedNotification(Notification):
     """Class for impel down bail posted notifications."""
 
@@ -1208,6 +1253,7 @@ NOTIFICATIONS = [
     DavyBackFightRequestAcceptedNotification(),
     DavyBackFightRequestRejectedNotification(),
     DavyBackFightStartNotification(),
+    DavyBackFightEndNotification(),
 ]
 
 
