@@ -9,6 +9,7 @@ from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameOutcome import GameOutcome
+from src.service.string_service import get_belly_formatted
 
 
 class DavyBackFight(BaseModel):
@@ -220,6 +221,23 @@ class DavyBackFight(BaseModel):
             return GameOutcome.CHALLENGER_WON
 
         return GameOutcome.OPPONENT_WON
+
+    def get_penalty_payout(self):
+        """
+        Get the penalty payout
+        :return: The penalty payout
+        """
+        if self.get_status() is GameStatus.WON:
+            return self.challenger_chest + self.penalty_payout
+
+        return self.opponent_chest + self.penalty_payout
+
+    def get_penalty_payout_formatted(self):
+        """
+        Get the penalty payout formatted
+        :return: The penalty payout formatted
+        """
+        return get_belly_formatted(self.get_penalty_payout())
 
 
 DavyBackFight.create_table()

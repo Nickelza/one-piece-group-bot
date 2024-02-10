@@ -409,15 +409,7 @@ class Crew(BaseModel):
                         & (DavyBackFight.status == GameStatus.WON)
                     )
                 )
-                & (
-                    DavyBackFight.end_date
-                    > (
-                        datetime.datetime.now()
-                        - datetime.timedelta(
-                            hours=Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int()
-                        )
-                    )
-                )
+                & (DavyBackFight.penalty_end_date > datetime.datetime.now())
             )
             .get_or_none()
         )

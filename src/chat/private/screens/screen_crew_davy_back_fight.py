@@ -103,6 +103,18 @@ class CrewDavyBackFightListPage(ListPage):
         end_text = ""
         if self.effective_status.is_finished():
             conscripted_member_text = ""
+
+            if self.object.get_winner_crew() == self.crew:
+                penalty_payout_text = (
+                    phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENALTY_RECEIVED.format(
+                        self.object.get_penalty_payout_formatted()
+                    )
+                )
+            else:
+                penalty_payout_text = phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENALTY_PAID.format(
+                    self.object.get_penalty_payout_formatted()
+                )
+
             if self.object.conscript is not None:
                 conscripted_member_text = (
                     phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER.format(
@@ -111,6 +123,7 @@ class CrewDavyBackFightListPage(ListPage):
                 )
             end_text = phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END.format(
                 default_datetime_format(self.object.penalty_end_date),
+                penalty_payout_text,
                 conscripted_member_text,
             )
 
@@ -122,6 +135,14 @@ class CrewDavyBackFightListPage(ListPage):
                 else:
                     end_text += phrases.CREW_DAVY_BACK_FIGHT_LOST.format(penalty_remaining)
         else:
+            if self.object.in_progress():
+                # Pending chest
+                contributions_text += (
+                    phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENDING_CHEST.format(
+                        get_belly_formatted(self.object.get_chest_amount(self.crew))
+                    )
+                )
+
             # Add rules
             end_text += phrases.CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_WITH_TIME.format(
                 self.object.get_remaining_time()
@@ -190,12 +211,26 @@ class CrewDavyBackFightListPage(ListPage):
             ),
         ]
 
-    def get_direct_item(self) -> DavyBackFight:
+    def get_direct_item(self) -> DavyBackFight | None:
         """
         Get active DavyBackFight
         """
+        # If they have only one DBF, return that
+        all_items = self.get_items(1)
+        if len(all_items) == 1:
+            return all_items[0]
 
-        return self.crew.get_active_davy_back_fight()
+        # If they have an active DBF, return that
+        active_dbf: DavyBackFight = self.crew.get_active_davy_back_fight()
+        if active_dbf:
+            return active_dbf
+
+        # If they have a penalty DBF, return that
+        penalty_dbf: DavyBackFight = self.crew.get_penalty_davy_back_fight()
+        if penalty_dbf:
+            return penalty_dbf
+
+        return None
 
 
 async def manage(

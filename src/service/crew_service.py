@@ -34,6 +34,7 @@ from src.service.date_service import (
     get_elapsed_duration,
 )
 from src.service.location_service import update_location
+from src.service.math_service import get_value_from_percentage
 from src.service.message_service import get_deeplink
 from src.service.notification_service import send_notification
 
@@ -84,7 +85,7 @@ async def remove_member(
         raise ChatWarning(phrases.CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT)
 
     # Crew with a Davy Back Fight penalty
-    if crew.has_davy_back_fight_penalty():
+    if crew.has_penalty_davy_back_fight():
         raise ChatWarning(phrases.CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY)
 
     crew_member.crew = None
@@ -180,7 +181,7 @@ async def disband_crew(
         raise ChatWarning(phrases.CREW_DISBAND_ACTIVE_DAVY_BACK_FIGHT)
 
     # Crew with a Davy Back Fight penalty
-    if crew.has_davy_back_fight_penalty():
+    if crew.has_penalty_davy_back_fight():
         raise ChatWarning(phrases.CREW_DISBAND_DAVY_BACK_FIGHT_PENALTY)
 
     crew_members: list[User] = crew.get_members()
@@ -263,17 +264,6 @@ def add_to_crew_chest(user: User, amount: int) -> None:
 
     crew: Crew = user.crew
 
-    # Crew in an active Davy Back Fight, add half to that
-    dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
-    if dbf is not None:
-        amount //= 2
-
-        if dbf.challenger_crew == crew:
-            dbf.challenger_chest += amount
-        else:
-            dbf.opponent_chest += amount
-        dbf.save()
-
     crew.chest_amount += amount
     crew.total_gained_chest_amount += amount
     crew.save()
@@ -291,6 +281,36 @@ def add_to_crew_chest(user: User, amount: int) -> None:
     contribution.amount += amount
     contribution.last_contribution_date = datetime.now()
     contribution.save()
+
+    # Crew in an active Davy Back Fight, add half to that
+    active_dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
+    if active_dbf is not None:
+        amount_to_freeze = amount // 2
+        if active_dbf.challenger_crew == crew:
+            active_dbf.challenger_chest += amount_to_freeze
+        else:
+            active_dbf.opponent_chest += amount_to_freeze
+        active_dbf.save()
+
+        crew.chest_amount -= amount_to_freeze
+        crew.save()
+    else:
+        # Crew has penalty DBF, pay the opponent Crew
+        penalty_dbf: DavyBackFight = crew.get_penalty_davy_back_fight()
+        if penalty_dbf is not None:
+            penalty_amount = get_value_from_percentage(
+                amount, Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get_int()
+            )
+
+            opponent_crew = penalty_dbf.get_opponent_crew(crew)
+            opponent_crew.chest_amount += penalty_amount
+            opponent_crew.total_gained_chest_amount += penalty_amount
+            crew.chest_amount -= penalty_amount
+            penalty_dbf.penalty_payout += penalty_amount
+
+            crew.save()
+            opponent_crew.save()
+            penalty_dbf.save()
 
 
 def get_crew_abilities_text(
@@ -463,7 +483,6 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
     treasure_chest_text = ""
     active_abilities_text = ""
     no_new_members_allowed_text = ""
-    pending_chest = ""
     davy_back_fight_penalty_active = ""
 
     if from_search:
@@ -491,13 +510,6 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         active_abilities_text = phrases.CREW_OVERVIEW_ACTIVE_ABILITIES.format(
             get_crew_abilities_text(crew=crew)
         )
-
-        # Add pending chest if in active DBF
-        dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
-        if dbf is not None:
-            pending_chest = phrases.CREW_OVERVIEW_PENDING_CHEST.format(
-                get_belly_formatted(dbf.get_chest_amount(crew))
-            )
 
         # No new members allowed
         if not crew.can_accept_new_members:
@@ -533,7 +545,6 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         active_abilities_count_text,
         required_bounty_text,
         treasure_chest_text,
-        pending_chest,
         active_abilities_text,
         no_new_members_allowed_text,
         davy_back_fight_penalty_active,

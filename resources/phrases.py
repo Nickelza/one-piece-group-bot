@@ -773,7 +773,6 @@ CREW_OVERVIEW = (
     "{}"  # Active abilities count
     "{}"  # Required bounty
     "{}"  # Treasure chest
-    "{}"  # Pending chest
     "{}"  # Abilities
     "{}"  # No new members allowed
     "{}"  # Davy Back Fight penalty active
@@ -781,7 +780,6 @@ CREW_OVERVIEW = (
 CREW_OVERVIEW_FIRST_MATE = "\n*First Mate*: {}"
 CREW_OVERVIEW_ACTIVE_ABILITIES_COUNT = "\n*Active abilities*: {} \\(Max. {}\\)"
 CREW_OVERVIEW_TREASURE_CHEST = "\n\n*Treasure Chest*: ฿{}"
-CREW_OVERVIEW_PENDING_CHEST = "\n*Pending Chest*: ฿{}"
 CREW_OVERVIEW_ACTIVE_ABILITIES = "\n\n*Abilities*{}"
 CREW_OVERVIEW_REQUIRED_BOUNTY = "\n\n*Required bounty*: ฿{}"
 
@@ -1021,10 +1019,13 @@ CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT = (
     "*{}*: {}\n\n*Start date*: {}\n*End date*: {}\n*Players*: {}{}\n\n{}{}"
 )
 CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONTRIBUTIONS = (
-    "\n\n*Total gained*: ฿{}\n*Opponent total gained*: ฿{}\n*Top Crew Player*: {}\\(฿{}\\)"
+    "\n\n*Total gained*: ฿{}\n*Opponent total gained*: ฿{}\n*Top Crew Player*: {} \\(฿{}\\)"
 )
-CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END = "\n\nPenalty end: {}{}"
-CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER = "\nConscripted member: {}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENDING_CHEST = "\n*Frozen Chest*: ฿{}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_END = "\n\n*Penalty end*: {}{}{}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENALTY_PAID = "\n*Penalty paid*: {}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_PENALTY_RECEIVED = "\n*Penalty payment received*: {}"
+CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_CONSCRIPTED_MEMBER = "\n\n*Conscripted member*: {}"
 
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_SAME_CREW = "Cannot challenge your own Crew"
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_ALREADY_IN_FIGHT = "Crew already in a Davy Back Fight"
