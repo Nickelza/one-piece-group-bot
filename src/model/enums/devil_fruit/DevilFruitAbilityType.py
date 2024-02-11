@@ -45,17 +45,6 @@ class DevilFruitAbilityType(IntEnum):
 
         return DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP[self]
 
-    @staticmethod
-    def get_random() -> "DevilFruitAbilityType":
-        """
-        Get a random devil fruit ability type
-        :return: A random devil fruit ability type
-        """
-
-        from random import choice
-
-        return choice(list(DevilFruitAbilityType))
-
 
 DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {
     DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION: phrases.ABILITY_TYPE_DOC_Q_COOLDOWN_DURATION,

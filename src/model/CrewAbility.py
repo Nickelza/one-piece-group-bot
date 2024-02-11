@@ -1,4 +1,5 @@
 import datetime
+from random import choice
 
 from peewee import *
 
@@ -68,6 +69,15 @@ class CrewAbility(BaseModel):
             for ability_type in DevilFruitAbilityType
             if ability_type not in CrewAbility.get_not_allowed_ability_types()
         ]
+
+    @staticmethod
+    def get_random_ability() -> "DevilFruitAbilityType":
+        """
+        Get a random devil fruit ability type
+        :return: A random devil fruit ability type
+        """
+
+        return choice(list(CrewAbility.get_allowed_ability_types()))
 
 
 CrewAbility.create_table()
