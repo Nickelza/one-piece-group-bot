@@ -371,7 +371,7 @@ async def full_message_send(
     if show_alert:
         answer_callback = True
 
-    if update.callback_query is None:
+    if update and update.callback_query is None:
         answer_callback = False
 
     if text is not None and parse_mode == c.TG_PARSE_MODE_MARKDOWN and not answer_callback:
