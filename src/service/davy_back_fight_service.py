@@ -107,7 +107,7 @@ async def start_all(context: ContextTypes.DEFAULT_TYPE):
 
     for davy_back_fight in DavyBackFight.select().where(
         (DavyBackFight.status == GameStatus.COUNTDOWN_TO_START)
-        & (DavyBackFight.date < datetime.datetime.now())
+        & (DavyBackFight.date > datetime.datetime.now())
     ):
         context.application.create_task(start(context, davy_back_fight))
 
