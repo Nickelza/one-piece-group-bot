@@ -139,10 +139,6 @@ async def validate(
         if opponent.is_arrested():
             raise OpponentValidationException()
 
-        # Opponent in your same crew
-        if user.is_crew_member() and user.crew == opponent.crew:
-            raise OpponentValidationException(phrases.PLUNDER_CANNOT_PLUNDER_CREW_MEMBER)
-
     except OpponentValidationException as ove:
         if ove.message is not None:
             await full_message_or_media_send_or_edit(context, ove.message, update)

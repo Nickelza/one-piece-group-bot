@@ -1858,8 +1858,6 @@ ABILITY_TYPE_PLUNDER_COOLDOWN_DURATION = "Plunder Cooldown"
 ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION = "Plunder Immunity"
 ABILITY_TYPE_PLUNDER_SENTENCE_DURATION = "Plunder Sentence"
 
-
-PLUNDER_CANNOT_PLUNDER_CREW_MEMBER = "You cannot plunder a member of your own Crew"
 PLUNDER_CANNOT_PLUNDER_USER = "You cannot plunder this user"
 PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{}*"
 PLUNDER_CONFIRMATION_REQUEST = (
