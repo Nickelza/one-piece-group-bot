@@ -3,10 +3,13 @@ from telegram.ext import ContextTypes
 
 from resources import phrases
 from src.chat.private.screens.screen_crew_davy_back_fight import CrewDavyBackFightListPage
+from src.model.Crew import Crew
+from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
+from src.service.crew_service import get_crew
 from src.service.list_service import get_show_list_button
 from src.service.message_service import full_message_send
 
@@ -24,9 +27,10 @@ async def manage(
     """
 
     dbf_list_page = CrewDavyBackFightListPage()
+    crew: Crew = get_crew(user)
 
     dbf_list_page.user = user
-    dbf_list_page.crew = user.crew
+    dbf_list_page.crew = crew
     dbf_list_page.init_legend_filter_results()
     dbf_list_page.set_object(inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
 
@@ -38,6 +42,24 @@ async def manage(
             screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW,
         )
     ]]
+
+    # Conscript opponent button, only for Captain
+    dbf: DavyBackFight = dbf_list_page.object
+    if (
+        user.is_crew_captain()
+        and dbf.has_ended()
+        and dbf.is_winner_crew(crew)
+        and dbf.in_penalty_period()
+        and dbf.conscript is None
+    ):
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT,
+                inbound_info=inbound_keyboard.info,
+                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_CONSCRIPT_OPPONENT,
+            )
+        ])
+
     if (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info
         and inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM]

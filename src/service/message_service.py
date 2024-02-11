@@ -926,6 +926,8 @@ def get_yes_no_keyboard(
     exclude_yes_button: bool = False,
     exclude_no_button: bool = False,
     authorized_users: list[User] = None,
+    yes_keys_to_exclude: list[str] = None,
+    no_keys_to_exclude: list[str] = None,
 ) -> list[Keyboard]:
     """
     Create a yes/no keyboard
@@ -951,6 +953,8 @@ def get_yes_no_keyboard(
     :param exclude_yes_button: True if the yes button should be excluded
     :param exclude_no_button: True if the no button should be excluded
     :param authorized_users: List of users that can operate the keyboard
+    :param yes_keys_to_exclude: List of keys to exclude from the copy of info dict for the yes button
+    :param no_keys_to_exclude: List of keys to exclude from the copy of info dict for the no button
     :return: The yes and no keyboard
     """
 
@@ -970,6 +974,8 @@ def get_yes_no_keyboard(
             raise ValueError("screen or yes_screen and no_screen must be specified")
 
     keys_to_exclude = keys_to_exclude if keys_to_exclude is not None else []
+    yes_keys_to_exclude = yes_keys_to_exclude if yes_keys_to_exclude is not None else []
+    no_keys_to_exclude = no_keys_to_exclude if no_keys_to_exclude is not None else []
 
     keyboard_line: list[Keyboard] = []
 
@@ -995,10 +1001,20 @@ def get_yes_no_keyboard(
 
     # Yes
     if not exclude_yes_button:
+        keyboard_data_yes: dict = default_keyboard_data.copy()
+
+        # Exclude keys
+        for key in yes_keys_to_exclude:
+            keyboard_data_yes.pop(key, None)
+
         if yes_is_back_button:
             keyboard_line.append(
                 get_back_button(
-                    inbound_keyboard, key_text=yes_text, user=user, info=default_keyboard_data
+                    inbound_keyboard,
+                    key_text=yes_text,
+                    user=user,
+                    info=keyboard_data_yes,
+                    excluded_keys=(keys_to_exclude + yes_keys_to_exclude),
                 )
             )
         elif yes_is_delete_button:
@@ -1007,11 +1023,7 @@ def get_yes_no_keyboard(
             )
         else:
             # If screen is being changed, discard yes key value
-            keyboard_data_yes: dict = default_keyboard_data | (
-                {confirm_key: True}
-                if not (yes_screen is not None and screen is not yes_screen)
-                else {}
-            )
+            keyboard_data_yes |= {confirm_key: True}
             if yes_extra_keys is not None:
                 for key, value in yes_extra_keys.items():
                     keyboard_data_yes[key] = value
@@ -1029,10 +1041,20 @@ def get_yes_no_keyboard(
 
     # No
     if not exclude_no_button:
+        keyboard_data_no: dict = default_keyboard_data.copy()
+
+        # Exclude keys
+        for key in no_keys_to_exclude:
+            keyboard_data_no.pop(key, None)
+
         if no_is_back_button:
             keyboard_line.append(
                 get_back_button(
-                    inbound_keyboard, key_text=no_text, user=user, info=default_keyboard_data
+                    inbound_keyboard,
+                    key_text=no_text,
+                    user=user,
+                    info=keyboard_data_no,
+                    excluded_keys=(keys_to_exclude + no_keys_to_exclude),
                 )
             )
         elif no_is_delete_button:
@@ -1041,11 +1063,7 @@ def get_yes_no_keyboard(
             )
         else:
             # If screen is being changed, discard no key value
-            keyboard_data_no: dict = default_keyboard_data | (
-                {confirm_key: False}
-                if not (no_screen is not None and screen is not no_screen)
-                else {}
-            )
+            keyboard_data_no |= {confirm_key: False}
             if no_extra_keys is not None:
                 for key, value in no_extra_keys.items():
                     keyboard_data_no[key] = value

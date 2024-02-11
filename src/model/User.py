@@ -64,6 +64,7 @@ class User(BaseModel):
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="crew_members", null=True)
     crew_join_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     crew_role: int | SmallIntegerField = SmallIntegerField(null=True)
+    conscription_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     can_create_crew: bool | BooleanField = BooleanField(default=True)
     can_join_crew: bool | BooleanField = BooleanField(default=True)
     last_message_date: datetime.datetime | DateTimeField = DateTimeField(
@@ -733,8 +734,7 @@ class User(BaseModel):
         Returns the crew role
         :return: The crew role
         """
-
-        return CrewRole(self.crew_role)
+        return CrewRole(self.crew_role) if self.crew_role is not None else None
 
     def get_crew_role_description(self):
         """
@@ -768,6 +768,15 @@ class User(BaseModel):
         """
 
         return f"tg://user?id={self.tg_user_id}"
+
+    def get_conscription_remaining_time(self) -> str:
+        """
+        Get the conscription remaining time
+        :return: The conscription remaining time
+        """
+        from src.service.date_service import get_remaining_duration
+
+        return get_remaining_duration(self.conscription_end_date)
 
 
 User.create_table()

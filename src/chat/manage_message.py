@@ -291,8 +291,9 @@ async def manage_after_db(
                 await manage_inline_query(update, context)
             case _:
                 raise ValueError("Invalid message source")
-    except DoesNotExist:
+    except DoesNotExist as dne:
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
+        logging.exception(dne)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         user.should_update_model = False

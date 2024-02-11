@@ -9,6 +9,7 @@ from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameOutcome import GameOutcome
+from src.service.date_service import datetime_is_after, get_remaining_duration
 from src.service.string_service import get_belly_formatted
 
 
@@ -104,6 +105,13 @@ class DavyBackFight(BaseModel):
         :return: True if the game is in progress, False otherwise
         """
         return self.get_status() is GameStatus.IN_PROGRESS
+
+    def has_ended(self) -> bool:
+        """
+        Check if the game has ended
+        :return: True if the game has ended, False otherwise
+        """
+        return self.get_status().is_finished()
 
     def get_crew_gain(self, crew: Crew) -> int:
         """
@@ -203,6 +211,14 @@ class DavyBackFight(BaseModel):
 
         return self.opponent_crew
 
+    def is_winner_crew(self, crew: Crew) -> bool:
+        """
+        Check if the crew is the winner
+        :param crew: The crew object
+        :return: True if the crew is the winner, False otherwise
+        """
+        return self.get_winner_crew() == crew
+
     def get_remaining_time(self) -> str:
         from src.service.date_service import get_remaining_duration
 
@@ -238,6 +254,21 @@ class DavyBackFight(BaseModel):
         :return: The penalty payout formatted
         """
         return get_belly_formatted(self.get_penalty_payout())
+
+    def in_penalty_period(self) -> bool:
+        """
+        Check if the game is in penalty period
+        :return: True if the game is in penalty period, False otherwise
+        """
+        return datetime_is_after(self.penalty_end_date)
+
+    def get_penalty_remaining_time(self) -> str:
+        """
+        Get the penalty remaining time
+        :return: The penalty remaining time
+        """
+
+        return get_remaining_duration(self.penalty_end_date)
 
 
 DavyBackFight.create_table()

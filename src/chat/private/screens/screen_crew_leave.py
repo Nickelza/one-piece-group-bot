@@ -9,6 +9,8 @@ from src.model.User import User
 from src.model.enums.Location import get_by_bounty
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.crew.CrewRole import CrewRole
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import remove_member, get_crew
@@ -47,6 +49,12 @@ async def manage(
             context, cve.message, update=update, inbound_keyboard=inbound_keyboard
         )
         return
+
+    # User is a conscript
+    if user.get_crew_role() is CrewRole.CONSCRIPT:
+        raise ChatWarning(
+            phrases.CREW_REMOVE_MEMBER_CONSCRIPT.format(user.get_conscription_remaining_time())
+        )
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         ot_text = phrases.CREW_LEAVE_CONFIRMATION.format(

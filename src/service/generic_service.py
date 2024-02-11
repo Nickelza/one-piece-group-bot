@@ -1,6 +1,7 @@
 from telegram.ext import ContextTypes
 
 from src.model.DavyBackFight import DavyBackFight
+from src.service.crew_service import end_all_conscription
 from src.service.davy_back_fight_service import start_all as start_dbf, end_all as end_dbf
 
 
@@ -19,3 +20,6 @@ async def run_generic_minute_tasks(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # End Davy Back Fight
     context.application.create_task(end_dbf(context))
+
+    # End all Crew conscription
+    context.application.create_task(end_all_conscription(context))

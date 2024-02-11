@@ -282,6 +282,7 @@ PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose players"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "Players"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT = "Conscript opponent"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
 PVT_TXT_SETTINGS_NOTIFICATIONS = "Which category of notifications would you like to change?"
 PVT_TXT_SETTINGS_NOTIFICATIONS_TYPE = "Which notification would you like to change?"
@@ -799,6 +800,7 @@ CREW_MEMBER_ITEM_DETAIL = (
     " MVP Bonus: {}{}"
 )
 CREW_MEMBER_ITEM_DETAIL_ARRESTED = f"\n\n{Emoji.LOG_NEGATIVE}Arrested \\({{}}\\)"
+CREW_MEMBER_ITEM_DETAIL_CONSCRIPTION_END_DATE = "\n\n*Conscription end date*: {}"
 CREW_MEMBER_ITEM_TEXT_FILL_IN = "Crew Member"
 CREW_USER_ALREADY_IN_SAME_CREW = "You are already in this Crew"
 CREW_USER_ALREADY_IN_CREW = "You are already in a Crew"
@@ -838,6 +840,7 @@ CREW_MODIFY = (
 )
 CREW_ROLE_CAPTAIN = "Captain"
 CREW_ROLE_FIRST_MATE = "First Mate"
+CREW_ROLE_CONSCRIPT = "Conscript"
 
 # Crew - Join request
 CREW_JOIN_REQUEST_CREW_FULL = "The Crew is full"
@@ -911,6 +914,7 @@ CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT = (
 CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY = (
     "Members cannot be removed or leave the Crew during a Davy Back Fight penalty period"
 )
+CREW_REMOVE_MEMBER_CONSCRIPT = "You can leave the Crew after your conscription period ends in {}"
 
 # Crew - Promote to First Mate
 CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE = "The Crew already has a First Mate"
@@ -1053,7 +1057,7 @@ CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
     f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n- Winner Crew will receive"
     f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"
     f" for a penalty period of {Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()} days\n- Winner"
-    " Crew can recruit any member from the opponent Crew that participated in the challenge"
+    " Crew can conscript any member from the opponent Crew that participated in the challenge"
     " \\(apart from Captain and First Mate\\), and the new recruit can't leave the Crew until the"
     " penalty period is over\nDuring the Davy Back Fight and eventual penalty period in case of"
     " loss, no one can leave the Crew\n\n\nHow many members from each Crew will participate in"
@@ -1102,18 +1106,29 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_WITH_TIME = (
     f"\n\n_{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}\n\n*Remaining time*: {{}}_"
 )
 CREW_DAVY_BACK_FIGHT_WON = (
-    f"\n\n_For the next *{{}}* days, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
+    f"\n\n_For the next *{{}}*, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
     " opponent new Crew Chest gain will be given to your Crew.\nFurthermore, your Crew Captain"
-    " can recruit any member of the opponent Crew that participated \\(apart from Captain and"
+    " can conscript any member of the opponent Crew that participated \\(apart from Captain and"
     " First Mate\\), who can't leave your Crew until the penalty period is over._"
 )
 CREW_DAVY_BACK_FIGHT_LOST = (
-    f"\n\n_For the next *{{}}* days, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
+    f"\n\n_For the next *{{}}*, {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of every"
     " new Crew Chest gain will be given to the opponent Crew.\nFurthermore, the opponent Crew can"
-    " recruit any member of your Crew that participated \\(apart from Captain and First Mate\\),"
+    " conscript any member of your Crew that participated \\(apart from Captain and First Mate\\),"
     " who can't leave the opponent Crew until the penalty period is over._"
 )
-
+CREW_DAVY_BACK_FIGHT_OPPONENT_CONSCRIPT_ERROR_PENALTY_PERIOD_ENDED = "The penalty period has ended"
+CREW_DAVY_BACK_FIGHT_OPPONENT_CONSCRIPT_ERROR_ALREADY_CONSCRIPTED = (
+    "An opponent is already conscripted"
+)
+CREW_DAVY_BACK_FIGHT_OPPONENT_CONSCRIPT_CHOOSE_CONSCRIPT = (
+    "Choose the member you want to conscript from the opponent Crew.\nThey will have to stay in"
+    " your Crew until the penalty period is over in {}."
+)
+CREW_DAVY_BACK_FIGHT_OPPONENT_CONSCRIPT_CHOOSE_CONFIRMATION_REQUEST = (
+    "Are you sure you want to conscript {} from the opponent Crew?"
+)
+CREW_DAVY_BACK_FIGHT_OPPONENT_CONSCRIPT_SUCCESS = "{} has been conscripted to your Crew"
 
 # Bounty Gift
 BOUNTY_GIFT_NO_AMOUNT = (
@@ -1308,6 +1323,32 @@ CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when your request to join a Crew is rejected."
 )
 CREW_JOIN_REQUEST_REJECTED_NOTIFICATION_KEY = "Join request rejected"
+# Notification - Crew conscription start
+CREW_CONSCRIPTION_START_NOTIFICATION = (
+    "You have been conscripted to {}.\n\nYou can't leave the Crew for *{}*."
+)
+CREW_CONSCRIPTION_START_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when you are conscripted to a Crew."
+)
+CREW_CONSCRIPTION_START_NOTIFICATION_KEY = "Conscription start"
+# Notification - Crew conscription start captain
+CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION = (
+    "{} has been conscripted from your Crew to {}.\n\nThey can't leave the Crew for *{}*."
+)
+CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when a member of your Crew is conscripted to another Crew."
+    "\nApplicable only if you are the Captain of the Crew"
+)
+CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION_KEY = "Conscription start Captain"
+# Notification - Crew conscription end
+CREW_CONSCRIPTION_END_NOTIFICATION = (
+    "Your conscription period towards {} has ended, you can now leave the Crew"
+)
+CREW_CONSCRIPTION_END_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when your conscription period ends."
+)
+CREW_CONSCRIPTION_END_NOTIFICATION_KEY = "Conscription end"
+
 # Notification - Davy Back Fight request accepted
 DAVY_BACK_FIGHT_REQUEST_ACCEPTED_NOTIFICATION = (
     "{} has accepted your Crew's Davy Back Fight challenge, it will start in"
@@ -1347,12 +1388,13 @@ DAVY_BACK_FIGHT_END_NOTIFICATION_WON = (
     f"{Emoji.CONFETTI}Congratulations, your Crew has won the Davy Back Fight against "
     "{}!\n\nYou have earned"
     " ฿*{}* for contributing to {}% of the total"
-    f" gain.{CREW_DAVY_BACK_FIGHT_WON.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION)}"
+    " gain."
+    f"{CREW_DAVY_BACK_FIGHT_WON.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()+' days')}"
 )
 DAVY_BACK_FIGHT_END_NOTIFICATION_LOST = (
     f"{Emoji.LOG_NEGATIVE}Your Crew has lost the Davy Back Fight against "
     "{}."
-    f"{CREW_DAVY_BACK_FIGHT_LOST.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION)}"
+    f"{CREW_DAVY_BACK_FIGHT_LOST.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()+' days')}"
 )
 
 # Notification - Game turn

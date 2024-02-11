@@ -414,7 +414,7 @@ class Crew(BaseModel):
             .get_or_none()
         )
 
-    def get_name_with_deeplink(self, add_level: bool = True):
+    def get_name_with_deeplink(self, add_level: bool = False):
         """
         Returns the crew name with deeplink
         :param add_level: Whether to add the level to the name

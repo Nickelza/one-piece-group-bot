@@ -276,7 +276,7 @@ async def send_request_to_captain(
     davy_back_fight.save()
 
     ot_text_for_captain = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST.format(
-        challenger_crew.get_name_with_deeplink(),
+        challenger_crew.get_name_with_deeplink(add_level=True),
         participants_count,
         convert_minutes_to_duration(Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
     )

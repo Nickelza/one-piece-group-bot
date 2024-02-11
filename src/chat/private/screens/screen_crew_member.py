@@ -8,6 +8,7 @@ from src.model.User import User
 from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.crew.CrewRole import CrewRole
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
 from src.service.date_service import default_date_format, get_remaining_duration
@@ -72,6 +73,11 @@ class CrewMemberListPage(ListPage):
                 phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
                 if member.impel_down_is_permanent
                 else get_remaining_duration(member.impel_down_release_date)
+            )
+
+        if member.get_crew_role() is CrewRole.CONSCRIPT:
+            text_to_add += phrases.CREW_MEMBER_ITEM_DETAIL_CONSCRIPTION_END_DATE.format(
+                member.conscription_end_date
             )
 
         ot_text = phrases.CREW_MEMBER_ITEM_DETAIL.format(

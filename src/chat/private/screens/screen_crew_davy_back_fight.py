@@ -64,7 +64,7 @@ class CrewDavyBackFightListPage(ListPage):
 
     def get_item_text(self) -> str:
         return phrases.CREW_DAVY_BACK_FIGHT_ITEM_TEXT.format(
-            self.legend.emoji, self.opponent_crew.get_name_with_deeplink(add_level=False)
+            self.legend.emoji, self.opponent_crew.get_name_with_deeplink()
         )
 
     def get_item_detail_text(self) -> str:
@@ -156,7 +156,7 @@ class CrewDavyBackFightListPage(ListPage):
 
         return phrases.CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT.format(
             challenger_text,
-            self.opponent_crew.get_name_with_deeplink(add_level=False),
+            self.opponent_crew.get_name_with_deeplink(),
             start_date,
             end_date,
             self.object.participants_count,

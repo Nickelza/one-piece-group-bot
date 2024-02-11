@@ -103,6 +103,9 @@ class NotificationType(IntEnum):
     DAVY_BACK_FIGHT_REQUEST_REJECTED = 31
     DAVY_BACK_FIGHT_START = 32
     DAVY_BACK_FIGHT_END = 33
+    CREW_CONSCRIPTION_START = 34
+    CREW_CONSCRIPTION_START_CAPTAIN = 35
+    CREW_CONSCRIPTION_END = 36
 
 
 class Notification:
@@ -157,11 +160,7 @@ class Notification:
     def get_go_to_item_keyboard(self) -> list[Keyboard]:
         """Gets the go to item keyboard."""
 
-        if (
-            self.item_screen is None
-            or self.item_info is None
-            or self.to_to_item_button_text is None
-        ):
+        if self.item_screen is None or self.to_to_item_button_text is None:
             return []
 
         return [
@@ -1064,6 +1063,79 @@ class CrewJoinRequestRejectedNotification(Notification):
         return self.text.format(self.crew.get_name_with_deeplink())
 
 
+class CrewConscriptionStartNotification(Notification):
+    """Class for crew conscription start notifications."""
+
+    def __init__(self, user: User = None):
+        """
+        Constructor
+        """
+
+        self.user: User = user
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_CONSCRIPTION_START,
+            phrases.CREW_CONSCRIPTION_START_NOTIFICATION,
+            phrases.CREW_CONSCRIPTION_START_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_CONSCRIPTION_START_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW,
+            go_to_item_button_text=phrases.KEY_VIEW,
+        )
+
+    def build(self) -> str:
+        return self.text.format(
+            self.user.crew.get_name_with_deeplink(), self.user.get_conscription_remaining_time()
+        )
+
+
+class CrewConscriptionStartCaptainNotification(Notification):
+    """Class for crew conscription start captain notifications."""
+
+    def __init__(self, user: User = None):
+        """
+        Constructor
+        """
+
+        self.user: User = user
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_CONSCRIPTION_START_CAPTAIN,
+            phrases.CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION,
+            phrases.CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_CONSCRIPTION_START_CAPTAIN_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(
+            self.user.get_markdown_mention(),
+            self.user.crew.get_name_with_deeplink(),
+            self.user.get_conscription_remaining_time(),
+        )
+
+
+class CrewConscriptionEndNotification(Notification):
+    """Class for crew conscription end notifications."""
+
+    def __init__(self, user: User = None):
+        """
+        Constructor
+        """
+
+        self.user: User = user
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_CONSCRIPTION_END,
+            phrases.CREW_CONSCRIPTION_END_NOTIFICATION,
+            phrases.CREW_CONSCRIPTION_END_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_CONSCRIPTION_END_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW,
+            go_to_item_button_text=phrases.KEY_VIEW,
+        )
+
+    def build(self) -> str:
+        return self.text.format(self.user.crew.get_name_with_deeplink())
+
+
 class DavyBackFightRequestAcceptedNotification(Notification):
     """Class for davy back fight request accepted notifications."""
 
@@ -1144,7 +1216,7 @@ class DavyBackFightStartNotification(Notification):
 
     def build(self) -> str:
         return self.text.format(
-            self.opponent_crew.get_name_with_deeplink(add_level=False),
+            self.opponent_crew.get_name_with_deeplink(),
             self.davy_back_fight.get_remaining_time(),
         )
 
@@ -1180,13 +1252,13 @@ class DavyBackFightEndNotification(Notification):
     def build(self) -> str:
         if self.participant.in_winner_crew():
             return phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_WON.format(
-                self.opponent_crew.get_name_with_deeplink(add_level=False),
+                self.opponent_crew.get_name_with_deeplink(),
                 get_belly_formatted(self.participant.win_amount),
                 format_percentage_value(self.participant.get_contribution_percentage()),
             )
 
         return phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_LOST.format(
-            self.opponent_crew.get_name_with_deeplink(add_level=False),
+            self.opponent_crew.get_name_with_deeplink(),
         )
 
 
@@ -1249,6 +1321,9 @@ NOTIFICATIONS = [
     CrewFirstMateDemotionNotification(),
     CrewJoinRequestAcceptedNotification(),
     CrewJoinRequestRejectedNotification(),
+    CrewConscriptionStartNotification(),
+    CrewConscriptionStartCaptainNotification(),
+    CrewConscriptionEndNotification(),
     ImpelDownBailPostedNotification(),
     DavyBackFightRequestAcceptedNotification(),
     DavyBackFightRequestRejectedNotification(),

@@ -17,6 +17,7 @@ from src.model.enums.Notification import (
     CrewMemberRemoveNotification,
     Notification,
     CrewAbilityActivatedNotification,
+    CrewConscriptionEndNotification,
 )
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -25,7 +26,6 @@ from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.ChatWarning import ChatWarning
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import (
@@ -39,18 +39,25 @@ from src.service.message_service import get_deeplink
 from src.service.notification_service import send_notification
 
 
-async def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> None:
+async def add_member(
+    crew_member: User, crew: Crew, role: CrewRole = None, conscription_end_date: datetime = None
+) -> None:
     """
     Adds a member to a crew
 
     :param crew_member: The user
     :param crew: The crew
     :param role: The role
+    :param conscription_end_date: The conscription end date
     """
+
+    if role is CrewRole.CONSCRIPT and conscription_end_date is None:
+        raise ValueError("Conscription end date must be provided for a conscript")
 
     crew_member.crew = crew
     crew_member.crew_role = role
     crew_member.crew_join_date = datetime.now()
+    crew_member.conscription_end_date = conscription_end_date
 
     await update_location(crew_member, should_passive_update=True)
 
@@ -59,12 +66,13 @@ async def add_member(crew_member: User, crew: Crew, role: CrewRole = None) -> No
 
 
 async def remove_member(
-    crew_member,
+    crew_member: User,
     context: ContextTypes.DEFAULT_TYPE = None,
     send_notification_to_captain: bool = False,
     send_notification_to_member: bool = False,
     disable_user_can_join_crew: bool = False,
     disable_crew_can_accept_new_members: bool = False,
+    from_davy_back_fight_conscript: bool = False,
 ) -> None:
     """
     Removes a member from a crew
@@ -75,18 +83,20 @@ async def remove_member(
     :param send_notification_to_member: Whether to send a notification to the member
     :param disable_user_can_join_crew: Whether to set user can_join_crew to False
     :param disable_crew_can_accept_new_members: Whether to set crew can_accept_new_members to False
+    :param from_davy_back_fight_conscript: Whether the user is a conscript
     :return: None
     """
 
     crew: Crew = crew_member.crew
 
-    # Crew in an active Davy Back Fight
-    if crew.has_active_davy_back_fight():
-        raise ChatWarning(phrases.CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT)
+    if not from_davy_back_fight_conscript:
+        # Crew in an active Davy Back Fight
+        if crew.has_active_davy_back_fight():
+            raise ChatWarning(phrases.CREW_REMOVE_MEMBER_ACTIVE_DAVY_BACK_FIGHT)
 
-    # Crew with a Davy Back Fight penalty
-    if crew.has_penalty_davy_back_fight():
-        raise ChatWarning(phrases.CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY)
+        # Crew with a Davy Back Fight penalty
+        if crew.has_penalty_davy_back_fight():
+            raise ChatWarning(phrases.CREW_REMOVE_MEMBER_DAVY_BACK_FIGHT_PENALTY)
 
     crew_member.crew = None
     crew_member.crew_role = None
@@ -138,6 +148,8 @@ def get_crew(
     :return: The crew
     """
 
+    # TODO no longer raising CrewValidationException, so no need to catch it in callers
+
     if user is None and crew_id is None and inbound_keyboard is None:
         raise ValueError("Either user or crew_id or inbound_keyboard must be provided")
 
@@ -153,11 +165,11 @@ def get_crew(
 
     # Crew is not found or is not active
     if crew is None or not crew.is_active:
-        raise CrewValidationException(phrases.CREW_NOT_FOUND)
+        raise ChatWarning(phrases.CREW_NOT_FOUND)
 
     # Crew is not the same
     if validate_against_crew is not None and crew != validate_against_crew:
-        raise CrewValidationException(phrases.CREW_NOT_SAME)
+        raise ChatWarning(phrases.CREW_NOT_SAME)
 
     return crew
 
@@ -572,3 +584,23 @@ def get_crew_name_with_deeplink(crew: Crew, add_level: bool = True) -> str:
         return phrases.CREW_NAME_WITH_LEVEL_DEEPLINK.format(name, deeplink, crew.level)
 
     return phrases.ITEM_LINK.format(name, deeplink)
+
+
+async def end_all_conscription(context: ContextTypes.DEFAULT_TYPE):
+    """
+    Ends all conscription
+    :param context: The context
+    :return: None
+    """
+    conscripts = User.select().where(
+        User.crew_role == CrewRole.CONSCRIPT,
+        User.conscription_end_date.is_null(False),
+        User.conscription_end_date < datetime.now(),
+    )
+
+    for conscript in conscripts:
+        conscript.crew_role = None
+        conscript.save()
+
+        # Send notification
+        await send_notification(context, conscript, CrewConscriptionEndNotification(conscript))
