@@ -1053,15 +1053,17 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
     " contribution from the opponent Crew, proportionally to their contribution"
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
-    f"A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2"
-    f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n- Winner Crew will receive"
-    f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"
-    f" for a penalty period of {Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()} days\n- Winner"
-    " Crew can conscript any member from the opponent Crew that participated in the challenge"
-    " \\(apart from Captain and First Mate\\), and the new recruit can't leave the Crew until the"
-    " penalty period is over\nDuring the Davy Back Fight and eventual penalty period in case of"
-    " loss, no one can leave the Crew\n\n\nHow many members from each Crew will participate in"
-    " the Davy Back Fight?"
+    f"A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2 Crews,"
+    " with the same number of players from each Crew (minimum"
+    f" {Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get()}."
+    f"\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n-"
+    f" Winner Crew will receive {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser"
+    " Crew new Crew Chest gain for a penalty period of"
+    f" {Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()} days\n- Winner Crew can conscript any"
+    " member from the opponent Crew that participated in the challenge \\(apart from Captain and"
+    " First Mate\\), and the new recruit can't leave the Crew until the penalty period is"
+    " over\nDuring the Davy Back Fight and eventual penalty period in case of loss, no one can"
+    " leave the Crew\n\nHow many members from each Crew will participate in the Davy Back Fight?"
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION = (
     "Are you sure you want to challenge *{}* to a Davy Back Fight with {} members from each Crew?"
