@@ -1054,8 +1054,8 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
     f"A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2 Crews,"
-    " with the same number of players from each Crew (minimum"
-    f" {Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get()}."
+    " with the same number of players from each Crew \\(minimum"
+    f" {Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get()}\\)."
     f"\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n-"
     f" Winner Crew will receive {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser"
     " Crew new Crew Chest gain for a penalty period of"
