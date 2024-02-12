@@ -1055,7 +1055,7 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
     " contribution will frozen\n>- The players from the winner Crew will receive the frozen chest"
     " contribution from the opponent Crew, proportionally to their contribution"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
+CREW_DAVY_BACK_FIGHT_REQUEST = (
     f">A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2"
     f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n>- Winner Crew will receive"
     f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"

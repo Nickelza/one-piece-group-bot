@@ -95,7 +95,7 @@ async def manage(
 
     # Request confirmation
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
-        await request_confirmation(update, context, inbound_keyboard, challenger_crew, user)
+        await request_confirmation(update, context, inbound_keyboard, opponent_crew, user)
         return
 
     # Sending the join request to the crew captain
@@ -326,7 +326,7 @@ async def request_confirmation(
 
     await full_message_send(
         context,
-        phrases.CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS.format(
+        phrases.CREW_DAVY_BACK_FIGHT_REQUEST.format(
             inbound_keyboard.get(ScreenReservedKeys.PENALTY),
             inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
             inbound_keyboard.get(ScreenReservedKeys.DURATION),
