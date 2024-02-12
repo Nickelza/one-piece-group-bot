@@ -157,6 +157,7 @@ KEYBOARD_OPTION_RETREAT = Emoji.RETREAT + " Retreat"
 KEYBOARD_OPTION_BACK = Emoji.BACK + " Back"
 KEYBOARD_OPTION_YES = Emoji.YES + " Yes"
 KEYBOARD_OPTION_NO = Emoji.NO + " No"
+KEYBOARD_OPTION_SEND_REQUEST = Emoji.YES + " Send request"
 
 TEXT_YES = "Yes"
 TEXT_NO = "No"
@@ -280,7 +281,9 @@ PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
-PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose players"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS = "Edit participants"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION = "Edit penalty period"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PENALTY = "Choose players"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "Players"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT = "Conscript opponent"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
@@ -561,17 +564,17 @@ PREDICTION_IS_PUBLIC_DESCRIPTION = (
 )
 PREDICTION_BET_INVALID_FORMAT = (
     "Make sure your bet is in the following"
-    f" format:\n{CommandName.PREDICTION_BET.get_formatted()} <amount> <option number>\n\nExample:"
-    f" {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1"
+    f" format:\n{CommandName.PREDICTION_BET.get_formatted()} <amount\\> <option"
+    f" number\\>\n\nExample: {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1"
 )
 PREDICTION_BET_HOW_TO_PLACE_BET = (
     "\n\n_To place a bet, reply to this message with the following"
-    f" command:\n{CommandName.PREDICTION_BET.get_formatted()} <amount> <option number>\nExample:"
-    f" {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1_"
+    f" command:\n{CommandName.PREDICTION_BET.get_formatted()} <amount\\> <option"
+    f" number\\>\nExample: {CommandName.PREDICTION_BET.get_formatted()} 10.000.000 1_"
 )
 PREDICTION_BET_HOW_TO_REMOVE_BET = (
     "\n\n_To remove a bet, reply to the prediction with the following"
-    f" command:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} <option number>\nExample:"
+    f" command:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} <option number\\>\nExample:"
     f" {CommandName.PREDICTION_BET_REMOVE.get_formatted()} 1_"
 )
 PREDICTION_BET_HOW_TO_REMOVE_ALL_BETS = (
@@ -595,7 +598,7 @@ PREDICTION_BET_SUCCESS = "Bet placed successfully"
 PREDICTION_RESULTS_SET = "The results of this prediction have been set"
 PREDICTION_BET_REMOVE_INVALID_FORMAT = (
     "Make sure your command is in the following"
-    f" format:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} ]<option number>\n\nExample:"
+    f" format:\n{CommandName.PREDICTION_BET_REMOVE.get_formatted()} ]<option number\\>\n\nExample:"
     f" {CommandName.PREDICTION_BET_REMOVE.get_formatted()} 1"
 )
 PREDICTION_BET_REMOVE_SUCCESS = "Bet removed successfully"
@@ -736,7 +739,7 @@ CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
 CREW_SEARCH_FILTER_NAME = "Crew name"
 CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"
-    " to find the Crew from search` option under `Crew->Modify`"
+    " to find the Crew from search` option under `Crew-\\>Modify`"
 )
 CREW_SEARCH_JOIN_NOT_ALLOWED = "The Crew does not allow join requests from search"
 CREW_SEARCH_JOIN_CONFIRMATION_REQUEST = (
@@ -999,7 +1002,7 @@ CREW_POWERUP = (
 )
 
 # Crew level
-CREW_LEVEL_UP_RECAP = "*Upgrade*: +1 {} slot \\({}->{}\\)\n*Income Tax*: -1 Bracket\n*Cost*: ฿{}"
+CREW_LEVEL_UP_RECAP = "*Upgrade*: +1 {} slot \\({}-\\>{}\\)\n*Income Tax*: -1 Bracket\n*Cost*: ฿{}"
 CREW_LEVEL = (
     "*Level*"
     "\n\nBy leveling-up a, the Crew can increase the number of allowed abilities or members slot"
@@ -1046,35 +1049,38 @@ CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS = (
     "Crew must have at least {} members to participate in a Davy Back Fight"
 )
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
-    "Every net bounty gained from challenges, fights and plunders will be considered towards"
-    " the Crew's total gain.\n- Bounty gained from same Crew members are not considered\n- Bounty"
-    " gained from non-players of the opponents Crew are valued half\n- Half of any new Crew chest"
-    " contribution will frozen\n- The players from the winner Crew will receive the frozen chest"
+    ">Every net bounty gained from challenges, fights and plunders will be considered towards the"
+    " Crew's total gain.\n>- Bounty gained from same Crew members are not considered\n>- Bounty"
+    " gained from non-players of the opponents Crew are valued half\n>- Half of any new Crew chest"
+    " contribution will frozen\n>- The players from the winner Crew will receive the frozen chest"
     " contribution from the opponent Crew, proportionally to their contribution"
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS = (
-    f"A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2 Crews,"
-    " with the same number of players from each Crew \\(minimum"
-    f" {Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get()}\\)."
-    f"\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n-"
-    f" Winner Crew will receive {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser"
-    " Crew new Crew Chest gain for a penalty period of"
-    f" {Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()} days\n- Winner Crew can conscript any"
-    " member from the opponent Crew that participated in the challenge \\(apart from Captain and"
-    " First Mate\\), and the new recruit can't leave the Crew until the penalty period is"
-    " over\nDuring the Davy Back Fight and eventual penalty period in case of loss, no one can"
-    " leave the Crew\n\nHow many members from each Crew will participate in the Davy Back Fight?"
+    f">A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2"
+    f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n>- Winner Crew will receive"
+    f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"
+    " for a penalty period of {} days\n>- Winner Crew can conscript any member from the"
+    " opponent Crew that participated in the challenge \\(apart from Captain and First Mate\\),"
+    " and the new recruit can't leave the Crew until the penalty period is over\n>During the Davy"
+    " Back Fight and eventual penalty period in case of loss, no one can leave the"
+    " Crew.\n\n*Number of participants*: {}\n*Duration*\\(hours\\): {}\n*Penalty"
+    " period*\\(days\\): {}\n\nAre you sure you want to challenge *{}* to a Davy Back"
+    f" Fight?\nThey will have {Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get()} minutes to"
+    " accept or reject"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION = (
-    "Are you sure you want to challenge *{}* to a Davy Back Fight with {} members from each Crew?"
-    "\n\nThey will have {} to accept or reject"
+CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PARTICIPANTS = (
+    "How many members from each Crew will participate in the Davy Back Fight?"
 )
+CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_DURATION = "How many hours will the Davy Back Fight last?"
+CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PENALTY = "How many days will the penalty period last?"
 CREW_DAVY_BACK_FIGHT_REQUEST_SUCCESS = (
     "Davy Back Fight challenge to *{}* sent successfully, you will be notified when it is accepted"
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
     "New Davy Back Fight challenge from {}!"
     "\n\n*Number of participants*: {}"
+    "\n*Duration*\\(hours\\): {}"
+    "\n*Penalty period*\\(days\\): {}"
     "\n\nYou have {} to accept the challenge"
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
@@ -1391,12 +1397,12 @@ DAVY_BACK_FIGHT_END_NOTIFICATION_WON = (
     "{}!\n\nYou have earned"
     " ฿*{}* for contributing to {}% of the total"
     " gain."
-    f"{CREW_DAVY_BACK_FIGHT_WON.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()+' days')}"
+    f"{CREW_DAVY_BACK_FIGHT_WON}"
 )
 DAVY_BACK_FIGHT_END_NOTIFICATION_LOST = (
     f"{Emoji.LOG_NEGATIVE}Your Crew has lost the Davy Back Fight against "
     "{}."
-    f"{CREW_DAVY_BACK_FIGHT_LOST.format(Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get()+' days')}"
+    f"{CREW_DAVY_BACK_FIGHT_LOST}"
 )
 
 # Notification - Game turn
@@ -1432,8 +1438,8 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT = "Permanent"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL = (
     "\n\nA Crew member can post bail for you, at a cost of"
     f" ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}* for every minute left in your sentence"
-    f" \n\\(`{PVT_KEY_CREW}`->`{PVT_KEY_CREW_MEMBERS}`->"
-    f"Select->`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
+    f" \n\\(`{PVT_KEY_CREW}`-\\>`{PVT_KEY_CREW_MEMBERS}`-\\>"
+    f"Select-\\>`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are restricted"
@@ -1767,7 +1773,7 @@ DEVIL_FRUIT_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}{}{}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiring in: {}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
     "\n\nYou can sell this Devil Fruit in the Chat Group with"
-    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price> command"
+    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price\\> command"
 )
 DEVIL_FRUIT_LIST_NO_ITEMS = "You do not have any Devil Fruits"
 DEVIL_FRUIT_NOT_OWNER = "You do not own this Devil Fruit"

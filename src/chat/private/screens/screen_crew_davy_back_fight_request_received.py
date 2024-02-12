@@ -110,7 +110,7 @@ async def accept(context: ContextTypes.DEFAULT_TYPE, davy_back_fight: DavyBackFi
             Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get_int()
         )
         davy_back_fight.end_date = get_datetime_in_future_hours(
-            Env.DAVY_BACK_FIGHT_DURATION.get_int(), start_time=davy_back_fight.start_date
+            davy_back_fight.duration_hours, start_time=davy_back_fight.start_date
         )
         davy_back_fight.save()
 

@@ -2,6 +2,9 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
+from src.chat.private.screens.screen_crew_davy_back_fight_request import (
+    ScreenReservedKeys as DBFRequestReservedKeys,
+)
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
@@ -135,6 +138,9 @@ async def manage(
         update=update,
         keyboard=items_keyboard,
         inbound_keyboard=inbound_keyboard,
-        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
+        # Excluding DBF request keys here so as long as user stays in Crew search, their preferred
+        # DBF options will be kept
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE]
+        + [s for s in DBFRequestReservedKeys],
         previous_screens=user.get_private_screen_list(),
     )

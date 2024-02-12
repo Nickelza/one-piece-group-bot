@@ -1,3 +1,6 @@
+import logging
+from enum import IntEnum, StrEnum
+
 from telegram import Update
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
@@ -21,6 +24,18 @@ from src.service.date_service import (
     datetime_is_before,
 )
 from src.service.message_service import full_message_send, get_yes_no_keyboard
+
+
+class StepEdit(IntEnum):
+    PARTICIPANTS = 1
+    DURATION = 2
+    PENALTY = 3
+
+
+class ScreenReservedKeys(StrEnum):
+    PARTICIPANTS = "c"
+    DURATION = "d"
+    PENALTY = "e"
 
 
 async def manage(
@@ -47,14 +62,35 @@ async def manage(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
 
+    # Add edit keys to keyboard if not already there
+    max_participants = DavyBackFight.get_max_participants(challenger_crew, opponent_crew)
+    if not inbound_keyboard.has_key(ScreenReservedKeys.PARTICIPANTS):
+        inbound_keyboard.info[ScreenReservedKeys.PARTICIPANTS] = max_participants
+    # Cap max participants, in case it was already in memory from another Crew DBF request screen.
+    # Bonus point, this also prevents the user from sending a request with more participants than
+    # the crew can handle in case someone leaves the Crew meanwhile
+    # (even though it's validated again at acceptance).
+    else:
+        inbound_keyboard.info[ScreenReservedKeys.PARTICIPANTS] = min(
+            inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
+            max_participants,
+        )
+
+    if not inbound_keyboard.has_key(ScreenReservedKeys.DURATION):
+        inbound_keyboard.info[ScreenReservedKeys.DURATION] = (
+            Env.DAVY_BACK_FIGHT_MAX_DURATION.get_int()
+        )
+    if not inbound_keyboard.has_key(ScreenReservedKeys.PENALTY):
+        inbound_keyboard.info[ScreenReservedKeys.PENALTY] = (
+            Env.DAVY_BACK_FIGHT_MAX_LOSE_PENALTY_DURATION.get_int()
+        )
+
     if not await validate(update, context, inbound_keyboard, challenger_crew, opponent_crew):
         return
 
-    # Request number of participants
-    if ReservedKeyboardKeys.NUMBER not in inbound_keyboard.info:
-        await request_number_of_participants(
-            update, context, inbound_keyboard, challenger_crew, opponent_crew
-        )
+    # Edit item
+    if inbound_keyboard.has_key(ReservedKeyboardKeys.SCREEN_STEP):
+        await edit_options(update, context, inbound_keyboard, challenger_crew, opponent_crew, user)
         return
 
     # Request confirmation
@@ -67,7 +103,7 @@ async def manage(
         context,
         challenger_crew,
         opponent_crew,
-        inbound_keyboard.get_int(ReservedKeyboardKeys.NUMBER),
+        inbound_keyboard,
     )
 
     await full_message_send(
@@ -104,13 +140,12 @@ async def validate(
 
         # Challenger or opponent crew does not have the minimum required members
         if (
-            challenger_crew.get_member_count() < Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
-            or opponent_crew.get_member_count()
-            < Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+            challenger_crew.get_member_count() < Env.DAVY_BACK_FIGHT_MIN_PARTICIPANTS.get_int()
+            or opponent_crew.get_member_count() < Env.DAVY_BACK_FIGHT_MIN_PARTICIPANTS.get_int()
         ):
             raise CrewValidationException(
                 phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS.format(
-                    Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
+                    Env.DAVY_BACK_FIGHT_MIN_PARTICIPANTS.get_int()
                 )
             )
 
@@ -166,33 +201,56 @@ async def validate(
         return False
 
 
-async def request_number_of_participants(
+async def edit_options(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     inbound_keyboard: Keyboard,
     challenger_crew: Crew,
     opponent_crew: Crew,
+    user: User,
 ) -> None:
     """
-    Request the number of participants
+    Edit the Davy Back Fight options
     :param update: The update
     :param context: The context
     :param inbound_keyboard: The inbound keyboard
     :param challenger_crew: The crew
     :param opponent_crew: The opponent crew
+    :param user: The user
     :return: None
     """
 
-    min_participants = Env.DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS.get_int()
-    max_participants = min(challenger_crew.get_member_count(), opponent_crew.get_member_count())
+    step: StepEdit = StepEdit(inbound_keyboard.get_int(ReservedKeyboardKeys.SCREEN_STEP))
+    match step:
+        case StepEdit.PARTICIPANTS:
+            text = phrases.CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PARTICIPANTS
+            key = ScreenReservedKeys.PARTICIPANTS
+            minimum = Env.DAVY_BACK_FIGHT_MIN_PARTICIPANTS.get_int()
+            maximum = DavyBackFight.get_max_participants(challenger_crew, opponent_crew)
+        case StepEdit.DURATION:
+            text = phrases.CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_DURATION
+            key = ScreenReservedKeys.DURATION
+            minimum = Env.DAVY_BACK_FIGHT_MIN_DURATION.get_int()
+            maximum = Env.DAVY_BACK_FIGHT_MAX_DURATION.get_int()
+        case StepEdit.PENALTY:
+            text = phrases.CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PENALTY
+            key = ScreenReservedKeys.PENALTY
+            minimum = Env.DAVY_BACK_FIGHT_MIN_LOSE_PENALTY_DURATION.get_int()
+            maximum = Env.DAVY_BACK_FIGHT_MAX_LOSE_PENALTY_DURATION.get_int()
+
+        case _:
+            raise ValueError()
 
     # Create numeric keyboard with all possible values
     numeric_keyboard: list[list[Keyboard]] = []
     line_keyboard: list[Keyboard] = []
-    for i in range(min_participants, max_participants + 1):
+    for i in range(minimum, maximum + 1):
         line_keyboard.append(
             Keyboard(
-                str(i), info={ReservedKeyboardKeys.NUMBER: i}, inbound_info=inbound_keyboard.info
+                str(i),
+                info={key: i},
+                inbound_info=inbound_keyboard.info,
+                exclude_key_from_inbound_info=[ReservedKeyboardKeys.SCREEN_STEP],
             )
         )
         if len(line_keyboard) == c.STANDARD_LIST_KEYBOARD_ROW_SIZE:
@@ -202,12 +260,15 @@ async def request_number_of_participants(
     if len(line_keyboard) > 0:
         numeric_keyboard.append(line_keyboard)
 
+    user.private_screen_stay = True
     await full_message_send(
         context,
-        phrases.CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS,
+        text=text,
         update=update,
         keyboard=numeric_keyboard,
         inbound_keyboard=inbound_keyboard,
+        user=user,
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.SCREEN_STEP],
     )
 
 
@@ -229,26 +290,52 @@ async def request_confirmation(
     """
 
     inline_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS,
+                screen=inbound_keyboard.screen,
+                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.PARTICIPANTS},
+                inbound_info=inbound_keyboard.info,
+            )
+        ],
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION,
+                screen=inbound_keyboard.screen,
+                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.DURATION},
+                inbound_info=inbound_keyboard.info,
+            )
+        ],
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PENALTY,
+                screen=inbound_keyboard.screen,
+                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.PENALTY},
+                inbound_info=inbound_keyboard.info,
+            )
+        ],
         get_yes_no_keyboard(
             screen=inbound_keyboard.screen,
             inbound_keyboard=inbound_keyboard,
             no_is_back_button=True,
             add_inbound_key_info=True,
-        )
+            yes_text=phrases.KEYBOARD_OPTION_SEND_REQUEST,
+            no_text=phrases.KEYBOARD_OPTION_CANCEL,
+        ),
     ]
 
-    user.private_screen_stay = True  # Stay on the same screen, so to request number again
     await full_message_send(
         context,
-        phrases.CREW_DAVY_BACK_FIGHT_REQUEST_CONFIRMATION.format(
+        phrases.CREW_DAVY_BACK_FIGHT_REQUEST_NUMBER_OF_PARTICIPANTS.format(
+            inbound_keyboard.get(ScreenReservedKeys.PENALTY),
+            inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
+            inbound_keyboard.get(ScreenReservedKeys.DURATION),
+            inbound_keyboard.get(ScreenReservedKeys.PENALTY),
             opponent_crew.get_name_escaped(),
-            inbound_keyboard.get(ReservedKeyboardKeys.NUMBER),
-            convert_minutes_to_duration(Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
         ),
         update=update,
         keyboard=inline_keyboard,
         inbound_keyboard=inbound_keyboard,
-        excluded_keys_from_back_button=[ReservedKeyboardKeys.NUMBER],
         user=user,
     )
 
@@ -257,14 +344,14 @@ async def send_request_to_captain(
     context: ContextTypes.DEFAULT_TYPE,
     challenger_crew: Crew,
     opponent_crew: Crew,
-    participants_count: int,
+    inbound_keyboard: Keyboard,
 ) -> None:
     """
     Send the request to the captain
     :param context: The context object
     :param challenger_crew: The challenger crew
     :param opponent_crew: The opponent crew
-    :param participants_count: The number of participants
+    :param inbound_keyboard: The inbound keyboard
     :return: None
     """
 
@@ -272,12 +359,16 @@ async def send_request_to_captain(
     davy_back_fight: DavyBackFight = DavyBackFight()
     davy_back_fight.challenger_crew = challenger_crew
     davy_back_fight.opponent_crew = opponent_crew
-    davy_back_fight.participants_count = participants_count
+    davy_back_fight.participants_count = inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS)
+    davy_back_fight.duration_hours = inbound_keyboard.get(ScreenReservedKeys.DURATION)
+    davy_back_fight.penalty_days = inbound_keyboard.get(ScreenReservedKeys.PENALTY)
     davy_back_fight.save()
 
     ot_text_for_captain = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST.format(
         challenger_crew.get_name_with_deeplink(add_level=True),
-        participants_count,
+        davy_back_fight.participants_count,
+        davy_back_fight.duration_hours,
+        davy_back_fight.penalty_days,
         convert_minutes_to_duration(Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get_int()),
     )
 
@@ -299,6 +390,7 @@ async def send_request_to_captain(
             chat_id=captain.tg_user_id,
             keyboard=inline_keyboard,
         )
-    except TelegramError:
+    except TelegramError as te:
         davy_back_fight.delete_instance()
+        logging.exception(te)
         raise PrivateChatException(text=phrases.CREW_SEARCH_JOIN_CAPTAIN_ERROR)

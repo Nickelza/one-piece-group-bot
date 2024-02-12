@@ -871,13 +871,21 @@ DAVY_BACK_FIGHT_DURATION = Environment("DAVY_BACK_FIGHT_DURATION", default_value
 DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION = Environment(
     "DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION", default_value="48"
 )
-# How long should the penalty last after losing a DBF in days. Default: 7
-DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION = Environment(
-    "DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION", default_value="7"
-)
 # Minimum number of members required to start a DBF. Default: 3
-DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS = Environment(
-    "DAVY_BACK_FIGHT_MINIMUM_PARTICIPANTS", default_value="3"
+DAVY_BACK_FIGHT_MIN_PARTICIPANTS = Environment(
+    "DAVY_BACK_FIGHT_MIN_PARTICIPANTS", default_value="3"
+)
+# Minimum duration of DBF in hours. Default: 1
+DAVY_BACK_FIGHT_MIN_DURATION = Environment("DAVY_BACK_FIGHT_MIN_DURATION", default_value="1")
+# Maximum duration of DBF in hours. Default: 24
+DAVY_BACK_FIGHT_MAX_DURATION = Environment("DAVY_BACK_FIGHT_MAX_DURATION", default_value="24")
+# Minimum penalty period for losing a DBF in days. Default: 0
+DAVY_BACK_FIGHT_MIN_LOSE_PENALTY_DURATION = Environment(
+    "DAVY_BACK_FIGHT_MIN_LOSE_PENALTY_DURATION", default_value="0"
+)
+# Maximum penalty period for losing a DBF in days. Default: 7
+DAVY_BACK_FIGHT_MAX_LOSE_PENALTY_DURATION = Environment(
+    "DAVY_BACK_FIGHT_MAX_LOSE_PENALTY_DURATION", default_value="7"
 )
 # How much percent of Crew chest should be taken from the loser after a DBF. Default: 50%
 DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE = Environment(

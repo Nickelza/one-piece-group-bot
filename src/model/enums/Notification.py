@@ -1255,10 +1255,12 @@ class DavyBackFightEndNotification(Notification):
                 self.opponent_crew.get_name_with_deeplink(),
                 get_belly_formatted(self.participant.win_amount),
                 format_percentage_value(self.participant.get_contribution_percentage()),
+                get_remaining_duration(self.davy_back_fight.penalty_end_date),
             )
 
         return phrases.DAVY_BACK_FIGHT_END_NOTIFICATION_LOST.format(
             self.opponent_crew.get_name_with_deeplink(),
+            get_remaining_duration(self.davy_back_fight.penalty_end_date),
         )
 
 

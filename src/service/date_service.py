@@ -72,6 +72,9 @@ def convert_seconds_to_duration(seconds: int | float, show_full: bool = False) -
     minutes = int(remaining_seconds // 60)
     remaining_seconds %= 60
 
+    if seconds == 0:
+        return "0 seconds"
+
     result = ""
     if weeks > 0:
         if weeks == 1:

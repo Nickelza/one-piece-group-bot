@@ -47,7 +47,7 @@ def escape_invalid_markdown_chars(text: str) -> str:
     :return: Escaped text
     """
 
-    escape_chars = r"~>#+-=|{}.!"
+    escape_chars = r"~#+-=|{}.!"
 
     text = re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
@@ -64,7 +64,7 @@ def escape_valid_markdown_chars(text: str) -> str:
     :return: Escaped text
     """
 
-    escape_chars = r"_*[]()"
+    escape_chars = r"_*[]()>"
 
     return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
@@ -1161,7 +1161,8 @@ def get_back_button(
         previous_screen_end_index = -1 - back_screen_index
         screen: Screen = previous_screen_list[previous_screen_end_index]
 
-        # Make sure the screen isn't the same as the next previous screen, don't go back to the same screen
+        # Make sure the screen isn't the same as the next previous screen,
+        # don't go back to the same screen
         try:
             if inbound_keyboard is not None and inbound_keyboard.screen is screen:
                 screen = previous_screen_list[previous_screen_end_index - 1]
@@ -1267,8 +1268,8 @@ def get_deeplink(
 
         info = json.dumps(info, separators=(",", ":"))
 
-    encoded_bytes = info.encode("utf-8")
-    encoded_string = base64.b64encode(encoded_bytes).decode("utf-8")
+    encoded_bytes = info.encode()
+    encoded_string = base64.b64encode(encoded_bytes).decode()
 
     return get_start_with_command_url(encoded_string)
 

@@ -2,7 +2,6 @@ import datetime
 
 from telegram.ext import CallbackContext, ContextTypes
 
-import resources.Environment as Env
 from resources import phrases
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
@@ -206,7 +205,7 @@ async def end(context: CallbackContext, davy_back_fight: DavyBackFight):
         davy_back_fight.status = GameStatus.LOST
 
     davy_back_fight.penalty_end_date = get_datetime_in_future_days(
-        Env.DAVY_BACK_FIGHT_LOSE_PENALTY_DURATION.get_int(), start_time=davy_back_fight.end_date
+        davy_back_fight.penalty_days, start_time=davy_back_fight.end_date
     )
     davy_back_fight.save()
 

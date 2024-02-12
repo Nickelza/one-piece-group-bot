@@ -27,7 +27,9 @@ class DavyBackFight(BaseModel):
     )
     challenger_chest: int | BigIntegerField = BigIntegerField(default=0)
     opponent_chest: int | BigIntegerField = BigIntegerField(default=0)
-    participants_count: int | IntegerField = IntegerField(null=True)
+    participants_count: int | IntegerField = IntegerField()
+    duration_hours: int | IntegerField = IntegerField()
+    penalty_days = IntegerField()
     date = DateTimeField(default=datetime.datetime.now)
     status: int | SmallIntegerField = SmallIntegerField(
         default=GameStatus.AWAITING_OPPONENT_CONFIRMATION
@@ -269,6 +271,16 @@ class DavyBackFight(BaseModel):
         """
 
         return get_remaining_duration(self.penalty_end_date)
+
+    @staticmethod
+    def get_max_participants(challenger_crew: Crew, opponent_crew: Crew) -> int:
+        """
+        Get the max participants
+        :param challenger_crew: The challenger crew
+        :param opponent_crew: The opponent crew
+        :return: The max participants
+        """
+        return min(challenger_crew.get_member_count(), opponent_crew.get_member_count())
 
 
 DavyBackFight.create_table()

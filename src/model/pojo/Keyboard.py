@@ -23,6 +23,7 @@ class Keyboard:
         is_deeplink: bool = False,
         only_authorized_users_can_interact: bool = True,
         switch_inline_query: str = None,
+        exclude_key_from_inbound_info: list[str] = None,
     ):
         """
         Creates a keyboard object
@@ -40,6 +41,7 @@ class Keyboard:
         :param only_authorized_users_can_interact: If only authorized users can interact with the
         keyboard
         :param switch_inline_query: The switch inline query
+        :param exclude_key_from_inbound_info: The keys to be excluded from the inbound info
         """
         self.text = text
         self.info: dict = info if info is not None else {}
@@ -58,8 +60,14 @@ class Keyboard:
         self.only_authorized_users_can_interact: bool = only_authorized_users_can_interact
         self.switch_inline_query: str = switch_inline_query
         self.is_simulated: bool = False
+        self.exclude_key_from_inbound_info: list[str] = (
+            exclude_key_from_inbound_info if exclude_key_from_inbound_info is not None else []
+        )
 
         if inbound_info is not None:
+            for key in self.exclude_key_from_inbound_info:
+                inbound_info.pop(key, None)
+
             self.info = inbound_info | self.info
             self.refresh_callback_data()
 
