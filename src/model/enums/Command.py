@@ -155,6 +155,7 @@ limitations_list = set(
     + ALLOW_WHILE_ARRESTED_TEMPORARY
     + ALLOW_DEEPLINK
     + ONLY_BY_CAPTAIN_OR_FIRST_MATE
+    + ONLY_BY_CAPTAIN
 )
 for sc in limitations_list:
     _active = sc not in DEPRECATED

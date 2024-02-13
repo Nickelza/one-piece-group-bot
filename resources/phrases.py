@@ -877,6 +877,10 @@ CREW_MODIFY = (
     "\n_{}_"
     "\n\n What would you like to modify?"
 )
+
+CREW_MODIFY_ONLY_CAPTAIN_OR_FIRST_MATE = (
+    "Only the Captain or First Mate can modify the Crew settings"
+)
 CREW_EDIT_DAVY_BACK_FIGHT_PRIORITY_SELECT_USER = (
     "Of which member do you want to change the priority?"
 )
@@ -979,7 +983,10 @@ CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_DAVY_BACK_FIGHT = (
     " period following a loss"
 )
 CREW_FIRST_MATE_PRIVILEGES = (
-    "\n• Accept new members \n• Activate Crew Abilities\n• Activate Crew Abilities"
+    "\n• Accept new members "
+    "\n• Activate Crew Abilities"
+    "\n• Modify Crew settings"
+    "\n• Can't be conscripted in Davy Back Fights"
 )
 CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION = (
     "Are you sure you want to promote {} to First Mate?\nThey will gain the following privileges:"

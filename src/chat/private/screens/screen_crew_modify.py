@@ -8,6 +8,7 @@ from src.chat.private.screens.screen_crew_create import Step
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.ChatWarning import ChatWarning
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
@@ -40,6 +41,12 @@ async def manage(
 
     crew = get_crew(user=user)
     inline_keyboard: list[list[Keyboard]] = []
+
+    # Allow members to view screen, but they can't modify anything
+    if not user.is_crew_captain_or_first_mate():
+        for key in CrewModifyReservedKeys:
+            if inbound_keyboard.has_key(key):
+                raise ChatWarning(phrases.CREW_MODIFY_ONLY_CAPTAIN_OR_FIRST_MATE)
 
     # Manage toggle
     if CrewModifyReservedKeys.TOGGLE_ALLOW_VIEW_IN_SEARCH in inbound_keyboard.info:
