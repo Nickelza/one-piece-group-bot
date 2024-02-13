@@ -82,7 +82,7 @@ def main() -> None:
 
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO,
+        level=logging.getLevelName(Env.LOG_LEVEL.get()),
         stream=sys.stdout,
     )
 

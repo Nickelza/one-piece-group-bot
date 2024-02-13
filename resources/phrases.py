@@ -739,6 +739,7 @@ CREW_SEARCH_ITEM_TEXT = "{} \\(Lv. {}\\)"
 CREW_SEARCH_ITEM_TEXT_FILL_IN = "Crew"
 CREW_SEARCH_ITEM_LEGEND_CAN_JOIN = "Can join"
 CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
+CREW_SEARCH_ITEM_LEGEND_AVAILABLE_FOR_DAVY_BACK_FIGHT = "Available for Davy Back Fight"
 CREW_SEARCH_FILTER_NAME = "Crew name"
 CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"

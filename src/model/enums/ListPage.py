@@ -187,6 +187,23 @@ class ListPage(ABC):
 
         raise UnauthorizedToViewItemException()
 
+    def get_emoji_legend_multiple(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend
+
+        :return: The emoji legend
+        """
+
+        legend_list = []
+        for legend, results in self.legend_filter_results.items():
+            if self.object in results:
+                legend_list.append(legend)
+
+        if len(legend_list) == 0:
+            raise UnauthorizedToViewItemException()
+
+        return legend_list
+
     def get_emoji_legend_formatted(self) -> str:
         """
         Get the emoji legend formatted
@@ -195,6 +212,15 @@ class ListPage(ABC):
         """
 
         return self.get_emoji_legend().get_formatted()
+
+    def get_emoji_legend_multiple_formatted(self) -> str:
+        """
+        Get the emoji legend formatted
+
+        :return: The emoji legend formatted
+        """
+
+        return "".join([legend.emoji for legend in self.get_emoji_legend_multiple()]) + " "
 
     def get_emoji_legend_list_text(self) -> str:
         """

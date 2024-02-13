@@ -43,6 +43,9 @@ class DavyBackFight(BaseModel):
     penalty_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     penalty_payout: int | BigIntegerField = BigIntegerField(default=0)
 
+    # Backlinks
+    davy_back_fight_participants = None
+
     class Meta:
         db_table = "davy_back_fight"
 
@@ -281,6 +284,77 @@ class DavyBackFight(BaseModel):
         :return: The max participants
         """
         return min(challenger_crew.get_member_count(), opponent_crew.get_member_count())
+
+    @staticmethod
+    def get_active_status() -> list[GameStatus]:
+        """
+        Get the active status
+        :return: The active status
+        """
+        return [GameStatus.COUNTDOWN_TO_START, GameStatus.IN_PROGRESS]
+
+    @staticmethod
+    def get_ended_status() -> list[GameStatus]:
+        """
+        Get the ended status
+        :return: The ended status
+        """
+        return [GameStatus.WON, GameStatus.LOST]
+
+    @staticmethod
+    def get_active() -> list["DavyBackFight"]:
+        """
+        Get the active Davy Back Fights
+        :return: The active Davy Back Fights
+        """
+        return DavyBackFight.select().where(
+            DavyBackFight.status << DavyBackFight.get_active_status()
+        )
+
+    @staticmethod
+    def get_crew_with_enough_members() -> list[Crew]:
+        """
+        Get the crews with enough members for Davy Back Fight
+        :return: The crews with enough members for Davy Back Fight
+        """
+        return [
+            c
+            for c in Crew.select()
+            if c.get_member_count() >= Env.DAVY_BACK_FIGHT_MIN_PARTICIPANTS.get_int()
+        ]
+
+    @staticmethod
+    def get_crews_in_active() -> list[Crew]:
+        """
+        Returns the crew in active Davy Back Fight
+        :return: The crew in active Davy Back Fight
+        """
+
+        active = DavyBackFight.get_active()
+        return [d.challenger_crew for d in active] + [d.opponent_crew for d in active]
+
+    @staticmethod
+    def get_ended_with_penalty() -> list["DavyBackFight"]:
+        """
+        Get the ended Davy Back Fights with penalty still active
+        :return: The ended Davy Back Fights with penalty
+        """
+        return DavyBackFight.select().where(
+            DavyBackFight.status.in_(DavyBackFight.get_ended_status()),
+            DavyBackFight.penalty_end_date > datetime.datetime.now(),
+        )
+
+    @staticmethod
+    def get_crews_in_penalty() -> list[Crew]:
+        """
+        Returns the crew in Davy Back Fight penalty
+        :return: The crew in Davy Back Fight penalty
+        """
+
+        ended_with_penalty = DavyBackFight.get_ended_with_penalty()
+        return [d.challenger_crew for d in ended_with_penalty] + [
+            d.opponent_crew for d in ended_with_penalty
+        ]
 
 
 DavyBackFight.create_table()

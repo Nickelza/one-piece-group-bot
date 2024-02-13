@@ -6,6 +6,7 @@ from src.chat.private.screens.screen_crew_davy_back_fight_request import (
     ScreenReservedKeys as DBFRequestReservedKeys,
 )
 from src.model.Crew import Crew
+from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage, EmojiLegend, ListFilter, ListFilterType
@@ -46,7 +47,7 @@ class CrewSearchListPage(ListPage):
         )
 
     def get_item_text(self) -> str:
-        return self.get_emoji_legend_formatted() + phrases.CREW_SEARCH_ITEM_TEXT.format(
+        return self.get_emoji_legend_multiple_formatted() + phrases.CREW_SEARCH_ITEM_TEXT.format(
             self.object.get_name_escaped(), self.object.level
         )
 
@@ -62,7 +63,7 @@ class CrewSearchListPage(ListPage):
         :return: The emoji legend list
         """
 
-        return [
+        result = [
             EmojiLegend(
                 Emoji.LOG_POSITIVE,
                 phrases.CREW_SEARCH_ITEM_LEGEND_CAN_JOIN,
@@ -74,6 +75,18 @@ class CrewSearchListPage(ListPage):
                 ~(self.get_can_join_condition()),
             ),
         ]
+
+        # Available for Davy Back Fight, only if user is Captain
+        if self.user.is_crew_captain():
+            result.append(
+                EmojiLegend(
+                    Emoji.LOG_BLUE,
+                    phrases.CREW_SEARCH_ITEM_LEGEND_AVAILABLE_FOR_DAVY_BACK_FIGHT,
+                    self.get_available_for_dbf_condition(),
+                ),
+            )
+
+        return result
 
     def get_filter_list(self) -> list[ListFilter]:
         """
@@ -100,6 +113,22 @@ class CrewSearchListPage(ListPage):
             & (Crew.can_accept_new_members == True)
             & (Crew.allow_join_from_search == True)
             & (Crew.required_bounty <= self.user.bounty)
+            & (Crew.id != self.user.crew.id)
+        )
+
+    def get_available_for_dbf_condition(self) -> any:
+        """
+        Get the condition for the crew to be available for DBF
+        - Allows DBF requests
+        - Has the minimum required members
+        - Not already in a DBF (pending too)
+        - Not in DBF penalty period
+        """
+        return (
+            (Crew.allow_davy_back_fight_request == True)
+            & (Crew.id.in_(DavyBackFight.get_crew_with_enough_members()))
+            & (Crew.id.not_in([c.id for c in DavyBackFight.get_crews_in_active()]))
+            & (Crew.id.not_in([c.id for c in DavyBackFight.get_crews_in_penalty()]))
             & (Crew.id != self.user.crew.id)
         )
 
