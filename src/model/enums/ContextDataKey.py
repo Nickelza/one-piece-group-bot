@@ -9,6 +9,7 @@ class ContextDataKey(StrEnum):
     PAST_MESSAGES_DATE = "past_messages_date"
     FILTER = "filter"
     INBOUND_KEYBOARD = "inbound_keyboard"
+    KEYBOARD_DATA = "keyboard_data"
 
 
 class ContextDataType(StrEnum):

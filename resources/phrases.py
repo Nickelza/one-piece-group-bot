@@ -144,6 +144,7 @@ SAVED_MEDIA_NOT_FOUND = "Saved Media not found"
 UNKNOWN_EXTRA_STEP = "Unknown extra step"
 PRIVATE_STEP_NOT_SET = "Private step not set"
 SAVED_USER_DATA_NOT_FOUND = "Saved user data not found"
+RESTART_BOT = "Oops, looks like there was some error. Please restart the Bot"
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + " Cancel"

@@ -106,6 +106,8 @@ BOT_USERNAME = Environment("BOT_USERNAME")
 # CONFIG
 # Which timezone to use
 TZ = Environment("TZ", default_value="Etc/UTC")
+# Log level
+LOG_LEVEL = Environment("LOG_LEVEL", default_value="INFO")
 
 # DATABASE
 # Database name

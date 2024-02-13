@@ -94,6 +94,7 @@ def get_chat_id(
 
 def get_keyboard(
     keyboard: list[list[Keyboard]],
+    context: ContextTypes.DEFAULT_TYPE,
     update: Update = None,
     add_delete_button: bool = False,
     authorized_users_tg_ids: list = None,
@@ -110,15 +111,19 @@ def get_keyboard(
     Get keyboard markup
 
     :param keyboard: Keyboard object
+    :param context: The context
     :param update: Update object
     :param add_delete_button: True if the delete button should be added
     :param authorized_users_tg_ids: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object
-    :param only_authorized_users_can_interact: True if only authorized users can interact with the keyboard
-    :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the
+    keyboard
+    :param excluded_keys_from_back_button: List of keys that should not be added to the back button
+    info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
     :param use_close_delete: True if the close button should be used instead of the delete button
-    :param should_add_current_user_to_authorized: True if the current user should be added to the authorized users list
+    :param should_add_current_user_to_authorized: True if the current user should be added to the
+    authorized users list
     :param user: User object
     :param add_back_button: True if the back button should be added to the keyboard if possible
     :return: Keyboard markup
@@ -163,9 +168,12 @@ def get_keyboard(
                             )
                         )
                     else:
-                        # Already has some callback_data. If it has no data, nothing should be added
-                        # callback_data is a string initialized for an empty dict, so even if empty the string will have
-                        # value '{}'. So, to confirm that it is empty, we first revert to a dictionary and check if the
+                        # Already has some callback_data. If it has no data, nothing should be
+                        # added
+                        # callback_data is a string initialized for an empty dict,
+                        # so even if empty the string will have value '{}'.
+                        # So, to confirm that it is empty, we first revert to a dictionary and
+                        # check if the
                         # dict is empty.
                         if json.loads(button.callback_data):
                             # Add information about previous screen
@@ -219,7 +227,10 @@ def get_keyboard(
                         try:
                             keyboard_row.append(
                                 InlineKeyboardButton(
-                                    button.text, callback_data=button.callback_data
+                                    button.text,
+                                    callback_data=button.set_and_get_callback_data_in_context(
+                                        context
+                                    ),
                                 )
                             )
                         except AttributeError:
@@ -236,7 +247,10 @@ def get_keyboard(
                 authorized_users_ids, use_close_delete=use_close_delete
             )
             keyboard_list.append([
-                InlineKeyboardButton(delete_button.text, callback_data=delete_button.callback_data)
+                InlineKeyboardButton(
+                    delete_button.text,
+                    callback_data=delete_button.set_and_get_callback_data_in_context(context),
+                )
             ])
 
         if inbound_keyboard is not None and add_back_button:
@@ -247,9 +261,12 @@ def get_keyboard(
                 user=user,
             )
             back_button.refresh_callback_data()
-            keyboard_list.append(
-                [InlineKeyboardButton(back_button.text, callback_data=back_button.callback_data)]
-            )
+            keyboard_list.append([
+                InlineKeyboardButton(
+                    back_button.text,
+                    callback_data=back_button.set_and_get_callback_data_in_context(context),
+                )
+            ])
 
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
 
@@ -267,8 +284,8 @@ def get_reply_to_message_id(
     :param update: Update object. Required if reply_to_message_id is None
     :param quote: Quote message. Default: False
     :param reply_to_message_id: Reply message id. Default: None
-    :param quote_if_group: If the message should be quoted if it is in a filter_by_groups and update is not None.
-                           Default: True
+    :param quote_if_group: If the message should be quoted if it is in a filter_by_groups and
+    update is not None. Default: True
     :return: Reply message id
     """
 
@@ -344,21 +361,27 @@ async def full_message_send(
     :param reply_to_message_id: Message ID to reply to
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
-    :param quote_if_group: True if the message should be quoted if it is in a filter_by_groups and update is not None
+    :param quote_if_group: True if the message should be quoted if it is in a filter_by_groups and
+    update is not None
     :param protect_content: True if the message should be protected from saving and forwarding
     :param disable_web_page_preview: True if the web page preview should be disabled
-    :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
+    :param allow_sending_without_reply: True if the message should be sent if message to be replied
+    to is not found
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
-    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
-    :param send_in_private_chat: True if the message should be sent in private chat. Not necessary if update is not None
-    :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
+    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to
+    the keyboard
+    :param send_in_private_chat: True if the message should be sent in private chat. Not necessary
+    if update is not None
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the
+    message keyboard
     :param edit_message_id: ID of the message to edit
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
-    :param excluded_keys_from_back_button: List of keys that should not be added to the back button info
+    :param excluded_keys_from_back_button: List of keys that should not be added to the back button
+    info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
-    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
-            keyboard info to add to the back button
+    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from
+    previous_screens, this is the keyboard info to add to the back button
     :param use_close_delete: True if the close button should be used instead of the delete button
     :param group_chat: The group chat, used to get the group chat id
     :param ignore_exception: True if the TelegramError should be ignored
@@ -401,6 +424,7 @@ async def full_message_send(
     )
     keyboard_markup = get_keyboard(
         keyboard,
+        context,
         update=update,
         add_delete_button=add_delete_button,
         authorized_users_tg_ids=authorized_users,
@@ -547,15 +571,18 @@ async def full_media_send(
     :param parse_mode: Parse mode
     :param quote: True if the message should be quoted
     :param quote_if_group: True if the message should be quoted if it is a group_chat message
-    :param allow_sending_without_reply: True if the message should be sent if message to be replied to is not found
+    :param allow_sending_without_reply: True if the message should be sent if message to be replied
+    to is not found
     :param edit_only_keyboard: If only the keyboard should be edited
-    :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If keyboard is None,
-            it will be removed
+    :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If
+    keyboard is None, it will be removed
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
-        :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
+    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added
+    to the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat
-    :param only_authorized_users_can_interact: True if only authorized users can interact with the message keyboard
+    :param only_authorized_users_can_interact: True if only authorized users can interact with the
+    message keyboard
     :param saved_media_name: Saved media name
     :param group_chat: The group chat, used to get the group chat id
     :param exceptions_to_ignore: List of exceptions to ignore
@@ -614,6 +641,7 @@ async def full_media_send(
     )
     keyboard_markup = get_keyboard(
         keyboard,
+        context,
         update=update,
         add_delete_button=add_delete_button,
         authorized_users_tg_ids=authorized_users,
@@ -770,17 +798,19 @@ async def full_message_or_media_send_or_edit(
     :param protect_content: True if the message should be protected from saving and forwarding
     :param disable_web_page_preview: Only for text; True if the web page preview should be disabled
     :param edit_only_keyboard: Only for Media; if only the keyboard should be edited
-    :param edit_only_caption_and_keyboard: Only for Media; If only the caption and keyboard should be edited.
-            If keyboard is None, it will be removed
+    :param edit_only_caption_and_keyboard: Only for Media; If only the caption and keyboard should
+    be edited.
+    If keyboard is None, it will be removed
     :param add_delete_button: True if the delete button should be added
     :param authorized_users: List of user ids that are allowed to delete the message
     :param answer_callback: True if the callback should be answered
     :param show_alert: True if the callback should be answered with an alert
-    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to the keyboard
+    :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to
+    the keyboard
     :param previous_screens: List of previous screens. Ignored if inbound_keyboard is not None
     :param from_exception: True if the message is sent from an exception
-    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from previous_screens, this is the
-            keyboard info to add to the back button
+    :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from
+    previous_screens, this is the keyboard info to add to the back button
     :return: Message
     """
 
@@ -822,9 +852,12 @@ async def full_message_or_media_send_or_edit(
         )
 
 
-async def full_inline_query_answer(update: Update, items: list[ContextDataValue]) -> bool:
+async def full_inline_query_answer(
+    context: ContextTypes.DEFAULT_TYPE, update: Update, items: list[ContextDataValue]
+) -> bool:
     """
     Answer an inline query
+    :param context: The context
     :param update: Update object
     :param items: List of items to display
     :return: True if the answer was sent
@@ -840,7 +873,9 @@ async def full_inline_query_answer(update: Update, items: list[ContextDataValue]
         else:
             text = item.text
 
-        keyboard_markup = get_keyboard(item.keyboard) if item.keyboard is not None else None
+        keyboard_markup = (
+            get_keyboard(item.keyboard, context) if item.keyboard is not None else None
+        )
         results.append(
             InlineQueryResultArticle(
                 id=str(uuid4()),
@@ -941,8 +976,10 @@ def get_yes_no_keyboard(
     :param no_text: Text for the no button
     :param screen: The default screen that will be called when the user clicks on the yes/no button
     :param extra_keys: Dict of extra keys to add to the keyboard
-    :param yes_screen: Screen to call when the user clicks on the yes button. If None, the default screen will be called
-    :param no_screen: Screen to call when the user clicks on the no button. If None, the default screen will be called
+    :param yes_screen: Screen to call when the user clicks on the yes button. If None, the default
+    screen will be called
+    :param no_screen: Screen to call when the user clicks on the no button. If None, the default
+    screen will be called
     :param yes_extra_keys: Dict of extra keys for the yes button, in a dict of key and value
     :param no_extra_keys: Dict of extra keys for the no button, in a dict of key and value
     :param confirm_key: Yes or no key. If None, default value will be used
@@ -951,12 +988,14 @@ def get_yes_no_keyboard(
     :param no_is_back_button: True if the no button should be a back button
     :param yes_is_delete_button: True if the yes button should be a delete button
     :param no_is_delete_button: True if the no button should be a delete button
-    :param add_inbound_key_info: True if the inbound key info should be added to the yes and no buttons
+    :param add_inbound_key_info: True if the inbound key info should be added to the yes and no
+    buttons
     :param keys_to_exclude: List of keys to exclude from the copy of info dict
     :param exclude_yes_button: True if the yes button should be excluded
     :param exclude_no_button: True if the no button should be excluded
     :param authorized_users: List of users that can operate the keyboard
-    :param yes_keys_to_exclude: List of keys to exclude from the copy of info dict for the yes button
+    :param yes_keys_to_exclude: List of keys to exclude from the copy of info dict for the yes
+    button
     :param no_keys_to_exclude: List of keys to exclude from the copy of info dict for the no button
     :return: The yes and no keyboard
     """
@@ -1319,7 +1358,8 @@ async def log_error(
 
 def message_is_reply(update: Update) -> bool:
     """
-    Check if the message is a reply. Necessary because, due to a Telegram bug, the reply_to_message field is set
+    Check if the message is a reply. Necessary because, due to a Telegram bug, the reply_to_message
+    field is set
     for every message sent in not general topics
     :param update: Update object
     :return: True if the message is a reply

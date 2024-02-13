@@ -31,4 +31,4 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             description=phrases.INLINE_QUERY_ITEM_NOT_FOUND_DESCRIPTION,
         )
 
-    await full_inline_query_answer(update, [context_data])
+    await full_inline_query_answer(context, update, [context_data])

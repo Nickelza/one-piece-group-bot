@@ -1,7 +1,9 @@
+import logging
 from datetime import datetime
 
 from telegram.ext import CallbackContext, ContextTypes
 
+from resources import phrases
 from src.model.enums.ContextDataKey import ContextDataKey, ContextDataType
 from src.model.error.CommonChatError import CommonChatException
 
@@ -33,9 +35,10 @@ def get_context_data(
             return data[key]["value"]
     except KeyError as e:
         if tolerate_key_exception:
-            raise CommonChatException(
+            logging.debug(
                 f"Key {key} not found in context user data, this might be due to a system restart"
             )
+            raise CommonChatException(phrases.RESTART_BOT, only_message=True)
         else:
             raise e
 

@@ -15,6 +15,7 @@ class ReservedKeyboardKeys(StrEnum):
     FILTER = "s"
     NUMBER = "r"
     DIRECT_ITEM = "q"
+    CONTEXT = "ctx"
 
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"

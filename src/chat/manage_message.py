@@ -206,85 +206,92 @@ async def manage_after_db(
     command: Command.Command = Command.ND
     keyboard = None
     try:
-        if is_command(update.message.text):
-            if "/start " in update.message.text:  # Start with parameter
-                start_parameter = update.message.text.replace("/start ", "")
-                try:
-                    parameter_decoded = base64.b64decode(start_parameter).decode()
-                    keyboard = Keyboard.get_from_callback_query_or_info(
-                        message_source, info_str=str(parameter_decoded), from_deeplink=True
+        try:
+            if is_command(update.message.text):
+                if "/start " in update.message.text:  # Start with parameter
+                    start_parameter = update.message.text.replace("/start ", "")
+                    try:
+                        parameter_decoded = base64.b64decode(start_parameter).decode()
+                        keyboard = Keyboard.get_from_callback_query_or_info(
+                            context,
+                            message_source,
+                            info_str=str(parameter_decoded),
+                            from_deeplink=True,
+                        )
+                        command = Command.get_by_screen(keyboard.screen)
+                        command_name = command.name
+                    except (UnicodeDecodeError, ValueError):
+                        command_name = start_parameter
+                else:
+                    command_name = (update.message.text.split(" ")[0])[1:].lower()
+                    command_name = command_name.replace("@" + Env.BOT_USERNAME.get(), "")
+
+                if keyboard is None:
+                    if command_name.strip() != "":
+                        command = Command.get_by_name(command_name, message_source)
+
+                    try:
+                        command.parameters = update.message.text.split(" ")[1:]
+                    except IndexError:
+                        pass
+
+        except (AttributeError, ValueError):
+            if is_callback:
+                keyboard = Keyboard.get_from_callback_query_or_info(
+                    context, message_source, update.callback_query
+                )
+
+                if not keyboard.info:
+                    # No provided info, do nothing
+                    return
+
+                if keyboard.screen is not None:
+                    try:
+                        command = Command.get_by_screen(keyboard.screen)
+                    except ValueError:
+                        # For commands without screen, example "delete"
+                        command = Command.Command(None, keyboard.screen)
+
+        target_user: User | None = None
+        if keyboard is None:
+            try:
+                if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
+                    target_user: User = get_user(
+                        update.effective_message.reply_to_message.from_user
                     )
-                    command = Command.get_by_screen(keyboard.screen)
-                    command_name = command.name
-                except (UnicodeDecodeError, ValueError):
-                    command_name = start_parameter
-            else:
-                command_name = (update.message.text.split(" ")[0])[1:].lower()
-                command_name = command_name.replace("@" + Env.BOT_USERNAME.get(), "")
+            except AttributeError:
+                pass
 
-            if keyboard is None:
-                if command_name.strip() != "":
-                    command = Command.get_by_name(command_name, message_source)
+        # Start command, reset private screen
+        if command is Command.PVT_START:
+            user.private_screen_list = None
+            user.reset_private_screen()
 
-                try:
-                    command.parameters = update.message.text.split(" ")[1:]
-                except IndexError:
-                    pass
-
-    except (AttributeError, ValueError):
-        if is_callback:
-            keyboard = Keyboard.get_from_callback_query_or_info(
-                message_source, update.callback_query
-            )
-
-            if not keyboard.info:
-                # No provided info, do nothing
+        # Check for spam only if a valid command or private chat
+        if command != Command.ND or message_source is MessageSource.PRIVATE:
+            if await is_spam(update, context, message_source, command, user):
+                logging.warning(
+                    f"Spam detected for chat {update.effective_chat.id}: Ignoring message"
+                )
                 return
 
-            if keyboard.screen is not None:
-                try:
-                    command = Command.get_by_screen(keyboard.screen)
-                except ValueError:
-                    # For commands without screen, example "delete"
-                    command = Command.Command(None, keyboard.screen)
+        if command != Command.ND or is_callback:
+            if not await validate(
+                update,
+                context,
+                command,
+                user,
+                keyboard,
+                target_user,
+                is_callback,
+                message_source,
+                group_chat,
+            ):
+                return
 
-    target_user: User | None = None
-    if keyboard is None:
-        try:
-            if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
-                target_user: User = get_user(update.effective_message.reply_to_message.from_user)
-        except AttributeError:
-            pass
+        if command != Command.ND:
+            command.message_source = message_source
 
-    # Start command, reset private screen
-    if command is Command.PVT_START:
-        user.private_screen_list = None
-        user.reset_private_screen()
-
-    # Check for spam only if a valid command or private chat
-    if command != Command.ND or message_source is MessageSource.PRIVATE:
-        if await is_spam(update, context, message_source, command, user):
-            logging.warning(f"Spam detected for chat {update.effective_chat.id}: Ignoring message")
-            return
-
-    if command != Command.ND or is_callback:
-        if not await validate(
-            update,
-            context,
-            command,
-            user,
-            keyboard,
-            target_user,
-            is_callback,
-            message_source,
-            group_chat,
-        ):
-            return
-
-    if command != Command.ND:
-        command.message_source = message_source
-
-    try:
         match message_source:
             case MessageSource.PRIVATE:
                 await manage_private_chat(update, context, command, user, keyboard)

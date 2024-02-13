@@ -1,8 +1,13 @@
+import hashlib
 import json
+import logging
 
 from telegram import CallbackQuery
+from telegram.ext import ContextTypes
 
+import constants as c
 from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -112,8 +117,26 @@ class Keyboard:
         """
         self.callback_data = self.create_callback_data()
 
+    def set_and_get_callback_data_in_context(self, context: ContextTypes.DEFAULT_TYPE) -> str:
+        """
+        Get the callback data in the context if longer than allowed
+        :param context: The context
+        """
+
+        if len(self.callback_data) < c.TG_KEYBOARD_DATA_MAX_LEN:
+            return self.callback_data
+
+        # Inner key is md5 hash of the callback data
+        inner_key = hashlib.md5(self.callback_data.encode()).hexdigest()
+        User.set_context_data(
+            context, ContextDataKey.KEYBOARD_DATA, self.callback_data, inner_key=inner_key
+        )
+        logging.debug(f"Keyboard data too long, saved in context with inner key {inner_key}")
+        return json.dumps({ReservedKeyboardKeys.CONTEXT: inner_key}, separators=(",", ":"))
+
     @staticmethod
     def get_from_callback_query_or_info(
+        context: ContextTypes.DEFAULT_TYPE,
         message_source: MessageSource,
         callback_query: CallbackQuery = None,
         info_str: str = None,
@@ -121,6 +144,7 @@ class Keyboard:
     ) -> "Keyboard":
         """
         Create a Keyboard object from a CallbackQuery object
+        :param context: The context
         :param callback_query: CallbackQuery object
         :param message_source: Source of the message
         :param info_str: The info to be added to the keyboard info
@@ -135,6 +159,19 @@ class Keyboard:
             info: dict = json.loads(info_str)
         else:
             info: dict = json.loads(callback_query.data)
+
+        # Data was too long, so get it from context
+        if ReservedKeyboardKeys.CONTEXT in info:
+            info_str_from_context = User.get_context_data(
+                context,
+                ContextDataKey.KEYBOARD_DATA,
+                inner_key=info[ReservedKeyboardKeys.CONTEXT],
+            )
+            # Remove the context data
+            User.remove_context_data(
+                context, ContextDataKey.KEYBOARD_DATA, info[ReservedKeyboardKeys.CONTEXT]
+            )
+            info = json.loads(info_str_from_context)
 
         try:
             if ReservedKeyboardKeys.SCREEN in info:
