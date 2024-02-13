@@ -15,6 +15,10 @@ class Leaderboard(BaseModel):
     group: Group | ForeignKeyField = ForeignKeyField(Group, null=True, backref="leaderboards")
     global_message_id: int | IntegerField = IntegerField(null=True)
 
+    # Backref
+    leaderboard_users = None
+    leaderboard_crews = None
+
     class Meta:
         db_table = "leaderboard"
 

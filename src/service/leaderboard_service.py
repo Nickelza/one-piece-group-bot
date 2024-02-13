@@ -11,6 +11,7 @@ from src.model.Crew import Crew
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
+from src.model.LeaderboardCrew import LeaderboardCrew
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
 from src.model.Warlord import Warlord
@@ -52,8 +53,11 @@ def get_leaderboard_message(
     from src.model.enums.LogType import LogType
     from src.model.enums.Log import Log
 
+    is_global = leaderboard.group is None
+
     content_text = ""
     warlords_text = ""
+    effective_users_count = 0
     for index, leaderboard_user in enumerate(leaderboard.leaderboard_users):
         leaderboard_user: LeaderboardUser = leaderboard_user
         user: User = leaderboard_user.user
@@ -66,7 +70,8 @@ def get_leaderboard_message(
                 Log.get_deeplink_by_type(LogType.WARLORD, warlord.id),
             )
         else:
-            content_text += phrases.LEADERBOARD_ROW.format(
+            effective_users_count += 1
+            content_text += phrases.LEADERBOARD_USER_ROW.format(
                 leaderboard_user.position,
                 get_leaderboard_rank_message(leaderboard_user.rank_index),
                 mention_markdown_v2(user.tg_user_id, user.tg_first_name),
@@ -75,9 +80,7 @@ def get_leaderboard_message(
 
     next_bounty_reset_time = get_next_bounty_reset_time()
 
-    local_global_text = (
-        phrases.LEADERBOARD_GLOBAL if leaderboard.group is None else phrases.LEADERBOARD_LOCAL
-    )
+    local_global_text = phrases.LEADERBOARD_GLOBAL if is_global else phrases.LEADERBOARD_LOCAL
     if global_leaderboard_message_id is not None:
         view_global_leaderboard_text = phrases.LEADERBOARD_VIEW_GLOBAL_LEADERBOARD.format(
             get_message_url(
@@ -90,12 +93,26 @@ def get_leaderboard_message(
     if warlords_text != "":
         warlords_text = phrases.LEADERBOARD_WARLORDS + warlords_text
 
+    crew_text = ""
+    crew_items_text = ""
+    total_crews = len(leaderboard.leaderboard_crews)
+    if is_global and total_crews > 0:
+        for index, leaderboard_crew in enumerate(leaderboard.leaderboard_crews):
+            leaderboard_crew: LeaderboardCrew = leaderboard_crew
+            crew_items_text += phrases.LEADERBOARD_CREW_ROW.format(
+                leaderboard_crew.position,
+                leaderboard_crew.crew.get_name_with_deeplink(add_level=True),
+                leaderboard_crew.captain.get_markdown_mention(),
+            )
+        crew_text = phrases.LEADERBOARD_CREW.format(total_crews, crew_items_text)
+
     return phrases.LEADERBOARD.format(
         local_global_text,
         leaderboard.week,
         leaderboard.year,
-        leaderboard.leaderboard_users.count(),
+        effective_users_count,
         content_text,
+        crew_text,
         warlords_text,
         view_global_leaderboard_text,
         default_date_format(next_bounty_reset_time),
@@ -110,7 +127,8 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     from src.service.bounty_service import should_reset_bounty, reset_bounty
 
-    # Create and send the leaderboard, not fire and forget because all leaderboards need to be completed before
+    # Create and send the leaderboard, not fire and forget because all leaderboards need to be
+    # completed before
     # eventually resetting the bounty
     await manage_leaderboard(context)
 
@@ -206,8 +224,9 @@ async def create_and_send_leaderboard(
 
     leaderboard.save()
 
-    # Create the leaderboard users
+    # Create the leaderboard users and crew
     create_leaderboard_users(leaderboard, group)
+    create_leaderboard_crews(leaderboard)
 
     # Send message to chats
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
@@ -284,7 +303,8 @@ def create_leaderboard_users(
             User.id.in_(group.get_active_users_ids())
         )
 
-    # Eligible users for Pirate King position - Those who were Emperor or higher in the previous leaderboard
+    # Eligible users for Pirate King position - Those who were Emperor or higher in the previous
+    # leaderboard
     eligible_pk_users: list[User] = [
         leaderboard_user.user
         for leaderboard_user in previous_leaderboard_users
@@ -375,6 +395,38 @@ def create_leaderboard_users(
             leaderboard_users.append(leaderboard_user)
 
         return leaderboard_users
+
+
+def create_leaderboard_crews(leaderboard: Leaderboard) -> list[LeaderboardCrew]:
+    """
+    Creates a leaderboard list
+    :param leaderboard: The leaderboard to create the crews for
+    :return: The leaderboard crews
+    """
+
+    leaderboard_crews: list[LeaderboardCrew] = []
+
+    # Get active crews that are visible in search, ordered by level and total chest
+    crews: list[Crew] = (
+        Crew.select()
+        .where((Crew.is_active == True) & (Crew.allow_view_in_search == True))
+        .order_by(Crew.level.desc(), Crew.total_gained_chest_amount.desc())
+        .limit(Env.LEADERBOARD_CREW_LIMIT.get_int())
+    )
+
+    for index, crew in enumerate(crews):
+        leaderboard_crew: LeaderboardCrew = LeaderboardCrew()
+        leaderboard_crew.leaderboard = leaderboard
+        leaderboard_crew.crew = crew
+        leaderboard_crew.captain = crew.get_captain()
+        leaderboard_crew.position = index + 1
+        leaderboard_crew.level = crew.level
+        leaderboard_crew.total_chest_amount = crew.total_gained_chest_amount
+        leaderboard_crew.save()
+
+        leaderboard_crews.append(leaderboard_crew)
+
+    return leaderboard_crews
 
 
 def save_leaderboard_user(
@@ -474,7 +526,8 @@ def get_current_leaderboard_rank(
 def get_highest_active_rank(user: User, group_chat: GroupChat) -> LeaderboardRank:
     """
     Get the highest active rank for a given user
-    If the user has a special rank, the special rank is returned if it's higher than the user's leaderboard rank
+    If the user has a special rank, the special rank is returned if it's higher than the user's
+    leaderboard rank
     :param user: User
     :param group_chat: Group chat
     :return: Leaderboard rank

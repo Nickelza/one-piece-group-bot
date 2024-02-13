@@ -82,10 +82,12 @@ STATUS_PRIVATE_CHAT_KEY = "View in Private Chat"
 BOUNTY_RESET = "Bounties have been reset"
 
 LEADERBOARD = (
-    "*{}* Leaderboard for week *{}* of *{}*\n\nHere are the top {} users with the most"
-    " bounties:{}{}{}\n\n_Next bounty reset on {} \\(in {}\\)_"
+    "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
+    " bounties*:{}{}{}{}\n\n_Next bounty reset on {} \\(in {}\\)_"
 )
-LEADERBOARD_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
+LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
+LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
+LEADERBOARD_CREW = f"\n\n\n{Emoji.CREW}*Here are the top {{}} Crews*:{{}}"
 LEADERBOARD_LOCAL = "Local"
 LEADERBOARD_GLOBAL = "Global"
 LEADERBOARD_VIEW_GLOBAL_LEADERBOARD = "\n\n\n" + Emoji.GLOBE + "[Global Leaderboard]({})"

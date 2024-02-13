@@ -508,8 +508,8 @@ BOUNTY_POSTER_LIMIT_SUPERNOVA = Environment("BOUNTY_POSTER_LIMIT_SUPERNOVA", def
 # How many times Rookies can display bounty poster before it is reset. Default: 0
 BOUNTY_POSTER_LIMIT_ROOKIE = Environment("BOUNTY_POSTER_LIMIT_ROOKIE", default_value="0")
 
-# How many entries should be shown in the leaderboard. Default: 20
-LEADERBOARD_LIMIT = Environment("LEADERBOARD_LIMIT", default_value="20")
+# How many crew entries should be shown in the leaderboard. Default: 5
+LEADERBOARD_CREW_LIMIT = Environment("LEADERBOARD_CREW_LIMIT", default_value="5")
 # How many active users are required to create a local leaderboard. Default: 20
 LEADERBOARD_MIN_ACTIVE_USERS = Environment("LEADERBOARD_MIN_ACTIVE_USERS", default_value="20")
 
