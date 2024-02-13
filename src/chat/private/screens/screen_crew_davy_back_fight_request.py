@@ -327,7 +327,6 @@ async def request_confirmation(
     await full_message_send(
         context,
         phrases.CREW_DAVY_BACK_FIGHT_REQUEST.format(
-            inbound_keyboard.get(ScreenReservedKeys.PENALTY),
             inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
             inbound_keyboard.get(ScreenReservedKeys.DURATION),
             inbound_keyboard.get(ScreenReservedKeys.PENALTY),

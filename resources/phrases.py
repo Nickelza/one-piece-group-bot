@@ -282,8 +282,9 @@ PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS = "Edit participants"
-PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION = "Edit penalty period"
-PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PENALTY = "Choose players"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION = "Edit duration"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PENALTY = "Edit penalty"
+PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT = "Choose players"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW = "Players"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT = "Conscript opponent"
 PVT_KEY_SETTINGS_NOTIFICATIONS = "Notifications"
@@ -1055,15 +1056,18 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
     " contribution will frozen\n>- The players from the winner Crew will receive the frozen chest"
     " contribution from the opponent Crew, proportionally to their contribution"
 )
-CREW_DAVY_BACK_FIGHT_REQUEST = (
-    f">A Davy Back Fight is a *{Env.DAVY_BACK_FIGHT_DURATION}* hours competition between 2"
-    f" Crews.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n>- Winner Crew will receive"
+CREW_DAVY_BACK_FIGHT_RULES_RECAP = (
+    ">A *Davy Back Fight* is a competition between 2 Crews which lasts for a determined"
+    f" duration.\n{CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP}.\n>- Winner Crew will receive"
     f" {Env.DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE.get()}% of the loser Crew new Crew Chest gain"
-    " for a penalty period of {} days\n>- Winner Crew can conscript any member from the"
-    " opponent Crew that participated in the challenge \\(apart from Captain and First Mate\\),"
-    " and the new recruit can't leave the Crew until the penalty period is over\n>During the Davy"
-    " Back Fight and eventual penalty period in case of loss, no one can leave the"
-    " Crew.\n\n*Number of participants*: {}\n*Duration*\\(hours\\): {}\n*Penalty"
+    " for a penalty period.\n>- Winner Crew can conscript any member from the opponent Crew that"
+    " participated in the challenge \\(apart from Captain and First Mate\\), and the new recruit"
+    " can't leave the Crew until the penalty period is over\n>During the Davy Back Fight and"
+    " eventual penalty period in case of loss, no one can leave the Crew."
+)
+CREW_DAVY_BACK_FIGHT_REQUEST = (
+    CREW_DAVY_BACK_FIGHT_RULES_RECAP
+    + "\n\n*Number of participants*: {}\n*Duration*\\(hours\\): {}\n*Penalty"
     " period*\\(days\\): {}\n\nAre you sure you want to challenge *{}* to a Davy Back"
     f" Fight?\nThey will have {Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get()} minutes to"
     " accept or reject"
@@ -1082,6 +1086,8 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
     "\n*Duration*\\(hours\\): {}"
     "\n*Penalty period*\\(days\\): {}"
     "\n\nYou have {} to accept the challenge"
+    "\n\n"
+    + CREW_DAVY_BACK_FIGHT_RULES_RECAP
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
     "Davy Back Fight against {} accepted, it will start in"
