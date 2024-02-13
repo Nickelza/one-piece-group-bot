@@ -36,6 +36,7 @@ class Crew(BaseModel):
     allow_view_in_search: bool | BooleanField = BooleanField(default=True)
     allow_join_from_search: bool | BooleanField = BooleanField(default=True)
     is_full: bool | BooleanField = BooleanField(default=False)
+    allow_davy_back_fight_request: bool | BooleanField = BooleanField(default=True)
 
     class Meta:
         db_table = "crew"

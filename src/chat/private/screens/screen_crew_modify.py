@@ -19,8 +19,9 @@ class CrewModifyReservedKeys(StrEnum):
     The reserved keys for this screen
     """
 
-    TOGGLE_ALLOW_VIEW_IN_SEARCH = "b"
-    TOGGLE_ALLOW_JOIN_FROM_SEARCH = "c"
+    TOGGLE_ALLOW_VIEW_IN_SEARCH = "c"
+    TOGGLE_ALLOW_JOIN_FROM_SEARCH = "d"
+    TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST = "e"
 
 
 async def manage(
@@ -45,6 +46,9 @@ async def manage(
     elif CrewModifyReservedKeys.TOGGLE_ALLOW_JOIN_FROM_SEARCH in inbound_keyboard.info:
         crew.allow_join_from_search = not crew.allow_join_from_search
         inbound_keyboard.info.pop(CrewModifyReservedKeys.TOGGLE_ALLOW_JOIN_FROM_SEARCH)
+    elif CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST in inbound_keyboard.info:
+        crew.allow_davy_back_fight_request = not crew.allow_davy_back_fight_request
+        inbound_keyboard.info.pop(CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST)
     crew.save()
 
     # Name edit button
@@ -106,6 +110,17 @@ async def manage(
         )
     ])
 
+    # Allow davy back fight request edit button
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_CREW_ALLOW_DAVY_BACK_FIGHT_REQUEST.format(
+                get_enabled_emoji(not crew.allow_davy_back_fight_request)
+            ),
+            screen=inbound_keyboard.screen,
+            info={CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST: True},
+        )
+    ])
+
     # Disband button
     inline_keyboard.append(
         [Keyboard(phrases.PVT_KEY_CREW_DISBAND, screen=Screen.PVT_CREW_DISBAND, info=button_info)]
@@ -117,6 +132,7 @@ async def manage(
         crew.get_required_bounty_formatted(),
         get_current_setting_text(crew.allow_view_in_search),
         get_current_setting_text(crew.allow_join_from_search),
+        get_current_setting_text(crew.allow_davy_back_fight_request),
     )
 
     await full_message_send(

@@ -187,6 +187,12 @@ async def validate(
                 )
             )
 
+        # Opponent Crew does not allow Davy Back Fight requests
+        if not opponent_crew.allow_davy_back_fight_request:
+            raise CrewValidationException(
+                phrases.CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_OPPONENT_NOT_ALLOWING
+            )
+
         return True
     except CrewValidationException as e:
         await full_message_send(

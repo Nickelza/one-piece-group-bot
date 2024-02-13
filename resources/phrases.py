@@ -280,6 +280,7 @@ PVT_KEY_CREW_LEVEL = "Level"
 PVT_KEY_CREW_LEVEL_UP = "Level up"
 PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
+PVT_KEY_CREW_ALLOW_DAVY_BACK_FIGHT_REQUEST = "{} Allow Davy Back Fight request"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS = "Edit participants"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION = "Edit duration"
@@ -840,6 +841,8 @@ CREW_MODIFY = (
     "\n_{}_"
     "\n\nAllow users to request to join the Crew from search"
     "\n_{}_"
+    "\n\nAllow captains to challenge your Crew to a Davy Back Fight"
+    "\n_{}_"
     "\n\n What would you like to modify?"
 )
 CREW_ROLE_CAPTAIN = "Captain"
@@ -1048,6 +1051,9 @@ CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_TOO_LATE = (
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_MINIMUM_PARTICIPANTS = (
     "Crew must have at least {} members to participate in a Davy Back Fight"
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_OPPONENT_NOT_ALLOWING = (
+    "Opponent Crew does not allow Davy Back Fight requests"
 )
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
     ">Every net bounty gained from challenges, fights and plunders will be considered towards the"
