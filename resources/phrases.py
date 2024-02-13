@@ -377,6 +377,8 @@ Current time zone: *{}* \\({}\\)
 
 DATETIME_REMAINING = "{} remaining"
 DATETIME_REMAINING_PARENTHESIS = f" _\\({DATETIME_REMAINING}\\)_"
+DATETIME_ELAPSED = "{} ago"
+DATETIME_ELAPSED_PARENTHESIS = f" _\\({DATETIME_ELAPSED}\\)_"
 
 ITEM_LINK = "[{}]({})"
 
@@ -810,7 +812,9 @@ CREW_MEMBER_ITEM_TEXT = "{}"
 CREW_MEMBER_ITEM_ROLE = " \\({}\\)"
 # Crew - Member
 CREW_MEMBER_ITEM_DETAIL = (
-    "*{}*\n\n*Bounty*: ฿{}\n*Join Date*: {} \\({}°\\)\n\nChest contribution: ฿{} \\({}°\\)\nCrew"
+    "*{}*\n\n*Bounty*: ฿{}\n*Join Date*: {} \\({}°\\)"
+    "\n*Last active*: {}"
+    "\n\nChest contribution: ฿{} \\({}°\\)\nCrew"
     " MVP Bonus: {}{}"
 )
 CREW_MEMBER_ITEM_DETAIL_ARRESTED = f"\n\n{Emoji.LOG_NEGATIVE}Arrested \\({{}}\\)"

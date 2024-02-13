@@ -362,33 +362,63 @@ def get_random_time_between_by_seconds(seconds: int) -> datetime:
 
 
 def default_datetime_format(
-    date_time: datetime, user: User = None, add_remaining_time: bool = False
+    date_time: datetime,
+    user: User = None,
+    add_remaining_time: bool = False,
+    add_elapsed_time: bool = False,
+    time_format: str = c.STANDARD_DATE_TIME_FORMAT,
 ) -> str:
     """
     Default datetime format
     :param date_time: The datetime
     :param user: The user. If given, the timezone of the user will be used
     :param add_remaining_time: Whether to add the remaining time
+    :param add_elapsed_time: Whether to add the elapsed time
+    :param time_format: The time format
     :return: The formatted datetime
     """
 
-    text = get_time_with_timezone(date_time, user).strftime(c.STANDARD_DATE_TIME_FORMAT)
+    text = get_time_with_timezone(date_time, user).strftime(time_format)
 
-    if not add_remaining_time or date_time < datetime.datetime.now():
+    if not add_remaining_time and not add_elapsed_time:
         return text
 
-    return text + phrases.DATETIME_REMAINING_PARENTHESIS.format(get_remaining_duration(date_time))
+    if add_remaining_time:
+        if datetime_is_before(date_time):
+            return text
+
+        return text + phrases.DATETIME_REMAINING_PARENTHESIS.format(
+            get_remaining_duration(date_time)
+        )
+
+    if datetime_is_after(date_time):
+        return text
+
+    return text + phrases.DATETIME_ELAPSED_PARENTHESIS.format(get_elapsed_duration(date_time))
 
 
-def default_date_format(date: datetime, user: User = None) -> str:
+def default_date_format(
+    date: datetime,
+    user: User = None,
+    add_remaining_time: bool = False,
+    add_elapsed_time: bool = False,
+) -> str:
     """
     Default date format
     :param date: The date
     :param user: The user. If given, the timezone of the user will be used
+    :param add_remaining_time: Whether to add the remaining time
+    :param add_elapsed_time: Whether to add the elapsed time
     :return: The formatted date
     """
 
-    return get_time_with_timezone(date, user).strftime(c.STANDARD_DATE_FORMAT)
+    return default_datetime_format(
+        date,
+        user,
+        add_remaining_time=add_remaining_time,
+        add_elapsed_time=add_elapsed_time,
+        time_format=c.STANDARD_DATE_FORMAT,
+    )
 
 
 def get_time_with_timezone(date_time: datetime, user: User) -> datetime:

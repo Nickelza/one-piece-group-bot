@@ -85,6 +85,9 @@ class CrewMemberListPage(ListPage):
             member.get_bounty_formatted(),
             default_date_format(member.crew_join_date, member),
             member_join_order,
+            default_date_format(
+                member.last_system_interaction_date, member, add_elapsed_time=(member != self.user)
+            ),
             get_belly_formatted(member_contribution_amount),
             member_chest_order,
             (phrases.TEXT_YES if member.has_crew_mvp_bonus() else phrases.TEXT_NO),
