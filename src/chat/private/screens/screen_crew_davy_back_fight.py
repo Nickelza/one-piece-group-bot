@@ -250,7 +250,7 @@ async def manage(
 
     dbf_list_page: CrewDavyBackFightListPage = CrewDavyBackFightListPage()
     dbf_list_page.user = user
-    dbf_list_page.crew = user.crew
+    dbf_list_page.crew = get_crew(user)
 
     if not (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info

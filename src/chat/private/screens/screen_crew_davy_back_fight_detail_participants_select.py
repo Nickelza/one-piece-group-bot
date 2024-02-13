@@ -13,6 +13,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.crew_service import get_crew
 from src.service.date_service import get_remaining_duration
 from src.service.davy_back_fight_service import swap_participant
 from src.service.message_service import full_message_send
@@ -89,7 +90,7 @@ async def manage(
     dbf: DavyBackFight = DavyBackFight.get_by_id(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
-    crew: Crew = user.crew
+    crew: Crew = get_crew(user)
 
     # Allow members view even in case they can't be changed, only if no member is selected
     if not await validate(update, context, inbound_keyboard, crew, dbf):

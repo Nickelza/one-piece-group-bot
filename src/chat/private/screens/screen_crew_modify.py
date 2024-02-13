@@ -23,6 +23,7 @@ class CrewModifyReservedKeys(StrEnum):
     TOGGLE_ALLOW_JOIN_FROM_SEARCH = "d"
     TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST = "e"
     TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST = "f"
+    TOGGLE_ALLOW_AUTO_ACCEPT_JOIN = "g"
 
 
 async def manage(
@@ -57,6 +58,9 @@ async def manage(
         inbound_keyboard.info.pop(
             CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST
         )
+    elif CrewModifyReservedKeys.TOGGLE_ALLOW_AUTO_ACCEPT_JOIN in inbound_keyboard.info:
+        crew.auto_accept_join = not crew.auto_accept_join
+        inbound_keyboard.info.pop(CrewModifyReservedKeys.TOGGLE_ALLOW_AUTO_ACCEPT_JOIN)
 
     crew.save()
 
@@ -119,6 +123,17 @@ async def manage(
         )
     ])
 
+    # Auto accept join requests
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_JOIN.format(
+                get_enabled_emoji(not crew.auto_accept_join)
+            ),
+            screen=inbound_keyboard.screen,
+            info={CrewModifyReservedKeys.TOGGLE_ALLOW_AUTO_ACCEPT_JOIN: True},
+        )
+    ])
+
     # Allow davy back fight request edit button
     inline_keyboard.append([
         Keyboard(
@@ -160,6 +175,7 @@ async def manage(
         crew.get_required_bounty_formatted(),
         get_current_setting_text(crew.allow_view_in_search),
         get_current_setting_text(crew.allow_join_from_search),
+        get_current_setting_text(crew.auto_accept_join),
         get_current_setting_text(crew.allow_davy_back_fight_request),
         get_current_setting_text(crew.auto_accept_davy_back_fight),
     )

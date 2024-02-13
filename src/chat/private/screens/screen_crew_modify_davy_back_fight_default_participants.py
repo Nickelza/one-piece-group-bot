@@ -34,7 +34,7 @@ async def manage(
     :return: None
     """
 
-    crew: Crew = user.crew
+    crew: Crew = get_crew(user)
 
     # Crew has at least a member without priority set, refresh
     if User.get_or_none(crew=crew, crew_davy_back_fight_priority=None) is not None:

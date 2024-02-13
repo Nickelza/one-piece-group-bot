@@ -62,9 +62,7 @@ async def manage(
         return
 
     # Add requesting user to crew
-    await add_member(requesting_user, crew)
-
-    await send_outcome_notification(context, join_request, True)
+    await accept(context, join_request)
 
     # Accepted message
     ot_text = phrases.CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED.format(
@@ -116,6 +114,24 @@ async def validate(
         return False
 
     return True
+
+
+async def accept(context: ContextTypes.DEFAULT_TYPE, join_request: CrewJoinRequest):
+    """
+    Accept the join request
+
+    :param context: The context object
+    :param join_request: The join request object
+    :return: None
+    """
+
+    crew: Crew = join_request.crew
+    user: User = join_request.user
+
+    # Add requesting user to crew
+    await add_member(user, crew)
+    # Send outcome notification
+    await send_outcome_notification(context, join_request, True)
 
 
 async def send_outcome_notification(

@@ -825,7 +825,9 @@ class BountyLoanPaymentNotification(Notification):
             phrases.BOUNTY_LOAN_PAYMENT_NOTIFICATION_KEY,
             item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
             item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+            go_to_item_button_text=(
+                phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format()
+            ),
         )
 
     def build(self) -> str:
@@ -856,7 +858,9 @@ class BountyLoanForgivenNotification(Notification):
             phrases.BOUNTY_LOAN_FORGIVEN_NOTIFICATION_KEY,
             item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
             item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+            go_to_item_button_text=(
+                phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format()
+            ),
         )
 
     def build(self) -> str:
@@ -889,7 +893,9 @@ class BountyLoanExpiredNotification(Notification):
             phrases.BOUNTY_LOAN_EXPIRED_NOTIFICATION_KEY,
             item_screen=Screen.PVT_BOUNTY_LOAN_DETAIL,
             item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-            go_to_item_button_text=phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format(),
+            go_to_item_button_text=(
+                phrases.BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT.format()
+            ),
         )
 
     def build(self) -> str:
@@ -1036,6 +1042,8 @@ class CrewJoinRequestAcceptedNotification(Notification):
             phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION,
             phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_DESCRIPTION,
             phrases.CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_CREW,
+            go_to_item_button_text=phrases.KEY_VIEW,
         )
 
     def build(self) -> str:

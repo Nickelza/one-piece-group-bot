@@ -108,6 +108,7 @@ class Emoji(StrEnum):
     LOG_FORCED_END = "🟡"
     LOG_BLUE = "🔵"
     LOG_PURPLE = "🟣"
+    LOG_YELLOW = "🟡"
 
     # Impel Down
     DISCIPLINARY_ACTION = "⛔"

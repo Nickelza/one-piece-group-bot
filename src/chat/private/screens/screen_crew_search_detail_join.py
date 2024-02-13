@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 from resources import phrases
 from src.chat.group.screens.screen_crew_join import validate as validate_crew_join
+from src.chat.private.screens.screen_crew_join_request_received import accept
 from src.model.Crew import Crew
 from src.model.CrewJoinRequest import CrewJoinRequest
 from src.model.User import User
@@ -20,7 +21,7 @@ from src.service.date_service import (
     get_datetime_in_future_hours,
     get_datetime_in_future_days,
 )
-from src.service.message_service import full_message_send, get_yes_no_keyboard
+from src.service.message_service import full_message_send, get_yes_no_keyboard, get_deeplink
 
 
 async def manage(
@@ -78,9 +79,14 @@ async def request_confirmation(
         )
     ]
 
+    ot_text = phrases.CREW_SEARCH_JOIN_CONFIRMATION_REQUEST.format(crew.get_name_escaped())
+
+    if crew.auto_accept_join:
+        ot_text += phrases.CREW_SEARCH_JOIN_CONFIRMATION_REQUEST_AUTO_ACCEPT
+
     await full_message_send(
         context,
-        phrases.CREW_SEARCH_JOIN_CONFIRMATION_REQUEST.format(crew.get_name_escaped()),
+        ot_text,
         update=update,
         keyboard=inline_keyboard,
         inbound_keyboard=inbound_keyboard,
@@ -107,6 +113,14 @@ async def validate(
     try:
         if not crew.allow_join_from_search:
             raise CrewValidationException(phrases.CREW_SEARCH_JOIN_NOT_ALLOWED)
+
+        # User does not have required bounty
+        if user.bounty < crew.required_bounty:
+            raise CrewValidationException(
+                phrases.CREW_SEARCH_JOIN_NOT_ENOUGH_BOUNTY.format(
+                    crew.get_required_bounty_formatted()
+                )
+            )
 
         # User has reached maximum amount of join requests per n hours
         join_requests: list[CrewJoinRequest] = CrewJoinRequest.get_all_requests_in_cooldown_period(
@@ -171,6 +185,36 @@ async def send_request_to_captain(
     join_request.user = user
     join_request.crew = crew
     join_request.save()
+
+    # Auto accept join
+    if crew.auto_accept_join:
+        captain: User = crew.get_captain()
+        try:
+            ot_text = phrases.CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED.format(
+                join_request.user.get_markdown_mention()
+            )
+            ot_text += phrases.CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED_AUTO_ACCEPT.format(
+                get_deeplink(screen=Screen.PVT_CREW_MODIFY, previous_screens=[Screen.PVT_CREW]),
+            )
+
+            # View member button
+            inline_keyboard: list[list[Keyboard]] = [[
+                Keyboard(
+                    phrases.PVT_KEY_CREW_MEMBER_VIEW,
+                    screen=Screen.PVT_CREW_MEMBER_DETAIL,
+                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: join_request.user.id},
+                    previous_screen_list=[Screen.PVT_CREW, Screen.PVT_CREW_MEMBER],
+                )
+            ]]
+
+            await full_message_send(
+                context, ot_text, chat_id=captain.tg_user_id, keyboard=inline_keyboard
+            )
+            await accept(context, join_request)
+            return
+        except TelegramError:
+            join_request.delete_instance()
+            raise PrivateChatException(text=phrases.CREW_SEARCH_JOIN_CAPTAIN_ERROR)
 
     ot_text_for_captain = phrases.CREW_SEARCH_JOIN_CAPTAIN_REQUEST.format(
         user.get_markdown_mention(), user.get_bounty_formatted()

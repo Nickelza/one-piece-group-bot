@@ -274,6 +274,7 @@ PVT_KEY_CREW_EDIT_DESCRIPTION = "Description"
 PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY = "Required bounty"
 PVT_KEY_CREW_EDIT_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
 PVT_KEY_CREW_EDIT_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
+PVT_KEY_CREW_EDIT_AUTO_ACCEPT_JOIN = "{} Auto-accept join"
 PVT_KEY_CREW_EDIT_ALLOW_DAVY_BACK_FIGHT_REQUEST = "{} Allow Davy Back Fight request"
 PVT_KEY_CREW_EDIT_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST = "{} Auto-accept Davy Back Fight request"
 PVT_KEY_CREW_EDIT_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS = "DBF default participants"
@@ -746,6 +747,7 @@ PREDICTION_SET_RESULT_CONFIRMATION_REQUEST_NO_CORRECT_OPTION = (
 CREW_SEARCH_ITEM_TEXT = "{} \\(Lv. {}\\)"
 CREW_SEARCH_ITEM_TEXT_FILL_IN = "Crew"
 CREW_SEARCH_ITEM_LEGEND_CAN_JOIN = "Can join"
+CREW_SEARCH_ITEM_LEGEND_AUTO_ACCEPT_JOIN = "Auto accepts join"
 CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
 CREW_SEARCH_ITEM_LEGEND_AVAILABLE_FOR_DAVY_BACK_FIGHT = "Available for Davy Back Fight"
 CREW_SEARCH_ITEM_LEGEND_AUTO_ACCEPTS_DAVY_BACK_FIGHT = "Auto accepts Davy Back Fight"
@@ -755,6 +757,7 @@ CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     " to find the Crew from search` option under `Crew-\\>Modify`"
 )
 CREW_SEARCH_JOIN_NOT_ALLOWED = "The Crew does not allow join requests from search"
+CREW_SEARCH_JOIN_NOT_ENOUGH_BOUNTY = "You need a bounty of ฿{} to join the Crew"
 CREW_SEARCH_JOIN_CONFIRMATION_REQUEST = (
     "Are you sure you want to send a request to join *{}*?\nYou can request to join a maximum of"
     f" {Env.CREW_JOIN_REQUESTS_PER_COOLDOWN} Crews every"
@@ -762,13 +765,19 @@ CREW_SEARCH_JOIN_CONFIRMATION_REQUEST = (
     f" {Env.CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION} days."
     "\n\nYour current bounty will be shared with the Crew Captain"
 )
+CREW_SEARCH_JOIN_CONFIRMATION_REQUEST_AUTO_ACCEPT = (
+    "\n\n_*Your request will be automatically accepted*_"
+)
 CREW_SEARCH_JOIN_SUCCESS = (
     "Request to join *{}* sent successfully, you will be notified when it is accepted"
 )
 CREW_SEARCH_JOIN_CAPTAIN_REQUEST = (
     "Hi, I'm {} and I would like to join your Crew!\n\nCurrent bounty: ฿{}"
 )
-CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED = "{} is now a member of your Crew"
+CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED = "{} is now a member of your Crew!"
+CREW_SEARCH_JOIN_CAPTAIN_ACCEPTED_AUTO_ACCEPT = (
+    "\n\n_This request was automatically accepted, [click here]({}) to change this setting_"
+)
 CREW_SEARCH_JOIN_CAPTAIN_REJECTED = "You have rejected {}'s request to join your Crew"
 CREW_SEARCH_JOIN_CAPTAIN_ERROR = "Error while sending request to Crew Captain"
 CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_PER_COOLDOWN = "You can request to join another Crew in {}"
@@ -853,6 +862,8 @@ CREW_MODIFY = (
     "\n\nAllow users to find the Crew from search"
     "\n_{}_"
     "\n\nAllow users to request to join the Crew from search"
+    "\n_{}_"
+    "\n\nAuto accept join requests from search"
     "\n_{}_"
     "\n\nAllow captains to challenge your Crew to a Davy Back Fight"
     "\n_{}_"

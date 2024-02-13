@@ -38,6 +38,7 @@ class Crew(BaseModel):
     is_full: bool | BooleanField = BooleanField(default=False)
     allow_davy_back_fight_request: bool | BooleanField = BooleanField(default=True)
     auto_accept_davy_back_fight: bool | BooleanField = BooleanField(default=False)
+    auto_accept_join: bool | BooleanField = BooleanField(default=True)
 
     # Backref
     crew_abilities = None
@@ -45,7 +46,8 @@ class Crew(BaseModel):
     crew_join_requests = None
     crew_member_chest_contributions = None
     davy_back_fight_participants = None
-    davy_back_fight_challengers = None
+    davy_back_fights_challengers = None
+    davy_back_fights_opponents = None
     crew_members = None
 
     class Meta:

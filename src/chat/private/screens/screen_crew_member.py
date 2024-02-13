@@ -111,7 +111,7 @@ async def manage(
 
     crew_member_list_page: CrewMemberListPage = CrewMemberListPage()
     crew_member_list_page.user = user
-    crew_member_list_page.crew = user.crew
+    crew_member_list_page.crew = get_crew(user)
 
     ot_text, items_keyboard = get_items_text_keyboard(
         inbound_keyboard,

@@ -70,6 +70,11 @@ class CrewSearchListPage(ListPage):
                 self.get_can_join_condition(),
             ),
             EmojiLegend(
+                Emoji.LOG_YELLOW,
+                phrases.CREW_SEARCH_ITEM_LEGEND_AUTO_ACCEPT_JOIN,
+                (Crew.auto_accept_join == True),
+            ),
+            EmojiLegend(
                 Emoji.LOG_NEGATIVE,
                 phrases.CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN,
                 ~(self.get_can_join_condition()),
@@ -123,7 +128,7 @@ class CrewSearchListPage(ListPage):
             & (Crew.can_accept_new_members == True)
             & (Crew.allow_join_from_search == True)
             & (Crew.required_bounty <= self.user.bounty)
-            & (Crew.id != self.user.crew.id)
+            & (Crew.id != (self.user.crew.id if self.user.crew else None))
         )
 
     def get_available_for_dbf_condition(self) -> any:

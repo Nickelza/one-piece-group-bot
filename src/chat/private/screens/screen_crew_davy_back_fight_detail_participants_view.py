@@ -10,6 +10,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
+from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
 
 
@@ -28,7 +29,7 @@ async def manage(
     dbf: DavyBackFight = DavyBackFight.get_by_id(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
-    crew: Crew = user.crew
+    crew: Crew = get_crew(user)
 
     team_mates_text = ""
     opponents_text = ""

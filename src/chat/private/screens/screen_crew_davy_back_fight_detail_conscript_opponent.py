@@ -17,7 +17,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.crew_service import remove_member, add_member
+from src.service.crew_service import remove_member, add_member, get_crew
 from src.service.message_service import full_message_send, get_yes_no_keyboard
 from src.service.notification_service import send_notification
 
@@ -78,7 +78,7 @@ async def manage(
     dbf: DavyBackFight = DavyBackFight.get_by_id(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
     )
-    crew: Crew = user.crew
+    crew: Crew = get_crew(user)
 
     if not await validate(update, context, inbound_keyboard, dbf):
         return
