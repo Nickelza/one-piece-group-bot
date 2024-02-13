@@ -66,6 +66,7 @@ class Emoji(StrEnum):
     YELLOW = "🟡"
     GREEN = "🟢"
     SEARCH = "🔍"
+    RESET = "🔄"
 
     # Game
     WINNER = "🏆"
@@ -106,6 +107,7 @@ class Emoji(StrEnum):
     LOG_NEUTRAL = "⚪"
     LOG_FORCED_END = "🟡"
     LOG_BLUE = "🔵"
+    LOG_PURPLE = "🟣"
 
     # Impel Down
     DISCIPLINARY_ACTION = "⛔"

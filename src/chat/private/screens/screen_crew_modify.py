@@ -22,6 +22,7 @@ class CrewModifyReservedKeys(StrEnum):
     TOGGLE_ALLOW_VIEW_IN_SEARCH = "c"
     TOGGLE_ALLOW_JOIN_FROM_SEARCH = "d"
     TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST = "e"
+    TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST = "f"
 
 
 async def manage(
@@ -49,6 +50,14 @@ async def manage(
     elif CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST in inbound_keyboard.info:
         crew.allow_davy_back_fight_request = not crew.allow_davy_back_fight_request
         inbound_keyboard.info.pop(CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST)
+    elif (
+        CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST in inbound_keyboard.info
+    ):
+        crew.auto_accept_davy_back_fight = not crew.auto_accept_davy_back_fight
+        inbound_keyboard.info.pop(
+            CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST
+        )
+
     crew.save()
 
     # Name edit button
@@ -91,7 +100,7 @@ async def manage(
     # Allow view in search edit button
     inline_keyboard.append([
         Keyboard(
-            phrases.PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH.format(
+            phrases.PVT_KEY_CREW_EDIT_ALLOW_VIEW_IN_SEARCH.format(
                 get_enabled_emoji(not crew.allow_view_in_search)
             ),
             screen=inbound_keyboard.screen,
@@ -102,7 +111,7 @@ async def manage(
     # Allow join from search edit button
     inline_keyboard.append([
         Keyboard(
-            phrases.PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH.format(
+            phrases.PVT_KEY_CREW_EDIT_ALLOW_JOIN_FROM_SEARCH.format(
                 get_enabled_emoji(not crew.allow_join_from_search)
             ),
             screen=inbound_keyboard.screen,
@@ -113,11 +122,30 @@ async def manage(
     # Allow davy back fight request edit button
     inline_keyboard.append([
         Keyboard(
-            phrases.PVT_KEY_CREW_ALLOW_DAVY_BACK_FIGHT_REQUEST.format(
+            phrases.PVT_KEY_CREW_EDIT_ALLOW_DAVY_BACK_FIGHT_REQUEST.format(
                 get_enabled_emoji(not crew.allow_davy_back_fight_request)
             ),
             screen=inbound_keyboard.screen,
             info={CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST: True},
+        )
+    ])
+
+    # Auto accept davy back fight request edit button
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST.format(
+                get_enabled_emoji(crew.auto_accept_davy_back_fight)
+            ),
+            screen=inbound_keyboard.screen,
+            info={CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST: True},
+        )
+    ])
+
+    # Davy Back Fight default participants
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_CREW_EDIT_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
+            screen=Screen.PVT_CREW_MODIFY_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
         )
     ])
 
@@ -133,6 +161,7 @@ async def manage(
         get_current_setting_text(crew.allow_view_in_search),
         get_current_setting_text(crew.allow_join_from_search),
         get_current_setting_text(crew.allow_davy_back_fight_request),
+        get_current_setting_text(crew.auto_accept_davy_back_fight),
     )
 
     await full_message_send(

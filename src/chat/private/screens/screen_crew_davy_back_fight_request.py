@@ -8,6 +8,7 @@ from telegram.ext import ContextTypes
 import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.chat.private.screens.screen_crew_davy_back_fight_request_received import accept
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
@@ -23,7 +24,7 @@ from src.service.date_service import (
     convert_minutes_to_duration,
     datetime_is_before,
 )
-from src.service.message_service import full_message_send, get_yes_no_keyboard
+from src.service.message_service import full_message_send, get_yes_no_keyboard, get_deeplink
 
 
 class StepEdit(IntEnum):
@@ -78,7 +79,7 @@ async def manage(
 
     if not inbound_keyboard.has_key(ScreenReservedKeys.DURATION):
         inbound_keyboard.info[ScreenReservedKeys.DURATION] = (
-            Env.DAVY_BACK_FIGHT_MAX_DURATION.get_int()
+            Env.DAVY_BACK_FIGHT_DEFAULT_DURATION.get_int()
         )
     if not inbound_keyboard.has_key(ScreenReservedKeys.PENALTY):
         inbound_keyboard.info[ScreenReservedKeys.PENALTY] = (
@@ -330,14 +331,19 @@ async def request_confirmation(
         ),
     ]
 
+    ot_text = phrases.CREW_DAVY_BACK_FIGHT_REQUEST.format(
+        inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
+        inbound_keyboard.get(ScreenReservedKeys.DURATION),
+        inbound_keyboard.get(ScreenReservedKeys.PENALTY),
+        opponent_crew.get_name_escaped(),
+    )
+
+    if opponent_crew.auto_accept_davy_back_fight:
+        ot_text += phrases.CREW_DAVY_BACK_FIGHT_REQUEST_AUTO_ACCEPT
+
     await full_message_send(
         context,
-        phrases.CREW_DAVY_BACK_FIGHT_REQUEST.format(
-            inbound_keyboard.get(ScreenReservedKeys.PARTICIPANTS),
-            inbound_keyboard.get(ScreenReservedKeys.DURATION),
-            inbound_keyboard.get(ScreenReservedKeys.PENALTY),
-            opponent_crew.get_name_escaped(),
-        ),
+        ot_text,
         update=update,
         keyboard=inline_keyboard,
         inbound_keyboard=inbound_keyboard,
@@ -369,6 +375,52 @@ async def send_request_to_captain(
     davy_back_fight.penalty_days = inbound_keyboard.get(ScreenReservedKeys.PENALTY)
     davy_back_fight.save()
 
+    captain: User = opponent_crew.get_captain()
+
+    # Auto accept
+    if (
+        opponent_crew.auto_accept_davy_back_fight
+        and davy_back_fight.duration_hours >= Env.DAVY_BACK_FIGHT_DEFAULT_DURATION.get_int()
+    ):
+        davy_back_fight.is_auto_accepted = True
+        davy_back_fight.save()
+
+        ot_text_for_captain = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST_AUTO_ACCEPT.format(
+            challenger_crew.get_name_with_deeplink(add_level=True),
+            davy_back_fight.participants_count,
+            davy_back_fight.duration_hours,
+            davy_back_fight.penalty_days,
+            get_deeplink(screen=Screen.PVT_CREW_MODIFY, previous_screens=[Screen.PVT_CREW]),
+        )
+
+        # Manage DBF button
+        inline_keyboard = [[
+            Keyboard(
+                phrases.KEY_MANAGE,
+                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+                inbound_info={
+                    ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: davy_back_fight.id,
+                    ReservedKeyboardKeys.DIRECT_ITEM: False,
+                },
+            )
+        ]]
+
+        try:
+            await full_message_send(
+                context,
+                ot_text_for_captain,
+                chat_id=captain.tg_user_id,
+                keyboard=inline_keyboard,
+            )
+        except TelegramError as te:
+            davy_back_fight.delete_instance()
+            logging.exception(te)
+            raise PrivateChatException(text=phrases.CREW_SEARCH_JOIN_CAPTAIN_ERROR)
+
+        await accept(context, davy_back_fight)
+        return
+
+    # Manual accept
     ot_text_for_captain = phrases.CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST.format(
         challenger_crew.get_name_with_deeplink(add_level=True),
         davy_back_fight.participants_count,
@@ -385,8 +437,6 @@ async def send_request_to_captain(
             primary_key=davy_back_fight.id,
         )
     ]
-
-    captain: User = opponent_crew.get_captain()
 
     try:
         await full_message_send(

@@ -70,6 +70,9 @@ from src.chat.private.screens.screen_crew_member_detail_remove import (
     manage as manage_screen_crew_member_detail_remove,
 )
 from src.chat.private.screens.screen_crew_modify import manage as manage_screen_crew_edit
+from src.chat.private.screens.screen_crew_modify_davy_back_fight_default_participants import (
+    manage as manage_screen_crew_modify_davy_back_fight_default_participants,
+)
 from src.chat.private.screens.screen_crew_powerup import manage as manage_screen_crew_powerup
 from src.chat.private.screens.screen_crew_search import manage as manage_screen_crew_search
 from src.chat.private.screens.screen_crew_search_detail import (
@@ -487,6 +490,12 @@ async def dispatch_screens(
             # Crew Davy Back Fight Detail Conscript Opponent
             case Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_CONSCRIPT_OPPONENT:
                 await manage_screen_crew_davy_back_fight_detail_conscript_opponent(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Crew Modify Davy Back Fight Default Participants
+            case Screen.PVT_CREW_MODIFY_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS:
+                await manage_screen_crew_modify_davy_back_fight_default_participants(
                     update, context, inbound_keyboard, user
                 )
 

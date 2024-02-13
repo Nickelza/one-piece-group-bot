@@ -37,6 +37,16 @@ class Crew(BaseModel):
     allow_join_from_search: bool | BooleanField = BooleanField(default=True)
     is_full: bool | BooleanField = BooleanField(default=False)
     allow_davy_back_fight_request: bool | BooleanField = BooleanField(default=True)
+    auto_accept_davy_back_fight: bool | BooleanField = BooleanField(default=False)
+
+    # Backref
+    crew_abilities = None
+    crew_chest_spending_records = None
+    crew_join_requests = None
+    crew_member_chest_contributions = None
+    davy_back_fight_participants = None
+    davy_back_fight_challengers = None
+    crew_members = None
 
     class Meta:
         db_table = "crew"
@@ -80,6 +90,21 @@ class Crew(BaseModel):
             )
 
         return self.crew_members.select().order_by(User.crew_join_date.asc())
+
+    def get_members_order_by_davy_back_fight_priority(self) -> list:
+        """
+        Returns the crew members ordered by Davy Back Fight priority
+        :return: The crew members
+        """
+
+        return sorted(
+            self.get_members(),
+            key=lambda x: (
+                x.crew_davy_back_fight_priority is None,
+                x.crew_davy_back_fight_priority,
+                x.crew_join_date,
+            ),
+        )
 
     @staticmethod
     def get_by_name_if_active(name: str) -> "Crew":
@@ -324,6 +349,9 @@ class Crew(BaseModel):
 
         self.save()
 
+        # Also set Davy Back Fight priority
+        self.set_davy_back_fight_priority()
+
     @staticmethod
     def set_is_full_for_all_crews() -> None:
         """
@@ -441,6 +469,26 @@ class Crew(BaseModel):
         """
 
         return self.get_penalty_davy_back_fight() is not None
+
+    def set_davy_back_fight_priority(self, should_reset: bool = False):
+        """
+        Set the crew members Davy Back Fight priority
+        :param should_reset: Whether to reset the priority
+        :return: None
+        """
+
+        from src.model.User import User
+
+        # Sorting only by join date
+        members: list[User] = (
+            self.get_members()
+            if should_reset
+            else self.get_members_order_by_davy_back_fight_priority()
+        )
+
+        for i, member in enumerate(members):
+            member.crew_davy_back_fight_priority = i + 1
+            member.save()
 
 
 Crew.create_table()

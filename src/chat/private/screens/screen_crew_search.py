@@ -76,13 +76,23 @@ class CrewSearchListPage(ListPage):
             ),
         ]
 
-        # Available for Davy Back Fight, only if user is Captain
+        # Captain only filters
         if self.user.is_crew_captain():
+            # Available for Davy Back Fight
             result.append(
                 EmojiLegend(
                     Emoji.LOG_BLUE,
                     phrases.CREW_SEARCH_ITEM_LEGEND_AVAILABLE_FOR_DAVY_BACK_FIGHT,
                     self.get_available_for_dbf_condition(),
+                ),
+            )
+
+            # Auto accepts Davy Back Fight
+            result.append(
+                EmojiLegend(
+                    Emoji.LOG_PURPLE,
+                    phrases.CREW_SEARCH_ITEM_LEGEND_AUTO_ACCEPTS_DAVY_BACK_FIGHT,
+                    (Crew.auto_accept_davy_back_fight == True),
                 ),
             )
 

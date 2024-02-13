@@ -70,7 +70,7 @@ def set_default_participants(crew: Crew, davy_back_fight: DavyBackFight) -> None
     ).execute()
 
     # Add participants
-    for index, user in enumerate(crew.get_members()):
+    for index, user in enumerate(crew.get_members_order_by_davy_back_fight_priority()):
         if index >= davy_back_fight.participants_count:
             break
         add_participant(user=user, davy_back_fight=davy_back_fight)

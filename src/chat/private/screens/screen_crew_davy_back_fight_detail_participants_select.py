@@ -122,7 +122,7 @@ async def manage(
             # Swap successful alert
             await full_message_send(
                 context,
-                phrases.CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP_SUCCESS,
+                phrases.SWAP_SUCCESSFUL,
                 update=update,
                 answer_callback=True,
             )

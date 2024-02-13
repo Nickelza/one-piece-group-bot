@@ -42,6 +42,7 @@ class DavyBackFight(BaseModel):
     conscript_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     penalty_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     penalty_payout: int | BigIntegerField = BigIntegerField(default=0)
+    is_auto_accepted: bool | BooleanField = BooleanField(default=False)
 
     # Backlinks
     davy_back_fight_participants = None

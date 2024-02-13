@@ -159,6 +159,7 @@ KEYBOARD_OPTION_BACK = Emoji.BACK + " Back"
 KEYBOARD_OPTION_YES = Emoji.YES + " Yes"
 KEYBOARD_OPTION_NO = Emoji.NO + " No"
 KEYBOARD_OPTION_SEND_REQUEST = Emoji.YES + " Send request"
+KEYBOARD_OPTION_RESET = Emoji.RESET + " Reset"
 
 TEXT_YES = "Yes"
 TEXT_NO = "No"
@@ -182,6 +183,9 @@ EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is N
 
 KEYBOARD_NOT_FOUND = "Keyboard not found"
 KEYBOARD_USE_UNAUTHORIZED = "You are not authorized to use this keyboard"
+
+SWAP_SUCCESSFUL = "Swap successful"
+RESET_SUCCESSFUL = "Reset successful"
 
 LOCATION_CHANGE_REGION_PROPOSAL = "{}{} would you like to move to {}?"
 LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = "{}{} You can move to {} later with {} command"
@@ -268,6 +272,11 @@ PVT_KEY_CREW_SEARCH_JOIN = "Join"
 PVT_KEY_CREW_EDIT_NAME = "Name"
 PVT_KEY_CREW_EDIT_DESCRIPTION = "Description"
 PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY = "Required bounty"
+PVT_KEY_CREW_EDIT_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
+PVT_KEY_CREW_EDIT_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
+PVT_KEY_CREW_EDIT_ALLOW_DAVY_BACK_FIGHT_REQUEST = "{} Allow Davy Back Fight request"
+PVT_KEY_CREW_EDIT_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST = "{} Auto-accept Davy Back Fight request"
+PVT_KEY_CREW_EDIT_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS = "DBF default participants"
 PVT_KEY_CREW_DISBAND = Emoji.DELETE + " Disband"
 PVT_KEY_CREW_MEMBER_REMOVE = "Expel"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = "Promote to First Mate"
@@ -279,9 +288,6 @@ PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
 PVT_KEY_CREW_POWERUP = "Power-up"
 PVT_KEY_CREW_LEVEL = "Level"
 PVT_KEY_CREW_LEVEL_UP = "Level up"
-PVT_KEY_CREW_ALLOW_VIEW_IN_SEARCH = "{} Allow search"
-PVT_KEY_CREW_ALLOW_JOIN_FROM_SEARCH = "{} Allow join"
-PVT_KEY_CREW_ALLOW_DAVY_BACK_FIGHT_REQUEST = "{} Allow Davy Back Fight request"
 PVT_KEY_CREW_DAVY_BACK_FIGHT = Emoji.FIGHT + " Davy Back Fight"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS = "Edit participants"
 PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION = "Edit duration"
@@ -740,6 +746,7 @@ CREW_SEARCH_ITEM_TEXT_FILL_IN = "Crew"
 CREW_SEARCH_ITEM_LEGEND_CAN_JOIN = "Can join"
 CREW_SEARCH_ITEM_LEGEND_CANNOT_JOIN = "Cannot join"
 CREW_SEARCH_ITEM_LEGEND_AVAILABLE_FOR_DAVY_BACK_FIGHT = "Available for Davy Back Fight"
+CREW_SEARCH_ITEM_LEGEND_AUTO_ACCEPTS_DAVY_BACK_FIGHT = "Auto accepts Davy Back Fight"
 CREW_SEARCH_FILTER_NAME = "Crew name"
 CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
     "Crew information not available.\n\nIf you are the Captain of this Crew, enable `Allow users"
@@ -845,7 +852,26 @@ CREW_MODIFY = (
     "\n_{}_"
     "\n\nAllow captains to challenge your Crew to a Davy Back Fight"
     "\n_{}_"
+    "\n\nAuto-accept Davy Back Fight challenges \\(only if duration is at least "
+    f"{Env.DAVY_BACK_FIGHT_DEFAULT_DURATION.get()} hours\\)."
+    "\nIf active, you can choose which Crew members will be chosen by default to participate, in "
+    "case you are not able to manually select them before the Challenge starts"
+    "\n_{}_"
     "\n\n What would you like to modify?"
+)
+CREW_EDIT_DAVY_BACK_FIGHT_PRIORITY_SELECT_USER = (
+    "Of which member do you want to change the priority?"
+)
+CREW_EDIT_DAVY_BACK_FIGHT_PRIORITY_SELECT_SWAP = (
+    "With which member do you want to swap {} priority?"
+)
+CREW_EDIT_DAVY_BACK_FIGHT_PRIORITY = "{}\n{}{}"
+CREW_EDIT_DAVY_BACK_FIGHT_PRIORITY_EXPLANATION = (
+    "\n\n>The priority determines the default order in which members will be chosen for"
+    " Davy Back Fights.\n>For example, if a you receive a Davy Back Fight challenge with 3"
+    " participants from each Crew, the first 3 members in the above list will be automatically"
+    " chosen.\n>You can always change the actual players during the"
+    f" {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes countdown before the challenge starts."
 )
 CREW_ROLE_CAPTAIN = "Captain"
 CREW_ROLE_FIRST_MATE = "First Mate"
@@ -1078,7 +1104,11 @@ CREW_DAVY_BACK_FIGHT_REQUEST = (
     + "\n\n*Number of participants*: {}\n*Duration*\\(hours\\): {}\n*Penalty"
     " period*\\(days\\): {}\n\nAre you sure you want to challenge *{}* to a Davy Back"
     f" Fight?\nThey will have {Env.DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME.get()} minutes to"
-    " accept or reject"
+    " accept or reject."
+)
+CREW_DAVY_BACK_FIGHT_REQUEST_AUTO_ACCEPT = (
+    "\n\n_*The challenge will be automatically accepted if the duration is at least"
+    f" {Env.DAVY_BACK_FIGHT_DEFAULT_DURATION.get()} hours*_"
 )
 CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PARTICIPANTS = (
     "How many members from each Crew will participate in the Davy Back Fight?"
@@ -1102,6 +1132,17 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
     f" {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes.\n\nClick `{KEY_MANAGE}` to review"
     " and change the players"
 )
+CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST_AUTO_ACCEPT = (
+    "You have accepted a Davy Back Fight challenge from {}!"
+    "\n\n*Number of participants*: {}"
+    "\n*Duration*\\(hours\\): {}"
+    "\n*Penalty period*\\(days\\): {}"
+    f"\n\nThe challenge will start in {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes."
+    "\n\n_This challenge was automatically accepted, [click here]({}) to change this setting_"
+    f"\n\nClick `{KEY_MANAGE}` to review and change the players"
+    "\n\n"
+    + CREW_DAVY_BACK_FIGHT_RULES_RECAP
+)
 CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"
 CREW_DAVY_BACK_FIGHT_USER_NOT_MEMBER_OF_PARTICIPATING_CREW = (
     "User not a member of a participating Crew"
@@ -1118,7 +1159,6 @@ CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT = (
     "Choose the members you want to participate in the Davy Back Fight.\n\nRemaining time: {}"
 )
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP = "Select the member you want to swap with"
-CREW_DAVY_BACK_FIGHT_PARTICIPANTS_SELECT_SWAP_SUCCESS = "Participant swapped successfully"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS = "*Team Mates*{}\n\n*Opponents*{}"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM = "\n{} - ฿{}"
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_ITEM_POTENTIAL_WIN = "\nPotential win: ฿{}\n"

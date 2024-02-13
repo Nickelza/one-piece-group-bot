@@ -67,6 +67,7 @@ class User(BaseModel):
     conscription_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     can_create_crew: bool | BooleanField = BooleanField(default=True)
     can_join_crew: bool | BooleanField = BooleanField(default=True)
+    crew_davy_back_fight_priority: int | IntegerField = IntegerField(null=True)
     last_message_date: datetime.datetime | DateTimeField = DateTimeField(
         default=datetime.datetime.now
     )
@@ -107,6 +108,11 @@ class User(BaseModel):
     # where it can not be passed as a parameter, so updating it at the end of the script would
     # overwrite the changes
     should_update_model: bool = True
+
+    # Backref
+    bounty_borrowers = None
+    legendary_pirates = None
+    warlords = None
 
     class Meta:
         db_table = "user"
@@ -151,7 +157,7 @@ class User(BaseModel):
             | (User.impel_down_release_date < datetime.datetime.now())
         )
 
-    def get_current_impel_down_log(self) -> "ImpelDownLog":
+    def get_current_impel_down_log(self):
         """
         Returns the current impel down log
         :return: The current impel down log
@@ -358,14 +364,6 @@ class User(BaseModel):
         from src.service.message_service import escape_valid_markdown_chars
 
         return escape_valid_markdown_chars(self.tg_first_name)
-
-    def refresh(self) -> "User":
-        """
-        Refreshes the user
-        :return: The refreshed user
-        """
-
-        return type(self).get(self._pk_expr())
 
     def get_max_bounty(self) -> int:
         """

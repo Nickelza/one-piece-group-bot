@@ -10,6 +10,7 @@ from src.model.enums.Screen import (
     ALLOW_WHILE_ARRESTED_TEMPORARY,
     ALLOW_DEEPLINK,
     DEPRECATED,
+    ONLY_BY_CAPTAIN,
 )
 
 
@@ -161,6 +162,7 @@ for sc in limitations_list:
     _allow_while_arrested_temporary = sc in ALLOW_WHILE_ARRESTED_TEMPORARY
     _allow_deeplink = sc in ALLOW_DEEPLINK
     _only_by_crew_captain_or_first_mate = sc in ONLY_BY_CAPTAIN_OR_FIRST_MATE
+    _only_by_crew_captain = sc in ONLY_BY_CAPTAIN
 
     COMMANDS.append(
         Command(
@@ -171,6 +173,7 @@ for sc in limitations_list:
             allow_while_arrested_temporary=_allow_while_arrested_temporary,
             allow_deeplink=_allow_deeplink,
             only_by_crew_captain_or_first_mate=_only_by_crew_captain_or_first_mate,
+            only_by_crew_captain=_only_by_crew_captain,
         )
     )
 

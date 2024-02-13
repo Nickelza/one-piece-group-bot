@@ -867,8 +867,6 @@ DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME = Environment(
 DAVY_BACK_FIGHT_START_WAIT_TIME = Environment(
     "DAVY_BACK_FIGHT_START_WAIT_TIME", default_value="15"
 )
-# How long a Davy Back Fight lasts in hours. Default 24 hours
-DAVY_BACK_FIGHT_DURATION = Environment("DAVY_BACK_FIGHT_DURATION", default_value="24")
 # How long before bounty reset can a DBF be initiated in hours. Default: 48 hours
 DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION = Environment(
     "DAVY_BACK_FIGHT_BOUNTY_RESET_COOLDOWN_DURATION", default_value="48"
@@ -879,8 +877,12 @@ DAVY_BACK_FIGHT_MIN_PARTICIPANTS = Environment(
 )
 # Minimum duration of DBF in hours. Default: 1
 DAVY_BACK_FIGHT_MIN_DURATION = Environment("DAVY_BACK_FIGHT_MIN_DURATION", default_value="1")
-# Maximum duration of DBF in hours. Default: 24
-DAVY_BACK_FIGHT_MAX_DURATION = Environment("DAVY_BACK_FIGHT_MAX_DURATION", default_value="24")
+# Maximum duration of DBF in hours. Default: 48
+DAVY_BACK_FIGHT_MAX_DURATION = Environment("DAVY_BACK_FIGHT_MAX_DURATION", default_value="48")
+# Default duration of DBF in hours. Default: 24
+DAVY_BACK_FIGHT_DEFAULT_DURATION = Environment(
+    "DAVY_BACK_FIGHT_DEFAULT_DURATION", default_value="24"
+)
 # Minimum penalty period for losing a DBF in days. Default: 0
 DAVY_BACK_FIGHT_MIN_LOSE_PENALTY_DURATION = Environment(
     "DAVY_BACK_FIGHT_MIN_LOSE_PENALTY_DURATION", default_value="0"

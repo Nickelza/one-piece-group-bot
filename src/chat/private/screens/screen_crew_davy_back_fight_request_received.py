@@ -3,7 +3,6 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
-from src.chat.private.screens.screen_crew_davy_back_fight_request import validate
 from src.model.Crew import Crew
 from src.model.DavyBackFight import DavyBackFight
 from src.model.User import User
@@ -39,6 +38,7 @@ async def manage(
     :param inbound_keyboard: The keyboard object
     :return: None
     """
+    from src.chat.private.screens.screen_crew_davy_back_fight_request import validate
 
     davy_back_fight: DavyBackFight = DavyBackFight.get_by_id(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)
