@@ -6,6 +6,7 @@ from src.model.BaseModel import BaseModel
 from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeStatus
 
 
@@ -53,6 +54,25 @@ class DevilFruitTrade(BaseModel):
 
     class Meta:
         db_table = "devil_fruit_trade"
+
+    @staticmethod
+    def get_average_price(devil_fruit_category: DevilFruitCategory) -> int:
+        """
+        Get the average price of the sold fruits in a category
+        :return: The average price
+        """
+
+        return int(
+            DevilFruitTrade.select(fn.AVG(DevilFruitTrade.price))
+            .join(DevilFruit)
+            .where(
+                (DevilFruit.category == devil_fruit_category)
+                & (DevilFruitTrade.price.is_null(False))
+                & (DevilFruitTrade.status == DevilFruitTradeStatus.COMPLETED)
+                & (DevilFruitTrade.price > 0)
+            )
+            .scalar()
+        )
 
 
 DevilFruitTrade.create_table()

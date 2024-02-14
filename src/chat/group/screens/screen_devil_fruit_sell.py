@@ -1,5 +1,6 @@
 from enum import StrEnum, IntEnum
 
+from peewee import DoesNotExist
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -79,7 +80,7 @@ async def manage(
         devil_fruit_trade: DevilFruitTrade = DevilFruitTrade.get(
             DevilFruitTrade.id == inbound_keyboard.get(DevilFruitSellReservedKeys.ITEM_ID)
         )
-    except DevilFruitTrade.DoesNotExist:
+    except DoesNotExist:
         # Custom exception to avoid logging
         raise PrivateChatException(text=phrases.ITEM_NOT_FOUND)
 
@@ -90,7 +91,8 @@ async def manage(
         devil_fruit_trade.save()
 
     devil_fruit: DevilFruit = devil_fruit_trade.devil_fruit
-    if not await validate_trade(update, context, devil_fruit_trade, devil_fruit):
+    if not await validate_trade(update, context, devil_fruit, devil_fruit_trade.giver):
+        devil_fruit_trade.delete_instance()
         return
 
     match inbound_keyboard.get(DevilFruitSellReservedKeys.STEP):
@@ -251,24 +253,27 @@ async def send_list_of_fruits(
 async def validate_trade(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    devil_fruit_trade: DevilFruitTrade,
     devil_fruit: DevilFruit,
+    seller: User,
+    add_delete_button: bool = True,
+    inbound_keyboard: Keyboard = None,
 ) -> bool:
     """
     Validate the trade
     :param update: The update object
     :param context: The context object
-    :param devil_fruit_trade: The Devil Fruit trade
     :param devil_fruit: The Devil Fruit
+    :param seller: The seller
+    :param add_delete_button: Whether to add the delete button
+    :param inbound_keyboard: The inbound keyboard
     :return: True if the trade is valid, False otherwise
     """
-
+    # TODO If selling in shop, check that there are no other active trades. If yes, link to and warn
     try:
         # Seller no longer owns the Devil Fruit
-        if devil_fruit.owner != devil_fruit_trade.giver:
-            giver: User = devil_fruit_trade.giver
+        if devil_fruit.owner != seller:
             raise DevilFruitTradeValidationException(
-                phrases.DEVIL_FRUIT_SELL_NO_LONGER_OWN.format(giver.get_markdown_mention())
+                phrases.DEVIL_FRUIT_SELL_NO_LONGER_OWN.format(seller.get_markdown_mention())
             )
 
         # Devil Fruit is no longer sellable
@@ -276,8 +281,13 @@ async def validate_trade(
             raise DevilFruitTradeValidationException(phrases.DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE)
 
     except DevilFruitTradeValidationException as e:
-        devil_fruit_trade.delete_instance()
-        await full_message_send(context, e.message, update=update, add_delete_button=True)
+        await full_message_send(
+            context,
+            e.message,
+            update=update,
+            inbound_keyboard=inbound_keyboard,
+            add_delete_button=add_delete_button,
+        )
         return False
 
     return True

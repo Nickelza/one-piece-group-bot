@@ -31,7 +31,8 @@ def get_unit_value_from_string(value: str, unit_multiplier_map: dict) -> int:
 
     # Set magnitude full name
     for key in unit_multiplier_map:
-        # There is a key that is a substring of the magnitude, e.g. 'sec' is a substring of 'seconds' (starts with)
+        # There is a key that is a substring of the magnitude, e.g. 'sec' is a substring of
+        # 'seconds' (starts with)
         if key.startswith(unit.lower()):
             unit_full_name = key
             break

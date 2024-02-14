@@ -618,7 +618,7 @@ async def validate_amount(
         else:
             try:
                 wager: int = get_amount_from_string(wager_str, user)
-            except ValueError:
+            except (AttributeError, ValueError):
                 raise BellyValidationException(phrases.ACTION_INVALID_WAGER_AMOUNT)
 
         # User does not have enough bounty

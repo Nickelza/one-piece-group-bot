@@ -91,6 +91,9 @@ from src.chat.private.screens.screen_devil_fruit_detail_discard import (
 from src.chat.private.screens.screen_devil_fruit_detail_eat import (
     manage as manage_screen_devil_fruit_detail_eat,
 )
+from src.chat.private.screens.screen_devil_fruit_detail_sell import (
+    manage as manage_screen_devil_fruit_detail_sell,
+)
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
 )
@@ -441,6 +444,11 @@ async def dispatch_screens(
 
             case Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD:  # Devil Fruit Detail Discard
                 await manage_screen_devil_fruit_detail_discard(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_DEVIL_FRUIT_DETAIL_SELL:  # Devil Fruit Detail Sell
+                await manage_screen_devil_fruit_detail_sell(
                     update, context, inbound_keyboard, user
                 )
 

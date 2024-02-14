@@ -48,10 +48,14 @@ async def manage(
             )
         ])
 
-        # Trade button
-        # inline_keyboard.append([Keyboard(phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE,
-        #                                  screen=Screen.PVT_DEVIL_FRUIT_DETAIL_TRADE,
-        #                                  info=button_info)])
+        # Sell button
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_SELL,
+                screen=Screen.PVT_DEVIL_FRUIT_DETAIL_SELL,
+                info=button_info,
+            )
+        ])
 
     # Discard button
     inline_keyboard.append([

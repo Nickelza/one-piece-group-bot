@@ -332,8 +332,9 @@ PVT_KEY_PREDICTION_CHANGE_POLL = Emoji.CHANGE + " Change poll"
 PVT_KEY_PREDICTION_NO_CORRECT_OPTION = "No correct option"
 PVT_KEY_DEVIL_FRUIT = Emoji.DEVIL_FRUIT + " Devil Fruit"
 PVT_KEY_DEVIL_FRUIT_DETAIL_EAT = "Eat"
-PVT_KEY_DEVIL_FRUIT_DETAIL_TRADE = "Trade"
+PVT_KEY_DEVIL_FRUIT_DETAIL_SELL = "Sell"
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = "Discard"
+PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP = "View in shop"
 PVT_KEY_GO_TO_MESSAGE = "Go to message"
 PVT_KEY_VIEW = "View"
 PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + " Loan"
@@ -1899,6 +1900,18 @@ DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = "You cannot buy your own Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_SUCCESS = (
     "{} has bought the following Devil Fruit from {}\n\n{}\n\nExpiring in: *{}*\n\nPrice:"
     " ฿{}\nTax: ฿{} \\({}%\\)\nTotal Price: ฿*{}*"
+)
+DEVIL_FRUIT_DETAIL_SELL = "Please send the amount you want to sell the Devil Fruit for"
+DEVIL_FRUIT_DETAIL_SELL_AVERAGE_PRICE = ".\n\nAverage selling price: ฿{}"
+DEVIL_FRUIT_DETAIL_SELL_CONFIRMATION_REQUEST = (
+    "Are you sure you want to put up the *{}* for sale at ฿{}?\n\nYou will be notified when "
+    "someone buys it"
+)
+DEVIL_FRUIT_DETAIL_SELL_CONFIRMATION_CONFIRMED = (
+    "The Devil Fruit is now available for purchase by other users in the Shop."
+    "\n\n*Name*: {}"
+    "\n*Price*: ฿{}"
+    f"\n\nClick `{PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP}` to review or cancel"
 )
 
 # Admin chat error messages

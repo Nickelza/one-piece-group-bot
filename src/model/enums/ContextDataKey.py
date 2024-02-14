@@ -10,6 +10,7 @@ class ContextDataKey(StrEnum):
     FILTER = "filter"
     INBOUND_KEYBOARD = "inbound_keyboard"
     KEYBOARD_DATA = "keyboard_data"
+    AMOUNT = "amount"
 
 
 class ContextDataType(StrEnum):
