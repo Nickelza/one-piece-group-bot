@@ -124,7 +124,9 @@ async def manage(
         challenger, game.wager, add=False, should_affect_pending_bounty=True, update=update
     )
     challenger.game_cooldown_end_date = get_ability_adjusted_datetime(
-        user, DevilFruitAbilityType.GAME_COOLDOWN_DURATION, Env.GAME_COOLDOWN_DURATION.get_int()
+        challenger,
+        DevilFruitAbilityType.GAME_COOLDOWN_DURATION,
+        Env.GAME_COOLDOWN_DURATION.get_int(),
     )
     challenger.save()
 
