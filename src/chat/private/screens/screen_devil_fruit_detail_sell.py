@@ -62,9 +62,30 @@ async def manage(
         context,
         devil_fruit,
         user,
-        add_delete_button=False,
         inbound_keyboard=inbound_keyboard,
     ):
+        return
+
+    # Already for sale in the shop, no need for hard validation since all previous trades will be
+    # deleted on new trade
+    trade = DevilFruitTrade.get_pending_in_shop(devil_fruit)
+    if trade is not None:
+        inline_keyboard: list[list[Keyboard]] = [[
+            Keyboard(
+                phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
+                inbound_info=inbound_keyboard.info,
+            )
+        ]]
+        ot_text = phrases.DEVIL_FRUIT_DETAIL_SELL_ALREADY_FOR_SALE
+        await full_message_send(
+            context,
+            ot_text,
+            update=update,
+            keyboard=inline_keyboard,
+            inbound_keyboard=inbound_keyboard,
+        )
         return
 
     user.private_screen_in_edit_id = devil_fruit.id
@@ -115,6 +136,10 @@ async def manage(
         case Step.END:
             if inbound_keyboard is None:
                 return
+
+            # Remove previous trades
+            DevilFruitTrade.delete_pending_trades(devil_fruit)
+
             amount = int(user.get_context_data(context, ContextDataKey.AMOUNT))
             # Sell the fruit
             trade: DevilFruitTrade = DevilFruitTrade()
@@ -127,7 +152,18 @@ async def manage(
             user.private_screen_in_edit_id = None
             user.private_screen_force_go_back = True
 
-            # TODO when shop is on, add keyboard to item
+            inline_keyboard.append([
+                Keyboard(
+                    phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL,
+                    info={
+                        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id,
+                        ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id,
+                    },
+                    previous_screen_list=[Screen.PVT_DEVIL_FRUIT, Screen.PVT_DEVIL_FRUIT_DETAIL],
+                )
+            ])
+
             ot_text = phrases.DEVIL_FRUIT_DETAIL_SELL_CONFIRMATION_CONFIRMED.format(
                 devil_fruit.get_full_name(),
                 get_belly_formatted(amount),

@@ -94,6 +94,18 @@ from src.chat.private.screens.screen_devil_fruit_detail_eat import (
 from src.chat.private.screens.screen_devil_fruit_detail_sell import (
     manage as manage_screen_devil_fruit_detail_sell,
 )
+from src.chat.private.screens.screen_devil_fruit_shop import (
+    manage as manage_screen_devil_fruit_shop,
+)
+from src.chat.private.screens.screen_devil_fruit_shop_detail import (
+    manage as manage_screen_devil_fruit_shop_detail,
+)
+from src.chat.private.screens.screen_devil_fruit_shop_detail_buy import (
+    manage as manage_screen_devil_fruit_shop_detail_buy,
+)
+from src.chat.private.screens.screen_devil_fruit_shop_detail_remove import (
+    manage as manage_screen_devil_fruit_shop_detail_remove,
+)
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
 )
@@ -507,6 +519,28 @@ async def dispatch_screens(
                     update, context, inbound_keyboard, user
                 )
 
+            # Devil Fruit Shop
+            case Screen.PVT_DEVIL_FRUIT_SHOP:
+                await manage_screen_devil_fruit_shop(update, context, inbound_keyboard, user)
+
+            # Devil Fruit Shop detail
+            case Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL:
+                await manage_screen_devil_fruit_shop_detail(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Devil Fruit Shop detail buy
+            case Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_BUY:
+                await manage_screen_devil_fruit_shop_detail_buy(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Devil Fruit Shop detail remove
+            case Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_REMOVE:
+                await manage_screen_devil_fruit_shop_detail_remove(
+                    update, context, inbound_keyboard, user
+                )
+
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)
@@ -554,7 +588,7 @@ async def send_system_update_message(
     # Notifications
     inline_keyboard: list[list[Keyboard]] = [[
         Keyboard(
-            phrases.PVT_KEY_VIEW,
+            phrases.KEY_VIEW,
             url=get_message_url(
                 chat_id=system_update.chat_id, message_id=system_update.message_id
             ),

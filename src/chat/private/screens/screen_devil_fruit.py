@@ -12,8 +12,9 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
+from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_remaining_duration
+from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
@@ -55,13 +56,20 @@ class DevilFruitListPage(ListPage):
             escape_valid_markdown_chars(self.object.get_full_name())
         )
 
-    def get_item_detail_text(self, from_private_chat: bool = True) -> str:
+    def get_item_detail_text(
+        self, from_private_chat: bool = True, always_view: bool = False
+    ) -> str:
         """
         Get the item detail text
         :param from_private_chat: If it was called from a private chat
+        :param always_view: Show detail even if not authorized
         :return:
         """
-        super().get_item_detail_text()
+        try:
+            super().get_item_detail_text()
+        except UnauthorizedToViewItemException:
+            if not always_view:
+                raise UnauthorizedToViewItemException
 
         expiring_date_text = ""
         sell_command_text = ""
@@ -69,7 +77,9 @@ class DevilFruitListPage(ListPage):
             if DevilFruitStatus(self.object.status) is DevilFruitStatus.COLLECTED:
                 if self.object.expiration_date is not None:  # Should always be the case
                     expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-                        get_remaining_duration(self.object.expiration_date)
+                        default_datetime_format(
+                            self.object.expiration_date, add_remaining_time=True
+                        )
                     )
                 else:
                     logging.error(
@@ -99,25 +109,18 @@ async def manage(
     :param user: The user
     :return: None
     """
+    from src.chat.private.screens.screen_devil_fruit_detail import (
+        manage as manage_screen_devil_fruit_detail,
+    )
 
     devil_fruit_list_page: DevilFruitListPage = DevilFruitListPage()
     devil_fruit_list_page.user = user
 
-    items_count = devil_fruit_list_page.get_total_items_count()
-
-    # If no Devil Fruits, show error message
-    if items_count == 0:
-        await full_message_send(
-            context,
-            phrases.DEVIL_FRUIT_LIST_NO_ITEMS,
-            update=update,
-            inbound_keyboard=inbound_keyboard,
-        )
-        return
-
-    # If only 1 devil fruit, go directly to the devil fruit detail screen
-    if items_count == 1:
-        await skip_screen(update, context, inbound_keyboard, user, devil_fruit_list_page)
+    # Has direct DF
+    direct_item: DevilFruit = devil_fruit_list_page.get_direct_item()
+    if direct_item is not None:
+        inbound_keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY] = direct_item.id
+        await manage_screen_devil_fruit_detail(update, context, inbound_keyboard, user)
         return
 
     ot_text, items_keyboard = get_items_text_keyboard(
@@ -126,7 +129,17 @@ async def manage(
         DevilFruitReservedKeys.ITEM_ID,
         Screen.PVT_DEVIL_FRUIT_DETAIL,
         text_fill_in=phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN,
+        empty_list_text=phrases.DEVIL_FRUIT_LIST_NO_ITEMS,
     )
+
+    # Shop button
+    items_keyboard.append([
+        Keyboard(
+            phrases.KEY_SHOP,
+            screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+            inbound_info=inbound_keyboard.info,
+        )
+    ])
 
     await full_message_send(
         context,
@@ -136,30 +149,3 @@ async def manage(
         inbound_keyboard=inbound_keyboard,
         excluded_keys_from_back_button=[ReservedKeyboardKeys.PAGE],
     )
-
-
-async def skip_screen(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    inbound_keyboard: Keyboard,
-    user: User,
-    devil_fruit_list_page: DevilFruitListPage,
-) -> None:
-    """
-    Skip the Devil Fruit list screen and go to devil fruit detail screen
-    :param update: The update
-    :param context: The context
-    :param inbound_keyboard: The inbound keyboard
-    :param user: The user
-    :param devil_fruit_list_page: The devil fruit list page
-    :return: None
-    """
-    from src.chat.private.screens.screen_devil_fruit_detail import (
-        manage as manage_screen_devil_fruit_detail,
-    )
-
-    devil_fruit: DevilFruit = devil_fruit_list_page.get_items(1)[0]
-    inbound_keyboard.info[DevilFruitReservedKeys.ITEM_ID] = devil_fruit.id
-    inbound_keyboard.screen = Screen.PVT_DEVIL_FRUIT_DETAIL
-
-    await manage_screen_devil_fruit_detail(update, context, inbound_keyboard, user)

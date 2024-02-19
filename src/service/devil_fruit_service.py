@@ -70,7 +70,7 @@ def give_devil_fruit_to_user(
     """
 
     # Make sure the devil fruit is not already owned by someone
-    if devil_fruit.owner and source is not DevilFruitSource.USER:
+    if devil_fruit.owner and source not in [DevilFruitSource.USER, DevilFruitSource.SHOP]:
         owner: User = devil_fruit.owner
         raise DevilFruitValidationException(
             f"Devil fruit {devil_fruit.get_full_name()} is already owned by {owner.tg_user_id}"
@@ -104,13 +104,11 @@ def give_devil_fruit_to_user(
     devil_fruit_trade.source = source
     devil_fruit_trade.reason = reason
     devil_fruit_trade.status = DevilFruitTradeStatus.COMPLETED
+    devil_fruit_trade.date_sold = datetime.now()
     devil_fruit_trade.save()
 
     # Delete all pending trades
-    DevilFruitTrade.delete().where(
-        DevilFruitTrade.devil_fruit == devil_fruit,
-        DevilFruitTrade.status == DevilFruitTradeStatus.PENDING,
-    ).execute()
+    DevilFruitTrade.delete_pending_trades(devil_fruit)
 
 
 def get_devil_fruit_abilities(devil_fruit: DevilFruit) -> list[DevilFruitAbility]:
@@ -129,7 +127,8 @@ def get_devil_fruit_abilities_text(
     Get devil fruit abilities text
     :param devil_fruit: The devil fruit
     :param add_header: Whether to add the header
-    :param always_show_abilities: Whether to always show the abilities, even if the Devil Fruit has never been eaten
+    :param always_show_abilities: Whether to always show the abilities, even if the Devil Fruit has
+     never been eaten
     :return: The text
     """
 
@@ -171,7 +170,8 @@ def get_devil_fruits_in_circulation(category: DevilFruitCategory = None) -> list
 
 def should_release_devil_fruit() -> bool:
     """
-    Checks if a Devil Fruit should be released based on the number of Devil Fruits in circulation and the number of
+    Checks if a Devil Fruit should be released based on the number of Devil Fruits in circulation
+    and the number of
     active users
     :return: Whether a Devil Fruit should be released
     """
@@ -461,7 +461,8 @@ async def warn_inactive_users_with_eaten_devil_fruit(
     Warn inactive users with eaten Devil Fruits
 
     :param context: The context object
-    :param users: The users to warn. If provided, it will only warn these users, else it will warn all inactive users
+    :param users: The users to warn. If provided, it will only warn these users, else it will warn
+    all inactive users
     :return: None
     """
 
@@ -508,8 +509,9 @@ def get_inactive_users_with_eaten_devil_fruits(
     eaten_active_devil_fruits: list[DevilFruit] = list(query)
 
     # Inactive Devil Fruits
-    # Have to first get inactive ones else, by using "not in", it will return records for previous leaderboards too
-    # since the user might have been in a leaderboard before N, so it will not be in the latest N leaderboards
+    # Have to first get inactive ones else, by using "not in", it will return records for previous
+    # leaderboards too since the user might have been in a leaderboard before N, so it will not be
+    # in the latest N leaderboards
     # Exclude admins and those exempt from global leaderboard requirement
     inactive_devil_fruits: list[DevilFruit] = (
         DevilFruit.select()

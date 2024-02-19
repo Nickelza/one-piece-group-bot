@@ -68,9 +68,10 @@ def get_page(inbound_keyboard: Keyboard) -> int:
 
 def get_items_paginate(
     inbound_keyboard: Keyboard, list_page: ListPage
-) -> [list[BaseModel], int, int, int, int]:
+) -> [list[BaseModel], int, int, int, int, int]:
     """
-    Get the items, page, start number, end number and the total number of items
+    Get the items, page, start number, end number, total number of items
+    and all items without filter count
 
     :param inbound_keyboard: The inbound keyboard
     :param list_page: The list page object
@@ -95,13 +96,16 @@ def get_items_paginate(
     # Get the total number of items
     total_items: int = list_page.get_total_items_count()
 
-    return items, page, start_number, end_number, total_items
+    # Get all items count, without any filter
+    all_items_count: int = list_page.get_total_items_no_filter_count()
+
+    return items, page, start_number, end_number, total_items, all_items_count
 
 
 def get_items_text_keyboard(
     inbound_keyboard: Keyboard,
     list_page: ListPage,
-    item_detail_key: StrEnum,
+    item_detail_key: StrEnum,  # TODO default PRIMARY_KEY, switch with screen
     item_detail_screen: Screen,
     text_fill_in: str = None,
     text_overview: str = None,
@@ -109,6 +113,7 @@ def get_items_text_keyboard(
     user: User = None,
     update: Update = None,
     allow_string_filter: bool = False,
+    empty_list_text: str = None,
 ) -> tuple[str, list[list[Keyboard]]]:
     """
     Get the items text and keyboard
@@ -123,6 +128,7 @@ def get_items_text_keyboard(
     :param user: The user
     :param update: The update
     :param allow_string_filter: Whether to allow string filter
+    :param empty_list_text: The empty list text
     :return: The text and keyboard
     """
     list_page.init_legend_filter_results()
@@ -158,44 +164,53 @@ def get_items_text_keyboard(
     list_page.filter_list_active = active_filters
 
     # Get the items
-    items, page, start_number, end_number, total_count = get_items_paginate(
-        inbound_keyboard, list_page
+    items, page, start_number, end_number, total_count, all_items_no_filter_count = (
+        get_items_paginate(inbound_keyboard, list_page)
     )
 
     # Get the text
-    items_text = ""
     inline_keyboard: list[list[Keyboard]] = []
+    items_text = ""
+
+    # No items
+    if total_count == 0:
+        items_text = (
+            phrases.LIST_OVERVIEW_NO_ITEMS.format(text_fill_in)
+            if empty_list_text is None
+            else empty_list_text
+        )
+
+        if all_items_no_filter_count == 0:
+            return items_text, inline_keyboard
+
     keyboard_line: list[Keyboard] = []
 
-    if total_count == 0:
-        items_text = phrases.LIST_OVERVIEW_NO_ITEMS.format(text_fill_in)
-    else:
-        for index, item in enumerate(items):
-            current_number = start_number + index
-            list_page.set_object(item.id)
-            items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
+    for index, item in enumerate(items):
+        current_number = start_number + index
+        list_page.set_object(item.id)
+        items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
 
-            button_info = {item_detail_key: item.id}
-            button = Keyboard(
-                str(current_number),
-                screen=item_detail_screen,
-                info=button_info,
-                inbound_info=inbound_keyboard.info,
-            )
-            keyboard_line.append(button)
+        button_info = {item_detail_key: item.id}
+        button = Keyboard(
+            str(current_number),
+            screen=item_detail_screen,
+            info=button_info,
+            inbound_info=inbound_keyboard.info,
+        )
+        keyboard_line.append(button)
 
-            # Add new keyboard line if needed
-            if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
-                inline_keyboard.append(keyboard_line)
-                keyboard_line = []
-
-        # Add the last keyboard line if needed
-        if len(keyboard_line) > 0:
+        # Add new keyboard line if needed
+        if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
             inline_keyboard.append(keyboard_line)
+            keyboard_line = []
 
-        # Add navigation buttons if needed
-        if total_count > c.STANDARD_LIST_SIZE:
-            inline_keyboard.append(get_navigation_buttons(inbound_keyboard, page))
+    # Add the last keyboard line if needed
+    if len(keyboard_line) > 0:
+        inline_keyboard.append(keyboard_line)
+
+    # Add navigation buttons if needed
+    if total_count > c.STANDARD_LIST_SIZE:
+        inline_keyboard.append(get_navigation_buttons(inbound_keyboard, page))
 
     # Add filters button
     string_filter: ListFilter | None = None
@@ -205,6 +220,9 @@ def get_items_text_keyboard(
     filters = list_page.get_filter_list()
 
     legend_filters = [f for f in filters if f.filter_type is ListFilterType.LEGEND]
+    legend_filters_with_items = [
+        f for f in legend_filters if len(list_page.legend_filter_results[f.legend]) > 0
+    ]
     active_legend_filters = [f for f in active_filters if f.filter_type is ListFilterType.LEGEND]
 
     for index, list_filter in enumerate(list_page.get_filter_list()):
@@ -227,7 +245,7 @@ def get_items_text_keyboard(
                     add_legend_filter = True
 
                     # No next filter, add remove button
-                    if list_filter.description == legend_filters[-1].description:
+                    if list_filter.description == legend_filters_with_items[-1].description:
                         inline_keyboard.append([
                             Keyboard(
                                 phrases.PVT_KEY_STRING_FILTER_REMOVE.format(phrases.LEGEND),
@@ -238,6 +256,10 @@ def get_items_text_keyboard(
                         ])
 
                     continue
+
+            # Doesn't have items, don't add button
+            if len(list_page.legend_filter_results[list_filter.legend]) == 0:
+                continue
 
             # Is the filter of which to add the button
             inline_keyboard.append([
@@ -265,7 +287,7 @@ def get_items_text_keyboard(
                     )
                 ])
 
-    if total_count > 0 and len(list_page.emoji_legend_list) > 0 and list_page.show_legend_list:
+    if len(list_page.emoji_legend_list) > 0 and list_page.show_legend_list:
         items_text += list_page.get_emoji_legend_list_text()
 
     # Add string filter suggestion

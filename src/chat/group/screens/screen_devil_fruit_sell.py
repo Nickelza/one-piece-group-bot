@@ -16,7 +16,9 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
-from src.model.error.CustomException import DevilFruitTradeValidationException
+from src.model.error.CustomException import (
+    DevilFruitTradeValidationException,
+)
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import (
@@ -91,7 +93,9 @@ async def manage(
         devil_fruit_trade.save()
 
     devil_fruit: DevilFruit = devil_fruit_trade.devil_fruit
-    if not await validate_trade(update, context, devil_fruit, devil_fruit_trade.giver):
+    if not await validate_trade(
+        update, context, devil_fruit, devil_fruit_trade.giver, add_delete_button=True
+    ):
         devil_fruit_trade.delete_instance()
         return
 
@@ -100,7 +104,11 @@ async def manage(
             return await send_sell_proposal(update, context, user, devil_fruit_trade, devil_fruit)
 
         case Step.BUY:
-            return await buy(update, context, user, devil_fruit_trade, devil_fruit)
+            ot_text = await buy(
+                update, context, user, devil_fruit_trade, devil_fruit, DevilFruitSource.USER
+            )
+            if ot_text:
+                await full_message_send(context, ot_text, update=update, add_delete_button=True)
 
         case _:
             raise ValueError(
@@ -134,9 +142,12 @@ async def get_amounts(
         else devil_fruit_trade.tax_percentage
     )
 
-    # Parse to int if tax does not have a decimal
-    if float(tax_percentage).is_integer():
-        tax_percentage = int(tax_percentage)
+    if not tax_percentage:
+        tax_percentage = 0
+    else:
+        # Parse to int if tax does not have a decimal
+        if tax_percentage and float(tax_percentage).is_integer():
+            tax_percentage = int(tax_percentage)
 
     tax_amount = int(get_value_from_percentage(amount, tax_percentage))
     total_amount = amount + tax_amount
@@ -255,8 +266,9 @@ async def validate_trade(
     context: ContextTypes.DEFAULT_TYPE,
     devil_fruit: DevilFruit,
     seller: User,
-    add_delete_button: bool = True,
+    add_delete_button: bool = False,
     inbound_keyboard: Keyboard = None,
+    show_alert: bool = False,
 ) -> bool:
     """
     Validate the trade
@@ -266,9 +278,9 @@ async def validate_trade(
     :param seller: The seller
     :param add_delete_button: Whether to add the delete button
     :param inbound_keyboard: The inbound keyboard
+    :param show_alert: Whether to show an alert
     :return: True if the trade is valid, False otherwise
     """
-    # TODO If selling in shop, check that there are no other active trades. If yes, link to and warn
     try:
         # Seller no longer owns the Devil Fruit
         if devil_fruit.owner != seller:
@@ -287,6 +299,7 @@ async def validate_trade(
             update=update,
             inbound_keyboard=inbound_keyboard,
             add_delete_button=add_delete_button,
+            show_alert=show_alert,
         )
         return False
 
@@ -409,7 +422,8 @@ async def buy(
     buyer: User,
     devil_fruit_trade: DevilFruitTrade,
     devil_fruit: DevilFruit,
-) -> None:
+    source: DevilFruitSource,
+) -> str | None:
     """
     Buy the Devil Fruit
     :param update: The update object
@@ -417,16 +431,15 @@ async def buy(
     :param buyer: The buyer
     :param devil_fruit_trade: The Devil Fruit trade
     :param devil_fruit: The Devil Fruit
-    :return: None
+    :param source: The source
+    :return: The completed buy text
     """
 
     # Validate the buy
     if not await validate_buy(update, context, buyer, devil_fruit_trade):
         return
 
-    give_devil_fruit_to_user(
-        devil_fruit, buyer, DevilFruitSource.USER, devil_fruit_trade=devil_fruit_trade
-    )
+    give_devil_fruit_to_user(devil_fruit, buyer, source, devil_fruit_trade=devil_fruit_trade)
 
     # Get the amounts
     amount, tax_percentage, tax_amount, total_amount = await get_amounts(
@@ -456,15 +469,14 @@ async def buy(
     )
 
     seller: User = devil_fruit_trade.giver
-    ot_text = phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
-        buyer.get_markdown_mention(),
+
+    return phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
+        buyer.get_you_markdown_mention(),
         seller.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False),
+        list_page.get_item_detail_text(from_private_chat=False, always_view=True),
         get_remaining_duration(devil_fruit.expiration_date),
         get_belly_formatted(amount),
         get_belly_formatted(tax_amount),
         tax_percentage,
         get_belly_formatted(total_amount),
     )
-
-    await full_message_send(context, ot_text, update=update, add_delete_button=True)

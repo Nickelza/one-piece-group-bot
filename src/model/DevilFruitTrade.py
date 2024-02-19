@@ -7,6 +7,7 @@ from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
+from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeStatus
 
 
@@ -16,41 +17,44 @@ class DevilFruitTrade(BaseModel):
     """
 
     id = PrimaryKeyField()
-    devil_fruit = ForeignKeyField(
+    devil_fruit: DevilFruit | ForeignKeyField = ForeignKeyField(
         DevilFruit,
         null=True,
         backref="devil_fruit_trades",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    giver = ForeignKeyField(
+    giver: User | ForeignKeyField = ForeignKeyField(
         User,
         null=True,
         backref="devil_fruit_trade_givers",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    receiver = ForeignKeyField(
+    receiver: User | ForeignKeyField = ForeignKeyField(
         User,
         null=True,
         backref="devil_fruit_trade_receivers",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    source = SmallIntegerField()
-    price = BigIntegerField(null=True)
-    tax_percentage = FloatField(null=True)
-    reason = CharField(max_length=100, null=True)
-    date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=DevilFruitTradeStatus.PENDING)
-    group_chat = ForeignKeyField(
+    source: DevilFruitSource | SmallIntegerField = SmallIntegerField()
+    price: int | BigIntegerField = BigIntegerField(null=True)
+    tax_percentage: float | FloatField = FloatField(null=True)
+    reason: str | CharField = CharField(max_length=100, null=True)
+    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    date_sold: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    status: DevilFruitTradeStatus | SmallIntegerField = SmallIntegerField(
+        default=DevilFruitTradeStatus.PENDING
+    )
+    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
         GroupChat,
         null=True,
         backref="devil_fruit_trade_group_chats",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    message_id = IntegerField(null=True)
+    message_id: int = IntegerField(null=True)
 
     class Meta:
         db_table = "devil_fruit_trade"
@@ -72,6 +76,46 @@ class DevilFruitTrade(BaseModel):
                 & (DevilFruitTrade.price > 0)
             )
             .scalar()
+        )
+
+    def get_source(self) -> DevilFruitSource:
+        """
+        Get the source of the trade
+        :return: The source
+        """
+        return DevilFruitSource(self.source)
+
+    def get_status(self) -> DevilFruitTradeStatus:
+        """
+        Get the status of the trade
+        :return: The status
+        """
+        return DevilFruitTradeStatus(self.status)
+
+    @staticmethod
+    def delete_pending_trades(devil_fruit: DevilFruit):
+        """
+        Delete pending trades of a devil fruit
+        :param devil_fruit: The devil fruit
+        :return: None
+        """
+        DevilFruitTrade.delete().where(
+            (DevilFruitTrade.devil_fruit == devil_fruit)
+            & (DevilFruitTrade.status == DevilFruitTradeStatus.PENDING)
+        ).execute()
+
+    @staticmethod
+    def get_pending_in_shop(devil_fruit: DevilFruit) -> "DevilFruitTrade":
+        """
+        Get a pending trade in the shop
+        :param devil_fruit: The devil fruit
+        :return: The trade
+        """
+
+        return DevilFruitTrade.get_or_none(
+            DevilFruitTrade.devil_fruit == devil_fruit,
+            DevilFruitTrade.status == DevilFruitTradeStatus.PENDING,
+            DevilFruitTrade.source == DevilFruitSource.SHOP,
         )
 
 

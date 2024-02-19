@@ -67,6 +67,7 @@ class Emoji(StrEnum):
     GREEN = "🟢"
     SEARCH = "🔍"
     RESET = "🔄"
+    SHOP = "🛒"
 
     # Game
     WINNER = "🏆"

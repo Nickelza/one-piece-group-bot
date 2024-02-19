@@ -10,6 +10,7 @@ from src.model.CrewAbility import CrewAbility
 from src.model.DavyBackFight import DavyBackFight
 from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.DevilFruit import DevilFruit
+from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.Game import Game
 from src.model.ImpelDownLog import ImpelDownLog
 from src.model.Prediction import Prediction
@@ -106,6 +107,7 @@ class NotificationType(IntEnum):
     CREW_CONSCRIPTION_START = 34
     CREW_CONSCRIPTION_START_CAPTAIN = 35
     CREW_CONSCRIPTION_END = 36
+    DEVIL_FRUIT_SOLD = 37
 
 
 class Notification:
@@ -1302,6 +1304,34 @@ class ImpelDownBailPostedNotification(Notification):
         )
 
 
+class DevilFruitSoldNotification(Notification):
+    """Class for devil fruit sold notifications."""
+
+    def __init__(self, devil_fruit_trade: DevilFruitTrade = None):
+        """
+        Constructor
+
+        :param devil_fruit_trade: The trade
+        """
+
+        self.trade: DevilFruitTrade = devil_fruit_trade
+
+        super().__init__(
+            NotificationCategory.DEVIL_FRUIT,
+            NotificationType.DEVIL_FRUIT_SOLD,
+            phrases.DEVIL_FRUIT_SOLD_NOTIFICATION,
+            phrases.DEVIL_FRUIT_SOLD_NOTIFICATION_DESCRIPTION,
+            phrases.DEVIL_FRUIT_SOLD_NOTIFICATION_KEY,
+        )
+
+    def build(self) -> str:
+        return self.text.format(
+            escape_valid_markdown_chars(self.trade.devil_fruit.get_full_name()),
+            get_belly_formatted(self.trade.price),
+            self.trade.receiver.get_markdown_mention(),
+        )
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1339,6 +1369,7 @@ NOTIFICATIONS = [
     DavyBackFightRequestRejectedNotification(),
     DavyBackFightStartNotification(),
     DavyBackFightEndNotification(),
+    DevilFruitSoldNotification(),
 ]
 
 

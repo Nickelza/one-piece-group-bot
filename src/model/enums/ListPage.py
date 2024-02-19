@@ -153,6 +153,20 @@ class ListPage(ABC):
 
         return len(self.get_all_items())
 
+    def get_total_items_no_filter_count(self) -> int:
+        """
+        Get the total items count without filters
+
+        :return: The total items count
+        """
+
+        active_filters = self.filter_list_active.copy()
+        self.filter_list_active = []
+        count = len(self.get_all_items())
+        self.filter_list_active = active_filters
+
+        return count
+
     @abstractmethod
     def get_item_text(self) -> str:
         """
@@ -299,13 +313,18 @@ class ListPage(ABC):
 
         return filter_list
 
-    def get_direct_item(self) -> BaseModel | None:
+    def get_direct_item(self) -> any:
         """
         Get the direct item. If it returns not None, instead of showing a list of items,
         It will show the item detail directly
         """
 
-        pass
+        # If they have only one item, return that
+        all_items = self.get_all_items()
+        if len(all_items) == 1:
+            return all_items[0]
+
+        return None
 
     def has_direct_item(self) -> bool:
         """

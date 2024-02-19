@@ -252,6 +252,9 @@ KEY_SET_RESULT = "Set result"
 KEY_CONFIRM = "Confirm"
 KEY_MODIFY = "Modify"
 KEY_RESET = "Reset"
+KEY_SHOP = Emoji.SHOP + " Shop"
+KEY_REMOVE = Emoji.DELETE + " Remove"
+KEY_BUY = "Buy"
 
 # Private chat
 PVT_TXT_START = (
@@ -336,7 +339,6 @@ PVT_KEY_DEVIL_FRUIT_DETAIL_SELL = "Sell"
 PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD = "Discard"
 PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP = "View in shop"
 PVT_KEY_GO_TO_MESSAGE = "Go to message"
-PVT_KEY_VIEW = "View"
 PVT_KEY_BOUNTY_LOAN = Emoji.MONEY + " Loan"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY = "Pay"
 PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
@@ -1601,8 +1603,8 @@ BOUNTY_GIFT_RECEIVED_NOTIFICATION_DESCRIPTION = "If to be notified when you are 
 BOUNTY_GIFT_RECEIVED_NOTIFICATION_KEY = "Bounty gift"
 # Notification - Devil Fruit Awarded
 DEVIL_FRUIT_EAT_OR_SELL = (
-    "\n\nYou can eat it or sell it with the"
-    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} command in a group"
+    "\n\nYou can eat it or sell it the Shop or in a Chat Group"
+    f"\\({CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price\\> command\\)"
 )
 DEVIL_FRUIT_AWARDED_NOTIFICATION = (
     "You have been awarded the following Devil Fruit:\n\n*{}*\nReason: {}"
@@ -1632,6 +1634,12 @@ DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_DESCRIPTION = (
     f" {Env.DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE.get()} consecutive leaderboards"
 )
 DEVIL_FRUIT_REVOKE_WARNING_NOTIFICATION_KEY = "Devil Fruit revoke warning"
+# Notification - Devil Fruit Sold
+DEVIL_FRUIT_SOLD_NOTIFICATION = (
+    "Your Devil Fruit has been bought!\n\n*Name*: {}\n*Price*: ฿{}\n*Buyer*: {}"
+)
+DEVIL_FRUIT_SOLD_NOTIFICATION_DESCRIPTION = "If to be notified when your Devil Fruit is sold"
+DEVIL_FRUIT_SOLD_NOTIFICATION_KEY = "Devil Fruit Sold"
 # Notification - Bounty Loan
 BOUNTY_LOAN_NOTIFICATION_GO_TO_ITEM_BUTTON_TEXT = "Go to loan"
 # Notification - Bounty Loan Payment
@@ -1683,9 +1691,9 @@ LIST_OVERVIEW_NO_ITEMS = "No {} found"
 LIST_ITEM_TEXT = "\n*{}*. {}"
 LIST_FOOTER = "\n\n_Showing {}-{} of {} items_"
 LEGEND = "legend"
-LIST_EMOJI_LEGEND = "\n\n_*Legend*{}_"
-LIST_EMOJI_LEGEND_ITEM = "\n{} {} \\({}\\)"
-LIST_FILTER_SEND_PART_OF_STRING = "\n\n__Send a part of the {} to restrict the search__"
+LIST_EMOJI_LEGEND = "\n\n>*Legend*{}"
+LIST_EMOJI_LEGEND_ITEM = "\n>{} {} \\({}\\)"
+LIST_FILTER_SEND_PART_OF_STRING = "\n\n>_Send a part of the {} to restrict the search_"
 LIST_FILTER_ACTIVE_FILTERS = "\n\n_*Active filters*:{}_"
 LIST_FILTER_ITEM = "\n• {}"
 LIST_FILTER_ITEM_CONTAINS = "{} contains '{}'"
@@ -1843,6 +1851,9 @@ SILENCE_END = "The soundproof field has been cancelled, everyone can speak again
 SPEAK = "{} has been granted permission to speak"
 
 # Devil Fruit
+DEVIL_FRUIT_CATEGORY_DESCRIPTION_ZOAN = "Zoan"
+DEVIL_FRUIT_CATEGORY_DESCRIPTION_ANCIENT_ZOAN = "Ancient Zoan"
+DEVIL_FRUIT_CATEGORY_DESCRIPTION_MYTHICAL_ZOAN = "Mythical Zoan"
 DEVIL_FRUIT_ABILITY_TEXT = "\n\n*Abilities*"
 DEVIL_FRUIT_ABILITY_TEXT_LINE = "\n{}{} \\({}{}%\\)"
 DEVIL_FRUIT_ABILITY_UNKNOWN = "\nUnknown"
@@ -1850,10 +1861,12 @@ DEVIL_FRUIT_ABILITY_UNKNOWN = "\nUnknown"
 DEVIL_FRUIT_ITEM_TEXT = "{}"
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = "Devil Fruit"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}{}{}"
-DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiring in: {}"
+DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = (
+    "\n\nExpiration: {}\n>If the Fruit is not eaten before the expiration, it will be revoked"
+)
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
-    "\n\nYou can sell this Devil Fruit in the Chat Group with"
-    f" {CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price\\> command"
+    "\n\nYou can sell this Devil Fruit in the Shop or in a Chat Group"
+    f"\\({CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price\\> command\\)"
 )
 DEVIL_FRUIT_LIST_NO_ITEMS = "You do not have any Devil Fruits"
 DEVIL_FRUIT_NOT_OWNER = "You do not own this Devil Fruit"
@@ -1898,7 +1911,7 @@ DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM = "\n\n_Only {} can buy this Devil Fr
 DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = "You do not have enough belly to buy this Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = "You cannot buy your own Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_SUCCESS = (
-    "{} has bought the following Devil Fruit from {}\n\n{}\n\nExpiring in: *{}*\n\nPrice:"
+    "{} have bought the following Devil Fruit from {}\n\n{}\n\nExpiring in: *{}*\n\nPrice:"
     " ฿{}\nTax: ฿{} \\({}%\\)\nTotal Price: ฿*{}*"
 )
 DEVIL_FRUIT_DETAIL_SELL = "Please send the amount you want to sell the Devil Fruit for"
@@ -1912,6 +1925,30 @@ DEVIL_FRUIT_DETAIL_SELL_CONFIRMATION_CONFIRMED = (
     "\n\n*Name*: {}"
     "\n*Price*: ฿{}"
     f"\n\nClick `{PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP}` to review or cancel"
+)
+DEVIL_FRUIT_DETAIL_SELL_ALREADY_FOR_SALE = (
+    "This Devil Fruit is already for sale in the Shop, please remove it first"
+)
+# Devil Fruit Shop
+DEVIL_FRUIT_SHOP_ITEM_TEXT = "{}\nPrice: ฿{}"
+DEVIL_FRUIT_SHOP_ITEM_TEXT_FILL_IN = "Devil Fruit"
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}\n\n*Seller*: {}\n*Price*: ฿{}{}"
+# TODO after daily bonus is on, add that DFs for sale will appear in bonus message
+DEVIL_FRUIT_SHOP_LIST_NO_ITEMS = (
+    "There are currently no *Devil Fruits* for sale, please come back later"
+)
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_CONFIRMATION = (
+    "Are you sure you want to remove this Devil Fruit from the Shop?\nYou will be able to put it"
+    " up for sale again."
+)
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_SUCCESS = "The Devil Fruit has been removed from the Shop"
+# TODO smile condition
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION_REVOKE = (
+    "\n\n>If you don't eat or sell it within {}, it will be revoked"
+)
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION = (
+    "Are you sure you want to buy the following Devil Fruit?\n\n*Name*: {}\n*Price*: ฿{}"
+    + DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION_REVOKE
 )
 
 # Admin chat error messages

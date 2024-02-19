@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 from resources import phrases
 from src.chat.private.screens.screen_devil_fruit import DevilFruitListPage
 from src.model.DevilFruit import DevilFruit
+from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -63,6 +64,28 @@ async def manage(
             phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
             screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
             info=button_info,
+        )
+    ])
+
+    # View in shop button
+    trade = DevilFruitTrade.get_pending_in_shop(devil_fruit)
+    if trade is not None:
+        inline_keyboard.append([
+            Keyboard(
+                phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
+                inbound_info=inbound_keyboard.info,
+            )
+        ])
+
+    # Shop button, adding here too because user could arrive here directly, without going through
+    # list page
+    inline_keyboard.append([
+        Keyboard(
+            phrases.KEY_SHOP,
+            screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+            inbound_info=inbound_keyboard.info,
         )
     ])
 

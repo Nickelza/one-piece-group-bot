@@ -68,12 +68,12 @@ class Keyboard:
         self.exclude_key_from_inbound_info: list[str] = (
             exclude_key_from_inbound_info if exclude_key_from_inbound_info is not None else []
         )
+        self.inbound_info = inbound_info.copy() if inbound_info else {}
 
-        if inbound_info is not None:
+        if len(self.inbound_info) > 0:
             for key in self.exclude_key_from_inbound_info:
-                inbound_info.pop(key, None)
-
-            self.info = inbound_info | self.info
+                self.inbound_info.pop(key, None)
+            self.info = self.inbound_info | self.info
             self.refresh_callback_data()
 
         if self.is_deeplink:
