@@ -937,10 +937,6 @@ DEVIL_FRUIT_RESPAWN_HOURS = Environment("DEVIL_FRUIT_RESPAWN_HOURS", default_val
 DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE = Environment(
     "DEVIL_FRUIT_MAINTAIN_MIN_LATEST_LEADERBOARD_APPEARANCE", default_value="4"
 )
-# Minimum amount a Devil Fruit can be sold for. Default: 100.000.000
-DEVIL_FRUIT_SELL_MIN_AMOUNT = Environment("DEVIL_FRUIT_SELL_MIN_AMOUNT", default_value="100000000")
-# Tax applied when selling a Devil Fruit. Default: 50%
-DEVIL_FRUIT_SELL_TAX = Environment("DEVIL_FRUIT_SELL_TAX", default_value="50")
 # How many active users are required for each Devil Fruit in circulation. Default: 20
 DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT = Environment(
     "DEVIL_FRUIT_MIN_ACTIVE_USERS_PER_DEVIL_FRUIT", default_value="20"

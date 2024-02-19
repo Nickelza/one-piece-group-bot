@@ -1861,8 +1861,11 @@ DEVIL_FRUIT_ABILITY_UNKNOWN = "\nUnknown"
 DEVIL_FRUIT_ITEM_TEXT = "{}"
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = "Devil Fruit"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}{}{}"
+DEVIL_FRUIT_EXPIRATION_EXPLANATION = (
+    "\n>If the Fruit is not eaten or sold before the expiration, it will be revoked"
+)
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = (
-    "\n\nExpiration: {}\n>If the Fruit is not eaten before the expiration, it will be revoked"
+    f"\n\nExpiration: {{}}{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
 )
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
     "\n\nYou can sell this Devil Fruit in the Shop or in a Chat Group"
@@ -1904,15 +1907,17 @@ DEVIL_FRUIT_SELL_SELECT_FRUIT = (
 DEVIL_FRUIT_SELL_NO_LONGER_OWN = "{} no longer owns this Devil Fruit"
 DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = "This Devil Fruit is no longer sellable"
 DEVIL_FRUIT_SELL_BUY = (
-    "{} has put up the following Devil Fruit for sale:\n\n{}\n\nExpiring in: {}\n\nPrice:"
-    " ฿{}\nTax: ฿{} \\({}%\\)\nTotal Price: ฿*{}*{}"
+    "{} has put up the following Devil Fruit for sale:\n\n{}\n\n*Expiring in*: {}"
+    f"{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
+    "\n\n*Price*: ฿{}{}"
 )
 DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM = "\n\n_Only {} can buy this Devil Fruit_"
 DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = "You do not have enough belly to buy this Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = "You cannot buy your own Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_SUCCESS = (
-    "{} have bought the following Devil Fruit from {}\n\n{}\n\nExpiring in: *{}*\n\nPrice:"
-    " ฿{}\nTax: ฿{} \\({}%\\)\nTotal Price: ฿*{}*"
+    "{} have bought the following Devil Fruit from {}\n\n{}\n\n*Expiring in*: {}"
+    f"{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
+    "\n\n*Price*: ฿{}"
 )
 DEVIL_FRUIT_DETAIL_SELL = "Please send the amount you want to sell the Devil Fruit for"
 DEVIL_FRUIT_DETAIL_SELL_AVERAGE_PRICE = ".\n\nAverage selling price: ฿{}"

@@ -56,19 +56,16 @@ class DevilFruitListPage(ListPage):
             escape_valid_markdown_chars(self.object.get_full_name())
         )
 
-    def get_item_detail_text(
-        self, from_private_chat: bool = True, always_view: bool = False
-    ) -> str:
+    def get_item_detail_text(self, from_private_chat: bool = True) -> str:
         """
         Get the item detail text
         :param from_private_chat: If it was called from a private chat
-        :param always_view: Show detail even if not authorized
         :return:
         """
         try:
             super().get_item_detail_text()
         except UnauthorizedToViewItemException:
-            if not always_view:
+            if from_private_chat:
                 raise UnauthorizedToViewItemException
 
         expiring_date_text = ""
