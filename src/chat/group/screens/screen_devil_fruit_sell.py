@@ -5,7 +5,6 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.private.screens.screen_devil_fruit import DevilFruitListPage
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.GroupChat import GroupChat
@@ -26,8 +25,7 @@ from src.service.bounty_service import (
     get_amount_from_string,
     add_or_remove_bounty,
 )
-from src.service.date_service import get_remaining_duration
-from src.service.devil_fruit_service import give_devil_fruit_to_user
+from src.service.devil_fruit_service import give_devil_fruit_to_user, get_recap_text
 from src.service.message_service import full_message_send
 from src.service.string_service import get_belly_formatted
 
@@ -326,13 +324,9 @@ async def send_sell_proposal(
         else ""
     )
 
-    list_page: DevilFruitListPage = DevilFruitListPage()
-    list_page.object = devil_fruit
-
     ot_text = phrases.DEVIL_FRUIT_SELL_BUY.format(
         user.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False),
-        get_remaining_duration(devil_fruit.expiration_date),
+        get_recap_text(devil_fruit),
         get_belly_formatted(devil_fruit_trade.price),
         ot_text_addendum,
     )
@@ -414,15 +408,11 @@ async def buy(
         should_save=True,
     )
 
-    list_page: DevilFruitListPage = DevilFruitListPage()
-    list_page.object = devil_fruit
-
     seller: User = devil_fruit_trade.giver
 
     return phrases.DEVIL_FRUIT_SELL_BUY_SUCCESS.format(
         buyer.get_you_markdown_mention(),
         seller.get_markdown_mention(),
-        list_page.get_item_detail_text(from_private_chat=False),
-        get_remaining_duration(devil_fruit.expiration_date),
+        get_recap_text(devil_fruit),
         get_belly_formatted(devil_fruit_trade.price),
     )

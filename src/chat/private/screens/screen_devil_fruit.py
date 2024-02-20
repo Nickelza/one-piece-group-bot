@@ -1,4 +1,3 @@
-import logging
 from enum import StrEnum
 
 from telegram import Update
@@ -10,12 +9,9 @@ from src.model.User import User
 from src.model.enums.ListPage import ListPage
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
-from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import default_datetime_format
-from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.devil_fruit_service import get_recap_text
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
@@ -56,43 +52,17 @@ class DevilFruitListPage(ListPage):
             escape_valid_markdown_chars(self.object.get_full_name())
         )
 
-    def get_item_detail_text(self, from_private_chat: bool = True) -> str:
+    def get_item_detail_text(self) -> str:
         """
         Get the item detail text
-        :param from_private_chat: If it was called from a private chat
         :return:
         """
         try:
             super().get_item_detail_text()
         except UnauthorizedToViewItemException:
-            if from_private_chat:
-                raise UnauthorizedToViewItemException
+            raise UnauthorizedToViewItemException
 
-        expiring_date_text = ""
-        sell_command_text = ""
-        if from_private_chat:
-            if DevilFruitStatus(self.object.status) is DevilFruitStatus.COLLECTED:
-                if self.object.expiration_date is not None:  # Should always be the case
-                    expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-                        default_datetime_format(
-                            self.object.expiration_date, add_remaining_time=True
-                        )
-                    )
-                else:
-                    logging.error(
-                        "Devil Fruit %s in collected status has no expiration date", self.object.id
-                    )
-
-                sell_command_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND
-
-        abilities_text = get_devil_fruit_abilities_text(self.object, always_show_abilities=False)
-        return phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT.format(
-            self.object.get_full_name(),
-            DevilFruitCategory(self.object.category).get_description(),
-            abilities_text,
-            expiring_date_text,
-            sell_command_text,
-        )
+        return get_recap_text(self.object, add_sell_command=True)
 
 
 async def manage(

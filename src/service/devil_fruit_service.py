@@ -15,6 +15,7 @@ from src.model.GroupChat import GroupChat
 from src.model.Leaderboard import Leaderboard
 from src.model.LeaderboardUser import LeaderboardUser
 from src.model.User import User
+from src.model.enums.AssetPath import AssetPath
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Notification import (
     DevilFruitExpiredNotification,
@@ -41,13 +42,16 @@ from src.service.date_service import (
     get_datetime_in_future_hours,
     get_remaining_time_in_minutes,
     datetime_is_before,
+    default_datetime_format,
 )
+from src.service.file_service import get_random_item_from_txt
 from src.service.math_service import (
     add_percentage_to_value,
     subtract_percentage_from_value,
     get_random_win,
     get_cumulative_percentage_sum,
     format_percentage_value,
+    get_random_int,
 )
 from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
 from src.service.notification_service import send_notification
@@ -88,6 +92,7 @@ def give_devil_fruit_to_user(
 
     # Add collection and expiration date if from ADMIN or BOT
     if source is DevilFruitSource.ADMIN or source is DevilFruitSource.BOT:
+        # TODO also add DAILY
         devil_fruit.expiration_date = get_datetime_in_future_days(
             Env.DEVIL_FRUIT_EXPIRATION_DAYS.get_int()
         )
@@ -334,6 +339,14 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     :return: None
     """
 
+    devil_fruit.owner = None
+
+    # Never re-release SMILEs
+    if devil_fruit.get_category() is DevilFruitCategory.SMILE:
+        devil_fruit.status = DevilFruitStatus.COMPLETED
+        devil_fruit.save()
+        return
+
     if not should_release_devil_fruit():
         devil_fruit.status = DevilFruitStatus.ENABLED
         devil_fruit.save()
@@ -347,7 +360,6 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
     else:  # If it's a re-release, set the release date to random time between now and next n hours
         release_date = get_random_time_between_by_hours(Env.DEVIL_FRUIT_RESPAWN_HOURS.get_int())
 
-    devil_fruit.owner = None
     devil_fruit.eaten_date = None
     devil_fruit.expiration_date = None
     devil_fruit.collection_date = None
@@ -364,9 +376,12 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
     :return: None
     """
 
-    # Get all Devil Fruits that have expired and have not been eaten yet
+    # Get all Devil Fruits that have expired and have not been eaten yet or expired SMILEs
     devil_fruits: list[DevilFruit] = DevilFruit.select().where(
-        (DevilFruit.status == DevilFruitStatus.COLLECTED)
+        (
+            (DevilFruit.status == DevilFruitStatus.COLLECTED)
+            | (DevilFruit.category == DevilFruitCategory.SMILE)
+        )
         & (DevilFruit.expiration_date <= datetime.now())
     )
     for devil_fruit in devil_fruits:
@@ -550,3 +565,73 @@ async def revoke_devil_fruit_from_inactive_users(context: ContextTypes.DEFAULT_T
         await send_notification(
             context, owner, DevilFruitRevokeNotification(devil_fruit=devil_fruit)
         )
+
+
+def create_smile() -> DevilFruit:
+    """
+    Generate a SMILE
+    :return: The SMILE
+    """
+
+    devil_fruit: DevilFruit = DevilFruit()
+    devil_fruit.category = DevilFruitCategory.SMILE
+    devil_fruit.name = get_random_item_from_txt(AssetPath.ANIMALS_LIST)
+    devil_fruit.save()
+
+    # Add ability
+    ability: DevilFruitAbility = DevilFruitAbility()
+    ability.devil_fruit = devil_fruit
+    ability.ability_type = DevilFruitAbilityType.get_random()
+    ability.value = get_random_int(1, 100)
+    ability.save()
+
+    return devil_fruit
+
+
+def get_recap_text(devil_fruit: DevilFruit, add_sell_command: bool = False) -> str:
+    """
+    Get the recap text
+    :param devil_fruit: The devil fruit
+    :param add_sell_command: Whether to add the sell command
+    :return: The text
+    """
+
+    expiring_date_text = ""
+    sell_command_text = ""
+    has_standard_expiring_date_explanation = False
+
+    if (
+        devil_fruit.get_status() is DevilFruitStatus.COLLECTED
+        or devil_fruit.get_category() is DevilFruitCategory.SMILE
+    ):
+        if devil_fruit.expiration_date is not None:  # Should always be the case
+            expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
+                default_datetime_format(devil_fruit.expiration_date, add_remaining_time=True)
+            )
+
+            if devil_fruit.get_status() is DevilFruitStatus.COLLECTED:
+                expiring_date_text += phrases.DEVIL_FRUIT_EXPIRATION_EXPLANATION
+                has_standard_expiring_date_explanation = True
+
+        else:
+            logging.error(
+                "Devil Fruit %s in collected status has no expiration date", devil_fruit.id
+            )
+
+    # SMILE, add info that the ability is temporary
+    if devil_fruit.get_category() is DevilFruitCategory.SMILE:
+        if has_standard_expiring_date_explanation:
+            expiring_date_text += "\n"
+        expiring_date_text += phrases.DEVIL_FRUIT_SMILE_EXPIRATION_EXPLANATION
+
+    if add_sell_command:
+        sell_command_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND
+
+    abilities_text = get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False)
+    return phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT.format(
+        devil_fruit.get_full_name(),
+        DevilFruitCategory(devil_fruit.category).get_description(),
+        abilities_text,
+        expiring_date_text,
+        sell_command_text,
+    )

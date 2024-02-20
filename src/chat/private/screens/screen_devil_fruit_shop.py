@@ -13,8 +13,7 @@ from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitTradeStatus import DevilFruitTradeStatus
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import default_datetime_format
-from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.devil_fruit_service import get_recap_text
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 from src.service.string_service import get_belly_formatted
@@ -64,22 +63,10 @@ class DevilFruitShopListPage(ListPage):
         """
         super().get_item_detail_text()
 
-        # TODO when we'll have Smiles, expiration explanation should be different because after
-        #   x time they will be revoked/destroyed
-        expiring_date_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE.format(
-            default_datetime_format(self.devil_fruit.expiration_date, add_remaining_time=True)
-        )
-
-        abilities_text = get_devil_fruit_abilities_text(
-            self.devil_fruit, always_show_abilities=False
-        )
         return phrases.DEVIL_FRUIT_SHOP_ITEM_DETAIL_TEXT.format(
-            self.devil_fruit.get_full_name(),
-            DevilFruitCategory(self.devil_fruit.category).get_description(),
-            abilities_text,
+            get_recap_text(self.devil_fruit),
             self.object.giver.get_markdown_mention(),
             get_belly_formatted(self.object.price),
-            expiring_date_text,
         )
 
     def get_emoji_legend_list(self) -> list[EmojiLegend]:
@@ -89,8 +76,12 @@ class DevilFruitShopListPage(ListPage):
         :return: The emoji legend list
         """
 
-        # TODO add Smile
         return [
+            EmojiLegend(
+                Emoji.GREEN,
+                DevilFruitCategory.SMILE.get_description(),
+                (DevilFruitTrade.devil_fruit.category == DevilFruitCategory.SMILE),
+            ),
             EmojiLegend(
                 Emoji.LOG_YELLOW,
                 DevilFruitCategory.ZOAN.get_description(),

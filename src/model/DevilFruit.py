@@ -48,11 +48,13 @@ class DevilFruit(BaseModel):
         Get fruit full name
         :return: Fruit full name
         """
-
         if self.model:
             return f"{self.name}, Model: {self.model}"
-        else:
-            return str(self.name)
+
+        if self.get_category() is DevilFruitCategory.SMILE:
+            return f"{self.name} SMILE"
+
+        return str(self.name)
 
     @staticmethod
     def get_by_owner_if_eaten(user: User) -> Optional["DevilFruit"]:
@@ -75,6 +77,20 @@ class DevilFruit(BaseModel):
         from src.model.DevilFruitTrade import DevilFruitTrade
 
         return DevilFruitTrade.get_average_price(self.category)
+
+    def get_category(self) -> DevilFruitCategory:
+        """
+        Get the category of the devil fruit
+        :return: The category
+        """
+        return DevilFruitCategory(self.category)
+
+    def get_status(self) -> DevilFruitStatus:
+        """
+        Get the status of the devil fruit
+        :return: The status
+        """
+        return DevilFruitStatus(self.status)
 
 
 DevilFruit.create_table()

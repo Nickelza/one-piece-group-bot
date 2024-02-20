@@ -339,6 +339,16 @@ def get_random_time_between_by_cron(cron_expression: str) -> datetime:
     )
 
 
+def get_random_time_between_by_days(days: int) -> datetime:
+    """
+    Get a random time between now and next n days
+    :param days: The number of days
+    :return: The random datetime
+    """
+
+    return get_random_time_between(datetime.datetime.now(), get_datetime_in_future_days(days))
+
+
 def get_random_time_between_by_hours(hours: int) -> datetime:
     """
     Get a random time between now and next n hours

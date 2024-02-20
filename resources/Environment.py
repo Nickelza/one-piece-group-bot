@@ -134,8 +134,6 @@ LIMIT_TO_AUTHORIZED_GROUPS = Environment("LIMIT_TO_AUTHORIZED_GROUPS", default_v
 AUTHORIZED_GROUPS = Environment("AUTHORIZED_GROUPS", default_value="")
 # Group chat id
 OPD_GROUP_ID = Environment("OPD_GROUP_ID")
-# Group chat username
-OPD_GROUP_USERNAME = Environment("OPD_GROUP_USERNAME")
 # Main channel id
 OPD_CHANNEL_ID = Environment("OPD_CHANNEL_ID")
 # Chat ID for error logs
@@ -950,6 +948,9 @@ DEVIL_FRUIT_REGULAR_ZOAN_TO_ANCIENT_ZOAN_RATIO = Environment(
 DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION = Environment(
     "DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION", default_value="1"
 )
+# Maximum days a SMILE lasts. Default: 14
+DEVIL_FRUIT_SMILE_MAX_DAYS = Environment("DEVIL_FRUIT_SMILE_MAX_DAYS", default_value="14")
+
 
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment(

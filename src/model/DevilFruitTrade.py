@@ -66,7 +66,7 @@ class DevilFruitTrade(BaseModel):
         :return: The average price
         """
 
-        return int(
+        avg = (
             DevilFruitTrade.select(fn.AVG(DevilFruitTrade.price))
             .join(DevilFruit)
             .where(
@@ -77,6 +77,8 @@ class DevilFruitTrade(BaseModel):
             )
             .scalar()
         )
+
+        return int(avg) if avg is not None else None
 
     def get_source(self) -> DevilFruitSource:
         """

@@ -1854,6 +1854,7 @@ SPEAK = "{} has been granted permission to speak"
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_ZOAN = "Zoan"
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_ANCIENT_ZOAN = "Ancient Zoan"
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_MYTHICAL_ZOAN = "Mythical Zoan"
+DEVIL_FRUIT_CATEGORY_DESCRIPTION_SMILE = "SMILE"
 DEVIL_FRUIT_ABILITY_TEXT = "\n\n*Abilities*"
 DEVIL_FRUIT_ABILITY_TEXT_LINE = "\n{}{} \\({}{}%\\)"
 DEVIL_FRUIT_ABILITY_UNKNOWN = "\nUnknown"
@@ -1862,11 +1863,13 @@ DEVIL_FRUIT_ITEM_TEXT = "{}"
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = "Devil Fruit"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}{}{}"
 DEVIL_FRUIT_EXPIRATION_EXPLANATION = (
-    "\n>If the Fruit is not eaten or sold before the expiration, it will be revoked"
+    "\n>The Devil Fruit will be revoked if not eaten before the expiration"
 )
-DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = (
-    f"\n\nExpiration: {{}}{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
+DEVIL_FRUIT_SMILE_EXPIRATION_EXPLANATION = (
+    "\n>SMILEs abilities last for a random duration that is determined once eaten, maximum"
+    f" {Env.DEVIL_FRUIT_SMILE_MAX_DAYS} days"
 )
+DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiration: {}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
     "\n\nYou can sell this Devil Fruit in the Shop or in a Chat Group"
     f"\\({CommandName.DEVIL_FRUIT_SELL.get_formatted()} <price\\> command\\)"
@@ -1889,6 +1892,7 @@ DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = (
 DEVIL_FRUIT_DISCARD_CONFIRMATION_CONFIRMED = "You have discarded the {}"
 DEVIL_FRUIT_RELEASE_MESSAGE_INFO = (
     "Congratulations {}, you have found a Devil Fruit!\n\nName: *{}*\nCategory: {}{}"
+    + DEVIL_FRUIT_EXPIRATION_EXPLANATION
     + DEVIL_FRUIT_EAT_OR_SELL
 )
 
@@ -1901,23 +1905,17 @@ DEVIL_FRUIT_SELL_NO_FRUITS = (
     " Fruits can be sold\\)"
 )
 DEVIL_FRUIT_SELL_SELECT_FRUIT = (
-    "Select the Devil Fruit you want to sell\n\n_Tip: When using this command in response to a"
-    " user, only they will have the ability to purchase the Devil Fruit_"
+    "Select the Devil Fruit you want to sell\n\n>When using this command in response to a"
+    " user, only they will have the ability to purchase the Devil Fruit"
 )
 DEVIL_FRUIT_SELL_NO_LONGER_OWN = "{} no longer owns this Devil Fruit"
 DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = "This Devil Fruit is no longer sellable"
-DEVIL_FRUIT_SELL_BUY = (
-    "{} has put up the following Devil Fruit for sale:\n\n{}\n\n*Expiring in*: {}"
-    f"{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
-    "\n\n*Price*: ฿{}{}"
-)
+DEVIL_FRUIT_SELL_BUY = "{} has put up the following Devil Fruit for sale:\n\n{}\n\n*Price*: ฿{}{}"
 DEVIL_FRUIT_SELL_BUY_ONLY_BY_USER_ADDENDUM = "\n\n_Only {} can buy this Devil Fruit_"
 DEVIL_FRUIT_SELL_BUY_NOT_ENOUGH_BELLY = "You do not have enough belly to buy this Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_CANNOT_BUY_OWN = "You cannot buy your own Devil Fruit"
 DEVIL_FRUIT_SELL_BUY_SUCCESS = (
-    "{} have bought the following Devil Fruit from {}\n\n{}\n\n*Expiring in*: {}"
-    f"{DEVIL_FRUIT_EXPIRATION_EXPLANATION}"
-    "\n\n*Price*: ฿{}"
+    "{} have bought the following Devil Fruit from {}\n\n{}\n\n*Price*: ฿{}"
 )
 DEVIL_FRUIT_DETAIL_SELL = "Please send the amount you want to sell the Devil Fruit for"
 DEVIL_FRUIT_DETAIL_SELL_AVERAGE_PRICE = ".\n\nAverage selling price: ฿{}"
@@ -1937,7 +1935,7 @@ DEVIL_FRUIT_DETAIL_SELL_ALREADY_FOR_SALE = (
 # Devil Fruit Shop
 DEVIL_FRUIT_SHOP_ITEM_TEXT = "{}\nPrice: ฿{}"
 DEVIL_FRUIT_SHOP_ITEM_TEXT_FILL_IN = "Devil Fruit"
-DEVIL_FRUIT_SHOP_ITEM_DETAIL_TEXT = "*{}*\nCategory: {}{}\n\n*Seller*: {}\n*Price*: ฿{}{}"
+DEVIL_FRUIT_SHOP_ITEM_DETAIL_TEXT = "{}\n\n*Seller*: {}\n*Price*: ฿{}"
 # TODO after daily bonus is on, add that DFs for sale will appear in bonus message
 DEVIL_FRUIT_SHOP_LIST_NO_ITEMS = (
     "There are currently no *Devil Fruits* for sale, please come back later"
@@ -1947,9 +1945,8 @@ DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_CONFIRMATION = (
     " up for sale again."
 )
 DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_SUCCESS = "The Devil Fruit has been removed from the Shop"
-# TODO smile condition
 DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION_REVOKE = (
-    "\n\n>If you don't eat or sell it within {}, it will be revoked"
+    "\n\n>If you don't eat it within {}, it will be revoked"
 )
 DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION = (
     "Are you sure you want to buy the following Devil Fruit?\n\n*Name*: {}\n*Price*: ฿{}"

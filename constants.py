@@ -16,6 +16,7 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 ASSETS_IMAGES_DIR = os.path.join(ASSETS_DIR, "images")
 ASSETS_SAVED_MEDIA_DIR = os.path.join(ASSETS_IMAGES_DIR, "saved_media")
 ASSETS_FONTS_DIR = os.path.join(ASSETS_DIR, "fonts")
+ASSETS_ITEMS_DIR = os.path.join(ASSETS_DIR, "items")
 
 # Command
 STANDARD_SPLIT_CHAR = "|"

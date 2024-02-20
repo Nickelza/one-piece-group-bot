@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from resources import phrases
+
 
 class DevilFruitCategory(IntEnum):
     """
@@ -9,6 +11,7 @@ class DevilFruitCategory(IntEnum):
     ZOAN = 3
     ANCIENT_ZOAN = 4
     MYTHICAL_ZOAN = 5
+    SMILE = 6
 
     def get_description(self) -> str:
         """
@@ -20,7 +23,8 @@ class DevilFruitCategory(IntEnum):
 
 
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_MAP = {
-    DevilFruitCategory.ZOAN: "Zoan",
-    DevilFruitCategory.ANCIENT_ZOAN: "Ancient Zoan",
-    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan",
+    DevilFruitCategory.ZOAN: phrases.DEVIL_FRUIT_CATEGORY_DESCRIPTION_ZOAN,
+    DevilFruitCategory.ANCIENT_ZOAN: phrases.DEVIL_FRUIT_CATEGORY_DESCRIPTION_ANCIENT_ZOAN,
+    DevilFruitCategory.MYTHICAL_ZOAN: phrases.DEVIL_FRUIT_CATEGORY_DESCRIPTION_MYTHICAL_ZOAN,
+    DevilFruitCategory.SMILE: phrases.DEVIL_FRUIT_CATEGORY_DESCRIPTION_SMILE,
 }
