@@ -575,7 +575,7 @@ def create_smile() -> DevilFruit:
 
     devil_fruit: DevilFruit = DevilFruit()
     devil_fruit.category = DevilFruitCategory.SMILE
-    devil_fruit.name = get_random_item_from_txt(AssetPath.ANIMALS_LIST)
+    devil_fruit.name = get_random_item_from_txt(AssetPath.ANIMALS)
     devil_fruit.save()
 
     # Add ability

@@ -1,12 +1,30 @@
+import logging
 import random
+from enum import StrEnum
 
 import requests
 
 import resources.Environment as Env
+from src.model.enums.AssetPath import AssetPath
 from src.model.error.CustomException import WikiException
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
+from src.service.file_service import get_list_from_json
+
+
+class SupabaseTableName(StrEnum):
+    CHARACTER = "character"
+    TERMINOLOGY = "terminology"
+
+    def get_asset_path(self) -> AssetPath:
+        return TABLE_TO_LOCAL_ASSET_PATH[self]
+
+
+TABLE_TO_LOCAL_ASSET_PATH = {
+    SupabaseTableName.CHARACTER: AssetPath.CHARACTERS,
+    SupabaseTableName.TERMINOLOGY: AssetPath.TERMINOLOGIES,
+}
 
 
 class SupabaseRest:
@@ -17,14 +35,18 @@ class SupabaseRest:
         self.rest_url = Env.SUPABASE_REST_URL.get()
         self.api_key = Env.SUPABASE_API_KEY.get()
 
-    def make_get_request(self, path):
+    def make_get_request(self, table: SupabaseTableName) -> list[dict]:
         """
         Make a request to the Supabase REST API
-        :param path: The path to the resource
+        :param table: The table of the resource
         :return: The response
         """
 
-        full_path = f"{self.rest_url}{path}"
+        # If Supabase is not set up, use local file resource instead
+        if not self.rest_url or not self.api_key:
+            return get_list_from_json(table.get_asset_path())
+
+        full_path = f"{self.rest_url}{table}"
         # Make request
         response = requests.get(
             url=full_path, headers={"apikey": self.api_key, "Content-Type": "application/json"}
@@ -32,7 +54,8 @@ class SupabaseRest:
 
         # Check response
         if response.status_code != 200:
-            raise Exception(f"Error making request to {full_path}")
+            logging.error(f"Error making request to {full_path}, using local resource")
+            return get_list_from_json(table.get_asset_path())
 
         # Return response
         return response.json()
@@ -46,7 +69,7 @@ class SupabaseRest:
         """
 
         # Get a random character
-        response: list[dict] = SupabaseRest().make_get_request("character")
+        response: list[dict] = SupabaseRest().make_get_request(SupabaseTableName.CHARACTER)
 
         if len(response) == 0:
             raise WikiException("No characters found")
@@ -75,7 +98,8 @@ class SupabaseRest:
         Get a random terminology
         :param max_len: The maximum length of the terminology
         :param only_letters: Whether the terminology should only contain letters
-        :param consider_len_without_space: Whether the length of the terminology should be considered without spaces
+        :param consider_len_without_space: Whether the length of the terminology should be
+        considered without spaces
         :param allow_spaces: Whether the terminology can contain spaces if only_letters is True
         :param min_unique_characters: The minimum amount of unique characters in the terminology
         :param max_unique_characters: The maximum amount of unique characters in the terminology
@@ -83,7 +107,7 @@ class SupabaseRest:
         """
 
         # Get a random terminology
-        response: list[dict] = SupabaseRest().make_get_request("terminology")
+        response: list[dict] = SupabaseRest().make_get_request(SupabaseTableName.TERMINOLOGY)
         random.shuffle(response)
 
         for term in response:

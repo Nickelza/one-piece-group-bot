@@ -36,4 +36,6 @@ class AssetPath(StrEnum):
     FONT_BLOGGER_SANS_BOLD = os.path.join(c.ASSETS_FONTS_DIR, "Blogger_Sans-Bold.otf")
 
     # LISTS
-    ANIMALS_LIST = os.path.join(c.ASSETS_ITEMS_DIR, "animals.txt")
+    ANIMALS = os.path.join(c.ASSETS_ITEMS_DIR, "animal.txt")
+    CHARACTERS = os.path.join(c.ASSETS_ITEMS_DIR, "character.json")
+    TERMINOLOGIES = os.path.join(c.ASSETS_ITEMS_DIR, "terminology.json")

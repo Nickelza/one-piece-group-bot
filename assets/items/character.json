@@ -1,0 +1,741 @@
+[
+  {
+    "name": "Abdullah",
+    "info_url": "https://onepiece.fandom.com/wiki/Abdullah",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/4/44/Abdullah_Manga_Infobox.png/revision/latest?cb=20151004140342",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/f/f1/Abdullah_Anime_Infobox.png/revision/latest?cb=20151004140309",
+    "id": 700,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "704",
+          "episode": "633"
+        },
+        "Status": "Alive",
+        "Japanese VA": "Keiji Hirai",
+        "Occupations": [
+          "Pirate, Criminal",
+          "Bounty Hunter (former)"
+        ],
+        "Affiliations": [
+          "Ideo Pirates",
+          "Straw Hat Grand Fleet"
+        ],
+        "Japanese Name": "アブドーラ",
+        "Romanized Name": "Abudōra",
+        "Funi English VA": "Sean O'Connor",
+        "Official English Name": "Abdullah"
+      }
+    }
+  },
+  {
+    "name": "Bentham",
+    "info_url": "https://onepiece.fandom.com/wiki/Bentham",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/3/3d/Bentham_Manga_Infobox.png/revision/latest?cb=20130412042816",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/0/0e/Bentham_Anime_Infobox.png/revision/latest?cb=20160929070742",
+    "id": 735,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "30 (debut)32 (after timeskip)"
+        ],
+        "Alias": "\"Mr. 2 Bon Kurei\" (Mr. 2・ボン・クレー, Misutā Tsū Bon Kurē?, Official Translation: Mr. 2 Bon Clay)",
+        "Debut": {
+          "chapter": "129",
+          "episode": "78"
+        },
+        "Bounty": "32,000,000",
+        "Height": "238 cm (7'10\")",
+        "Origin": "East Blue",
+        "Status": "Alive",
+        "Epithet": "\"Bentham of the Wild\" (荒野のベンサム, Kōya no Bensamu?)",
+        "Birthday": "August 15th",
+        "Blood Type": "F",
+        "Japanese VA": "Kazuki Yao",
+        "Occupations": [
+          "Queen of Newkama Land",
+          "Officer Agent (former)",
+          "Prisoner of the Great Prison"
+        ],
+        "Affiliations": [
+          "Newkama Land",
+          "Baroque Works (former)"
+        ],
+        "Japanese Name": "ベンサム",
+        "Romanized Name": "Bensamu",
+        "Funi English VA": "Barry YandellMike McFarland (Unlimited Adventure)",
+        "Odex English VA": "Dwayne Tan",
+        "4Kids English VA": "Kevin Kolack",
+        "Official English Name": "Bentham"
+      },
+      "Devil Fruit": {
+        "Type": "Paramecia",
+        "Meaning": "Imitation",
+        "English Name": "Clone-Clone Fruit",
+        "Japanese Name": "Mane Mane no Mi"
+      }
+    }
+  },
+  {
+    "name": "Caesar Clown",
+    "info_url": "https://onepiece.fandom.com/wiki/Caesar_Clown",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/d/df/Caesar_Clown_Manga_Infobox.png/revision/latest?cb=20130521000515",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/a/a6/Caesar_Clown_Anime_Infobox.png/revision/latest?cb=20221101011307",
+    "id": 770,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "55"
+        ],
+        "Alias": "\"Cedar\" (シーダー, Shīdā?)\"'Gangster' Gastino\" (“ギャングスター”ガスティーノ, Gyangusutā Gasutīno?)",
+        "Debut": {
+          "chapter": "658",
+          "episode": "581"
+        },
+        "Bounty": "300,000,000",
+        "Height": "309 cm (10'1½\")",
+        "Origin": "Grand Line",
+        "Status": "Alive",
+        "Epithet": "\"Master\" (M, Masutā?)",
+        "Birthday": "April 9th",
+        "Residence": [
+          "Punk Hazard (Third Research Institute)(former)"
+        ],
+        "Blood Type": "X",
+        "Japanese VA": "Ryūsei Nakao",
+        "Occupations": [
+          "Scientist"
+        ],
+        "Affiliations": [
+          "Germa Kingdom",
+          "NEO MADS",
+          "Fire Tank Pirates (former)",
+          "Donquixote Pirates (former)",
+          "Marines and World Government (former)",
+          "MADS (former)"
+        ],
+        "Japanese Name": "シーザー・クラウン",
+        "Romanized Name": "Shīzā Kuraun",
+        "Funi English VA": "Jerry Jewell",
+        "Official English Name": "Caesar Clown"
+      },
+      "Devil Fruit": {
+        "Type": "Logia",
+        "Meaning": "Gas",
+        "English Name": "Gas-Gas Fruit",
+        "Japanese Name": "Gasu Gasu no Mi"
+      }
+    }
+  },
+  {
+    "name": "Charlotte Katakuri",
+    "info_url": "https://onepiece.fandom.com/wiki/Charlotte_Katakuri",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/2a/Charlotte_Katakuri_Manga_Infobox.png/revision/latest?cb=20170327052140",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/2e/Charlotte_Katakuri_Anime_Infobox.png/revision/latest?cb=20230204155539",
+    "id": 805,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "48"
+        ],
+        "Debut": {
+          "chapter": "860",
+          "episode": "825"
+        },
+        "Bounty": "1,057,000,000",
+        "Height": "509 cm (16'8½\")",
+        "Origin": "Grand Line (On a boat)",
+        "Status": "Alive",
+        "Birthday": "November 25th",
+        "Residence": [
+          "Komugi Island"
+        ],
+        "Blood Type": "XF",
+        "Japanese VA": "Tomokazu Sugita",
+        "Occupations": [
+          "Sweet Commander",
+          "Minister of Flour"
+        ],
+        "Affiliations": [
+          "Charlotte Family",
+          "Big Mom Pirates"
+        ],
+        "Japanese Name": "シャーロット・カタクリ",
+        "Romanized Name": "Shārotto Katakuri",
+        "Funi English VA": "Jonah Scott",
+        "Official English Name": "Charlotte Katakuri"
+      },
+      "Devil Fruit": {
+        "Type": "Special Paramecia",
+        "Meaning": "Mochi; Springy",
+        "English Name": "Mochi-Mochi Fruit",
+        "Japanese Name": "Mochi Mochi no Mi"
+      }
+    }
+  },
+  {
+    "name": "Daifugo",
+    "info_url": "https://onepiece.fandom.com/wiki/Daifugo",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/4/42/Daifugo_Manga_Infobox.png/revision/latest?cb=20190308063108",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/8/8c/Daifugo_Anime_Infobox.png/revision/latest?cb=20200412130200",
+    "id": 840,
+    "difficulty": 2,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "934",
+          "episode": "928"
+        },
+        "Status": "Alive",
+        "Japanese VA": "Tōru Nakane",
+        "Occupations": [
+          "Shinuchi",
+          "Vice Warden of the Prisoner Mine"
+        ],
+        "Affiliations": [
+          "Beasts Pirates",
+          "Tama"
+        ],
+        "Japanese Name": "ダイフゴー",
+        "Romanized Name": "Daifugō",
+        "Funi English VA": "Josh Martin",
+        "Official English Name": "Daifugo"
+      },
+      "Devil Fruit": {
+        "Type": "Artificial Zoan",
+        "English Name": "Scorpion SMILE"
+      }
+    }
+  },
+  {
+    "name": "Edward Weevil",
+    "info_url": "https://onepiece.fandom.com/wiki/Edward_Weevil",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/0/00/Edward_Weevil_Manga_Infobox.png/revision/latest?cb=20151210202200",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/b/be/Edward_Weevil_Anime_Infobox.png/revision/latest?cb=20160807113654",
+    "id": 875,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "35"
+        ],
+        "Alias": "\"Whitebeard Jr.\" (白ひげJr., Shirohige Junia?) (self proclaimed)",
+        "Debut": {
+          "chapter": "802",
+          "episode": "751"
+        },
+        "Bounty": "480,000,000",
+        "Height": "680 cm (22'4\")",
+        "Origin": "Grand Line",
+        "Status": "Alive",
+        "Birthday": "December 10th",
+        "Blood Type": "S",
+        "Japanese VA": "Kōzō Shioya",
+        "Occupations": [
+          "Pirate"
+        ],
+        "Affiliations": [
+          "Seven Warlords of the Sea (former)"
+        ],
+        "Japanese Name": "エドワード・ウィーブル",
+        "Romanized Name": "Edowādo Wīburu",
+        "Funi English VA": "Brook Chalmers",
+        "Official English Name": "Edward Weevil"
+      }
+    }
+  },
+  {
+    "name": "Genzo",
+    "info_url": "https://onepiece.fandom.com/wiki/Genzo",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/3/3b/Genzo_Manga_Post_Timeskip_Infobox.png/revision/latest?cb=20160628200451",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/21/Genzo_Anime_Pre_Timeskip_Infobox.png/revision/latest?cb=20130319224056",
+    "id": 910,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "46 (debut)48 (after timeskip)"
+        ],
+        "Debut": {
+          "chapter": "71",
+          "episode": "32"
+        },
+        "Height": "173 cm (5'8\")",
+        "Origin": "East Blue (Conomi Islands)",
+        "Status": "Alive",
+        "Birthday": "June 17th",
+        "Residence": [
+          "Cocoyasi Village"
+        ],
+        "Blood Type": "F",
+        "Japanese VA": "Kōzō Shioya",
+        "Occupations": [
+          "Sheriff of Cocoyasi Village"
+        ],
+        "Affiliations": [
+          "Cocoyasi Village"
+        ],
+        "Japanese Name": "ゲンゾウ",
+        "Romanized Name": "Genzō",
+        "Funi English VA": "Bill Flynn",
+        "Odex English VA": "Jamie Meldrum",
+        "4Kids English VA": "Marc Diraison",
+        "Live-Action Portrayal": "Grant Ross",
+        "Official English Name": "Genzo"
+      }
+    }
+  },
+  {
+    "name": "Hasami",
+    "info_url": "https://onepiece.fandom.com/wiki/Hasami",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/d/d7/Hasami_Manga_Infobox.png/revision/latest?cb=20210407132357",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/9/96/Hasami_Anime_Infobox.png/revision/latest?cb=20130625111432",
+    "id": 945,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "176",
+          "episode": "110"
+        },
+        "Status": "Alive",
+        "Residence": [
+          "Arabasta Kingdom",
+          "Ukkari Hot-Springs Island"
+        ],
+        "Occupations": [
+          "Ukkari Hot-Springs Resort Transportation"
+        ],
+        "Affiliations": [
+          "Ukkari Hot-Spring Island",
+          "Matsuge",
+          "Straw Hat Pirates (temporary)"
+        ],
+        "Japanese Name": "ハサミ",
+        "Romanized Name": "Hasami",
+        "Official English Name": "Pincers (VIZ, 4Kids, Funimation subs)Scissors (Funimation dub)"
+      }
+    }
+  },
+  {
+    "name": "Issho",
+    "info_url": "https://onepiece.fandom.com/wiki/Issho",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/c/c1/Issho_Manga_Infobox.png/revision/latest?cb=20130703124438",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/e/e8/Issho_Anime_Infobox.png/revision/latest?cb=20220718140829",
+    "id": 980,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "54"
+        ],
+        "Alias": "\"Fujitora\" (藤虎, Fujitora?, literally meaning \"Wisteria Tiger\")",
+        "Debut": {
+          "chapter": "701",
+          "episode": "630"
+        },
+        "Bounty": "(3,000,000,000)",
+        "Height": "270 cm (8'10\")",
+        "Origin": "Grand Line",
+        "Status": "Alive",
+        "Birthday": "August 10th",
+        "Blood Type": "S",
+        "Japanese VA": "Ikuya Sawaki",
+        "Occupations": [
+          "Admiral"
+        ],
+        "Affiliations": [
+          "Marines"
+        ],
+        "Japanese Name": "イッショウ",
+        "Romanized Name": "Isshō",
+        "Funi English VA": "Charles C. Campbell",
+        "Official English Name": "Issho"
+      },
+      "Devil Fruit": {
+        "Type": "Paramecia",
+        "Meaning": "Sound of heavy stomps",
+        "English Name": "Press-Press Fruit",
+        "Japanese Name": "Zushi Zushi no Mi"
+      }
+    }
+  },
+  {
+    "name": "Kamijiro",
+    "info_url": "https://onepiece.fandom.com/wiki/Kamijiro",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/22/Kamijiro_Manga_Infobox.png/revision/latest?cb=20180913130657",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/e/e0/Kamijiro_Anime_Infobox.png/revision/latest?cb=20190908032259",
+    "id": 1015,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "914",
+          "episode": "901"
+        },
+        "Status": "Alive",
+        "Japanese VA": "Tsuyoshi Koyama",
+        "Affiliations": [
+          "Beasts Pirates"
+        ],
+        "Japanese Name": "噛二郎",
+        "Romanized Name": "Kamijirō",
+        "Funi English VA": "Davon Oliver",
+        "Official English Name": "Kamijiro"
+      }
+    }
+  },
+  {
+    "name": "Kuni",
+    "info_url": "https://onepiece.fandom.com/wiki/Kuni",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/6/68/Kuni_Manga_Infobox.png/revision/latest?cb=20181210213323",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/7/7a/Kuni_Anime_Infobox.png/revision/latest?cb=20200202094745",
+    "id": 1050,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "927",
+          "episode": "919"
+        },
+        "Status": "Alive",
+        "Residence": [
+          "Wano Country"
+        ],
+        "Japanese VA": "Takashi Matsuyama",
+        "Affiliations": [
+          "Kyoshiro Family"
+        ],
+        "Japanese Name": "クニさん",
+        "Romanized Name": "Kuni-san",
+        "Funi English VA": "Cory J Phillips",
+        "Official English Name": "Kuni"
+      }
+    }
+  },
+  {
+    "name": "Makino",
+    "info_url": "https://onepiece.fandom.com/wiki/Makino",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/2b/Makino_Manga_Post_Timeskip_Infobox.png/revision/latest?cb=20170315021637",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/5/5a/Makino_Anime_Post_Timeskip_Infobox.png/revision/latest?cb=20190331031018",
+    "id": 1085,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "19 (debut)",
+          "29 (pre-timeskip)31 (after timeskip)"
+        ],
+        "Debut": {
+          "chapter": "1",
+          "episode": "4"
+        },
+        "Height": "166 cm (5'5\")",
+        "Origin": "East Blue (Foosha Village)",
+        "Status": "Alive",
+        "Birthday": "February 23rd",
+        "Residence": [
+          "Foosha Village"
+        ],
+        "Blood Type": "S",
+        "Japanese VA": "Makiko Ohmoto",
+        "Occupations": [
+          "Bar Owner",
+          "Bartender"
+        ],
+        "Affiliations": [
+          "Partys Bar"
+        ],
+        "Japanese Name": "マキノ",
+        "Romanized Name": "Makino",
+        "Funi English VA": "Gwendolyn Lau",
+        "4Kids English VA": "Tara Sands",
+        "Official English Name": "Makino"
+      }
+    }
+  },
+  {
+    "name": "Mohji",
+    "info_url": "https://onepiece.fandom.com/wiki/Mohji",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/b/bb/Mohji_Manga_Post_Timeskip_Infobox.png/revision/latest?cb=20200112022936",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/0/09/Mohji_Anime_Post_Timeskip_Infobox.png/revision/latest?cb=20200821151313",
+    "id": 1120,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "27 (debut)29 (after timeskip)"
+        ],
+        "Debut": {
+          "chapter": "9",
+          "episode": "6"
+        },
+        "Height": "197 cm (6'6\")",
+        "Origin": "East Blue",
+        "Status": "Alive",
+        "Epithet": "Beast Tamer (猛獣使いのモージ, Mōjū-tsukai no Mōji?);Beast Breaker (4Kids)",
+        "Birthday": "October 1st",
+        "Residence": [
+          "Karai Bari Island"
+        ],
+        "Blood Type": "S",
+        "Japanese VA": "Shigenori Sōya",
+        "Occupations": [
+          "Pirate",
+          "First Mate"
+        ],
+        "Affiliations": [
+          "Cross Guild",
+          "Buggy and Alvida Alliance",
+          "Buggy Pirates"
+        ],
+        "Japanese Name": "モージ",
+        "Romanized Name": "Mōji",
+        "Funi English VA": "Chuck Huber",
+        "Odex English VA": "Jamie Meldrum",
+        "4Kids English VA": "Tom Souhrada",
+        "Official English Name": "Mohji;Morji (Odex)"
+      }
+    }
+  },
+  {
+    "name": "Nika",
+    "info_url": "https://onepiece.fandom.com/wiki/Nika",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/9/9f/Nika_Manga_Infobox.png/revision/latest?cb=20210704164056",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/0/06/Nika_Anime_Infobox.png/revision/latest?cb=20221113032050",
+    "id": 1155,
+    "difficulty": 2,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "1018 (silhouette)",
+          "episode": "1040 (silhouette)"
+        },
+        "Status": "Unknown",
+        "Epithet": "\"Sun God Nika\" (太陽の神ニカ, Taiyō no Kami Nika?)\"Warrior of Liberation\" (解放の戦士, Kaihō no Senshi?)",
+        "Japanese Name": "ニカ",
+        "Romanized Name": "Nika",
+        "Official English Name": "Nika"
+      }
+    }
+  },
+  {
+    "name": "Poker",
+    "info_url": "https://onepiece.fandom.com/wiki/Poker",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/8/83/Poker_Manga_Infobox.png/revision/latest?cb=20201129212421",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/f/fb/Poker_Anime_Infobox.png/revision/latest?cb=20220220041145",
+    "id": 1190,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "997",
+          "episode": "982"
+        },
+        "Status": "Alive",
+        "Japanese VA": "Tomohisa Hashizume",
+        "Occupations": [
+          "Shinuchi"
+        ],
+        "Affiliations": [
+          "Beasts Pirates, Tama"
+        ],
+        "Japanese Name": "ポーカー",
+        "Romanized Name": "Pōkā",
+        "Funi English VA": "Matthew Elkins",
+        "Official English Name": "Poker"
+      },
+      "Devil Fruit": {
+        "Type": "Artificial Zoan",
+        "English Name": "Rattlesnake SMILE"
+      }
+    }
+  },
+  {
+    "name": "Roji",
+    "info_url": "https://onepiece.fandom.com/wiki/Roji",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/b/b3/Roji_Manga_Infobox.png/revision/latest?cb=20141009200504",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/4/42/Roji_Anime_Infobox.png/revision/latest?cb=20100426185345",
+    "id": 1225,
+    "difficulty": 3,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "391",
+          "episode": "275"
+        },
+        "Status": "Deceased",
+        "Japanese VA": "Noriko Uemura",
+        "Occupations": [
+          "Housewife"
+        ],
+        "Affiliations": [
+          "N/A"
+        ],
+        "Japanese Name": "ロジ",
+        "Romanized Name": "Roji",
+        "Funi English VA": "Jessica Cavanagh",
+        "Official English Name": "Roji"
+      }
+    }
+  },
+  {
+    "name": "Shanks",
+    "info_url": "https://onepiece.fandom.com/wiki/Shanks",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/b/b3/Shanks_Manga_Infobox.png/revision/latest?cb=20220713142359",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/6/66/Shanks_Anime_Infobox.png/revision/latest?cb=20230201001138",
+    "id": 1260,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "27 (debut)",
+          "37 (pre-timeskip)",
+          "39 (after timeskip)"
+        ],
+        "Debut": {
+          "chapter": "1",
+          "episode": "4"
+        },
+        "Bounty": "4,048,900,0001,040,000,000",
+        "Height": "199 cm (6'6\") (age 39)132 cm (4'4\") (age 13)",
+        "Origin": "West Blue",
+        "Status": "Alive",
+        "Epithet": "\"Red-Haired Shanks\" (赤髪のシャンクス, Akagami no Shankusu?)",
+        "Birthday": "March 9th",
+        "Blood Type": "XF",
+        "Japanese VA": "Shūichi Ikeda;Nobunaga Shimazaki (young; Episode 959-Present)",
+        "Occupations": [
+          "Chief",
+          "Emperor",
+          "Apprentice (former)"
+        ],
+        "Affiliations": [
+          "Red Hair Pirates",
+          "Four Emperors",
+          "Roger Pirates (former)"
+        ],
+        "Japanese Name": "シャンクス",
+        "Romanized Name": "Shankusu",
+        "Funi English VA": "Brandon Potter;Aaron Dismuke (young; Episode 959-Present)",
+        "Odex English VA": "Christian J. Lee",
+        "4Kids English VA": "Tom Souhrada",
+        "Live-Action Portrayal": "Peter Gadiot;Matt Herrington (young)",
+        "Official English Name": "Shanks"
+      }
+    }
+  },
+  {
+    "name": "Surume",
+    "info_url": "https://onepiece.fandom.com/wiki/Surume",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/7/7c/Surume_Manga_Infobox.png/revision/latest?cb=20140802075240",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/8/85/Surume_Anime_Infobox.png/revision/latest?cb=20180802055215",
+    "id": 1295,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "120"
+        ],
+        "Size": "300 m (984')",
+        "Debut": {
+          "chapter": "604",
+          "episode": "524"
+        },
+        "Origin": "North Blue (North Pole)",
+        "Status": "Alive",
+        "Birthday": "June 9th",
+        "Blood Type": "S",
+        "Occupations": [
+          "Pet",
+          "Slave (former)"
+        ],
+        "Affiliations": [
+          "Straw Hat Pirates",
+          "New Fish-Man Pirates (defected)"
+        ],
+        "Japanese Name": "スルメ",
+        "Romanized Name": "Surume",
+        "Funi English VA": "Jessie James Grelle",
+        "Official English Name": "Surume"
+      }
+    }
+  },
+  {
+    "name": "Ucy",
+    "info_url": "https://onepiece.fandom.com/wiki/Ucy",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/2/2c/Ucy_Manga_Infobox.png/revision/latest?cb=20200513014543",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/6/6a/Ucy_Anime_Infobox.png/revision/latest?cb=20200515001902",
+    "id": 1330,
+    "difficulty": 2,
+    "info_box": {
+      "Statistics": {
+        "Debut": {
+          "chapter": "706",
+          "episode": "639"
+        },
+        "Status": "Alive",
+        "Epithet": "\"Brutal Bull\" (非情なる牛, Burūtaru Buru?)",
+        "Birthday": "April 21st",
+        "Japanese VA": "Kōji Haramaki",
+        "Occupations": [
+          "Gladiator"
+        ],
+        "Affiliations": [
+          "Corrida Colosseum"
+        ],
+        "Japanese Name": "ウーシー",
+        "Romanized Name": "Ūshī",
+        "Funi English VA": "Chris Thurman (Episode of Sabo only)",
+        "Official English Name": "Moocy (VIZ Media, FUNimation dub);Usy (FUNimation simulcast);Bullcy (FUNimation subs)"
+      }
+    }
+  },
+  {
+    "name": "Yamato",
+    "info_url": "https://onepiece.fandom.com/wiki/Yamato",
+    "manga_image_url": "https://static.wikia.nocookie.net/onepiece/images/4/40/Yamato_Manga_Infobox.png/revision/latest?cb=20220302054134",
+    "anime_image_url": "https://static.wikia.nocookie.net/onepiece/images/b/bd/Yamato_Anime_Infobox.png/revision/latest?cb=20220119060149",
+    "id": 1365,
+    "difficulty": 1,
+    "info_box": {
+      "Statistics": {
+        "Age": [
+          "28"
+        ],
+        "Alias": "\"Kozuki Oden\" (光月おでん, Kōzuki Oden?)",
+        "Debut": {
+          "chapter": "971",
+          "episode": "972"
+        },
+        "Height": "263 cm (8'8\")",
+        "Status": "Alive",
+        "Epithet": "\"Oni Princess\" (鬼姫, Onihime?, VIZ: \"Ogre Princess\")",
+        "Birthday": "November 3rd",
+        "Residence": [
+          "Wano Country (Onigashima)"
+        ],
+        "Blood Type": "F",
+        "Japanese VA": "Saori Hayami",
+        "Affiliations": [
+          "Ninja-Pirate-Mink-Samurai Alliance (disbanded)",
+          "Beasts Pirates (defected)"
+        ],
+        "Japanese Name": "ヤマト",
+        "Romanized Name": "Yamato",
+        "Funi English VA": "Michelle Rojas",
+        "Official English Name": "Yamato"
+      },
+      "Devil Fruit": {
+        "Type": "Mythical Zoan",
+        "Meaning": "Dog; Large-Mouthed True/Pure God",
+        "English Name": "Dog-Dog Fruit, Model: Okuchi-no-Makami",
+        "Japanese Name": "Inu Inu no Mi, Model: Okuchi no Makami"
+      }
+    }
+  }
+]

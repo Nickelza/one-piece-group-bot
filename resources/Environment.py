@@ -174,9 +174,9 @@ REDDIT_MEME_PIECE_SUBREDDIT = Environment("REDDIT_MEME_PIECE_SUBREDDIT", default
 
 # SUPABASE
 # Supabase rest url
-SUPABASE_REST_URL = Environment("SUPABASE_REST_URL")
+SUPABASE_REST_URL = Environment("SUPABASE_REST_URL", can_be_empty=True)
 # Supabase API key
-SUPABASE_API_KEY = Environment("SUPABASE_API_KEY")
+SUPABASE_API_KEY = Environment("SUPABASE_API_KEY", can_be_empty=True)
 
 # SENTRY
 # Enable Sentry
