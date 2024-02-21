@@ -80,7 +80,6 @@ class User(BaseModel):
     devil_fruit_collection_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(
         null=True
     )
-    bounty_message_limit: int | BigIntegerField = BigIntegerField(default=0)
     timezone: str | CharField = CharField(max_length=99, null=True)
     is_active: bool | BooleanField = BooleanField(default=True)
     prediction_creation_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(
@@ -91,8 +90,9 @@ class User(BaseModel):
     )
     # For Legendary Pirate
     is_exempt_from_global_leaderboard_requirements: bool | BooleanField = BooleanField(
-        default=False
+        default=True
     )
+    can_collect_daily_reward: bool | BooleanField = BooleanField(default=True)
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen
@@ -113,6 +113,7 @@ class User(BaseModel):
     bounty_borrowers = None
     legendary_pirates = None
     warlords = None
+    daily_bonuses = None
 
     class Meta:
         db_table = "user"
@@ -775,6 +776,15 @@ class User(BaseModel):
         from src.service.date_service import get_remaining_duration
 
         return get_remaining_duration(self.conscription_end_date)
+
+    @staticmethod
+    def reset_daily_reward():
+        """
+        Reset the daily reward
+        :return: None
+        """
+
+        User.update(can_collect_daily_reward=True).execute()
 
 
 User.create_table()

@@ -28,6 +28,7 @@ class AssetPath(StrEnum):
     PLUNDER = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "plunder.jpg")
     PLUNDER_SUCCESS = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "plunder_success.jpg")
     PLUNDER_FAIL = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "plunder_fail.jpg")
+    DAILY_REWARD = os.path.join(c.ASSETS_SAVED_MEDIA_DIR, "daily_reward.jpg")
 
     # Other images
     GAME_BACKGROUND = os.path.join(c.ASSETS_IMAGES_DIR, "game_background.jpg")

@@ -133,9 +133,9 @@ LIMIT_TO_AUTHORIZED_GROUPS = Environment("LIMIT_TO_AUTHORIZED_GROUPS", default_v
 # List of authorized groups
 AUTHORIZED_GROUPS = Environment("AUTHORIZED_GROUPS", default_value="")
 # Group chat id
-OPD_GROUP_ID = Environment("OPD_GROUP_ID")
+OPD_GROUP_ID = Environment("OPD_GROUP_ID")  # TODO should go
 # Main channel id
-OPD_CHANNEL_ID = Environment("OPD_CHANNEL_ID")
+OPD_CHANNEL_ID = Environment("OPD_CHANNEL_ID")  # TODO should go
 # Chat ID for error logs
 ERROR_LOG_CHAT_ID = Environment("ERROR_LOG_CHAT_ID")
 # OPMA bot id
@@ -281,6 +281,13 @@ SHOULD_LOG_TIMER_ADD_CREW_MVP_BOUNTY_BONUS = Environment(
 )
 SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS = Environment(
     "SHOULD_RUN_ON_STARTUP_ADD_CREW_MVP_BOUNTY_BONUS", default_value="False"
+)
+# Daily Reward. Default: Every 12 hours
+CRON_DAILY_REWARD = Environment("CRON_DAILY_REWARD", default_value="0 */12 * * *")
+ENABLE_TIMER_DAILY_REWARD = Environment("ENABLE_TIMER_DAILY_REWARD", default_value="True")
+SHOULD_LOG_TIMER_DAILY_REWARD = Environment("SHOULD_LOG_TIMER_DAILY_REWARD", default_value="False")
+SHOULD_RUN_ON_STARTUP_DAILY_REWARD = Environment(
+    "SHOULD_RUN_ON_STARTUP_DAILY_REWARD", default_value="False"
 )
 # Maximum amount of bounty that can be gained from messages. Default: Every day at 00:10
 CRON_RESET_BOUNTY_MESSAGE_LIMIT = Environment(
@@ -433,13 +440,11 @@ SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment(
 )
 
 # Generic task. Default: Every 1 minute
-CRON_GENERIC_TASKS = Environment("CRON_GENERIC_TASKS", default_value="*/1 * * * *")
-ENABLE_TIMER_GENERIC_TASKS = Environment("ENABLE_TIMER_GENERIC_TASKS", default_value="True")
-SHOULD_LOG_TIMER_GENERIC_TASKS = Environment(
-    "SHOULD_LOG_TIMER_GENERIC_TASKS", default_value="False"
-)
-SHOULD_RUN_ON_STARTUP_GENERIC_TASKS = Environment(
-    "SHOULD_RUN_ON_STARTUP_GENERIC_TASKS", default_value="False"
+CRON_MINUTE_TASKS = Environment("CRON_MINUTE_TASKS", default_value="*/1 * * * *")
+ENABLE_TIMER_MINUTE_TASKS = Environment("ENABLE_TIMER_MINUTE_TASKS", default_value="True")
+SHOULD_LOG_TIMER_MINUTE_TASKS = Environment("SHOULD_LOG_TIMER_MINUTE_TASKS", default_value="False")
+SHOULD_RUN_ON_STARTUP_MINUTE_TASKS = Environment(
+    "SHOULD_RUN_ON_STARTUP_MINUTE_TASKS", default_value="False"
 )
 
 
@@ -447,29 +452,8 @@ SHOULD_RUN_ON_STARTUP_GENERIC_TASKS = Environment(
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", default_value="21600")
 
 # BOUNTY
-# How much a single message is worth. Default: 50,000
-BELLY_BASE_MESSAGE = Environment("BELLY_BASE_MESSAGE", default_value="50000")
-# Multiplier to use for each message. Default: 0.05
-BELLY_CHARACTER_MULTIPLIER = Environment("BELLY_CHARACTER_MULTIPLIER", default_value="0.05")
-# How much multiple of the base message can the multiplier by character be, before it is capped.
-# Default: 2
-BELLY_CHARACTER_MAX_MULTIPLE = Environment("BELLY_CHARACTER_MAX_MULTIPLE", default_value="2")
-# Multiplier for messages in reply to a channel post. Default: 1.3
-BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER = Environment(
-    "BELLY_REPLY_TO_CHANNEL_POST_MULTIPLIER", default_value="1.3"
-)
-# Multiplier for stickers. Default: 0.2
-BELLY_STICKER_MULTIPLIER = Environment("BELLY_STICKER_MULTIPLIER", default_value="0.2")
-# Multiplier for animations. Default: 0.2
-BELLY_ANIMATION_MULTIPLIER = Environment("BELLY_ANIMATION_MULTIPLIER", default_value="0.2")
-# Multiplier percentage for location level. Default 10
-BELLY_LOCATION_LEVEL_MULTIPLIER = Environment(
-    "BELLY_LOCATION_LEVEL_MULTIPLIER", default_value="10"
-)
 # How much should belly be upper rounded. Default: 1000
 BELLY_UPPER_ROUND_AMOUNT = Environment("BELLY_UPPER_ROUND_AMOUNT", default_value="1000")
-# Daily base limit of bellys gained from messages. Default: 5,000,000
-BELLY_DAILY_BASE_LIMIT = Environment("BELLY_DAILY_BASE_LIMIT", default_value="5000000")
 
 # After how many days from the last message should a group or group chat be considered inactive.
 # Default: 7
@@ -478,17 +462,25 @@ INACTIVE_GROUP_DAYS = Environment("INACTIVE_GROUP_DAYS", default_value="7")
 # Default: 7
 INACTIVE_GROUP_USER_DAYS = Environment("INACTIVE_GROUP_USER_DAYS", default_value="7")
 
-# BOUNTY BONUS
-# LOCATION
-# Percentage that bounty is incremented by on timer for Paradise. Default: 0
-PARADISE_BOUNTY_BONUS = Environment("PARADISE_BOUNTY_BONUS", default_value="0")
-# Percentage that bounty is incremented by on timer for New World. Default: -3
-NEW_WORLD_BOUNTY_BONUS = Environment("NEW_WORLD_BOUNTY_BONUS", default_value="-3")
-# Percentage that bounty is incremented by on timer for Crew members. Default: 2
-CREW_BOUNTY_BONUS = Environment("CREW_BOUNTY_BONUS", default_value="2")
-# Percentage that bounty is incremented by on timer for Crew members with bounty higher than crew
-# average. Default: 1
-CREW_MVP_BOUNTY_BONUS = Environment("CREW_MVP_BOUNTY_BONUS", default_value="1")
+# DAILY REWARD
+# Base Bonus amount. Default: 10 Million
+DAILY_REWARD_BONUS_BASE_AMOUNT = Environment(
+    "DAILY_REWARD_BONUS_BASE_AMOUNT", default_value="10000000"
+)
+# Location base Bonus. Default: 5
+DAILY_REWARD_BONUS_BASE_LOCATION = Environment(
+    "DAILY_REWARD_BONUS_BASE_LOCATION", default_value="2"
+)
+# Streak base Bonus. Default: 1
+DAILY_REWARD_BONUS_BASE_STREAK = Environment("DAILY_REWARD_BONUS_BASE_STREAK", default_value="1")
+# Streak max Bonus. Default: 100
+DAILY_REWARD_BONUS_MAX_STREAK = Environment("DAILY_REWARD_BONUS_MAX_STREAK", default_value="100")
+# Crew member Bonus. Default: 20
+DAILY_REWARD_BONUS_CREW = Environment("DAILY_REWARD_BONUS_CREW", default_value="20")
+# Crew members with bounty higher than crew average. Default: 20
+DAILY_REWARD_BONUS_CREW_MVP = Environment("DAILY_REWARD_BONUS_CREW_MVP", default_value="20")
+# Every how many streak days is a prize given. Default: 7
+DAILY_REWARD_STREAK_DAYS = Environment("DAILY_REWARD_STREAK_DAYS", default_value="7")
 
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (is boss)

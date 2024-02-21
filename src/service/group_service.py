@@ -70,19 +70,6 @@ def get_group_or_topic_text(group_chat: GroupChat) -> str:
         return phrases.TEXT_GROUP
 
 
-def allow_unlimited_bounty_from_messages(group_chat: GroupChat) -> bool:
-    """
-    Checks if the group chat/group_chat allows unlimited bounty from messages
-    :param group_chat: The group chat
-    :return: True if the group chat/group_chat allows bounty from messages, False otherwise
-    """
-
-    if not is_main_group(group_chat):
-        return False
-
-    return feature_is_enabled(group_chat, Feature.BOUNTY_MESSAGES_GAIN)
-
-
 def get_group_chats_with_feature_enabled(
     feature: Feature,
     filter_by_groups: list[Group] = None,
@@ -196,7 +183,8 @@ async def broadcast_to_chats_with_feature_enabled(
 
     # Unpin all previous messages of this feature
     if feature_is_pinnable:
-        # Get all messages to unpin to avoid unpinning messages that are just pinned due to async call
+        # Get all messages to unpin to avoid unpinning messages that are just pinned due to async
+        # call
         messages_to_unpin: list[GroupChatFeaturePinMessage] = list(
             GroupChatFeaturePinMessage.select().where(
                 GroupChatFeaturePinMessage.feature == feature

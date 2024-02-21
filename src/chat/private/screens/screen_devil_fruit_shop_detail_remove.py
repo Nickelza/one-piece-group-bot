@@ -57,7 +57,7 @@ async def manage(
         return
 
     # Remove trade
-    DevilFruitTrade.delete_pending_trades(devil_fruit)
+    DevilFruitTrade.delete_pending_trades_in_shop(devil_fruit)
 
     # Send success message
     ot_text = phrases.DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_SUCCESS

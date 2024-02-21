@@ -6,18 +6,13 @@ from telegram.ext import ContextTypes, Application, Job
 
 import src.model.enums.Timer as Timer
 from src.chat.manage_message import init, end
+from src.model.DailyReward import DailyReward
 from src.service.bounty_loan_service import set_expired_bounty_loans
 from src.service.bounty_poster_service import reset_bounty_poster_limit
-from src.service.bounty_service import (
-    add_region_bounty_bonus,
-    add_crew_bounty_bonus,
-    add_crew_mvp_bounty_bonus,
-    reset_bounty_message_limit,
-)
 from src.service.devil_fruit_service import schedule_devil_fruit_release, respawn_devil_fruit
 from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import end_inactive_games
-from src.service.generic_service import run_generic_minute_tasks
+from src.service.generic_service import run_minute_tasks
 from src.service.group_service import deactivate_inactive_group_chats
 from src.service.leaderboard_service import send_leaderboard
 from src.service.location_service import reset_can_change_region
@@ -109,14 +104,6 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await reset_bounty_poster_limit()
         case Timer.RESET_CAN_CHANGE_REGION:
             reset_can_change_region()
-        case Timer.ADD_REGION_BOUNTY_BONUS:
-            add_region_bounty_bonus()
-        case Timer.ADD_CREW_BOUNTY_BONUS:
-            add_crew_bounty_bonus()
-        case Timer.ADD_CREW_MVP_BOUNTY_BONUS:
-            add_crew_mvp_bounty_bonus()
-        case Timer.RESET_BOUNTY_MESSAGE_LIMIT:
-            reset_bounty_message_limit()
         case Timer.SEND_SCHEDULED_PREDICTIONS:
             await send_scheduled_predictions(context)
         case Timer.CLOSE_SCHEDULED_PREDICTIONS:
@@ -135,8 +122,10 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await end_inactive_games(context)
         case Timer.SET_EXPIRED_BOUNTY_LOANS:
             await set_expired_bounty_loans(context)
-        case Timer.GENERIC_TASKS:
-            await run_generic_minute_tasks(context)
+        case Timer.MINUTE_TASKS:
+            await run_minute_tasks(context)
+        case Timer.DAILY_REWARD:
+            DailyReward.reset()
         case _:
             raise ValueError(f"Unknown timer {timer.name}")
 

@@ -5,7 +5,6 @@ from resources import phrases
 
 class Feature(IntEnum):
     BOUNTY_GIFT = 1
-    BOUNTY_MESSAGES_GAIN = 2
     CHALLENGE = 3
     CREW = 4
     DEVIL_FRUIT_APPEARANCE = 5
@@ -19,6 +18,7 @@ class Feature(IntEnum):
     DEVIL_FRUIT_SELL = 13
     BOUNTY_LOAN = 14
     PLUNDER = 15
+    DAILY_REWARD = 16
 
     def get_description(self) -> str:
         """
@@ -38,7 +38,6 @@ class Feature(IntEnum):
         """
         return [
             Feature.BOUNTY_GIFT,
-            Feature.BOUNTY_MESSAGES_GAIN,
             Feature.CHALLENGE,
             Feature.CREW,
             Feature.DEVIL_FRUIT_APPEARANCE,
@@ -52,6 +51,7 @@ class Feature(IntEnum):
             Feature.DEVIL_FRUIT_SELL,
             Feature.BOUNTY_LOAN,
             Feature.PLUNDER,
+            Feature.DAILY_REWARD,
         ]
 
     @staticmethod
@@ -61,7 +61,7 @@ class Feature(IntEnum):
 
         :return: All the features that are restricted
         """
-        return [Feature.BOUNTY_MESSAGES_GAIN, Feature.MESSAGE_FILTER, Feature.SILENCE]
+        return [Feature.MESSAGE_FILTER, Feature.SILENCE]
 
     @staticmethod
     def get_non_restricted() -> list["Feature"]:
@@ -104,7 +104,6 @@ class Feature(IntEnum):
 
 FEATURE_DESCRIPTION_MAP = {
     Feature.BOUNTY_GIFT: phrases.FEATURE_BOUNTY_GIFT,
-    Feature.BOUNTY_MESSAGES_GAIN: phrases.FEATURE_BOUNTY_MESSAGES_GAIN,
     Feature.CHALLENGE: phrases.FEATURE_CHALLENGE,
     Feature.CREW: phrases.FEATURE_CREW,
     Feature.DEVIL_FRUIT_APPEARANCE: phrases.FEATURE_DEVIL_FRUIT_APPEARANCE,
@@ -118,4 +117,5 @@ FEATURE_DESCRIPTION_MAP = {
     Feature.DEVIL_FRUIT_SELL: phrases.FEATURE_DEVIL_FRUIT_SELL,
     Feature.BOUNTY_LOAN: phrases.FEATURE_BOUNTY_LOAN,
     Feature.PLUNDER: phrases.FEATURE_PLUNDER,
+    Feature.DAILY_REWARD: phrases.FEATURE_DAILY_REWARD,
 }

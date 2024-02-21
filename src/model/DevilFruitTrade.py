@@ -107,6 +107,37 @@ class DevilFruitTrade(BaseModel):
         ).execute()
 
     @staticmethod
+    def delete_pending_trades_in_shop(devil_fruit: DevilFruit):
+        """
+        Delete pending trades of a devil fruit in the shop
+        :param devil_fruit: The devil fruit
+        :return: None
+        """
+        DevilFruitTrade.delete().where(
+            (DevilFruitTrade.devil_fruit == devil_fruit)
+            & (DevilFruitTrade.status == DevilFruitTradeStatus.PENDING)
+            & (DevilFruitTrade.source == DevilFruitSource.SHOP)
+        ).execute()
+
+    @staticmethod
+    def delete_pending_trades_in_group(
+        devil_fruit: DevilFruit, group_chat: GroupChat, exclude_id: int
+    ):
+        """
+        Delete pending trades of a devil fruit in a group chat
+        :param devil_fruit: The devil fruit
+        :param group_chat: The group chat
+        :param exclude_id: The id to exclude
+        :return: None
+        """
+        DevilFruitTrade.delete().where(
+            (DevilFruitTrade.devil_fruit == devil_fruit)
+            & (DevilFruitTrade.status == DevilFruitTradeStatus.PENDING)
+            & (DevilFruitTrade.group_chat == group_chat)
+            & (DevilFruitTrade.id != exclude_id)
+        ).execute()
+
+    @staticmethod
     def get_pending_in_shop(devil_fruit: DevilFruit) -> "DevilFruitTrade":
         """
         Get a pending trade in the shop
@@ -118,6 +149,33 @@ class DevilFruitTrade(BaseModel):
             DevilFruitTrade.devil_fruit == devil_fruit,
             DevilFruitTrade.status == DevilFruitTradeStatus.PENDING,
             DevilFruitTrade.source == DevilFruitSource.SHOP,
+        )
+
+    @staticmethod
+    def get_all_selling_in_shop_or_group(
+        group_chat: GroupChat = None, user: User = None
+    ) -> list["DevilFruitTrade"]:
+        """
+        Get all trades in the shop
+        :param group_chat: The group chat
+        :param user: The user
+        :return: The trades
+        """
+        return DevilFruitTrade.select().where(
+            # Only non completed trades
+            (DevilFruitTrade.devil_fruit.is_null(False))
+            & (DevilFruitTrade.status == DevilFruitTradeStatus.PENDING)
+            & (
+                # Is in shop
+                (DevilFruitTrade.source == DevilFruitSource.SHOP)
+                | (
+                    # Is in the given group chat
+                    (DevilFruitTrade.source == DevilFruitSource.USER)
+                    & (DevilFruitTrade.group_chat == group_chat)
+                    # Not reserved to a specific user or reserved to the given user
+                    & ((DevilFruitTrade.receiver.is_null()) | (DevilFruitTrade.receiver == user))
+                )
+            )
         )
 
 

@@ -12,6 +12,7 @@ from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bo
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
+from src.chat.group.screens.screen_daily_reward import manage as manage_screen_daily_reward
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
@@ -48,8 +49,6 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import GroupMessageValidationException
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import add_or_remove_bounty
-from src.service.bounty_service import get_message_belly
 from src.service.devil_fruit_service import release_devil_fruit_to_user
 from src.service.group_service import is_main_group, feature_is_enabled
 from src.service.message_service import delete_message
@@ -116,16 +115,7 @@ async def manage(
             ):
                 return
 
-    # Update bounty from message gain
     if command is Command.ND:
-        await add_or_remove_bounty(
-            user,
-            get_message_belly(update, user, group_chat),
-            context=context,
-            update=update,
-            should_update_location=True,
-            from_message=True,
-        )
         return
 
     await dispatch_screens(
@@ -237,6 +227,9 @@ async def dispatch_screens(
 
         case Screen.GRP_PLUNDER:  # Plunder
             await manage_screen_plunder(update, context, user, inbound_keyboard, group_chat)
+
+        case Screen.GRP_DAILY_REWARD:  # Daily reward
+            await manage_screen_daily_reward(update, context, user, group_chat)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

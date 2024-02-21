@@ -138,7 +138,7 @@ async def manage(
                 return
 
             # Remove previous trades
-            DevilFruitTrade.delete_pending_trades(devil_fruit)
+            DevilFruitTrade.delete_pending_trades_in_shop(devil_fruit)
 
             amount = int(user.get_context_data(context, ContextDataKey.AMOUNT))
             # Sell the fruit

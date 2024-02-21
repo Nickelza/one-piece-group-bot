@@ -7,7 +7,6 @@ from telegram import Update, User as TelegramUser
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
@@ -34,7 +33,13 @@ from src.model.error.CustomException import (
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bot_service import get_context_data, set_context_data
+from src.service.bot_service import (
+    get_context_data,
+    set_context_data,
+    get_user_context_data,
+    set_user_context_data,
+    remove_user_context_data,
+)
 from src.service.date_service import get_datetime_in_future_seconds
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import (
@@ -114,11 +119,11 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
         return
 
     if current_tg_user_id is not None:
-        if not await check_current_requests(current_tg_user_id):
+        if not await check_current_requests(context):
             end(db)
             return
 
-        add_current_request(current_tg_user_id, now)
+        set_user_context_data(context, ContextDataKey.LAST_REQUEST, now)
 
     try:
         await manage_after_db(update, context, is_callback)
@@ -135,7 +140,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
             pass
 
     if current_tg_user_id is not None:
-        remove_current_request(current_tg_user_id, now)
+        remove_current_request(context, now)
 
 
 async def manage_after_db(
@@ -572,7 +577,6 @@ def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
     if user is None:
         user = User()
         user.tg_user_id = effective_user.id
-        user.bounty_message_limit = Env.BELLY_DAILY_BASE_LIMIT.get_int()
 
     user.tg_first_name = effective_user.first_name
     user.tg_last_name = effective_user.last_name
@@ -755,47 +759,42 @@ async def is_spam(
     return False
 
 
-async def check_current_requests(tg_user_id: str) -> bool:
+async def check_current_requests(context: ContextTypes.DEFAULT_TYPE) -> bool:
     """
     Make sure that there are no request currently being processed for a user before processing
     the next one
-    If there is, and it is being processed for less than 5 seconds, drop the incoming request
-    :param tg_user_id: The user ID
+    If there is, and it is being processed for less than 10 seconds, drop the incoming request
+    :param context: The context
     :return: None
     """
     try:
-        # Request being processed for more than 5 seconds, go ahead and process next one
-        if (datetime.now() - c.CURRENT_REQUESTS[tg_user_id]).total_seconds() > 5:
+        # Request being processed for more than 10 seconds, go ahead and process next one
+        if (
+            datetime.now()
+            - get_user_context_data(
+                context, ContextDataKey.LAST_REQUEST, tolerate_key_exception=False
+            )
+        ).total_seconds() > 10:
             return True
 
         # Request not yet stale, drop the incoming request
         return False
     except KeyError:
-        # Not user id not in CURRENT_REQUESTS
+        # No saved requests
         return True
 
 
-def add_current_request(tg_user_id: str, now: datetime) -> None:
-    """
-    Add a new request to the dictionary
-    :param tg_user_id: The user ID
-    :param now: The datetime
-    :return: None
-    """
-
-    c.CURRENT_REQUESTS[tg_user_id] = now
-
-
-def remove_current_request(tg_user_id: str, inserted_time: datetime) -> None:
+def remove_current_request(context: ContextTypes.DEFAULT_TYPE, inserted_time: datetime) -> None:
     """
     Remove a request from the dictionary, if it's of the given datetime
-    :param tg_user_id: The user ID
+    :param context: The context
     :param inserted_time: The datetime
     :return: None
     """
 
-    if tg_user_id in c.CURRENT_REQUESTS and c.CURRENT_REQUESTS[tg_user_id] == inserted_time:
-        try:
-            c.CURRENT_REQUESTS.pop(tg_user_id)
-        except KeyError:
-            pass
+    try:
+        value = get_user_context_data(context, ContextDataKey.LAST_REQUEST)
+        if value == inserted_time:
+            remove_user_context_data(context, ContextDataKey.LAST_REQUEST)
+    except KeyError:
+        pass

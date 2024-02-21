@@ -62,12 +62,8 @@ SHOW_USER_STATUS_PLUNDER_IMMUNITY = "\nPlunder immunity: {}"
 SHOW_USER_STATUS_PLUNDER_COOLDOWN = "\nPlunder cooldown: {}"
 SHOW_USER_STATUS_WARLORD_REMAINING_TIME = "\nWarlord remaining time: {}"
 SHOW_USER_STATUS_CREW = "\nCrew: {}"
-SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE = "\n\n*Daily Bounty Bonus*"
-SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT = "\n{}{} \\({}%\\)"
-SHOW_USER_STATUS_BOUNTY_BONUS_CREW = "Crew"
-SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP = "Crew MVP"
-SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD = "New World"
 SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE = "\n\n*Bounty Deductions*"
+SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TEXT = "\n{}{} \\({}%\\)"
 SHOW_USER_STATUS_EXPIRED_LOAN = "Expired loan"
 SHOW_USER_STATUS_INCOME_TAX = "Income tax"
 SHOW_USER_STATUS_ADD_REPLY = "_Requested by {}_"
@@ -75,6 +71,10 @@ SHOW_USER_STATUS_DEVIL_FRUIT = "\n\n*Devil Fruit*\n_{}_{}"
 SHOW_USER_STATUS_CREW_ABILITIES = "\n\n*Crew Abilities*{}"
 NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = (
     "You can only view the status of those who rank below you.\n\n{} rank: {}\n{} rank: {}"
+)
+SHOW_USER_STATUS_DAILY_REWARD = (
+    f"\n\n>You have a daily reward awaiting, use {CommandName.DAILY_REWARD.get_non_formatted()} in"
+    " a group to claim it!"
 )
 ROOKIE_STATUS_PRIVATE_CHAT_ONLY = "Rookies can only view their status in Private Chat"
 PRISONER_STATUS_PRIVATE_CHAT_ONLY = "Prisoners can only view their status in Private Chat"
@@ -348,7 +348,6 @@ PVT_KEY_SHOW_ALL = "Back to list"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in this {}?"
-GRP_KEY_GO_TO_MESSAGE = "Go to message"
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = "Bet in private chat"
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
 GRP_KEY_GAME_PLAY = "Play"
@@ -764,11 +763,11 @@ CREW_SEARCH_NOT_ALLOWED_TO_VIEW = (
 CREW_SEARCH_JOIN_NOT_ALLOWED = "The Crew does not allow join requests from search"
 CREW_SEARCH_JOIN_NOT_ENOUGH_BOUNTY = "You need a bounty of ฿{} to join the Crew"
 CREW_SEARCH_JOIN_CONFIRMATION_REQUEST = (
-    "Are you sure you want to send a request to join *{}*?\nYou can request to join a maximum of"
-    f" {Env.CREW_JOIN_REQUESTS_PER_COOLDOWN} Crews every"
-    f" {Env.CREW_JOIN_REQUEST_COOLDOWN_DURATION} hours and can request to join the same Crew every"
-    f" {Env.CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION} days."
-    "\n\nYour current bounty will be shared with the Crew Captain"
+    "Are you sure you want to send a request to join *{}*?\nYou can request to join a maximum"
+    f" of {Env.CREW_JOIN_REQUESTS_PER_COOLDOWN.get_int()} Crews every"
+    f" {Env.CREW_JOIN_REQUEST_COOLDOWN_DURATION.get_int()} hours and can request to join the same"
+    f" Crew every {Env.CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION.get_int()} days.\n\nYour"
+    " current bounty will be shared with the Crew Captain"
 )
 CREW_SEARCH_JOIN_CONFIRMATION_REQUEST_AUTO_ACCEPT = (
     "\n\n_*Your request will be automatically accepted*_"
@@ -851,7 +850,7 @@ CREW_CREATE_SUCCESS = (
 )
 CREW_EDIT_NAME_SUCCESS = "Crew name updated successfully"
 CREW_EDIT_REQUEST_DESCRIPTION = (
-    f"Send the new description of your Crew \\(max. {Env.CREW_DESCRIPTION_MAX_LENGTH}"
+    f"Send the new description of your Crew \\(max. {Env.CREW_DESCRIPTION_MAX_LENGTH.get_int()}"
     " characters\\)"
 )
 CREW_EDIT_DESCRIPTION_TOO_LONG = (
@@ -1867,7 +1866,7 @@ DEVIL_FRUIT_EXPIRATION_EXPLANATION = (
 )
 DEVIL_FRUIT_SMILE_EXPIRATION_EXPLANATION = (
     "\n>SMILEs abilities last for a random duration that is determined once eaten, maximum"
-    f" {Env.DEVIL_FRUIT_SMILE_MAX_DAYS} days"
+    f" {Env.DEVIL_FRUIT_SMILE_MAX_DAYS.get()} days"
 )
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiration: {}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
@@ -1969,7 +1968,6 @@ INCOME_TAX_DEDUCTION_TYPE_DEVIL_FRUIT = "Devil Fruit"
 INCOME_TAX_CONTRIBUTION_TYPE_CREW_CHEST = "Crew Chest"
 
 FEATURE_BOUNTY_GIFT = "Bounty Gift"
-FEATURE_BOUNTY_MESSAGES_GAIN = "Bounty Messages Gain"
 FEATURE_CHALLENGE = "Challenge"
 FEATURE_CREW = "Crew"
 FEATURE_DEVIL_FRUIT_APPEARANCE = "Devil Fruit Appearance"
@@ -1983,6 +1981,7 @@ FEATURE_STATUS = "Status"
 FEATURE_DEVIL_FRUIT_SELL = "Devil Fruit Sell"
 FEATURE_BOUNTY_LOAN = "Bounty Loan"
 FEATURE_PLUNDER = "Plunder"
+FEATURE_DAILY_REWARD = "Daily Reward"
 
 # Ability
 ABILITY_TYPE_DOC_Q_COOLDOWN_DURATION = "Doc Q Cooldown"
@@ -2017,3 +2016,29 @@ PLUNDER_LOSE = (
     + "\n\nYou now have a [฿*{}* loan]({}) towards {}"
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"
+
+DAILY_REWARD_ALREADY_COLLECTED = (
+    "You have already collected your daily reward, the next one will be available in *{}*"
+)
+DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"
+DAILY_REWARD_GROUP_MESSAGE = (
+    "Here's your daily reward for today!\n\n{}\n\nCurrent streak: *{} day*\nDays to next"
+    " prize: *{}*"
+)
+DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)"
+DAILY_REWARD_BONUS_LIMITATION_LOCATION_PARADISE = (
+    "\n>No bonus available due to being in Paradise while having enough Bounty for New World"
+    " \\(฿{}\\)"
+)
+DAILY_REWARD_BONUS_LIMITATION_LOCATION_NEW_WORLD = (
+    "\n>No bonus available due having more than ฿{} and being in the final New World location"
+)
+DAILY_REWARD_BONUS_LIMITATION_ARRESTED = "\n>No bonus available due to being arrested"
+DAILY_REWARD_NEXT = "\n\n>Next reward available in *{}*"
+DAILY_REWARD_NEXT_SPLIT = "\n\n>Daily reward is split into {} parts, next reward available in *{}*"
+DAILY_REWARD_BONUS_DESCRIPTION_STREAK = "Streak"
+DAILY_REWARD_BONUS_DESCRIPTION_LOCATION = "Location"
+DAILY_REWARD_BONUS_DESCRIPTION_CREW = "Crew"
+DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP = "Crew MVP"
+DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
+DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"

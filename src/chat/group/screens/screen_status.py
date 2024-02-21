@@ -233,59 +233,13 @@ async def manage(
                     remaining_time
                 )
 
-            # BOUNTY BONUSES
-            has_bounty_bonus = False
-            bounty_bonus_text = phrases.SHOW_USER_STATUS_BOUNTY_DAILY_BONUSES_TITLE
-
-            # Crew Bounty Bonus
-            if target_user.has_crew_bonus():
-                bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-                    (
-                        Emoji.LOG_POSITIVE
-                        if Env.CREW_BOUNTY_BONUS.get_int() > 0
-                        else Emoji.LOG_NEGATIVE
-                    ),
-                    phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW,
-                    Env.CREW_BOUNTY_BONUS.get_int(),
-                )
-                has_bounty_bonus = True
-
-            # Crew MVP Bounty Bonus
-            if target_user.has_crew_mvp_bonus():
-                bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-                    (
-                        Emoji.LOG_POSITIVE
-                        if Env.CREW_MVP_BOUNTY_BONUS.get_int() > 0
-                        else Emoji.LOG_NEGATIVE
-                    ),
-                    phrases.SHOW_USER_STATUS_BOUNTY_BONUS_CREW_MVP,
-                    Env.CREW_MVP_BOUNTY_BONUS.get_int(),
-                )
-                has_bounty_bonus = True
-
-            # New World Bounty Bonus
-            if target_user.has_new_world_bonus():
-                bounty_bonus_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
-                    (
-                        Emoji.LOG_POSITIVE
-                        if Env.NEW_WORLD_BOUNTY_BONUS.get_int() > 0
-                        else Emoji.LOG_NEGATIVE
-                    ),
-                    phrases.SHOW_USER_STATUS_BOUNTY_BONUS_NEW_WORLD,
-                    Env.NEW_WORLD_BOUNTY_BONUS.get_int(),
-                )
-                has_bounty_bonus = True
-
-            if has_bounty_bonus:
-                message_text += bounty_bonus_text
-
             # BOUNTY DEDUCTIONS
             has_bounty_deduction = False
             bounty_deduction_text = phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TITLE
 
             # Expired loan
             if target_user.has_expired_bounty_loans():
-                bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TEXT.format(
                     Emoji.LOG_NEGATIVE,
                     phrases.SHOW_USER_STATUS_EXPIRED_LOAN,
                     (-1 * target_user.get_expired_bounty_loans_cumulative_percentage()),
@@ -294,7 +248,7 @@ async def manage(
 
             # Income tax
             if target_user.has_income_tax() and not user_has_complete_tax_deduction(target_user):
-                bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_BONUSES_TEXT.format(
+                bounty_deduction_text += phrases.SHOW_USER_STATUS_BOUNTY_DEDUCTIONS_TEXT.format(
                     Emoji.LOG_NEGATIVE,
                     phrases.SHOW_USER_STATUS_INCOME_TAX,
                     (-1 * target_user.get_income_tax_percentage()),
@@ -324,6 +278,10 @@ async def manage(
                                 active_abilities=crew_active_abilities, add_emoji=True
                             )
                         )
+
+        if own_status:
+            if target_user.can_collect_daily_reward:
+                message_text += phrases.SHOW_USER_STATUS_DAILY_REWARD
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

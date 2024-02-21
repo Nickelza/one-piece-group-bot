@@ -56,6 +56,17 @@ def get_previous_run(cron_expression: str, start_datetime: datetime = None) -> d
     return itr.get_prev(datetime.datetime)
 
 
+def next_run_is_today(cron_expression: str) -> bool:
+    """
+    Check if the next run is today
+    :param cron_expression: The cron expression
+    :return: Whether the next run is today
+    """
+
+    next_run = get_next_run(cron_expression)
+    return next_run.date() == datetime.datetime.now().date()
+
+
 def convert_seconds_to_duration(seconds: int | float, show_full: bool = False) -> str:
     """
     Converts seconds to days, hours, minutes, seconds
@@ -627,3 +638,29 @@ def get_user_timezone_and_offset_text(user: User) -> (str, str):
     offset_text = get_utc_offset(user.timezone)
 
     return timezone_text, offset_text
+
+
+def get_day_in_past(days: int = 0) -> datetime.datetime:
+    """
+    Get the day in the past
+    :param days: The number of days in the past
+    :return: The datetime
+    """
+
+    return datetime.datetime.now().replace(
+        hour=0, minute=0, second=0, microsecond=0
+    ) - datetime.timedelta(days=days)
+
+
+def is_same_day(date_1: datetime.datetime, date_2: datetime.datetime = None) -> bool:
+    """
+    Check if two dates are the same day
+    :param date_1: The first date
+    :param date_2: The second date
+    :return: Whether the dates are the same day
+    """
+
+    if date_2 is None:
+        date_2 = datetime.datetime.now()
+
+    return date_1.date() == date_2.date()

@@ -26,7 +26,8 @@ async def update_location(
     :param user: The user object
     :param context: Telegram context
     :param update: Telegram update
-    :param cap_to_paradise: If the move should be capped to Paradise max level when user is in Paradise
+    :param cap_to_paradise: If the move should be capped to Paradise max level when user is in
+    Paradise
     :param region: The region to move the user to
     :param requested_by_user: If the user requested the update
     :param can_scale_down: If the new location can be lower than the current one
@@ -115,4 +116,4 @@ def reset_can_change_region() -> None:
     :return: None
     """
 
-    User.update(can_change_region=True).where(User.can_change_region is False).execute()
+    User.update(can_change_region=True).execute()

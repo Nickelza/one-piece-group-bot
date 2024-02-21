@@ -11,6 +11,7 @@ class ContextDataKey(StrEnum):
     INBOUND_KEYBOARD = "inbound_keyboard"
     KEYBOARD_DATA = "keyboard_data"
     AMOUNT = "amount"
+    LAST_REQUEST = "last_request"
 
 
 class ContextDataType(StrEnum):

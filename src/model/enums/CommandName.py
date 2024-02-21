@@ -23,9 +23,16 @@ class CommandName(StrEnum):
     DEVIL_FRUIT_SELL = "dfsell"
     PLUNDER = "steal"
     SETTINGS = "settings"
+    DAILY_REWARD = "daily"
 
     def get_formatted(self):
         """
         Returns the command formatted for the text display.
         """
         return "`/{}`".format(self)
+
+    def get_non_formatted(self):
+        """
+        Returns the command formatted for the text display.
+        """
+        return "/{}".format(self)

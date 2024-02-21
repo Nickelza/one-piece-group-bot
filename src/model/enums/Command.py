@@ -348,6 +348,14 @@ GRP_SETTINGS = Command(
 )
 COMMANDS.append(GRP_SETTINGS)
 
+GRP_DAILY_REWARD = Command(
+    CommandName.DAILY_REWARD,
+    Screen.GRP_DAILY_REWARD,
+    feature=Feature.DAILY_REWARD,
+    allow_while_arrested_temporary=True,
+)
+COMMANDS.append(GRP_DAILY_REWARD)
+
 
 def get_by_name(name: str, message_source: MessageSource = MessageSource.ND):
     """

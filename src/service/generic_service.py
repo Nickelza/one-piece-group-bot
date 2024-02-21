@@ -5,9 +5,9 @@ from src.service.crew_service import end_all_conscription
 from src.service.davy_back_fight_service import start_all as start_dbf, end_all as end_dbf
 
 
-async def run_generic_minute_tasks(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def run_minute_tasks(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Run the generic minute tasks
+    Run the minute tasks
     :param context: The context
     :return: None
     """

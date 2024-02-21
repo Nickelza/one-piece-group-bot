@@ -69,6 +69,7 @@ FIGHT = SavedMedia(
 )
 SAVED_MEDIA_DICT[SavedMediaName.FIGHT] = FIGHT
 
+# noinspection DuplicatedCode
 GAME = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.GAME, file_name=AssetPath.GAME
 )
@@ -118,6 +119,7 @@ PUNK_RECORDS = SavedMedia(
 )
 SAVED_MEDIA_DICT[SavedMediaName.GAME_PUNK_RECORDS] = PUNK_RECORDS
 
+# noinspection DuplicatedCode
 SILENCE = SavedMedia(
     media_type=SavedMediaType.PHOTO, name=SavedMediaName.SILENCE, file_name=AssetPath.SILENCE
 )
@@ -141,3 +143,10 @@ PLUNDER_FAIL = SavedMedia(
     file_name=AssetPath.PLUNDER_FAIL,
 )
 SAVED_MEDIA_DICT[SavedMediaName.PLUNDER_FAIL] = PLUNDER_FAIL
+
+DAILY_REWARD = SavedMedia(
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.DAILY_REWARD,
+    file_name=AssetPath.DAILY_REWARD,
+)
+SAVED_MEDIA_DICT[SavedMediaName.DAILY_REWARD] = DAILY_REWARD

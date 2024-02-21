@@ -99,6 +99,20 @@ def remove_context_data(
         data.pop(key)
 
 
+def remove_user_context_data(
+    context: CallbackContext, key: ContextDataKey, inner_key: str = None
+) -> None:
+    """
+    Remove the user context data
+    :param context: The context
+    :param key: The key
+    :param inner_key: The inner key
+    :return: None
+    """
+
+    remove_context_data(context, ContextDataType.USER, key, inner_key)
+
+
 def get_bot_context_data(
     context: CallbackContext,
     key: ContextDataKey,

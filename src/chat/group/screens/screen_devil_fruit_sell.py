@@ -1,7 +1,7 @@
 from enum import StrEnum, IntEnum
 
 from peewee import DoesNotExist
-from telegram import Update
+from telegram import Update, Message
 from telegram.ext import ContextTypes
 
 from resources import phrases
@@ -199,7 +199,6 @@ async def send_list_of_fruits(
     trade.source = DevilFruitSource.USER
     trade.price = get_amount_from_string(command.parameters[0], user)
     trade.group_chat = group_chat
-    trade.message_id = update.message.message_id
     trade.save()
 
     # Get list of sellable Devil Fruits
@@ -223,9 +222,12 @@ async def send_list_of_fruits(
     ot_text = phrases.DEVIL_FRUIT_SELL_SELECT_FRUIT
 
     # Send the message
-    await full_message_send(
+    message: Message = await full_message_send(
         context, ot_text, update=update, keyboard=outbound_keyboard, add_delete_button=True
     )
+
+    trade.message_id = message.id
+    trade.save()
 
 
 async def validate_trade(
@@ -297,6 +299,11 @@ async def send_sell_proposal(
         DevilFruitSellReservedKeys.DEVIL_FRUIT_ID: devil_fruit.id,
         DevilFruitSellReservedKeys.STEP: Step.BUY,
     }
+
+    # Delete all pending trades of this fruit in the group
+    DevilFruitTrade.delete_pending_trades_in_group(
+        devil_fruit, devil_fruit_trade.group_chat, devil_fruit_trade.id
+    )
 
     receiver: User = devil_fruit_trade.receiver
 
