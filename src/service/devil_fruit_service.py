@@ -336,6 +336,9 @@ def set_devil_fruit_release_date(devil_fruit: DevilFruit, is_new_release: bool =
 
     devil_fruit.owner = None
 
+    # Delete all associated pending trades
+    DevilFruitTrade.delete_pending_trades(devil_fruit=devil_fruit)
+
     # Never re-release SMILEs
     if devil_fruit.get_category() is DevilFruitCategory.SMILE:
         devil_fruit.status = DevilFruitStatus.COMPLETED
