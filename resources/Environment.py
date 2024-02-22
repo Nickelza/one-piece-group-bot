@@ -467,7 +467,7 @@ INACTIVE_GROUP_USER_DAYS = Environment("INACTIVE_GROUP_USER_DAYS", default_value
 DAILY_REWARD_BONUS_BASE_AMOUNT = Environment(
     "DAILY_REWARD_BONUS_BASE_AMOUNT", default_value="10000000"
 )
-# Location base Bonus. Default: 5
+# Location base Bonus. Default: 2
 DAILY_REWARD_BONUS_BASE_LOCATION = Environment(
     "DAILY_REWARD_BONUS_BASE_LOCATION", default_value="2"
 )
@@ -481,6 +481,14 @@ DAILY_REWARD_BONUS_CREW = Environment("DAILY_REWARD_BONUS_CREW", default_value="
 DAILY_REWARD_BONUS_CREW_MVP = Environment("DAILY_REWARD_BONUS_CREW_MVP", default_value="20")
 # Every how many streak days is a prize given. Default: 7
 DAILY_REWARD_STREAK_DAYS = Environment("DAILY_REWARD_STREAK_DAYS", default_value="7")
+# Probability of obtaining Belly as a daily reward prize. Default: 90%
+DAILY_REWARD_PRIZE_BELLY_PERCENTAGE = Environment(
+    "DAILY_REWARD_PRIZE_BELLY_PERCENTAGE", default_value="90"
+)
+# Probability of obtaining SMILE as a daily reward prize. Default: 10%
+DAILY_REWARD_PRIZE_SMILE_PERCENTAGE = Environment(
+    "DAILY_REWARD_PRIZE_SMILE_PERCENTAGE", default_value="10"
+)
 
 # BOUNTY POSTER
 # How many times Pirate King can display bounty poster before it is reset. Default: -1 (is boss)

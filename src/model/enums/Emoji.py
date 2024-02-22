@@ -68,6 +68,7 @@ class Emoji(StrEnum):
     SEARCH = "🔍"
     RESET = "🔄"
     SHOP = "🛒"
+    GIFT = "🎁"
 
     # Game
     WINNER = "🏆"

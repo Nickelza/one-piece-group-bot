@@ -330,7 +330,7 @@ async def full_message_send(
     disable_web_page_preview: bool = True,
     allow_sending_without_reply: bool = True,
     add_delete_button: bool = False,
-    authorized_users: list = None,
+    authorized_users: list[str] = None,
     inbound_keyboard: Keyboard = None,
     send_in_private_chat: bool = False,
     only_authorized_users_can_interact: bool = True,
@@ -368,7 +368,7 @@ async def full_message_send(
     :param allow_sending_without_reply: True if the message should be sent if message to be replied
     to is not found
     :param add_delete_button: True if the delete button should be added
-    :param authorized_users: List of user ids that are allowed to delete the message
+    :param authorized_users: List of tg user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to
     the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat. Not necessary

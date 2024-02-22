@@ -91,8 +91,11 @@ def give_devil_fruit_to_user(
     devil_fruit.status = DevilFruitStatus.COLLECTED
 
     # Add collection and expiration date if from ADMIN or BOT
-    if source is DevilFruitSource.ADMIN or source is DevilFruitSource.BOT:
-        # TODO also add DAILY
+    if source in [
+        DevilFruitSource.ADMIN,
+        DevilFruitSource.BOT,
+        DevilFruitSource.DAILY_REWARD_PRIZE,
+    ]:
         devil_fruit.expiration_date = get_datetime_in_future_days(
             Env.DEVIL_FRUIT_EXPIRATION_DAYS.get_int()
         )
@@ -299,15 +302,7 @@ async def release_devil_fruit_to_user(
         )
 
         # Add deeplink button
-        info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id}
-        inline_keyboard: list[list[Keyboard]] = [[
-            Keyboard(
-                phrases.KEY_MANAGE,
-                screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
-                info=info,
-                is_deeplink=True,
-            )
-        ]]
+        inline_keyboard: list[list[Keyboard]] = [[get_manage_deeplink_keyboard(devil_fruit)]]
 
         try:
             # Send release message
@@ -576,6 +571,7 @@ def create_smile() -> DevilFruit:
     devil_fruit: DevilFruit = DevilFruit()
     devil_fruit.category = DevilFruitCategory.SMILE
     devil_fruit.name = get_random_item_from_txt(AssetPath.ANIMALS)
+    devil_fruit.should_show_abilities = True  # SMILEs always have abilities visible
     devil_fruit.save()
 
     # Add ability
@@ -634,4 +630,19 @@ def get_recap_text(devil_fruit: DevilFruit, add_sell_command: bool = False) -> s
         abilities_text,
         expiring_date_text,
         sell_command_text,
+    )
+
+
+def get_manage_deeplink_keyboard(devil_fruit: DevilFruit) -> Keyboard:
+    """
+    Get the manage deeplink keyboard
+    :param devil_fruit: The devil fruit
+    :return: The keyboard
+    """
+
+    return Keyboard(
+        phrases.KEY_MANAGE_DEVIL_FRUIT,
+        screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
+        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id},
+        is_deeplink=True,
     )

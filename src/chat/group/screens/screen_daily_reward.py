@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
+from src.chat.group.screens.screen_daily_reward_prize import send_prize_request
 from src.model.DailyReward import DailyReward
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
@@ -16,7 +17,8 @@ from src.model.enums.daily_reward.DailyRewardLimitation import DailyRewardLimita
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.daily_reward_service import get_text
-from src.service.date_service import is_same_day
+from src.service.date_service import is_same_day, get_next_run
+from src.service.english_phrase_service import day_or_days
 from src.service.message_service import (
     full_message_send,
     get_deeplink,
@@ -41,10 +43,35 @@ async def manage(
     :return: None
     """
 
+    # Devil Fruit Shop items
+    df_trade_shop_items = DevilFruitTrade.get_all_selling_in_shop_or_group(
+        group_chat=group_chat, user=user
+    )
+    extra_text = ""
+    df_items_text = ""
+    if len(df_trade_shop_items) > 0:
+        for df_trade in df_trade_shop_items:
+            df: DevilFruit = df_trade.devil_fruit
+
+            # Add deeplink
+            if df_trade.get_source() is DevilFruitSource.USER:  # Group message url
+                url = get_message_url(df_trade.message_id, group_chat=df_trade.group_chat)
+            else:
+                url = get_deeplink(
+                    info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: df_trade.id},
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL,
+                    previous_screens=[Screen.PVT_DEVIL_FRUIT_SHOP],
+                )
+
+            df_items_text += phrases.DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM.format(
+                df.get_full_name(), get_belly_formatted(df_trade.price), url
+            )
+        extra_text += phrases.DAILY_REWARD_DEVIL_FRUIT_SHOP.format(df_items_text)
+
     # Already used
     if not user.can_collect_daily_reward:
         ot_text = phrases.DAILY_REWARD_ALREADY_COLLECTED.format(
-            DailyReward.get_remaining_time_to_next_reward()
+            DailyReward.get_remaining_time_to_next_reward(), extra_text
         )
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return
@@ -90,12 +117,14 @@ async def manage(
     ot_text = phrases.DAILY_REWARD_GROUP_MESSAGE.format(
         get_text(reward),
         reward.streak_count,
-        days_to_next_prize if days_to_next_prize > 0 else Env.DAILY_REWARD_STREAK_DAYS.get_int(),
+        day_or_days(reward.streak_count),
+        days_to_next_prize,
+        day_or_days(days_to_next_prize),
     )
 
     # Daily reward split message
     # Next run of cron is still today, show split message
-    if is_same_day(reward.date):
+    if is_same_day(get_next_run(Env.CRON_DAILY_REWARD.get())):
         ot_text += phrases.DAILY_REWARD_NEXT_SPLIT.format(
             reward_parts, DailyReward.get_remaining_time_to_next_reward()
         )
@@ -104,29 +133,7 @@ async def manage(
             DailyReward.get_remaining_time_to_next_reward()
         )
 
-    # Devil Fruit Shop items
-    df_trade_shop_items = DevilFruitTrade.get_all_selling_in_shop_or_group(
-        group_chat=group_chat, user=user
-    )
-    if len(df_trade_shop_items) > 0:
-        df_items_text = ""
-        for df_trade in df_trade_shop_items:
-            df: DevilFruit = df_trade.devil_fruit
-
-            # Add deeplink
-            if df_trade.get_source() is DevilFruitSource.USER:  # Group message url
-                url = get_message_url(df_trade.message_id, group_chat=df_trade.group_chat)
-            else:
-                url = get_deeplink(
-                    info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: df_trade.id},
-                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL,
-                    previous_screens=[Screen.PVT_DEVIL_FRUIT_SHOP],
-                )
-
-            df_items_text += phrases.DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM.format(
-                df.get_full_name(), get_belly_formatted(df_trade.price), url
-            )
-        ot_text += phrases.DAILY_REWARD_DEVIL_FRUIT_SHOP.format(df_items_text)
+    ot_text += extra_text
 
     message: Message = await full_media_send(
         context,
@@ -139,4 +146,6 @@ async def manage(
     reward.message_id = message.id
     reward.save()
 
-    # TODO prize
+    # Prize day
+    if reward.should_award_prize():
+        await send_prize_request(context, update, reward)

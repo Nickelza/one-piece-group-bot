@@ -718,7 +718,7 @@ class DevilFruitAwardedNotification(Notification):
             phrases.DEVIL_FRUIT_AWARDED_NOTIFICATION_KEY,
             item_screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
             item_info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: item_id},
-            go_to_item_button_text=phrases.KEY_MANAGE,
+            go_to_item_button_text=phrases.KEY_MANAGE_DEVIL_FRUIT,
         )
 
     def build(self) -> str:

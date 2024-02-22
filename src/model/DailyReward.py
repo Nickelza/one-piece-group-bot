@@ -8,6 +8,7 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.daily_reward.DailyRewardBonus import DailyRewardBonus, DailyRewardBonusType
 from src.model.enums.daily_reward.DailyRewardLimitation import DailyRewardLimitation
+from src.model.enums.daily_reward.DailyRewardPrizeSource import DailyRewardPrizeSource
 from src.model.enums.daily_reward.DailyRewardPrizeType import DailyRewardPrizeType
 from src.service.date_service import get_day_in_past, is_same_day
 from src.service.math_service import get_value_from_percentage
@@ -26,10 +27,12 @@ class DailyReward(BaseModel):
     total_amount: int | BigIntegerField = BigIntegerField()
     streak_count: int | IntegerField = IntegerField()
     limitation: str | DailyRewardLimitation = CharField(max_length=20)
-    prize_type: DailyRewardPrizeType | CharField = CharField(max_length=20)
-    prize_value: str | CharField = CharField(max_length=100)
+    prize_type: DailyRewardPrizeType | CharField = CharField(max_length=20, null=True)
+    prize_value: str | CharField = CharField(max_length=50, null=True)
+    prize_source: DailyRewardPrizeSource | CharField = CharField(max_length=20, null=True)
     group_chat: GroupChat | ForeignKeyField = ForeignKeyField(GroupChat, backref="daily_rewards")
-    message_id: int | IntegerField = IntegerField()
+    message_id: int | IntegerField = IntegerField(null=True)
+    message_id_prize: int | IntegerField = IntegerField(null=True)
 
     class Meta:
         db_table = "daily_reward"
@@ -165,18 +168,57 @@ class DailyReward(BaseModel):
         """
 
         prize_days = Env.DAILY_REWARD_STREAK_DAYS.get_int()
-        last_reward = self.get_last_streak_reward(self.user)
+        last_streak_reward = self.get_last_streak_reward(self.user)
 
-        remaining = prize_days - (prize_days % last_reward.streak_count)
+        # Not yet up to minimum streak days.
+        # Ex. Day 3 with prize days 7, so 4 days remaining
+        if last_streak_reward.streak_count < prize_days:
+            return prize_days - last_streak_reward.streak_count
 
-        # First day of new streak sequence
-        if remaining == 0:
-            return prize_days - 7
+        # Ex. Day 9 with prize days 7, so 5 days remaining
+        return prize_days - (last_streak_reward.streak_count % prize_days)
 
-        if remaining == prize_days:
-            return 0
+    def get_base_belly_prize_offer(self) -> int:
+        """
+        Get the base belly prize
+        :return: The base belly prize offer
+        """
 
-        return remaining
+        return self.total_amount
+
+    @staticmethod
+    def get_minimum_belly_prize() -> int:
+        """
+        Get the minimum belly prize
+        :return: The minimum belly prize
+        """
+
+        return 1
+
+    def get_maximum_belly_prize(self) -> int:
+        """
+        Get the maximum belly prize
+        :return: The maximum belly prize
+        """
+
+        return self.total_amount * 2
+
+    def should_award_prize(self) -> bool:
+        """
+        Should award prize
+        :return: Should award prize
+        """
+        if self.get_days_to_next_prize() != Env.DAILY_REWARD_STREAK_DAYS.get_int():
+            return False
+
+        # Award if it's the first claim of the day
+        rewards_today = (
+            DailyReward.select()
+            .where((DailyReward.user == self.user) & (DailyReward.date >= get_day_in_past()))
+            .count()
+        )
+
+        return rewards_today == 1
 
 
 DailyReward.create_table()

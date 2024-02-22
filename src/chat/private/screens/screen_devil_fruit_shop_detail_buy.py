@@ -79,7 +79,7 @@ async def manage(
 
     inline_keyboard.append([
         Keyboard(
-            phrases.KEY_VIEW,
+            phrases.KEY_MANAGE_DEVIL_FRUIT,
             screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
             info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id},
         )

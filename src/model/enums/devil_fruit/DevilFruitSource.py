@@ -6,3 +6,4 @@ class DevilFruitSource(IntEnum):
     ADMIN = 2
     USER = 3
     SHOP = 4
+    DAILY_REWARD_PRIZE = 5

@@ -10,7 +10,6 @@ from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.Command import Command
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
@@ -25,7 +24,11 @@ from src.service.bounty_service import (
     get_amount_from_string,
     add_or_remove_bounty,
 )
-from src.service.devil_fruit_service import give_devil_fruit_to_user, get_recap_text
+from src.service.devil_fruit_service import (
+    give_devil_fruit_to_user,
+    get_recap_text,
+    get_manage_deeplink_keyboard,
+)
 from src.service.message_service import full_message_send
 from src.service.string_service import get_belly_formatted
 
@@ -105,15 +108,9 @@ async def manage(
             )
             if ot_text:
                 # Add deeplink button
-                info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id}
-                inline_keyboard: list[list[Keyboard]] = [[
-                    Keyboard(
-                        phrases.KEY_MANAGE,
-                        screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
-                        info=info,
-                        is_deeplink=True,
-                    )
-                ]]
+                inline_keyboard: list[list[Keyboard]] = [
+                    [get_manage_deeplink_keyboard(devil_fruit)]
+                ]
                 await full_message_send(
                     context,
                     ot_text,

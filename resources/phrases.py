@@ -180,6 +180,9 @@ TEXT_YOU = "You"
 TEXT_STOLE = "stole"
 TEXT_OWE = "[owe]({})"
 
+TEXT_DAY = "day"
+TEXT_DAYS = "days"
+
 EXCEPTION_CHAT_ID_NOT_PROVIDED = "chat_id is None and update.effective_chat.id is None"
 EXCEPTION_NO_EDIT_MESSAGE = "new_message is False but update.callback_query is None"
 
@@ -255,6 +258,7 @@ KEY_RESET = "Reset"
 KEY_SHOP = Emoji.SHOP + " Shop"
 KEY_REMOVE = Emoji.DELETE + " Remove"
 KEY_BUY = "Buy"
+KEY_MANAGE_DEVIL_FRUIT = "Manage Devil Fruit"
 
 # Private chat
 PVT_TXT_START = (
@@ -351,6 +355,8 @@ GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in t
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = "Bet in private chat"
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
 GRP_KEY_GAME_PLAY = "Play"
+GRP_KEY_DAILY_REWARD_PRIZE_ACCEPT = Emoji.MONEY + " Accept offer"
+GRP_KEY_DAILY_REWARD_PRIZE_RANDOM = Emoji.GIFT + " Random prize"
 
 DATETIME_EXAMPLES = """
 Write the date using this format:
@@ -1935,9 +1941,10 @@ DEVIL_FRUIT_DETAIL_SELL_ALREADY_FOR_SALE = (
 DEVIL_FRUIT_SHOP_ITEM_TEXT = "{}\nPrice: ฿{}"
 DEVIL_FRUIT_SHOP_ITEM_TEXT_FILL_IN = "Devil Fruit"
 DEVIL_FRUIT_SHOP_ITEM_DETAIL_TEXT = "{}\n\n*Seller*: {}\n*Price*: ฿{}"
-# TODO after daily bonus is on, add that DFs for sale will appear in bonus message
 DEVIL_FRUIT_SHOP_LIST_NO_ITEMS = (
-    "There are currently no *Devil Fruits* for sale, please come back later"
+    "There are currently no *Devil Fruits* for sale, please come back later.\n\nYou will see any"
+    " Devil Fruits for sale in your daily reward message, by using the"
+    f" {CommandName.DAILY_REWARD.get_formatted()} in a Chat Group."
 )
 DEVIL_FRUIT_SHOP_ITEM_DETAIL_REMOVE_CONFIRMATION = (
     "Are you sure you want to remove this Devil Fruit from the Shop?\nYou will be able to put it"
@@ -2018,12 +2025,13 @@ PLUNDER_LOSE = (
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"
 
 DAILY_REWARD_ALREADY_COLLECTED = (
-    "You have already collected your daily reward, the next one will be available in *{}*"
+    "You have already collected your daily reward, the next one will be available in *{}*{}"
 )
 DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"
 DAILY_REWARD_GROUP_MESSAGE = (
-    "Here's your daily reward for today!\n\n{}\n\nCurrent streak: *{} day*\nDays to next"
-    " prize: *{}*"
+    "Here's your daily reward for today!\n\n{}\n\nCurrent streak: *{} {}*\nNext prize in:"
+    f" *{{}} {{}}*\n>_For every {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you"
+    " claim the daily reward, you will receive a special prize!_"
 )
 DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)"
 DAILY_REWARD_BONUS_LIMITATION_LOCATION_PARADISE = (
@@ -2042,3 +2050,17 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW = "Crew"
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP = "Crew MVP"
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
+DAILY_REWARD_PRIZE_REQUEST = (
+    "Congratulations for keeping your streak for the past"
+    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days!\nYou can either accept the offered prize or"
+    " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"
+    " your luck, you could obtain:\n• Random belly between ฿*{}* and"
+    f" ฿*{{}}* \\({Env.DAILY_REWARD_PRIZE_BELLY_PERCENTAGE.get_int()}% chance\\)\n• A SMILE Devil"
+    f" Fruit \\({Env.DAILY_REWARD_PRIZE_BELLY_PERCENTAGE.get_int()}% chance\\)"
+)
+DAILY_REWARD_PRIZE_CONFIRM = (
+    Emoji.CONFETTI
+    + "You have obtained the following prize:\n\n{}\n\n\n_Keep your streak for the next"
+    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days to claim another prize!_"
+)
+DAILY_REWARD_PRIZE_CONFIRM_BELLY = "Belly amount: ฿*{}*"

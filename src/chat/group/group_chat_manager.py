@@ -13,6 +13,9 @@ from src.chat.group.screens.screen_change_region import manage as manage_screen_
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
 from src.chat.group.screens.screen_daily_reward import manage as manage_screen_daily_reward
+from src.chat.group.screens.screen_daily_reward_prize import (
+    manage as manage_screen_daily_reward_prize,
+)
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
@@ -230,6 +233,9 @@ async def dispatch_screens(
 
         case Screen.GRP_DAILY_REWARD:  # Daily reward
             await manage_screen_daily_reward(update, context, user, group_chat)
+
+        case Screen.GRP_DAILY_REWARD_PRIZE:  # Daily reward prize
+            await manage_screen_daily_reward_prize(update, context, inbound_keyboard)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

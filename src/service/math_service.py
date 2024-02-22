@@ -32,6 +32,39 @@ def get_random_int(min_value: int, max_value: int) -> int:
     return random.randint(min_value, max_value)
 
 
+def get_random_key_based_on_probability(probability_dict: dict[any, float]) -> any:
+    """
+    This function returns a random key from a dictionary based on the probability associated with
+    each key.
+    The input dictionary, 'probability_dict', should have keys of any type and values of type
+    float, representing the probability associated with each key.
+
+    :param probability_dict: The dictionary containing keys and their associated probabilities
+    :return: A random key from the dictionary based on the associated probabilities
+    """
+
+    # Calculate the total sum of all probability values in the dictionary
+    total_probability = sum(probability_dict.values())
+
+    # Generate a random integer within the range of 0 to total_probability - 1
+    random_number = random.randint(0, total_probability - 1)
+
+    # Initialize a variable to accumulate the sum of probabilities
+    accumulated_probability = 0
+
+    # Iterate over each key-value pair in the dictionary
+    for key, probability in probability_dict.items():
+        # Add the current probability to the accumulated sum
+        accumulated_probability += probability
+
+        # If the accumulated sum is greater than the random number, return the current key
+        if accumulated_probability > random_number:
+            return key
+
+    # If no key is found that satisfies the condition, return the last key from the dictionary
+    return list(probability_dict.keys())[-1]
+
+
 def get_percentage_from_value(value: float, total: float, add_decimal=True) -> float:
     """
     Gets a percentage from a value
@@ -91,10 +124,9 @@ def subtract_percentage_from_value(value: float, percentage: float) -> float:
 def get_cumulative_percentage_sum(percentages: list[float]) -> float:
     """
     Calculate the cumulative sum of percentages.
-
-    This function takes a list of percentages and calculates the cumulative sum by iteratively adding each percentage to
-    the result and adjusting the remaining percentage for subsequent iterations.
-
+    This function takes a list of percentages and calculates the cumulative sum by iteratively
+    adding each percentage to the result and adjusting the remaining percentage for subsequent
+    iterations.
     :param percentages: A list of percentages to sum.
     :return: The cumulative sum of the percentages.
     """

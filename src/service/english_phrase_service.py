@@ -1,3 +1,6 @@
+from resources import phrases
+
+
 def determine_article(word) -> str:
     """
     Determines the article for the given word.
@@ -19,3 +22,13 @@ def get_word_with_article(word) -> str:
     """
 
     return f"{determine_article(word)} {word}"
+
+
+def day_or_days(count: int) -> str:
+    """
+    Returns the correct word for day or days
+
+    :param count: The count
+    :return: The correct word for day or days
+    """
+    return phrases.TEXT_DAY if count == 1 else phrases.TEXT_DAYS
