@@ -2033,7 +2033,7 @@ DAILY_REWARD_GROUP_MESSAGE = (
     f" *{{}} {{}}*\n>_For every {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you"
     " claim the daily reward, you will receive a special prize!_"
 )
-DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)"
+DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)\n>_{}_"
 DAILY_REWARD_BONUS_LIMITATION_LOCATION_PARADISE = (
     "\n>No bonus available due to being in Paradise while having enough Bounty for New World"
     " \\(฿{}\\)"
@@ -2045,9 +2045,23 @@ DAILY_REWARD_BONUS_LIMITATION_ARRESTED = "\n>No bonus available due to being arr
 DAILY_REWARD_NEXT = "\n\n>Next reward available in *{}*"
 DAILY_REWARD_NEXT_SPLIT = "\n\n>Daily reward is split into {} parts, next reward available in *{}*"
 DAILY_REWARD_BONUS_DESCRIPTION_STREAK = "Streak"
+DAILY_REWARD_BONUS_DESCRIPTION_STREAK_EXPLANATION = (
+    f"+{Env.DAILY_REWARD_BONUS_BASE_STREAK.get_int()}% for every consecutive day you claim the"
+    " reward"
+)
 DAILY_REWARD_BONUS_DESCRIPTION_LOCATION = "Location"
-DAILY_REWARD_BONUS_DESCRIPTION_CREW = "Crew"
+DAILY_REWARD_BONUS_DESCRIPTION_LOCATION_EXPLANATION = (
+    f"+{Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int()}% \\* current location level"
+)
+DAILY_REWARD_BONUS_DESCRIPTION_CREW_LEVEL = "Crew Level"
+DAILY_REWARD_BONUS_DESCRIPTION_CREW_LEVEL_EXPLANATION = (
+    f"+{Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int()}% \\* Crew level"
+)
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP = "Crew MVP"
+DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
+    "If your bounty is higher than your Crew's average bounty"
+)
+
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
 DAILY_REWARD_PRIZE_REQUEST = (

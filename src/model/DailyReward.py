@@ -140,11 +140,11 @@ class DailyReward(BaseModel):
                 case DailyRewardBonusType.LOCATION:
                     value = Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int() * user.location_level
 
-                # Crew member
-                case DailyRewardBonusType.CREW:
+                # Crew level
+                case DailyRewardBonusType.CREW_LEVEL:
                     if not user.is_crew_member():
                         continue
-                    value = Env.DAILY_REWARD_BONUS_CREW.get_int()
+                    value = Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int() * user.crew.level
 
                 # Crew MVP
                 case DailyRewardBonusType.CREW_MVP:

@@ -23,7 +23,7 @@ class CommandName(StrEnum):
     DEVIL_FRUIT_SELL = "dfsell"
     PLUNDER = "steal"
     SETTINGS = "settings"
-    DAILY_REWARD = "daily"
+    DAILY_REWARD = "reward"
 
     def get_formatted(self):
         """

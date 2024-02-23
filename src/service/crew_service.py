@@ -27,7 +27,6 @@ from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.ChatWarning import ChatWarning
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import get_belly_formatted
 from src.service.date_service import (
     get_remaining_duration,
     get_datetime_in_future_days,
@@ -37,6 +36,7 @@ from src.service.location_service import update_location
 from src.service.message_service import get_deeplink
 from src.service.notification_service import send_notification
 from src.utils.math_utils import get_value_from_percentage
+from src.utils.string_utils import get_belly_formatted
 
 
 async def add_member(

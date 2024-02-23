@@ -475,8 +475,10 @@ DAILY_REWARD_BONUS_BASE_LOCATION = Environment(
 DAILY_REWARD_BONUS_BASE_STREAK = Environment("DAILY_REWARD_BONUS_BASE_STREAK", default_value="1")
 # Streak max Bonus. Default: 100
 DAILY_REWARD_BONUS_MAX_STREAK = Environment("DAILY_REWARD_BONUS_MAX_STREAK", default_value="100")
-# Crew member Bonus. Default: 20
-DAILY_REWARD_BONUS_CREW = Environment("DAILY_REWARD_BONUS_CREW", default_value="20")
+# Crew level base Bonus. Default: 10
+DAILY_REWARD_BONUS_BASE_CREW_LEVEL = Environment(
+    "DAILY_REWARD_BONUS_BASE_CREW_LEVEL", default_value="10"
+)
 # Crew members with bounty higher than crew average. Default: 20
 DAILY_REWARD_BONUS_CREW_MVP = Environment("DAILY_REWARD_BONUS_CREW_MVP", default_value="20")
 # Every how many streak days is a prize given. Default: 7

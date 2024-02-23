@@ -239,7 +239,7 @@ class Crew(BaseModel):
             & (CrewAbility.ability_type == ability_type.value)
         )
 
-    def get_next_level_upgrade_type(self):
+    def get_next_level_upgrade_type(self) -> CrewLevelUpgradeType:
         """
         Returns the next level upgrade type
         :return: The next level upgrade type

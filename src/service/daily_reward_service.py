@@ -32,7 +32,10 @@ def get_text(reward: DailyReward) -> str:
     else:
         for bonus in bonus_list:
             bonus_text += phrases.DAILY_REWARD_BONUS.format(
-                bonus.get_description(), bonus.value, get_belly_formatted(bonus.amount)
+                bonus.get_description(),
+                bonus.value,
+                get_belly_formatted(bonus.amount),
+                bonus.get_explanation(),
             )
 
     return phrases.DAILY_REWARD.format(

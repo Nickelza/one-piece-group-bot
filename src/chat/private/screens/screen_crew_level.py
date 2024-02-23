@@ -6,6 +6,7 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
+from src.model.enums.crew.CrewLevelUpgradeType import CrewLevelUpgradeType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
 from src.service.message_service import full_message_send
@@ -58,7 +59,7 @@ def get_level_up_recap_text(crew: Crew) -> str:
     :return: The level up recap text
     """
 
-    upgrade_type = crew.get_next_level_upgrade_type()
+    upgrade_type: CrewLevelUpgradeType = crew.get_next_level_upgrade_type()
     upgrade_type_current_count = crew.get_upgrade_type_count(upgrade_type)
     return phrases.CREW_LEVEL_UP_RECAP.format(
         upgrade_type.get_description(),
