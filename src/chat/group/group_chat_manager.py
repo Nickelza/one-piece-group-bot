@@ -98,11 +98,8 @@ async def manage(
 
     # Insert or update user, with message count
     try:
-        # Ignore self bot messages or from linked channel
-        if (
-            update.effective_user.is_bot
-            or update.message.sender_chat.id == Env.OPD_CHANNEL_ID.get_int()
-        ):
+        # Ignore self bot messages
+        if update.effective_user.is_bot and user is None:
             return
     except AttributeError:
         pass
