@@ -28,6 +28,7 @@ class Crew(BaseModel):
     level: int | IntegerField = IntegerField(default=1)
     max_abilities: int | IntegerField = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
     can_promote_first_mate: bool = BooleanField(default=True)
+    can_promote_captain: bool = BooleanField(default=True)
     max_members: int | IntegerField = IntegerField(default=Env.CREW_MAX_MEMBERS.get_int())
     description: str | CharField = CharField(
         max_length=Env.CREW_DESCRIPTION_MAX_LENGTH.get_int(), null=True

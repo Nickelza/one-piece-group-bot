@@ -64,6 +64,7 @@ class User(BaseModel):
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="crew_members", null=True)
     crew_join_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     crew_role: int | SmallIntegerField = SmallIntegerField(null=True)
+    crew_promotion_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     conscription_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     can_create_crew: bool | BooleanField = BooleanField(default=True)
     can_join_crew: bool | BooleanField = BooleanField(default=True)

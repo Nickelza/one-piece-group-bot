@@ -30,7 +30,7 @@ from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import BellyValidationException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.date_service import get_next_run, get_previous_run
+from src.service.date_service import get_next_run, get_previous_run, get_remaining_duration
 from src.service.davy_back_fight_service import add_contribution as add_dbf_contribution
 from src.service.devil_fruit_service import get_ability_value
 from src.service.income_tax_service import (
@@ -129,6 +129,9 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Reset level
     Crew.reset_level()
+
+    # Reset can promote to Captain
+    Crew.update(can_promote_captain=True).execute()
 
     if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
         ot_text = phrases.BOUNTY_RESET
@@ -455,6 +458,15 @@ def get_next_bounty_reset_time() -> datetime.datetime:
             return next_run_time
 
         start_datetime = next_run_time + datetime.timedelta(seconds=1)
+
+
+def get_duration_to_next_bounty_reset() -> str:
+    """
+    Get the remaining duration to the next bounty reset
+    :return: The remaining duration to the next bounty reset
+    """
+
+    return get_remaining_duration(get_next_bounty_reset_time())
 
 
 def get_previous_bounty_reset_time() -> datetime.datetime:

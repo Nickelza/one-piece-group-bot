@@ -100,6 +100,7 @@ async def remove_member(
 
     crew_member.crew = None
     crew_member.crew_role = None
+    crew_member.crew_promotion_date = None
     crew_member.crew_join_date = None
 
     if disable_user_can_join_crew:

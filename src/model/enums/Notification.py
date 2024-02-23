@@ -108,6 +108,7 @@ class NotificationType(IntEnum):
     CREW_CONSCRIPTION_START_CAPTAIN = 35
     CREW_CONSCRIPTION_END = 36
     DEVIL_FRUIT_SOLD = 37
+    CREW_CAPTAIN_PROMOTION = 38
 
 
 class Notification:
@@ -286,9 +287,9 @@ class CrewDisbandWarningNotification(Notification):
 
     def build(self) -> str:
         """Builds the notification."""
-        from src.service.bounty_service import get_next_bounty_reset_time
+        from src.service.bounty_service import get_duration_to_next_bounty_reset
 
-        return self.text.format(get_remaining_duration(get_next_bounty_reset_time()))
+        return self.text.format(get_duration_to_next_bounty_reset())
 
 
 class GameTurnNotification(Notification):
@@ -1332,6 +1333,23 @@ class DevilFruitSoldNotification(Notification):
         )
 
 
+class CrewCaptainPromotionNotification(Notification):
+    """Class for crew captain promotion notifications."""
+
+    def __init__(self):
+        """
+        Constructor
+        """
+
+        super().__init__(
+            NotificationCategory.CREW,
+            NotificationType.CREW_CAPTAIN_PROMOTION,
+            phrases.CREW_CAPTAIN_PROMOTION_NOTIFICATION,
+            phrases.CREW_CAPTAIN_PROMOTION_NOTIFICATION_DESCRIPTION,
+            phrases.CREW_CAPTAIN_PROMOTION_NOTIFICATION_KEY,
+        )
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1370,6 +1388,7 @@ NOTIFICATIONS = [
     DavyBackFightStartNotification(),
     DavyBackFightEndNotification(),
     DevilFruitSoldNotification(),
+    CrewCaptainPromotionNotification(),
 ]
 
 

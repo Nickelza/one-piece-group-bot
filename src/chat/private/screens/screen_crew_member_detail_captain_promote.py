@@ -6,11 +6,12 @@ from telegram.ext import ContextTypes
 import resources.phrases as phrases
 from src.model.Crew import Crew
 from src.model.User import User
-from src.model.enums.Notification import CrewFirstMatePromotionNotification
+from src.model.enums.Notification import CrewCaptainPromotionNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
+from src.service.bounty_service import get_duration_to_next_bounty_reset
 from src.service.crew_service import get_crew
 from src.service.message_service import (
     full_message_send,
@@ -24,7 +25,7 @@ async def manage(
     update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
 ) -> None:
     """
-    Manage the Crew First Mate promote screen
+    Manage the Crew Captain promote screen
     :param update: The update object
     :param context: The context object
     :param user: The user object
@@ -38,16 +39,18 @@ async def manage(
     try:
         crew: Crew = get_crew(user=member, validate_against_crew=user.crew)
 
-        # Crew already has a First Mate
-        if crew.has_first_mate():
+        # Member is not First Mate
+        if not member.is_crew_first_mate():
             raise CrewValidationException(
-                phrases.CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE
+                phrases.CREW_PROMOTE_TO_CAPTAIN_CANNOT_PROMOTE_NOT_FIRST_MATE
             )
 
-        # Crew cannot promote First Mate
-        if not crew.can_promote_first_mate:
+        # Crew cannot promote Captain
+        if not crew.can_promote_captain:
             raise CrewValidationException(
-                phrases.CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD
+                phrases.CREW_PROMOTE_TO_CAPTAIN_CANNOT_PROMOTE_UNTIL_NEXT_RESET.format(
+                    get_duration_to_next_bounty_reset()
+                )
             )
 
         # Crew in a Davy Back Fight or has a Penalty
@@ -65,8 +68,8 @@ async def manage(
         return
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
-        # Send promote to First Mate confirmation request
-        ot_text = phrases.CREW_PROMOTE_TO_FIRST_MATE_CONFIRMATION.format(
+        # Send promote to Captain confirmation request
+        ot_text = phrases.CREW_PROMOTE_TO_CAPTAIN_CONFIRMATION.format(
             mention_markdown_user(member)
         )
         inline_keyboard: list[list[Keyboard]] = [
@@ -88,16 +91,20 @@ async def manage(
         )
         return
 
-    # Appoint to First Mate
-    crew.can_promote_first_mate = False
-    member.crew_role = CrewRole.FIRST_MATE
-    member.crew_promotion_date = datetime.datetime.now()
+    # Appoint to Captain
+    crew.can_promote_captain = False
+
+    member.crew_role = CrewRole.CAPTAIN
+    user.crew_role = CrewRole.FIRST_MATE
+    member.crew_promotion_date = user.crew_promotion_date = datetime.datetime.now()
+
     crew.save()
     member.save()
+    user.save()
 
     # Send success message
-    ot_text = phrases.CREW_PROMOTE_TO_FIRST_MATE_SUCCESS.format(mention_markdown_user(member))
+    ot_text = phrases.CREW_PROMOTE_TO_CAPTAIN_SUCCESS.format(mention_markdown_user(member))
     await full_message_send(context, ot_text, update=update, inbound_keyboard=inbound_keyboard)
 
     # Send notification
-    await send_notification(context, member, CrewFirstMatePromotionNotification(), update=update)
+    await send_notification(context, member, CrewCaptainPromotionNotification(), update=update)

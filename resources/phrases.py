@@ -291,6 +291,7 @@ PVT_KEY_CREW_DISBAND = Emoji.DELETE + " Disband"
 PVT_KEY_CREW_MEMBER_REMOVE = "Expel"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = "Promote to First Mate"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = "Demote from First Mate"
+PVT_KEY_CREW_MEMBER_CAPTAIN_PROMOTE = "Promote to Captain"
 PVT_KEY_CREW_MEMBER_POST_BAIL = "Post bail"
 PVT_KEY_CREW_ABILITY = "Abilities"
 PVT_KEY_CREW_ABILITY_ACTIVATE = "Activate"
@@ -986,9 +987,9 @@ CREW_PROMOTE_TO_FIRST_MATE_CREW_ALREADY_HAS_FIRST_MATE = "The Crew already has a
 CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_UNTIL_NEXT_LEADERBOARD = (
     "You cannot promote a member to First Mate until the next weekly leaderboard in {}"
 )
-CREW_PROMOTE_TO_FIRST_MATE_CANNOT_PROMOTE_DAVY_BACK_FIGHT = (
-    "You cannot promote a member to First Mate during an active Davy Back Fight or the penalty"
-    " period following a loss"
+CREW_PROMOTE_CANNOT_PROMOTE_DAVY_BACK_FIGHT = (
+    "You cannot promote a member during an active Davy Back Fight or the penalty period following "
+    "a loss"
 )
 CREW_FIRST_MATE_PRIVILEGES = (
     "\n• Accept new members "
@@ -1019,6 +1020,22 @@ CREW_POST_BAIL_CONFIRMATION_REQUEST = (
     "\n\nTotal bail: *฿{}*"
 )
 CREW_POST_BAIL_SUCCESS = "Bail posted successfully"
+
+# Crew - Promote to Captain
+CREW_PROMOTE_TO_CAPTAIN_CANNOT_PROMOTE_NOT_FIRST_MATE = (
+    "You can only promote a First Mate to Captain"
+)
+CREW_PROMOTE_TO_CAPTAIN_CANNOT_PROMOTE_UNTIL_NEXT_RESET = (
+    "You cannot promote a member to Captain until the next bounty reset in {}"
+)
+CREW_PROMOTE_TO_CAPTAIN_CONFIRMATION = (
+    "Are you sure you want to promote {} to Captain?\nYou will be demoted to First"
+    f" Mate.\n\n{Emoji.WARNING_STRONG}Attention: This action cannot be undone and you will"
+    " permanently lose ownership of your Crew unless you are promoted back to Captain by the new"
+    " Captain"
+)
+CREW_PROMOTE_TO_CAPTAIN_SUCCESS = "{} has been promoted to Captain"
+
 # Crew abilities
 CREW_ABILITIES = (
     "*Crew Abilities*\n\nAbilities mimic the effects of Devil Fruits and are extended to all"
@@ -1404,6 +1421,15 @@ CREW_FIRST_MATE_DEMOTION_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are demoted from First Mate of the Crew."
 )
 CREW_FIRST_MATE_DEMOTION_NOTIFICATION_KEY = "First Mate demotion"
+# Notification - Crew Captain promotion
+CREW_CAPTAIN_PROMOTION_NOTIFICATION = (
+    "Congratulations! You have been promoted to Captain of the Crew"
+)
+CREW_CAPTAIN_PROMOTION_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when you are promoted to Captain of the Crew."
+)
+CREW_CAPTAIN_PROMOTION_NOTIFICATION_KEY = "Captain promotion"
+
 # Notification - Crew join request accepted
 CREW_JOIN_REQUEST_ACCEPTED_NOTIFICATION = (
     "Congratulations! Your request to join *{}* has been accepted"

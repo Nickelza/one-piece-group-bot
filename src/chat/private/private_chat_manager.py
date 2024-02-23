@@ -57,6 +57,9 @@ from src.chat.private.screens.screen_crew_member import manage as manage_screen_
 from src.chat.private.screens.screen_crew_member_detail import (
     manage as manage_screen_crew_member_detail,
 )
+from src.chat.private.screens.screen_crew_member_detail_captain_promote import (
+    manage as manage_screen_crew_member_detail_captain_promote,
+)
 from src.chat.private.screens.screen_crew_member_detail_first_mate_demote import (
     manage as manage_screen_crew_member_detail_first_mate_demote,
 )
@@ -538,6 +541,12 @@ async def dispatch_screens(
             # Devil Fruit Shop detail remove
             case Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_REMOVE:
                 await manage_screen_devil_fruit_shop_detail_remove(
+                    update, context, inbound_keyboard, user
+                )
+
+            # Crew Member Detail Captain Promote
+            case Screen.PVT_CREW_MEMBER_DETAIL_CAPTAIN_PROMOTE:
+                await manage_screen_crew_member_detail_captain_promote(
                     update, context, inbound_keyboard, user
                 )
 

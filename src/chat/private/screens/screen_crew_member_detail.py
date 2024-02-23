@@ -69,6 +69,18 @@ async def manage(
                     inbound_info=inbound_keyboard.info,
                 )
             ])
+
+        # Promote to Captain (only if the member is the First Mate)
+        if member.is_crew_first_mate():
+            inline_keyboard.append([
+                Keyboard(
+                    phrases.PVT_KEY_CREW_MEMBER_CAPTAIN_PROMOTE,
+                    screen=Screen.PVT_CREW_MEMBER_DETAIL_CAPTAIN_PROMOTE,
+                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ])
+
         # Remove member
         inline_keyboard.append([
             Keyboard(

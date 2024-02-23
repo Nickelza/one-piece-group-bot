@@ -15,12 +15,11 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import (
-    get_next_bounty_reset_time,
     add_or_remove_bounty,
     validate_amount,
     get_amount_from_string,
+    get_duration_to_next_bounty_reset,
 )
-from src.service.date_service import get_remaining_duration
 from src.service.message_service import (
     full_message_send,
     escape_valid_markdown_chars,
@@ -214,9 +213,8 @@ async def validate(
 
         # User cannot create a crew
         if not user.can_create_crew:
-            ot_text = phrases.CREW_CANNOT_CREATE_CREW.format(
-                get_remaining_duration(get_next_bounty_reset_time())
-            )
+            ot_text = phrases.CREW_CANNOT_CREATE_CREW.format(get_duration_to_next_bounty_reset())
+
             raise CrewValidationException(ot_text)
 
         # User does not have enough bounty
