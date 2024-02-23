@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 
 from peewee import *
@@ -78,7 +77,6 @@ class BountyLoan(BaseModel):
         # noinspection PyTypeChecker
         await add_or_remove_bounty(self.loaner, amount, check_for_loan=False, update=update)
 
-        logging.info(f"Loan {self.id} repaid {amount} by {self.borrower.id} to {self.loaner.id}")
         self.borrower.save()
         self.loaner.save()
 
