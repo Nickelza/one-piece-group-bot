@@ -129,7 +129,7 @@ async def keyboard_interaction(
             caption=ot_text,
             update=update,
             add_delete_button=True,
-            authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+            authorized_users=[captain],
             edit_only_caption_and_keyboard=True,
         )
         return
@@ -148,6 +148,6 @@ async def keyboard_interaction(
         caption=ot_text,
         update=update,
         add_delete_button=True,
-        authorized_users=[captain.tg_user_id, invited_user.tg_user_id],
+        authorized_users=[captain],
         edit_only_caption_and_keyboard=True,
     )

@@ -55,7 +55,6 @@ class Keyboard:
             previous_screen_list if previous_screen_list is not None else []
         )
         self.url: str = url
-        self.callback_data: str = self.create_callback_data()
         self.inherit_authorized_users: bool = inherit_authorized_users
         self.authorized_users: list[User] = (
             authorized_users if authorized_users is not None else []
@@ -78,6 +77,8 @@ class Keyboard:
 
         if self.is_deeplink:
             self.set_deeplink_url()
+
+        self.callback_data: str = self.create_callback_data()
 
     def create_callback_data(self) -> str:
         """
@@ -108,6 +109,19 @@ class Keyboard:
         for key, value in info_with_screen.items():
             if isinstance(value, bool):
                 info_with_screen[key] = int(value)
+
+        # Set authorized users id
+        if self.authorized_users:
+            if ReservedKeyboardKeys.AUTHORIZED_USERS not in info_with_screen:
+                info_with_screen[ReservedKeyboardKeys.AUTHORIZED_USERS] = []
+            info_with_screen[ReservedKeyboardKeys.AUTHORIZED_USERS] += [
+                user.id for user in self.authorized_users
+            ]
+
+        if ReservedKeyboardKeys.AUTHORIZED_USERS in info_with_screen:
+            info_with_screen[ReservedKeyboardKeys.AUTHORIZED_USERS] = list(
+                set(info_with_screen[ReservedKeyboardKeys.AUTHORIZED_USERS])
+            )
 
         return json.dumps(info_with_screen, separators=(",", ":"))
 

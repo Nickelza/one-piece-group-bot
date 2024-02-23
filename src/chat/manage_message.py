@@ -29,6 +29,7 @@ from src.model.error.CommonChatError import CommonChatException
 from src.model.error.CustomException import (
     CommandValidationException,
     NavigationLimitReachedException,
+    AnonymousAdminException,
 )
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
@@ -51,7 +52,7 @@ from src.service.message_service import (
     message_is_reply,
     escape_valid_markdown_chars,
 )
-from src.service.user_service import user_is_boss, user_is_muted
+from src.service.user_service import user_is_boss, user_is_muted, get_effective_tg_user_id
 
 
 def init() -> MySQLDatabase:
@@ -107,26 +108,26 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     :param is_callback: True if the message is a callback
     :return: None
     """
-    db = init()
-
     now = datetime.now()
     current_tg_user_id = (
         str(update.effective_user.id) if update.effective_user is not None else None
     )
 
+    # Sending message disguised as channel, ignore
     if current_tg_user_id == "777000":
-        end(db)
         return
 
     if current_tg_user_id is not None:
         if not await check_current_requests(context):
-            end(db)
             return
 
         set_user_context_data(context, ContextDataKey.LAST_REQUEST, now)
 
+    db = init()
     try:
         await manage_after_db(update, context, is_callback)
+    except AnonymousAdminException:  # Wasn't able to infer the user
+        pass
     except Exception as e:
         logging.error(update)
         logging.error(e, exc_info=True)
@@ -158,7 +159,10 @@ async def manage_after_db(
 
     user = User()
     if update.effective_user is not None:
-        user: User = get_user(update.effective_user, should_save=False)
+        tg_user_id = await get_effective_tg_user_id(
+            update.effective_user, update.effective_message
+        )
+        user: User = await get_user(tg_user_id, update.effective_user, should_save=False)
 
         # Check if the user is authorized
         if (
@@ -261,8 +265,12 @@ async def manage_after_db(
         if keyboard is None:
             try:
                 if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
-                    target_user: User = get_user(
-                        update.effective_message.reply_to_message.from_user
+                    tg_user_id = await get_effective_tg_user_id(
+                        update.effective_message.reply_to_message.from_user,
+                        update.effective_message,
+                    )
+                    target_user: User = await get_user(
+                        tg_user_id, update.effective_message.reply_to_message.from_user
                     )
             except AttributeError:
                 pass
@@ -390,9 +398,9 @@ async def validate(
     """
 
     # Validate keyboard interaction
-    if is_callback and ReservedKeyboardKeys.AUTHORIZED_USER in inbound_keyboard.info:
+    if is_callback and ReservedKeyboardKeys.AUTHORIZED_USERS in inbound_keyboard.info:
         if (
-            int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USER]
+            int(user.id) not in inbound_keyboard.info[ReservedKeyboardKeys.AUTHORIZED_USERS]
         ):  # Unauthorized
             await full_message_send(
                 context,
@@ -564,23 +572,29 @@ async def validate(
     return True
 
 
-def get_user(effective_user: TelegramUser, should_save: bool = True) -> User:
+async def get_user(
+    tg_user_id: str, effective_user: TelegramUser, should_save: bool = True
+) -> User:
     """
     Create or update the user
+    :param tg_user_id: The Telegram user ID
     :param effective_user: The Telegram user
     :param should_save: True if the user should be saved
     :return: The user
     """
 
     # Insert or update user
-    user = User.get_or_none(User.tg_user_id == effective_user.id)
+    user = User.get_or_none(User.tg_user_id == tg_user_id)
     if user is None:
         user = User()
-        user.tg_user_id = effective_user.id
+        user.tg_user_id = tg_user_id
 
-    user.tg_first_name = effective_user.first_name
-    user.tg_last_name = effective_user.last_name
-    user.tg_username = effective_user.username
+    # Update name only if not anonymous
+    if effective_user.id == int(tg_user_id):
+        user.tg_first_name = effective_user.first_name
+        user.tg_last_name = effective_user.last_name
+        user.tg_username = effective_user.username
+
     user.last_message_date = datetime.now()
     user.is_active = True
 

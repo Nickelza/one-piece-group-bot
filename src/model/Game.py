@@ -16,27 +16,31 @@ class Game(BaseModel):
     Game class
     """
 
-    id = PrimaryKeyField()
-    challenger = ForeignKeyField(
+    id: int | PrimaryKeyField = PrimaryKeyField()
+    challenger: User | ForeignKeyField = ForeignKeyField(
         User, backref="game_challengers", on_delete="CASCADE", on_update="CASCADE"
     )
-    opponent = ForeignKeyField(
+    opponent: User | ForeignKeyField = ForeignKeyField(
         User, backref="game_opponents", on_delete="CASCADE", on_update="CASCADE", null=True
     )
-    type = SmallIntegerField(null=True)
-    board = CharField(max_length=9999, null=True)
-    date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=GameStatus.AWAITING_SELECTION)
-    group_chat = ForeignKeyField(
+    type: GameType | SmallIntegerField = SmallIntegerField(null=True)
+    board: str | CharField = CharField(max_length=9999, null=True)
+    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    status: GameStatus | SmallIntegerField = SmallIntegerField(
+        default=GameStatus.AWAITING_SELECTION
+    )
+    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
         GroupChat,
         null=True,
         backref="game_groups_chats",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    message_id = IntegerField(null=True)
-    wager = BigIntegerField(null=True)
-    last_interaction_date = DateTimeField(default=datetime.datetime.now)
+    message_id: int | IntegerField = IntegerField(null=True)
+    wager: int | BigIntegerField = BigIntegerField(null=True)
+    last_interaction_date: datetime.datetime | DateTimeField = DateTimeField(
+        default=datetime.datetime.now
+    )
 
     class Meta:
         db_table = "game"
@@ -228,6 +232,14 @@ class Game(BaseModel):
         """
 
         return GameStatus(self.status)
+
+    def get_players(self) -> list[User]:
+        """
+        Get the players
+        :return: The players
+        """
+
+        return [self.challenger, self.opponent]
 
 
 Game.create_table()

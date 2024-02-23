@@ -10,7 +10,7 @@ class ReservedKeyboardKeys(StrEnum):
     TOGGLE = "x"
     PAGE = "w"
     CONFIRM = "v"
-    AUTHORIZED_USER = "u"
+    AUTHORIZED_USERS = "u"
     RESET = "t"
     FILTER = "s"
     NUMBER = "r"

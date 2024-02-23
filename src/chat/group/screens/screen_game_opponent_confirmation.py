@@ -67,7 +67,7 @@ async def manage(
                 caption=ot_text,
                 update=update,
                 add_delete_button=True,
-                authorized_users=[game.challenger, game.opponent],
+                authorized_users=game.get_players(),
                 edit_only_caption_and_keyboard=True,
             )
 

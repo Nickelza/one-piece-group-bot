@@ -92,18 +92,17 @@ def get_chat_id(
     return update.effective_chat.id
 
 
-def get_keyboard(
+async def get_keyboard(
     keyboard: list[list[Keyboard]],
     context: ContextTypes.DEFAULT_TYPE,
     update: Update = None,
     add_delete_button: bool = False,
-    authorized_users_tg_ids: list = None,
+    authorized_users: list[User] = None,
     inbound_keyboard: Keyboard = None,
     only_authorized_users_can_interact: bool = True,
     excluded_keys_from_back_button: list[str] = None,
     back_screen_index: int = 0,
-    use_close_delete: bool = False,
-    should_add_current_user_to_authorized: bool = True,
+    delete_button_text: str = None,
     user: User = None,
     add_back_button: bool = True,
 ) -> InlineKeyboardMarkup | None:
@@ -114,20 +113,20 @@ def get_keyboard(
     :param context: The context
     :param update: Update object
     :param add_delete_button: True if the delete button should be added
-    :param authorized_users_tg_ids: List of user ids that are allowed to delete the message
+    :param authorized_users: List of user ids that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object
     :param only_authorized_users_can_interact: True if only authorized users can interact with the
     keyboard
     :param excluded_keys_from_back_button: List of keys that should not be added to the back button
     info
     :param back_screen_index: Index of the screen to go back to from previous_screens. Default: 0
-    :param use_close_delete: True if the close button should be used instead of the delete button
-    :param should_add_current_user_to_authorized: True if the current user should be added to the
+    :param delete_button_text: Text to be used for the delete button
     authorized users list
     :param user: User object
     :param add_back_button: True if the back button should be added to the keyboard if possible
     :return: Keyboard markup
     """
+    from src.service.user_service import get_effective_tg_user_id
 
     # Do not validate user interaction for private chats
     if update is not None:
@@ -135,22 +134,24 @@ def get_keyboard(
         if message_source is MessageSource.ND:
             only_authorized_users_can_interact = False
 
-    if authorized_users_tg_ids is None:
-        authorized_users_tg_ids = []
+    if authorized_users is None:
+        authorized_users: list[User] = []
+    # Remove None values from authorized users, could happen for example for games where the
+    # opponent is not yet set
+    authorized_users = [u for u in authorized_users if u is not None]
+
     try:
-        if (
-            update.effective_user.id not in authorized_users_tg_ids
-            and should_add_current_user_to_authorized
-        ):
-            authorized_users_tg_ids.append(update.effective_user.id)
+        # Current user not in authorized users
+        if not any(int(u.tg_user_id) == update.effective_user.id for u in authorized_users):
+            # Get the user that sent the update. Could per user parameter,but to be sure let's
+            # re-select it
+            user_from_update: User = User.get(
+                User.tg_user_id
+                == await get_effective_tg_user_id(update.effective_user, update.effective_message)
+            )
+            authorized_users.append(user_from_update)
     except AttributeError:
         pass
-
-    authorized_users_ids: list[int] = []
-    for tg_user_id in authorized_users_tg_ids:
-        _user: User = User.get_or_none(User.tg_user_id == tg_user_id)
-        if _user is not None:
-            authorized_users_ids.append(_user.id)
 
     keyboard_markup = None
     if keyboard is not None or add_delete_button is True or inbound_keyboard is not None:
@@ -205,22 +206,22 @@ def get_keyboard(
                                         update is not None
                                         and update.effective_chat.type != Chat.PRIVATE
                                     ):
-                                        button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = (
-                                            authorized_users_ids
-                                        )
+                                        button.info[ReservedKeyboardKeys.AUTHORIZED_USERS] = [
+                                            u.id for u in authorized_users
+                                        ]
                                 elif (
                                     not button.inherit_authorized_users
                                     and len(button.authorized_users) > 0
                                 ):
-                                    button.info[ReservedKeyboardKeys.AUTHORIZED_USER] = [
-                                        u.id for u in button.authorized_users if u is not None
+                                    button.info[ReservedKeyboardKeys.AUTHORIZED_USERS] = [
+                                        u.id for u in button.authorized_users
                                     ]
 
                             if (
-                                ReservedKeyboardKeys.AUTHORIZED_USER in button.info
-                                and len(button.info[ReservedKeyboardKeys.AUTHORIZED_USER]) == 0
+                                ReservedKeyboardKeys.AUTHORIZED_USERS in button.info
+                                and len(button.info[ReservedKeyboardKeys.AUTHORIZED_USERS]) == 0
                             ):
-                                del button.info[ReservedKeyboardKeys.AUTHORIZED_USER]
+                                del button.info[ReservedKeyboardKeys.AUTHORIZED_USERS]
 
                             button.refresh_callback_data()
 
@@ -240,12 +241,10 @@ def get_keyboard(
                 keyboard_list.append(keyboard_row)
 
         if add_delete_button is True:
-            if not len(authorized_users_ids) > 0:
+            if not len(authorized_users) > 0:
                 raise Exception("No authorized users provided for delete button")
 
-            delete_button = get_delete_button(
-                authorized_users_ids, use_close_delete=use_close_delete
-            )
+            delete_button = get_delete_button(authorized_users, button_text=delete_button_text)
             keyboard_list.append([
                 InlineKeyboardButton(
                     delete_button.text,
@@ -330,7 +329,7 @@ async def full_message_send(
     disable_web_page_preview: bool = True,
     allow_sending_without_reply: bool = True,
     add_delete_button: bool = False,
-    authorized_users: list[str] = None,
+    authorized_users: list[User] = None,
     inbound_keyboard: Keyboard = None,
     send_in_private_chat: bool = False,
     only_authorized_users_can_interact: bool = True,
@@ -368,7 +367,7 @@ async def full_message_send(
     :param allow_sending_without_reply: True if the message should be sent if message to be replied
     to is not found
     :param add_delete_button: True if the delete button should be added
-    :param authorized_users: List of tg user ids that are allowed to delete the message
+    :param authorized_users: List of users that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added to
     the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat. Not necessary
@@ -422,17 +421,17 @@ async def full_message_send(
     chat_id = get_chat_id(
         update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat
     )
-    keyboard_markup = get_keyboard(
+    keyboard_markup = await get_keyboard(
         keyboard,
         context,
         update=update,
         add_delete_button=add_delete_button,
-        authorized_users_tg_ids=authorized_users,
+        authorized_users=authorized_users,
         inbound_keyboard=inbound_keyboard,
         only_authorized_users_can_interact=only_authorized_users_can_interact,
         excluded_keys_from_back_button=excluded_keys_from_back_button,
         back_screen_index=back_screen_index,
-        use_close_delete=use_close_delete,
+        delete_button_text=phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else None,
         user=user,
         add_back_button=add_back_button,
     )
@@ -543,7 +542,7 @@ async def full_media_send(
     edit_only_keyboard: bool = False,
     edit_only_caption_and_keyboard: bool = False,
     add_delete_button: bool = False,
-    authorized_users: list = None,
+    authorized_users: list[User] = None,
     inbound_keyboard: Keyboard = None,
     send_in_private_chat: bool = False,
     only_authorized_users_can_interact: bool = True,
@@ -577,7 +576,7 @@ async def full_media_send(
     :param edit_only_caption_and_keyboard: If only the caption and keyboard should be edited. If
     keyboard is None, it will be removed
     :param add_delete_button: True if the delete button should be added
-    :param authorized_users: List of user ids that are allowed to delete the message
+    :param authorized_users: List of users that are allowed to delete the message
     :param inbound_keyboard: Inbound Keyboard object. If not None, a back button will be added
     to the keyboard
     :param send_in_private_chat: True if the message should be sent in private chat
@@ -639,12 +638,12 @@ async def full_media_send(
     chat_id = get_chat_id(
         update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat
     )
-    keyboard_markup = get_keyboard(
+    keyboard_markup = await get_keyboard(
         keyboard,
         context,
         update=update,
         add_delete_button=add_delete_button,
-        authorized_users_tg_ids=authorized_users,
+        authorized_users=authorized_users,
         inbound_keyboard=inbound_keyboard,
         only_authorized_users_can_interact=only_authorized_users_can_interact,
     )
@@ -779,7 +778,7 @@ async def full_message_or_media_send_or_edit(
     edit_only_keyboard: bool = False,
     edit_only_caption_and_keyboard: bool = True,
     add_delete_button: bool = False,
-    authorized_users: list = None,
+    authorized_users: list[User] = None,
     answer_callback: bool = False,
     show_alert: bool = False,
     inbound_keyboard: Keyboard = None,
@@ -874,7 +873,7 @@ async def full_inline_query_answer(
             text = item.text
 
         keyboard_markup = (
-            get_keyboard(item.keyboard, context) if item.keyboard is not None else None
+            await get_keyboard(item.keyboard, context) if item.keyboard is not None else None
         )
         results.append(
             InlineQueryResultArticle(
@@ -920,26 +919,21 @@ def get_image_preview(image_url: str) -> str:
     return f"[​]({image_url})"
 
 
-def get_delete_button(
-    user_ids: list[int], use_close_delete=False, button_text: str = None
-) -> Keyboard:
+def get_delete_button(authorized_users: list[User], button_text: str = None) -> Keyboard:
     """
     Create a delete button
-    :param user_ids: List of users ids that can operate the delete button
-    :param use_close_delete: True if the close button should be used instead of the delete button
-    :param button_text: Text of the button
+    :param authorized_users: List of users ids that can operate the delete button
+    :param button_text: Text of the button. If not provided, the default Delete text is used
     """
-    keyboard_data: dict = {
-        ReservedKeyboardKeys.AUTHORIZED_USER: user_ids,
-        ReservedKeyboardKeys.DELETE: True,
-    }
 
     if button_text is None:
-        button_text = (
-            phrases.KEYBOARD_OPTION_CLOSE if use_close_delete else phrases.KEYBOARD_OPTION_DELETE
-        )
+        button_text = phrases.KEYBOARD_OPTION_DELETE
 
-    return Keyboard(button_text, keyboard_data)
+    return Keyboard(
+        button_text,
+        info={ReservedKeyboardKeys.DELETE: True},
+        authorized_users=authorized_users,
+    )
 
 
 def get_yes_no_keyboard(
@@ -1060,9 +1054,7 @@ def get_yes_no_keyboard(
                 )
             )
         elif yes_is_delete_button:
-            keyboard_line.append(
-                get_delete_button([u.id for u in authorized_users], button_text=yes_text)
-            )
+            keyboard_line.append(get_delete_button(authorized_users, button_text=yes_text))
         else:
             # If screen is being changed, discard yes key value
             keyboard_data_yes |= {confirm_key: True}
@@ -1100,9 +1092,7 @@ def get_yes_no_keyboard(
                 )
             )
         elif no_is_delete_button:
-            keyboard_line.append(
-                get_delete_button([u.id for u in authorized_users], button_text=no_text)
-            )
+            keyboard_line.append(get_delete_button(authorized_users, button_text=no_text))
         else:
             # If screen is being changed, discard no key value
             keyboard_data_no |= {confirm_key: False}

@@ -43,7 +43,7 @@ async def manage(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     command: Command.Command,
-    original_user: User,
+    user: User,
     inbound_keyboard: Keyboard = None,
     group_chat: GroupChat = None,
 ) -> None:
@@ -52,7 +52,7 @@ async def manage(
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command
-    :param original_user: The original user
+    :param user: The original user
     :param inbound_keyboard: Inbound keyboard
     :param group_chat: Group chat
     :return: None
@@ -63,8 +63,7 @@ async def manage(
     except AttributeError:  # In case of a callback in private chat
         in_reply_to_message = False
 
-    can_delete_users: list = []
-    user = User.get_or_none(User.tg_user_id == update.effective_user.id)
+    can_delete_users: list[User] = []
 
     # If used in reply to a message, get the user from the message
     if in_reply_to_message:
@@ -96,7 +95,7 @@ async def manage(
     # to
     if in_reply_to_message and not target_user.is_arrested():  # Arrested users are always viewable
         # Add the requested user to the list of users that can delete the message
-        can_delete_users.append(target_user.tg_user_id)
+        can_delete_users.append(target_user)
 
         requesting_user_leaderboard_user_rank = get_highest_active_rank(
             user, group_chat=group_chat
@@ -287,7 +286,7 @@ async def manage(
     reply_to_message_id = None
     if in_reply_to_message:
         message_text += "\n\n" + phrases.SHOW_USER_STATUS_ADD_REPLY.format(
-            mention_markdown_v2(update.effective_user.id, update.effective_user.first_name)
+            user.get_markdown_mention()
         )
         reply_to_message_id = update.effective_message.reply_to_message.message_id
 
@@ -301,7 +300,7 @@ async def manage(
         if not user_is_boss(target_user, group_chat=group_chat):
             target_user.bounty_poster_limit -= 1
             target_user.save()
-            original_user.should_update_model = False
+            user.should_update_model = False
 
     else:  # Send regular message
         await full_message_send(
@@ -358,7 +357,7 @@ def should_send_poster(user: User, group_chat: GroupChat, is_own_status: bool) -
     if boss_type in (BossType.ADMIN, BossType.PIRATE_KING, BossType.LEGENDARY_PIRATE):
         return True
 
-    if user.bounty_poster_limit <= 0:
+    if user.bounty_poster_limit == 0:
         return False
 
     return True

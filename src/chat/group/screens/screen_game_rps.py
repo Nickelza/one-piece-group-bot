@@ -91,7 +91,7 @@ async def manage(
             caption=get_text(game, rock_paper_scissors),
             update=update,
             keyboard=get_outbound_keyboard(game),
-            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            authorized_users=game.get_players(),
             edit_only_caption_and_keyboard=True,
         )
         return
@@ -103,7 +103,7 @@ async def manage(
             caption=get_text(game, rock_paper_scissors),
             update=update,
             keyboard=get_outbound_keyboard(game),
-            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            authorized_users=game.get_players(),
             saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
         )
 

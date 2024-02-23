@@ -92,7 +92,7 @@ async def manage(
 
     button_delete_info = {
         GameSelectionReservedKeys.GAME_ID: game.id,
-        ReservedKeyboardKeys.AUTHORIZED_USER: [challenger.id],
+        ReservedKeyboardKeys.AUTHORIZED_USERS: [challenger.id],
         GameSelectionReservedKeys.CANCEL: True,
     }
     outbound_keyboard.append([

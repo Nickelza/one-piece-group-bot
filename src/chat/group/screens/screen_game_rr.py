@@ -104,7 +104,7 @@ async def manage(
             caption=get_specific_text(game, russian_roulette),
             update=update,
             keyboard=get_outbound_keyboard(game, russian_roulette),
-            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            authorized_users=game.get_players(),
             edit_only_caption_and_keyboard=True,
         )
     else:
@@ -118,7 +118,7 @@ async def manage(
             caption=get_specific_text(game, russian_roulette),
             update=update,
             keyboard=get_outbound_keyboard(game, russian_roulette),
-            authorized_users=game_service.get_game_authorized_tg_user_ids(game),
+            authorized_users=game.get_players(),
             saved_media_name=SavedMediaName.GAME_RUSSIAN_ROULETTE,
         )
         should_notify_of_turn = True

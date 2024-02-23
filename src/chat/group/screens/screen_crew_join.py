@@ -65,7 +65,7 @@ async def manage(
             await send_request(update, context, user, crew)
             return
 
-        await keyboard_interaction(update, context, user, crew, inbound_keyboard)
+        await keyboard_interaction(update, context, crew, inbound_keyboard)
     except CrewValidationException as cve:
         await full_message_or_media_send_or_edit(
             context, cve.message, update=update, add_delete_button=True
@@ -186,7 +186,6 @@ async def send_request(
 async def keyboard_interaction(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-    captain: User,
     crew: Crew,
     inbound_keyboard: Keyboard,
 ) -> None:
@@ -194,7 +193,6 @@ async def keyboard_interaction(
     Keyboard interaction
     :param update: The update object
     :param context: The context object
-    :param captain: The captain
     :param crew: The crew object
     :param inbound_keyboard: The inbound keyboard
     :return: None
@@ -212,7 +210,7 @@ async def keyboard_interaction(
             caption=ot_text,
             update=update,
             add_delete_button=True,
-            authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
+            authorized_users=[requesting_user],
             edit_only_caption_and_keyboard=True,
         )
         return
@@ -231,6 +229,6 @@ async def keyboard_interaction(
         caption=ot_text,
         update=update,
         add_delete_button=True,
-        authorized_users=[captain.tg_user_id, requesting_user.tg_user_id],
+        authorized_users=[requesting_user],
         edit_only_caption_and_keyboard=True,
     )

@@ -78,11 +78,11 @@ async def end_game(
 
     challenger: User = game.challenger
     opponent: User = game.opponent
-    half_wager: int = game.wager / 2
+    half_wager: int = int(game.wager / 2)
     previous_status: GameStatus = game.get_status()
 
     bounty_for_challenger = bounty_for_opponent = 0
-    pending_bounty_for_challenger = pending_bounty_for_opponent = game.wager / 2
+    pending_bounty_for_challenger = pending_bounty_for_opponent = int(game.wager / 2)
     if game_outcome == GameOutcome.CHALLENGER_WON:
         # Challenger won
         game.status = GameStatus.WON
@@ -131,19 +131,6 @@ async def end_game(
     game.save()
 
     return game
-
-
-def get_game_authorized_tg_user_ids(game: Game) -> list[str]:
-    """
-    Get the authorized tg user ids
-    :param game: The game
-    :return: The authorized tg user ids
-    """
-
-    challenger: User = game.challenger
-    opponent: User = game.opponent
-
-    return [challenger.tg_user_id, opponent.tg_user_id]
 
 
 def get_text(
@@ -313,7 +300,7 @@ async def validate_game(
                 caption=ot_text,
                 update=update,
                 add_delete_button=True,
-                authorized_users=[challenger, game.opponent],
+                authorized_users=game.get_players(),
                 edit_only_caption_and_keyboard=True,
             )
 
