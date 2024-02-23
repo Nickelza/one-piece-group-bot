@@ -35,8 +35,8 @@ from src.service.message_service import (
     escape_valid_markdown_chars,
     message_is_reply,
 )
-from src.service.string_service import get_belly_formatted
 from src.service.user_service import user_is_boss, get_boss_type
+from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(

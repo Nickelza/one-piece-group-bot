@@ -14,9 +14,9 @@ from src.model.enums.Screen import Screen
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import convert_seconds_to_duration, default_datetime_format
 from src.service.list_service import get_items_text_keyboard
-from src.service.math_service import get_value_from_percentage
 from src.service.message_service import full_message_send
-from src.service.string_service import get_belly_formatted
+from src.utils.math_utils import get_value_from_percentage
+from src.utils.string_utils import get_belly_formatted
 
 
 class BountyLoanListPage(ListPage):

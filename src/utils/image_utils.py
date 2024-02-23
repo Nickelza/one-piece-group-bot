@@ -3,7 +3,7 @@ import os
 import validators
 from PIL import Image
 
-from src.service.download_service import download_temp_file
+from src.utils.download_utils import download_temp_file
 
 
 def compress_image(path: str, quality: int) -> str:

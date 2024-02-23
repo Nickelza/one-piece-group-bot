@@ -40,7 +40,7 @@ from src.service.message_service import (
     full_message_send,
 )
 from src.service.notification_service import send_notification
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:

@@ -10,7 +10,6 @@ from src.model.DailyReward import DailyReward
 from src.service.bounty_loan_service import set_expired_bounty_loans
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.devil_fruit_service import schedule_devil_fruit_release, respawn_devil_fruit
-from src.service.download_service import cleanup_temp_dir
 from src.service.game_service import end_inactive_games
 from src.service.generic_service import run_minute_tasks
 from src.service.group_service import deactivate_inactive_group_chats
@@ -22,6 +21,7 @@ from src.service.prediction_service import (
     send_prediction_status_change_message_or_refresh_dispatch,
 )
 from src.service.reddit_service import manage as send_reddit_post
+from src.utils.download_utils import cleanup_temp_dir
 
 
 def add_to_queue(application: Application, timer: Timer.Timer) -> Job:

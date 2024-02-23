@@ -27,14 +27,14 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import default_datetime_format, convert_days_to_duration
 from src.service.date_service import get_remaining_duration
-from src.service.math_service import format_percentage_value
 from src.service.message_service import (
     get_image_preview,
     escape_valid_markdown_chars,
     mention_markdown_user,
     get_message_url,
 )
-from src.service.string_service import get_belly_formatted
+from src.utils.math_utils import format_percentage_value
+from src.utils.string_utils import get_belly_formatted
 
 
 class NotificationCategory(IntEnum):
@@ -221,7 +221,7 @@ class LocationUpdateNotification(Notification):
     def build(self) -> str:
         """Builds the notification."""
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         location: Location = self.location
         # Determine preposition to use for the location
@@ -462,7 +462,7 @@ class PredictionResultNotification(Notification):
     def build(self) -> str:
         """Builds the notification"""
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
         from src.service.prediction_service import get_max_wager_refund
 
         # Result text
@@ -570,7 +570,7 @@ class PredictionBetInvalidNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         if len(self.prediction_options_user) == 1:
             bet_has = phrases.PREDICTION_BET_INVALID_BET_HAS
@@ -688,7 +688,7 @@ class BountyGiftReceivedNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return self.text.format(
             get_belly_formatted(self.amount), self.sender.get_markdown_mention()
@@ -833,7 +833,7 @@ class BountyLoanPaymentNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         borrower: User = self.loan.borrower
         return self.text.format(get_belly_formatted(self.amount), borrower.get_markdown_mention())
@@ -866,7 +866,7 @@ class BountyLoanForgivenNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         loaner: User = self.loan.loaner
         return self.text.format(
@@ -901,7 +901,7 @@ class BountyLoanExpiredNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         loaner: User = self.loan.loaner
         return self.text.format(
@@ -1295,7 +1295,7 @@ class ImpelDownBailPostedNotification(Notification):
         )
 
     def build(self) -> str:
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return self.text.format(
             self.impel_down_log.bail_payer.get_markdown_mention(),

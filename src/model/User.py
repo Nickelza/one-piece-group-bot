@@ -27,7 +27,7 @@ from src.service.bot_service import (
     set_user_context_data,
     remove_context_data,
 )
-from src.service.math_service import get_cumulative_percentage_sum
+from src.utils.math_utils import get_cumulative_percentage_sum
 
 
 class User(BaseModel):
@@ -124,7 +124,7 @@ class User(BaseModel):
         :return: The formatted string e.g. 1,000,000
         """
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return get_belly_formatted(self.bounty)
 
@@ -622,7 +622,7 @@ class User(BaseModel):
         :return: The cumulative percentage of the expired bounty loans
         """
 
-        from src.service.math_service import format_percentage_value
+        from src.utils.math_utils import format_percentage_value
 
         return format_percentage_value(
             get_cumulative_percentage_sum(
@@ -669,7 +669,7 @@ class User(BaseModel):
         :return: The income tax percentage
         """
 
-        from src.service.math_service import format_percentage_value
+        from src.utils.math_utils import format_percentage_value
 
         return format_percentage_value(
             IncomeTaxBracket.get_bracket(self.total_gained_bounty).percentage

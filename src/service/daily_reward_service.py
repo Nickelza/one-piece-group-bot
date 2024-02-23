@@ -3,7 +3,7 @@ from src.model.DailyReward import DailyReward
 from src.model.enums.Location import get_last_new_world, get_first_new_world
 from src.model.enums.daily_reward.DailyRewardBonus import DailyRewardBonus
 from src.model.enums.daily_reward.DailyRewardLimitation import DailyRewardLimitation
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 def get_text(reward: DailyReward) -> str:

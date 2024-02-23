@@ -20,7 +20,7 @@ from src.service.date_service import (
 )
 from src.service.list_service import get_items_text_keyboard
 from src.service.message_service import full_message_send
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class CrewDavyBackFightListPage(ListPage):

@@ -12,7 +12,7 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import delete_game, validate_game, enqueue_game_timeout
 from src.service.message_service import mention_markdown_user, get_yes_no_keyboard, full_media_send
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class GameSelectionReservedKeys(StrEnum):

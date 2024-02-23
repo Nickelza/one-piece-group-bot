@@ -30,7 +30,7 @@ from src.service.devil_fruit_service import (
     get_manage_deeplink_keyboard,
 )
 from src.service.message_service import full_message_send
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class DevilFruitSellReservedKeys(StrEnum):

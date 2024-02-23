@@ -39,14 +39,14 @@ from src.service.date_service import (
     default_datetime_format,
     convert_hours_to_duration,
 )
-from src.service.math_service import get_value_from_percentage, get_percentage_from_value
 from src.service.message_service import (
     mention_markdown_v2,
     escape_valid_markdown_chars,
     get_message_url,
     get_deeplink,
 )
-from src.service.string_service import get_belly_formatted
+from src.utils.math_utils import get_value_from_percentage, get_percentage_from_value
+from src.utils.string_utils import get_belly_formatted
 
 LOG_TYPE_BUTTON_TEXTS = {
     LogType.FIGHT: phrases.FIGHT_LOG_KEY,

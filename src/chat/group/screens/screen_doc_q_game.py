@@ -30,7 +30,7 @@ from src.service.message_service import (
     mention_markdown_v2,
     delete_message,
 )
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class DocQReservedKeys(StrEnum):
@@ -48,7 +48,8 @@ def get_play_amounts(current_bounty: int, win_odds) -> tuple[int, int, int, int]
     Get play amounts
     :param current_bounty: The current bounty
     :param win_odds: The win odds
-    :return: list -  [0] - Win amount, [1] - Lose amount, [2] - Final bounty if won, [3] - Final bounty if lost
+    :return: list -  [0] - Win amount, [1] - Lose amount, [2] - Final bounty if won,
+    [3] - Final bounty if lost
     """
 
     # Win amount always takes in consideration standard odd

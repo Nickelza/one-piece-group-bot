@@ -23,7 +23,7 @@ from src.service.bounty_service import add_or_remove_bounty
 from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.game_service import delete_game, validate_game
 from src.service.message_service import mention_markdown_user, full_media_send, full_message_send
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class GameOpponentConfirmationReservedKeys(StrEnum):

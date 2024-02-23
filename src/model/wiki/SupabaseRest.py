@@ -10,7 +10,7 @@ from src.model.error.CustomException import WikiException
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
-from src.service.file_service import get_list_from_json
+from src.utils.file_utils import get_list_from_json
 
 
 class SupabaseTableName(StrEnum):

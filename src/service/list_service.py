@@ -13,7 +13,7 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.error.CustomException import NavigationLimitReachedException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.english_phrase_service import determine_article
+from src.utils.english_phrase_utils import determine_article
 
 
 def get_navigation_buttons(inbound_keyboard: Keyboard, current_page: int) -> list[Keyboard]:

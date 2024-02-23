@@ -19,7 +19,7 @@ from src.service.message_service import (
     get_yes_no_keyboard,
     get_create_or_edit_status,
 )
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class Step(IntEnum):

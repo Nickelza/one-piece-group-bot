@@ -13,8 +13,8 @@ from src.model.enums.income_tax.IncomeTaxDeduction import (
     IncomeTaxDeduction,
     IncomeTaxDeductionType,
 )
-from src.service.math_service import get_cumulative_percentage_sum, get_value_from_percentage
-from src.service.string_service import object_to_json_string
+from src.utils.math_utils import get_cumulative_percentage_sum, get_value_from_percentage
+from src.utils.string_utils import object_to_json_string
 
 
 def get_tax_deductions(user: User) -> list[IncomeTaxDeduction]:

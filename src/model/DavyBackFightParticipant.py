@@ -106,7 +106,7 @@ class DavyBackFightParticipant(BaseModel):
         Get the user win amount
         :return: The user win
         """
-        from src.service.math_service import get_value_from_percentage
+        from src.utils.math_utils import get_value_from_percentage
 
         user_percentage = self.get_contribution_percentage()
         return int(

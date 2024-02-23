@@ -3,7 +3,7 @@ import json
 from PIL import Image, ImageFilter
 
 from src.model.wiki.Character import Character
-from src.service.download_service import generate_temp_file_path, download_temp_file
+from src.utils.download_utils import generate_temp_file_path, download_temp_file
 
 
 class WhosWho:

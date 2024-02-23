@@ -36,7 +36,7 @@ class IncomeTaxDeduction:
         :return: The total deduction percentage
         """
 
-        from src.service.math_service import get_cumulative_percentage_sum
+        from src.utils.math_utils import get_cumulative_percentage_sum
 
         return get_cumulative_percentage_sum(
             [deduction.percentage for deduction in deduction_list]

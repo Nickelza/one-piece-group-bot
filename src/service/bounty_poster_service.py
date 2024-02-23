@@ -14,7 +14,7 @@ from src.model.User import User
 from src.model.enums.BossType import BossType
 from src.model.enums.LeaderboardRank import LeaderboardRank, get_rank_by_index
 from src.service.devil_fruit_service import user_has_eaten_devil_fruit
-from src.service.download_service import generate_temp_file_path
+from src.utils.download_utils import generate_temp_file_path
 
 
 async def get_bounty_poster(update: Update, user: User) -> str:

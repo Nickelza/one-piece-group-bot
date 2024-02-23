@@ -43,7 +43,7 @@ class IncomeTaxBreakdown:
         :param deduction_list: The deduction list
         :return: The tax
         """
-        from src.service.math_service import get_value_from_percentage
+        from src.utils.math_utils import get_value_from_percentage
 
         amount = IncomeTaxBreakdown.get_amount_from_list(tax_breakdown)
         deduction_percentage = IncomeTaxDeduction.get_percentage_from_list(deduction_list)

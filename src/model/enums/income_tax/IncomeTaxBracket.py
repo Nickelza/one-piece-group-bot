@@ -1,6 +1,6 @@
 import resources.Environment as Env
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
-from src.service.math_service import get_value_from_percentage
+from src.utils.math_utils import get_value_from_percentage
 
 
 class IncomeTaxBracket:
@@ -23,7 +23,8 @@ class IncomeTaxBracket:
     @staticmethod
     def get_tax_breakdown(starting_amount: int, amount: int) -> list[IncomeTaxBreakdown]:
         """
-        Calculate a tax breakdown for the given amount, showing the taxable amounts, tax brackets, and tax amounts for
+        Calculate a tax breakdown for the given amount, showing the taxable amounts, tax brackets,
+        and tax amounts for
         each tier.
 
         :param starting_amount: The starting amount

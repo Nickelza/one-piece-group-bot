@@ -10,7 +10,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameOutcome import GameOutcome
 from src.service.date_service import datetime_is_after, get_remaining_duration
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 class DavyBackFight(BaseModel):

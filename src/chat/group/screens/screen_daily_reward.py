@@ -18,14 +18,14 @@ from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.daily_reward_service import get_text
 from src.service.date_service import is_same_day, get_next_run
-from src.service.english_phrase_service import day_or_days
 from src.service.message_service import (
     full_message_send,
     get_deeplink,
     get_message_url,
     full_media_send,
 )
-from src.service.string_service import object_to_json_string, get_belly_formatted
+from src.utils.english_phrase_utils import day_or_days
+from src.utils.string_utils import object_to_json_string, get_belly_formatted
 
 
 async def manage(

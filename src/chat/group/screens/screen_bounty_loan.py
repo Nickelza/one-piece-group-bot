@@ -35,9 +35,9 @@ from src.service.date_service import (
     get_datetime_in_future_hours,
 )
 from src.service.devil_fruit_service import get_ability_value
-from src.service.math_service import get_value_from_percentage, get_interest_percentage_from_value
 from src.service.message_service import full_message_send, get_yes_no_keyboard
-from src.service.string_service import get_belly_formatted
+from src.utils.math_utils import get_value_from_percentage, get_interest_percentage_from_value
+from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(

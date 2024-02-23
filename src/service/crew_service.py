@@ -34,9 +34,9 @@ from src.service.date_service import (
     get_elapsed_duration,
 )
 from src.service.location_service import update_location
-from src.service.math_service import get_value_from_percentage
 from src.service.message_service import get_deeplink
 from src.service.notification_service import send_notification
+from src.utils.math_utils import get_value_from_percentage
 
 
 async def add_member(

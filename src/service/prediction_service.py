@@ -29,19 +29,19 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import round_belly_up, add_or_remove_bounty
 from src.service.date_service import default_datetime_format
 from src.service.devil_fruit_service import get_ability_value
-from src.service.download_service import get_random_string
 from src.service.group_service import (
     broadcast_to_chats_with_feature_enabled_dispatch,
     save_group_chat_error,
 )
-from src.service.math_service import (
+from src.service.message_service import escape_valid_markdown_chars, full_message_send
+from src.service.notification_service import send_notification
+from src.utils.download_utils import get_random_string
+from src.utils.math_utils import (
     get_percentage_from_value,
     get_value_from_percentage,
     add_percentage_to_value,
 )
-from src.service.message_service import escape_valid_markdown_chars, full_message_send
-from src.service.notification_service import send_notification
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 async def send(
@@ -84,7 +84,8 @@ def get_prediction_text(
     Get prediction text
     :param prediction: Prediction
     :param add_bets_command: If to add commands on how to place and remove bets
-    :param user: User, if called from private chat and prediction max refund should be customized by DF ability
+    :param user: User, if called from private chat and prediction max refund should be customized
+    by DF ability
     :param is_creator_recap: If the prediction is being sent to the creator as a recap
     :return: Prediction text
     """
@@ -425,7 +426,8 @@ async def cut_off_invalid_bets(context: ContextTypes.DEFAULT_TYPE, prediction: P
     # Dictionary with key: user_id, value: user, prediction option user, total refund
     users_invalid_prediction_options: dict[int, [User, list[PredictionOptionUser], int]] = {}
 
-    # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and return wager
+    # If cut off date is not None, delete all PredictionOptionUsers with date > cut off date and
+    # return wager
     if prediction.cut_off_date is not None:
         invalid_prediction_option_users: list[PredictionOptionUser] = get_invalid_bets(prediction)
         for invalid_prediction_option_user in invalid_prediction_option_users:
@@ -875,7 +877,8 @@ def get_max_wager_refund(
     user: User = None,
 ) -> int:
     """
-    Get the maximum wager refund for a prediction option user, considering the Devil Fruit ability boost
+    Get the maximum wager refund for a prediction option user, considering the Devil Fruit ability
+    boost
     :param prediction_option_user: The prediction option user
     :param prediction: The prediction
     :param user: The user
@@ -975,7 +978,8 @@ async def send_prediction_status_change_message_or_refresh(
     group_chat: GroupChat = None,
 ):
     """
-    Send a prediction status change message to all group chats in which the prediction was sent or refresh the message
+    Send a prediction status change message to all group chats in which the prediction was sent or
+    refresh the message
     :param context: The context
     :param prediction: The prediction
     :param text: The text

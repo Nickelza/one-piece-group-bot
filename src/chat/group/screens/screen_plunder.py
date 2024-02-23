@@ -33,7 +33,6 @@ from src.service.date_service import (
 )
 from src.service.devil_fruit_service import get_ability_adjusted_datetime, get_ability_value
 from src.service.impel_down_service import add_sentence
-from src.service.math_service import get_random_win, get_value_from_percentage
 from src.service.message_service import (
     full_message_send,
     mention_markdown_user,
@@ -42,7 +41,8 @@ from src.service.message_service import (
     full_message_or_media_send_or_edit,
     delete_message,
 )
-from src.service.string_service import get_belly_formatted
+from src.utils.math_utils import get_random_win, get_value_from_percentage
+from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(

@@ -18,7 +18,7 @@ from src.model.enums.Screen import Screen
 from src.model.error.CustomException import DateValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
-from src.service.string_service import get_unit_value_from_string
+from src.utils.string_utils import get_unit_value_from_string
 
 
 def get_next_run(

@@ -199,7 +199,7 @@ class Crew(BaseModel):
         :return: The next powerup price formatted
         """
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return get_belly_formatted(self.get_powerup_price(reason))
 
@@ -209,7 +209,7 @@ class Crew(BaseModel):
         :return: The crew chest formatted
         """
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return get_belly_formatted(self.chest_amount)
 
@@ -335,7 +335,7 @@ class Crew(BaseModel):
         :return: The crew required bounty formatted
         """
 
-        from src.service.string_service import get_belly_formatted
+        from src.utils.string_utils import get_belly_formatted
 
         return get_belly_formatted(self.required_bounty)
 

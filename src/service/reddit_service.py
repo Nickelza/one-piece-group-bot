@@ -15,9 +15,9 @@ import resources.Environment as Env
 from src.model.RedditGroupPost import RedditGroupPost
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
-from src.service.download_service import download_temp_file
-from src.service.image_service import compress_image
 from src.service.message_service import full_media_send, escape_valid_markdown_chars
+from src.utils.download_utils import download_temp_file
+from src.utils.image_utils import compress_image
 
 
 async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> None:

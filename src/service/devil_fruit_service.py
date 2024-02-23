@@ -44,8 +44,10 @@ from src.service.date_service import (
     datetime_is_before,
     default_datetime_format,
 )
-from src.service.file_service import get_random_item_from_txt
-from src.service.math_service import (
+from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
+from src.service.notification_service import send_notification
+from src.utils.file_utils import get_random_item_from_txt
+from src.utils.math_utils import (
     add_percentage_to_value,
     subtract_percentage_from_value,
     get_random_win,
@@ -53,8 +55,6 @@ from src.service.math_service import (
     format_percentage_value,
     get_random_int,
 )
-from src.service.message_service import log_error, escape_valid_markdown_chars, full_media_send
-from src.service.notification_service import send_notification
 
 
 def give_devil_fruit_to_user(

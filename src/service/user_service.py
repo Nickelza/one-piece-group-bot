@@ -13,8 +13,8 @@ from src.model.UnmutedUser import UnmutedUser
 from src.model.User import User
 from src.model.enums.BossType import BossType
 from src.model.enums.LeaderboardRank import PIRATE_KING
-from src.service.download_service import generate_temp_file_path
 from src.service.leaderboard_service import get_current_leaderboard_rank
+from src.utils.download_utils import generate_temp_file_path
 
 
 async def get_user_profile_photo(update: Update) -> str | None:
@@ -132,7 +132,7 @@ async def get_chat_member(
 
     try:
         if update is not None:
-            return await update.effective_chat.get_member(str(user.tg_user_id))
+            return await update.effective_chat.get_member(int(user.tg_user_id))
         elif group_chat is not None:  # To avoid IDE warning
             group: Group = group_chat.group
             return await context.bot.get_chat_member(group.tg_group_id, str(user.tg_user_id))

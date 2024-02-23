@@ -11,7 +11,7 @@ from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew, add_powerup
 from src.service.message_service import full_message_send, get_yes_no_keyboard
-from src.service.string_service import get_belly_formatted
+from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(

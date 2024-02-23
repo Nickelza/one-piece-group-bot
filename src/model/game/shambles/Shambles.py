@@ -8,7 +8,7 @@ import resources.Environment as Env
 from src.model.enums.AssetPath import AssetPath
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Terminology import Terminology
-from src.service.download_service import generate_temp_file_path
+from src.utils.download_utils import generate_temp_file_path
 
 
 class Shambles:
@@ -28,7 +28,8 @@ class Shambles:
         :param grid_size: The grid size
         :param grid: The grid of letters
         :param word_coordinates: The coordinates of the word
-        :param excluded_coordinates: The coordinates of the letters that have been blanked out to make it easier
+        :param excluded_coordinates: The coordinates of the letters that have been blanked out to
+        make it easier
         :param image_path: The crossword image path
         :param revealed_letters_count: The revealed letters count
         """
@@ -89,7 +90,8 @@ class Shambles:
         # Select a random direction for the word (either horizontal, vertical, or diagonal).
         direction = random.choice(["horizontal", "vertical", "diagonal"])
 
-        # Determine the number of cells in the grid that the word will occupy based on its length and direction.
+        # Determine the number of cells in the grid that the word will occupy based on its length
+        # and direction.
         word_len = len(word)
         if direction == "horizontal":
             max_start_x = self.grid_size - word_len

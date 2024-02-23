@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 import resources.Environment as Env
-from src.service.math_service import get_random_key_based_on_probability
+from src.utils.math_utils import get_random_key_based_on_probability
 
 
 class DailyRewardPrizeType(StrEnum):

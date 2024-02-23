@@ -11,7 +11,7 @@ from src.model.enums.daily_reward.DailyRewardLimitation import DailyRewardLimita
 from src.model.enums.daily_reward.DailyRewardPrizeSource import DailyRewardPrizeSource
 from src.model.enums.daily_reward.DailyRewardPrizeType import DailyRewardPrizeType
 from src.service.date_service import get_day_in_past, is_same_day
-from src.service.math_service import get_value_from_percentage
+from src.utils.math_utils import get_value_from_percentage
 
 
 class DailyReward(BaseModel):

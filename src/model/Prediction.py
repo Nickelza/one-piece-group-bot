@@ -33,6 +33,9 @@ class Prediction(BaseModel):
     options: list[str] = []  # For saving in context when creating a private prediction
     should_save: bool = True
 
+    # Backref
+    prediction_options = None
+
     class Meta:
         db_table = "prediction"
 
