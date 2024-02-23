@@ -39,6 +39,7 @@ class DevilFruit(BaseModel):
     release_date = DateTimeField(null=True)
     release_message_id = IntegerField(null=True)
     should_show_abilities = BooleanField(default=False)
+    is_defective = BooleanField(default=False)
 
     class Meta:
         db_table = "devil_fruit"

@@ -1863,6 +1863,7 @@ DEVIL_FRUIT_CATEGORY_DESCRIPTION_SMILE = "SMILE"
 DEVIL_FRUIT_ABILITY_TEXT = "\n\n*Abilities*"
 DEVIL_FRUIT_ABILITY_TEXT_LINE = "\n{}{} \\({}{}%\\)"
 DEVIL_FRUIT_ABILITY_UNKNOWN = "\nUnknown"
+DEVIL_FRUIT_ABILITY_DEFECTIVE_SMILE = f"\n{Emoji.LOG_NEGATIVE}Defective SMILE, no ability granted"
 # Devil Fruit - Private Chat
 DEVIL_FRUIT_ITEM_TEXT = "{}"
 DEVIL_FRUIT_ITEM_TEXT_FILL_IN = "Devil Fruit"
@@ -1871,8 +1872,9 @@ DEVIL_FRUIT_EXPIRATION_EXPLANATION = (
     "\n>The Devil Fruit will be revoked if not eaten before the expiration"
 )
 DEVIL_FRUIT_SMILE_EXPIRATION_EXPLANATION = (
-    "\n>SMILEs abilities last for a random duration that is determined once eaten, maximum"
-    f" {Env.DEVIL_FRUIT_SMILE_MAX_DAYS.get()} days"
+    f"\n>SMILEs have a {Env.DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE.get_int()}% probability of"
+    " being defective \\(no abilities granted\\) and their abilities last for a random duration"
+    f" that is determined once eaten, maximum {Env.DEVIL_FRUIT_SMILE_MAX_DAYS.get()} days"
 )
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_EXPIRING_DATE = "\n\nExpiration: {}"
 DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND = (
@@ -1890,6 +1892,7 @@ DEVIL_FRUIT_EAT_CONFIRMATION_REQUEST_ABILITIES = "\nYou will gain the following 
 DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED = (
     "You have eaten the {} and gained the following abilities:\n{}"
 )
+DEVIL_FRUIT_DISCARD_DEFECTIVE_SMILE = "You cannot discard a defective SMILE, wait until it expires"
 DEVIL_FRUIT_DISCARD_CONFIRMATION_REQUEST = (
     "Are you sure you want to discard the {}?\n\nYou will lose it and can regain it by finding or"
     " trading for it again"

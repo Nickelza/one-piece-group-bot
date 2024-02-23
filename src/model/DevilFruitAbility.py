@@ -29,7 +29,8 @@ class DevilFruitAbility(BaseModel):
         user: User, ability_type: DevilFruitAbilityType
     ) -> Optional["DevilFruitAbility"]:
         """
-        Given a user and an ability type, get the ability of a Devil Fruit eaten by the user with the given ability type
+        Given a user and an ability type, get the ability of a non-defective Devil Fruit eaten by
+        the user with the given ability type
 
         :param user: The user
         :param ability_type: The ability type
@@ -41,6 +42,7 @@ class DevilFruitAbility(BaseModel):
             .join(DevilFruit)
             .where(
                 (DevilFruit.owner == user)
+                & (DevilFruit.is_defective == False)
                 & (DevilFruit.status == DevilFruitStatus.EATEN)
                 & (DevilFruitAbility.ability_type == ability_type)
             )

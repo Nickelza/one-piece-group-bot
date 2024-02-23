@@ -144,7 +144,9 @@ def get_devil_fruit_abilities_text(
 
     abilities_text: str = phrases.DEVIL_FRUIT_ABILITY_TEXT if add_header else ""
 
-    if always_show_abilities or devil_fruit.should_show_abilities:
+    if devil_fruit.is_defective:
+        abilities_text += phrases.DEVIL_FRUIT_ABILITY_DEFECTIVE_SMILE
+    elif always_show_abilities or devil_fruit.should_show_abilities:
         for ability in abilities:
             ability_type: DevilFruitAbilityType = DevilFruitAbilityType(ability.ability_type)
 

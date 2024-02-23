@@ -8,6 +8,7 @@ from src.model.DevilFruit import DevilFruit
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitCategory import DevilFruitCategory
 from src.model.error.CustomException import DevilFruitValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.devil_fruit_service import (
@@ -97,3 +98,7 @@ def validate(devil_fruit: DevilFruit, user: User) -> None:
     # User is not owner
     if devil_fruit.owner != user:
         raise DevilFruitValidationException(phrases.DEVIL_FRUIT_NOT_OWNER)
+
+    # Defective SMILEs cannot be discarded
+    if devil_fruit.is_defective and devil_fruit.get_category() is DevilFruitCategory.SMILE:
+        raise DevilFruitValidationException(phrases.DEVIL_FRUIT_DISCARD_DEFECTIVE_SMILE)

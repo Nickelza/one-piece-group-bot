@@ -22,6 +22,7 @@ from src.service.devil_fruit_service import (
     warn_inactive_users_with_eaten_devil_fruit,
 )
 from src.service.message_service import full_message_send, get_yes_no_keyboard
+from src.utils.math_utils import get_random_win
 
 
 class DevilFruitEatReservedKeys(StrEnum):
@@ -94,10 +95,13 @@ async def manage(
     devil_fruit.eaten_date = datetime.datetime.now()
     devil_fruit.should_show_abilities = True
 
-    # If SMILE, set new expiration time
+    # If SMILE, set new expiration time and if it's defective
     if devil_fruit.get_category() is DevilFruitCategory.SMILE:
         devil_fruit.expiration_date = get_random_time_between_by_days(
             Env.DEVIL_FRUIT_SMILE_MAX_DAYS.get_int()
+        )
+        devil_fruit.is_defective = get_random_win(
+            Env.DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE.get_float()
         )
     else:
         devil_fruit.expiration_date = None

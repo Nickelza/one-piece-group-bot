@@ -952,6 +952,10 @@ DEVIL_FRUIT_COLLECT_COOLDOWN_DURATION = Environment(
 )
 # Maximum days a SMILE lasts. Default: 14
 DEVIL_FRUIT_SMILE_MAX_DAYS = Environment("DEVIL_FRUIT_SMILE_MAX_DAYS", default_value="14")
+# Probability of getting a defective SMILE. Default: 10%
+DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE = Environment(
+    "DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE", default_value="10"
+)
 
 
 # If rookies or arrested users can view their status in groups. Default: True
