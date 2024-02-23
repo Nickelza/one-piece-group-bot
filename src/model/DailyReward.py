@@ -126,6 +126,7 @@ class DailyReward(BaseModel):
         total_amount = base_amount
 
         for bonus_type in list(DailyRewardBonusType):
+            multiplier = None
             match bonus_type:
                 # Streak
                 case DailyRewardBonusType.STREAK:
@@ -134,17 +135,20 @@ class DailyReward(BaseModel):
                         DailyReward.get_user_streak_count(user),
                         Env.DAILY_REWARD_BONUS_MAX_STREAK.get_int(),
                     )
-                    value *= streak_count
+                    multiplier = streak_count
+                    value *= multiplier
 
                 # Location
                 case DailyRewardBonusType.LOCATION:
-                    value = Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int() * user.location_level
+                    multiplier = user.location_level
+                    value = Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int() * multiplier
 
                 # Crew level
                 case DailyRewardBonusType.CREW_LEVEL:
                     if not user.is_crew_member():
                         continue
-                    value = Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int() * user.crew.level
+                    multiplier = user.crew.level
+                    value = Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int() * multiplier
 
                 # Crew MVP
                 case DailyRewardBonusType.CREW_MVP:
@@ -157,7 +161,7 @@ class DailyReward(BaseModel):
 
             amount = int(get_value_from_percentage(total_amount, value))
             total_amount += amount
-            bonus_list.append(DailyRewardBonus(bonus_type, value, amount))
+            bonus_list.append(DailyRewardBonus(bonus_type, value, amount, multiplier))
 
         return bonus_list
 

@@ -31,11 +31,16 @@ def get_text(reward: DailyReward) -> str:
                 raise ValueError("Invalid limitation")
     else:
         for bonus in bonus_list:
+
+            bonus_explanation = bonus.get_explanation()
+            if bonus.multiplier is not None:
+                bonus_explanation = bonus_explanation.format(bonus.multiplier)
+
             bonus_text += phrases.DAILY_REWARD_BONUS.format(
                 bonus.get_description(),
                 bonus.value,
                 get_belly_formatted(bonus.amount),
-                bonus.get_explanation(),
+                bonus_explanation,
             )
 
     return phrases.DAILY_REWARD.format(

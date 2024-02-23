@@ -19,10 +19,11 @@ class DailyRewardBonusType(IntEnum):
 
 
 class DailyRewardBonus:
-    def __init__(self, bonus_type: DailyRewardBonusType, value: int, amount: int):
+    def __init__(self, bonus_type: DailyRewardBonusType, value: int, amount: int, multiplier: int):
         self.bonus_type = bonus_type
         self.value = value
         self.amount = amount
+        self.multiplier = multiplier
 
     def get_type(self) -> DailyRewardBonusType:
         """

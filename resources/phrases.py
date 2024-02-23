@@ -2047,15 +2047,15 @@ DAILY_REWARD_NEXT_SPLIT = "\n\n>Daily reward is split into {} parts, next reward
 DAILY_REWARD_BONUS_DESCRIPTION_STREAK = "Streak"
 DAILY_REWARD_BONUS_DESCRIPTION_STREAK_EXPLANATION = (
     f"+{Env.DAILY_REWARD_BONUS_BASE_STREAK.get_int()}% for every consecutive day you claim the"
-    " reward"
+    " reward \\({}\\)"
 )
 DAILY_REWARD_BONUS_DESCRIPTION_LOCATION = "Location"
 DAILY_REWARD_BONUS_DESCRIPTION_LOCATION_EXPLANATION = (
-    f"+{Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int()}% \\* current location level"
+    f"+{Env.DAILY_REWARD_BONUS_BASE_LOCATION.get_int()}% \\* current location level \\({{}}\\)"
 )
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_LEVEL = "Crew Level"
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_LEVEL_EXPLANATION = (
-    f"+{Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int()}% \\* Crew level"
+    f"+{Env.DAILY_REWARD_BONUS_BASE_CREW_LEVEL.get_int()}% \\* Crew level \\({{}}\\)"
 )
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP = "Crew MVP"
 DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
@@ -2070,7 +2070,7 @@ DAILY_REWARD_PRIZE_REQUEST = (
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"
     " your luck, you could obtain:\n• Random belly between ฿*{}* and"
     f" ฿*{{}}* \\({Env.DAILY_REWARD_PRIZE_BELLY_PERCENTAGE.get_int()}% chance\\)\n• A SMILE Devil"
-    f" Fruit \\({Env.DAILY_REWARD_PRIZE_BELLY_PERCENTAGE.get_int()}% chance\\)"
+    f" Fruit \\({Env.DAILY_REWARD_PRIZE_SMILE_PERCENTAGE.get_int()}% chance\\)"
 )
 DAILY_REWARD_PRIZE_CONFIRM = (
     Emoji.CONFETTI
