@@ -68,7 +68,9 @@ async def manage(
     reward.prize_type, reward.prize_value = prize_type, str(prize_value)
     reward.save()
 
-    ot_text = phrases.DAILY_REWARD_PRIZE_CONFIRM.format(prize_text)
+    ot_text = phrases.DAILY_REWARD_PRIZE_CONFIRM.format(
+        reward.user.get_markdown_mention(), prize_text
+    )
 
     await full_message_send(
         context, ot_text, update=update, keyboard=inline_keyboard, add_delete_button=True
@@ -86,6 +88,7 @@ async def send_prize_request(
     """
 
     ot_text = phrases.DAILY_REWARD_PRIZE_REQUEST.format(
+        reward.user.get_markdown_mention(),
         get_belly_formatted(reward.get_base_belly_prize_offer()),
         get_belly_formatted(reward.get_minimum_belly_prize()),
         get_belly_formatted(reward.get_maximum_belly_prize()),

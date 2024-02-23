@@ -2029,9 +2029,10 @@ DAILY_REWARD_ALREADY_COLLECTED = (
 )
 DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"
 DAILY_REWARD_GROUP_MESSAGE = (
-    "Here's your daily reward for today!\n\n{}\n\nCurrent streak: *{} {}*\nNext prize in:"
-    f" *{{}} {{}}*\n>_For every {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you"
-    " claim the daily reward, you will receive a special prize!_"
+    "Welcome back {}, here's your daily reward for today!\n\n{}\n\nCurrent streak: *{}"
+    " {}*\nNext prize in: *{} {}*\n>_For every"
+    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you claim the daily reward, you"
+    " will receive a special prize!_"
 )
 DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)\n>_{}_"
 DAILY_REWARD_BONUS_LIMITATION_LOCATION_PARADISE = (
@@ -2065,7 +2066,7 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
 DAILY_REWARD_PRIZE_REQUEST = (
-    "Congratulations for keeping your streak for the past"
+    "Congratulations {} for keeping your streak for the past"
     f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days!\nYou can either accept the offered prize or"
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"
     " your luck, you could obtain:\n• Random belly between ฿*{}* and"
@@ -2074,7 +2075,8 @@ DAILY_REWARD_PRIZE_REQUEST = (
 )
 DAILY_REWARD_PRIZE_CONFIRM = (
     Emoji.CONFETTI
-    + "You have obtained the following prize:\n\n{}\n\n\n_Keep your streak for the next"
-    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days to claim another prize!_"
+    + "Congratulations {}, you have obtained the following prize:\n\n{}\n\n\n_Keep your"
+    f" streak for the next {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days to claim another"
+    " prize!_"
 )
 DAILY_REWARD_PRIZE_CONFIRM_BELLY = "Belly amount: ฿*{}*"

@@ -115,6 +115,7 @@ async def manage(
     # Send message
     days_to_next_prize = reward.get_days_to_next_prize()
     ot_text = phrases.DAILY_REWARD_GROUP_MESSAGE.format(
+        user.get_markdown_mention(),
         get_text(reward),
         reward.streak_count,
         day_or_days(reward.streak_count),
