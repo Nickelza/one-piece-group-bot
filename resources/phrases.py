@@ -2024,9 +2024,7 @@ PLUNDER_LOSE = (
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"
 
-DAILY_REWARD_ALREADY_COLLECTED = (
-    "You have already collected your daily reward, the next one will be available in *{}*{}"
-)
+DAILY_REWARD_ALREADY_COLLECTED = "Your next reward will be available in *{}*{}"
 DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"
 DAILY_REWARD_GROUP_MESSAGE = (
     "Welcome back {}, here's your daily reward for today!\n\n{}\n\nCurrent streak: *{}"
