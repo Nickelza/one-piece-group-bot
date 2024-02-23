@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from resources import phrases
+
 
 class DevilFruitStatus(IntEnum):
     """
@@ -26,3 +28,21 @@ class DevilFruitStatus(IntEnum):
             DevilFruitStatus.COLLECTED,
             DevilFruitStatus.EATEN,
         ]
+
+    def get_description(self) -> str:
+        """
+        Get the description of the status
+        :return: The description
+        """
+        return DEVIL_FRUIT_STATUS_DESCRIPTION[self]
+
+
+DEVIL_FRUIT_STATUS_DESCRIPTION = {
+    DevilFruitStatus.NEW: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_NEW,
+    DevilFruitStatus.COMPLETED: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_COMPLETED,
+    DevilFruitStatus.ENABLED: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_ENABLED,
+    DevilFruitStatus.SCHEDULED: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_SCHEDULED,
+    DevilFruitStatus.RELEASED: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_RELEASED,
+    DevilFruitStatus.COLLECTED: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_COLLECTED,
+    DevilFruitStatus.EATEN: phrases.DEVIL_FRUIT_STATUS_DESCRIPTION_EATEN,
+}

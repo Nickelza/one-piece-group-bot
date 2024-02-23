@@ -6,9 +6,11 @@ from telegram.ext import ContextTypes
 from resources import phrases
 from src.model.DevilFruit import DevilFruit
 from src.model.User import User
-from src.model.enums.ListPage import ListPage
+from src.model.enums.Emoji import Emoji
+from src.model.enums.ListPage import ListPage, EmojiLegend
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.devil_fruit_service import get_recap_text
@@ -42,14 +44,15 @@ class DevilFruitListPage(ListPage):
 
         return (
             self.object.select()
-            .where(DevilFruit.owner == self.user)
+            .where((DevilFruit.owner == self.user) & (self.get_active_filter_list_condition()))
             .order_by(DevilFruit.status.desc(), DevilFruit.name.asc(), DevilFruit.model.asc())
             .paginate(page, limit)
         )
 
     def get_item_text(self) -> str:
         return phrases.DEVIL_FRUIT_ITEM_TEXT.format(
-            escape_valid_markdown_chars(self.object.get_full_name())
+            self.get_emoji_legend_formatted()
+            + escape_valid_markdown_chars(self.object.get_full_name())
         )
 
     def get_item_detail_text(self) -> str:
@@ -63,6 +66,26 @@ class DevilFruitListPage(ListPage):
             raise UnauthorizedToViewItemException
 
         return get_recap_text(self.object, add_sell_command=True)
+
+    def get_emoji_legend_list(self) -> list[EmojiLegend]:
+        """
+        Get the emoji legend list
+
+        :return: The emoji legend list
+        """
+
+        return [
+            EmojiLegend(
+                Emoji.LOG_NEGATIVE,
+                DevilFruitStatus.EATEN.get_description(),
+                (DevilFruit.status == DevilFruitStatus.EATEN),
+            ),
+            EmojiLegend(
+                Emoji.LOG_POSITIVE,
+                DevilFruitStatus.COLLECTED.get_description(),
+                (DevilFruit.status == DevilFruitStatus.COLLECTED),
+            ),
+        ]
 
 
 async def manage(
@@ -97,6 +120,8 @@ async def manage(
         Screen.PVT_DEVIL_FRUIT_DETAIL,
         text_fill_in=phrases.DEVIL_FRUIT_ITEM_TEXT_FILL_IN,
         empty_list_text=phrases.DEVIL_FRUIT_LIST_NO_ITEMS,
+        context=context,
+        user=user,
     )
 
     # Shop button
