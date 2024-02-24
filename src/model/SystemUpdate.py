@@ -12,7 +12,7 @@ class SystemUpdate(BaseModel):
 
     id = PrimaryKeyField()
     title = CharField()
-    description = CharField()
+    description = CharField(max_length=999)
     date = DateTimeField(default=datetime.datetime.now)
     chat_id = CharField()
     message_id = BigIntegerField()

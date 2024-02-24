@@ -70,6 +70,7 @@ class Emoji(StrEnum):
     SHOP = "🛒"
     GIFT = "🎁"
     INFO = "ℹ"
+    HELP = "❓"
 
     # Game
     WINNER = "🏆"

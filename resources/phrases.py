@@ -409,7 +409,10 @@ ACTION_INVALID_DURATION = (
 )
 
 SYSTEM_UPDATE = (
-    Emoji.CONFETTI + "New update" + Emoji.CONFETTI + "\n\n*{}*\n\n{}\n\n[View full changelog]({})"
+    f"{Emoji.CONFETTI}New update{Emoji.CONFETTI}"
+    "\n\n*{}*\n\n{}"
+    "\n\n[View full changelog]({})"
+    f"\n\n{Emoji.HELP}[Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 )
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
