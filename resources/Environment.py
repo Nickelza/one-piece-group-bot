@@ -677,7 +677,7 @@ LOCATION_ZOU_IMAGE_URL = Environment(
     "LOCATION_ZOU_IMAGE_URL", default_value="https://i.imgur.com/UD2YCV4.jpg"
 )
 LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment(
-    "LOCATION_WHOLE_CAKE_ISLAND", default_value="https://i.imgur.com/fEAM6eN.jpg"
+    "LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL", default_value="https://i.imgur.com/fEAM6eN.jpg"
 )
 LOCATION_WANO_COUNTRY_IMAGE_URL = Environment(
     "LOCATION_WANO_COUNTRY_IMAGE_URL", default_value="https://i.imgur.com/vznQ3W2.jpg"
