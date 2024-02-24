@@ -142,6 +142,8 @@ ERROR_LOG_CHAT_ID = Environment("ERROR_LOG_CHAT_ID")
 OPMA_BOT_ID = Environment("OPMA_BOT_ID", default_value="921260484")
 # Updates channel id
 UPDATES_CHANNEL_ID = Environment("UPDATES_CHANNEL_ID")
+# Support group id
+SUPPORT_GROUP_LINK = Environment("SUPPORT_GROUP_LINK")
 
 # TgRest Channel ID
 TG_REST_CHANNEL_ID = Environment("TG_REST_CHANNEL_ID")

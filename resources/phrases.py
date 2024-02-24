@@ -83,7 +83,8 @@ BOUNTY_RESET = "Bounties have been reset"
 
 LEADERBOARD = (
     "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
-    " bounties*:{}{}{}{}\n\n_Next bounty reset on {} \\(in {}\\)_"
+    " bounties*:{}{}{}{}\n\n_Next bounty reset on {} \\(in {}\\)_\n>For questions or"
+    f" suggestions, please join the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 )
 LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
 LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
@@ -262,8 +263,9 @@ KEY_MANAGE_DEVIL_FRUIT = "Manage Devil Fruit"
 
 # Private chat
 PVT_TXT_START = (
-    f"Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!\nWhat"
-    f" would you like to do?"
+    "Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!"
+    "\n\n>For questions or suggestions, please join the [Support Group]"
+    f"({Env.SUPPORT_GROUP_LINK.get()})"
 )
 PVT_KEY_SETTINGS = Emoji.SETTINGS + " Settings"
 PVT_KEY_STATUS = Emoji.STATUS + " Status"
@@ -798,6 +800,7 @@ CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_SAME_CREW_PER_COOLDOWN = (
 CREW_USER_NOT_IN_CREW = (
     "You are not in a Crew. Search for one or create your"
     f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."
+    f"\n\n>You can also find available Crew in the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 )
 CREW_NAME_WITH_LEVEL_DEEPLINK = "[{}]({}) \\(Lv. {}\\)"
 CREW_OVERVIEW = (
