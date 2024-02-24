@@ -31,15 +31,6 @@ def is_main_group(group_chat: GroupChat) -> bool:
     return int(group.tg_group_id) == Env.OPD_GROUP_ID.get_int()
 
 
-def get_main_group() -> Group:
-    """
-    Gets the main group_chat
-    :return: The main group_chat
-    """
-
-    return Group.get(Group.tg_group_id == str(Env.OPD_GROUP_ID.get_int()))
-
-
 def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:
     """
     Checks if a feature is enabled

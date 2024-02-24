@@ -69,6 +69,7 @@ class Emoji(StrEnum):
     RESET = "🔄"
     SHOP = "🛒"
     GIFT = "🎁"
+    INFO = "ℹ"
 
     # Game
     WINNER = "🏆"

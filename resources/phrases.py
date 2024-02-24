@@ -79,12 +79,11 @@ SHOW_USER_STATUS_DAILY_REWARD = (
 ROOKIE_STATUS_PRIVATE_CHAT_ONLY = "Rookies can only view their status in Private Chat"
 PRISONER_STATUS_PRIVATE_CHAT_ONLY = "Prisoners can only view their status in Private Chat"
 STATUS_PRIVATE_CHAT_KEY = "View in Private Chat"
-BOUNTY_RESET = "Bounties have been reset"
 
 LEADERBOARD = (
     "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
-    " bounties*:{}{}{}{}\n\n_Next bounty reset on {} \\(in {}\\)_\n>For questions or"
-    f" suggestions, please join the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
+    " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n>For questions"
+    f" or suggestions, please join the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 )
 LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
 LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
@@ -102,6 +101,7 @@ LEADERBOARD_RANK_ROOKIE = "Rookie"
 LEADERBOARD_RANK_ADMIN = "Veteran"
 LEADERBOARD_RANK_LEGENDARY_PIRATE = "Legendary Pirate"
 LEADERBOARD_RANK_WARLORD = "Warlord"
+LEADERBOARD_VIEW_BOUNTIES_RESET = f"\n>{Emoji.INFO}*Bounties have been reset*\n"
 
 
 SAVE_MEDIA_NOT_IN_REPLY_TO_MEDIA = "This command can only be used in a reply to a media message"

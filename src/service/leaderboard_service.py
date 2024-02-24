@@ -115,6 +115,7 @@ def get_leaderboard_message(
         crew_text,
         warlords_text,
         view_global_leaderboard_text,
+        phrases.LEADERBOARD_VIEW_BOUNTIES_RESET if leaderboard.is_bounty_reset else "",
         default_date_format(next_bounty_reset_time),
         get_remaining_duration(next_bounty_reset_time),
     )
@@ -127,10 +128,13 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     from src.service.bounty_service import should_reset_bounty, reset_bounty
 
+    now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
+    is_bounty_reset = should_reset_bounty(now)
+
     # Create and send the leaderboard, not fire and forget because all leaderboards need to be
     # completed before
     # eventually resetting the bounty
-    await manage_leaderboard(context)
+    await manage_leaderboard(context, is_bounty_reset)
 
     # Reset bounty poster limit
     context.application.create_task(reset_bounty_poster_limit(reset_previous_leaderboard=True))
@@ -143,7 +147,7 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Reset bounty if last leaderboard of the month
     now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
-    if should_reset_bounty(now):
+    if is_bounty_reset:
         context.application.create_task(reset_bounty(context))
     # Second last leaderboard of the month
     elif should_reset_bounty(
@@ -162,15 +166,16 @@ async def send_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     context.application.create_task(warn_inactive_users_with_eaten_devil_fruit(context))
 
 
-async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE, is_bounty_reset: bool) -> None:
     """
     Manages the leaderboard
     :param context: Context of callback
+    :param is_bounty_reset: Whether the bounty is reset
     :return: None
     """
 
     # Create and send global leaderboard
-    global_leaderboard = await create_and_send_leaderboard(context)
+    global_leaderboard = await create_and_send_leaderboard(context, is_bounty_reset)
 
     # Get all active groups
     groups: list[Group] = Group.select().where(Group.is_active == True).order_by(Group.id.asc())
@@ -178,15 +183,22 @@ async def manage_leaderboard(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Create and send local leaderboards
     for group in groups:
         context.application.create_task(
-            create_and_send_leaderboard(context, group, global_leaderboard)
+            create_and_send_leaderboard(context, is_bounty_reset, group, global_leaderboard)
         )
 
 
 async def create_and_send_leaderboard(
-    context: ContextTypes, group: Group = None, global_leaderboard: Leaderboard = None
+    context: ContextTypes,
+    is_bounty_reset: bool,
+    group: Group = None,
+    global_leaderboard: Leaderboard = None,
 ) -> Leaderboard | None:
     """
     Creates a leaderboard list and sends it to the group chat
+    :param context: Context of callback
+    :param is_bounty_reset: Whether the bounty is reset
+    :param group: The group to create the leaderboard for
+    :param global_leaderboard: The global leaderboard
     :return: The leaderboard
     """
 
@@ -221,6 +233,7 @@ async def create_and_send_leaderboard(
     leaderboard.year = datetime.datetime.now().isocalendar()[0]
     leaderboard.week = datetime.datetime.now().isocalendar()[1]
     leaderboard.group = group
+    leaderboard.is_bounty_reset = is_bounty_reset
 
     leaderboard.save()
 

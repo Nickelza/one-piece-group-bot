@@ -754,8 +754,6 @@ SEND_MESSAGE_LOCATION_UPDATE = Environment("SEND_MESSAGE_LOCATION_UPDATE", defau
 SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL = Environment(
     "SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL", default_value="True"
 )
-# Send bounty reset message. Default: True
-SEND_MESSAGE_BOUNTY_RESET = Environment("SEND_MESSAGE_BOUNTY_RESET", default_value="True")
 
 # Required location to use DocQ. Default: 14 (Jaya)
 REQUIRED_LOCATION_LEVEL_DOC_Q_GAME = Environment(

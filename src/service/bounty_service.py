@@ -40,7 +40,7 @@ from src.service.income_tax_service import (
     user_has_complete_tax_deduction,
 )
 from src.service.location_service import reset_location
-from src.service.message_service import full_message_send, full_message_or_media_send_or_edit
+from src.service.message_service import full_message_or_media_send_or_edit
 from src.service.user_service import get_boss_type, user_is_boss
 from src.utils.math_utils import subtract_percentage_from_value
 from src.utils.string_utils import (
@@ -132,10 +132,6 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Reset can promote to Captain
     Crew.update(can_promote_captain=True).execute()
-
-    if Env.SEND_MESSAGE_BOUNTY_RESET.get_bool():
-        ot_text = phrases.BOUNTY_RESET
-        await full_message_send(context, ot_text, chat_id=Env.OPD_GROUP_ID.get_int())
 
     # Disband inactive crews
     context.application.create_task(disband_inactive_crews(context))

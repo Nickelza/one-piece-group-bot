@@ -14,6 +14,7 @@ class Leaderboard(BaseModel):
     week: int | SmallIntegerField = SmallIntegerField()
     group: Group | ForeignKeyField = ForeignKeyField(Group, null=True, backref="leaderboards")
     global_message_id: int | IntegerField = IntegerField(null=True)
+    is_bounty_reset: bool | BooleanField = BooleanField(default=False)
 
     # Backref
     leaderboard_users = None
