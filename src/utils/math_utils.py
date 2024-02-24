@@ -47,7 +47,7 @@ def get_random_key_based_on_probability(probability_dict: dict[any, float]) -> a
     total_probability = sum(probability_dict.values())
 
     # Generate a random integer within the range of 0 to total_probability - 1
-    random_number = random.randint(0, total_probability - 1)
+    random_number = get_random_int(1, total_probability)
 
     # Initialize a variable to accumulate the sum of probabilities
     accumulated_probability = 0
