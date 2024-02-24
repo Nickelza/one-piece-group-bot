@@ -69,6 +69,7 @@ class Keyboard:
         )
         self.inbound_info = inbound_info.copy() if inbound_info else {}
 
+        self.callback_data: str = self.create_callback_data()
         if len(self.inbound_info) > 0:
             for key in self.exclude_key_from_inbound_info:
                 self.inbound_info.pop(key, None)
@@ -77,8 +78,6 @@ class Keyboard:
 
         if self.is_deeplink:
             self.set_deeplink_url()
-
-        self.callback_data: str = self.create_callback_data()
 
     def create_callback_data(self) -> str:
         """
