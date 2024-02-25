@@ -207,11 +207,26 @@ class DailyReward(BaseModel):
 
         return self.total_amount * 2
 
+    @staticmethod
+    def get_reward_count_for_user(user: User) -> int:
+        """
+        Get the reward count for the user
+        :param user: The user
+        :return: The reward count for the user
+        """
+
+        return DailyReward.select().where(DailyReward.user == user).count()
+
     def should_award_prize(self) -> bool:
         """
         Should award prize
         :return: Should award prize
         """
+        # First time ever claiming reward, award prize
+        if DailyReward.get_reward_count_for_user(self.user) == 1:
+            return True
+
+        # User has reached streak
         if self.get_days_to_next_prize() != Env.DAILY_REWARD_STREAK_DAYS.get_int():
             return False
 

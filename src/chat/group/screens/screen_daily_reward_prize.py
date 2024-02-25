@@ -87,8 +87,14 @@ async def send_prize_request(
     :param reward: The reward
     """
 
+    prefix_text = (
+        phrases.DAILY_REWARD_PRIZE_REQUEST_FIRST_TIME
+        if DailyReward.get_reward_count_for_user(reward.user) == 1
+        else phrases.DAILY_REWARD_PRIZE_REQUEST_FROM_STREAK
+    )
+
     ot_text = phrases.DAILY_REWARD_PRIZE_REQUEST.format(
-        reward.user.get_markdown_mention(),
+        prefix_text.format(reward.user.get_markdown_mention()),
         get_belly_formatted(reward.get_base_belly_prize_offer()),
         get_belly_formatted(reward.get_minimum_belly_prize()),
         get_belly_formatted(reward.get_maximum_belly_prize()),

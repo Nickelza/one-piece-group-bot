@@ -2106,13 +2106,17 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
 DAILY_REWARD_PRIZE_REQUEST = (
-    "Congratulations {} for keeping your streak for the past"
-    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days!\nYou can either accept the offered prize or"
+    "{}\nYou can either accept the offered prize or"
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"
     " your luck, you could obtain:\n• Random belly between ฿*{}* and"
     f" ฿*{{}}* \\({Env.DAILY_REWARD_PRIZE_BELLY_PERCENTAGE.get_int()}% chance\\)\n• A SMILE Devil"
     f" Fruit \\({Env.DAILY_REWARD_PRIZE_SMILE_PERCENTAGE.get_int()}% chance\\)"
 )
+DAILY_REWARD_PRIZE_REQUEST_FROM_STREAK = (
+    "Congratulations {} for keeping your streak for the past"
+    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} days!"
+)
+DAILY_REWARD_PRIZE_REQUEST_FIRST_TIME = "Congratulations {} for collecting your first reward!"
 DAILY_REWARD_PRIZE_CONFIRM = (
     Emoji.CONFETTI
     + "Congratulations {}, you have obtained the following prize:\n\n{}\n\n\n_Keep your"
