@@ -36,7 +36,11 @@ class TgRestImpelDownNotification(TgRest):
 
         self.user = User.get(User.id == user_id)
         self.sentence_type: ImpelDownSentenceType = ImpelDownSentenceType(sentence_type)
-        self.release_date_time = datetime.strptime(release_date_time, "%Y-%m-%d %H:%M:%S")
+        self.release_date_time = (
+            datetime.strptime(release_date_time, "%Y-%m-%d %H:%M:%S")
+            if release_date_time
+            else None
+        )
         self.bounty_action: ImpelDownBountyAction = ImpelDownBountyAction(bounty_action)
         self.reason: str = reason
 
