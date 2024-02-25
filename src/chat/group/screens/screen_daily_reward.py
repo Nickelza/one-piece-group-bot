@@ -108,7 +108,14 @@ async def manage(
     reward.save()
 
     # Add to user bounty
-    await add_or_remove_bounty(user, reward.total_amount, should_tax=False)
+    await add_or_remove_bounty(
+        user,
+        reward.total_amount,
+        should_tax=False,
+        update=update,
+        context=context,
+        should_update_location=True,
+    )
     user.can_collect_daily_reward = False
     user.save()
 
