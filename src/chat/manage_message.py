@@ -807,7 +807,9 @@ def remove_current_request(context: ContextTypes.DEFAULT_TYPE, inserted_time: da
     """
 
     try:
-        value = get_user_context_data(context, ContextDataKey.LAST_REQUEST)
+        value = get_user_context_data(
+            context, ContextDataKey.LAST_REQUEST, tolerate_key_exception=False
+        )
         if value == inserted_time:
             remove_user_context_data(context, ContextDataKey.LAST_REQUEST)
     except KeyError:
