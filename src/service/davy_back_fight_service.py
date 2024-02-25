@@ -143,6 +143,10 @@ async def add_contribution(user: User, amount: int, opponent: User = None):
     """
     crew: Crew = user.crew
 
+    # User not in a crew
+    if crew is None:
+        return
+
     dbf: DavyBackFight = crew.get_in_progress_davy_back_fight()
 
     # Crew not in an active Davy Back Fight
