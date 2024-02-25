@@ -320,6 +320,7 @@ async def manage_after_db(
                 raise ValueError("Invalid message source")
     except DoesNotExist as dne:
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
+        logging.error(update)
         logging.exception(dne)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
