@@ -7,6 +7,7 @@ class ReservedKeyboardKeys(StrEnum):
     DELETE = "del"
     IN_EDIT_ID = "z"
     SCREEN_STEP = "y"
+    SCREEN_STEP_NO_INPUT = "y1"
     TOGGLE = "x"
     PAGE = "w"
     CONFIRM = "v"

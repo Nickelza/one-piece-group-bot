@@ -90,7 +90,7 @@ async def manage(
         return
 
     # Edit item
-    if inbound_keyboard.has_key(ReservedKeyboardKeys.SCREEN_STEP):
+    if inbound_keyboard.has_key(ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT):
         await edit_options(update, context, inbound_keyboard, challenger_crew, opponent_crew, user)
         return
 
@@ -227,7 +227,7 @@ async def edit_options(
     :return: None
     """
 
-    step: StepEdit = StepEdit(inbound_keyboard.get_int(ReservedKeyboardKeys.SCREEN_STEP))
+    step: StepEdit = StepEdit(inbound_keyboard.get_int(ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT))
     match step:
         case StepEdit.PARTICIPANTS:
             text = phrases.CREW_DAVY_BACK_FIGHT_REQUEST_EDIT_PARTICIPANTS
@@ -257,7 +257,7 @@ async def edit_options(
                 str(i),
                 info={key: i},
                 inbound_info=inbound_keyboard.info,
-                exclude_key_from_inbound_info=[ReservedKeyboardKeys.SCREEN_STEP],
+                exclude_key_from_inbound_info=[ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT],
             )
         )
         if len(line_keyboard) == c.STANDARD_LIST_KEYBOARD_ROW_SIZE:
@@ -275,7 +275,7 @@ async def edit_options(
         keyboard=numeric_keyboard,
         inbound_keyboard=inbound_keyboard,
         user=user,
-        excluded_keys_from_back_button=[ReservedKeyboardKeys.SCREEN_STEP],
+        excluded_keys_from_back_button=[ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT],
     )
 
 
@@ -301,7 +301,7 @@ async def request_confirmation(
             Keyboard(
                 phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PARTICIPANTS,
                 screen=inbound_keyboard.screen,
-                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.PARTICIPANTS},
+                info={ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT: StepEdit.PARTICIPANTS},
                 inbound_info=inbound_keyboard.info,
             )
         ],
@@ -309,7 +309,7 @@ async def request_confirmation(
             Keyboard(
                 phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_DURATION,
                 screen=inbound_keyboard.screen,
-                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.DURATION},
+                info={ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT: StepEdit.DURATION},
                 inbound_info=inbound_keyboard.info,
             )
         ],
@@ -317,7 +317,7 @@ async def request_confirmation(
             Keyboard(
                 phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_EDIT_PENALTY,
                 screen=inbound_keyboard.screen,
-                info={ReservedKeyboardKeys.SCREEN_STEP: StepEdit.PENALTY},
+                info={ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT: StepEdit.PENALTY},
                 inbound_info=inbound_keyboard.info,
             )
         ],
