@@ -537,8 +537,8 @@ DOC_Q_GAME_SHOW_CORRECT_OPTION = Environment(
 # How long a user has to wait before playing the game again in hours. Default: 24
 DOC_Q_GAME_COOLDOWN_DURATION = Environment("DOC_Q_GAME_COOLDOWN_DURATION", default_value="24")
 
-# Minimum wager for games. Default: 10 million
-GAME_MIN_WAGER = Environment("GAME_MIN_WAGER", default_value="10000000")
+# Minimum wager for games. Default: 5 million
+GAME_MIN_WAGER = Environment("GAME_MIN_WAGER", default_value="5000000")
 # Maximum total wager for easy mode. Default: 50 million
 GAME_MAX_TOTAL_WAGER_EASY = Environment("GAME_MAX_TOTAL_WAGER_EASY", default_value="50000000")
 # Maximum total wager for medium mode. Default: 200 million
@@ -548,11 +548,11 @@ GAME_MAX_TOTAL_WAGER_MEDIUM = Environment("GAME_MAX_TOTAL_WAGER_MEDIUM", default
 GAME_TURN_NOTIFICATION_TIME = Environment("GAME_TURN_NOTIFICATION_TIME", default_value="60")
 # Game cooldown duration in hours. Default: 8
 GAME_COOLDOWN_DURATION = Environment("GAME_COOLDOWN_DURATION", default_value="8")
-# How much time to wait for opponent confirmation before timing out. Default: 120 seconds
-GAME_CONFIRMATION_TIMEOUT = Environment("GAME_CONFIRMATION_TIMEOUT", default_value="120")
+# How much time to wait for opponent confirmation before timing out. Default: 60 seconds
+GAME_CONFIRMATION_TIMEOUT = Environment("GAME_CONFIRMATION_TIMEOUT", default_value="60")
 # How much time to wait after user has confirmed the game before starting the game.
-# Default: 60 seconds
-GAME_START_WAIT_TIME = Environment("GAME_START_WAIT_TIME", default_value="60")
+# Default: 30 seconds
+GAME_START_WAIT_TIME = Environment("GAME_START_WAIT_TIME", default_value="30")
 # After how much time since the last interaction should a game be considered inactive.
 # Default: 600 seconds
 GAME_INACTIVE_TIME = Environment("GAME_INACTIVE_TIME", default_value="600")
@@ -573,8 +573,8 @@ SHAMBLES_GRID_SIZE_EASY = Environment("SHAMBLES_GRID_SIZE_EASY", default_value="
 SHAMBLES_GRID_SIZE_MEDIUM = Environment("SHAMBLES_GRID_SIZE_MEDIUM", default_value="10")
 # Shambles grid size hard mode. Default: 13
 SHAMBLES_GRID_SIZE_HARD = Environment("SHAMBLES_GRID_SIZE_HARD", default_value="13")
-# How much time to wait before sending the next level in Shambles game. Default: 30 seconds
-SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment("SHAMBLES_NEXT_LEVEL_WAIT_TIME", default_value="30")
+# How much time to wait before sending the next level in Shambles game. Default: 60 seconds
+SHAMBLES_NEXT_LEVEL_WAIT_TIME = Environment("SHAMBLES_NEXT_LEVEL_WAIT_TIME", default_value="60")
 # Starting lives in Guess or Life game. Default: 5
 GUESS_OR_LIFE_STARTING_LIVES = Environment("GUESS_OR_LIFE_STARTING_LIVES", default_value="5")
 # How much time to wait before issuing a new life in Guess or Life game. Default: 30 seconds
@@ -686,10 +686,10 @@ LOCATION_EGGHEAD_IMAGE_URL = Environment(
     "LOCATION_EGGHEAD_IMAGE_URL", default_value="https://i.imgur.com/mPsUp7x.jpeg"
 )
 
-# How long fight immunity lasts in hours. Default: 24 hours
-FIGHT_IMMUNITY_DURATION = Environment("FIGHT_IMMUNITY_DURATION", default_value="24")
-# How long a user has to wait before fighting another user in hours. Default: 1 hour
-FIGHT_COOLDOWN_DURATION = Environment("FIGHT_COOLDOWN_DURATION", default_value="1")
+# How long fight immunity lasts in hours. Default: 6 hours
+FIGHT_IMMUNITY_DURATION = Environment("FIGHT_IMMUNITY_DURATION", default_value="6")
+# How long a user has to wait before fighting another user in hours. Default: 2 hours
+FIGHT_COOLDOWN_DURATION = Environment("FIGHT_COOLDOWN_DURATION", default_value="2")
 # Maximum win probability for Pirate King. Default: 99.99%
 FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING = Environment(
     "FIGHT_MAX_WIN_PROBABILITY_PIRATE_KING", default_value="99"
@@ -739,8 +739,8 @@ FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment(
     "FIGHT_MIN_WIN_PROBABILITY_ROOKIE", default_value="1"
 )
 
-# Minimum wager for prediction bets. Default: 10 million
-PREDICTION_BET_MIN_WAGER = Environment("PREDICTION_BET_MIN_WAGER", default_value="10000000")
+# Minimum wager for prediction bets. Default: 5 million
+PREDICTION_BET_MIN_WAGER = Environment("PREDICTION_BET_MIN_WAGER", default_value="5000000")
 # How long a user has to wait before creating a new prediction in hours. Default: 48 hours
 PREDICTION_CREATE_COOLDOWN_DURATION = Environment(
     "PREDICTION_CREATE_COOLDOWN_DURATION", default_value="48"
@@ -779,13 +779,13 @@ REQUIRED_LOCATION_LEVEL_SEND_DICE_EMOJI = Environment(
 REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS = Environment(
     "REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS", default_value="21"
 )
-# Required location to fight. Default: 21 (Fishman Island)
-REQUIRED_LOCATION_LEVEL_FIGHT = Environment("REQUIRED_LOCATION_LEVEL_FIGHT", default_value="21")
-# Required location to play games. Default: 21 (Fishman Island)
-REQUIRED_LOCATION_LEVEL_GAME = Environment("REQUIRED_LOCATION_LEVEL_GAME", default_value="21")
-# Required location to bet on predictions. Default: 21 (Fishman Island)
+# Required location to fight. Default: 10 (Whiskey Peak)
+REQUIRED_LOCATION_LEVEL_FIGHT = Environment("REQUIRED_LOCATION_LEVEL_FIGHT", default_value="10")
+# Required location to play games. Default: 1 (Foosha Village)
+REQUIRED_LOCATION_LEVEL_GAME = Environment("REQUIRED_LOCATION_LEVEL_GAME", default_value="1")
+# Required location to bet on predictions. Default: 1 (Foosha Village)
 REQUIRED_LOCATION_LEVEL_PREDICTION_BET = Environment(
-    "REQUIRED_LOCATION_LEVEL_PREDICTION_BET", default_value="21"
+    "REQUIRED_LOCATION_LEVEL_PREDICTION_BET", default_value="1"
 )
 # Required location to create predictions. Default: 21 (Fishman Island)
 REQUIRED_LOCATION_LEVEL_PREDICTION_CREATE = Environment(
