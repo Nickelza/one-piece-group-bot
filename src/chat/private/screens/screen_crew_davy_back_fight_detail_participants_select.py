@@ -11,6 +11,7 @@ from src.model.User import User
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
@@ -30,6 +31,7 @@ class ScreenReservedKeys(StrEnum):
 async def validate(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
+    user: User,
     inbound_keyboard: Keyboard,
     crew: Crew,
     davy_back_fight: DavyBackFight,
@@ -47,6 +49,10 @@ async def validate(
     # No member selected, it's okay to just view list
     if not inbound_keyboard.has_key(ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY):
         return True
+
+    # Member selected, check that user is Captain or First Mate
+    if not user.is_crew_captain_or_first_mate():
+        raise ChatWarning(phrases.COMMAND_ONLY_BY_CREW_CAPTAIN_OR_FIRST_MATE_ERROR)
 
     try:
         # Already started
@@ -93,7 +99,7 @@ async def manage(
     crew: Crew = get_crew(user)
 
     # Allow members view even in case they can't be changed, only if no member is selected
-    if not await validate(update, context, inbound_keyboard, crew, dbf):
+    if not await validate(update, context, user, inbound_keyboard, crew, dbf):
         return
 
     filter_participant: bool | None = None
