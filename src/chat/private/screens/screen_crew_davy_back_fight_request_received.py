@@ -135,11 +135,13 @@ async def send_outcome_notification(
     """
 
     challenger_crew: Crew = davy_back_fight.challenger_crew
+    opponent_crew: Crew = davy_back_fight.opponent_crew
+
     if is_accepted:
         return await send_notification(
             context,
             challenger_crew.get_captain(),
-            DavyBackFightRequestAcceptedNotification(challenger_crew, davy_back_fight),
+            DavyBackFightRequestAcceptedNotification(opponent_crew, davy_back_fight),
         )
 
     davy_back_fight.status = GameStatus.FORCED_END
@@ -148,5 +150,5 @@ async def send_outcome_notification(
     return await send_notification(
         context,
         challenger_crew.get_captain(),
-        DavyBackFightRequestRejectedNotification(challenger_crew),
+        DavyBackFightRequestRejectedNotification(opponent_crew),
     )
