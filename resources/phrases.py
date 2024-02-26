@@ -1960,6 +1960,11 @@ DEVIL_FRUIT_SELL_NO_FRUITS = (
 DEVIL_FRUIT_SELL_SELECT_FRUIT = (
     "Select the Devil Fruit you want to sell\n\n>When using this command in response to a"
     " user, only they will have the ability to purchase the Devil Fruit"
+    f"\n\n{Emoji.WARNING}The Devil"
+    " Fruit will not be listed for sale in the global Shop."
+    "\nIf you want all players to view it, put it up for sale from:"
+    f"\n`{CommandName.START.get_non_formatted()}-\\>{PVT_KEY_DEVIL_FRUIT}-\\>Select"
+    f"-\\>{PVT_KEY_DEVIL_FRUIT_DETAIL_SELL}`"
 )
 DEVIL_FRUIT_SELL_NO_LONGER_OWN = "{} no longer owns this Devil Fruit"
 DEVIL_FRUIT_SELL_NO_LONGER_SELLABLE = "This Devil Fruit is no longer sellable"
