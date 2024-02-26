@@ -625,7 +625,7 @@ def get_recap_text(devil_fruit: DevilFruit, add_sell_command: bool = False) -> s
             expiring_date_text += "\n"
         expiring_date_text += phrases.DEVIL_FRUIT_SMILE_EXPIRATION_EXPLANATION
 
-    if add_sell_command:
+    if add_sell_command and devil_fruit.get_status() is not DevilFruitStatus.EATEN:
         sell_command_text = phrases.DEVIL_FRUIT_ITEM_DETAIL_TEXT_SELL_COMMAND
 
     abilities_text = get_devil_fruit_abilities_text(devil_fruit, always_show_abilities=False)
