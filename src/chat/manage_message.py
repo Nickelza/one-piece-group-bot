@@ -53,6 +53,7 @@ from src.service.message_service import (
     escape_valid_markdown_chars,
 )
 from src.service.user_service import user_is_boss, user_is_muted, get_effective_tg_user_id
+from src.utils.string_utils import get_belly_formatted
 
 
 def init() -> MySQLDatabase:
@@ -421,8 +422,9 @@ async def validate(
     _is_main_group = group_chat is not None and is_main_group(group_chat)
     is_restricted_feature_error = False
 
-    # Is active
+    inline_keyboard: list[list[Keyboard]] = []
     try:
+        # Is active
         if not command.active:
             if command.replaced_by is not None:
                 raise CommandValidationException(
@@ -461,8 +463,26 @@ async def validate(
                     escape_valid_markdown_chars(command.required_location.name),
                     escape_valid_markdown_chars(user.get_location_name()),
                 )
+                if user.bounty < command.required_location.required_bounty:
+                    text += phrases.COMMAND_FOR_USERS_AFTER_LOCATION_BOUNTY_ERROR.format(
+                        get_belly_formatted(user.bounty),
+                        get_belly_formatted(command.required_location.required_bounty),
+                        get_belly_formatted(
+                            command.required_location.required_bounty - user.bounty
+                        ),
+                    )
+
                 if not user.is_crew_member() and user.can_join_crew:
                     text += phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW
+
+                    # Add Find Crew button
+                    inline_keyboard.append([
+                        Keyboard(
+                            phrases.KEY_JOIN_A_CREW,
+                            screen=Screen.PVT_CREW_SEARCH,
+                            is_deeplink=True,
+                        )
+                    ])
 
                 raise CommandValidationException(text)
 
@@ -567,6 +587,7 @@ async def validate(
                     answer_callback=command.answer_callback,
                     show_alert=command.show_alert,
                     inbound_keyboard=inbound_keyboard,
+                    keyboard=inline_keyboard,
                 )
         return False
 

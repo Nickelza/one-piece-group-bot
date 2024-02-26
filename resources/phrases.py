@@ -25,6 +25,9 @@ COMMAND_FOR_NEW_WORLD_USERS_ERROR = "This command is only available for users in
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR = (
     "This command is only available for users who have reached *{}*.\n\nCurrent location: *{}*"
 )
+COMMAND_FOR_USERS_AFTER_LOCATION_BOUNTY_ERROR = (
+    "\nCurrent bounty: ฿*{}*\nRequired bounty: ฿*{}*\nMissing bounty: ฿*{}*"
+)
 COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW = (
     "\n\n_Join a Crew to quickly level up your location!_"
 )
@@ -260,6 +263,7 @@ KEY_SHOP = Emoji.SHOP + " Shop"
 KEY_REMOVE = Emoji.DELETE + " Remove"
 KEY_BUY = "Buy"
 KEY_MANAGE_DEVIL_FRUIT = "Manage Devil Fruit"
+KEY_JOIN_A_CREW = "Join a Crew"
 
 # Private chat
 PVT_TXT_START = (
