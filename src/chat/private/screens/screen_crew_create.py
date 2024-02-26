@@ -11,6 +11,7 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CustomException import CrewValidationException
 from src.model.error.PrivateChatError import PrivateChatError, PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
@@ -50,6 +51,11 @@ async def manage(
     :param user: The user
     :return: None
     """
+
+    # If user already in a Crew, this Screen should be accessible only by the Captain or First Mate
+    if user.crew is not None:
+        if not user.is_crew_captain_or_first_mate():
+            raise ChatWarning(phrases.CREW_MODIFY_ONLY_CAPTAIN_OR_FIRST_MATE)
 
     should_ignore_input, should_create_item, should_validate_input = get_create_or_edit_status(
         user, inbound_keyboard
