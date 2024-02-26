@@ -82,6 +82,7 @@ async def manage(
             phrases.KEY_MANAGE_DEVIL_FRUIT,
             screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
             info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id},
+            previous_screen_list=[Screen.PVT_DEVIL_FRUIT],  # Don't go back to the shop
         )
     ])
 
