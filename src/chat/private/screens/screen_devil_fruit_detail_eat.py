@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 import resources.phrases as phrases
 from resources import Environment as Env
 from src.model.DevilFruit import DevilFruit
+from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -107,6 +108,9 @@ async def manage(
         devil_fruit.expiration_date = None
 
     devil_fruit.save()
+
+    # Delete all pending trades
+    DevilFruitTrade.delete_pending_trades(devil_fruit)
 
     # Send success message
     ot_text = phrases.DEVIL_FRUIT_EAT_CONFIRMATION_CONFIRMED.format(
