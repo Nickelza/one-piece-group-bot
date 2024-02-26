@@ -272,6 +272,7 @@ async def manage(
         text_fill_in=phrases.CREW_DAVY_BACK_FIGHT_ITEM_TEXT_FILL_IN,
         context=context,
         user=user,
+        empty_list_text=phrases.CREW_DAVY_BACK_FIGHT_LIST_NO_ITEMS,
     )
 
     await full_message_send(

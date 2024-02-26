@@ -1108,6 +1108,12 @@ CREW_LEVEL_UPGRADE_TYPE_ABILITY = "ability"
 
 CREW_LEVEL_UP_CONFIRMATION_REQUEST = "Are you sure you want to level up the Crew?\n\n{}"
 CREW_LEVEL_UP_SUCCESS = "Crew leveled up successfully\n\n{}"
+CREW_DAVY_BACK_FIGHT_LIST_NO_ITEMS = (
+    "The Crew has not yet participated in any Davy Back Fights.\nThe Captain can challenge"
+    " another Crew from:"
+    f"\n`{CommandName.START.get_non_formatted()}-\\>{PVT_KEY_CREW}-\\>{PVT_KEY_CREW_SEARCH}"
+    f"-\\>Select a Crew-\\>{PVT_KEY_CREW_DAVY_BACK_FIGHT}`"
+)
 CREW_DAVY_BACK_FIGHT_ITEM_TEXT = "{} vs. {}"
 CREW_DAVY_BACK_FIGHT_ITEM_TEXT_FILL_IN = "Davy Back Fight"
 CREW_DAVY_BACK_FIGHT_ITEM_DETAIL_TEXT = (
