@@ -380,7 +380,10 @@ async def respawn_devil_fruit(context: ContextTypes.DEFAULT_TYPE) -> None:
     devil_fruits: list[DevilFruit] = DevilFruit.select().where(
         (
             (DevilFruit.status == DevilFruitStatus.COLLECTED)
-            | (DevilFruit.category == DevilFruitCategory.SMILE)
+            | (
+                (DevilFruit.status == DevilFruitStatus.EATEN)
+                & (DevilFruit.category == DevilFruitCategory.SMILE)
+            )
         )
         & (DevilFruit.expiration_date <= datetime.now())
     )
