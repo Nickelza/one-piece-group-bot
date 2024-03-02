@@ -1,5 +1,6 @@
 import base64
 import logging
+import traceback
 from datetime import datetime
 
 from peewee import MySQLDatabase, DoesNotExist
@@ -132,6 +133,8 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE, is_callback
     except Exception as e:
         logging.error(update)
         logging.error(e, exc_info=True)
+        # For functions called asynchronously, since the full stacktrace is not printed
+        logging.error(traceback.format_stack())
     finally:
         end(db)
 
