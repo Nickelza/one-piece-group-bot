@@ -13,6 +13,7 @@ def surround_with_arrows(text: str) -> str:
 
 
 ANTI_SPAM_WARNING = "Too many messages sent, please slow down..."
+SUPPORT_GROUP_DEEPLINK = f"[Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 
 COMMAND_NOT_IN_REPLY_ERROR = "This command can only be used in a reply to a message"
 COMMAND_IN_REPLY_TO_BOT_ERROR = "This command can't be used in reply to a bot"
@@ -86,7 +87,7 @@ STATUS_PRIVATE_CHAT_KEY = "View in Private Chat"
 LEADERBOARD = (
     "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
     " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n>For questions"
-    f" or suggestions, please join the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
+    f" or suggestions, please join the {SUPPORT_GROUP_DEEPLINK}"
 )
 LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
 LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
@@ -151,6 +152,7 @@ UNKNOWN_EXTRA_STEP = "Unknown extra step"
 PRIVATE_STEP_NOT_SET = "Private step not set"
 SAVED_USER_DATA_NOT_FOUND = "Saved user data not found"
 RESTART_BOT = "Oops, looks like there was some error. Please restart the Bot"
+FORWARD_TO_SUPPORT_GROUP = f". Please forward this message to the {SUPPORT_GROUP_DEEPLINK}"
 
 # Keyboard options
 KEYBOARD_OPTION_CANCEL = Emoji.CANCEL + " Cancel"
@@ -268,8 +270,7 @@ KEY_JOIN_A_CREW = "Join a Crew"
 # Private chat
 PVT_TXT_START = (
     "Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!"
-    "\n\n>For questions or suggestions, please join the [Support Group]"
-    f"({Env.SUPPORT_GROUP_LINK.get()})"
+    f"\n\n>For questions or suggestions, please join the {SUPPORT_GROUP_DEEPLINK}"
 )
 PVT_KEY_SETTINGS = Emoji.SETTINGS + " Settings"
 PVT_KEY_STATUS = Emoji.STATUS + " Status"
@@ -416,7 +417,7 @@ SYSTEM_UPDATE = (
     f"{Emoji.CONFETTI}New update{Emoji.CONFETTI}"
     "\n\n*{}*\n\n{}"
     "\n\n[View full changelog]({})"
-    f"\n\n{Emoji.HELP}[Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
+    f"\n\n{Emoji.HELP}{SUPPORT_GROUP_DEEPLINK}"
 )
 
 GAME_CANNOT_CHALLENGE_USER = "You can't challenge this user"
@@ -812,7 +813,7 @@ CREW_SEARCH_UNAUTHORIZED_CANNOT_VIEW_FROM_SEARCH = (
 CREW_USER_NOT_IN_CREW = (
     "You are not in a Crew. Search for one or create your"
     f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."
-    f"\n\n>You can also find available Crew in the [Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
+    f"\n\n>You can also find available Crew in the {SUPPORT_GROUP_DEEPLINK}"
 )
 CREW_NAME_WITH_LEVEL_DEEPLINK = "[{}]({}) \\(Lv. {}\\)"
 CREW_OVERVIEW = (
@@ -952,7 +953,10 @@ CREW_INVITE_REQUEST_ACCEPTED = "{} is now a member of {}!"
 CREW_INVITE_REQUEST_REJECTED = "Invitation to join the *{}* has been rejected by {}"
 
 STEP_REQUIRES_TEXT = "Please send a valid text"
-ITEM_NOT_FOUND = "Item not found. If you think this is a mistake, please contact an Admin"
+ITEM_NOT_FOUND = (
+    "Item not found. If you think this is a mistake, please report it in the "
+    f"{SUPPORT_GROUP_DEEPLINK}"
+)
 ITEM_NOT_FOUND_NO_CONTACT = "Item not found."
 ITEM_IN_WRONG_STATUS = "Item in wrong status"
 INLINE_QUERY_ITEM_NOT_FOUND_TITLE = "Item not found"

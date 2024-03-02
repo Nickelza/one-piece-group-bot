@@ -1,3 +1,4 @@
+from resources import phrases
 from src.model.error.ErrorSource import ErrorSource
 
 
@@ -17,7 +18,7 @@ class Error:
             return self.message
 
         result = f"Error " + self.source + str(self.code) + ": " + self.message
-        result += ". Please forward this message to an Admin."
+        result += phrases.FORWARD_TO_SUPPORT_GROUP
 
         return result
 
