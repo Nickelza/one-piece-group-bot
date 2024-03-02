@@ -90,22 +90,6 @@ def validate(
                 phrases.CREW_USER_ALREADY_IN_SAME_CREW if specific_user_error else None
             )
 
-        # User already in a Crew
-        if user.is_crew_member():
-            raise CrewJoinValidationUserException(
-                phrases.CREW_USER_ALREADY_IN_CREW if specific_user_error else None
-            )
-
-        # User cannot join a Crew
-        if not user.can_join_crew:
-            raise CrewJoinValidationUserException(
-                phrases.CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET.format(
-                    get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())
-                )
-                if specific_user_error
-                else None
-            )
-
         # Target crew has reached the maximum number of members
         crew.set_is_full()  # Should not be necessary, but better to be safe
         if crew.is_full:
@@ -121,6 +105,22 @@ def validate(
                 )
                 if specific_crew_error
                 else None
+            )
+
+        # User cannot join a Crew
+        if not user.can_join_crew:
+            raise CrewJoinValidationUserException(
+                phrases.CREW_USER_CANNOT_JOIN_CREW_UNTIL_RESET.format(
+                    get_remaining_time_from_next_cron(Env.CRON_SEND_LEADERBOARD.get())
+                )
+                if specific_user_error
+                else None
+            )
+
+        # User already in a Crew
+        if user.is_crew_member():
+            raise CrewJoinValidationUserException(
+                phrases.CREW_USER_ALREADY_IN_CREW if specific_user_error else None
             )
 
     except CrewJoinValidationUserException as e:
