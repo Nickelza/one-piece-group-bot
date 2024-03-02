@@ -4,7 +4,7 @@ from datetime import datetime
 
 from peewee import MySQLDatabase, DoesNotExist
 from telegram import Update, User as TelegramUser
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TimedOut, NetworkError
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -321,8 +321,10 @@ async def manage_after_db(
                 raise ValueError("Invalid message source")
     except DoesNotExist as dne:
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
-        logging.error(update)
-        logging.exception(dne)
+        logging.warning(update)
+        logging.warning(dne)
+    except (TimedOut, NetworkError):
+        logging.warning("Network error")
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         user.should_update_model = False
