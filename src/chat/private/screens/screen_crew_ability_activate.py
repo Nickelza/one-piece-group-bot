@@ -5,10 +5,10 @@ from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
 from src.model.Crew import Crew
-from src.model.CrewAbility import CrewAbility
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew
@@ -46,7 +46,7 @@ async def manage(
     if not await validate(update, context, inbound_keyboard, crew):
         return
 
-    allowed_ability_types = CrewAbility.get_allowed_ability_types()
+    allowed_ability_types = DevilFruitAbilityType.get_allowed_ability_types_from_random()
     inline_keyboard: list[list[Keyboard]] = []
 
     screen = Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM

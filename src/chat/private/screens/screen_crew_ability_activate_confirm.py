@@ -7,7 +7,6 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.chat.private.screens.screen_crew_ability_activate import validate
 from src.model.Crew import Crew
-from src.model.CrewAbility import CrewAbility
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
@@ -66,7 +65,7 @@ async def manage(
         ability_value = Env.CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE.get_int()
         acquired_method = CrewAbilityAcquiredMethod.CHOSEN
     else:
-        ability_type = CrewAbility.get_random_ability()
+        ability_type = DevilFruitAbilityType.get_random_ability()
         ability_value = get_random_int(
             Env.CREW_ABILITY_RANDOM_MIN_VALUE_PERCENTAGE.get_int(),
             Env.CREW_ABILITY_RANDOM_MAX_VALUE_PERCENTAGE.get_int(),

@@ -1,4 +1,5 @@
 from enum import IntEnum, StrEnum
+from random import choice
 
 from resources import phrases
 
@@ -46,15 +47,35 @@ class DevilFruitAbilityType(IntEnum):
         return DEVIL_FRUIT_ABILITY_TYPE_SIGN_MAP[self]
 
     @staticmethod
-    def get_random() -> "DevilFruitAbilityType":
+    def get_not_allowed_ability_types_from_random() -> list["DevilFruitAbilityType"]:
+        """
+        Returns the not allowed ability types
+        :return: The not allowed ability types
+        """
+
+        return [DevilFruitAbilityType.INCOME_TAX]
+
+    @staticmethod
+    def get_allowed_ability_types_from_random() -> list["DevilFruitAbilityType"]:
+        """
+        Returns the allowed ability types
+        :return: The allowed ability types
+        """
+        return [
+            ability_type
+            for ability_type in DevilFruitAbilityType
+            if ability_type
+            not in DevilFruitAbilityType.get_not_allowed_ability_types_from_random()
+        ]
+
+    @staticmethod
+    def get_random_ability() -> "DevilFruitAbilityType":
         """
         Get a random devil fruit ability type
         :return: A random devil fruit ability type
         """
 
-        from random import choice
-
-        return choice(list(DevilFruitAbilityType))
+        return choice(list(DevilFruitAbilityType.get_allowed_ability_types_from_random()))
 
 
 DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {

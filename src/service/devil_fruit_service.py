@@ -585,7 +585,7 @@ def create_smile() -> DevilFruit:
     # Add ability
     ability: DevilFruitAbility = DevilFruitAbility()
     ability.devil_fruit = devil_fruit
-    ability.ability_type = DevilFruitAbilityType.get_random()
+    ability.ability_type = DevilFruitAbilityType.get_random_ability()
     ability.value = get_random_int(1, 100)
     ability.save()
 
