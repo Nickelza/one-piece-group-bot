@@ -12,3 +12,4 @@ venv
 /howtokill.sh
 /nohup.out
 /temp
+nohup*.out
