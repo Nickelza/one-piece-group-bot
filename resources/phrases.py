@@ -804,6 +804,11 @@ CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_PER_COOLDOWN = "You can request to join anothe
 CREW_SEARCH_JOIN_MAXIMUM_REQUESTS_SAME_CREW_PER_COOLDOWN = (
     "You can request to join this Crew again in {}"
 )
+CREW_SEARCH_UNAUTHORIZED_CANNOT_VIEW_FROM_SEARCH = (
+    "This Crew's information is not available from search.\n\nIf you are the Captain or First Mate"
+    " of this Crew, enable `Allow users to find the Crew from search` option under"
+    f" `{PVT_KEY_CREW}-\\>{KEY_MODIFY}`"
+)
 CREW_USER_NOT_IN_CREW = (
     "You are not in a Crew. Search for one or create your"
     f" own.\n\nCreating a Crew will cost ฿{Env.CREW_CREATE_PRICE.get_belly()}."

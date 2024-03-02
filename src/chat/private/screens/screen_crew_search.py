@@ -12,6 +12,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage, EmojiLegend, ListFilter, ListFilterType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
+from src.model.error.CustomException import UnauthorizedToViewItemException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew_overview_text
@@ -52,7 +53,15 @@ class CrewSearchListPage(ListPage):
         )
 
     def get_item_detail_text(self) -> str:
-        super().get_item_detail_text()
+        try:
+            super().get_item_detail_text()
+        except UnauthorizedToViewItemException:
+            if not self.object.allow_view_in_search:
+                raise UnauthorizedToViewItemException(
+                    phrases.CREW_SEARCH_UNAUTHORIZED_CANNOT_VIEW_FROM_SEARCH
+                )
+
+            raise UnauthorizedToViewItemException
 
         return get_crew_overview_text(self.object, self.user)
 

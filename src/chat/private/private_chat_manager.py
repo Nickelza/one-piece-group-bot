@@ -193,10 +193,10 @@ async def manage(
 
     try:
         await dispatch_screens(update, context, command, user, inbound_keyboard)
-    except UnauthorizedToViewItemException:
+    except UnauthorizedToViewItemException as e:
         await full_message_send(
             context,
-            phrases.LOG_ITEM_DETAIL_NO_PERMISSION,
+            phrases.LOG_ITEM_DETAIL_NO_PERMISSION if e.message is None else e.message,
             update=update,
             previous_screens=[Screen.PVT_START],
         )
