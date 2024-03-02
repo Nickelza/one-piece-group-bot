@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from telegram import Update, Message
 from telegram.error import Forbidden
 from telegram.ext import ContextTypes
@@ -30,6 +33,11 @@ async def send_notification(
     :param update: The update object
     :return: None
     """
+
+    if user is None:
+        logging.error("Trying to send a notification to a None user")
+        logging.error(traceback.format_stack())
+        return
 
     if (
         should_forward_message
