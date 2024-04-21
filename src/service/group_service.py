@@ -6,12 +6,14 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
+from src.model.BaseModel import BaseModel
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
 from src.model.GroupUser import GroupUser
+from src.model.Leaderboard import Leaderboard
 from src.model.Prediction import Prediction
 from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.User import User
@@ -114,7 +116,7 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(
     text: str,
     inline_keyboard: list[list[Keyboard]] = None,
     excluded_group_chats: list[GroupChat] = None,
-    prediction: Prediction = None,
+    external_item: BaseModel = None,
     filter_by_groups: list[Group] = None,
 ) -> None:
     """
@@ -124,7 +126,7 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(
     :param text: The message
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
-    :param prediction: The prediction, to save the group chat message
+    :param external_item: The external item to save the group chat message
     :param filter_by_groups: The groups to filter by
     """
 
@@ -135,7 +137,7 @@ async def broadcast_to_chats_with_feature_enabled_dispatch(
             text,
             inline_keyboard=inline_keyboard,
             excluded_group_chats=excluded_group_chats,
-            prediction=prediction,
+            external_item=external_item,
             filter_by_groups=filter_by_groups,
         )
     )
@@ -147,7 +149,7 @@ async def broadcast_to_chats_with_feature_enabled(
     text: str,
     inline_keyboard: list[list[Keyboard]] = None,
     excluded_group_chats: list[GroupChat] = None,
-    prediction: Prediction = None,
+    external_item: BaseModel = None,
     filter_by_groups: list[Group] = None,
 ) -> None:
     """
@@ -157,12 +159,14 @@ async def broadcast_to_chats_with_feature_enabled(
     :param text: The message
     :param inline_keyboard: The outbound keyboard
     :param excluded_group_chats: The chats to exclude from the broadcast
-    :param prediction: The prediction, to save the group chat message
+    :param external_item: The external item to save the group chat message
     :param filter_by_groups: The groups to filter by
     """
 
-    if feature is Feature.PREDICTION and prediction is None:
-        raise ValueError("Prediction cannot be None if the feature is PREDICTION")
+    if feature in [Feature.PREDICTION, Feature.LEADERBOARD] and external_item is None:
+        raise ValueError(
+            "External item cannot be None if the feature is " + feature.get_description()
+        )
 
     if filter_by_groups is None:
         filter_by_groups = []
@@ -194,10 +198,15 @@ async def broadcast_to_chats_with_feature_enabled(
                 prediction_group_chat_message: PredictionGroupChatMessage = (
                     PredictionGroupChatMessage()
                 )
-                prediction_group_chat_message.prediction = prediction
+                external_item: Prediction = external_item
+                prediction_group_chat_message.prediction = external_item
                 prediction_group_chat_message.group_chat = group_chat
                 prediction_group_chat_message.message_id = message.message_id
                 prediction_group_chat_message.save()
+            elif feature is Feature.LEADERBOARD:  # Save Leaderboard message id
+                external_item: Leaderboard = external_item
+                external_item.message_id = message.message_id
+                external_item.save()
 
             if feature_is_pinnable:
                 should_pin = (

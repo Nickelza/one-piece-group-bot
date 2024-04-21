@@ -69,7 +69,7 @@ async def send(
         context,
         Feature.PREDICTION,
         text,
-        prediction=prediction,
+        external_item=prediction,
         inline_keyboard=[[get_prediction_deeplink_button(prediction)]],
     )
 

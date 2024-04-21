@@ -245,18 +245,22 @@ async def create_and_send_leaderboard(
     if Env.SEND_MESSAGE_LEADERBOARD.get_bool():
         ot_text = get_leaderboard_message(
             leaderboard,
-            (global_leaderboard.global_message_id if global_leaderboard is not None else None),
+            (global_leaderboard.message_id if global_leaderboard is not None else None),
         )
         if group is not None:
             await broadcast_to_chats_with_feature_enabled_dispatch(
-                context, Feature.LEADERBOARD, ot_text, filter_by_groups=[group]
+                context,
+                Feature.LEADERBOARD,
+                ot_text,
+                external_item=leaderboard,
+                filter_by_groups=[group],
             )
         else:
             try:
                 message: Message = await full_message_send(
                     context, ot_text, chat_id=Env.UPDATES_CHANNEL_ID.get()
                 )
-                leaderboard.global_message_id = message.message_id
+                leaderboard.message_id = message.message_id
                 leaderboard.save()
             except TelegramError:
                 logging.exception(
