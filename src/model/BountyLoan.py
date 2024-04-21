@@ -86,7 +86,7 @@ class BountyLoan(BaseModel):
             and datetime_is_before(
                 self.deadline_date + timedelta(days=Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int())
             )
-            and self.amount_repaid * 2 <= self.repay_amount
+            and self.amount_repaid >= self.amount * 2
         ):
             self.forgive()
 
