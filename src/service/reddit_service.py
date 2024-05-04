@@ -27,6 +27,11 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
     :param subreddit_name: Name of the subreddit
     """
 
+    main_group_id = Env.MAIN_GROUP_ID.get()
+    if main_group_id is None:
+        logging.error("Main group ID is not set, can't send reddit post")
+        return
+
     # Create connection
     connection: Reddit = asyncpraw.Reddit(
         client_id=Env.REDDIT_CLIENT_ID.get(),
@@ -98,7 +103,7 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
 
                     # Send media
                     message: Message = await full_media_send(
-                        context, saved_media, caption=caption, chat_id=Env.OPD_GROUP_ID.get_int()
+                        context, saved_media, caption=caption, chat_id=main_group_id
                     )
                 except BadRequest as exceptionBadRequest:
                     # Resize if type is image
@@ -116,7 +121,7 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
                             context,
                             saved_media,
                             caption=caption,
-                            chat_id=Env.OPD_GROUP_ID.get_int(),
+                            chat_id=main_group_id,
                         )
 
                         try:

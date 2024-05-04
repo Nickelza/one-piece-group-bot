@@ -84,7 +84,7 @@ def get_leaderboard_message(
     if global_leaderboard_message_id is not None:
         view_global_leaderboard_text = phrases.LEADERBOARD_VIEW_GLOBAL_LEADERBOARD.format(
             get_message_url(
-                message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHANNEL_ID.get()
+                message_id=global_leaderboard_message_id, chat_id=Env.UPDATES_CHAT_ID.get()
             )
         )
     else:
@@ -258,13 +258,13 @@ async def create_and_send_leaderboard(
         else:
             try:
                 message: Message = await full_message_send(
-                    context, ot_text, chat_id=Env.UPDATES_CHANNEL_ID.get()
+                    context, ot_text, chat_id=Env.UPDATES_CHAT_ID.get()
                 )
                 leaderboard.message_id = message.message_id
                 leaderboard.save()
             except TelegramError:
                 logging.exception(
-                    f"Failed to send global leaderboard to {Env.UPDATES_CHANNEL_ID.get()}"
+                    f"Failed to send global leaderboard to {Env.UPDATES_CHAT_ID.get()}"
                 )
 
     return leaderboard

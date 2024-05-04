@@ -1256,7 +1256,10 @@ def get_message_source(update: Update) -> MessageSource:
         if update.effective_chat.type in [Chat.GROUP, Chat.SUPERGROUP]:
             return MessageSource.GROUP
 
-        if update.effective_chat.id == Env.TG_REST_CHANNEL_ID.get_int():
+        if (
+            Env.TG_REST_CHANNEL_ID.get() is not None
+            and update.effective_chat.id == Env.TG_REST_CHANNEL_ID.get_int()
+        ):
             return MessageSource.TG_REST
     except AttributeError:
         if update.inline_query.query is not None:
@@ -1330,9 +1333,7 @@ def get_create_or_edit_status(user: User, inbound_keyboard: Keyboard) -> tuple[b
     return should_ignore_input, should_create_item, should_validate_input
 
 
-async def log_error(
-    context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None
-) -> Message:
+async def log_error(context: ContextTypes.DEFAULT_TYPE, text: str, update: Update = None):
     """
     Send an error to the error log chat
     :param context: Context object
@@ -1341,9 +1342,12 @@ async def log_error(
     """
 
     text = f"Error: {text}".upper()
-    return await full_message_send(
-        context, text, update=update, chat_id=Env.ERROR_LOG_CHAT_ID.get_int()
-    )
+    error_log_chat_id = Env.ERROR_LOG_CHAT_ID.get()
+    if error_log_chat_id is None:
+        logging.error(f"Error log chat id is not set: {text}")
+        return
+
+    await full_message_send(context, text, update=update, chat_id=error_log_chat_id)
 
 
 def message_is_reply(update: Update) -> bool:

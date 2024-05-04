@@ -29,8 +29,12 @@ def is_main_group(group_chat: GroupChat) -> bool:
     :return: True if the message is from the main group_chat, False otherwise
     """
 
+    main_group_id = Env.MAIN_GROUP_ID.get()
+    if main_group_id is None:
+        return False
+
     group: Group = group_chat.group
-    return int(group.tg_group_id) == Env.OPD_GROUP_ID.get_int()
+    return int(group.tg_group_id) == int(main_group_id)
 
 
 def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:

@@ -1,10 +1,12 @@
 /.idea/
 /out/
+*.env
 /environment/
 !/environment/env.example
 /one-piece-group-bot.iml
 *.pyc
 venv
+/.ignore/
 
 # Production server
 /howtorun.sh

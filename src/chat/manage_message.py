@@ -202,7 +202,7 @@ async def manage_after_db(
 
     # Leave chat if not recognized
     if message_source is MessageSource.ND:
-        if str(update.effective_chat.id) != Env.UPDATES_CHANNEL_ID.get():
+        if str(update.effective_chat.id) != Env.UPDATES_CHAT_ID.get():
             logging.error(f"Unknown message source for {update.effective_chat.id}: Leaving chat")
             await update.effective_chat.leave()
         return
@@ -374,6 +374,11 @@ async def manage_after_db(
             from_exception=True,
             show_alert=True,
         )
+    except Exception as e:
+        logging.error(update)
+        logging.error(e, exc_info=True)
+        # For functions called asynchronously, since the full stacktrace is not printed
+        logging.error(traceback.format_stack())
 
     if user.should_update_model and user.tg_user_id is not None:
         user.save()

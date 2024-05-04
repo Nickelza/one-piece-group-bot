@@ -95,7 +95,10 @@ class Environment:
         return self.get()
 
 
-load_dotenv(sys.argv[1])
+if len(sys.argv) > 1:
+    load_dotenv(sys.argv[1])
+else:
+    load_dotenv()
 
 # Bot
 BOT_TOKEN = Environment("BOT_TOKEN")
@@ -133,20 +136,18 @@ LIMIT_TO_AUTHORIZED_GROUPS = Environment("LIMIT_TO_AUTHORIZED_GROUPS", default_v
 # List of authorized groups
 AUTHORIZED_GROUPS = Environment("AUTHORIZED_GROUPS", default_value="")
 # Group chat id
-OPD_GROUP_ID = Environment("OPD_GROUP_ID")  # TODO should go
-# Main channel id
-OPD_CHANNEL_ID = Environment("OPD_CHANNEL_ID")  # TODO should go
+MAIN_GROUP_ID = Environment("MAIN_GROUP_ID", can_be_empty=True)  # TODO should go
 # Chat ID for error logs
-ERROR_LOG_CHAT_ID = Environment("ERROR_LOG_CHAT_ID")
+ERROR_LOG_CHAT_ID = Environment("ERROR_LOG_CHAT_ID", can_be_empty=True)
 # OPMA bot id
 OPMA_BOT_ID = Environment("OPMA_BOT_ID", default_value="921260484")
 # Updates channel id
-UPDATES_CHANNEL_ID = Environment("UPDATES_CHANNEL_ID")
+UPDATES_CHAT_ID = Environment("UPDATES_CHAT_ID")
 # Support group id
-SUPPORT_GROUP_LINK = Environment("SUPPORT_GROUP_LINK")
+SUPPORT_GROUP_LINK = Environment("SUPPORT_GROUP_LINK", default_value="https://t.me/bountysystem")
 
 # TgRest Channel ID
-TG_REST_CHANNEL_ID = Environment("TG_REST_CHANNEL_ID")
+TG_REST_CHANNEL_ID = Environment("TG_REST_CHANNEL_ID", can_be_empty=True)
 
 # ANTI SPAM
 # How many messages can be sent in private chat before spam is detected. Default: 30
@@ -163,12 +164,14 @@ ANTI_SPAM_TIME_INTERVAL_SECONDS = Environment(
 )
 
 # REDDIT
+# Enable reddit posts from r/onepiece and r/memepiece
+ENABLE_REDDIT_POSTS = Environment("ENABLE_REDDIT_POSTS", default_value="False")
 # Reddit client id
-REDDIT_CLIENT_ID = Environment("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_ID = Environment("REDDIT_CLIENT_ID", can_be_empty=True)
 # Reddit client secret
-REDDIT_CLIENT_SECRET = Environment("REDDIT_CLIENT_SECRET")
+REDDIT_CLIENT_SECRET = Environment("REDDIT_CLIENT_SECRET", can_be_empty=True)
 # Reddit username
-REDDIT_USER_AGENT = Environment("REDDIT_USER_AGENT")
+REDDIT_USER_AGENT = Environment("REDDIT_USER_AGENT", can_be_empty=True)
 # Reddit One Piece Subreddit
 REDDIT_ONE_PIECE_SUBREDDIT = Environment("REDDIT_ONE_PIECE_SUBREDDIT", default_value="onepiece")
 # Reddit Meme Piece Subreddit
@@ -448,7 +451,6 @@ SHOULD_LOG_TIMER_MINUTE_TASKS = Environment("SHOULD_LOG_TIMER_MINUTE_TASKS", def
 SHOULD_RUN_ON_STARTUP_MINUTE_TASKS = Environment(
     "SHOULD_RUN_ON_STARTUP_MINUTE_TASKS", default_value="False"
 )
-
 
 # How much time should temp files be kept before they are deleted. Default: 6 hours
 TEMP_DIR_CLEANUP_TIME_SECONDS = Environment("TEMP_DIR_CLEANUP_TIME_SECONDS", default_value="21600")
@@ -804,16 +806,10 @@ REQUIRED_LOCATION_LEVEL_PLUNDER = Environment(
     "REQUIRED_LOCATION_LEVEL_PLUNDER", default_value="10"
 )
 
-# Whitelist of chat ids from which to forward messages. Default: Main Channel, Self Bot, OPMA Bot
+# Whitelist of chat ids from which to forward messages. Default: Self Bot, OPMA Bot
 WHITELIST_FORWARD_MESSAGE = Environment(
     "WHITELIST_FORWARD_MESSAGE",
-    default_value=(
-        OPD_CHANNEL_ID.get()
-        + c.STANDARD_SPLIT_CHAR
-        + BOT_ID.get()
-        + c.STANDARD_SPLIT_CHAR
-        + OPMA_BOT_ID.get()
-    ),
+    default_value=(BOT_ID.get() + c.STANDARD_SPLIT_CHAR + OPMA_BOT_ID.get()),
 )
 # Whitelist of bot ids which users can use inline mode. Default: Empty
 WHITELIST_INLINE_BOTS = Environment("WHITELIST_INLINE_BOTS", default_value="")
@@ -896,7 +892,6 @@ DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE = Environment(
     "DAVY_BACK_FIGHT_LOSER_CHEST_PERCENTAGE", default_value="50"
 )
 
-
 # Minimum amount for Bounty Gift. Default: 10.000.000
 BOUNTY_GIFT_MIN_AMOUNT = Environment("BOUNTY_GIFT_MIN_AMOUNT", default_value="10000000")
 # Tax percentage increase after each Bounty Gift. Default: 1%
@@ -956,7 +951,6 @@ DEVIL_FRUIT_SMILE_MAX_DAYS = Environment("DEVIL_FRUIT_SMILE_MAX_DAYS", default_v
 DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE = Environment(
     "DEVIL_FRUIT_SMILE_DEFECTIVE_PERCENTAGE", default_value="10"
 )
-
 
 # If rookies or arrested users can view their status in groups. Default: True
 ROOKIES_OR_ARRESTED_CAN_VIEW_STATUS_IN_GROUP = Environment(
