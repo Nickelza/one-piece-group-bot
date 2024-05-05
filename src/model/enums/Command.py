@@ -348,9 +348,9 @@ GRP_SETTINGS = Command(
 )
 COMMANDS.append(GRP_SETTINGS)
 
-GRP_FEATURES = Command(
+GRP_SETTINGS_FEATURES = Command(
     CommandName.EMPTY,
-    Screen.GRP_FEATURES,
+    Screen.GRP_SETTINGS_FEATURES,
     allow_while_arrested=True,
     only_by_chat_admin=True,
     answer_callback=True,

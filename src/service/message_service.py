@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import re
+import traceback
 from uuid import uuid4
 
 from telegram import (
@@ -27,6 +28,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
+from src.model.GroupChatAutoDelete import GroupChatAutoDelete
 from src.model.User import User
 from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.MessageSource import MessageSource
@@ -344,6 +346,7 @@ async def full_message_send(
     user: User = None,
     from_exception: bool = False,
     add_back_button: bool = True,
+    should_auto_delete: bool = True,
 ) -> Message | bool:
     """
     Send a message
@@ -387,9 +390,11 @@ async def full_message_send(
     :param user: User object
     :param from_exception: True if the message is sent from an exception
     :param add_back_button: True if the back button should be added to the keyboard if possible
+    :param should_auto_delete: True if the message should be auto deleted
     :return: Message
     """
 
+    message_source: MessageSource = get_message_source(update)
     if show_alert:
         answer_callback = True
 
@@ -407,6 +412,15 @@ async def full_message_send(
         topic_id = group_chat.tg_topic_id
         group: Group = group_chat.group
         chat_id = group.tg_group_id
+    elif message_source is MessageSource.GROUP:
+        group_chat = get_group_chat_for_auto_delete(update)
+
+    should_auto_delete = (
+        should_auto_delete
+        and add_delete_button
+        and message_source is message_source.GROUP
+        and group_chat
+    )
 
     if previous_screens is not None and (inbound_keyboard is None or from_exception):
         inbound_keyboard = Keyboard(
@@ -461,6 +475,11 @@ async def full_message_send(
                 protect_content=protect_content,
                 message_thread_id=topic_id,
             )
+
+            # Enqueue for auto deletion
+            if should_auto_delete:
+                context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
             return message
         except TelegramError as e:
             if ignore_exception:
@@ -484,7 +503,7 @@ async def full_message_send(
         if edit_message_id is not None
         else update.callback_query.message.message_id
     )
-    return await context.bot.edit_message_text(
+    message: Message = await context.bot.edit_message_text(
         text=text,
         chat_id=chat_id,
         reply_markup=keyboard_markup,
@@ -492,6 +511,11 @@ async def full_message_send(
         disable_web_page_preview=disable_web_page_preview,
         message_id=edit_message_id,
     )
+
+    if should_auto_delete:
+        context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
+    return message
 
 
 def get_input_media_from_saved_media(
@@ -1400,3 +1424,72 @@ def get_message_url(message_id: int, group_chat: GroupChat = None, chat_id: str 
         url = url.replace("/c/", "/")
 
     return url
+
+
+def get_group_chat_from_update(update: Update) -> GroupChat | None:
+    """
+    Gets the group chat from the update
+    :param update: The update
+    :return: The group chat
+    """
+
+    group = Group.get_or_none(Group.tg_group_id == update.effective_chat.id)
+    if group is None:
+        return
+
+    tg_topic_id = None
+    if update.effective_chat.is_forum and update.effective_message.is_topic_message:
+        tg_topic_id = update.effective_message.message_thread_id
+
+    group_chat = GroupChat.get_or_none(
+        (GroupChat.group == group) & (GroupChat.tg_topic_id == tg_topic_id)
+    )
+
+    return group_chat
+
+
+def get_group_chat_for_auto_delete(
+    update: Update, group_chat: GroupChat = None
+) -> GroupChat | None:
+    """
+    Gets the group chat for auto delete
+    :param update: The update
+    :param group_chat: The group chat
+    :return: The group chat
+    """
+
+    if group_chat is not None:
+        return group_chat
+
+    if update is None:
+        logging.warning("Cannot add delete button without an update or group chat object")
+        logging.warning(traceback.format_stack())
+        return
+
+    if not get_message_source(update) is MessageSource.GROUP:
+        return
+
+    group_chat = get_group_chat_from_update(update)
+
+    if group_chat is None:
+        raise ValueError("Group chat not found")
+
+    return group_chat
+
+
+async def enqueue_message_auto_delete(group_chat: GroupChat, message: Message):
+    """
+    Enqueue a message for auto delete
+    :param group_chat: The group chat
+    :param message: The message
+    """
+    from src.service.date_service import get_datetime_in_future_minutes
+
+    if group_chat.auto_delete_duration is None:
+        return
+
+    auto_delete: GroupChatAutoDelete = GroupChatAutoDelete()
+    auto_delete.group_chat = group_chat
+    auto_delete.message_id = message.message_id
+    auto_delete.delete_date = get_datetime_in_future_minutes(group_chat.auto_delete_duration)
+    auto_delete.save()

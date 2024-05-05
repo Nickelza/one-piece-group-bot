@@ -5,7 +5,6 @@ from telegram import Update
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
-import constants as c
 import resources.Environment as Env
 import resources.phrases as phrases
 from src.chat.private.screens.screen_crew_davy_back_fight_request_received import accept
@@ -24,6 +23,7 @@ from src.service.date_service import (
     convert_minutes_to_duration,
     datetime_is_before,
 )
+from src.service.list_service import get_options_keyboard
 from src.service.message_service import full_message_send, get_yes_no_keyboard, get_deeplink
 
 
@@ -249,23 +249,14 @@ async def edit_options(
             raise ValueError()
 
     # Create numeric keyboard with all possible values
-    numeric_keyboard: list[list[Keyboard]] = []
-    line_keyboard: list[Keyboard] = []
-    for i in range(minimum, maximum + 1):
-        line_keyboard.append(
-            Keyboard(
-                str(i),
-                info={key: i},
-                inbound_info=inbound_keyboard.info,
-                exclude_key_from_inbound_info=[ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT],
-            )
-        )
-        if len(line_keyboard) == c.STANDARD_LIST_KEYBOARD_ROW_SIZE:
-            numeric_keyboard.append(line_keyboard)
-            line_keyboard = []
-
-    if len(line_keyboard) > 0:
-        numeric_keyboard.append(line_keyboard)
+    numeric_keyboard: list[list[Keyboard]] = get_options_keyboard(
+        primary_key=key,
+        inbound_info=inbound_keyboard.info,
+        exclude_key_from_inbound_info=[ReservedKeyboardKeys.SCREEN_STEP_NO_INPUT],
+        generate_numbers=True,
+        start_number=minimum,
+        end_number=maximum,
+    )
 
     user.private_screen_stay = True
     await full_message_send(

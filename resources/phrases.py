@@ -187,6 +187,7 @@ TEXT_ONLY = "Only {}"
 TEXT_YOU = "You"
 TEXT_STOLE = "stole"
 TEXT_OWE = "[owe]({})"
+TEXT_NEVER = "Never"
 
 TEXT_DAY = "day"
 TEXT_DAYS = "days"
@@ -362,7 +363,8 @@ PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 PVT_KEY_SHOW_ALL = "Back to list"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
-GRP_KEY_FEATURES = "Features"
+GRP_KEY_SETTINGS_FEATURES = "Features"
+GRP_KEY_SETTINGS_AUTO_DELETE = "Auto delete"
 GRP_TXT_FEATURES = "{}Which Bounty System features would you like to enable in this {}?"
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = "Bet in private chat"
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
@@ -2152,3 +2154,8 @@ DAILY_REWARD_PRIZE_CONFIRM = (
     " prize!_"
 )
 DAILY_REWARD_PRIZE_CONFIRM_BELLY = "Belly amount: ฿*{}*"
+
+AUTO_DELETE_SET = (
+    "After how many minutes should the Bot's messages be deleted from the chat?"
+    "\n\nCurrent setting: *{}*"
+)

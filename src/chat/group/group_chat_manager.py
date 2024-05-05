@@ -35,6 +35,9 @@ from src.chat.group.screens.screen_prediction_bet_status import (
     manage as manage_screen_prediction_bet_status,
 )
 from src.chat.group.screens.screen_settings import manage as manage_screen_settings
+from src.chat.group.screens.screen_settings_auto_delete import (
+    manage as manage_screen_settings_auto_delete,
+)
 from src.chat.group.screens.screen_settings_features import manage as manage_screen_features
 from src.chat.group.screens.screen_silence import manage as manage_screen_silence
 from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
@@ -95,7 +98,7 @@ async def manage(
     if added_to_group:
         group.is_active = True
         group.save()
-        command = Command.GRP_FEATURES
+        command = Command.GRP_SETTINGS_FEATURES
 
     # Insert or update user, with message count
     try:
@@ -211,7 +214,7 @@ async def dispatch_screens(
                 update, context, user, inbound_keyboard, target_user, command, group_chat
             )
 
-        case Screen.GRP_FEATURES:  # Features
+        case Screen.GRP_SETTINGS_FEATURES:  # Features
             await manage_screen_features(
                 update, context, inbound_keyboard, group_chat, added_to_group
             )
@@ -237,6 +240,9 @@ async def dispatch_screens(
 
         case Screen.GRP_SETTINGS:  # Settings
             await manage_screen_settings(update, context)
+
+        case Screen.GRP_SETTINGS_AUTO_DELETE:  # Auto delete
+            await manage_screen_settings_auto_delete(update, context, inbound_keyboard, group_chat)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

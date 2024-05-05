@@ -97,6 +97,7 @@ async def manage(
         add_delete_button=True,
         use_close_delete=True,
         inbound_keyboard=inbound_keyboard,
+        should_auto_delete=False,
     )
 
 
@@ -138,7 +139,9 @@ def get_features_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
             ReservedKeyboardKeys.TOGGLE: not is_enabled_feature,
         }
         button: Keyboard = Keyboard(
-            f"{emoji} {feature.get_description()}", info=button_info, screen=Screen.GRP_FEATURES
+            f"{emoji} {feature.get_description()}",
+            info=button_info,
+            screen=Screen.GRP_SETTINGS_FEATURES,
         )
 
         # If feature is pinnable, add button in a new row with the pin toggle button
@@ -153,7 +156,9 @@ def get_features_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
                 FeaturesReservedKeys.PIN_TOGGLE: not is_enabled_pin,
             }
             pin_toggle: Keyboard = Keyboard(
-                f"{is_enabled_emoji} {Emoji.PIN}", info=pin_button_info, screen=Screen.GRP_FEATURES
+                f"{is_enabled_emoji} {Emoji.PIN}",
+                info=pin_button_info,
+                screen=Screen.GRP_SETTINGS_FEATURES,
             )
 
             # Relative feature button and pin button in the same new row

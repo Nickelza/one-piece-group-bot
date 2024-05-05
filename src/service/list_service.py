@@ -8,6 +8,7 @@ import resources.phrases as phrases
 from src.model.BaseModel import BaseModel
 from src.model.User import User
 from src.model.enums.ContextDataKey import ContextDataKey
+from src.model.enums.Emoji import Emoji
 from src.model.enums.ListPage import ListPage, ListFilter, ListFilterType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
@@ -407,3 +408,65 @@ def get_show_list_button(inbound_keyboard: Keyboard) -> Keyboard:
         phrases.PVT_KEY_SHOW_ALL,
         inbound_info=inbound_keyboard.info,
     )
+
+
+def get_options_keyboard(
+    primary_key: str = ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY,
+    inbound_info: dict = None,
+    exclude_key_from_inbound_info: list[str] = None,
+    row_size: int = c.STANDARD_LIST_KEYBOARD_ROW_SIZE,
+    values: list[str | int] = None,
+    generate_numbers: bool = False,
+    start_number: int = None,
+    end_number: int = None,
+    is_numeric_values: int = True,
+    current_selected: str | int = None,
+) -> list[list[Keyboard]]:
+    """
+    Get the options keyboard
+    :param primary_key: The primary key
+    :param inbound_info: The inbound info
+    :param exclude_key_from_inbound_info: The exclude key from inbound info
+    :param row_size: The row size
+    :param values: The values
+    :param generate_numbers: Whether to generate numbers
+    :param start_number: The start number
+    :param end_number: The end number
+    :param is_numeric_values: Whether the values are numeric
+    :param current_selected: The current selected value
+    :return: The numeric keyboard
+    """
+
+    if generate_numbers:
+        if start_number is None:
+            start_number = 1
+
+        if end_number is None:
+            raise ValueError("End number must be set if auto generating numbers")
+
+        is_numeric_values = True
+        values = list(range(start_number, end_number + 1))
+
+    numeric_keyboard: list[list[Keyboard]] = []
+    line_keyboard: list[Keyboard] = []
+    for i in values:
+        button_info = {primary_key: int(i) if is_numeric_values else i}
+        text = str(i)
+        if current_selected is not None and str(i) == str(current_selected):
+            text = f"{Emoji.RADIO_BUTTON}{text}"
+        line_keyboard.append(
+            Keyboard(
+                text,
+                info=button_info,
+                inbound_info=inbound_info,
+                exclude_key_from_inbound_info=exclude_key_from_inbound_info,
+            )
+        )
+        if len(line_keyboard) == row_size:
+            numeric_keyboard.append(line_keyboard)
+            line_keyboard = []
+
+    if len(line_keyboard) > 0:
+        numeric_keyboard.append(line_keyboard)
+
+    return numeric_keyboard

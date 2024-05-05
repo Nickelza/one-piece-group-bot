@@ -16,7 +16,10 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
 
     inline_keyboard: list[list[Keyboard]] = [
-        [Keyboard(phrases.GRP_KEY_FEATURES, screen=Screen.GRP_FEATURES)],
+        # Features
+        [Keyboard(phrases.GRP_KEY_SETTINGS_FEATURES, screen=Screen.GRP_SETTINGS_FEATURES)],
+        # Auto delete
+        [Keyboard(phrases.GRP_KEY_SETTINGS_AUTO_DELETE, screen=Screen.GRP_SETTINGS_AUTO_DELETE)],
     ]
 
     await full_message_send(
@@ -26,4 +29,5 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         keyboard=inline_keyboard,
         add_delete_button=True,
         use_close_delete=True,
+        should_auto_delete=False,
     )

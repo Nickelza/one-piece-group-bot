@@ -22,6 +22,7 @@ class GroupChat(BaseModel):
     last_error_message = CharField(null=True)
     is_active = BooleanField(default=True)
     is_muted = BooleanField(default=False)
+    auto_delete_duration = IntegerField(null=True)  # In minutes
 
     # Backref
     enabled_features = None

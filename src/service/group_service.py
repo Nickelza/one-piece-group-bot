@@ -9,6 +9,7 @@ from resources import phrases
 from src.model.BaseModel import BaseModel
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
+from src.model.GroupChatAutoDelete import GroupChatAutoDelete
 from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
@@ -323,3 +324,39 @@ def save_group_chat_error(group_chat: GroupChat, error: str) -> None:
     group.last_error_date = datetime.now()
     group.last_error_message = error
     group.save()
+
+
+async def auto_delete(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Auto delete messages
+    :param context: The context
+    """
+
+    # Get maximum 20 messages to auto delete
+    auto_deletes: list[GroupChatAutoDelete] = (
+        GroupChatAutoDelete.select()
+        .where(GroupChatAutoDelete.delete_date < datetime.now())
+        .limit(20)
+    )
+
+    for auto_delete_item in auto_deletes:
+        context.application.create_task(auto_delete_process(context, auto_delete_item))
+
+
+async def auto_delete_process(
+    context: ContextTypes.DEFAULT_TYPE, auto_delete_item: GroupChatAutoDelete
+) -> None:
+    """
+    Auto delete process
+    :param context: The context
+    :param auto_delete_item: The message
+    """
+
+    group_chat: GroupChat = auto_delete_item.group_chat
+    group: Group = group_chat.group
+    try:
+        await context.bot.delete_message(group.tg_group_id, auto_delete_item.message_id)
+    except TelegramError as te:
+        save_group_chat_error(group_chat, str(te))
+
+    auto_delete_item.delete_instance()

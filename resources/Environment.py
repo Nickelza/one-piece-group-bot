@@ -1026,3 +1026,8 @@ PLUNDER_REPAY_MULTIPLIER = Environment("PLUNDER_REPAY_MULTIPLIER", default_value
 
 # How much is each remaining minute of the sentence for bail in Impel Down. Default: 100k
 IMPEL_DOWN_BAIL_PER_MINUTE = Environment("IMPEL_DOWN_BAIL_PER_MINUTE", default_value="100000")
+
+# Values in minute for auto delete. Default: 1|2|5|15|30|60|120|180|360
+AUTO_DELETE_DURATION_VALUES = Environment(
+    "AUTO_DELETE_DURATION_VALUES", default_value="1|2|5|15|30|60|120|180|360"
+)
