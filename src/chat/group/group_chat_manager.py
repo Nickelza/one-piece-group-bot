@@ -35,6 +35,7 @@ from src.chat.group.screens.screen_prediction_bet_status import (
     manage as manage_screen_prediction_bet_status,
 )
 from src.chat.group.screens.screen_settings import manage as manage_screen_settings
+from src.chat.group.screens.screen_settings_features import manage as manage_screen_features
 from src.chat.group.screens.screen_silence import manage as manage_screen_silence
 from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
 from src.chat.group.screens.screen_speak import manage as manage_screen_speak
@@ -94,7 +95,7 @@ async def manage(
     if added_to_group:
         group.is_active = True
         group.save()
-        command = Command.GRP_SETTINGS
+        command = Command.GRP_FEATURES
 
     # Insert or update user, with message count
     try:
@@ -210,8 +211,8 @@ async def dispatch_screens(
                 update, context, user, inbound_keyboard, target_user, command, group_chat
             )
 
-        case Screen.GRP_SETTINGS:  # Settings
-            await manage_screen_settings(
+        case Screen.GRP_FEATURES:  # Features
+            await manage_screen_features(
                 update, context, inbound_keyboard, group_chat, added_to_group
             )
 
@@ -233,6 +234,9 @@ async def dispatch_screens(
 
         case Screen.GRP_DAILY_REWARD_PRIZE:  # Daily reward prize
             await manage_screen_daily_reward_prize(update, context, inbound_keyboard)
+
+        case Screen.GRP_SETTINGS:  # Settings
+            await manage_screen_settings(update, context)
 
         case _:  # Unknown screen
             if update.callback_query is not None:

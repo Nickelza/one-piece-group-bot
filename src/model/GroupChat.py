@@ -23,6 +23,11 @@ class GroupChat(BaseModel):
     is_active = BooleanField(default=True)
     is_muted = BooleanField(default=False)
 
+    # Backref
+    enabled_features = None
+    disabled_features = None
+    enabled_features_pin = None
+
     class Meta:
         db_table = "group_chat"
 

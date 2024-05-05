@@ -339,7 +339,7 @@ async def manage_after_db(
         try:
             await full_message_send(
                 context,
-                escape_valid_markdown_chars(str(ce)),
+                str(ce),
                 update=update,
                 previous_screens=previous_screens,
                 from_exception=True,

@@ -1156,7 +1156,12 @@ def get_back_button(
         ]
 
     if inbound_keyboard is not None and len(inbound_keyboard.previous_screen_list) == 0:
-        return Keyboard(key_text, screen=Screen.PVT_START, inbound_info=info_copy)
+        if inbound_keyboard.message_source is MessageSource.PRIVATE:
+            return Keyboard(key_text, screen=Screen.PVT_START, inbound_info=info_copy)
+        elif inbound_keyboard.message_source is MessageSource.GROUP:
+            return Keyboard(key_text, screen=Screen.GRP_SETTINGS, inbound_info=info_copy)
+
+        raise ValueError("Invalid message source for back button")
 
     private_screen_step = None
     if inbound_keyboard is not None and ReservedKeyboardKeys.SCREEN_STEP in inbound_keyboard.info:

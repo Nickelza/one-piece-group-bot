@@ -348,6 +348,16 @@ GRP_SETTINGS = Command(
 )
 COMMANDS.append(GRP_SETTINGS)
 
+GRP_FEATURES = Command(
+    CommandName.EMPTY,
+    Screen.GRP_FEATURES,
+    allow_while_arrested=True,
+    only_by_chat_admin=True,
+    answer_callback=True,
+    send_message_if_error=False,
+)
+COMMANDS.append(GRP_SETTINGS)
+
 GRP_DAILY_REWARD = Command(
     CommandName.DAILY_REWARD,
     Screen.GRP_DAILY_REWARD,

@@ -84,10 +84,12 @@ ROOKIE_STATUS_PRIVATE_CHAT_ONLY = "Rookies can only view their status in Private
 PRISONER_STATUS_PRIVATE_CHAT_ONLY = "Prisoners can only view their status in Private Chat"
 STATUS_PRIVATE_CHAT_KEY = "View in Private Chat"
 
+JOIN_SUPPORT_GROUP = f">For questions or suggestions, please join the {SUPPORT_GROUP_DEEPLINK}"
+
 LEADERBOARD = (
     "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
-    " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n>For questions"
-    f" or suggestions, please join the {SUPPORT_GROUP_DEEPLINK}"
+    " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n"
+    + JOIN_SUPPORT_GROUP
 )
 LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
 LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
@@ -267,14 +269,15 @@ KEY_BUY = "Buy"
 KEY_MANAGE_DEVIL_FRUIT = "Manage Devil Fruit"
 KEY_JOIN_A_CREW = "Join a Crew"
 
+TXT_SETTINGS = "Which setting would you like to change?"
+
 # Private chat
 PVT_TXT_START = (
     "Welcome to One Piece Group Bot, a Bot that brings the Bounty System to any Chat Group!"
-    f"\n\n>For questions or suggestions, please join the {SUPPORT_GROUP_DEEPLINK}"
+    f"\n\n{JOIN_SUPPORT_GROUP}"
 )
 PVT_KEY_SETTINGS = Emoji.SETTINGS + " Settings"
 PVT_KEY_STATUS = Emoji.STATUS + " Status"
-PVT_TXT_SETTINGS = "Which setting would you like to change?"
 PVT_KEY_SETTINGS_LOCATION_UPDATE = "Location update"
 PVT_TXT_SETTINGS_LOCATION_UPDATE = (
     "Do you want to receive an update when you move to a new location?"
@@ -359,7 +362,8 @@ PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 PVT_KEY_SHOW_ALL = "Back to list"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
-GRP_TXT_SETTINGS = "{}Which Bounty System features would you like to enable in this {}?"
+GRP_KEY_FEATURES = "Features"
+GRP_TXT_FEATURES = "{}Which Bounty System features would you like to enable in this {}?"
 GRP_KEY_PREDICTION_BET_IN_PRIVATE_CHAT = "Bet in private chat"
 GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
 GRP_KEY_GAME_PLAY = "Play"
@@ -2028,7 +2032,7 @@ DEVIL_FRUIT_SHOP_ITEM_DETAIL_BUY_CONFIRMATION = (
 # Admin chat error messages
 NO_DEVIL_FRUIT_TO_SCHEDULE = "There are no {} Devil Fruits to schedule for release"
 
-THANKS_FOR_ADDING_TO_GROUP = "Thanks for adding me to your Group!\n"
+THANKS_FOR_ADDING_TO_GROUP = "Thanks for adding me to your Group!\n" + JOIN_SUPPORT_GROUP + "\n\n"
 
 INCOME_TAX_EVENT_BOUNTY_LOAN = "Bounty Loan"
 INCOME_TAX_EVENT_DEVIL_FRUIT_SELL = "Devil Fruit Sell"

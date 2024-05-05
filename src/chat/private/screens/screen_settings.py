@@ -30,7 +30,7 @@ async def manage(
 
     await full_message_send(
         context,
-        phrases.PVT_TXT_SETTINGS,
+        phrases.TXT_SETTINGS,
         update=update,
         keyboard=inline_keyboard,
         inbound_keyboard=inbound_keyboard,

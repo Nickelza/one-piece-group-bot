@@ -29,6 +29,7 @@ class Keyboard:
         only_authorized_users_can_interact: bool = True,
         switch_inline_query: str = None,
         exclude_key_from_inbound_info: list[str] = None,
+        message_source: MessageSource = None,
     ):
         """
         Creates a keyboard object
@@ -47,6 +48,7 @@ class Keyboard:
         keyboard
         :param switch_inline_query: The switch inline query
         :param exclude_key_from_inbound_info: The keys to be excluded from the inbound info
+        :param message_source: The source of the message
         """
         self.text = text
         self.info: dict = info if info is not None else {}
@@ -75,6 +77,8 @@ class Keyboard:
                 self.inbound_info.pop(key, None)
             self.info = self.inbound_info | self.info
             self.refresh_callback_data()
+
+        self.message_source = message_source
 
         if self.is_deeplink:
             self.set_deeplink_url()
@@ -210,6 +214,7 @@ class Keyboard:
             screen=screen,
             previous_screen_list=previous_screen_list,
             from_deeplink=from_deeplink,
+            message_source=message_source,
         )
 
     def get(self, key: str):
