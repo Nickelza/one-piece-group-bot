@@ -44,7 +44,7 @@ async def manage(
 
     # User clicked on cancel button
     if GameSelectionReservedKeys.CANCEL in inbound_keyboard.info:
-        await delete_game(context, game)
+        await delete_game(context, update, game)
         user.should_update_model = False
         return
 
@@ -112,4 +112,4 @@ async def manage(
     )
 
     # Enqueue the game for timeout
-    context.application.create_task(enqueue_game_timeout(context, game))
+    context.application.create_task(enqueue_game_timeout(context, update, game))

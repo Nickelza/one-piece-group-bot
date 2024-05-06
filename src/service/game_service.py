@@ -203,6 +203,7 @@ def get_text(
 
 async def delete_game(
     context: ContextTypes.DEFAULT_TYPE,
+    update: Update,
     game: Game,
     should_delete_message: bool = True,
     show_timeout_message: bool = False,
@@ -210,6 +211,7 @@ async def delete_game(
     """
     Delete game
     :param context: The context
+    :param update: The update
     :param game: The game
     :param should_delete_message: If the message should be deleted
     :param show_timeout_message: If the message should be edited showing timeout
@@ -222,10 +224,12 @@ async def delete_game(
     if show_timeout_message:
         await full_media_send(
             context=context,
+            update=update,
             group_chat=game.group_chat,
             caption=phrases.GAME_TIMEOUT,
             edit_message_id=game.message_id,
             edit_only_caption_and_keyboard=True,
+            add_delete_button=True,
         )
     elif should_delete_message:
         # Try to delete message
@@ -329,7 +333,7 @@ async def end_inactive_games(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Game
     inactive_games = Game.select().where(
-        (Game.status.not_in(GameStatus.get_finished()))
+        (Game.status == GameStatus.IN_PROGRESS)
         & (
             Game.last_interaction_date
             < (datetime.now() - timedelta(seconds=Env.GAME_INACTIVE_TIME.get_int()))
@@ -388,11 +392,12 @@ async def enqueue_game_turn_notification(
         await send_notification(context, user, GameTurnNotification(game, opponent))
 
 
-async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
+async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, update: Update, game: Game):
     """
     Enqueue a game timeout. Waits for N time and if the opponent doesn't accept,
     the game is deleted
     :param context: The context
+    :param update: The update
     :param game: The game
     :return: None
     """
@@ -408,7 +413,7 @@ async def enqueue_game_timeout(context: ContextTypes.DEFAULT_TYPE, game: Game):
     # Check if the game is still in the same state
     if GameStatus(updated_game.status) == GameStatus.AWAITING_OPPONENT_CONFIRMATION:
         await delete_game(
-            context, updated_game, should_delete_message=False, show_timeout_message=True
+            context, update, updated_game, should_delete_message=False, show_timeout_message=True
         )
 
 

@@ -71,14 +71,14 @@ async def manage(
                 edit_only_caption_and_keyboard=True,
             )
 
-        await delete_game(context, game, should_delete_message=should_delete_message)
+        await delete_game(context, update, game, should_delete_message=should_delete_message)
         user.should_update_model = False
         return
 
     # Opponent does not have enough bounty
     if user.bounty < game.wager:
         if game.opponent is not None:
-            await delete_game(context, game, should_delete_message=False)
+            await delete_game(context, update, game, should_delete_message=False)
             await full_media_send(
                 context,
                 caption=phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(game.wager)),

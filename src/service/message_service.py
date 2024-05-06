@@ -389,12 +389,21 @@ async def full_message_send(
     :param ignore_exception: True if the TelegramError should be ignored
     :param user: User object
     :param from_exception: True if the message is sent from an exception
-    :param add_back_button: True if the back button should be added to the keyboard if possible
+    :param add_back_button: True if the back button should be added to the keyboard when possible
     :param should_auto_delete: True if the message should be auto deleted
     :return: Message
     """
 
-    message_source: MessageSource = get_message_source(update)
+    message_source: MessageSource = MessageSource.ND
+    if update is None:
+        if add_delete_button:
+            raise ValueError(
+                "Cannot add delete button without an update object, needed to enqueue for auto"
+                " message deletion"
+            )
+    else:
+        message_source: MessageSource = get_message_source(update)
+
     if show_alert:
         answer_callback = True
 
@@ -576,6 +585,7 @@ async def full_media_send(
     ignore_forbidden_exception: bool = False,
     edit_message_id: int = None,
     ignore_bad_request_exception: bool = False,
+    should_auto_delete: bool = True,
 ) -> Message | bool:
     """
     Send a media
@@ -612,9 +622,20 @@ async def full_media_send(
     :param ignore_forbidden_exception: True if the forbidden exception should be ignored
     :param ignore_bad_request_exception: True if the bad request exception should be ignored
     :param edit_message_id: Message id to edit
+    :param should_auto_delete: True if the message should be auto deleted
+
     :return: Message
     """
 
+    message_source: MessageSource = MessageSource.ND
+    if update is None:
+        if add_delete_button:
+            raise ValueError(
+                "Cannot add delete button without an update object, needed to enqueue for auto"
+                " message deletion"
+            )
+    else:
+        message_source: MessageSource = get_message_source(update)
     if exceptions_to_ignore is None:
         exceptions_to_ignore = []
 
@@ -658,6 +679,15 @@ async def full_media_send(
         topic_id = group_chat.tg_topic_id
         group: Group = group_chat.group
         chat_id = group.tg_group_id
+    elif message_source is MessageSource.GROUP:
+        group_chat = get_group_chat_for_auto_delete(update)
+
+    should_auto_delete = (
+        should_auto_delete
+        and add_delete_button
+        and message_source is message_source.GROUP
+        and group_chat
+    )
 
     chat_id = get_chat_id(
         update=update, chat_id=chat_id, send_in_private_chat=send_in_private_chat
@@ -738,6 +768,10 @@ async def full_media_send(
                     inner_key=saved_media.name,
                 )
 
+            # Enqueue for auto deletion
+            if should_auto_delete:
+                context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
             return message
 
         # No message to edit or answer callback
@@ -758,29 +792,45 @@ async def full_media_send(
 
         # Edit only keyboard
         if edit_only_keyboard:
-            return await context.bot.edit_message_reply_markup(
+            message: Message = await context.bot.edit_message_reply_markup(
                 chat_id=chat_id, message_id=edit_message_id, reply_markup=keyboard_markup
             )
+            # Enqueue for auto deletion
+            if should_auto_delete:
+                context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
+            return message
 
         # Edit only caption and keyboard
         if edit_only_caption_and_keyboard:
-            return await context.bot.edit_message_caption(
+            message: Message = await context.bot.edit_message_caption(
                 chat_id=chat_id,
                 message_id=edit_message_id,
                 caption=caption,
                 reply_markup=keyboard_markup,
             )
+            # Enqueue for auto deletion
+            if should_auto_delete:
+                context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
+            return message
 
         # Edit full media
         input_media: InputMedia = get_input_media_from_saved_media(
             saved_media=saved_media, caption=caption
         )
-        return await context.bot.edit_message_media(
+        message: Message = await context.bot.edit_message_media(
             chat_id=chat_id,
             message_id=edit_message_id,
             media=input_media,
             reply_markup=keyboard_markup,
         )
+        # Enqueue for auto deletion
+        if should_auto_delete:
+            context.application.create_task(enqueue_message_auto_delete(group_chat, message))
+
+        return message
+
     except Exception as e:
         for e_to_ignore in exceptions_to_ignore:
             if isinstance(e, e_to_ignore):
@@ -809,6 +859,7 @@ async def full_message_or_media_send_or_edit(
     previous_screens: list[Screen] = None,
     from_exception: bool = False,
     previous_screen_list_keyboard_info: dict = None,
+    should_auto_delete: bool = True,
 ) -> Message:
     """
     Edit a message or media, in case the type of message being edited is unknown
@@ -834,6 +885,8 @@ async def full_message_or_media_send_or_edit(
     :param from_exception: True if the message is sent from an exception
     :param previous_screen_list_keyboard_info: In case inbound keyboard is inferred from
     previous_screens, this is the keyboard info to add to the back button
+    :param should_auto_delete: True if the message should be auto deleted
+
     :return: Message
     """
 
@@ -855,6 +908,7 @@ async def full_message_or_media_send_or_edit(
             previous_screens=previous_screens,
             from_exception=from_exception,
             previous_screen_list_keyboard_info=previous_screen_list_keyboard_info,
+            should_auto_delete=should_auto_delete,
         )
     except BadRequest:
         return await full_media_send(
@@ -872,6 +926,7 @@ async def full_message_or_media_send_or_edit(
             answer_callback=answer_callback,
             show_alert=show_alert,
             inbound_keyboard=inbound_keyboard,
+            should_auto_delete=should_auto_delete,
         )
 
 
