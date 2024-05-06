@@ -7,6 +7,7 @@ from src.model.GroupChat import GroupChat
 from src.model.enums.Emoji import Emoji
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.pojo.Keyboard import Keyboard
+from src.service.date_service import convert_minutes_to_duration
 from src.service.list_service import get_options_keyboard
 from src.service.message_service import full_message_send
 
@@ -52,7 +53,7 @@ async def manage(
     )
 
     ot_text = phrases.AUTO_DELETE_SET.format(
-        phrases.TEXT_NEVER if current_value is None else current_value
+        phrases.TEXT_NEVER if current_value is None else convert_minutes_to_duration(current_value)
     )
     await full_message_send(
         context,

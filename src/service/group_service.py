@@ -20,7 +20,7 @@ from src.model.PredictionGroupChatMessage import PredictionGroupChatMessage
 from src.model.User import User
 from src.model.enums.Feature import Feature
 from src.model.pojo.Keyboard import Keyboard
-from src.service.message_service import full_message_send
+from src.service.message_service import full_message_send, delete_message
 
 
 def is_main_group(group_chat: GroupChat) -> bool:
@@ -353,9 +353,10 @@ async def auto_delete_process(
     """
 
     group_chat: GroupChat = auto_delete_item.group_chat
-    group: Group = group_chat.group
     try:
-        await context.bot.delete_message(group.tg_group_id, auto_delete_item.message_id)
+        await delete_message(
+            context=context, group_chat=group_chat, message_id=auto_delete_item.message_id
+        )
     except TelegramError as te:
         save_group_chat_error(group_chat, str(te))
 
