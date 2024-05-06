@@ -29,7 +29,10 @@ from src.service.devil_fruit_service import (
     revoke_devil_fruit_from_inactive_users,
     warn_inactive_users_with_eaten_devil_fruit,
 )
-from src.service.group_service import broadcast_to_chats_with_feature_enabled_dispatch
+from src.service.group_service import (
+    broadcast_to_chats_with_feature_enabled_dispatch,
+    feature_is_enabled,
+)
 from src.service.message_service import (
     mention_markdown_v2,
     full_message_send,
@@ -207,12 +210,16 @@ async def create_and_send_leaderboard(
             "In order to create a local leaderboard, a global leaderboard must be provided"
         )
 
-    # If local leaderboard, check that the group has enough active users
-    if (
-        group is not None
-        and len(group.get_active_users()) < Env.LEADERBOARD_MIN_ACTIVE_USERS.get_int()
-    ):
-        return
+    # Local leaderboard checks
+    if group is not None:
+        # Group does not have enough active users
+        if len(group.get_active_users()) < Env.LEADERBOARD_MIN_ACTIVE_USERS.get_int():
+            return
+
+        group_chats: list[GroupChat] = [gc for gc in group.group_chats if gc.is_active]
+        # Feature is disabled in all active group chats
+        if all(not feature_is_enabled(gc, Feature.LEADERBOARD) for gc in group_chats):
+            return
 
     leaderboard = Leaderboard()
 

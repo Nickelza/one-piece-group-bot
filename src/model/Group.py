@@ -23,6 +23,9 @@ class Group(BaseModel):
     is_active = BooleanField(default=True)
     is_muted = BooleanField(default=False)
 
+    # Backref
+    group_chats = None
+
     class Meta:
         db_table = "group"
 
