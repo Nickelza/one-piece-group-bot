@@ -150,3 +150,10 @@ DAILY_REWARD = SavedMedia(
     file_name=AssetPath.DAILY_REWARD,
 )
 SAVED_MEDIA_DICT[SavedMediaName.DAILY_REWARD] = DAILY_REWARD
+
+FIGHT_PLUNDER_SCOUT = SavedMedia(
+    media_type=SavedMediaType.PHOTO,
+    name=SavedMediaName.FIGHT_PLUNDER_SCOUT,
+    file_name=AssetPath.FIGHT_PLUNDER_SCOUT,
+)
+SAVED_MEDIA_DICT[SavedMediaName.FIGHT_PLUNDER_SCOUT] = FIGHT_PLUNDER_SCOUT

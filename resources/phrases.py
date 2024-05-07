@@ -170,6 +170,7 @@ KEYBOARD_OPTION_YES = Emoji.YES + " Yes"
 KEYBOARD_OPTION_NO = Emoji.NO + " No"
 KEYBOARD_OPTION_SEND_REQUEST = Emoji.YES + " Send request"
 KEYBOARD_OPTION_RESET = Emoji.RESET + " Reset"
+KEYBOARD_OPTION_SCOUT = Emoji.BINOCULARS + " Scout"
 
 TEXT_YES = "Yes"
 TEXT_NO = "No"
@@ -242,6 +243,10 @@ FIGHT_LOSE = (
     + GAME_LOSE_STATUS
 )
 FIGHT_CONFIRMATION_RETREAT = "You have successfully retreated"
+FIGHT_PLUNDER_INSUFFICIENT_SCOUT_BOUNTY = (
+    "Insufficient bounty to scout the opponent.\n\nScouting price: *{}*฿\nCurrent bounty: *{}*฿"
+)
+FIGHT_SCOUT_USER = "Are you sure you want to scout {}?\nIt will cost you ฿*{}*"
 
 ENABLED = Emoji.ENABLED + " Enabled"
 DISABLED = Emoji.DISABLED + " Disabled"
@@ -2074,6 +2079,7 @@ ABILITY_TYPE_INCOME_TAX = "Income Tax"
 ABILITY_TYPE_PLUNDER_COOLDOWN_DURATION = "Plunder Cooldown"
 ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION = "Plunder Immunity"
 ABILITY_TYPE_PLUNDER_SENTENCE_DURATION = "Plunder Sentence"
+ABILITY_TYPE_FIGHT_PLUNDER_SCOUT_PRICE = "Fight Plunder Scout Price"
 
 PLUNDER_CANNOT_PLUNDER_USER = "You cannot plunder this user"
 PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{}*"

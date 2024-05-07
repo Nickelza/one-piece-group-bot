@@ -1,5 +1,4 @@
 import datetime
-from enum import StrEnum
 
 from telegram import Update, Message
 from telegram.ext import ContextTypes
@@ -23,6 +22,7 @@ from src.service.bounty_service import add_or_remove_bounty
 from src.service.date_service import convert_seconds_to_duration
 from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.devil_fruit_service import get_ability_value
+from src.service.fight_plunder_service import get_scout_price, send_scout_request, get_opponent
 from src.service.leaderboard_service import get_current_leaderboard_user
 from src.service.message_service import (
     full_message_send,
@@ -37,48 +37,29 @@ from src.utils.math_utils import get_random_win, get_value_from_percentage
 from src.utils.string_utils import get_belly_formatted
 
 
-class FightReservedKeys(StrEnum):
-    """
-    The reserved keys for this screen
-    """
-
-    FIGHT_ID = "a"
-
-
-def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | None:
-    """
-    Get opponent from update or keyboard
-    :param update: The update object. If None, the opponent is taken from the keyboard
-    :param keyboard: The keyboard object. If None, the opponent is taken from the update
-    :return: The opponent object
-    """
-
-    if update.callback_query is None:
-        return User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
-
-    fight: Fight = Fight.get_or_none(Fight.id == int(keyboard.info[FightReservedKeys.FIGHT_ID]))
-    if fight is None:
-        return None
-    return fight.opponent
-
-
 async def validate(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    is_group: bool,
+    keyboard: Keyboard = None,
 ) -> bool:
     """
     Validate the fight request
     :param update: The update object
     :param context: The context object
     :param user: The user object
+    :param is_group: If the fight is for a group
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
     # If not query callback
     fight: Fight | None = None
-    if update.callback_query is not None:
-        # Get opponent from fight id
+    if update.callback_query is not None and keyboard.has_key(
+        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY
+    ):
         fight: Fight = Fight.get_or_none(
-            Fight.id == int(keyboard.info[FightReservedKeys.FIGHT_ID])
+            Fight.id == int(keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY])
         )
         if fight is None:
             raise GroupChatException(GroupChatError.FIGHT_NOT_FOUND)
@@ -104,6 +85,15 @@ async def validate(
         # Opponent is arrested
         if opponent.is_arrested():
             raise OpponentValidationException()
+
+        # User does not have enough amount to scout
+        scout_price = get_scout_price(user, is_group)
+        if user.bounty < scout_price:
+            raise OpponentValidationException(
+                phrases.FIGHT_PLUNDER_INSUFFICIENT_SCOUT_BOUNTY.format(
+                    get_belly_formatted(scout_price), user.get_bounty_formatted()
+                )
+            )
 
     except OpponentValidationException as ove:
         if ove.message is not None:
@@ -204,7 +194,11 @@ async def delete_fight(
 
 
 async def send_request(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    group_chat: GroupChat,
+    keyboard: Keyboard,
 ) -> None:
     """
     Send request to confirm fight
@@ -212,8 +206,11 @@ async def send_request(
     :param context: The context
     :param user: The user
     :param group_chat: The group chat
+    :param keyboard: The keyboard
     :return: None
     """
+    # Remove scouting fee
+    await add_or_remove_bounty(user, get_scout_price(user, True), add=False)
 
     # Delete all previous pending fights
     previous_fights: list[Fight] = Fight.select().where(
@@ -223,7 +220,7 @@ async def send_request(
         await delete_fight(context, previous_fight, group_chat)
 
     # Get opponent
-    opponent: User = get_opponent(update)
+    opponent: User = get_opponent(update, keyboard)
     win_probability, win_amount, lose_amount, final_bounty_if_win, final_bounty_if_lose = (
         get_fight_odds(user, opponent)
     )
@@ -269,6 +266,8 @@ async def send_request(
             yes_text=phrases.KEYBOARD_OPTION_FIGHT,
             no_text=phrases.KEYBOARD_OPTION_RETREAT,
             primary_key=fight.id,
+            inbound_keyboard=keyboard,
+            add_inbound_key_info=True,
         )
     ]
 
@@ -302,7 +301,9 @@ async def keyboard_interaction(
     """
 
     # Get fight
-    fight: Fight = Fight.get_or_none(Fight.id == keyboard.info[FightReservedKeys.FIGHT_ID])
+    fight: Fight = Fight.get_or_none(
+        Fight.id == keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY]
+    )
 
     # User clicked on retreat button
     if not keyboard.info[ReservedKeyboardKeys.CONFIRM]:
@@ -416,12 +417,17 @@ async def manage(
     """
 
     # Validate the request
-    if not await validate(update, context, user, keyboard):
+    if not await validate(update, context, user, True, keyboard):
         return
 
     # Request to fight
     if keyboard is None:
-        await send_request(update, context, user, group_chat)
+        # Scouting request
+        await send_scout_request(update, context, user, Screen.GRP_FIGHT, group_chat)
+        return
+
+    elif not keyboard.has_key(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY):
+        await send_request(update, context, user, group_chat, keyboard)
         return
 
     await keyboard_interaction(update, context, user, keyboard, group_chat)

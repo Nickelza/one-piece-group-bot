@@ -32,6 +32,7 @@ from src.service.date_service import (
     convert_hours_to_duration,
 )
 from src.service.devil_fruit_service import get_ability_adjusted_datetime, get_ability_value
+from src.service.fight_plunder_service import get_scout_price, send_scout_request, get_opponent
 from src.service.impel_down_service import add_sentence
 from src.service.message_service import (
     full_message_send,
@@ -63,51 +64,44 @@ async def manage(
     """
 
     # Validate the request
-    if not await validate(update, context, user, keyboard):
+    if not await validate(update, context, user, True, keyboard):
         return
 
     # Request to plunder
     if keyboard is None:
-        await send_request(update, context, user, group_chat)
+        # Scouting request
+        await send_scout_request(update, context, user, Screen.GRP_PLUNDER, group_chat)
+        return
+
+    elif not keyboard.has_key(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY):
+        await send_request(update, context, user, group_chat, keyboard)
         return
 
     await keyboard_interaction(update, context, user, keyboard, group_chat)
 
 
-def get_opponent(update: Update = None, keyboard: Keyboard = None) -> User | None:
-    """
-    Get opponent from update or keyboard
-    :param update: The update object. If None, the opponent is taken from the keyboard
-    :param keyboard: The keyboard object. If None, the opponent is taken from the update
-    :return: The opponent object
-    """
-
-    if update.callback_query is None:
-        return User.get_or_none(User.tg_user_id == update.message.reply_to_message.from_user.id)
-
-    plunder: Plunder = Plunder.get_or_none(
-        Plunder.id == int(keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY])
-    )
-    if plunder is None:
-        return None
-    return plunder.opponent
-
-
 async def validate(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, keyboard: Keyboard = None
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    is_group: bool,
+    keyboard: Keyboard = None,
 ) -> bool:
     """
-    Validate the plunder request
+    Validate the fight request
     :param update: The update object
     :param context: The context object
     :param user: The user object
+    :param is_group: If the fight is for a group
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
+
     # If not query callback
     plunder: Plunder | None = None
-    if update.callback_query is not None:
-        # Get opponent from plunder id
+    if update.callback_query is not None and keyboard.has_key(
+        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY
+    ):  # Get opponent from plunder id
         plunder: Plunder = Plunder.get_or_none(
             Plunder.id == int(keyboard.info[ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY])
         )
@@ -138,6 +132,15 @@ async def validate(
         # Opponent is arrested
         if opponent.is_arrested():
             raise OpponentValidationException()
+
+        # User does not have enough amount to scout
+        scout_price = get_scout_price(user, is_group)
+        if user.bounty < scout_price:
+            raise OpponentValidationException(
+                phrases.FIGHT_PLUNDER_INSUFFICIENT_SCOUT_BOUNTY.format(
+                    get_belly_formatted(scout_price), user.get_bounty_formatted()
+                )
+            )
 
     except OpponentValidationException as ove:
         if ove.message is not None:
@@ -226,7 +229,11 @@ async def delete_plunder(
 
 
 async def send_request(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, user: User, group_chat: GroupChat
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    group_chat: GroupChat,
+    keyboard: Keyboard,
 ) -> None:
     """
     Send request to confirm plunder
@@ -234,8 +241,11 @@ async def send_request(
     :param context: The context
     :param user: The user
     :param group_chat: The group chat
+    :param keyboard: The keyboard
     :return: None
     """
+    # Remove scouting fee
+    await add_or_remove_bounty(user, get_scout_price(user, True), add=False)
 
     # Delete all previous pending plunders
     previous_plunders: list[Plunder] = Plunder.select().where(
@@ -245,7 +255,7 @@ async def send_request(
         await delete_plunder(context, previous_plunder, group_chat)
 
     # Get opponent
-    opponent: User = get_opponent(update)
+    opponent: User = get_opponent(update, keyboard)
     (
         win_probability,
         win_amount,
@@ -286,6 +296,8 @@ async def send_request(
             yes_text=phrases.KEYBOARD_OPTION_PLUNDER,
             no_text=phrases.KEYBOARD_OPTION_RETREAT,
             primary_key=plunder.id,
+            inbound_keyboard=keyboard,
+            add_inbound_key_info=True,
         )
     ]
 

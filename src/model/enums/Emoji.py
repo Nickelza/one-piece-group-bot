@@ -71,6 +71,7 @@ class Emoji(StrEnum):
     GIFT = "🎁"
     INFO = "ℹ"
     HELP = "❓"
+    BINOCULARS = "🔭"
 
     # Game
     WINNER = "🏆"

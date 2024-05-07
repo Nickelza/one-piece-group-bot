@@ -19,3 +19,4 @@ class SavedMediaName(StrEnum):
     PLUNDER_SUCCESS = "plunder_success"
     PLUNDER_FAIL = "plunder_fail"
     DAILY_REWARD = "daily_reward"
+    FIGHT_PLUNDER_SCOUT = "fight_plunder_scout"

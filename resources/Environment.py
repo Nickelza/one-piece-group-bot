@@ -740,6 +740,14 @@ FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment(
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment(
     "FIGHT_MIN_WIN_PROBABILITY_ROOKIE", default_value="1"
 )
+# Fight and plunder scouting base price. Default: 10.000
+FIGHT_PLUNDER_SCOUT_BASE_PRICE = Environment(
+    "FIGHT_PLUNDER_SCOUT_BASE_PRICE", default_value="10000"
+)
+# Fight and plunder scouting price multiplier for group. Default: 10
+FIGHT_PLUNDER_SCOUT_PRICE_MULTIPLIER_GROUP = Environment(
+    "FIGHT_PLUNDER_SCOUT_PRICE_MULTIPLIER_GROUP", default_value="10"
+)
 
 # Minimum wager for prediction bets. Default: 5 million
 PREDICTION_BET_MIN_WAGER = Environment("PREDICTION_BET_MIN_WAGER", default_value="5000000")
