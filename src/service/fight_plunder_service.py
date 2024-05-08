@@ -224,6 +224,7 @@ async def private_send_scout_request(
         next_scout_fee = get_scout_fee(user, False, scout_type)
         caption = phrases.FIGHT_PLUNDER_SCOUT_SEARCH_USER.format(
             opponent.get_markdown_name(),
+            win_probability,
             get_belly_formatted(win_amount),
             get_belly_formatted(lose_amount),
             potential_jail_time_text,

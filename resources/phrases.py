@@ -255,8 +255,8 @@ FIGHT_PLUNDER_PRIVATE_INSUFFICIENT_SCOUT_BOUNTY = (
 FIGHT_PLUNDER_SCOUT_USER_GROUP = "Are you sure you want to scout {}?\nIt will cost you ฿*{}*"
 FIGHT_PLUNDER_SCOUT_SEARCH = "Would you like to scout for an opponent?" + FIGHT_PLUNDER_SCOUT_FEE
 FIGHT_PLUNDER_SCOUT_SEARCH_USER = (
-    "Opponent: *{}*\nPotential win: ฿*{}*\nPotential loss: ฿*{}*{}\n\nNext scouting fee: "
-    " ฿*{}*\nCurrent bounty: ฿*{}*"
+    "Opponent: *{}*\nWin probability: *{}%*\nPotential win: ฿*{}*\nPotential loss: ฿*{}*{}\n\nNext"
+    " scouting fee:  ฿*{}*\nCurrent bounty: ฿*{}*"
 )
 FIGHT_PLUNDER_SCOUT_SEARCH_USER_NEW = "New opponent found!\n\n"
 FIGHT_PLUNDER_SCOUT_USER_JAIL_TIME = "\nPotential jail time: *{}*"
