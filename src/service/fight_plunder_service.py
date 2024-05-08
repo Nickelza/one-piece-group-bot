@@ -16,6 +16,7 @@ from src.model.User import User
 from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.LeaderboardRank import get_rank_by_leaderboard_user
+from src.model.enums.Notification import FightAttackNotification, PlunderAttackNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.ScoutType import ScoutType
@@ -49,6 +50,7 @@ from src.service.message_service import (
     mention_markdown_v2,
     mention_markdown_user,
 )
+from src.service.notification_service import send_notification
 from src.utils.math_utils import add_percentage_to_value, get_value_from_percentage, get_random_win
 from src.utils.string_utils import get_belly_formatted
 
@@ -869,6 +871,9 @@ async def fight_confirm_request(
     opponent.save()
     fight.save()
 
+    # Send notification to opponent
+    await send_notification(context, fight.opponent, FightAttackNotification(fight))
+
 
 def plunder_get_odds(
     challenger: User, opponent: User
@@ -1282,3 +1287,6 @@ async def plunder_confirm_request(
     # Save info
     opponent.save()
     plunder.save()
+
+    # Send notification to opponent
+    await send_notification(context, plunder.opponent, PlunderAttackNotification(plunder))

@@ -11,15 +11,19 @@ from src.model.DavyBackFight import DavyBackFight
 from src.model.DavyBackFightParticipant import DavyBackFightParticipant
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
+from src.model.Fight import Fight
 from src.model.Game import Game
 from src.model.ImpelDownLog import ImpelDownLog
+from src.model.Plunder import Plunder
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.PredictionOptionUser import PredictionOptionUser
 from src.model.User import User
 from src.model.Warlord import Warlord
 from src.model.enums.Emoji import Emoji
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.GameStatus import GameStatus
+from src.model.enums.LogType import LogType
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys, LogTypeReservedKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
@@ -51,6 +55,8 @@ class NotificationCategory(IntEnum):
     BOUNTY_LOAN = 9
     WARLORD = 10
     DAVY_BACK_FIGHT = 11
+    FIGHT = 12
+    PLUNDER = 13
 
 
 NOTIFICATION_CATEGORY_DESCRIPTIONS = {
@@ -65,6 +71,8 @@ NOTIFICATION_CATEGORY_DESCRIPTIONS = {
     NotificationCategory.BOUNTY_LOAN: phrases.NOTIFICATION_CATEGORY_BOUNTY_LOAN,
     NotificationCategory.WARLORD: phrases.NOTIFICATION_CATEGORY_WARLORD,
     NotificationCategory.DAVY_BACK_FIGHT: phrases.NOTIFICATION_CATEGORY_DAVY_BACK_FIGHT,
+    NotificationCategory.FIGHT: phrases.NOTIFICATION_CATEGORY_FIGHT,
+    NotificationCategory.PLUNDER: phrases.NOTIFICATION_CATEGORY_PLUNDER,
 }
 
 
@@ -109,6 +117,8 @@ class NotificationType(IntEnum):
     CREW_CONSCRIPTION_END = 36
     DEVIL_FRUIT_SOLD = 37
     CREW_CAPTAIN_PROMOTION = 38
+    FIGHT_ATTACK = 39
+    PLUNDER_ATTACK = 40
 
 
 class Notification:
@@ -1350,6 +1360,86 @@ class CrewCaptainPromotionNotification(Notification):
         )
 
 
+class FightAttackNotification(Notification):
+    """Class for fight attack notifications."""
+
+    def __init__(self, fight: Fight = None):
+        """
+        Constructor
+
+        :param fight: The fight
+        """
+
+        self.fight = fight
+
+        super().__init__(
+            NotificationCategory.FIGHT,
+            NotificationType.FIGHT_ATTACK,
+            phrases.FIGHT_ATTACK_NOTIFICATION,
+            phrases.FIGHT_ATTACK_NOTIFICATION_DESCRIPTION,
+            phrases.FIGHT_ATTACK_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_LOGS_TYPE_DETAIL,
+            item_info={
+                LogTypeReservedKeys.TYPE: LogType.FIGHT,
+                LogTypeReservedKeys.ITEM_ID: fight.id if fight is not None else None,
+            },
+            go_to_item_button_text=phrases.KEY_VIEW_LOG,
+        )
+
+    def build(self) -> str:
+        if self.fight.get_status() is GameStatus.LOST:
+            won_lost_text = phrases.TEXT_WON
+            won_lost_emoji = Emoji.CONFETTI
+        else:
+            won_lost_text = phrases.TEXT_LOST
+            won_lost_emoji = Emoji.LOSER
+
+        return self.text.format(
+            won_lost_text,
+            self.fight.opponent.get_markdown_mention(),
+            won_lost_emoji,
+            won_lost_text,
+            get_belly_formatted(self.fight.belly),
+        )
+
+
+class PlunderAttackNotification(Notification):
+    """Class for plunder attack notifications."""
+
+    def __init__(self, plunder: Plunder = None):
+        """
+        Constructor
+
+        :param plunder: The plunder
+        """
+
+        self.plunder = plunder
+
+        super().__init__(
+            NotificationCategory.PLUNDER,
+            NotificationType.PLUNDER_ATTACK,
+            phrases.PLUNDER_ATTACK_NOTIFICATION,
+            phrases.PLUNDER_ATTACK_NOTIFICATION_DESCRIPTION,
+            phrases.PLUNDER_ATTACK_NOTIFICATION_KEY,
+            item_screen=Screen.PVT_LOGS_TYPE_DETAIL,
+            item_info={
+                LogTypeReservedKeys.TYPE: LogType.PLUNDER,
+                LogTypeReservedKeys.ITEM_ID: plunder.id if plunder is not None else None,
+            },
+            go_to_item_button_text=phrases.KEY_VIEW_LOG,
+        )
+
+    def build(self) -> str:
+        if self.plunder.get_status() is GameStatus.LOST:
+            text = phrases.PLUNDER_ATTACK_NOTIFICATION_WON
+        else:
+            text = phrases.PLUNDER_ATTACK_NOTIFICATION_LOST
+
+        return text.format(
+            self.plunder.opponent.get_markdown_mention(), get_belly_formatted(self.plunder.belly)
+        )
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1389,6 +1479,8 @@ NOTIFICATIONS = [
     DavyBackFightEndNotification(),
     DevilFruitSoldNotification(),
     CrewCaptainPromotionNotification(),
+    FightAttackNotification(),
+    PlunderAttackNotification(),
 ]
 
 

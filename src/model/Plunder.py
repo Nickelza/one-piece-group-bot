@@ -15,25 +15,25 @@ class Plunder(BaseModel):
     Plunder class
     """
 
-    id = PrimaryKeyField()
-    challenger = ForeignKeyField(
+    id: int | PrimaryKeyField = PrimaryKeyField()
+    challenger: User | ForeignKeyField = ForeignKeyField(
         User, backref="plunder_challengers", on_delete="CASCADE", on_update="CASCADE"
     )
-    opponent = ForeignKeyField(
+    opponent: User | ForeignKeyField = ForeignKeyField(
         User, backref="plunder_opponents", on_delete="CASCADE", on_update="CASCADE"
     )
-    win_probability = FloatField()
-    date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=GameStatus.IN_PROGRESS)
-    group_chat = ForeignKeyField(
+    win_probability: float | FloatField = FloatField()
+    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    status: bool | SmallIntegerField = SmallIntegerField(default=GameStatus.IN_PROGRESS)
+    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
         GroupChat,
         null=True,
         backref="plunder_groups_chats",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    message_id = IntegerField(null=True)
-    belly = BigIntegerField(null=True)
+    message_id: int | IntegerField = IntegerField(null=True)
+    belly: int | BigIntegerField = BigIntegerField(null=True)
     sentence_duration = IntegerField(null=True)
 
     class Meta:

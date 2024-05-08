@@ -28,7 +28,7 @@ from src.model.enums.LeaderboardRank import (
 from src.model.enums.ListPage import ListPage, EmojiLegend
 from src.model.enums.Location import get_first_new_world
 from src.model.enums.LogType import LogType
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys, LogTypeReservedKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
@@ -151,8 +151,6 @@ class Log(ListPage):
         :return: The deeplink
         """
 
-        from src.chat.private.screens.screen_logs_type_detail import LogTypeReservedKeys
-
         info: dict = {LogTypeReservedKeys.TYPE: log_type, LogTypeReservedKeys.ITEM_ID: item_id}
         return get_deeplink(info, screen=Screen.PVT_LOGS_TYPE_DETAIL)
 
@@ -250,13 +248,19 @@ class FightLog(Log):
                 GAME_STATUS_DESCRIPTIONS[self.effective_status]
             )
 
+        go_to_message_text = ""
+        if self.object.group_chat is not None:
+            go_to_message_text = phrases.LOG_ITEM_DETAIL_GO_TO_MESSAGE.format(
+                get_message_url(self.object.message_id, self.object.group_chat)
+            )
+
         return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text,
             self.opponent.get_markdown_mention(),
             date,
             self.object.get_win_probability(self.user),
             outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat),
+            go_to_message_text,
         )
 
     def get_stats_text(self) -> str:
@@ -1156,13 +1160,19 @@ class PlunderLog(Log):
                 convert_hours_to_duration(self.object.sentence_duration, show_full=True)
             )
 
+        go_to_message_text = ""
+        if self.object.group_chat is not None:
+            go_to_message_text = phrases.LOG_ITEM_DETAIL_GO_TO_MESSAGE.format(
+                get_message_url(self.object.message_id, self.object.group_chat)
+            )
+
         return phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text,
             self.opponent.get_markdown_mention(),
             date,
             self.object.get_win_probability(self.user),
             outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat),
+            go_to_message_text,
         )
 
     def get_stats_text(self) -> str:

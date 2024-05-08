@@ -21,3 +21,12 @@ class ReservedKeyboardKeys(StrEnum):
     # Not unique
     DEFAULT_PRIMARY_KEY = "a"
     DEFAULT_SECONDARY_KEY = "b"
+
+
+class LogTypeReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    TYPE = "a"
+    ITEM_ID = "b"

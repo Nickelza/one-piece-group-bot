@@ -291,6 +291,7 @@ KEY_REMOVE = Emoji.DELETE + " Remove"
 KEY_BUY = "Buy"
 KEY_MANAGE_DEVIL_FRUIT = "Manage Devil Fruit"
 KEY_JOIN_A_CREW = "Join a Crew"
+KEY_VIEW_LOG = "View log"
 
 TXT_SETTINGS = "Which setting would you like to change?"
 
@@ -1422,6 +1423,8 @@ NOTIFICATION_CATEGORY_PREDICTION = "Prediction"
 NOTIFICATION_CATEGORY_DEVIL_FRUIT = "Devil Fruit"
 NOTIFICATION_CATEGORY_WARLORD = "Warlord"
 NOTIFICATION_CATEGORY_DAVY_BACK_FIGHT = "Davy Back Fight"
+NOTIFICATION_CATEGORY_FIGHT = "Fight"
+NOTIFICATION_CATEGORY_PLUNDER = "Plunder"
 
 # Notification - Crew Leave
 CREW_LEAVE_NOTIFICATION = "{} has left the Crew"
@@ -1767,6 +1770,27 @@ WARLORD_REVOCATION_NOTIFICATION_DESCRIPTION = (
 )
 WARLORD_REVOCATION_NOTIFICATION_KEY = "Warlord revocation"
 
+# Notification - Fight attack
+FIGHT_ATTACK_NOTIFICATION = "You {} in a fight against {}{}\n\nAmount {}: ฿*{}*"
+FIGHT_ATTACK_NOTIFICATION_DESCRIPTION = "If to be notified when you are fought by another player"
+FIGHT_ATTACK_NOTIFICATION_KEY = "Fight"
+
+# Notification - Plunder attack
+PLUNDER_ATTACK_NOTIFICATION = ""
+PLUNDER_ATTACK_NOTIFICATION_WON = (
+    "You defeated {} while they were trying to plunder you"
+    + Emoji.CONFETTI
+    + "\n\nAmount won \\(loan\\): ฿*{}*"
+)
+PLUNDER_ATTACK_NOTIFICATION_LOST = (
+    "You were plundered by {}" + Emoji.LOSER + "\n\nAmount lost: ฿*{}*"
+)
+PLUNDER_ATTACK_NOTIFICATION_DESCRIPTION = (
+    "If to be notified when you are plundered by another player"
+)
+PLUNDER_ATTACK_NOTIFICATION_KEY = "Plunder"
+
+
 # List
 LIST_OVERVIEW = (
     "Select" + " {} *{}* from the list below\n{}"
@@ -1804,9 +1828,7 @@ LOG_STATS_NOT_ENOUGH_DATA = "Not enough data to generate statistics for this log
 FIGHT_LOG_KEY = "Fights"
 FIGHT_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Fight"
 FIGHT_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
-FIGHT_LOG_ITEM_DETAIL_TEXT = (
-    f"*{{}}*: {{}}\n*Date*: {{}}\n*Win probability*: {{}}%\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
-)
+FIGHT_LOG_ITEM_DETAIL_TEXT = "*{}*: {}\n*Date*: {}\n*Win probability*: {}%\n\n{}{}"
 FIGHT_LOG_STATS_TEXT = (
     "*Total fights*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Belly won*: ฿{}\n*Belly"
     " lost*: ฿{}\n*Max belly won*: [฿{} \\({}\\)]({})\n*Max belly lost*: [฿{} \\({}\\)]({})\n*Most"
@@ -1817,9 +1839,7 @@ FIGHT_LOG_STATS_TEXT = (
 PLUNDER_LOG_KEY = "Plunders"
 PLUNDER_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Plunder"
 PLUNDER_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
-PLUNDER_LOG_ITEM_DETAIL_TEXT = (
-    f"*{{}}*: {{}}\n*Date*: {{}}\n*Win probability*: {{}}%\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
-)
+PLUNDER_LOG_ITEM_DETAIL_TEXT = "*{}*: {}\n*Date*: {}\n*Win probability*: {}%\n\n{}{}"
 PLUNDER_LOG_ITEM_DETAIL_SENTENCE_DURATION = "\n\n*Impel Down sentence*: {}"
 PLUNDER_LOG_STATS_TEXT = (
     "*Total plunders*: {}"
