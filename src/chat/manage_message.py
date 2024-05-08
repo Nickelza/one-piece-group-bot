@@ -326,8 +326,9 @@ async def manage_after_db(
         await full_message_or_media_send_or_edit(context, phrases.ITEM_NOT_FOUND, update=update)
         logging.warning(update)
         logging.warning(dne)
-    except (TimedOut, NetworkError):
+    except (TimedOut, NetworkError) as ne:
         logging.warning("Network error")
+        logging.exception(ne)
     except (PrivateChatException, GroupChatException, CommonChatException) as ce:
         # Manages system errors
         user.should_update_model = False

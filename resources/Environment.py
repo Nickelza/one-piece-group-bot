@@ -444,6 +444,20 @@ SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS = Environment(
     "SHOULD_RUN_ON_STARTUP_SET_EXPIRED_BOUNTY_LOANS", default_value="False"
 )
 
+# Fight and plunder decrease scout count. Default: Every 15 minutes
+CRON_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE = Environment(
+    "CRON_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE", default_value="*/15 * * * *"
+)
+ENABLE_TIMER_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE = Environment(
+    "ENABLE_TIMER_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE", default_value="True"
+)
+SHOULD_LOG_TIMER_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE = Environment(
+    "SHOULD_LOG_TIMER_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE", default_value="False"
+)
+SHOULD_RUN_ON_STARTUP_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE = Environment(
+    "SHOULD_RUN_ON_STARTUP_FIGHT_PLUNDER_SCOUT_COUNT_DECREASE", default_value="False"
+)
+
 # Generic task. Default: Every 1 minute
 CRON_MINUTE_TASKS = Environment("CRON_MINUTE_TASKS", default_value="*/1 * * * *")
 ENABLE_TIMER_MINUTE_TASKS = Environment("ENABLE_TIMER_MINUTE_TASKS", default_value="True")
@@ -745,8 +759,8 @@ FIGHT_PLUNDER_SCOUT_BASE_PRICE = Environment(
     "FIGHT_PLUNDER_SCOUT_BASE_PRICE", default_value="10000"
 )
 # Fight and plunder scouting price multiplier for group. Default: 10
-FIGHT_PLUNDER_SCOUT_PRICE_MULTIPLIER_GROUP = Environment(
-    "FIGHT_PLUNDER_SCOUT_PRICE_MULTIPLIER_GROUP", default_value="10"
+FIGHT_PLUNDER_SCOUT_FEE_MULTIPLIER_GROUP = Environment(
+    "FIGHT_PLUNDER_SCOUT_FEE_MULTIPLIER_GROUP", default_value="10"
 )
 
 # Minimum wager for prediction bets. Default: 5 million

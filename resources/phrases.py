@@ -115,7 +115,7 @@ SAVED_MEDIA_UNKNOWN_TYPE = "Unknown media type. Available types are: *{}*"
 SAVE_MEDIA_SUCCESS = "Media saved as *{}*"
 
 GAME_WIN_LOSE_STATUS = (
-    "_Current bounty: ฿*{}*_\n_Final bounty if you win: ฿*{}*_\n_Final bounty if you lose: ฿*{}*_"
+    "Current bounty: ฿*{}*\nFinal bounty if you win: ฿*{}*\nFinal bounty if you lose: ฿*{}*"
 )
 GAME_WIN_STATUS = "_You won ฿*{}*!_\n_Current bounty: ฿*{}*_"
 GAME_LOSE_STATUS = "_You lost ฿*{}*!_\n_Current bounty: ฿*{}*_"
@@ -171,6 +171,8 @@ KEYBOARD_OPTION_NO = Emoji.NO + " No"
 KEYBOARD_OPTION_SEND_REQUEST = Emoji.YES + " Send request"
 KEYBOARD_OPTION_RESET = Emoji.RESET + " Reset"
 KEYBOARD_OPTION_SCOUT = Emoji.BINOCULARS + " Scout"
+KEYBOARD_OPTION_NEW_SCOUT = Emoji.BINOCULARS + " New Scout"
+KEYBOARD_OPTION_CHOOSE = Emoji.ENABLED + " Choose"
 
 TEXT_YES = "Yes"
 TEXT_NO = "No"
@@ -243,10 +245,25 @@ FIGHT_LOSE = (
     + GAME_LOSE_STATUS
 )
 FIGHT_CONFIRMATION_RETREAT = "You have successfully retreated"
-FIGHT_PLUNDER_INSUFFICIENT_SCOUT_BOUNTY = (
-    "Insufficient bounty to scout the opponent.\n\nScouting price: *{}*฿\nCurrent bounty: *{}*฿"
+FIGHT_PLUNDER_SCOUT_FEE = "\n\nScouting fee: ฿*{}*\nCurrent bounty: ฿*{}*"
+FIGHT_PLUNDER_GROUP_INSUFFICIENT_SCOUT_BOUNTY = (
+    "Insufficient bounty to scout the opponent." + FIGHT_PLUNDER_SCOUT_FEE
 )
-FIGHT_SCOUT_USER = "Are you sure you want to scout {}?\nIt will cost you ฿*{}*"
+FIGHT_PLUNDER_PRIVATE_INSUFFICIENT_SCOUT_BOUNTY = (
+    "Insufficient bounty to scout for opponents." + FIGHT_PLUNDER_SCOUT_FEE
+)
+FIGHT_PLUNDER_SCOUT_USER_GROUP = "Are you sure you want to scout {}?\nIt will cost you ฿*{}*"
+FIGHT_PLUNDER_SCOUT_SEARCH = "Would you like to scout for an opponent?" + FIGHT_PLUNDER_SCOUT_FEE
+FIGHT_PLUNDER_SCOUT_SEARCH_USER = (
+    "Opponent: *{}*\nPotential win: ฿*{}*\nPotential loss: ฿*{}*{}\n\nNext scouting fee: "
+    " ฿*{}*\nCurrent bounty: ฿*{}*"
+)
+FIGHT_PLUNDER_SCOUT_SEARCH_USER_NEW = "New opponent found!\n\n"
+FIGHT_PLUNDER_SCOUT_USER_JAIL_TIME = "\nPotential jail time: *{}*"
+FIGHT_PLUNDER_SCOUT_NO_OPPONENT_FOUND = (
+    "No opponent found, please try again later.\n\n_No scouting fee was deducted_"
+)
+FIGHT_PLUNDER_SCOUT_NEXT_FEE = "\n\nNext scouting fee: ฿*{}*"
 
 ENABLED = Emoji.ENABLED + " Enabled"
 DISABLED = Emoji.DISABLED + " Disabled"
@@ -2079,7 +2096,7 @@ ABILITY_TYPE_INCOME_TAX = "Income Tax"
 ABILITY_TYPE_PLUNDER_COOLDOWN_DURATION = "Plunder Cooldown"
 ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION = "Plunder Immunity"
 ABILITY_TYPE_PLUNDER_SENTENCE_DURATION = "Plunder Sentence"
-ABILITY_TYPE_FIGHT_PLUNDER_SCOUT_PRICE = "Fight Plunder Scout Price"
+ABILITY_TYPE_FIGHT_PLUNDER_SCOUT_FEE = "Fight Plunder Scout Price"
 
 PLUNDER_CANNOT_PLUNDER_USER = "You cannot plunder this user"
 PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{}*"
@@ -2087,8 +2104,8 @@ PLUNDER_CONFIRMATION_REQUEST = (
     "{} are you sure you want to steal from {}?\n"
     "\nIf you're successful, you will gain ฿*{}*."
     "\nIf you're caught, you will owe ฿*{}* and be jailed in Impel Down for *{}*!"
-    + "\n\n_Success chance: *{}%*\nCurrent bounty: ฿*{}*\nFinal bounty if you win:"
-    " ฿*{}*_\n\nIf you"
+    + "\n\nSuccess chance: *{}%*\nCurrent bounty: ฿*{}*\nFinal bounty if you win:"
+    " ฿*{}*\n\nIf you"
     " lose, a loan will be created to repay the penalty"
 )
 PLUNDER_WIN = (

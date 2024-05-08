@@ -72,6 +72,7 @@ class Emoji(StrEnum):
     INFO = "ℹ"
     HELP = "❓"
     BINOCULARS = "🔭"
+    CHOOSE = "🔍"
 
     # Game
     WINNER = "🏆"

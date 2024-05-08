@@ -131,7 +131,7 @@ def convert_seconds_to_duration(seconds: int | float, show_full: bool = False) -
             else:
                 result += f"{remaining_seconds} seconds"
 
-    return result
+    return result.strip()
 
 
 def convert_minutes_to_duration(minutes: int, show_full: bool = False) -> str:

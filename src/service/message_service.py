@@ -586,6 +586,7 @@ async def full_media_send(
     edit_message_id: int = None,
     ignore_bad_request_exception: bool = False,
     should_auto_delete: bool = True,
+    delete_button_text=None,
 ) -> Message | bool:
     """
     Send a media
@@ -623,6 +624,7 @@ async def full_media_send(
     :param ignore_bad_request_exception: True if the bad request exception should be ignored
     :param edit_message_id: Message id to edit
     :param should_auto_delete: True if the message should be auto deleted
+    :param delete_button_text: Text to be used for the delete button
 
     :return: Message
     """
@@ -700,6 +702,7 @@ async def full_media_send(
         authorized_users=authorized_users,
         inbound_keyboard=inbound_keyboard,
         only_authorized_users_can_interact=only_authorized_users_can_interact,
+        delete_button_text=delete_button_text,
     )
 
     is_edit = edit_message_id is not None or edit_only_keyboard or edit_only_caption_and_keyboard

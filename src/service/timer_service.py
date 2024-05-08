@@ -10,6 +10,7 @@ from src.model.DailyReward import DailyReward
 from src.service.bounty_loan_service import set_expired_bounty_loans
 from src.service.bounty_poster_service import reset_bounty_poster_limit
 from src.service.devil_fruit_service import schedule_devil_fruit_release, respawn_devil_fruit
+from src.service.fight_plunder_service import decrease_scout_count
 from src.service.game_service import end_inactive_games
 from src.service.generic_service import run_minute_tasks
 from src.service.group_service import deactivate_inactive_group_chats
@@ -126,6 +127,8 @@ async def run(context: ContextTypes.DEFAULT_TYPE) -> None:
             await run_minute_tasks(context)
         case Timer.DAILY_REWARD:
             DailyReward.reset()
+        case Timer.FIGHT_PLUNDER_SCOUT_COUNT_DECREASE:
+            decrease_scout_count()
         case _:
             raise ValueError(f"Unknown timer {timer.name}")
 

@@ -94,6 +94,8 @@ class User(BaseModel):
         default=True
     )
     can_collect_daily_reward: bool | BooleanField = BooleanField(default=True)
+    fight_scout_count: int | IntegerField = IntegerField(default=0)
+    plunder_scout_count: int | IntegerField = IntegerField(default=0)
 
     # Transient fields
     # The private screen step with which the user arrived to the current screen

@@ -109,6 +109,7 @@ from src.chat.private.screens.screen_devil_fruit_shop_detail_buy import (
 from src.chat.private.screens.screen_devil_fruit_shop_detail_remove import (
     manage as manage_screen_devil_fruit_shop_detail_remove,
 )
+from src.chat.private.screens.screen_fight import manage as manage_screen_fight
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
 )
@@ -118,6 +119,7 @@ from src.chat.private.screens.screen_logs_type_detail import (
     manage as manage_screen_logs_type_detail,
 )
 from src.chat.private.screens.screen_logs_type_stats import manage as manage_screen_logs_type_stats
+from src.chat.private.screens.screen_plunder import manage as manage_screen_plunder
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.private.screens.screen_prediction_create import (
     manage as manage_screen_prediction_create,
@@ -549,6 +551,12 @@ async def dispatch_screens(
                 await manage_screen_crew_member_detail_captain_promote(
                     update, context, inbound_keyboard, user
                 )
+
+            case Screen.PVT_FIGHT:
+                await manage_screen_fight(update, context, user, inbound_keyboard)
+
+            case Screen.PVT_PLUNDER:
+                await manage_screen_plunder(update, context, user, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
