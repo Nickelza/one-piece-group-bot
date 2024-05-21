@@ -80,39 +80,45 @@ class BountyLoanListPage(ListPage):
         # Amounts
         ot_text += "\n"
         ot_text += phrases.BOUNTY_LOAN_AMOUNT.format(get_belly_formatted(self.object.amount))
-        ot_text += phrases.BOUNTY_LOAN_REPAY_AMOUNT.format(
-            get_belly_formatted(self.object.repay_amount)
-        )
-        ot_text += phrases.BOUNTY_LOAN_AMOUNT_REPAID.format(
-            get_belly_formatted(self.object.amount_repaid)
-        )
-        ot_text += phrases.BOUNTY_LOAN_AMOUNT_REMAINING.format(
-            get_belly_formatted(self.object.get_remaining_amount())
-        )
+
+        if self.object.get_source() is not BountyLoanSource.PLUNDER:
+            ot_text += phrases.BOUNTY_LOAN_REPAY_AMOUNT.format(
+                get_belly_formatted(self.object.repay_amount)
+            )
+
+        if self.object.get_status() is not BountyLoanStatus.REPAID:
+            ot_text += phrases.BOUNTY_LOAN_AMOUNT_REPAID.format(
+                get_belly_formatted(self.object.amount_repaid)
+            )
+            ot_text += phrases.BOUNTY_LOAN_AMOUNT_REMAINING.format(
+                get_belly_formatted(self.object.get_remaining_amount())
+            )
 
         # Dates
         ot_text += "\n"
         ot_text += phrases.BOUNTY_LOAN_DATE.format(
             default_datetime_format(self.object.date, self.user)
         )
-        ot_text += phrases.BOUNTY_LOAN_DURATION.format(
-            convert_seconds_to_duration(self.object.duration)
-        )
-        ot_text += phrases.BOUNTY_LOAN_DEADLINE_DATE.format(
-            default_datetime_format(self.object.deadline_date, self.user)
-        )
 
-        # Taxes (if loaner)
-        if self.user_is_loaner:
-            ot_text += "\n"
-            tax_amount = int(
-                get_value_from_percentage(self.object.amount, self.object.tax_percentage)
+        if self.object.get_source() is not BountyLoanSource.PLUNDER:
+            ot_text += phrases.BOUNTY_LOAN_DURATION.format(
+                convert_seconds_to_duration(self.object.duration)
             )
-            total_amount = self.object.amount + tax_amount
-            ot_text += phrases.BOUNTY_LOAN_TAX.format(
-                get_belly_formatted(tax_amount), self.object.tax_percentage
+            ot_text += phrases.BOUNTY_LOAN_DEADLINE_DATE.format(
+                default_datetime_format(self.object.deadline_date, self.user)
             )
-            ot_text += phrases.BOUNTY_LOAN_TOTAL.format(get_belly_formatted(total_amount))
+
+            # Taxes (if loaner)
+            if self.user_is_loaner:
+                ot_text += "\n"
+                tax_amount = int(
+                    get_value_from_percentage(self.object.amount, self.object.tax_percentage)
+                )
+                total_amount = self.object.amount + tax_amount
+                ot_text += phrases.BOUNTY_LOAN_TAX.format(
+                    get_belly_formatted(tax_amount), self.object.tax_percentage
+                )
+                ot_text += phrases.BOUNTY_LOAN_TOTAL.format(get_belly_formatted(total_amount))
 
         # Status
         ot_text += phrases.BOUNTY_LOAN_STATUS.format(
