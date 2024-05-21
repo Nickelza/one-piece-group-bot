@@ -403,7 +403,7 @@ async def validate(
     :param target_user: The target user in case of a reply
     :param is_callback: True if the message is a callback
     :param message_source: The message source
-    :param group_chat: The group chat chat
+    :param group_chat: The group chat
     :return: True if the command is valid
     """
 

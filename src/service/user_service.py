@@ -81,7 +81,7 @@ def user_is_boss(user: User, group_chat: GroupChat = None) -> bool:
     """
     Returns True if the user is a boss
     :param user: The user
-    :param group_chat: The group chat chat
+    :param group_chat: The group chat
     :return: True if the user is a boss
     """
 
@@ -92,7 +92,7 @@ def user_is_muted(user: User, group_chat: GroupChat) -> bool:
     """
     Returns True if the user is muted
     :param user: The user
-    :param group_chat: The group chat chat
+    :param group_chat: The group chat
     :return: True if the user is muted
     """
 

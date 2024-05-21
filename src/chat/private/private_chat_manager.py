@@ -184,7 +184,7 @@ async def manage(
     inbound_keyboard: Keyboard,
 ) -> None:
     """
-    Main function for the group chat chat manager
+    Main function for the group chat manager
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command to execute

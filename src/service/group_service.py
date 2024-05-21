@@ -41,7 +41,7 @@ def is_main_group(group_chat: GroupChat) -> bool:
 def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:
     """
     Checks if a feature is enabled
-    :param group_chat: The group chat chat
+    :param group_chat: The group chat
     :param feature: The feature
     :return: True if the feature is enabled, False otherwise
     """
@@ -77,7 +77,7 @@ def get_group_chats_with_feature_enabled(
     Gets the group chats with a feature enabled
     :param feature: The feature
     :param filter_by_groups: The groups to filter by
-    :param excluded_group_chats: The group chat chats to exclude from the result
+    :param excluded_group_chats: The group chats to exclude from the result
     :return: The list of group chats with the feature enabled
     """
 

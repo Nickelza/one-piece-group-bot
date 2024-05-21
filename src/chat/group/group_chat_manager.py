@@ -74,7 +74,7 @@ async def manage(
     group_chat: GroupChat,
 ) -> None:
     """
-    Main function for the group chat chat manager
+    Main function for the group chat manager
     :param update: Telegram update
     :param context: Telegram context
     :param command: Command to execute
