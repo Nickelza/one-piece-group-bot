@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
-import pytz
 from peewee import *
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -705,13 +705,13 @@ class User(BaseModel):
             - datetime.timedelta(days=Env.INACTIVE_GROUP_USER_DAYS.get_int())
         )
 
-    def get_timezone(self) -> pytz.timezone:
+    def get_timezone(self) -> ZoneInfo:
         """
         Returns the timezone of the user
         :return: The timezone of the user
         """
 
-        return pytz.timezone(self.timezone or Env.TZ.get())
+        return ZoneInfo(self.timezone or Env.TZ.get())
 
     def get_current_time(self) -> datetime.datetime:
         """

@@ -456,7 +456,7 @@ def get_time_with_timezone(date_time: datetime, user: User) -> datetime:
 
     # If datetime is without timezone, add the default timezone in case it's not timezone aware
     if date_time.tzinfo is None:
-        date_time = date_time.replace(tzinfo=pytz.timezone(Env.TZ.get()))
+        date_time = date_time.replace(tzinfo=ZoneInfo(Env.TZ.get()))
 
     return date_time.astimezone(user.get_timezone())
 
@@ -470,7 +470,7 @@ def get_utc_offset(timezone_name: str) -> str:
         timezone_name = Env.TZ.get()
 
     # Get the timezone object
-    timezone = pytz.timezone(timezone_name)
+    timezone = ZoneInfo(timezone_name)
     # Get the current UTC offset for the timezone
     current_offset = datetime.datetime.now(timezone).utcoffset()
     # Extract hours and minutes from the offset
@@ -621,7 +621,7 @@ def get_datetime_from_natural_language(text: str, user: User) -> datetime.dateti
         raise DateValidationException()
 
     # Convert to default timezone
-    return parsed_datetime.astimezone(pytz.timezone(Env.TZ.get()))
+    return parsed_datetime.astimezone(ZoneInfo(Env.TZ.get()))
 
 
 def get_user_timezone_and_offset_text(user: User) -> (str, str):

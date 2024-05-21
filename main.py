@@ -1,8 +1,8 @@
 import logging
 import sys
 import time
+from zoneinfo import ZoneInfo
 
-import pytz
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -105,7 +105,7 @@ def main() -> None:
             ],
         )
 
-    defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=pytz.timezone(Env.TZ.get()))
+    defaults = Defaults(parse_mode=c.TG_DEFAULT_PARSE_MODE, tzinfo=ZoneInfo(Env.TZ.get()))
 
     application = (
         Application.builder()
