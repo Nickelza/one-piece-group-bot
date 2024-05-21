@@ -139,6 +139,9 @@ class BountyLoanListPage(ListPage):
                 )
 
             ot_text += phrases.BOUNTY_LOAN_EXPIRED_ACTION_PREFIX + action_text
+        # Show notice if auto-forgiven
+        elif self.object.status == BountyLoanStatus.FORGIVEN and self.object.is_auto_forgiven:
+            ot_text += phrases.BOUNTY_LOAN_AUTO_FORGIVEN
 
         return ot_text
 

@@ -44,6 +44,7 @@ class BountyLoan(BaseModel):
     message_id = IntegerField(null=True)
     source = CharField(max_length=10, null=True)
     external_id: int | IntegerField = IntegerField(null=True)
+    is_auto_forgiven: bool | SmallIntegerField = SmallIntegerField(default=0)
 
     class Meta:
         db_table = "bounty_loan"
@@ -89,6 +90,7 @@ class BountyLoan(BaseModel):
             and self.amount_repaid >= self.amount * 2
         ):
             self.forgive()
+            self.is_auto_forgiven = True
 
         self.save()
 

@@ -1372,6 +1372,11 @@ BOUNTY_LOAN_EXPIRED_ACTION_LOANER_AND_BORROWER = (
     + BOUNTY_LOAN_EXPIRED_ACTION_SUFFIX
     + "_"
 )
+BOUNTY_LOAN_AUTO_FORGIVEN = (
+    "\n\n>This loan was automatically forgiven since"
+    f" {Env.BOUNTY_LOAN_FORGIVENESS_DAYS.get_int()} days have passed since the expiration date and"
+    " at least double the loan amount has been repaid."
+)
 BOUNTY_LOAN_REQUEST = (
     "*New Loan*\n"
     + BOUNTY_LOAN_LOANER
