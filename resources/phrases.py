@@ -245,6 +245,10 @@ FIGHT_LOSE = (
     + GAME_LOSE_STATUS
 )
 FIGHT_CONFIRMATION_RETREAT = "You have successfully retreated"
+FIGHT_REVENGE_TOO_LATE = (
+    "You can revenge a fight only if less than {} has passed since the attack.\n\nPassed time: {}"
+)
+FIGHT_REVENGE_ALREADY_REVENGED = "This fight has already been revenged\n\n[View revenge]({})"
 FIGHT_PLUNDER_SCOUT_FEE = "\n\nScouting fee: ฿*{}*\nCurrent bounty: ฿*{}*"
 FIGHT_PLUNDER_GROUP_INSUFFICIENT_SCOUT_BOUNTY = (
     "Insufficient bounty to scout the opponent." + FIGHT_PLUNDER_SCOUT_FEE
@@ -384,6 +388,7 @@ PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE = "Forgive"
 PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL = "Pay all"
 PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 PVT_KEY_SHOW_ALL = "Back to list"
+PVT_KEY_FIGHT_REVENGE = Emoji.FIGHT + " Revenge"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_KEY_SETTINGS_FEATURES = "Features"
@@ -1774,6 +1779,13 @@ WARLORD_REVOCATION_NOTIFICATION_KEY = "Warlord revocation"
 FIGHT_ATTACK_NOTIFICATION = "You {} in a fight against {}{}\n\nAmount {}: ฿*{}*"
 FIGHT_ATTACK_NOTIFICATION_DESCRIPTION = "If to be notified when you are fought by another player"
 FIGHT_ATTACK_NOTIFICATION_KEY = "Fight"
+FIGHT_ATTACK_CAN_REVENGE = (
+    "\n\n>You can revenge this fight for the next *{}* from"
+    " the fight log, regardless of any cooldown or opponent's immunity."
+)
+FIGHT_ATTACK_CANNOT_REVENGE = (
+    "\n\n>Since this attack was in response to your previous [fight]({}), it cannot be revenged"
+)
 
 # Notification - Plunder attack
 PLUNDER_ATTACK_NOTIFICATION = ""
@@ -1833,6 +1845,10 @@ FIGHT_LOG_STATS_TEXT = (
     "*Total fights*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Belly won*: ฿{}\n*Belly"
     " lost*: ฿{}\n*Max belly won*: [฿{} \\({}\\)]({})\n*Max belly lost*: [฿{} \\({}\\)]({})\n*Most"
     " fought user*: {} \\({}x\\)"
+)
+FIGHT_LOG_ITEM_DETAIL_TEXT_REVENGED = "\n\n>This fight has been [revenged]({})"
+FIGHT_LOG_ITEM_DETAIL_TEXT_IN_RESPONSE = (
+    "\n\n>This fight was in revenge to a previous [attack]({})"
 )
 
 # Logs . Plunder

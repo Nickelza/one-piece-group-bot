@@ -754,6 +754,8 @@ FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment(
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment(
     "FIGHT_MIN_WIN_PROBABILITY_ROOKIE", default_value="1"
 )
+# For how much time after a fight attack is revenge allowed. Default: 24 hours
+FIGHT_REVENGE_DURATION_HOURS = Environment("FIGHT_REVENGE_DURATION_HOURS", default_value="24")
 # Fight and plunder scouting base price. Default: 10.000
 FIGHT_PLUNDER_SCOUT_BASE_PRICE = Environment(
     "FIGHT_PLUNDER_SCOUT_BASE_PRICE", default_value="10000"

@@ -3,11 +3,11 @@ from telegram.ext import ContextTypes
 
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.ReservedKeyboardKeys import FightPlunderReservedKeys
 from src.model.enums.ScoutType import ScoutType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.fight_plunder_service import (
     group_send_scout_request,
-    FightPlunderReservedKeys,
     fight_validate,
     fight_send_request,
     fight_confirm_request,

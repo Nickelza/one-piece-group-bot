@@ -2,10 +2,16 @@ import datetime
 
 from peewee import *
 
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
+from src.service.date_service import (
+    get_elapsed_hours,
+    get_remaining_duration,
+    get_datetime_in_future_hours,
+)
 
 
 class Fight(BaseModel):
@@ -32,6 +38,17 @@ class Fight(BaseModel):
     )
     message_id: int | IntegerField = IntegerField(null=True)
     belly: int | BigIntegerField = BigIntegerField(null=True)
+
+    in_revenge_to_fight = ForeignKeyField(
+        "self",
+        null=True,
+        backref="revenge_attack_fights",
+        on_delete="RESTRICT",
+        on_update="RESTRICT",
+    )
+
+    # Backref
+    revenge_attack_fights = None
 
     class Meta:
         db_table = "fight"
@@ -166,6 +183,51 @@ class Fight(BaseModel):
         """
 
         return GameStatus(self.status)
+
+    def get_revenge_fight(self) -> "Fight":
+        """
+        Get the revenge fight
+        :return: The revenge fight
+        """
+
+        return Fight.get_or_none(Fight.in_revenge_to_fight == self)
+
+    def can_revenge(self, user: User = None) -> bool:
+        """
+        Check if a fight can be revenged.
+        User can revenge a fight if they were attacked less than x time ago and have not
+        already revenged that fight
+        :param user: The user
+        :return: True if the user can revenge the fight, False otherwise
+        """
+
+        # User is challenger
+        if self.challenger == user:
+            return False
+
+        # Attack was more than x hours ago
+        if get_elapsed_hours(self.date) > Env.FIGHT_REVENGE_DURATION_HOURS.get_int():
+            return False
+
+        # Fight was in response to attack
+        if self.in_revenge_to_fight is not None:
+            return False
+
+        # This fight has already been revenged
+        if self.get_revenge_fight() is not None:
+            return False
+
+        return True
+
+    def get_revenge_remaining_duration(self) -> str:
+        """
+        Get the remaining duration for the revenge
+        :return: The remaining duration
+        """
+
+        return get_remaining_duration(
+            get_datetime_in_future_hours(Env.FIGHT_REVENGE_DURATION_HOURS.get_int(), self.date)
+        )
 
 
 Fight.create_table()

@@ -59,7 +59,7 @@ from src.utils.string_utils import get_belly_formatted
 
 def init() -> MySQLDatabase:
     """
-    Initializes the group chat chat manager
+    Initializes the group chat manager
     :return: Database connection
     :rtype: MySQLDatabase
     """
@@ -71,11 +71,9 @@ def init() -> MySQLDatabase:
 
 def end(db: MySQLDatabase) -> None:
     """
-    Ends the group chat chat manager
+    Ends the group chat manager
     :param db: Database connection
-    :type db: MySQLDatabase
     :return: None
-    :rtype: None
     """
     db.close()
 
@@ -159,6 +157,7 @@ async def manage_after_db(
     :return: None
     """
     # Recast necessary for match case to work, don't ask me why
+
     message_source: MessageSource = MessageSource(get_message_source(update))
 
     user = User()
@@ -190,12 +189,10 @@ async def manage_after_db(
                 return
 
             # User not a member of an authorized group
-            if message_source is MessageSource.PRIVATE:
-                for group_id in group_ids:
-                    if await user.is_chat_member(context, group_id):
-                        break
-                else:
-                    return
+            if message_source is MessageSource.PRIVATE and not await user.in_authorized_groups(
+                context
+            ):
+                return
 
         user.private_screen_previous_step = user.private_screen_step
         user.save()

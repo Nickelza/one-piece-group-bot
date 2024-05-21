@@ -706,6 +706,19 @@ async def full_media_send(
     )
 
     is_edit = edit_message_id is not None or edit_only_keyboard or edit_only_caption_and_keyboard
+
+    # If current media type to send is different form media of message being edited,
+    # then new message
+    if update is not None and saved_media is not None:
+        media_type_map = {
+            SavedMediaType.PHOTO: update.effective_message.photo,
+            SavedMediaType.VIDEO: update.effective_message.video,
+            SavedMediaType.ANIMATION: update.effective_message.animation,
+        }
+
+        if media_type_map[saved_media.type] is None or len(media_type_map[saved_media.type]) == 0:
+            new_message = True
+
     try:
         # New message
         if (new_message or update is None or update.callback_query is None) and not is_edit:
@@ -1296,7 +1309,7 @@ def get_back_button(
 async def delete_message(
     update: Update = None,
     context: ContextTypes.DEFAULT_TYPE = None,
-    chat_id: int = None,
+    chat_id: int | str = None,
     message_id: int = None,
     group_chat: GroupChat = None,
 ):
@@ -1321,6 +1334,8 @@ async def delete_message(
 
     try:
         if update is not None:
+            message_id = update.effective_message.message_id
+            chat_id = update.effective_chat.id
             await update.effective_message.delete()
         else:
             await context.bot.delete_message(chat_id, message_id)

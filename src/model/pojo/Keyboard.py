@@ -226,6 +226,15 @@ class Keyboard:
 
         return self.info.get(key)
 
+    def get_or_none(self, key: str):
+        """
+        Get a value from the keyboard info
+        :param key: The key
+        :return: The value
+        """
+
+        return self.info.get(key, None)
+
     def get_int(self, key: str):
         """
         Get an int value from the keyboard info

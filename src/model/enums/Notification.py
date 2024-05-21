@@ -22,6 +22,7 @@ from src.model.User import User
 from src.model.Warlord import Warlord
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
+from src.model.enums.Log import Log
 from src.model.enums.LogType import LogType
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys, LogTypeReservedKeys
 from src.model.enums.Screen import Screen
@@ -1394,13 +1395,25 @@ class FightAttackNotification(Notification):
             won_lost_text = phrases.TEXT_LOST
             won_lost_emoji = Emoji.LOSER
 
-        return self.text.format(
+        ot_text = self.text.format(
             won_lost_text,
-            self.fight.opponent.get_markdown_mention(),
+            self.fight.challenger.get_markdown_mention(),
             won_lost_emoji,
             won_lost_text,
             get_belly_formatted(self.fight.belly),
         )
+
+        # Fight can be revenged
+        if self.fight.can_revenge():
+            ot_text += phrases.FIGHT_ATTACK_CAN_REVENGE.format(
+                self.fight.get_revenge_remaining_duration()
+            )
+        else:  # Only occasion a fight can't be revenged is if it was in response to another fight
+            ot_text += phrases.FIGHT_ATTACK_CANNOT_REVENGE.format(
+                Log.get_deeplink_by_type(LogType.FIGHT, self.fight.in_revenge_to_fight.id)
+            )
+
+        return ot_text
 
 
 class PlunderAttackNotification(Notification):
@@ -1436,7 +1449,7 @@ class PlunderAttackNotification(Notification):
             text = phrases.PLUNDER_ATTACK_NOTIFICATION_LOST
 
         return text.format(
-            self.plunder.opponent.get_markdown_mention(), get_belly_formatted(self.plunder.belly)
+            self.plunder.challenger.get_markdown_mention(), get_belly_formatted(self.plunder.belly)
         )
 
 

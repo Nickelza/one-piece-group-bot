@@ -36,5 +36,9 @@ async def manage(
         log.set_object(inbound_keyboard.get_int(LogTypeReservedKeys.ITEM_ID))
 
         await full_message_send(
-            context, log.get_item_detail_text(), update=update, inbound_keyboard=inbound_keyboard
+            context,
+            log.get_item_detail_text(),
+            update=update,
+            inbound_keyboard=inbound_keyboard,
+            keyboard=log.get_keyboard(),
         )

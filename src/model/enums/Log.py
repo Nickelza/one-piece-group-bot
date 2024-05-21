@@ -28,13 +28,18 @@ from src.model.enums.LeaderboardRank import (
 from src.model.enums.ListPage import ListPage, EmojiLegend
 from src.model.enums.Location import get_first_new_world
 from src.model.enums.LogType import LogType
-from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys, LogTypeReservedKeys
+from src.model.enums.ReservedKeyboardKeys import (
+    ReservedKeyboardKeys,
+    LogTypeReservedKeys,
+    FightPlunderReservedKeys,
+)
 from src.model.enums.Screen import Screen
 from src.model.enums.income_tax.IncomeTaxBreakdown import IncomeTaxBreakdown
 from src.model.enums.income_tax.IncomeTaxContribution import IncomeTaxContribution
 from src.model.enums.income_tax.IncomeTaxDeduction import IncomeTaxDeduction
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.game.GameType import GameType
+from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import (
     default_datetime_format,
     convert_hours_to_duration,
@@ -182,6 +187,15 @@ class Log(ListPage):
 
         return True if self.user.is_admin else (User.is_admin == False)
 
+    def get_keyboard(self) -> list[list[Keyboard]]:
+        """
+        Get a custom keyboard for the log
+
+        :return: The keyboard
+        """
+
+        pass
+
 
 # noinspection DuplicatedCode
 # Same as plunder
@@ -254,7 +268,7 @@ class FightLog(Log):
                 get_message_url(self.object.message_id, self.object.group_chat)
             )
 
-        return phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
+        ot_text = phrases.FIGHT_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text,
             self.opponent.get_markdown_mention(),
             date,
@@ -262,6 +276,24 @@ class FightLog(Log):
             outcome_text,
             go_to_message_text,
         )
+
+        # Fight still revengable
+        if self.object.can_revenge(self.user):
+            ot_text += phrases.FIGHT_ATTACK_CAN_REVENGE.format(
+                self.object.get_revenge_remaining_duration()
+            )
+        # Was in response to a previous attack
+        elif self.object.in_revenge_to_fight is not None:
+            ot_text += phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_IN_RESPONSE.format(
+                Log.get_deeplink_by_type(LogType.FIGHT, self.object.in_revenge_to_fight.id)
+            )
+        # Has been revenged
+        if revenge_fight := self.object.get_revenge_fight():
+            ot_text += phrases.FIGHT_LOG_ITEM_DETAIL_TEXT_REVENGED.format(
+                Log.get_deeplink_by_type(LogType.FIGHT, revenge_fight.id)
+            )
+
+        return ot_text
 
     def get_stats_text(self) -> str:
         total_fights = self.get_total_items_count()
@@ -315,6 +347,23 @@ class FightLog(Log):
                 status=GameStatus.LOST,
             ),
         ]
+
+    def get_keyboard(self) -> list[list[Keyboard]]:
+        # Return the revenge button
+        if not self.object.can_revenge(self.user):
+            return []
+
+        return [[
+            Keyboard(
+                phrases.PVT_KEY_FIGHT_REVENGE,
+                screen=Screen.PVT_FIGHT,
+                info={
+                    ReservedKeyboardKeys.CONFIRM: 1,
+                    FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
+                    FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID: self.object.id,
+                },
+            )
+        ]]
 
 
 class DocQGameLog(Log):

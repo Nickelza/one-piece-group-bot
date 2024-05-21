@@ -1,5 +1,6 @@
 import datetime
 import random
+from zoneinfo import ZoneInfo
 
 import parsedatetime
 import pytz
@@ -213,7 +214,7 @@ def get_elapsed_seconds(start_datetime: datetime) -> int:
     return int((datetime.datetime.now() - start_datetime).total_seconds())
 
 
-def get_elapsed_hours(start_datetime: datetime) -> int:
+def get_elapsed_hours(start_datetime: datetime) -> float:
     """
     Get the elapsed time since the start_datetime
     :param start_datetime: The start datetime
@@ -568,7 +569,7 @@ def datetime_is_before(
         return True
 
     if tz is None:
-        tz = pytz.timezone(Env.TZ.get())
+        tz = ZoneInfo(Env.TZ.get())
 
     # Add timezone to datetime if it's not timezone aware
     if dt.tzinfo is None:

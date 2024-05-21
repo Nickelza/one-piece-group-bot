@@ -30,3 +30,14 @@ class LogTypeReservedKeys(StrEnum):
 
     TYPE = "a"
     ITEM_ID = "b"
+
+
+class FightPlunderReservedKeys(StrEnum):
+    """
+    The reserved keys for this screen
+    """
+
+    ITEM_ID = ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY
+    OPPONENT_ID = ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY
+    USED_OPPONENTS_IDS = "c"
+    IN_REVENGE_TO_FIGHT_ID = "d"
