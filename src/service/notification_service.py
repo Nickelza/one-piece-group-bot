@@ -5,6 +5,7 @@ from telegram import Update, Message
 from telegram.error import Forbidden
 from telegram.ext import ContextTypes
 
+import resources.Environment as Env
 import resources.phrases as phrases
 from src.chat.private.screens.screen_settings_notifications_type import (
     NotificationTypeReservedKeys,
@@ -71,49 +72,63 @@ async def send_notification_execute(
     if should_forward_message and update is None:
         raise ValueError("If should_forward_message is not None, update must be not None")
 
-    if is_enabled(user, notification):
-        # Create Keyboard for notification management
-        inline_keyboard: list[list[Keyboard]] = []
-        previous_screens = [
-            Screen.PVT_START,
-            Screen.PVT_SETTINGS,
-            Screen.PVT_SETTINGS_NOTIFICATIONS,
-            Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
-        ]
-        button_info = {
-            NotificationTypeReservedKeys.CATEGORY: notification.category,
-            NotificationTypeReservedKeys.TYPE: notification.type,
-        }
+    # Notification not enabled
+    if not is_enabled(user, notification):
+        return
 
-        inline_keyboard.append(notification.get_go_to_item_keyboard())
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS,
-                info=button_info,
-                screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
-                previous_screen_list=previous_screens,
+    # Not in authorized users
+    if (
+        Env.LIMIT_TO_AUTHORIZED_USERS.get_bool()
+        and user.tg_user_id not in Env.AUTHORIZED_USERS.get_list()
+    ):
+        return
+
+    # Not in authorized groups
+    if Env.LIMIT_TO_AUTHORIZED_GROUPS.get_bool() and not await user.in_authorized_groups(context):
+        return
+
+    # Create Keyboard for notification management
+    inline_keyboard: list[list[Keyboard]] = []
+    previous_screens = [
+        Screen.PVT_START,
+        Screen.PVT_SETTINGS,
+        Screen.PVT_SETTINGS_NOTIFICATIONS,
+        Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
+    ]
+    button_info = {
+        NotificationTypeReservedKeys.CATEGORY: notification.category,
+        NotificationTypeReservedKeys.TYPE: notification.type,
+    }
+
+    inline_keyboard.append(notification.get_go_to_item_keyboard())
+    inline_keyboard.append([
+        Keyboard(
+            phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS,
+            info=button_info,
+            screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
+            previous_screen_list=previous_screens,
+        )
+    ])
+
+    try:
+        quote_message_id = None
+        if should_forward_message:
+            message: Message = await update.message.forward(
+                user.tg_user_id, disable_notification=True
             )
-        ])
+            quote_message_id = message.message_id
 
-        try:
-            quote_message_id = None
-            if should_forward_message:
-                message: Message = await update.message.forward(
-                    user.tg_user_id, disable_notification=True
-                )
-                quote_message_id = message.message_id
-
-            await full_message_send(
-                context,
-                notification.build(),
-                chat_id=user.tg_user_id,
-                keyboard=inline_keyboard,
-                disable_notification=notification.disable_notification,
-                reply_to_message_id=quote_message_id,
-                disable_web_page_preview=notification.disable_web_page_preview,
-            )
-        except Forbidden:  # User has blocked the bot
-            pass
+        await full_message_send(
+            context,
+            notification.build(),
+            chat_id=user.tg_user_id,
+            keyboard=inline_keyboard,
+            disable_notification=notification.disable_notification,
+            reply_to_message_id=quote_message_id,
+            disable_web_page_preview=notification.disable_web_page_preview,
+        )
+    except Forbidden:  # User has blocked the bot
+        pass
 
 
 def is_enabled(user: User, notification: Notification) -> bool:

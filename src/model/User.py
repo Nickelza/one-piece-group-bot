@@ -518,6 +518,20 @@ class User(BaseModel):
 
         return await user_is_chat_member(self, context=context, tg_group_id=chat_id)
 
+    async def in_authorized_groups(self, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Returns True if the user is in authorized groups
+        :param context: The context
+        :return: True if the user is in authorized groups
+        """
+
+        group_ids = Env.AUTHORIZED_GROUPS.get_list()
+        for group_id in group_ids:
+            if await self.is_chat_member(context, group_id):
+                return True
+
+        return False
+
     @staticmethod
     def get_context_data(
         context: ContextTypes.DEFAULT_TYPE,
