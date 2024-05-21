@@ -754,8 +754,10 @@ FIGHT_MIN_WIN_PROBABILITY_SUPERNOVA = Environment(
 FIGHT_MIN_WIN_PROBABILITY_ROOKIE = Environment(
     "FIGHT_MIN_WIN_PROBABILITY_ROOKIE", default_value="1"
 )
-# For how much time after a fight attack is revenge allowed. Default: 24 hours
-FIGHT_REVENGE_DURATION_HOURS = Environment("FIGHT_REVENGE_DURATION_HOURS", default_value="24")
+# For how much time after a fight or plunder attack is revenge allowed. Default: 24 hours
+FIGHT_PLUNDER_REVENGE_DURATION_HOURS = Environment(
+    "FIGHT_PLUNDER_REVENGE_DURATION_HOURS", default_value="24"
+)
 # Fight and plunder scouting base price. Default: 10.000
 FIGHT_PLUNDER_SCOUT_BASE_PRICE = Environment(
     "FIGHT_PLUNDER_SCOUT_BASE_PRICE", default_value="10000"
@@ -1039,8 +1041,8 @@ TAX_CREW_CHEST_PERCENTAGE = Environment("TAX_CREW_CHEST_PERCENTAGE", default_val
 
 # Minimum inactive hours to take into consideration for plunder. Default: 1
 PLUNDER_MIN_INACTIVE_HOURS = Environment("PLUNDER_MIN_INACTIVE_HOURS", default_value="1")
-# Maximum inactive hours to take into consideration for plunder. Default: 99
-PLUNDER_MAX_INACTIVE_HOURS = Environment("PLUNDER_MAX_INACTIVE_HOURS", default_value="99")
+# Maximum inactive hours to take into consideration for plunder. Default: 80
+PLUNDER_MAX_INACTIVE_HOURS = Environment("PLUNDER_MAX_INACTIVE_HOURS", default_value="80")
 # How long plunder immunity lasts in hours. Default: 24 hours
 PLUNDER_IMMUNITY_DURATION = Environment("PLUNDER_IMMUNITY_DURATION", default_value="24")
 # How long a user has to wait before plundering another user in hours. Default: 12 hours

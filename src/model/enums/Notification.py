@@ -1448,9 +1448,21 @@ class PlunderAttackNotification(Notification):
         else:
             text = phrases.PLUNDER_ATTACK_NOTIFICATION_LOST
 
-        return text.format(
+        ot_text = text.format(
             self.plunder.challenger.get_markdown_mention(), get_belly_formatted(self.plunder.belly)
         )
+
+        # Plunder can be revenged
+        if self.plunder.can_revenge():
+            ot_text += phrases.PLUNDER_ATTACK_CAN_REVENGE.format(
+                self.plunder.get_revenge_remaining_duration()
+            )
+        else:  # Only occasion a plunder can't be revenged is if it was in response to another plunder
+            ot_text += phrases.PLUNDER_ATTACK_CANNOT_REVENGE.format(
+                Log.get_deeplink_by_type(LogType.PLUNDER, self.plunder.in_revenge_to_plunder.id)
+            )
+
+        return ot_text
 
 
 NOTIFICATIONS = [
@@ -1522,6 +1534,13 @@ def get_notification_by_type(notification_type: NotificationType) -> Notificatio
     :return: The notification
     """
 
-    return next(
+    notification = next(
         notification for notification in NOTIFICATIONS if notification.type is notification_type
     )
+
+    # Need to re-initialize the class since it would be initialized only once on program start and it would keep in
+    # memory items
+    # noinspection PyArgumentList
+    notification.__init__()
+
+    return notification

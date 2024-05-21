@@ -389,6 +389,7 @@ PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL = "Pay all"
 PVT_KEY_STRING_FILTER_REMOVE = "Remove {} filter"
 PVT_KEY_SHOW_ALL = "Back to list"
 PVT_KEY_FIGHT_REVENGE = Emoji.FIGHT + " Revenge"
+PVT_KEY_PLUNDER_REVENGE = Emoji.PLUNDER + " Revenge"
 
 GRP_KEY_DEVIL_FRUIT_BUY = Emoji.MONEY + " Buy"
 GRP_KEY_SETTINGS_FEATURES = "Features"
@@ -1778,7 +1779,7 @@ WARLORD_REVOCATION_NOTIFICATION_KEY = "Warlord revocation"
 # Notification - Fight attack
 FIGHT_ATTACK_NOTIFICATION = "You {} in a fight against {}{}\n\nAmount {}: ฿*{}*"
 FIGHT_ATTACK_NOTIFICATION_DESCRIPTION = "If to be notified when you are fought by another player"
-FIGHT_ATTACK_NOTIFICATION_KEY = "Fight"
+FIGHT_ATTACK_NOTIFICATION_KEY = "Fight attack"
 FIGHT_ATTACK_CAN_REVENGE = (
     "\n\n>You can revenge this fight for the next *{}* from"
     " the fight log, regardless of any cooldown or opponent's immunity."
@@ -1800,8 +1801,14 @@ PLUNDER_ATTACK_NOTIFICATION_LOST = (
 PLUNDER_ATTACK_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are plundered by another player"
 )
-PLUNDER_ATTACK_NOTIFICATION_KEY = "Plunder"
-
+PLUNDER_ATTACK_NOTIFICATION_KEY = "Plunder attack"
+PLUNDER_ATTACK_CAN_REVENGE = (
+    "\n\n>You can revenge this plunder for the next *{}* from"
+    " the plunder log, regardless of any cooldown or opponent's immunity."
+)
+PLUNDER_ATTACK_CANNOT_REVENGE = (
+    "\n\n>Since this attack was in response to your previous [plunder]({}), it cannot be revenged"
+)
 
 # List
 LIST_OVERVIEW = (
@@ -1824,7 +1831,7 @@ NAVIGATION_LIMIT_REACHED = "Limit reached"
 LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT = "{} *{}*"
 LOG_ITEM_DETAIL_GENERIC_OUTCOME_TEXT_NO_BOLD = "{} {}"
 LOG_ITEM_DETAIL_OUTCOME_TEXT = "{}You *{}*"
-LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = "{}You *{}* ฿{}"
+LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT = "{}You {} ฿*{}*"
 LOG_ITEM_DETAIL_STATUS_TEXT = "*Status*: {}"
 LOG_ITEM_DETAIL_GO_TO_MESSAGE = (
     f"\n\n{Emoji.RIGHT_ARROW}[Go to message]("
@@ -1868,6 +1875,11 @@ PLUNDER_LOG_STATS_TEXT = (
     "\n*Max Impel Down sentence*: [{}]({})"
     "\n*Most plundered user*: {} \\({}x\\)"
 )
+PLUNDER_LOG_ITEM_DETAIL_TEXT_REVENGED = "\n\n>This plunder has been [revenged]({})"
+PLUNDER_LOG_ITEM_DETAIL_TEXT_IN_RESPONSE = (
+    "\n\n>This plunder was in revenge to a previous [attack]({})"
+)
+PLUNDER_LOG_ITEM_DETAIL_TEXT_WON_LOAN = "You gained ฿*{}* \\(it will be repaid by a [loan]({})\\)"
 
 # Logs - DocQ
 DOC_Q_GAME_LOG_KEY = "Doc Q"
@@ -2154,6 +2166,11 @@ PLUNDER_LOSE = (
     + "\n\nYou now have a [฿*{}* loan]({}) towards {}"
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"
+PLUNDER_REVENGE_TOO_LATE = (
+    "You can revenge a plunder only if less than {} has passed since the attack.\n\nPassed"
+    " time: {}"
+)
+PLUNDER_REVENGE_ALREADY_REVENGED = "This plunder has already been revenged\n\n[View revenge]({})"
 
 DAILY_REWARD_ALREADY_COLLECTED = "Your next reward will be available in *{}*{}"
 DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"

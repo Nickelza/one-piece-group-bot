@@ -360,7 +360,7 @@ class FightLog(Log):
                 info={
                     ReservedKeyboardKeys.CONFIRM: 1,
                     FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
-                    FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID: self.object.id,
+                    FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
                 },
             )
         ]]
@@ -1156,13 +1156,19 @@ class PlunderLog(Log):
         self.opponent: User = User()
         self.user_is_challenger: bool = False
         self.effective_status: GameStatus = GameStatus.ND
+        self.effective_belly = None
 
     def set_object(self, object_id: int) -> None:
-        self.object = Plunder.get(Plunder.id == object_id)
+        self.object: Plunder = Plunder.get(Plunder.id == object_id)
         self.user_is_challenger = self.object.challenger == self.user
         self.opponent = self.object.get_opponent(self.user)
         self.legend = self.get_emoji_legend()
         self.effective_status = self.legend.get_game_status()
+
+        if self.object.get_status() is GameStatus.LOST:
+            self.effective_belly = self.object.get_loan().repay_amount
+        else:
+            self.effective_belly = self.object.belly
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Plunder]:
         return (
@@ -1180,7 +1186,7 @@ class PlunderLog(Log):
         return phrases.PLUNDER_LOG_ITEM_TEXT.format(
             self.legend.get_formatted(),
             self.opponent.get_markdown_mention(),
-            get_belly_formatted(self.object.belly),
+            get_belly_formatted(self.effective_belly),
         )
 
     def get_item_detail_text(self) -> str:
@@ -1190,21 +1196,32 @@ class PlunderLog(Log):
         date = default_datetime_format(self.object.date, self.user)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
-            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
-                self.legend.get_formatted(),
-                (
-                    phrases.TEXT_STOLE
-                    if GameStatus(self.legend.status) is GameStatus.WON
-                    else phrases.TEXT_OWE.format(self.object.get_loan().get_deeplink())
-                ),
-                get_belly_formatted(self.object.belly),
-            )
+            if not self.user_is_challenger and self.effective_status is GameStatus.WON:
+                loan = self.object.get_loan()
+                outcome_text = phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT_WON_LOAN.format(
+                    get_belly_formatted(self.effective_belly), loan.get_deeplink()
+                )
+            else:
+                if self.user_is_challenger:
+                    inner_text = (
+                        phrases.TEXT_STOLE
+                        if self.effective_status is GameStatus.WON
+                        else phrases.TEXT_OWE.format(self.object.get_loan().get_deeplink())
+                    )
+                else:
+                    inner_text = phrases.TEXT_LOST
+
+                outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
+                    self.legend.get_formatted(),
+                    inner_text,
+                    get_belly_formatted(self.object.belly),
+                )
         else:
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
                 GAME_STATUS_DESCRIPTIONS[self.effective_status]
             )
 
-        if self.effective_status is GameStatus.LOST:
+        if self.effective_status is GameStatus.LOST and self.user_is_challenger:
             outcome_text += phrases.PLUNDER_LOG_ITEM_DETAIL_SENTENCE_DURATION.format(
                 convert_hours_to_duration(self.object.sentence_duration, show_full=True)
             )
@@ -1215,7 +1232,7 @@ class PlunderLog(Log):
                 get_message_url(self.object.message_id, self.object.group_chat)
             )
 
-        return phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT.format(
+        ot_text = phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text,
             self.opponent.get_markdown_mention(),
             date,
@@ -1223,6 +1240,24 @@ class PlunderLog(Log):
             outcome_text,
             go_to_message_text,
         )
+
+        # Plunder still revengable
+        if self.object.can_revenge(self.user):
+            ot_text += phrases.PLUNDER_ATTACK_CAN_REVENGE.format(
+                self.object.get_revenge_remaining_duration()
+            )
+        # Was in response to a previous attack
+        elif self.object.in_revenge_to_plunder is not None:
+            ot_text += phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT_IN_RESPONSE.format(
+                Log.get_deeplink_by_type(LogType.PLUNDER, self.object.in_revenge_to_plunder.id)
+            )
+        # Has been revenged
+        if revenge_plunder := self.object.get_revenge_plunder():
+            ot_text += phrases.PLUNDER_LOG_ITEM_DETAIL_TEXT_REVENGED.format(
+                Log.get_deeplink_by_type(LogType.PLUNDER, revenge_plunder.id)
+            )
+
+        return ot_text
 
     def get_stats_text(self) -> str:
         total_plunders = self.get_total_items_count()
@@ -1280,6 +1315,23 @@ class PlunderLog(Log):
             ),
         ]
 
+    def get_keyboard(self) -> list[list[Keyboard]]:
+        # Return the revenge button
+        if not self.object.can_revenge(self.user):
+            return []
+
+        return [[
+            Keyboard(
+                phrases.PVT_KEY_PLUNDER_REVENGE,
+                screen=Screen.PVT_PLUNDER,
+                info={
+                    ReservedKeyboardKeys.CONFIRM: 1,
+                    FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
+                    FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
+                },
+            )
+        ]]
+
 
 LOGS = [
     FightLog(),
@@ -1303,4 +1355,11 @@ def get_log_by_type(log_type: LogType) -> Log:
     :return: The notification
     """
 
-    return next(log for log in LOGS if log.type is log_type)
+    log: Log = next(log for log in LOGS if log.type is log_type)
+
+    # Need to re-initialize the class since it would be initialized only once on program start and it would keep in
+    # memory items like filters each user
+    # noinspection PyArgumentList
+    log.__init__()
+
+    return log

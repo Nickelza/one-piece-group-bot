@@ -206,7 +206,7 @@ class Fight(BaseModel):
             return False
 
         # Attack was more than x hours ago
-        if get_elapsed_hours(self.date) > Env.FIGHT_REVENGE_DURATION_HOURS.get_int():
+        if get_elapsed_hours(self.date) > Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int():
             return False
 
         # Fight was in response to attack
@@ -226,7 +226,9 @@ class Fight(BaseModel):
         """
 
         return get_remaining_duration(
-            get_datetime_in_future_hours(Env.FIGHT_REVENGE_DURATION_HOURS.get_int(), self.date)
+            get_datetime_in_future_hours(
+                Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int(), self.date
+            )
         )
 
 

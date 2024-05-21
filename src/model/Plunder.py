@@ -2,12 +2,18 @@ import datetime
 
 from peewee import *
 
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.BountyLoan import BountyLoan
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.BountyLoanSource import BountyLoanSource
 from src.model.enums.GameStatus import GameStatus
+from src.service.date_service import (
+    get_elapsed_hours,
+    get_remaining_duration,
+    get_datetime_in_future_hours,
+)
 
 
 class Plunder(BaseModel):
@@ -35,6 +41,17 @@ class Plunder(BaseModel):
     message_id: int | IntegerField = IntegerField(null=True)
     belly: int | BigIntegerField = BigIntegerField(null=True)
     sentence_duration = IntegerField(null=True)
+
+    in_revenge_to_plunder = ForeignKeyField(
+        "self",
+        null=True,
+        backref="revenge_attack_plunders",
+        on_delete="RESTRICT",
+        on_update="RESTRICT",
+    )
+
+    # Backref
+    revenge_attack_plunders = None
 
     class Meta:
         db_table = "plunder"
@@ -198,6 +215,53 @@ class Plunder(BaseModel):
 
         return BountyLoan.get(
             BountyLoan.source == BountyLoanSource.PLUNDER, BountyLoan.external_id == self.id
+        )
+
+    def get_revenge_plunder(self) -> "Plunder":
+        """
+        Get the revenge plunder
+        :return: The revenge plunder
+        """
+
+        return Plunder.get_or_none(Plunder.in_revenge_to_plunder == self)
+
+    def can_revenge(self, user: User = None) -> bool:
+        """
+        Check if a plunder can be revenged.
+        User can revenge a plunder if they were attacked less than x time ago and have not
+        already revenged that plunder
+        :param user: The user
+        :return: True if the user can revenge the plunder, False otherwise
+        """
+
+        # User is challenger
+        if self.challenger == user:
+            return False
+
+        # Attack was more than x hours ago
+        if get_elapsed_hours(self.date) > Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int():
+            return False
+
+        # Plunder was in response to attack
+        if self.in_revenge_to_plunder is not None:
+            return False
+
+        # This plunder has already been revenged
+        if self.get_revenge_plunder() is not None:
+            return False
+
+        return True
+
+    def get_revenge_remaining_duration(self) -> str:
+        """
+        Get the remaining duration for the revenge
+        :return: The remaining duration
+        """
+
+        return get_remaining_duration(
+            get_datetime_in_future_hours(
+                Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int(), self.date
+            )
         )
 
 

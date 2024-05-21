@@ -1,6 +1,6 @@
 import datetime
 import random
-from math import ceil, floor
+from math import ceil
 
 from peewee import fn
 from telegram import Update, Message
@@ -567,13 +567,13 @@ async def fight_validate(
         raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     # Revenge fight validation
-    if attack_fight_id := keyboard.get_or_none(FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID):
+    if attack_fight_id := keyboard.get_or_none(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID):
         attack_fight: Fight = Fight.get_by_id(attack_fight_id)
 
         # Attack was more than x hours ago
-        fight_revenge_hours: int = Env.FIGHT_REVENGE_DURATION_HOURS.get_int()
+        fight_revenge_hours: int = Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int()
         if get_elapsed_hours(attack_fight.date) > fight_revenge_hours:
-            ot_text = phrases.FIGHT_REVENGE_TOO_LATE.format(
+            ot_text = phrases.PLUNDER_REVENGE_TOO_LATE.format(
                 convert_hours_to_duration(fight_revenge_hours),
                 get_elapsed_duration(attack_fight.date),
             )
@@ -584,7 +584,7 @@ async def fight_validate(
 
         # Fight already revenged
         if attack_fight.get_revenge_fight() is not None:
-            ot_text = phrases.FIGHT_REVENGE_ALREADY_REVENGED.format(
+            ot_text = phrases.PLUNDER_REVENGE_ALREADY_REVENGED.format(
                 Log.get_deeplink_by_type(LogType.FIGHT, attack_fight.id)
             )
             await full_message_or_media_send_or_edit(
@@ -736,7 +736,7 @@ async def fight_send_request(
     ]
 
     if group_chat is None and not keyboard.has_key(
-        FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID
+        FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID
     ):
         # Add new scout button
         inline_keyboard.append([
@@ -766,6 +766,7 @@ async def fight_send_request(
     fight.save()
 
 
+# noinspection DuplicatedCode
 async def fight_confirm_request(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
@@ -788,7 +789,7 @@ async def fight_confirm_request(
     # Duplicated by fight
     fight: Fight = Fight.get(Fight.id == inbound_keyboard.info[FightPlunderReservedKeys.ITEM_ID])
 
-    is_revenge = inbound_keyboard.has_key(FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID)
+    is_revenge = inbound_keyboard.has_key(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID)
 
     # User clicked on retreat button
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
@@ -822,7 +823,7 @@ async def fight_confirm_request(
 
     if is_revenge:
         fight.in_revenge_to_fight = Fight.get_by_id(
-            inbound_keyboard.get_int(FightPlunderReservedKeys.IN_REVENGE_TO_FIGHT_ID)
+            inbound_keyboard.get_int(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID)
         )
 
     if get_random_win(win_probability):  # Challenger won
@@ -943,7 +944,7 @@ def plunder_get_odds(
      [6] - Sentence duration in hours
     """
     # Probability of winning - How many hours the opponent has been inactive
-    win_probability = floor(get_elapsed_hours(opponent.last_system_interaction_date))
+    win_probability = ceil(get_elapsed_hours(opponent.last_system_interaction_date))
     # Cap value
     win_probability = min(
         max(win_probability, Env.PLUNDER_MIN_INACTIVE_HOURS.get_int()),
@@ -1004,6 +1005,39 @@ async def plunder_validate(
 
     now = datetime.datetime.now()
 
+    # Wrong status
+    if plunder is not None and plunder.get_status() is not GameStatus.IN_PROGRESS:
+        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
+
+    # Revenge plunder validation
+    if attack_plunder_id := keyboard.get_or_none(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID):
+        attack_plunder: Plunder = Plunder.get_by_id(attack_plunder_id)
+
+        # Attack was more than x hours ago
+        plunder_revenge_hours: int = Env.FIGHT_PLUNDER_REVENGE_DURATION_HOURS.get_int()
+        if get_elapsed_hours(attack_plunder.date) > plunder_revenge_hours:
+            ot_text = phrases.PLUNDER_REVENGE_TOO_LATE.format(
+                convert_hours_to_duration(plunder_revenge_hours),
+                get_elapsed_duration(attack_plunder.date),
+            )
+            await full_message_or_media_send_or_edit(
+                context, ot_text, update, add_delete_button=True
+            )
+            return False
+
+        # Plunder already revenged
+        if attack_plunder.get_revenge_plunder() is not None:
+            ot_text = phrases.PLUNDER_REVENGE_ALREADY_REVENGED.format(
+                Log.get_deeplink_by_type(LogType.PLUNDER, attack_plunder.id)
+            )
+            await full_message_or_media_send_or_edit(
+                context, ot_text, update, add_delete_button=True
+            )
+            return False
+
+        # No more validation required
+        return True
+
     # User is in plunder cooldown
     if user.plunder_cooldown_end_date is not None and user.plunder_cooldown_end_date > now:
         # Get remaining time
@@ -1024,10 +1058,6 @@ async def plunder_validate(
         ).format(get_belly_formatted(scout_fee), user.get_bounty_formatted())
         await full_message_or_media_send_or_edit(context, ot_text, update, add_delete_button=True)
         return False
-
-    # Wrong status
-    if plunder is not None and plunder.get_status() is not GameStatus.IN_PROGRESS:
-        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
 
     # Opponent not yet available
     if not is_group and not keyboard.has_key(FightPlunderReservedKeys.OPPONENT_ID):
@@ -1087,12 +1117,12 @@ async def plunder_send_request(
         await add_or_remove_bounty(user, get_scout_fee(user, True, ScoutType.PLUNDER), add=False)
         user.plunder_scout_count += 1
 
-        # Delete all previous pending plunders
-        previous_plunders: list[Plunder] = Plunder.select().where(
-            (Plunder.challenger == user) & (Plunder.status == GameStatus.IN_PROGRESS)
-        )
-        for previous_plunder in previous_plunders:
-            await delete_item_in_chat(context, previous_plunder, group_chat)
+    # Delete all previous pending plunders
+    previous_plunders: list[Plunder] = Plunder.select().where(
+        (Plunder.challenger == user) & (Plunder.status == GameStatus.IN_PROGRESS)
+    )
+    for previous_plunder in previous_plunders:
+        await delete_item_in_chat(context, previous_plunder, group_chat, chat_id=user.tg_user_id)
 
     # Get opponent
     opponent: User = get_opponent(update, keyboard)
@@ -1142,8 +1172,9 @@ async def plunder_send_request(
         )
     ]
 
-    if group_chat is None:
-        # Add new scout button
+    if group_chat is None and not keyboard.has_key(
+        FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID
+    ):  # Add new scout button
         inline_keyboard.append([
             Keyboard(
                 phrases.KEYBOARD_OPTION_NEW_SCOUT,
@@ -1165,14 +1196,13 @@ async def plunder_send_request(
         update=update,
         caption=caption,
         keyboard=inline_keyboard,
-        add_delete_button=True,
-        delete_button_text=phrases.KEYBOARD_OPTION_CANCEL,
     )
 
     plunder.message_id = message.message_id
     plunder.save()
 
 
+# noinspection DuplicatedCode
 async def plunder_confirm_request(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
@@ -1193,9 +1223,11 @@ async def plunder_confirm_request(
     # Get plunder
     # noinspection DuplicatedCode
     # Duplicated by fight
-    plunder: Plunder = Plunder.get_or_none(
+    plunder: Plunder = Plunder.get(
         Plunder.id == inbound_keyboard.info[FightPlunderReservedKeys.ITEM_ID]
     )
+
+    is_revenge = inbound_keyboard.has_key(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID)
 
     # User clicked on retreat button
     if not inbound_keyboard.info[ReservedKeyboardKeys.CONFIRM]:
@@ -1207,7 +1239,11 @@ async def plunder_confirm_request(
             )
             return await delete_item_in_chat(context, plunder, group_chat)
 
-        # In private chat, back to scouting
+        # In private chat from revenge, delete message
+        if is_revenge:
+            return await delete_message(update=update)
+
+        # Back to scouting
         opponent: User = plunder.opponent
         plunder.delete_instance()
         return await private_send_scout_request(
@@ -1231,6 +1267,12 @@ async def plunder_confirm_request(
 
     plunder.belly = win_amount
     plunder.sentence_duration = sentence
+
+    if is_revenge:
+        plunder.in_revenge_to_plunder = Plunder.get_by_id(
+            inbound_keyboard.get_int(FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID)
+        )
+
     if get_random_win(win_probability):  # Challenger won
         plunder.status = GameStatus.WON
         # Add bounty to challenger
@@ -1292,42 +1334,45 @@ async def plunder_confirm_request(
 
         saved_media_name: SavedMediaName = SavedMediaName.PLUNDER_FAIL
 
-    # Add plunder immunity to opponent
-    opponent.plunder_immunity_end_date = get_ability_adjusted_datetime(
-        opponent,
-        DevilFruitAbilityType.PLUNDER_IMMUNITY_DURATION,
-        Env.PLUNDER_IMMUNITY_DURATION.get_int(),
-    )
-    # Remove plunder immunity from user
-    user.plunder_immunity_end_date = None
+    if not is_revenge:
+        # Add plunder immunity to opponent
+        opponent.plunder_immunity_end_date = get_ability_adjusted_datetime(
+            opponent,
+            DevilFruitAbilityType.PLUNDER_IMMUNITY_DURATION,
+            Env.PLUNDER_IMMUNITY_DURATION.get_int(),
+        )
+        # Remove plunder immunity from user
+        user.plunder_immunity_end_date = None
 
-    # Add plunder cooldown to user
-    user.plunder_cooldown_end_date = get_ability_adjusted_datetime(
-        user,
-        DevilFruitAbilityType.PLUNDER_COOLDOWN_DURATION,
-        Env.PLUNDER_COOLDOWN_DURATION.get_int(),
-    )
-    # Remove plunder cooldown from opponent
-    opponent.plunder_cooldown_end_date = None
+        # Add plunder cooldown to user
+        user.plunder_cooldown_end_date = get_ability_adjusted_datetime(
+            user,
+            DevilFruitAbilityType.PLUNDER_COOLDOWN_DURATION,
+            Env.PLUNDER_COOLDOWN_DURATION.get_int(),
+        )
+        # Remove plunder cooldown from opponent
+        opponent.plunder_cooldown_end_date = None
 
     inline_keyboard: list[list[Keyboard]] = []
     delete_button_text = None
     if group_chat is None:
         delete_button_text = phrases.KEYBOARD_OPTION_CLOSE
-        caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
-            get_belly_formatted(get_scout_fee(user, False, ScoutType.PLUNDER))
-        )
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                screen=Screen.PVT_PLUNDER,
-                inbound_info=inbound_keyboard.info,
-                exclude_key_from_inbound_info=[
-                    FightPlunderReservedKeys.ITEM_ID,
-                    FightPlunderReservedKeys.OPPONENT_ID,
-                ],
+
+        if not is_revenge:
+            caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
+                get_belly_formatted(get_scout_fee(user, False, ScoutType.PLUNDER))
             )
-        ])
+            inline_keyboard.append([
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                    screen=Screen.PVT_PLUNDER,
+                    inbound_info=inbound_keyboard.info,
+                    exclude_key_from_inbound_info=[
+                        FightPlunderReservedKeys.ITEM_ID,
+                        FightPlunderReservedKeys.OPPONENT_ID,
+                    ],
+                )
+            ])
 
     # Send message
     await full_media_send(
