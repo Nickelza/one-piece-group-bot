@@ -463,6 +463,7 @@ def find_random_opponent(
             & (User.bounty > 1000)
             & (User.id.not_in(exclude_user_ids))
             & (User.id != player.id)
+            & (User.is_active == True)
         )
         .order_by(*order_by_condition)
         .limit(10)
