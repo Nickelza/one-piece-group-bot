@@ -39,8 +39,8 @@ async def manage(
     if member.is_arrested_temporary():
         inline_keyboard.append([
             Keyboard(
-                phrases.PVT_KEY_CREW_MEMBER_POST_BAIL,
-                screen=Screen.PVT_CREW_MEMBER_DETAIL_POST_BAIL,
+                phrases.KEY_POST_BAIL,
+                screen=Screen.PVT_POST_BAIL,
                 info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
                 inbound_info=inbound_keyboard.info,
             )

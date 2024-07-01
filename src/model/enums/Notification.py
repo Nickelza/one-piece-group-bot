@@ -138,6 +138,8 @@ class Notification:
         item_info: dict = None,
         go_to_item_button_text: str = None,
         item_previous_screens: list[Screen] = None,
+        item_button_is_deeplink: bool = False,
+        keyboard: list[list[Keyboard]] = None,
     ):
         """
         Constructor
@@ -152,6 +154,9 @@ class Notification:
         :param item_screen: The screen of the item that is related to this notification
         :param item_info: The info of the item that is related to this notification
         :param go_to_item_button_text: The text for the button to go to the item
+        :param item_previous_screens: The previous screens of the item
+        :param item_button_is_deeplink: True if the item button is a deeplink
+        :param keyboard: The keyboard
         """
 
         self.category = category
@@ -165,6 +170,8 @@ class Notification:
         self.item_info = item_info
         self.to_to_item_button_text = go_to_item_button_text
         self.item_previous_screens = item_previous_screens if item_previous_screens else []
+        self.item_button_is_deeplink = item_button_is_deeplink
+        self.keyboard = keyboard if keyboard else []
 
     def build(self):
         """Builds the notification."""
@@ -183,8 +190,14 @@ class Notification:
                 screen=self.item_screen,
                 info=self.item_info,
                 previous_screen_list=self.item_previous_screens,
+                from_deeplink=self.item_button_is_deeplink,
             )
         ]
+
+    def get_keyboard(self) -> list[list[Keyboard]]:
+        """Gets the keyboard."""
+
+        return self.keyboard + [self.get_go_to_item_keyboard()]
 
 
 class CrewLeaveNotification(Notification):
@@ -367,6 +380,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
         release_date_time: datetime = None,
         bounty_action: ImpelDownBountyAction = None,
         reason: str = None,
+        impel_down_log: ImpelDownLog = None,
     ):
         """
         Constructor
@@ -375,12 +389,16 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
         :param release_date_time: The release date time
         :param bounty_action: The bounty action
         :param reason: The reason
+        :param impel_down_log: The impel down log
         """
+
+        from src.service.impel_down_service import get_post_bail_deeplink_button
 
         self.sentence_type = sentence_type
         self.release_date_time = release_date_time
         self.bounty_action = bounty_action
         self.reason = reason
+        self.impel_down_log = impel_down_log
 
         super().__init__(
             NotificationCategory.IMPEL_DOWN,
@@ -388,6 +406,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
             phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION,
             phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION,
             phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_KEY,
+            keyboard=[[get_post_bail_deeplink_button(impel_down_log)]],
         )
 
     def build(self) -> str:
@@ -405,7 +424,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
 
         # Sentence type
         if self.sentence_type is not ImpelDownSentenceType.NONE:
-            restriction_text += phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION
+            restriction_text += phrases.IMPEL_DOWN_RESTRICTIONS
 
             duration_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION.format(
                 get_remaining_duration(self.release_date_time)
@@ -414,7 +433,7 @@ class ImpelDownNotificationRestrictionPlaced(Notification):
             )
 
             if self.sentence_type is ImpelDownSentenceType.TEMPORARY:
-                bail_text = phrases.IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL
+                bail_text = phrases.IMPEL_DOWN_RESTRICTION_BAIL_GUIDE
 
         return self.text.format(
             escape_valid_markdown_chars(self.reason), restriction_text, duration_text, bail_text
@@ -1538,7 +1557,7 @@ def get_notification_by_type(notification_type: NotificationType) -> Notificatio
         notification for notification in NOTIFICATIONS if notification.type is notification_type
     )
 
-    # Need to re-initialize the class since it would be initialized only once on program start and it would keep in
+    # Need to re-initialize the class since it would be initialized only once on program start, and it would keep in
     # memory items
     # noinspection PyArgumentList
     notification.__init__()

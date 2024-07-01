@@ -7,9 +7,6 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
-from src.chat.private.screens.screen_settings_notifications_type import (
-    NotificationTypeReservedKeys,
-)
 from src.model.DisabledNotification import DisabledNotification
 from src.model.User import User
 from src.model.enums.Notification import Notification
@@ -69,6 +66,10 @@ async def send_notification_execute(
     :return: None
     """
 
+    from src.chat.private.screens.screen_settings_notifications_type import (
+        NotificationTypeReservedKeys,
+    )
+
     if should_forward_message and update is None:
         raise ValueError("If should_forward_message is not None, update must be not None")
 
@@ -100,7 +101,7 @@ async def send_notification_execute(
         NotificationTypeReservedKeys.TYPE: notification.type,
     }
 
-    inline_keyboard.append(notification.get_go_to_item_keyboard())
+    inline_keyboard += notification.get_keyboard()
     inline_keyboard.append([
         Keyboard(
             phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS,
@@ -134,7 +135,7 @@ async def send_notification_execute(
 def is_enabled(user: User, notification: Notification) -> bool:
     """
     Checks if a notification is enabled for a user
-    :param user: User
+    :param user: The user
     :param notification: Notification
     :return: True if the notification is enabled
     """

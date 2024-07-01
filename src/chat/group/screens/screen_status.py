@@ -25,6 +25,7 @@ from src.service.bounty_poster_service import get_bounty_poster
 from src.service.crew_service import get_crew_abilities_text, get_crew_name_with_deeplink
 from src.service.date_service import get_remaining_duration
 from src.service.devil_fruit_service import get_devil_fruit_abilities_text
+from src.service.impel_down_service import get_post_bail_deeplink_button
 from src.service.income_tax_service import user_has_complete_tax_deduction
 from src.service.leaderboard_service import get_current_leaderboard_user, get_highest_active_rank
 from src.service.message_service import (
@@ -64,6 +65,7 @@ async def manage(
         in_reply_to_message = False
 
     can_delete_users: list[User] = []
+    inline_keyboard: list[list[Keyboard]] = []
 
     # If used in reply to a message, get the user from the message
     if in_reply_to_message:
@@ -186,6 +188,17 @@ async def manage(
             else:
                 remaining_time = phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
             message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
+
+            message_text += phrases.SHOW_USER_STATUS_RESTRICTIONS.format(
+                phrases.IMPEL_DOWN_RESTRICTIONS
+            )
+            if not user.impel_down_is_permanent:
+                message_text += phrases.IMPEL_DOWN_RESTRICTION_BAIL_GUIDE
+
+                inline_keyboard.append(
+                    [get_post_bail_deeplink_button(target_user.get_current_impel_down_log())]
+                )
+
         if not target_user.is_arrested():
             # Add fight immunity if active
             if (
@@ -311,6 +324,7 @@ async def manage(
             add_delete_button=(inbound_keyboard is None),
             authorized_users=can_delete_users,
             inbound_keyboard=inbound_keyboard,
+            keyboard=inline_keyboard,
         )
 
 

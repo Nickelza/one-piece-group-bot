@@ -60,6 +60,7 @@ SHOW_USER_STATUS_IMPEL_DOWN = "Impel Down"
 SHOW_USER_STATUS_PENDING_BOUNTY = "\nPending bounty: ฿*{}*"
 SHOW_USER_STATUS_REMAINING_SENTENCE = "\nRemaining sentence: {}"
 SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN = "Permanent"
+SHOW_USER_STATUS_RESTRICTIONS = f"\n\n{Emoji.LOG_NEGATIVE}*Restrictions*{{}}"
 SHOW_USER_STATUS_FIGHT_IMMUNITY = "\nFight immunity: {}"
 SHOW_USER_STATUS_FIGHT_COOLDOWN = "\nFight cooldown: {}"
 SHOW_USER_STATUS_PLUNDER_IMMUNITY = "\nPlunder immunity: {}"
@@ -191,6 +192,7 @@ TEXT_YOU = "You"
 TEXT_STOLE = "stole"
 TEXT_OWE = "[owe]({})"
 TEXT_NEVER = "Never"
+TEXT_YOURSELF = "yourself"
 
 TEXT_DAY = "day"
 TEXT_DAYS = "days"
@@ -330,7 +332,7 @@ PVT_KEY_CREW_MEMBER_REMOVE = "Expel"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE = "Promote to First Mate"
 PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE = "Demote from First Mate"
 PVT_KEY_CREW_MEMBER_CAPTAIN_PROMOTE = "Promote to Captain"
-PVT_KEY_CREW_MEMBER_POST_BAIL = "Post bail"
+KEY_POST_BAIL = "Post bail"
 PVT_KEY_CREW_ABILITY = "Abilities"
 PVT_KEY_CREW_ABILITY_ACTIVATE = "Activate"
 PVT_KEY_CREW_ABILITY_RANDOM = Emoji.DICE + " Random"
@@ -627,7 +629,7 @@ PREDICTION_CAN_WITHDRAW_BETS_DESCRIPTION = (
 PREDICTION_IS_PUBLIC = "\n{} Public"
 PREDICTION_IS_PUBLIC_DESCRIPTION = (
     "\n_\\(Anyone in your groups can find this prediction.\nIf disabled, only those who you share"
-    " the prediction with can view it.\nYour fellow Crew members will always be able to find"
+    " the prediction with can view it.\nYour fellow Crewmates will always be able to find"
     " it._\\)"
 )
 PREDICTION_BET_INVALID_FORMAT = (
@@ -761,7 +763,7 @@ PREDICTION_DELETE_CONFIRMATION = (
 PREDICTION_OPEN_CONFIRMATION = (
     "Are you sure you want to open this prediction? You will not be able to change the question or"
     " options after this.\n\nIf the prediction is public, anyone in your groups will be able to"
-    " find it.\nYour fellow Crew members will always be able to find it."
+    " find it.\nYour Crewmates will always be able to find it."
 )
 PREDICTION_CREATE_SUCCESS = "Prediction created successfully"
 PREDICTION_DELETE_SUCCESS = "Prediction deleted successfully"
@@ -932,7 +934,7 @@ CREW_MODIFY = (
     "\n_{}_"
     "\n\nAuto-accept Davy Back Fight challenges \\(only if duration is at least "
     f"{Env.DAVY_BACK_FIGHT_DEFAULT_DURATION.get()} hours\\)."
-    "\nIf active, you can choose which Crew members will be chosen by default to participate, in "
+    "\nIf active, you can choose which Crewmates will be chosen by default to participate, in "
     "case you are not able to manually select them before the Challenge starts"
     "\n_{}_"
     "\n\n What would you like to modify?"
@@ -1064,14 +1066,13 @@ CREW_DEMOTE_FROM_FIRST_MATE_CONFIRMATION = (
     " member to First Mate until the next weekly leaderboard in {}"
 )
 CREW_DEMOTE_FROM_FIRST_MATE_SUCCESS = "{} has been demoted from First Mate"
-CREW_POST_BAIL_MEMBER_NOT_ARRESTED_TEMPORARY = "The member does not have a temporary sentence"
-CREW_POST_BAIL_NOT_ENOUGH_BOUNTY = "You need ฿{} to post bail.\n\nCurrent bounty: ฿{}"
-CREW_POST_BAIL_CANNOT_POST_BAIL_FOR_SELF = "You cannot post bail for yourself"
-CREW_POST_BAIL_CONFIRMATION_REQUEST = (
+POST_BAIL_MEMBER_NOT_ARRESTED_TEMPORARY = "The user does not have a temporary sentence"
+POST_BAIL_NOT_ENOUGH_BOUNTY = "You need ฿{} to post bail.\n\nCurrent bounty: ฿{}"
+POST_BAIL_CONFIRMATION_REQUEST = (
     "Are you sure you want to post bail for {}?"
     "\nFor each remaining minute in the sentence, "
-    f"you will be charged *฿{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}*"
-    "\n\nTotal bail: *฿{}*"
+    f"you will be charged ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}*"
+    "\n\nTotal bail: ฿*{}*"
 )
 CREW_POST_BAIL_SUCCESS = "Bail posted successfully"
 
@@ -1195,7 +1196,7 @@ CREW_DAVY_BACK_FIGHT_REQUEST_ERROR_OPPONENT_NOT_ALLOWING = (
 )
 CREW_DAVY_BACK_FIGHT_PARTICIPANTS_RULES_RECAP = (
     ">Every net bounty gained from challenges, fights and plunders will be considered towards the"
-    " Crew's total gain.\n>- Bounty gained from same Crew members are not considered\n>- Bounty"
+    " Crew's total gain.\n>- Bounty gained from your Crewmates are not considered\n>- Bounty"
     " gained from non-players of the opponents Crew are valued half\n>- Half of any new Crew chest"
     " contribution will frozen\n>- The players from the winner Crew will receive the frozen chest"
     " contribution from the opponent Crew, proportionally to their contribution"
@@ -1449,7 +1450,7 @@ CREW_MEMBER_REMOVE_NOTIFICATION = "You have been expelled from the Crew"
 CREW_MEMBER_REMOVE_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are expelled from the Crew."
 )
-CREW_MEMBER_REMOVE_NOTIFICATION_KEY = "Crew member expelled"
+CREW_MEMBER_REMOVE_NOTIFICATION_KEY = "Crewmate expelled"
 # Notification - Crew Disband
 CREW_DISBAND_NOTIFICATION = "Your Crew has been disbanded"
 CREW_DISBAND_NOTIFICATION_DESCRIPTION = "If to be notified when your Crew is disbanded."
@@ -1609,17 +1610,19 @@ IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION = (
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_HALVED = "\n- Bounty halved"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_BOUNTY_ERASED = "\n- Bounty erased"
-IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_WITH_DURATION = (
-    "\n- You can't acquire any new bounty\n- You can't appear in the leaderboard\n- You can't"
-    " challenge other users or play games\n- You can't bet in polls"
+IMPEL_DOWN_RESTRICTIONS = (
+    "\n• You can't acquire any new bounty"
+    "\n• You can't appear in the leaderboard"
+    "\n• You can't challenge other users or play games"
+    "\n• You can't bet in polls"
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION = "\n\n*Duration*: {}"
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_PERMANENT = "Permanent"
-IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL = (
-    "\n\nA Crew member can post bail for you, at a cost of"
-    f" ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}* for every minute left in your sentence"
+IMPEL_DOWN_RESTRICTION_BAIL_GUIDE = (
+    "\n\nYou or a Crewmate can post bail, at a cost of"
+    f" ฿*{Env.IMPEL_DOWN_BAIL_PER_MINUTE.get_belly()}* for every minute left in your sentence."
     f" \n\\(`{PVT_KEY_CREW}`-\\>`{PVT_KEY_CREW_MEMBERS}`-\\>"
-    f"Select-\\>`{PVT_KEY_CREW_MEMBER_POST_BAIL}`\\)"
+    f"Select-\\>`{KEY_POST_BAIL}`\\)"
 )
 IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DESCRIPTION = (
     "If to be notified when you are restricted"
@@ -1635,7 +1638,7 @@ IMPEL_DOWN_RESTRICTION_REMOVED_NOTIFICATION_KEY = "Restriction removed"
 IMPEL_DOWN_BAIL_POSTED_NOTIFICATION = (
     "{} has paid *฿{}* to free you from Impel Down \\({} was left in your sentence\\)"
 )
-IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_DESCRIPTION = "If to be notified when bail is posted"
+IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_DESCRIPTION = "If to be notified when bail is posted for you"
 IMPEL_DOWN_BAIL_POSTED_NOTIFICATION_KEY = "Bail posted"
 
 # Notification - Prediction result
@@ -2167,7 +2170,7 @@ PLUNDER_WIN = (
 PLUNDER_LOSE = (
     "{} have been caught trying to rob {} and they have handed you over to the Marines."
     "\nYou will be jailed in Impel Down for *{}*, better luck next time!"
-    + IMPEL_DOWN_RESTRICTION_PLACED_NOTIFICATION_DURATION_BAIL
+    + IMPEL_DOWN_RESTRICTION_BAIL_GUIDE
     + "\n\nYou now have a [฿*{}* loan]({}) towards {}"
 )
 PLUNDER_LOSE_SENTENCE_REASON = "Failed plunder against {}"

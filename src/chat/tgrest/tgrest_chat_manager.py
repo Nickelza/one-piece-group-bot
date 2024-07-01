@@ -7,6 +7,7 @@ from src.chat.tgrest.screens.screen_prediction import manage as manage_screen_pr
 from src.chat.tgrest.screens.screen_send_private_message import (
     manage as manage_screen_send_private_message,
 )
+from src.model.ImpelDownLog import ImpelDownLog
 from src.model.enums.Notification import (
     ImpelDownNotificationRestrictionPlaced,
     DevilFruitAwardedNotification,
@@ -78,6 +79,7 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         tg_rest_impel_down_notification.release_date_time,
                         tg_rest_impel_down_notification.bounty_action,
                         tg_rest_impel_down_notification.reason,
+                        ImpelDownLog.get_by_id(tg_rest_impel_down_notification.log_id),
                     )
 
                 await send_notification(

@@ -21,6 +21,7 @@ class TgRestImpelDownNotification(TgRest):
         release_date_time: str,
         bounty_action: ImpelDownBountyAction,
         reason: str,
+        log_id: int,
     ):
         """
         Constructor
@@ -30,6 +31,7 @@ class TgRestImpelDownNotification(TgRest):
         :param release_date_time: The release date time
         :param bounty_action: The bounty action
         :param reason: The reason
+        :param log_id: The log id
         """
 
         super().__init__(bot_id, object_type)
@@ -43,6 +45,7 @@ class TgRestImpelDownNotification(TgRest):
         )
         self.bounty_action: ImpelDownBountyAction = ImpelDownBountyAction(bounty_action)
         self.reason: str = reason
+        self.log_id: int = log_id
 
     def restriction_removed(self) -> bool:
         """

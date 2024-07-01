@@ -66,9 +66,6 @@ from src.chat.private.screens.screen_crew_member_detail_first_mate_demote import
 from src.chat.private.screens.screen_crew_member_detail_first_mate_promote import (
     manage as manage_screen_crew_member_detail_first_mate_promote,
 )
-from src.chat.private.screens.screen_crew_member_detail_post_bail import (
-    manage as manage_screen_crew_member_detail_post_bail,
-)
 from src.chat.private.screens.screen_crew_member_detail_remove import (
     manage as manage_screen_crew_member_detail_remove,
 )
@@ -120,6 +117,9 @@ from src.chat.private.screens.screen_logs_type_detail import (
 )
 from src.chat.private.screens.screen_logs_type_stats import manage as manage_screen_logs_type_stats
 from src.chat.private.screens.screen_plunder import manage as manage_screen_plunder
+from src.chat.private.screens.screen_post_bail import (
+    manage as manage_screen_post_bail,
+)
 from src.chat.private.screens.screen_prediction import manage as manage_screen_prediction
 from src.chat.private.screens.screen_prediction_create import (
     manage as manage_screen_prediction_create,
@@ -355,10 +355,8 @@ async def dispatch_screens(
                     update, context, inbound_keyboard, user
                 )
 
-            case Screen.PVT_CREW_MEMBER_DETAIL_POST_BAIL:  # Crew Member Post Bail
-                await manage_screen_crew_member_detail_post_bail(
-                    update, context, inbound_keyboard, user
-                )
+            case Screen.PVT_POST_BAIL:  # Crew Member Post Bail
+                await manage_screen_post_bail(update, context, inbound_keyboard, user)
 
             case Screen.PVT_CREW_SEARCH:  # Crew Search
                 await manage_screen_crew_search(update, context, inbound_keyboard, user)

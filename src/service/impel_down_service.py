@@ -3,15 +3,19 @@ from datetime import datetime
 from peewee import Update
 from telegram.ext import ContextTypes
 
+from resources import phrases
 from src.model.ImpelDownLog import ImpelDownLog
 from src.model.User import User
 from src.model.enums.Notification import (
     ImpelDownNotificationRestrictionPlaced,
     ImpelDownBailPostedNotification,
 )
+from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
+from src.model.enums.Screen import Screen
 from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.enums.impel_down.ImpelDownSource import ImpelDownSource
+from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.notification_service import send_notification
 
@@ -68,7 +72,7 @@ async def add_sentence(
 
     if should_send_notification:
         notification = ImpelDownNotificationRestrictionPlaced(
-            sentence_type, release_date, bounty_action, reason
+            sentence_type, release_date, bounty_action, reason, impel_down_log
         )
         await send_notification(context, user, notification)
 
@@ -105,10 +109,32 @@ async def post_bail(
     impel_down_log.bail_amount = bail
     impel_down_log.bail_date = datetime.now()
 
-    # Send notification to the prisoner
-    await send_notification(
-        context, prisoner, ImpelDownBailPostedNotification(impel_down_log), update=update
-    )
+    # Send notification to the prisoner if they did not pay
+    if prisoner != payer:
+        await send_notification(
+            context, prisoner, ImpelDownBailPostedNotification(impel_down_log), update=update
+        )
 
     prisoner.save()
     impel_down_log.save()
+
+
+def get_post_bail_deeplink_button(impel_down_log: ImpelDownLog) -> Keyboard | None:
+    """
+    Get the post bail deeplink
+    :param impel_down_log: The impel down log
+    :return: The deeplink
+    """
+
+    if impel_down_log is None:
+        return None
+
+    if impel_down_log.sentence_type != ImpelDownSentenceType.TEMPORARY:
+        return None
+
+    return Keyboard(
+        text=phrases.KEY_POST_BAIL,
+        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: impel_down_log.user.id},
+        screen=Screen.PVT_POST_BAIL,
+        is_deeplink=True,
+    )
