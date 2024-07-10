@@ -124,10 +124,12 @@ class Shambles:
         # Save the coordinates of the word in the grid
         word_coordinates = []
         for i in range(word_len):
-            word_coordinates.append((
-                start_x + i * (direction == "horizontal") + i * (direction == "diagonal"),
-                start_y + i * (direction == "vertical") + i * (direction == "diagonal"),
-            ))
+            word_coordinates.append(
+                (
+                    start_x + i * (direction == "horizontal") + i * (direction == "diagonal"),
+                    start_y + i * (direction == "vertical") + i * (direction == "diagonal"),
+                )
+            )
 
         self.grid = grid
         self.word_coordinates = word_coordinates
@@ -167,7 +169,7 @@ class Shambles:
                         y_pos = y * cell_height + cell_height / 2
 
                         # Get the width and height of the letter
-                        letter_width, letter_height = font.getsize(letter)
+                        letter_width, letter_height = font.getlength(letter), font_size
 
                         # Calculate the position of the letter on the image
                         x_pos -= letter_width / 2
