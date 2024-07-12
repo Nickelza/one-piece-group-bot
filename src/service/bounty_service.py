@@ -121,11 +121,13 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
     # Delete all contributions that are not valid
-    CrewMemberChestContribution.delete().where((
-        CrewMemberChestContribution.id.not_in(
-            [contribution.id for contribution in valid_contributions]
+    CrewMemberChestContribution.delete().where(
+        (
+            CrewMemberChestContribution.id.not_in(
+                [contribution.id for contribution in valid_contributions]
+            )
         )
-    )).execute()
+    ).execute()
 
     # Reset level
     Crew.reset_level()
@@ -245,8 +247,8 @@ async def add_or_remove_bounty(
         if amount <= 0 and not should_update_location:
             return
 
-        # User is arrested, no bounty is gained
-        if user.is_arrested():
+        # User is permanently arrested, no bounty is gained
+        if user.is_arrested_permanent():
             return
 
         if amount > 0:

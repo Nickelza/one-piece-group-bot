@@ -150,6 +150,14 @@ class User(BaseModel):
 
         return self.is_arrested() and not self.impel_down_is_permanent
 
+    def is_arrested_permanent(self):
+        """
+        Returns True if the user is permanently arrested
+        :return: True if the user is permanently arrested
+        """
+
+        return self.is_arrested() and self.impel_down_is_permanent
+
     @staticmethod
     def get_is_not_arrested_statement_condition() -> Any:
         """
