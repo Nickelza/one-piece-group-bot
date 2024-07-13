@@ -14,22 +14,22 @@ class DocQGame(BaseModel):
     Doc Q Game class
     """
 
-    id = PrimaryKeyField()
-    user = ForeignKeyField(
+    id: int | PrimaryKeyField = PrimaryKeyField()
+    user: User | ForeignKeyField = ForeignKeyField(
         User, backref="doc_q_game_users", on_delete="CASCADE", on_update="CASCADE"
     )
-    date = DateTimeField(default=datetime.datetime.now)
-    status = SmallIntegerField(default=GameStatus.IN_PROGRESS)
-    correct_choices_index = CharField(max_length=99, null=True)
-    group_chat = ForeignKeyField(
+    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
+    status: GameStatus | SmallIntegerField = SmallIntegerField(default=GameStatus.IN_PROGRESS)
+    correct_choices_index: str | CharField = CharField(max_length=99, null=True)
+    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
         GroupChat,
         null=True,
         backref="doc_q_game_groups_chats",
         on_delete="RESTRICT",
         on_update="CASCADE",
     )
-    message_id = IntegerField(null=True)
-    belly = BigIntegerField(null=True)
+    message_id: int | IntegerField = IntegerField(null=True)
+    belly: int | BigIntegerField = BigIntegerField(null=True)
 
     class Meta:
         db_table = "doc_q_game"

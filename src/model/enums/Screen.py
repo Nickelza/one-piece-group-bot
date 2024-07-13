@@ -99,6 +99,7 @@ class Screen(StrEnum):
     PVT_CREW_MEMBER_DETAIL_CAPTAIN_PROMOTE = "P65"
     PVT_FIGHT = "P66"
     PVT_PLUNDER = "P67"
+    PVT_DOC_Q_GAME = "P68"
 
 
 ONLY_BY_CAPTAIN = [

@@ -106,6 +106,7 @@ from src.chat.private.screens.screen_devil_fruit_shop_detail_buy import (
 from src.chat.private.screens.screen_devil_fruit_shop_detail_remove import (
     manage as manage_screen_devil_fruit_shop_detail_remove,
 )
+from src.chat.private.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.private.screens.screen_fight import manage as manage_screen_fight
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
@@ -556,6 +557,9 @@ async def dispatch_screens(
             case Screen.PVT_PLUNDER:
                 await manage_screen_plunder(update, context, user, inbound_keyboard)
 
+            case Screen.PVT_DOC_Q_GAME:
+                await manage_screen_doc_q_game(update, context, user, inbound_keyboard)
+
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:
                     raise PrivateChatException(PrivateChatError.UNRECOGNIZED_SCREEN)
@@ -601,14 +605,16 @@ async def send_system_update_message(
 
     # Add view button
     # Notifications
-    inline_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            phrases.KEY_VIEW,
-            url=get_message_url(
-                chat_id=system_update.chat_id, message_id=system_update.message_id
-            ),
-        )
-    ]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                phrases.KEY_VIEW,
+                url=get_message_url(
+                    chat_id=system_update.chat_id, message_id=system_update.message_id
+                ),
+            )
+        ]
+    ]
 
     system_update_user = SystemUpdateUser()
     system_update_user.system_update = system_update

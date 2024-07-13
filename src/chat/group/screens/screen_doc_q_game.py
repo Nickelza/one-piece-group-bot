@@ -18,7 +18,7 @@ from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
-from src.model.error.GroupChatError import GroupChatError, GroupChatException
+from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.date_service import get_remaining_duration
@@ -123,7 +123,7 @@ async def validate_play(
 
     # Wrong status
     if doc_q_game is not None and doc_q_game.get_status() is not GameStatus.IN_PROGRESS:
-        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
+        raise CommonChatException(phrases.ITEM_IN_WRONG_STATUS)
 
     for previous_game in previous_games:
         if previous_game != doc_q_game:
@@ -141,7 +141,10 @@ async def delete_game(context: ContextTypes.DEFAULT_TYPE, doc_q_game: DocQGame) 
     """
     # Try to delete message
     await delete_message(
-        context=context, group_chat=doc_q_game.group_chat, message_id=doc_q_game.message_id
+        context=context,
+        group_chat=doc_q_game.group_chat,
+        chat_id=(doc_q_game.user.tg_user_id if doc_q_game.group_chat is None else None),
+        message_id=doc_q_game.message_id,
     )
 
     # Delete game
@@ -159,6 +162,8 @@ async def play_request(
     :param group_chat: The group chat
     :return: None
     """
+    screen = Screen.GRP_DOC_Q_GAME if group_chat is not None else Screen.PVT_DOC_Q_GAME
+
     if await validate_play(update, context, user):
         doc_q_game = DocQGame()
         doc_q_game.user = user
@@ -199,7 +204,7 @@ async def play_request(
             if Env.DOC_Q_GAME_SHOW_CORRECT_OPTION.get_bool() and i in correct_choices_index:
                 option_emoji = Emoji.DOC_Q_GAME_CORRECT_OPTION
 
-            apples_keyboard.append(Keyboard(option_emoji, keyboard_data, Screen.GRP_DOC_Q_GAME))
+            apples_keyboard.append(Keyboard(option_emoji, keyboard_data, screen))
 
             # Add new keyboard line if needed
             if (i + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and i != 0:
@@ -222,13 +227,15 @@ async def play_request(
         )
 
         # Delete button, can't be replaced by add_delete_button because wagers have to be returned
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_CANCEL,
-                info={DocQReservedKeys.DOC_Q_ID: doc_q_game.id, DocQReservedKeys.CANCEL: True},
-                screen=Screen.GRP_DOC_Q_GAME,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_CANCEL,
+                    info={DocQReservedKeys.DOC_Q_ID: doc_q_game.id, DocQReservedKeys.CANCEL: True},
+                    screen=screen,
+                )
+            ]
+        )
 
         message: Message = await full_media_send(
             context,
@@ -259,7 +266,7 @@ async def keyboard_interaction(
     )
 
     if doc_q_game is None:
-        raise GroupChatException(GroupChatError.DOC_Q_GAME_NOT_FOUND)
+        raise CommonChatException(phrases.DOC_Q_GAME_NOT_FOUND)
 
     if await validate_play(update, context, user, doc_q_game):
         # User clicked on cancel button
@@ -340,7 +347,7 @@ async def manage(
     context: ContextTypes.DEFAULT_TYPE,
     user: User,
     keyboard: Keyboard,
-    group_chat: GroupChat,
+    group_chat: GroupChat = None,
 ) -> None:
     """
     Manage Doc Q Game screen

@@ -142,11 +142,20 @@ COMMANDS = []
 ND = None
 COMMANDS.append(ND)
 
+# PRIVATE
 PVT_START = Command(CommandName.START, Screen.PVT_START, allow_while_arrested=True)
 COMMANDS.append(PVT_START)
 
 PVT_USER_STATUS = Command(CommandName.STATUS, Screen.PVT_USER_STATUS, allow_while_arrested=True)
 COMMANDS.append(PVT_USER_STATUS)
+
+PVT_DOC_Q_GAME = Command(
+    CommandName.DOC_Q,
+    Screen.PVT_DOC_Q_GAME,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()),
+    feature=Feature.DOC_Q,
+)
+COMMANDS.append(PVT_DOC_Q_GAME)
 
 # Merge all lists with limitations
 limitations_list = set(
@@ -195,6 +204,7 @@ PVT_PREDICTION_CREATE = Command(
 )
 COMMANDS.append(PVT_PREDICTION_CREATE)
 
+# GROUP
 GRP_GAME_OPPONENT_CONFIRMATION = Command(
     CommandName.EMPTY,
     Screen.GRP_GAME_OPPONENT_CONFIRMATION,
