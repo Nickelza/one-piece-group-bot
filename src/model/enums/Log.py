@@ -353,17 +353,19 @@ class FightLog(Log):
         if not self.object.can_revenge(self.user):
             return []
 
-        return [[
-            Keyboard(
-                phrases.PVT_KEY_FIGHT_REVENGE,
-                screen=Screen.PVT_FIGHT,
-                info={
-                    ReservedKeyboardKeys.CONFIRM: 1,
-                    FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
-                    FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
-                },
-            )
-        ]]
+        return [
+            [
+                Keyboard(
+                    phrases.PVT_KEY_FIGHT_REVENGE,
+                    screen=Screen.PVT_FIGHT,
+                    info={
+                        ReservedKeyboardKeys.CONFIRM: 1,
+                        FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
+                        FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
+                    },
+                )
+            ]
+        ]
 
 
 class DocQGameLog(Log):
@@ -412,11 +414,17 @@ class DocQGameLog(Log):
             get_belly_formatted(self.object.belly),
         )
 
+        go_to_message_text = ""
+        if self.object.group_chat is not None:
+            go_to_message_text = phrases.LOG_ITEM_DETAIL_GO_TO_MESSAGE.format(
+                get_message_url(self.object.message_id, self.object.group_chat)
+            )
+
         return phrases.DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT.format(
             date,
             correct_apple,
             outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat),
+            go_to_message_text,
         )
 
     def get_stats_text(self) -> str:
@@ -1320,17 +1328,19 @@ class PlunderLog(Log):
         if not self.object.can_revenge(self.user):
             return []
 
-        return [[
-            Keyboard(
-                phrases.PVT_KEY_PLUNDER_REVENGE,
-                screen=Screen.PVT_PLUNDER,
-                info={
-                    ReservedKeyboardKeys.CONFIRM: 1,
-                    FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
-                    FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
-                },
-            )
-        ]]
+        return [
+            [
+                Keyboard(
+                    phrases.PVT_KEY_PLUNDER_REVENGE,
+                    screen=Screen.PVT_PLUNDER,
+                    info={
+                        ReservedKeyboardKeys.CONFIRM: 1,
+                        FightPlunderReservedKeys.OPPONENT_ID: self.object.challenger.id,
+                        FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID: self.object.id,
+                    },
+                )
+            ]
+        ]
 
 
 LOGS = [

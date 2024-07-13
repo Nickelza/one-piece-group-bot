@@ -1880,9 +1880,7 @@ PLUNDER_LOG_ITEM_DETAIL_TEXT_WON_LOAN = "You gained ฿*{}* \\(it will be repaid
 DOC_Q_GAME_LOG_KEY = "Doc Q"
 DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Doc Q Game"
 DOC_Q_GAME_LOG_ITEM_TEXT = "{} ฿{}"
-DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = (
-    f"*Date*: {{}}\n*Correct apple*: {{}}°\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
-)
+DOC_Q_GAME_LOG_ITEM_DETAIL_TEXT = "*Date*: {}\n*Correct apple*: {}°\n\n{}{}"
 DOC_Q_GAME_LOG_STATS_TEXT = (  # Logs - Game
     "*Total summons*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Belly won*: ฿{}\n*Belly"
     " lost*: ฿{}\n*Max belly won*: [฿{}]({})\n*Max belly lost*: [฿{}]({})\n"
