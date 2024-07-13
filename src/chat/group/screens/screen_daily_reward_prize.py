@@ -9,7 +9,7 @@ from src.model.enums.Screen import Screen
 from src.model.enums.daily_reward.DailyRewardPrizeSource import DailyRewardPrizeSource
 from src.model.enums.daily_reward.DailyRewardPrizeType import DailyRewardPrizeType
 from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
-from src.model.error.GroupChatError import GroupChatException, GroupChatError
+from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.devil_fruit_service import (
@@ -43,7 +43,7 @@ async def manage(
     )
 
     if reward.prize_type is not None:
-        raise GroupChatException(GroupChatError.ITEM_IN_WRONG_STATUS)
+        raise CommonChatException(phrases.ITEM_IN_WRONG_STATUS)
 
     prize_source: DailyRewardPrizeSource = DailyRewardPrizeSource(
         inbound_keyboard.get(ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY)
@@ -101,6 +101,11 @@ async def send_prize_request(
     )
 
     # Accept offer and random prize keyboard
+    screen = (
+        Screen.GRP_DAILY_REWARD_PRIZE
+        if reward.group_chat is not None
+        else Screen.PVT_DAILY_REWARD_PRIZE
+    )
     inline_keyboard: list[list[Keyboard]] = [
         [
             Keyboard(
@@ -109,7 +114,7 @@ async def send_prize_request(
                     ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: reward.id,
                     ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: DailyRewardPrizeSource.OFFER,
                 },
-                screen=Screen.GRP_DAILY_REWARD_PRIZE,
+                screen=screen,
             )
         ],
         [
@@ -119,7 +124,7 @@ async def send_prize_request(
                     ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: reward.id,
                     ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: DailyRewardPrizeSource.RANDOM,
                 },
-                screen=Screen.GRP_DAILY_REWARD_PRIZE,
+                screen=screen,
             )
         ],
     ]

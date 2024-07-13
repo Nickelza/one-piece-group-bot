@@ -174,6 +174,12 @@ PVT_PLUNDER = Command(
 )
 COMMANDS.append(PVT_PLUNDER)
 
+PVT_DAILY_REWARD = Command(
+    CommandName.DAILY_REWARD,
+    Screen.PVT_DAILY_REWARD,
+)
+COMMANDS.append(PVT_DAILY_REWARD)
+
 # Merge all lists with limitations
 limitations_list = set(
     DEPRECATED

@@ -81,6 +81,10 @@ from src.chat.private.screens.screen_crew_search_detail import (
 from src.chat.private.screens.screen_crew_search_detail_join import (
     manage as manage_screen_crew_search_detail_join,
 )
+from src.chat.private.screens.screen_daily_reward import manage as manage_screen_daily_reward
+from src.chat.private.screens.screen_daily_reward_prize import (
+    manage as manage_screen_daily_reward_prize,
+)
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import (
     manage as manage_screen_devil_fruit_detail,
@@ -559,6 +563,12 @@ async def dispatch_screens(
 
             case Screen.PVT_DOC_Q_GAME:
                 await manage_screen_doc_q_game(update, context, user, inbound_keyboard)
+
+            case Screen.PVT_DAILY_REWARD:
+                await manage_screen_daily_reward(update, context, user)
+
+            case Screen.PVT_DAILY_REWARD_PRIZE:
+                await manage_screen_daily_reward_prize(update, context, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

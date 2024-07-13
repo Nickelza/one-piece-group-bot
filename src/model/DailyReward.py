@@ -30,7 +30,9 @@ class DailyReward(BaseModel):
     prize_type: DailyRewardPrizeType | CharField = CharField(max_length=20, null=True)
     prize_value: str | CharField = CharField(max_length=50, null=True)
     prize_source: DailyRewardPrizeSource | CharField = CharField(max_length=20, null=True)
-    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(GroupChat, backref="daily_rewards")
+    group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
+        GroupChat, backref="daily_rewards", null=True
+    )
     message_id: int | IntegerField = IntegerField(null=True)
     message_id_prize: int | IntegerField = IntegerField(null=True)
 

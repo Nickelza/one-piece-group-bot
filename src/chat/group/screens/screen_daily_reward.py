@@ -32,7 +32,7 @@ async def manage(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     user: User,
-    group_chat: GroupChat,
+    group_chat: GroupChat = None,
 ) -> None:
     """
     Displays a user's status
