@@ -89,8 +89,7 @@ JOIN_SUPPORT_GROUP = f">For questions or suggestions, please join the {SUPPORT_G
 
 LEADERBOARD = (
     "*{}* Leaderboard for week *{}* of *{}*\n\n*Here are the top {} users with the most"
-    " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n"
-    + JOIN_SUPPORT_GROUP
+    " bounties*:{}{}{}{}\n\n{}_Next bounty reset on {} \\(in {}\\)_\n" + JOIN_SUPPORT_GROUP
 )
 LEADERBOARD_USER_ROW = "\n\n{}°: {}\n{} - ฿*{}*"
 LEADERBOARD_CREW_ROW = "\n\n{}°: {}\n*Captain*: {}"
@@ -127,9 +126,7 @@ DOC_Q_GAME_NOT_ENOUGH_BOUNTY = (
 DOC_Q_GAME_LIMIT_REACHED = "You have reached the limit of Doc Q games. You can play again in *{}*"
 DOC_Q_GAME_START = (
     "Hi {}, allow me to offer you an apple.\nIf you choose the right one, you will win ฿*{}*, else"
-    " you will lose ฿*{}*.\nChoose wisely!"
-    + "\n\n"
-    + GAME_WIN_LOSE_STATUS
+    " you will lose ฿*{}*.\nChoose wisely!" + "\n\n" + GAME_WIN_LOSE_STATUS
 )
 
 DOC_Q_GAME_NOT_FOUND = "Doc Q game not found"
@@ -142,9 +139,7 @@ DOC_Q_GAME_WIN = (
 DOC_Q_GAME_LOSE = (
     "Seems like today wasn't your lucky day {}...cough!...only the *{}°* apple wasn't rigged"
     " haha...\nDon't be so reckless or you won't survive long in these treacherous seas!\nLet's"
-    " go, Stronger...agh..!"
-    + "\n\n{}"
-    + GAME_LOSE_STATUS
+    " go, Stronger...agh..!" + "\n\n{}" + GAME_LOSE_STATUS
 )
 
 # Error messages
@@ -237,9 +232,7 @@ FIGHT_CONFIRMATION_OUTCOME_VICTORY = "victory"
 FIGHT_CONFIRMATION_OUTCOME_DEFEAT = "defeat"
 FIGHT_WIN = (
     "Just as I foresaw, {} won the fight against {}.\nI don't need the cards to tell me that your"
-    " strength is incredible..."
-    + "\n\n"
-    + GAME_WIN_STATUS
+    " strength is incredible..." + "\n\n" + GAME_WIN_STATUS
 )
 FIGHT_LOSE = (
     "Just as I foresaw, {} lost the fight against {}.\nLooks like your luck ran out..."
@@ -727,14 +720,12 @@ PREDICTION_CREATE_REQUEST_CUT_OFF_DATE = (
     "Send the cut off date of the prediction.\nAll bets placed after this time will be removed and"
     " refunded.\nThis action cannot be undone.\nThe time must be after the prediction was opened"
     " and before it was closed or any previously set cut off time\n\n*Opened time*: {}\n*Closed"
-    " time*: {}\n*Cut off time*: {}\n\n"
-    + DATETIME_EXAMPLES_NO_DURATION
+    " time*: {}\n*Cut off time*: {}\n\n" + DATETIME_EXAMPLES_NO_DURATION
 )
 PREDICTION_CREATE_INVALID_CUT_OFF_DATE = (
     "Invalid cut off date. Make sure to send a valid date and time after the prediction was opened"
     " and before it was closed or any previously set cut off time.\n\n*Opened time*: {}\n*Closed"
-    " time*: {}\n*Cut off time*: {}\n\n"
-    + DATETIME_EXAMPLES_NO_DURATION
+    " time*: {}\n*Cut off time*: {}\n\n" + DATETIME_EXAMPLES_NO_DURATION
 )
 PREDICTION_CUT_OFF_DATE_CONFIRMATION_REQUEST = (
     "Are you sure you want to set the cut off date to *{}*?\n{} bets with a total of ฿{} will be"
@@ -1094,8 +1085,7 @@ CREW_PROMOTE_TO_CAPTAIN_SUCCESS = "{} has been promoted to Captain"
 # Crew abilities
 CREW_ABILITIES = (
     "*Crew Abilities*\n\nAbilities mimic the effects of Devil Fruits and are extended to all"
-    " members of the Crew."
-    + "\nEach ability cost depends on the current Crew level and lasts for"
+    " members of the Crew." + "\nEach ability cost depends on the current Crew level and lasts for"
     f" {Env.CREW_ABILITY_DURATION_DAYS.get_int()} days."
     + "\n{}\n\nNext ability cost: ฿*{}*\nCrew chest: ฿{}"
 )
@@ -1235,8 +1225,7 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST = (
     "\n*Duration*\\(hours\\): {}"
     "\n*Penalty period*\\(days\\): {}"
     "\n\nYou have {} to accept the challenge"
-    "\n\n"
-    + CREW_DAVY_BACK_FIGHT_RULES_RECAP
+    "\n\n" + CREW_DAVY_BACK_FIGHT_RULES_RECAP
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_ACCEPTED = (
     "Davy Back Fight against {} accepted, it will start in"
@@ -1251,8 +1240,7 @@ CREW_DAVY_BACK_FIGHT_CAPTAIN_REQUEST_AUTO_ACCEPT = (
     f"\n\nThe challenge will start in {Env.DAVY_BACK_FIGHT_START_WAIT_TIME.get()} minutes."
     "\n\n_This challenge was automatically accepted, [click here]({}) to change this setting_"
     f"\n\nClick `{KEY_MANAGE}` to review and change the players"
-    "\n\n"
-    + CREW_DAVY_BACK_FIGHT_RULES_RECAP
+    "\n\n" + CREW_DAVY_BACK_FIGHT_RULES_RECAP
 )
 CREW_DAVY_BACK_FIGHT_CAPTAIN_REJECTED = "Davy Back Fight against {} rejected"
 CREW_DAVY_BACK_FIGHT_USER_NOT_MEMBER_OF_PARTICIPATING_CREW = (
@@ -1589,8 +1577,7 @@ DAVY_BACK_FIGHT_END_NOTIFICATION_LOST = (
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (
     f"It's your turn to play in {{}} against {{}}.\n\n[{Emoji.RIGHT_ARROW}Click here to view the"
-    f" game{Emoji.LEFT_ARROW}]"
-    + "({})"
+    f" game{Emoji.LEFT_ARROW}]" + "({})"
 )
 GAME_TURN_NOTIFICATION_DESCRIPTION = (
     "If to be notified when it is your turn to play in a game if no action is taken for"
@@ -1905,8 +1892,7 @@ GAME_LOG_KEY = "Challenges"
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Challenge"
 GAME_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
 GAME_LOG_ITEM_DETAIL_TEXT = (
-    "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*:"
-    f" ฿{{}}\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
+    "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*:" f" ฿{{}}\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
 )
 GAME_LOG_STATS_TEXT = (
     "*Total challenges*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Draws*: {}"
@@ -1985,9 +1971,11 @@ INCOME_TAX_EVENT_LOG_ITEM_DETAIL_TEXT_BREAKDOWN_ITEM = (
 )
 
 SILENCE_ACTIVE = (
-    "A soundproof field has been activated, only those who are granted permission can speak"
+    "A soundproof field has been activated, only those who are granted permission can speak."
+    f"\nUse {CommandName.SILENCE_END.get_formatted()} to allow everyone to speak again."
 )
 SILENCE_END = "The soundproof field has been cancelled, everyone can speak again"
+SILENCE_NOT_ACTIVE = "The soundproof field is not active"
 SPEAK = "{} has been granted permission to speak"
 
 # Devil Fruit

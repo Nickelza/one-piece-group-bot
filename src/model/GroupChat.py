@@ -29,8 +29,7 @@ class GroupChat(BaseModel):
     auto_delete_duration: int | IntegerField = IntegerField(null=True)  # In minutes
 
     # Backref
-    enabled_features = None
-    disabled_features = None
+    enabled_disabled_features = None
     enabled_features_pin = None
 
     class Meta:

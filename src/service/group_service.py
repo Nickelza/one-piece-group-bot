@@ -10,7 +10,7 @@ from src.model.BaseModel import BaseModel
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.GroupChatAutoDelete import GroupChatAutoDelete
-from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
+from src.model.GroupChatEnabledDisabledFeature import GroupChatEnabledDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.GroupChatFeaturePinMessage import GroupChatFeaturePinMessage
 from src.model.GroupUser import GroupUser
@@ -46,12 +46,15 @@ def feature_is_enabled(group_chat: GroupChat, feature: Feature) -> bool:
     :return: True if the feature is enabled, False otherwise
     """
 
+    group_chat_enabled_disabled_feature = GroupChatEnabledDisabledFeature.get_or_none(
+        (GroupChatEnabledDisabledFeature.group_chat == group_chat)
+        & (GroupChatEnabledDisabledFeature.feature == feature)
+    )
+
     return (
-        GroupChatDisabledFeature.get_or_none(
-            (GroupChatDisabledFeature.group_chat == group_chat)
-            & (GroupChatDisabledFeature.feature == feature)
-        )
-        is None
+        feature.is_enabled_by_default()
+        if group_chat_enabled_disabled_feature is None
+        else not feature.is_enabled_by_default()
     )
 
 
@@ -93,13 +96,28 @@ def get_group_chats_with_feature_enabled(
         excluded_group_chats = []
 
     # Would be better to use some join, couldn't get it to work though
-    group_chats_disabled_feature: list[GroupChatDisabledFeature] = (
-        GroupChatDisabledFeature.select().where(GroupChatDisabledFeature.feature == feature)
+    group_chats_enabled_disabled_feature: list[
+        GroupChatEnabledDisabledFeature
+    ] = GroupChatEnabledDisabledFeature.select().where(
+        GroupChatEnabledDisabledFeature.feature == feature
     )
 
-    group_chats_with_feature_disabled: list[GroupChat] = [
-        gcf.group_chat for gcf in group_chats_disabled_feature
-    ]
+    if feature.is_enabled_by_default():
+        group_chats_with_feature_disabled: list[GroupChat] = [
+            gcf.group_chat for gcf in group_chats_enabled_disabled_feature
+        ]
+    else:  # Find all group_chats that don't have a record
+        group_chats_with_feature_disabled: list[GroupChat] = [
+            gc
+            for gc in GroupChat.select().where(
+                (GroupChat.is_active == True)
+                & (
+                    GroupChat.id.not_in(
+                        [gcf.group_chat.id for gcf in group_chats_enabled_disabled_feature]
+                    )
+                )
+            )
+        ]
 
     return (
         GroupChat.select()

@@ -30,4 +30,5 @@ async def manage(
         saved_media_name=SavedMediaName.SILENCE,
         update=update,
         caption=phrases.SILENCE_ACTIVE,
+        add_delete_button=True,
     )

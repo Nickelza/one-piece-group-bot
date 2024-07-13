@@ -61,7 +61,7 @@ class Feature(IntEnum):
 
         :return: All the features that are restricted
         """
-        return [Feature.MESSAGE_FILTER, Feature.SILENCE]
+        return [Feature.MESSAGE_FILTER]
 
     @staticmethod
     def get_non_restricted() -> list["Feature"]:
@@ -100,6 +100,25 @@ class Feature(IntEnum):
         """
 
         return self in Feature.get_pinnable()
+
+    @staticmethod
+    def get_disabled_by_default() -> list["Feature"]:
+        """
+        Get all the features that are disabled by default
+
+        :return: All the features that are disabled by default
+        """
+
+        return [Feature.SILENCE]
+
+    def is_enabled_by_default(self) -> bool:
+        """
+        Checks if the feature is enabled by default
+
+        :return: True if the feature is enabled by default, False otherwise
+        """
+
+        return self not in Feature.get_disabled_by_default()
 
 
 FEATURE_DESCRIPTION_MAP = {

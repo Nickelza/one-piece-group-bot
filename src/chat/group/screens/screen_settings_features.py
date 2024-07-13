@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 import constants as c
 import resources.phrases as phrases
 from src.model.GroupChat import GroupChat
-from src.model.GroupChatDisabledFeature import GroupChatDisabledFeature
+from src.model.GroupChatEnabledDisabledFeature import GroupChatEnabledDisabledFeature
 from src.model.GroupChatEnabledFeaturePin import GroupChatEnabledFeaturePin
 from src.model.enums.Emoji import Emoji
 from src.model.enums.Feature import Feature
@@ -62,23 +62,31 @@ async def manage(
                     & (GroupChatEnabledFeaturePin.feature == feature)
                 ).execute()
         else:
-            if inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]:
-                #  Enable feature - Remove from disabled features
-                GroupChatDisabledFeature.delete().where(
-                    (GroupChatDisabledFeature.group_chat == group_chat)
-                    & (GroupChatDisabledFeature.feature == feature)
-                ).execute()
-            else:
-                # Disable feature - Add to disabled features
-                disabled_feature = GroupChatDisabledFeature()
-                disabled_feature.group_chat = group_chat
-                disabled_feature.feature = feature
-                disabled_feature.save()
+            # Record should be added to table if the feature is enabled by default and the toggle is false,
+            # or the feature is disabled by default and the toggle is true
+            add_record = (
+                feature.is_enabled_by_default()
+                and not inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]
+            ) or (
+                not feature.is_enabled_by_default()
+                and inbound_keyboard.info[ReservedKeyboardKeys.TOGGLE]
+            )
+
+            if add_record:
+                enabled_disabled_feature = GroupChatEnabledDisabledFeature()
+                enabled_disabled_feature.group_chat = group_chat
+                enabled_disabled_feature.feature = feature
+                enabled_disabled_feature.save()
 
                 # Delete the feature pin
                 GroupChatEnabledFeaturePin.delete().where(
                     (GroupChatEnabledFeaturePin.group_chat == group_chat)
                     & (GroupChatEnabledFeaturePin.feature == feature)
+                ).execute()
+            else:
+                GroupChatEnabledDisabledFeature.delete().where(
+                    (GroupChatEnabledDisabledFeature.group_chat == group_chat)
+                    & (GroupChatEnabledDisabledFeature.feature == feature)
                 ).execute()
 
         # Refresh backlinks
@@ -123,16 +131,22 @@ def get_features_keyboard(group_chat: GroupChat) -> list[list[Keyboard]]:
         features.remove(pinnable_feature)
         features.append(pinnable_feature)
 
-    # Get all disabled features, avoids multiple queries, Backref
-    disabled_features: list[Feature] = [
-        disabled_feature.feature for disabled_feature in group_chat.disabled_features
+    # Get all enabled/disabled features, avoids multiple queries, Backref
+    enabled_disabled_features: list[Feature] = [
+        enabled_disabled_feature.feature
+        for enabled_disabled_feature in group_chat.enabled_disabled_features
     ]
 
     keyboard: list[list[Keyboard]] = [[]]
     keyboard_row: list[Keyboard] = []
 
     for feature in features:
-        is_enabled_feature = feature not in disabled_features
+        is_enabled_feature = (
+            feature.is_enabled_by_default()
+            if feature not in enabled_disabled_features
+            else not feature.is_enabled_by_default()
+        )
+
         emoji = Emoji.ENABLED if is_enabled_feature else Emoji.DISABLED_EMPTY
         button_info: dict = {
             FeaturesReservedKeys.FEATURE: feature.value,
