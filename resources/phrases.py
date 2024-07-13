@@ -1114,6 +1114,10 @@ CREW_ABILITY_ACTIVATE_CHOOSE_CONFIRMATION_REQUEST = (
 CREW_ABILITY_ACTIVATE_SUCCESS = (
     "Ability activated successfully" + CREW_ABILITY_ACTIVATE_CHOOSE_RECAP
 )
+CREW_ABILITY_ALREADY_ACTIVATED = (
+    "This ability is already activated, please choose another one."
+    "\nIt can still be obtained randomly."
+)
 
 # Crew power-up
 CREW_POWERUP = (

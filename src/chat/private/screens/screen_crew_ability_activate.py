@@ -48,9 +48,14 @@ async def manage(
 
     allowed_ability_types = DevilFruitAbilityType.get_allowed_ability_types_from_random()
     inline_keyboard: list[list[Keyboard]] = []
+    crew_active_ability_types: list[DevilFruitAbilityType] = crew.get_active_abilities_types()
 
     screen = Screen.PVT_CREW_ABILITY_ACTIVATE_CONFIRM
     for ability_type in allowed_ability_types:
+        # Exclude already activated abilities
+        if ability_type in crew_active_ability_types:
+            continue
+
         info = {CrewAbilityActivateReservedKeys.ABILITY_TYPE: ability_type}
         inline_keyboard.append(
             [Keyboard(ability_type.get_description(), info=info, screen=screen)]

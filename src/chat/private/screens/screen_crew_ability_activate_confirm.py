@@ -59,9 +59,21 @@ async def manage(
     # Activate the ability
     ability_type = inbound_keyboard.get(CrewAbilityActivateReservedKeys.ABILITY_TYPE)
     if ability_type is not None:
+        crew_active_ability_types: list[DevilFruitAbilityType] = crew.get_active_abilities_types()
         ability_type = DevilFruitAbilityType(
             inbound_keyboard.get(CrewAbilityActivateReservedKeys.ABILITY_TYPE)
         )
+
+        # Make sure the ability is not already activated
+        if ability_type in crew_active_ability_types:
+            await full_message_send(
+                context,
+                phrases.CREW_ABILITY_ALREADY_ACTIVATED,
+                update=update,
+                inbound_keyboard=inbound_keyboard,
+            )
+            return
+
         ability_value = Env.CREW_ABILITY_DEFAULT_VALUE_PERCENTAGE.get_int()
         acquired_method = CrewAbilityAcquiredMethod.CHOSEN
     else:

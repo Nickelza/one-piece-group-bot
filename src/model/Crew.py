@@ -226,6 +226,16 @@ class Crew(BaseModel):
             CrewAbility.expiration_date > datetime.datetime.now()
         )
 
+    def get_active_abilities_types(self) -> list[DevilFruitAbilityType]:
+        """
+        Returns the crew active abilities types
+        :return: The crew active abilities types
+        """
+
+        return list(
+            set([crew_ability.get_ability_type() for crew_ability in self.get_active_abilities()])
+        )
+
     def get_active_ability(self, ability_type: DevilFruitAbilityType) -> list:
         """
         Returns the crew active ability of the given type
