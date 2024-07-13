@@ -162,6 +162,18 @@ PVT_SETTINGS = Command(
 )
 COMMANDS.append(PVT_SETTINGS)
 
+PVT_FIGHT = Command(
+    CommandName.FIGHT,
+    Screen.PVT_FIGHT,
+)
+COMMANDS.append(PVT_FIGHT)
+
+PVT_PLUNDER = Command(
+    CommandName.PLUNDER,
+    Screen.PVT_PLUNDER,
+)
+COMMANDS.append(PVT_PLUNDER)
+
 # Merge all lists with limitations
 limitations_list = set(
     DEPRECATED

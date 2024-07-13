@@ -32,14 +32,6 @@ async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Crew button
     outbound_keyboard.append([Keyboard(phrases.PVT_KEY_CREW, screen=Screen.PVT_CREW)])
 
-    # Fight button
-    outbound_keyboard.append([Keyboard(phrases.KEYBOARD_OPTION_FIGHT, screen=Screen.PVT_FIGHT)])
-
-    # Plunder button
-    outbound_keyboard.append(
-        [Keyboard(phrases.KEYBOARD_OPTION_PLUNDER, screen=Screen.PVT_PLUNDER)]
-    )
-
     # Devil Fruit button
     outbound_keyboard.append(
         [Keyboard(phrases.PVT_KEY_DEVIL_FRUIT, screen=Screen.PVT_DEVIL_FRUIT)]

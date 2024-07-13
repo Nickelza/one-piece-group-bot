@@ -243,18 +243,22 @@ async def private_send_scout_request(
         )
 
         # Next scout keyboard
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                screen=Screen.PVT_FIGHT if scout_type is ScoutType.FIGHT else Screen.PVT_PLUNDER,
-                inbound_info=inbound_keyboard.info,
-                info={FightPlunderReservedKeys.USED_OPPONENTS_IDS: used_opponent_ids},
-                exclude_key_from_inbound_info=[
-                    FightPlunderReservedKeys.ITEM_ID,
-                    FightPlunderReservedKeys.OPPONENT_ID,
-                ],
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                    screen=(
+                        Screen.PVT_FIGHT if scout_type is ScoutType.FIGHT else Screen.PVT_PLUNDER
+                    ),
+                    inbound_info=inbound_keyboard.info,
+                    info={FightPlunderReservedKeys.USED_OPPONENTS_IDS: used_opponent_ids},
+                    exclude_key_from_inbound_info=[
+                        FightPlunderReservedKeys.ITEM_ID,
+                        FightPlunderReservedKeys.OPPONENT_ID,
+                    ],
+                )
+            ]
+        )
 
     if is_new_scout and opponent is not None:
         caption = phrases.FIGHT_PLUNDER_SCOUT_SEARCH_USER_NEW + caption
@@ -305,6 +309,10 @@ async def private_manage(
     :param scout_type: The scout type
     :return: None
     """
+
+    # If no keyboard provided, simulate empty keyboard
+    if inbound_keyboard is None:
+        inbound_keyboard = Keyboard("")
 
     # First scout, no confirm in the keyboard and no opponent
     if not inbound_keyboard.has_key(ReservedKeyboardKeys.CONFIRM) and not inbound_keyboard.has_key(
@@ -552,6 +560,10 @@ async def fight_validate(
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
+    # No keyboard, simulate empty one
+    if keyboard is None:
+        keyboard = Keyboard("")
+
     # If not query callback
     fight: Fight | None = None
     if update.callback_query is not None and keyboard.has_key(FightPlunderReservedKeys.ITEM_ID):
@@ -740,16 +752,18 @@ async def fight_send_request(
         FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID
     ):
         # Add new scout button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                inbound_info=keyboard.info,
-                exclude_key_from_inbound_info=[
-                    FightPlunderReservedKeys.OPPONENT_ID,
-                ],
-                screen=Screen.PVT_FIGHT,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                    inbound_info=keyboard.info,
+                    exclude_key_from_inbound_info=[
+                        FightPlunderReservedKeys.OPPONENT_ID,
+                    ],
+                    screen=Screen.PVT_FIGHT,
+                )
+            ]
+        )
 
         caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
             get_belly_formatted(get_scout_fee(user, False, ScoutType.FIGHT))
@@ -902,17 +916,19 @@ async def fight_confirm_request(
             caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
                 get_belly_formatted(get_scout_fee(user, False, ScoutType.FIGHT))
             )
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                    screen=Screen.PVT_FIGHT,
-                    inbound_info=inbound_keyboard.info,
-                    exclude_key_from_inbound_info=[
-                        FightPlunderReservedKeys.ITEM_ID,
-                        FightPlunderReservedKeys.OPPONENT_ID,
-                    ],
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                        screen=Screen.PVT_FIGHT,
+                        inbound_info=inbound_keyboard.info,
+                        exclude_key_from_inbound_info=[
+                            FightPlunderReservedKeys.ITEM_ID,
+                            FightPlunderReservedKeys.OPPONENT_ID,
+                        ],
+                    )
+                ]
+            )
 
     # Send message
     await full_media_send(
@@ -994,6 +1010,9 @@ async def plunder_validate(
     :param keyboard: The keyboard object
     :return: True if the request is valid, False otherwise
     """
+    # No keyboard, simulate empty one
+    if keyboard is None:
+        keyboard = Keyboard("")
 
     # If not query callback
     plunder: Plunder | None = None
@@ -1176,16 +1195,18 @@ async def plunder_send_request(
     if group_chat is None and not keyboard.has_key(
         FightPlunderReservedKeys.IN_REVENGE_TO_ATTACK_ID
     ):  # Add new scout button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                inbound_info=keyboard.info,
-                exclude_key_from_inbound_info=[
-                    FightPlunderReservedKeys.OPPONENT_ID,
-                ],
-                screen=Screen.PVT_PLUNDER,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                    inbound_info=keyboard.info,
+                    exclude_key_from_inbound_info=[
+                        FightPlunderReservedKeys.OPPONENT_ID,
+                    ],
+                    screen=Screen.PVT_PLUNDER,
+                )
+            ]
+        )
 
         caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
             get_belly_formatted(get_scout_fee(user, False, ScoutType.PLUNDER))
@@ -1363,17 +1384,19 @@ async def plunder_confirm_request(
             caption += phrases.FIGHT_PLUNDER_SCOUT_NEXT_FEE.format(
                 get_belly_formatted(get_scout_fee(user, False, ScoutType.PLUNDER))
             )
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEYBOARD_OPTION_NEW_SCOUT,
-                    screen=Screen.PVT_PLUNDER,
-                    inbound_info=inbound_keyboard.info,
-                    exclude_key_from_inbound_info=[
-                        FightPlunderReservedKeys.ITEM_ID,
-                        FightPlunderReservedKeys.OPPONENT_ID,
-                    ],
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEYBOARD_OPTION_NEW_SCOUT,
+                        screen=Screen.PVT_PLUNDER,
+                        inbound_info=inbound_keyboard.info,
+                        exclude_key_from_inbound_info=[
+                            FightPlunderReservedKeys.ITEM_ID,
+                            FightPlunderReservedKeys.OPPONENT_ID,
+                        ],
+                    )
+                ]
+            )
 
     # Send message
     await full_media_send(
