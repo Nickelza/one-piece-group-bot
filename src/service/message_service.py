@@ -247,12 +247,14 @@ async def get_keyboard(
                 raise Exception("No authorized users provided for delete button")
 
             delete_button = get_delete_button(authorized_users, button_text=delete_button_text)
-            keyboard_list.append([
-                InlineKeyboardButton(
-                    delete_button.text,
-                    callback_data=delete_button.set_and_get_callback_data_in_context(context),
-                )
-            ])
+            keyboard_list.append(
+                [
+                    InlineKeyboardButton(
+                        delete_button.text,
+                        callback_data=delete_button.set_and_get_callback_data_in_context(context),
+                    )
+                ]
+            )
 
         if inbound_keyboard is not None and add_back_button:
             back_button = get_back_button(
@@ -262,12 +264,14 @@ async def get_keyboard(
                 user=user,
             )
             back_button.refresh_callback_data()
-            keyboard_list.append([
-                InlineKeyboardButton(
-                    back_button.text,
-                    callback_data=back_button.set_and_get_callback_data_in_context(context),
-                )
-            ])
+            keyboard_list.append(
+                [
+                    InlineKeyboardButton(
+                        back_button.text,
+                        callback_data=back_button.set_and_get_callback_data_in_context(context),
+                    )
+                ]
+            )
 
         keyboard_markup = InlineKeyboardMarkup(keyboard_list)
 
@@ -1312,6 +1316,7 @@ async def delete_message(
     chat_id: int | str = None,
     message_id: int = None,
     group_chat: GroupChat = None,
+    is_auto_delete: bool = False,
 ):
     """
     Delete a message with the best effort method
@@ -1320,6 +1325,7 @@ async def delete_message(
     :param chat_id: Chat id
     :param message_id: Message id
     :param group_chat: The group chat
+    :param is_auto_delete: True if the message is being auto deleted
     """
 
     if group_chat is not None:
@@ -1340,8 +1346,10 @@ async def delete_message(
         else:
             await context.bot.delete_message(chat_id, message_id)
     except TelegramError:
+        if is_auto_delete:  # No logging if auto deleted
+            return
+
         logging.error(f"Failed to delete message {message_id} in chat {chat_id}")
-        pass
 
 
 def get_message_source(update: Update) -> MessageSource:

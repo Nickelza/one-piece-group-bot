@@ -355,7 +355,10 @@ async def auto_delete_process(
     group_chat: GroupChat = auto_delete_item.group_chat
     try:
         await delete_message(
-            context=context, group_chat=group_chat, message_id=auto_delete_item.message_id
+            context=context,
+            group_chat=group_chat,
+            message_id=auto_delete_item.message_id,
+            is_auto_delete=True,
         )
     except TelegramError as te:
         save_group_chat_error(group_chat, str(te))
