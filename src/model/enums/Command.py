@@ -153,9 +153,14 @@ PVT_DOC_Q_GAME = Command(
     CommandName.DOC_Q,
     Screen.PVT_DOC_Q_GAME,
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_DOC_Q_GAME.get_int()),
-    feature=Feature.DOC_Q,
 )
 COMMANDS.append(PVT_DOC_Q_GAME)
+
+PVT_SETTINGS = Command(
+    CommandName.SETTINGS,
+    Screen.PVT_SETTINGS,
+)
+COMMANDS.append(PVT_SETTINGS)
 
 # Merge all lists with limitations
 limitations_list = set(
