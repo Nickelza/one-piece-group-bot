@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_devil_fruit_sell import validate_trade
+from src.chat.common.screens.screen_devil_fruit_sell import validate_trade
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.User import User

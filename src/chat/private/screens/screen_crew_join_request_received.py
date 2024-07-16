@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_crew_join import validate as validate_crew_join
+from src.chat.common.screens.screen_crew_join import validate as validate_crew_join
 from src.model.Crew import Crew
 from src.model.CrewJoinRequest import CrewJoinRequest
 from src.model.User import User
@@ -70,14 +70,16 @@ async def manage(
     )
 
     # View member button
-    inline_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            phrases.PVT_KEY_CREW_MEMBER_VIEW,
-            screen=Screen.PVT_CREW_MEMBER_DETAIL,
-            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: requesting_user.id},
-            previous_screen_list=[Screen.PVT_CREW, Screen.PVT_CREW_MEMBER],
-        )
-    ]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_MEMBER_VIEW,
+                screen=Screen.PVT_CREW_MEMBER_DETAIL,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: requesting_user.id},
+                previous_screen_list=[Screen.PVT_CREW, Screen.PVT_CREW_MEMBER],
+            )
+        ]
+    ]
 
     await full_message_send(context, ot_text, update=update, keyboard=inline_keyboard)
 

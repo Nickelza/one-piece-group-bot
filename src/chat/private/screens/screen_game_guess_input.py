@@ -5,16 +5,16 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_game_gol import (
+from src.chat.common.screens.screen_game_gol import (
     run_game as run_game_gol,
     validate_answer as validate_answer_gol,
 )
-from src.chat.group.screens.screen_game_pr import (
+from src.chat.common.screens.screen_game_pr import (
     run_game as run_game_pr,
     validate_answer as validate_answer_pr,
 )
-from src.chat.group.screens.screen_game_shambles import run_game as run_game_shambles
-from src.chat.group.screens.screen_game_ww import run_game as run_game_ww
+from src.chat.common.screens.screen_game_shambles import run_game as run_game_shambles
+from src.chat.common.screens.screen_game_ww import run_game as run_game_ww
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus

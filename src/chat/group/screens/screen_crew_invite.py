@@ -2,7 +2,8 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.chat.group.screens.screen_crew_join import CrewReservedKeys, validate
+from src.chat.common.screens.screen_crew_join import validate
+from src.chat.group.screens.screen_crew_join import CrewReservedKeys
 from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys

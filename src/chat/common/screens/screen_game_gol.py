@@ -223,7 +223,7 @@ async def run_game(
     schedule_next_send: bool = True,
 ) -> None:
     """
-    Issue lives to to the players
+    Issue lives to the players
     :param context: The context
     :param game: The game
     :param send_to_user: The user to send the message to

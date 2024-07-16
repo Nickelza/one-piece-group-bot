@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_devil_fruit_sell import validate_trade, validate_buy, buy
+from src.chat.common.screens.screen_devil_fruit_sell import validate_trade, validate_buy, buy
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.User import User
@@ -77,14 +77,16 @@ async def manage(
     if not ot_text:  # Error during buying, message already sent
         return
 
-    inline_keyboard.append([
-        Keyboard(
-            phrases.KEY_MANAGE_DEVIL_FRUIT,
-            screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
-            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id},
-            previous_screen_list=[Screen.PVT_DEVIL_FRUIT],  # Don't go back to the shop
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.KEY_MANAGE_DEVIL_FRUIT,
+                screen=Screen.PVT_DEVIL_FRUIT_DETAIL,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id},
+                previous_screen_list=[Screen.PVT_DEVIL_FRUIT],  # Don't go back to the shop
+            )
+        ]
+    )
 
     await full_message_send(
         context,

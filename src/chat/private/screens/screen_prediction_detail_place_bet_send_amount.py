@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.chat.group.screens.screen_prediction_bet import validate
+from src.chat.common.screens.screen_prediction_bet import validate
 from src.chat.private.screens.screen_prediction_detail_place_bet import (
     PredictionPlaceBetReservedKeys,
 )

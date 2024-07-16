@@ -7,17 +7,18 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import src.model.enums.Command as Command
 import src.model.enums.Location as Location
+from src.chat.common.screens.screen_daily_reward import manage as manage_screen_daily_reward
+from src.chat.common.screens.screen_daily_reward_prize import (
+    manage as manage_screen_daily_reward_prize,
+)
+from src.chat.common.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.common.screens.screen_status import manage as manage_screen_show_status
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
 from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
-from src.chat.group.screens.screen_daily_reward import manage as manage_screen_daily_reward
-from src.chat.group.screens.screen_daily_reward_prize import (
-    manage as manage_screen_daily_reward_prize,
-)
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
-from src.chat.group.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
 from src.chat.group.screens.screen_game import manage as manage_screen_game
 from src.chat.group.screens.screen_game_opponent_confirmation import (
@@ -42,7 +43,6 @@ from src.chat.group.screens.screen_settings_features import manage as manage_scr
 from src.chat.group.screens.screen_silence import manage as manage_screen_silence
 from src.chat.group.screens.screen_silence_end import manage as manage_screen_silence_end
 from src.chat.group.screens.screen_speak import manage as manage_screen_speak
-from src.chat.group.screens.screen_status import manage as manage_screen_show_status
 from src.model.Group import Group
 from src.model.GroupChat import GroupChat
 from src.model.User import User

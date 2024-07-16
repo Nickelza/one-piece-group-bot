@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
-from src.chat.group.screens.screen_daily_reward_prize import send_prize_request
+from src.chat.common.screens.screen_daily_reward_prize import send_prize_request
 from src.model.DailyReward import DailyReward
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade

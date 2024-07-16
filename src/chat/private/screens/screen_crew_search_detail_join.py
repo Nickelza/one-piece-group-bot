@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 from resources import phrases
-from src.chat.group.screens.screen_crew_join import validate as validate_crew_join
+from src.chat.common.screens.screen_crew_join import validate as validate_crew_join
 from src.chat.private.screens.screen_crew_join_request_received import accept
 from src.model.Crew import Crew
 from src.model.CrewJoinRequest import CrewJoinRequest
@@ -198,14 +198,16 @@ async def send_request_to_captain(
             )
 
             # View member button
-            inline_keyboard: list[list[Keyboard]] = [[
-                Keyboard(
-                    phrases.PVT_KEY_CREW_MEMBER_VIEW,
-                    screen=Screen.PVT_CREW_MEMBER_DETAIL,
-                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: join_request.user.id},
-                    previous_screen_list=[Screen.PVT_CREW, Screen.PVT_CREW_MEMBER],
-                )
-            ]]
+            inline_keyboard: list[list[Keyboard]] = [
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_CREW_MEMBER_VIEW,
+                        screen=Screen.PVT_CREW_MEMBER_DETAIL,
+                        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: join_request.user.id},
+                        previous_screen_list=[Screen.PVT_CREW, Screen.PVT_CREW_MEMBER],
+                    )
+                ]
+            ]
 
             await full_message_send(
                 context, ot_text, chat_id=captain.tg_user_id, keyboard=inline_keyboard

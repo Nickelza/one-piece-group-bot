@@ -6,6 +6,12 @@ from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
 from resources import phrases
+from src.chat.common.screens.screen_daily_reward import manage as manage_screen_daily_reward
+from src.chat.common.screens.screen_daily_reward_prize import (
+    manage as manage_screen_daily_reward_prize,
+)
+from src.chat.common.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.common.screens.screen_status import manage as manage_screen_status
 from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.private.screens.screen_bounty_loan_detail import (
     manage as manage_screen_bounty_loan_detail,
@@ -81,10 +87,6 @@ from src.chat.private.screens.screen_crew_search_detail import (
 from src.chat.private.screens.screen_crew_search_detail_join import (
     manage as manage_screen_crew_search_detail_join,
 )
-from src.chat.private.screens.screen_daily_reward import manage as manage_screen_daily_reward
-from src.chat.private.screens.screen_daily_reward_prize import (
-    manage as manage_screen_daily_reward_prize,
-)
 from src.chat.private.screens.screen_devil_fruit import manage as manage_screen_devil_fruit
 from src.chat.private.screens.screen_devil_fruit_detail import (
     manage as manage_screen_devil_fruit_detail,
@@ -110,7 +112,6 @@ from src.chat.private.screens.screen_devil_fruit_shop_detail_buy import (
 from src.chat.private.screens.screen_devil_fruit_shop_detail_remove import (
     manage as manage_screen_devil_fruit_shop_detail_remove,
 )
-from src.chat.private.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.private.screens.screen_fight import manage as manage_screen_fight
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
@@ -164,7 +165,6 @@ from src.chat.private.screens.screen_settings_timezone import (
     manage as manage_screen_settings_timezone,
 )
 from src.chat.private.screens.screen_start import manage as manage_screen_start
-from src.chat.private.screens.screen_status import manage as manage_screen_status
 from src.model.SystemUpdate import SystemUpdate
 from src.model.SystemUpdateUser import SystemUpdateUser
 from src.model.User import User

@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.group.screens.screen_devil_fruit_sell import validate_trade
+from src.chat.common.screens.screen_devil_fruit_sell import validate_trade
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
 from src.model.User import User
@@ -70,14 +70,16 @@ async def manage(
     # deleted on new trade
     trade = DevilFruitTrade.get_pending_in_shop(devil_fruit)
     if trade is not None:
-        inline_keyboard: list[list[Keyboard]] = [[
-            Keyboard(
-                phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
-                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
-                info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
-                inbound_info=inbound_keyboard.info,
-            )
-        ]]
+        inline_keyboard: list[list[Keyboard]] = [
+            [
+                Keyboard(
+                    phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                    info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        ]
         ot_text = phrases.DEVIL_FRUIT_DETAIL_SELL_ALREADY_FOR_SALE
         await full_message_send(
             context,
@@ -152,17 +154,22 @@ async def manage(
             user.private_screen_in_edit_id = None
             user.private_screen_force_go_back = True
 
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
-                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL,
-                    info={
-                        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id,
-                        ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id,
-                    },
-                    previous_screen_list=[Screen.PVT_DEVIL_FRUIT, Screen.PVT_DEVIL_FRUIT_DETAIL],
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                        screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL,
+                        info={
+                            ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: devil_fruit.id,
+                            ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id,
+                        },
+                        previous_screen_list=[
+                            Screen.PVT_DEVIL_FRUIT,
+                            Screen.PVT_DEVIL_FRUIT_DETAIL,
+                        ],
+                    )
+                ]
+            )
 
             ot_text = phrases.DEVIL_FRUIT_DETAIL_SELL_CONFIRMATION_CONFIRMED.format(
                 devil_fruit.get_full_name(),
