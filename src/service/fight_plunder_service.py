@@ -91,7 +91,12 @@ def get_scout_fee(user: User, is_group: bool, scout_type: ScoutType) -> int:
         price = int(add_percentage_to_value(price, user.plunder_scout_count))
 
     # Adjust by Devil Fruit ability
-    price = int(get_ability_value(user, DevilFruitAbilityType.FIGHT_PLUNDER_SCOUT_FEE, price))
+    df_ability_type = (
+        DevilFruitAbilityType.FIGHT_SCOUT_FEE
+        if scout_type is ScoutType.FIGHT
+        else DevilFruitAbilityType.PLUNDER_SCOUT_FEE
+    )
+    price = int(get_ability_value(user, df_ability_type, price))
 
     return price
 
