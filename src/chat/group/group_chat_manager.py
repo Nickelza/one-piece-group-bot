@@ -12,6 +12,9 @@ from src.chat.common.screens.screen_daily_reward_prize import (
     manage as manage_screen_daily_reward_prize,
 )
 from src.chat.common.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.common.screens.screen_game import manage as manage_screen_game
+from src.chat.common.screens.screen_game_rps import manage as manage_screen_game_rps
+from src.chat.common.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.common.screens.screen_status import manage as manage_screen_show_status
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
 from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
@@ -20,13 +23,10 @@ from src.chat.group.screens.screen_crew_invite import manage as manage_screen_cr
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
 from src.chat.group.screens.screen_fight import manage as manage_screen_fight
-from src.chat.group.screens.screen_game import manage as manage_screen_game
 from src.chat.group.screens.screen_game_opponent_confirmation import (
     manage as manage_screen_game_opponent_confirmation,
 )
-from src.chat.group.screens.screen_game_rps import manage as manage_screen_game_rps
 from src.chat.group.screens.screen_game_rr import manage as manage_screen_game_rr
-from src.chat.group.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.group.screens.screen_plunder import manage as manage_screen_plunder
 from src.chat.group.screens.screen_prediction_bet import manage as manage_screen_prediction_bet
 from src.chat.group.screens.screen_prediction_bet_remove import (

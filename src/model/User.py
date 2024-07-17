@@ -51,6 +51,9 @@ class User(BaseModel):
     pending_bounty: int | BigIntegerField = BigIntegerField(default=0)
     doc_q_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     game_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    game_accept_global_cooldown_end_date: datetime.datetime | DateTimeField = DateTimeField(
+        null=True
+    )
     bounty_poster_limit: int | SmallIntegerField = SmallIntegerField(default=0)
     location_level: int | SmallIntegerField = SmallIntegerField(default=0)
     should_propose_new_world: bool | BooleanField = BooleanField(default=True)

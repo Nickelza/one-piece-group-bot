@@ -200,6 +200,7 @@ KEYBOARD_USE_UNAUTHORIZED = "You are not authorized to use this keyboard"
 
 SWAP_SUCCESSFUL = "Swap successful"
 RESET_SUCCESSFUL = "Reset successful"
+VIEW_ALL_WITH_EMOJI = "\n" + Emoji.RIGHT_ARROW + " [View all]({})"
 
 LOCATION_CHANGE_REGION_PROPOSAL = "{}{} would you like to move to {}?"
 LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = "{}{} You can move to {} later with {} command"
@@ -395,6 +396,7 @@ GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
 GRP_KEY_GAME_PLAY = "Play"
 GRP_KEY_DAILY_REWARD_PRIZE_ACCEPT = Emoji.MONEY + " Accept offer"
 GRP_KEY_DAILY_REWARD_PRIZE_RANDOM = Emoji.GIFT + " Random prize"
+GRP_KEY_GAME_START_GLOBAL = "Start as global"
 
 DATETIME_EXAMPLES = """
 Write the date using this format:
@@ -464,16 +466,23 @@ GAME_REQUEST = (
     f" accepted within {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, it will be automatically"
     " rejected."
 )
+GAME_REQUEST_OPEN_HEADER = (
+    "{} is challenging anyone to play *{}* with a wager of ฿*{}*."
+    "\n\n_*Description*: {}_"
+    "\n\nPress the button below to accept."
+)
 GAME_REQUEST_OPEN = (
-    "{} is challenging anyone to play *{}* with a wager of ฿*{}*.\n\nPress the button below"
-    " to accept.\n\nIf the challenge is not accepted within"
+    GAME_REQUEST_OPEN_HEADER + "\n\nIf the challenge is not accepted within"
     f" {Env.GAME_CONFIRMATION_TIMEOUT.get_int()} seconds, it will be automatically rejected."
+    "\n\n>You can start this game as a global challenge, "
+    "allowing you to play immediately while another player will challenge your result later"
 )
 GAME_CANCELED = "Game cancelled"
 GAME_CHALLENGE_REJECTED = "{} has rejected the challenge"
 GAME_INVALID = "Invalid game"
 GAME_NOT_SELECTED_NAME = "Not selected"
 GAME_TEXT = "*{}*\n\n_*Description*: {}_\n\n{} vs {}\nWager: ฿*{}*{}\n\n{}"
+GAME_TEXT_WITHOUT_PLAYERS = "*{}*\n\n_*Description*: {}_\n\nWager: ฿*{}*{}\n\n{}"
 GAME_STATUS_AWAITING_CHOICE = "Status: Awaiting choice"
 GAME_STATUS_AWAITING_USER_CHOICE = "Status: Awaiting {}'s choice"
 GAME_RESULT_DRAW = "Result: Draw"
@@ -484,7 +493,11 @@ GAME_ENDED = "This game has ended"
 GAME_CANNOT_INITIATE = (
     "Challenge limit reached, make sure you have canceled any pending challenges.\nYou can"
     " initiate another challenge in *{}*, but in the meantime you can ask another user to"
-    " challenge you."
+    " challenge you or accept a Global Challenge if available."
+)
+GAME_GLOBAL_COOLDOWN = (
+    "Challenge limit reached. You can accept another global challenge in *{}*, but in the meantime you can ask another "
+    "user to challenge you"
 )
 GAME_PENDING_KEY = "Pending challenge"
 GAME_FORCED_END = (
@@ -520,17 +533,34 @@ GAME_DIFFICULTY = "\nDifficulty: {}"
 GAME_DIFFICULTY_EASY = "Easy"
 GAME_DIFFICULTY_MEDIUM = "Medium"
 GAME_DIFFICULTY_HARD = "Hard"
+GAME_GLOBAL_ITEM_DEEPLINK = "{}[{} - ฿{}]({})"
+GAME_GLOBAL_ALREADY_ACCEPTED = "This challenge has already been accepted by another player"
+GAME_GLOBAL_OPPONENT_CONFIRMATION_REQUEST = (
+    "_*Description*: {}_"
+    "\n\n*Opponent*: {}"
+    "\n*Wager*: ฿{}"
+    "\n\nDo you want to accept this challenge?"
+)
+GAME_GLOBAL_CHALLENGE_ACCEPTED_ALERT = "Challenge accepted"
+GAME_GLOBAL_CHALLENGE_ITEM_TEXT_FILL_IN = "Global Challenge"
+GAME_AUTO_MOVE_WARNING = "\n\n>In case of no selection, a move will be automatically made after {}"
 
 ROCK_PAPER_SCISSORS_GAME_NAME = "Rock Paper Scissors"
 ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = (
     "Try to beat your opponent by choosing rock, paper or scissors. \nRock beats scissors,"
     " scissors beats paper and paper beats rock."
 )
-ROCK_PAPER_SCISSORS_CHOICE_ALERT = "You chose {}"
+ROCK_PAPER_SCISSORS_CHOICE = "You chose {}"
 ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + " Rock"
 ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + " Paper"
 ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS + " Scissors"
 ROCK_PAPER_SCISSORS_CHOICES = "{} chose {} \n{} chose {}\n\n"
+ROCK_PAPER_SCISSORS_PENDING_CHALLENGER = (
+    "\n\n>You will be notified once another player has accepted the game and chosen an option"
+)
+ROCK_PAPER_SCISSORS_PENDING_OPPONENT = (
+    "\n\n>You will be notified once the challenger has chosen an option"
+)
 
 RUSSIAN_ROULETTE_GAME_NAME = "Russian Roulette"
 RUSSIAN_ROULETTE_GAME_DESCRIPTION = "Try to avoid choosing the chamber with the bullet."
@@ -1581,11 +1611,11 @@ DAVY_BACK_FIGHT_END_NOTIFICATION_LOST = (
 # Notification - Game turn
 GAME_TURN_NOTIFICATION = (
     f"It's your turn to play in {{}} against {{}}.\n\n[{Emoji.RIGHT_ARROW}Click here to view the"
-    f" game{Emoji.LEFT_ARROW}]" + "({})"
+    f" game{Emoji.LEFT_ARROW}]" + "({}){}"
 )
 GAME_TURN_NOTIFICATION_DESCRIPTION = (
     "If to be notified when it is your turn to play in a game if no action is taken for"
-    f" {Env.GAME_TURN_NOTIFICATION_TIME.get_int()} seconds"
+    f" {Env.GAME_TURN_NOTIFICATION_TIME_SECONDS.get_int()} seconds"
 )
 GAME_TURN_NOTIFICATION_KEY = "Game turn"
 # Notification - Location
@@ -1809,6 +1839,14 @@ PLUNDER_ATTACK_CANNOT_REVENGE = (
     "\n\n>Since this attack was in response to your previous [plunder]({}), it cannot be revenged"
 )
 
+# Notification - Game Outcome
+GAME_OUTCOME_NOTIFICATION = "{}You {} ฿*{}* in the *{}* challenge against {}"
+GAME_OUTCOME_NOTIFICATION_DRAW = (
+    "The *{}* challenge against {} ended in a draw." "\nYour wager \\(฿*{}*\\) has been returned"
+)
+GAME_OUTCOME_NOTIFICATION_DESCRIPTION = "If to be notified of the outcome of a game (only global)"
+GAME_OUTCOME_NOTIFICATION_KEY = "Game outcome"
+
 # List
 LIST_OVERVIEW = (
     "Select" + " {} *{}* from the list below\n{}"
@@ -1893,9 +1931,7 @@ DOC_Q_GAME_LOG_STATS_TEXT = (  # Logs - Game
 GAME_LOG_KEY = "Challenges"
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Challenge"
 GAME_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
-GAME_LOG_ITEM_DETAIL_TEXT = (
-    "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*:" f" ฿{{}}\n\n{{}}{LOG_ITEM_DETAIL_GO_TO_MESSAGE}"
-)
+GAME_LOG_ITEM_DETAIL_TEXT = "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*: ฿{}\n\n{}"
 GAME_LOG_STATS_TEXT = (
     "*Total challenges*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Draws*: {}"
     " \\({}%\\)\n*Belly won*: ฿{}\n*Belly lost*: ฿{}\n*Max belly won*: [฿{} \\({}\\)]({})\n*Max"
@@ -2144,6 +2180,7 @@ ABILITY_TYPE_PLUNDER_IMMUNITY_DURATION = "Plunder Immunity"
 ABILITY_TYPE_PLUNDER_SENTENCE_DURATION = "Plunder Sentence"
 ABILITY_TYPE_FIGHT_SCOUT_FEE = "Fight Scout Price"
 ABILITY_TYPE_PLUNDER_SCOUT_FEE = "Plunder Scout Price"
+ABILITY_TYPE_GAME_GLOBAL_ACCEPT_COOLDOWN_DURATION = "Global Challenge Acceptance Cooldown"
 
 PLUNDER_CANNOT_PLUNDER_USER = "You cannot plunder this user"
 PLUNDER_USER_IN_COOLDOWN = "Plunder cooldown active. You can plunder again in *{}*"
@@ -2210,6 +2247,8 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
 
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
+DAILY_REWARD_GLOBAL_CHALLENGE = "\n\n*Global Challenges*{}"
+DAILY_REWARD_GLOBAL_CHALLENGE_ITEM = "\n{}"
 DAILY_REWARD_PRIZE_REQUEST = (
     "{}\nYou can either accept the offered prize or"
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"

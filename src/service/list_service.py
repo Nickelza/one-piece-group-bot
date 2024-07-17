@@ -106,8 +106,8 @@ def get_items_paginate(
 def get_items_text_keyboard(
     inbound_keyboard: Keyboard,
     list_page: ListPage,
-    item_detail_key: StrEnum,  # TODO default PRIMARY_KEY, switch with screen
-    item_detail_screen: Screen,
+    item_detail_key: StrEnum = None,  # TODO default PRIMARY_KEY, switch with screen
+    item_detail_screen: Screen = None,
     text_fill_in: str = None,
     text_overview: str = None,
     context: ContextTypes.DEFAULT_TYPE = None,
@@ -191,23 +191,25 @@ def get_items_text_keyboard(
         list_page.set_object(item.id)
         items_text += phrases.LIST_ITEM_TEXT.format(current_number, list_page.get_item_text())
 
-        button_info = {item_detail_key: item.id}
-        button = Keyboard(
-            str(current_number),
-            screen=item_detail_screen,
-            info=button_info,
-            inbound_info=inbound_keyboard.info,
-        )
-        keyboard_line.append(button)
+        if item_detail_screen is not None:
+            button_info = {item_detail_key: item.id}
+            button = Keyboard(
+                str(current_number),
+                screen=item_detail_screen,
+                info=button_info,
+                inbound_info=inbound_keyboard.info,
+            )
+            keyboard_line.append(button)
 
-        # Add new keyboard line if needed
-        if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
+            # Add new keyboard line if needed
+            if (index + 1) % c.STANDARD_LIST_KEYBOARD_ROW_SIZE == 0 and index != 0:
+                inline_keyboard.append(keyboard_line)
+                keyboard_line = []
+
+    if item_detail_screen is not None:
+        # Add the last keyboard line if needed
+        if len(keyboard_line) > 0:
             inline_keyboard.append(keyboard_line)
-            keyboard_line = []
-
-    # Add the last keyboard line if needed
-    if len(keyboard_line) > 0:
-        inline_keyboard.append(keyboard_line)
 
     # Add navigation buttons if needed
     if total_count > c.STANDARD_LIST_SIZE:
@@ -247,14 +249,16 @@ def get_items_text_keyboard(
 
                     # No next filter, add remove button
                     if list_filter.description == legend_filters_with_items[-1].description:
-                        inline_keyboard.append([
-                            Keyboard(
-                                phrases.PVT_KEY_STRING_FILTER_REMOVE.format(phrases.LEGEND),
-                                screen=inbound_keyboard.screen,
-                                info={key: False, ReservedKeyboardKeys.PAGE: 1},
-                                inbound_info=inbound_keyboard.info,
-                            )
-                        ])
+                        inline_keyboard.append(
+                            [
+                                Keyboard(
+                                    phrases.PVT_KEY_STRING_FILTER_REMOVE.format(phrases.LEGEND),
+                                    screen=inbound_keyboard.screen,
+                                    info={key: False, ReservedKeyboardKeys.PAGE: 1},
+                                    inbound_info=inbound_keyboard.info,
+                                )
+                            ]
+                        )
 
                     continue
 
@@ -263,15 +267,17 @@ def get_items_text_keyboard(
                 continue
 
             # Is the filter of which to add the button
-            inline_keyboard.append([
-                Keyboard(
-                    list_filter.legend.get_formatted()
-                    + phrases.TEXT_ONLY.format(list_filter.description),
-                    screen=inbound_keyboard.screen,
-                    info={key: True, ReservedKeyboardKeys.PAGE: 1},
-                    inbound_info=inbound_keyboard.info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        list_filter.legend.get_formatted()
+                        + phrases.TEXT_ONLY.format(list_filter.description),
+                        screen=inbound_keyboard.screen,
+                        info={key: True, ReservedKeyboardKeys.PAGE: 1},
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ]
+            )
             has_added_legend_filter = True
 
         elif list_filter.filter_type is ListFilterType.STRING:
@@ -279,14 +285,16 @@ def get_items_text_keyboard(
             current_value: str = get_string_filter_value(context, key, user)
             if current_value is not None:
                 # Add remove filter button
-                inline_keyboard.append([
-                    Keyboard(
-                        phrases.PVT_KEY_STRING_FILTER_REMOVE.format(list_filter.description),
-                        screen=inbound_keyboard.screen,
-                        info={key: False, ReservedKeyboardKeys.PAGE: 1},
-                        inbound_info=inbound_keyboard.info,
-                    )
-                ])
+                inline_keyboard.append(
+                    [
+                        Keyboard(
+                            phrases.PVT_KEY_STRING_FILTER_REMOVE.format(list_filter.description),
+                            screen=inbound_keyboard.screen,
+                            info={key: False, ReservedKeyboardKeys.PAGE: 1},
+                            inbound_info=inbound_keyboard.info,
+                        )
+                    ]
+                )
 
     if len(list_page.emoji_legend_list) > 0 and list_page.show_legend_list:
         items_text += list_page.get_emoji_legend_list_text()

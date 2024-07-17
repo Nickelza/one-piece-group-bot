@@ -120,6 +120,7 @@ class NotificationType(IntEnum):
     CREW_CAPTAIN_PROMOTION = 38
     FIGHT_ATTACK = 39
     PLUNDER_ATTACK = 40
+    GAME_OUTCOME = 41
 
 
 class Notification:
@@ -168,7 +169,7 @@ class Notification:
         self.disable_notification = disable_notification
         self.item_screen = item_screen
         self.item_info = item_info
-        self.to_to_item_button_text = go_to_item_button_text
+        self.go_to_item_button_text = go_to_item_button_text
         self.item_previous_screens = item_previous_screens if item_previous_screens else []
         self.item_button_is_deeplink = item_button_is_deeplink
         self.keyboard = keyboard if keyboard else []
@@ -181,12 +182,12 @@ class Notification:
     def get_go_to_item_keyboard(self) -> list[Keyboard]:
         """Gets the go to item keyboard."""
 
-        if self.item_screen is None or self.to_to_item_button_text is None:
+        if self.item_screen is None or self.go_to_item_button_text is None:
             return []
 
         return [
             Keyboard(
-                self.to_to_item_button_text,
+                self.go_to_item_button_text,
                 screen=self.item_screen,
                 info=self.item_info,
                 previous_screen_list=self.item_previous_screens,
@@ -339,11 +340,13 @@ class GameTurnNotification(Notification):
 
     def build(self) -> str:
         """Builds the notification."""
+        from src.service.game_service import get_auto_move_warning
 
         return self.text.format(
             GameType(self.game.type).get_name(),
             mention_markdown_user(self.opponent),
             get_message_url(self.game.message_id, self.game.group_chat),
+            get_auto_move_warning(),
         )
 
 
@@ -1484,6 +1487,65 @@ class PlunderAttackNotification(Notification):
         return ot_text
 
 
+class GameOutcomeNotification(Notification):
+    """Class for game outcome notifications."""
+
+    def __init__(self, game: Game = None, user: User = None):
+        """Constructor
+
+        :param game: The game
+        :param user: The user to send the outcome to
+        """
+
+        self.game = game
+        self.user = user
+        super().__init__(
+            NotificationCategory.GAME,
+            NotificationType.GAME_OUTCOME,
+            "",
+            phrases.GAME_OUTCOME_NOTIFICATION_DESCRIPTION,
+            phrases.GAME_OUTCOME_NOTIFICATION_KEY,
+            disable_notification=False,
+            item_screen=Screen.PVT_LOGS_TYPE_DETAIL,
+            item_info={
+                LogTypeReservedKeys.TYPE: LogType.GAME,
+                LogTypeReservedKeys.ITEM_ID: game.id if game is not None else None,
+            },
+            go_to_item_button_text=phrases.KEY_VIEW_LOG,
+        )
+
+    def build(self) -> str:
+        """Builds the notification."""
+        # Not supported if result is not win/lost/draw
+        if self.game.get_status() not in [GameStatus.WON, GameStatus.LOST, GameStatus.DRAW]:
+            raise ValueError(
+                "send_outcome_to_user is not supported for this game outcome: "
+                + str(self.game.get_status())
+            )
+
+        if self.game.get_status() is not GameStatus.DRAW:
+            if self.user == self.game.get_winner():
+                emoji = Emoji.LOG_POSITIVE
+                text_won_lost = phrases.TEXT_WON
+            else:
+                emoji = Emoji.LOG_NEGATIVE
+                text_won_lost = phrases.TEXT_LOST
+
+            return phrases.GAME_OUTCOME_NOTIFICATION.format(
+                emoji,
+                text_won_lost,
+                self.game.get_wager_formatted(),
+                GameType(self.game.type).get_name(),
+                mention_markdown_user(self.game.get_other_player(self.user)),
+            )
+
+        return phrases.GAME_OUTCOME_NOTIFICATION_DRAW.format(
+            GameType(self.game.type).get_name(),
+            mention_markdown_user(self.game.get_other_player(self.user)),
+            self.game.get_half_wager_formatted(),
+        )
+
+
 NOTIFICATIONS = [
     CrewLeaveNotification(),
     LocationUpdateNotification(),
@@ -1525,6 +1587,7 @@ NOTIFICATIONS = [
     CrewCaptainPromotionNotification(),
     FightAttackNotification(),
     PlunderAttackNotification(),
+    GameOutcomeNotification(),
 ]
 
 

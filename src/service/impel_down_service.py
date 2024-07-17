@@ -16,7 +16,6 @@ from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyActi
 from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.enums.impel_down.ImpelDownSource import ImpelDownSource
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bounty_service import add_or_remove_bounty
 from src.service.notification_service import send_notification
 
 
@@ -95,6 +94,7 @@ async def post_bail(
     :param should_save_payer: If the payer should be saved
     :return: None
     """
+    from src.service.bounty_service import add_or_remove_bounty
 
     bail = impel_down_log.get_bail()
     prisoner: User = impel_down_log.user

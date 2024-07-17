@@ -342,14 +342,23 @@ async def manage_after_db(
                 previous_screens=previous_screens,
                 from_exception=True,
             )
-        except BadRequest:
-            await full_message_or_media_send_or_edit(
-                context,
-                escape_valid_markdown_chars(str(ce)),
-                update=update,
-                previous_screens=previous_screens,
-                from_exception=True,
-            )
+        except BadRequest:  # Trying to edit a media caption
+            try:
+                await full_message_or_media_send_or_edit(
+                    context,
+                    str(ce),
+                    update=update,
+                    previous_screens=previous_screens,
+                    from_exception=True,
+                )
+            except BadRequest:  # Last resort, send without any formatting
+                await full_message_or_media_send_or_edit(
+                    context,
+                    escape_valid_markdown_chars(str(ce)),
+                    update=update,
+                    previous_screens=previous_screens,
+                    from_exception=True,
+                )
     except BadRequest as bre:
         if "Message is not modified" in str(bre):
             logging.error(f"Updated message same as previous in chat {update.effective_chat.id}")
@@ -426,6 +435,15 @@ async def validate(
             await delete_message(update)
             return False
 
+    # Always accept delete request in private chat
+    if (
+            is_callback
+            and message_source is MessageSource.PRIVATE
+            and ReservedKeyboardKeys.DELETE in inbound_keyboard.info
+    ):
+        await delete_message(update)
+        return False
+
     _message_is_reply = message_is_reply(update)
     _is_main_group = group_chat is not None and is_main_group(group_chat)
     is_restricted_feature_error = False
@@ -484,13 +502,15 @@ async def validate(
                     text += phrases.COMMAND_FOR_USERS_AFTER_LOCATION_ERROR_JOIN_CREW
 
                     # Add Find Crew button
-                    inline_keyboard.append([
-                        Keyboard(
-                            phrases.KEY_JOIN_A_CREW,
-                            screen=Screen.PVT_CREW_SEARCH,
-                            is_deeplink=True,
-                        )
-                    ])
+                    inline_keyboard.append(
+                        [
+                            Keyboard(
+                                phrases.KEY_JOIN_A_CREW,
+                                screen=Screen.PVT_CREW_SEARCH,
+                                is_deeplink=True,
+                            )
+                        ]
+                    )
 
                 raise CommandValidationException(text)
 

@@ -102,14 +102,16 @@ async def send_notification_execute(
     }
 
     inline_keyboard += notification.get_keyboard()
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS,
-            info=button_info,
-            screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
-            previous_screen_list=previous_screens,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_MANAGE_NOTIFICATION_SETTINGS,
+                info=button_info,
+                screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
+                previous_screen_list=previous_screens,
+            )
+        ]
+    )
 
     try:
         quote_message_id = None
@@ -127,6 +129,9 @@ async def send_notification_execute(
             disable_notification=notification.disable_notification,
             reply_to_message_id=quote_message_id,
             disable_web_page_preview=notification.disable_web_page_preview,
+            add_delete_button=True,
+            should_auto_delete=False,
+            authorized_users=[user],
         )
     except Forbidden:  # User has blocked the bot
         pass

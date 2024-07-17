@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from peewee import DoesNotExist
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -18,7 +17,6 @@ from src.chat.common.screens.screen_game_ww import run_game as run_game_ww
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
-from src.model.error.GroupChatError import GroupChatException
 from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import get_game_from_keyboard, guess_game_validate_answer
@@ -38,10 +36,7 @@ async def manage(
     """
 
     if inbound_keyboard is not None:  # From deep link
-        try:
-            game: Game = get_game_from_keyboard(inbound_keyboard)
-        except GroupChatException:
-            raise DoesNotExist
+        game: Game = get_game_from_keyboard(inbound_keyboard)
     else:  # From private chat
         game: Game = Game.get_by_id(user.private_screen_in_edit_id)
 

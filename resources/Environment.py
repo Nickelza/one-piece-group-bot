@@ -559,19 +559,37 @@ GAME_MIN_WAGER = Environment("GAME_MIN_WAGER", default_value="5000000")
 GAME_MAX_TOTAL_WAGER_EASY = Environment("GAME_MAX_TOTAL_WAGER_EASY", default_value="50000000")
 # Maximum total wager for medium mode. Default: 200 million
 GAME_MAX_TOTAL_WAGER_MEDIUM = Environment("GAME_MAX_TOTAL_WAGER_MEDIUM", default_value="200000000")
-# After how much time in seconds without action should a user be notified about their turn.
-# Default: 60 seconds
-GAME_TURN_NOTIFICATION_TIME = Environment("GAME_TURN_NOTIFICATION_TIME", default_value="60")
+# After how much time in seconds without action should a user be notified about their turn in seconds. Default: 60
+GAME_TURN_NOTIFICATION_TIME_SECONDS = Environment(
+    "GAME_TURN_NOTIFICATION_TIME_SECONDS", default_value="60"
+)
+# After how much time in seconds without action should a move be automatically made in seconds. Default: 60
+GAME_TURN_AUTO_MOVE_TIME_SECONDS = Environment(
+    "GAME_TURN_AUTO_MOVE_TIME_SECONDS", default_value="60"
+)
 # Game cooldown duration in hours. Default: 8
 GAME_COOLDOWN_DURATION = Environment("GAME_COOLDOWN_DURATION", default_value="8")
+# Game accept global cooldown duration in hours. Default: 2
+GAME_GLOBAL_ACCEPT_COOLDOWN_DURATION = Environment(
+    "GAME_GLOBAL_ACCEPT_COOLDOWN_DURATION", default_value="2"
+)
 # How much time to wait for opponent confirmation before timing out. Default: 60 seconds
 GAME_CONFIRMATION_TIMEOUT = Environment("GAME_CONFIRMATION_TIMEOUT", default_value="60")
 # How much time to wait after user has confirmed the game before starting the game.
 # Default: 30 seconds
 GAME_START_WAIT_TIME = Environment("GAME_START_WAIT_TIME", default_value="30")
-# After how much time since the last interaction should a game be considered inactive.
-# Default: 600 seconds
-GAME_INACTIVE_TIME = Environment("GAME_INACTIVE_TIME", default_value="600")
+# After how much time since the last interaction should a game be considered inactive. # Default: 10 minutes
+GAME_INACTIVE_TIME_SINCE_INTERACTION_MINUTES = Environment(
+    "GAME_INACTIVE_TIME_SINCE_INTERACTION_MINUTES", default_value="10"
+)
+# After how much time since the start should a game be considered inactive in minutes. Default: 60 minutes
+GAME_INACTIVE_TIME_SINCE_START_MINUTES = Environment(
+    "GAME_INACTIVE_TIME_SINCE_START_MINUTES", default_value="60"
+)
+# After how much time should a global game be considered inactive if an opponent has not yet accepted it in hours.
+# Default: 12 hours
+GAME_GLOBAL_INACTIVE_HOURS = Environment("GAME_GLOBAL_INACTIVE_HOURS", default_value="12")
+
 # One Piece Wiki URL
 ONE_PIECE_WIKI_URL = Environment(
     "ONE_PIECE_WIKI_URL", default_value="https://onepiece.fandom.com/wiki/"

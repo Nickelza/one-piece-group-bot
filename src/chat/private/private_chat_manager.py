@@ -11,6 +11,9 @@ from src.chat.common.screens.screen_daily_reward_prize import (
     manage as manage_screen_daily_reward_prize,
 )
 from src.chat.common.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
+from src.chat.common.screens.screen_game import manage as manage_screen_game
+from src.chat.common.screens.screen_game_rps import manage as manage_screen_game_rps
+from src.chat.common.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.common.screens.screen_status import manage as manage_screen_status
 from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
 from src.chat.private.screens.screen_bounty_loan_detail import (
@@ -113,6 +116,15 @@ from src.chat.private.screens.screen_devil_fruit_shop_detail_remove import (
     manage as manage_screen_devil_fruit_shop_detail_remove,
 )
 from src.chat.private.screens.screen_fight import manage as manage_screen_fight
+from src.chat.private.screens.screen_game_global_list import (
+    manage as manage_screen_game_global_list,
+)
+from src.chat.private.screens.screen_game_global_start_challenger import (
+    manage as manage_screen_game_global_start_challenger,
+)
+from src.chat.private.screens.screen_game_global_start_opponent import (
+    manage as manage_screen_game_global_start_opponent,
+)
 from src.chat.private.screens.screen_game_guess_input import (
     manage as manage_screen_game_guess_input,
 )
@@ -569,6 +581,28 @@ async def dispatch_screens(
 
             case Screen.PVT_DAILY_REWARD_PRIZE:
                 await manage_screen_daily_reward_prize(update, context, inbound_keyboard)
+
+            case Screen.PVT_GAME_GLOBAL_LIST:
+                await manage_screen_game_global_list(update, context, inbound_keyboard, user)
+
+            case Screen.PVT_GAME:
+                await manage_screen_game(update, context, user, command)
+
+            case Screen.PVT_GAME_SELECTION:
+                await manage_screen_game_selection(update, context, user, inbound_keyboard)
+
+            case Screen.PVT_GAME_GLOBAL_START_CHALLENGER:
+                await manage_screen_game_global_start_challenger(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_GAME_GLOBAL_START_OPPONENT:
+                await manage_screen_game_global_start_opponent(
+                    update, context, inbound_keyboard, user
+                )
+
+            case Screen.PVT_ROCK_PAPER_SCISSORS_GAME:
+                await manage_screen_game_rps(update, context, user, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

@@ -165,12 +165,14 @@ COMMANDS.append(PVT_SETTINGS)
 PVT_FIGHT = Command(
     CommandName.FIGHT,
     Screen.PVT_FIGHT,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_FIGHT.get_int()),
 )
 COMMANDS.append(PVT_FIGHT)
 
 PVT_PLUNDER = Command(
     CommandName.PLUNDER,
     Screen.PVT_PLUNDER,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_PLUNDER.get_int()),
 )
 COMMANDS.append(PVT_PLUNDER)
 
@@ -179,6 +181,14 @@ PVT_DAILY_REWARD = Command(
     Screen.PVT_DAILY_REWARD,
 )
 COMMANDS.append(PVT_DAILY_REWARD)
+
+PVT_GAME = Command(
+    CommandName.GAME,
+    Screen.PVT_GAME,
+    feature=Feature.CHALLENGE,
+    required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()),
+)
+COMMANDS.append(PVT_GAME)
 
 # Merge all lists with limitations
 limitations_list = set(

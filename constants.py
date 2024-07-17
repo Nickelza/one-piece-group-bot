@@ -54,3 +54,5 @@ DURATION_UNIT_TO_SECONDS = {
     "months": 2628000,
     "years": 31536000,
 }
+
+DAILY_REWARD_EXTRA_ITEMS_MAX = 5

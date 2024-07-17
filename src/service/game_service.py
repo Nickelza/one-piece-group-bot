@@ -9,19 +9,21 @@ from telegram import Update
 from telegram.error import RetryAfter
 from telegram.ext import ContextTypes
 
-import resources.Environment as Env
-from resources import phrases as phrases
+import constants as c
+from resources import phrases as phrases, Environment as Env
 from src.model.Game import Game
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
-from src.model.enums.Notification import GameTurnNotification
+from src.model.enums.Notification import GameTurnNotification, GameOutcomeNotification
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
+from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
-from src.model.error.GroupChatError import GroupChatError, GroupChatException
+from src.model.error.CommonChatError import CommonChatException
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
 from src.model.game.GameType import GameType
@@ -32,12 +34,15 @@ from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
 from src.service.bounty_service import add_or_remove_bounty, validate_amount
 from src.service.date_service import convert_seconds_to_duration, get_remaining_duration
+from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.message_service import (
     mention_markdown_user,
     delete_message,
     full_media_send,
     get_message_url,
     full_message_send,
+    full_message_or_media_send_or_edit,
+    get_deeplink,
 )
 from src.service.notification_service import send_notification
 from src.utils.string_utils import get_belly_formatted
@@ -56,7 +61,7 @@ def get_game_from_keyboard(inbound_keyboard: Keyboard) -> Game:
         )
         return game
     except IndexError:
-        raise GroupChatException(GroupChatError.GAME_NOT_FOUND)
+        raise CommonChatException(phrases.GAME_NOT_FOUND)
 
 
 async def end_game(
@@ -65,6 +70,7 @@ async def end_game(
     context: ContextTypes.DEFAULT_TYPE,
     is_forced_end: bool = False,
     update: Update = None,
+    send_outcome_to_user: User = None,
 ) -> Game:
     """
     End the game, set the status and return the game
@@ -73,6 +79,7 @@ async def end_game(
     :param context: The context
     :param is_forced_end: If the game was forced to end
     :param update: The update
+    :param send_outcome_to_user: End user to send game outcome notification
     :return: The game
     """
 
@@ -130,6 +137,28 @@ async def end_game(
         opponent.save()
     game.save()
 
+    if not is_forced_end:
+        if send_outcome_to_user:
+            await send_notification(
+                context, send_outcome_to_user, GameOutcomeNotification(game, send_outcome_to_user)
+            )
+
+        # Edit message in group, if global
+        if game.is_global() and game.group_chat is not None:
+            ot_text = get_text(game, True, game_outcome=game_outcome, is_for_group_global=True)
+            context.application.create_task(
+                full_media_send(
+                    context,
+                    caption=ot_text,
+                    chat_id=game.group_chat.group.tg_group_id,
+                    edit_message_id=game.message_id,
+                    add_delete_button=True,
+                    edit_only_caption_and_keyboard=True,
+                    group_chat=game.group_chat,
+                    authorized_users=[game.challenger],
+                )
+            )
+
     return game
 
 
@@ -143,6 +172,7 @@ def get_text(
     remaining_seconds_to_start: int = None,
     is_played_in_private_chat: bool = False,
     text_to_add_before_footer: str = None,
+    is_for_group_global: bool = False,
 ) -> str:
     """
     Get the text
@@ -155,13 +185,14 @@ def get_text(
     :param remaining_seconds_to_start: The remaining seconds to start
     :param is_played_in_private_chat: Is the game played in private chat
     :param text_to_add_before_footer: The text to add before the footer
+        :param is_for_group_global: If the text is for a group and the game is global
     :return: The text
     """
 
     added_ot_text = ""
     difficulty_text = ""
 
-    game_type: GameType = GameType(game.type)
+    game_type: GameType = game.get_type()
     if game_type.has_difficulty_level():
         difficulty_text = phrases.GAME_DIFFICULTY.format(game.get_difficulty().get_name())
 
@@ -178,7 +209,7 @@ def get_text(
             added_ot_text += phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.opponent))
         else:
             added_ot_text += phrases.GAME_RESULT_DRAW
-    else:
+    elif not is_for_group_global:
         if is_turn_based:
             added_ot_text += phrases.GAME_TURN.format(mention_markdown_user(user_turn))
         else:
@@ -189,7 +220,6 @@ def get_text(
             elif is_played_in_private_chat:
                 added_ot_text += phrases.GAME_STARTED
 
-    game_type: GameType = GameType(game.type)
     return phrases.GAME_TEXT.format(
         game_type.get_name(),
         game_type.get_description(),
@@ -273,13 +303,12 @@ async def validate_game(
         return None
 
     if status.is_finished():
-        await full_media_send(
+        await full_message_or_media_send_or_edit(
             context,
-            caption=phrases.GAME_ENDED,
+            text=phrases.GAME_ENDED,
             update=update,
             answer_callback=True,
             show_alert=True,
-            edit_only_caption_and_keyboard=True,
         )
         return None
 
@@ -333,10 +362,52 @@ async def end_inactive_games(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Game
     inactive_games = Game.select().where(
+        # Still in progress
         (Game.status == GameStatus.IN_PROGRESS)
         & (
-            Game.last_interaction_date
-            < (datetime.now() - timedelta(seconds=Env.GAME_INACTIVE_TIME.get_int()))
+            # Is not global and start date was more than N minutes ago
+            (
+                (Game.global_challenger_start_date.is_null())
+                & (
+                    Game.date
+                    < (
+                        datetime.now()
+                        - timedelta(minutes=Env.GAME_INACTIVE_TIME_SINCE_START_MINUTES.get_int())
+                    )
+                )
+            )
+            |
+            # Is global and opponent has started and start time was more than N minutes ago
+            (
+                (Game.global_opponent_start_date.is_null(False))
+                & (
+                    Game.global_opponent_start_date
+                    < (
+                        datetime.now()
+                        - timedelta(minutes=Env.GAME_INACTIVE_TIME_SINCE_START_MINUTES.get_int())
+                    )
+                )
+            )
+            |
+            # Last interaction was more than N minutes ago
+            (
+                Game.last_interaction_date
+                < (
+                    datetime.now()
+                    - timedelta(minutes=Env.GAME_INACTIVE_TIME_SINCE_INTERACTION_MINUTES.get_int())
+                )
+            )
+        )
+        &
+        # It's not a global game. If it is, then it's not considered inactive if an opponent has not yet accepted it
+        # and X hours have not passed since the global game was initiated
+        ~(
+            (Game.global_challenger_start_date.is_null(False))  # It's a global game
+            & (Game.opponent.is_null())  # But no opponent has accepted it
+            & (
+                Game.global_challenger_start_date
+                > (datetime.now() - timedelta(hours=Env.GAME_GLOBAL_INACTIVE_HOURS.get_int()))
+            )  # N hours have not passed since the global game was initiated
         )
     )
 
@@ -354,6 +425,10 @@ async def notify_game_turn(context: ContextTypes.DEFAULT_TYPE, game: Game, game_
     :param game_turn: The game turn
     :return: None
     """
+
+    # No notification required for global games
+    if game.is_global():
+        return
 
     if game_turn == GameTurn.CHALLENGER:
         user_turn: User = game.challenger
@@ -383,7 +458,7 @@ async def enqueue_game_turn_notification(
     """
 
     # Wait for N time
-    await asyncio.sleep(Env.GAME_TURN_NOTIFICATION_TIME.get_int())
+    await asyncio.sleep(Env.GAME_TURN_NOTIFICATION_TIME_SECONDS.get_int())
 
     updated_game = Game.get_by_id(game.id)
 
@@ -639,12 +714,14 @@ async def guess_game_validate_answer(
     loser = challenger if user == opponent else opponent
 
     # Go to game message in group button
-    outbound_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            text=phrases.PVT_KEY_GO_TO_MESSAGE,
-            url=get_message_url(game.message_id, game.group_chat),
-        )
-    ]]
+    outbound_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                url=get_message_url(game.message_id, game.group_chat),
+            )
+        ]
+    ]
 
     term_text_addition = get_guess_game_result_term_text(terminology)
     image_path: str = get_guess_game_final_image_path(game)
@@ -771,12 +848,14 @@ async def end_text_based_game(
     loser_text += term_text_addition
 
     # Go to game message in group button
-    outbound_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            text=phrases.PVT_KEY_GO_TO_MESSAGE,
-            url=get_message_url(game.message_id, game.group_chat),
-        )
-    ]]
+    outbound_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                url=get_message_url(game.message_id, game.group_chat),
+            )
+        ]
+    ]
 
     # Send message to winner
     await set_user_private_screen(winner, should_reset=True)
@@ -808,3 +887,206 @@ async def end_text_based_game(
         edit_message_id=game.message_id,
         edit_only_caption_and_keyboard=True,
     )
+
+
+async def collect_game_wagers_and_set_in_progress(
+    update: Update,
+    game: Game,
+    challenger: User = None,
+    opponent: User = None,
+    should_remove_bounty_challenger: bool = True,
+    should_save_challenger: bool = True,
+    should_remove_bounty_opponent: bool = True,
+    should_save_opponent: bool = True,
+    should_save_game: bool = True,
+    should_set_cooldown_challenger: bool = True,
+    should_set_global_cooldown_opponent: bool = False,
+) -> None:
+    """
+    Start the game, removing bounty from challenger and opponent
+    :param update: The update object
+    :param game: The game object
+    :param challenger: The challenger
+    :param opponent: The opponent
+    :param should_remove_bounty_challenger: If the bounty should be removed from the challenger
+    :param should_save_challenger: If the challenger should be saved
+    :param should_remove_bounty_opponent: If the bounty should be removed from the opponent
+    :param should_save_opponent: If the opponent should be saved
+    :param should_save_game: If the game should be saved
+    :param should_set_cooldown_challenger: If the game cooldown should be set for the challenger
+    :param should_set_global_cooldown_opponent: If the global cooldown should be set for the opponent
+    :return: None
+    """
+    if challenger is None:
+        if should_remove_bounty_challenger:
+            raise ValueError(
+                "Challenger must be provided if should_remove_bounty_challenger is True"
+            )
+
+        if should_set_cooldown_challenger:
+            raise ValueError(
+                "Challenger must be provided if should_set_cooldown_challenger is True"
+            )
+
+    if opponent is None:
+        if should_remove_bounty_opponent:
+            raise ValueError("Opponent must be provided if should_remove_bounty_opponent is True")
+
+        if should_set_global_cooldown_opponent:
+            raise ValueError(
+                "Opponent must be provided if should_set_global_cooldown_opponent is True"
+            )
+
+    if should_remove_bounty_opponent:
+        await add_or_remove_bounty(
+            opponent,
+            game.wager,
+            add=False,
+            update=update,
+            should_affect_pending_bounty=True,
+            should_save=should_save_opponent,
+        )
+    if should_set_global_cooldown_opponent:
+        opponent.should_set_global_cooldown_opponent = get_ability_adjusted_datetime(
+            opponent,
+            DevilFruitAbilityType.GAME_GLOBAL_ACCEPT_COOLDOWN_DURATION,
+            Env.GAME_GLOBAL_ACCEPT_COOLDOWN_DURATION.get_int(),
+        )
+
+    if should_remove_bounty_challenger:
+        await add_or_remove_bounty(
+            challenger,
+            game.wager,
+            add=False,
+            should_affect_pending_bounty=True,
+            update=update,
+            should_save=should_save_challenger,
+        )
+    if should_set_cooldown_challenger:
+        challenger.game_cooldown_end_date = get_ability_adjusted_datetime(
+            challenger,
+            DevilFruitAbilityType.GAME_COOLDOWN_DURATION,
+            Env.GAME_COOLDOWN_DURATION.get_int(),
+        )
+
+    # Double wager if opponent is provided
+    if opponent is not None:
+        game.wager *= 2
+        game.opponent = opponent
+
+    game.status = GameStatus.IN_PROGRESS
+
+    if should_save_game:
+        game.save()
+
+
+def get_global_game_item_text_deeplink(game: Game, user: User) -> str:
+    """
+    Get global game item text with deeplink
+    :param game: The game
+    :param user: The user
+    :return: The text
+    """
+    self_emoji = Emoji.USER if game.is_challenger(user) else ""
+
+    return phrases.GAME_GLOBAL_ITEM_DEEPLINK.format(
+        self_emoji,
+        game.get_type().get_name(),
+        get_belly_formatted(game.wager),
+        get_deeplink(
+            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
+            screen=Screen.PVT_GAME_GLOBAL_START_OPPONENT,
+        ),
+    )
+
+
+def get_global_challenges_section_text(
+    user: User, max_items_per_category: int = c.STANDARD_LIST_SIZE
+) -> str:
+    """
+    Get global challenges section text
+    :param user: The user
+    :param max_items_per_category: Max items per category
+    :return: Global challenges section
+    """
+
+    global_challenges = Game.get_global_games()
+    global_challenges_text = ""
+
+    if len(global_challenges) == 0:
+        return ""
+
+    for i, game in enumerate(global_challenges):
+        # Limit max visible items
+        if i == max_items_per_category:
+            url = get_deeplink(screen=Screen.PVT_GAME_GLOBAL_LIST)
+            global_challenges_text += phrases.VIEW_ALL_WITH_EMOJI.format(url)
+            break
+
+        global_challenges_text += phrases.DAILY_REWARD_GLOBAL_CHALLENGE_ITEM.format(
+            get_global_game_item_text_deeplink(game, user)
+        )
+
+    return phrases.DAILY_REWARD_GLOBAL_CHALLENGE.format(global_challenges_text)
+
+
+def get_auto_move_seconds(add_turn_notification_time: bool = False) -> int:
+    """
+    Get auto move seconds
+    :param add_turn_notification_time: If turn notification time should be added
+    :return: The seconds
+    """
+
+    seconds = Env.GAME_TURN_AUTO_MOVE_TIME_SECONDS.get_int()
+
+    # In case it's played in a group, auto move countdown should start from when the user is notified of their turn
+    if add_turn_notification_time:
+        seconds += Env.GAME_TURN_NOTIFICATION_TIME_SECONDS.get_int()
+
+    return seconds
+
+
+def get_auto_move_warning(add_turn_notification_time: bool = False) -> str:
+    """
+    Get auto move warning
+    :param add_turn_notification_time: If turn notification time should be added
+    :return: The warning
+    """
+
+    return phrases.GAME_AUTO_MOVE_WARNING.format(
+        convert_seconds_to_duration(
+            get_auto_move_seconds(add_turn_notification_time=add_turn_notification_time)
+        )
+    )
+
+
+async def enqueue_auto_move(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    user: User,
+    auto_move_function: Callable,
+    extra_wait_time: int = 0,
+) -> None:
+    """
+    Enqueue auto move
+    :param update: The update
+    :param context: The context
+    :param game: The game
+    :param user: The user
+    :param auto_move_function: The auto move function
+    :param extra_wait_time: Extra time to wait
+    :return: None
+    """
+    await asyncio.sleep(get_auto_move_seconds(not game.is_global()))
+
+    if extra_wait_time > 0:
+        await asyncio.sleep(extra_wait_time)
+
+    updated_game = Game.get_by_id(game.id)
+
+    # Game already ended
+    if game.is_finished():
+        return
+
+    await auto_move_function(update, context, updated_game, user)

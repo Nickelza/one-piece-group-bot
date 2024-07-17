@@ -9,6 +9,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameType import GameType
+from src.utils.string_utils import get_belly_formatted
 
 
 class Game(BaseModel):
@@ -25,6 +26,7 @@ class Game(BaseModel):
     )
     type: GameType | SmallIntegerField = SmallIntegerField(null=True)
     board: str | CharField = CharField(max_length=9999, null=True)
+    opponent_board: str | CharField = CharField(max_length=9999, null=True)
     date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     status: GameStatus | SmallIntegerField = SmallIntegerField(
         default=GameStatus.AWAITING_SELECTION
@@ -37,10 +39,15 @@ class Game(BaseModel):
         on_update="CASCADE",
     )
     message_id: int | IntegerField = IntegerField(null=True)
+    challenger_message_id: int | IntegerField = IntegerField(null=True)
+    opponent_message_id: int | IntegerField = IntegerField(null=True)
     wager: int | BigIntegerField = BigIntegerField(null=True)
     last_interaction_date: datetime.datetime | DateTimeField = DateTimeField(
         default=datetime.datetime.now
     )
+    global_challenger_start_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    global_opponent_start_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    global_challenger_has_finished: bool | BooleanField = BooleanField(default=False)
 
     class Meta:
         db_table = "game"
@@ -240,6 +247,104 @@ class Game(BaseModel):
         """
 
         return [self.challenger, self.opponent]
+
+    def is_global(self) -> bool:
+        """
+        Check if the game is global
+        :return: True if the game is global, False otherwise
+        """
+
+        return self.global_challenger_start_date is not None
+
+    @staticmethod
+    def get_global_games() -> list["Game"]:
+        """
+        Get all global games that are in progress and an opponent has not being found yet,
+        first those of which the challenger has finished, then oldest
+        :return: The global games
+        """
+
+        return (
+            Game.select()
+            .where(
+                (
+                    Game.global_challenger_start_date.is_null(False)
+                    & (Game.global_opponent_start_date.is_null())
+                    & (Game.status == GameStatus.IN_PROGRESS)
+                )
+            )
+            .order_by(
+                Game.global_challenger_has_finished.desc(), Game.global_challenger_start_date
+            )
+        )
+
+    def get_wager_formatted(self) -> str:
+        """
+        Get the formatted wager
+        :return: The formatted wager
+        """
+
+        return get_belly_formatted(self.wager)
+
+    def get_half_wager_formatted(self) -> str:
+        """
+        Get the formatted half wager
+        :return: The formatted half wager
+        """
+
+        return get_belly_formatted(self.wager // 2)
+
+    def is_challenger(self, user: User) -> bool:
+        """
+        Check if the user is the challenger
+        :param user: The user
+        :return: True if the user is the challenger, False otherwise
+        """
+
+        return user == self.challenger
+
+    def is_opponent(self, user: User) -> bool:
+        """
+        Check if the user is the opponent
+        :param user: The user
+        :return: True if the user is the opponent, False otherwise
+        """
+
+        return not self.is_challenger(user)
+
+    def get_other_player(self, user: User) -> User:
+        """
+        Get the other player
+        :param user: The user
+        :return: The other player
+        """
+
+        if self.is_challenger(user):
+            return self.opponent
+
+        return self.challenger
+
+    def get_winner(self) -> User | None:
+        """
+        Get the winner of the game
+        :return: The winner
+        """
+
+        if self.get_status() is GameStatus.WON:
+            return self.challenger
+
+        if self.get_status() is GameStatus.LOST:
+            return self.opponent
+
+        return None
+
+    def is_finished(self) -> bool:
+        """
+        Check if the game is finished
+        :return: True if the game is finished, False otherwise
+        """
+
+        return self.get_status().is_finished()
 
 
 Game.create_table()

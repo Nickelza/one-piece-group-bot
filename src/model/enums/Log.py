@@ -539,6 +539,12 @@ class GameLog(Log):
                 GAME_STATUS_DESCRIPTIONS[self.effective_status]
             )
 
+        go_to_message_text = ""
+        if not self.object.is_global():
+            go_to_message_text = phrases.LOG_ITEM_DETAIL_GO_TO_MESSAGE.format(
+                get_message_url(self.object.message_id, self.object.group_chat)
+            )
+
         return phrases.GAME_LOG_ITEM_DETAIL_TEXT.format(
             challenger_text,
             self.opponent.get_markdown_mention(),
@@ -547,6 +553,7 @@ class GameLog(Log):
             get_belly_formatted(self.object.wager),
             outcome_text,
             get_message_url(self.object.message_id, self.object.group_chat),
+            go_to_message_text,
         )
 
     def get_stats_text(self) -> str:

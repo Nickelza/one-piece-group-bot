@@ -400,7 +400,7 @@ async def full_message_send(
 
     message_source: MessageSource = MessageSource.ND
     if update is None:
-        if add_delete_button:
+        if add_delete_button and group_chat is None and should_auto_delete:
             raise ValueError(
                 "Cannot add delete button without an update object, needed to enqueue for auto"
                 " message deletion"
@@ -589,6 +589,7 @@ async def full_media_send(
     ignore_forbidden_exception: bool = False,
     edit_message_id: int = None,
     ignore_bad_request_exception: bool = False,
+    should_log_ignored_exception: bool = False,
     should_auto_delete: bool = True,
     delete_button_text=None,
 ) -> Message | bool:
@@ -626,6 +627,7 @@ async def full_media_send(
     :param exceptions_to_ignore: List of exceptions to ignore
     :param ignore_forbidden_exception: True if the forbidden exception should be ignored
     :param ignore_bad_request_exception: True if the bad request exception should be ignored
+    :param should_log_ignored_exception: If to log the ignored exception error message
     :param edit_message_id: Message id to edit
     :param should_auto_delete: True if the message should be auto deleted
     :param delete_button_text: Text to be used for the delete button
@@ -635,7 +637,7 @@ async def full_media_send(
 
     message_source: MessageSource = MessageSource.ND
     if update is None:
-        if add_delete_button:
+        if add_delete_button and group_chat is None:
             raise ValueError(
                 "Cannot add delete button without an update object, needed to enqueue for auto"
                 " message deletion"
@@ -854,7 +856,8 @@ async def full_media_send(
     except Exception as e:
         for e_to_ignore in exceptions_to_ignore:
             if isinstance(e, e_to_ignore):
-                logging.error(f"Error while sending message: {e}")
+                if should_log_ignored_exception:
+                    logging.error(f"Error while sending message: {e}")
                 return False
 
         raise e

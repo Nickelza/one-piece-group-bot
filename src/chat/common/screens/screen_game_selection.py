@@ -4,6 +4,9 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
+from src.chat.private.screens.screen_game_global_start_challenger import (
+    manage as manage_global_game,
+)
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -55,6 +58,11 @@ async def manage(
     challenger: User = game.challenger
     opponent: User = game.opponent
 
+    # In private chat, immediately start game
+    if game.group_chat is None:
+        await manage_global_game(update, context, inbound_keyboard, user)
+        return
+
     if opponent is not None:
         # Direct request to opponent
         ot_text = phrases.GAME_REQUEST.format(
@@ -82,12 +90,22 @@ async def manage(
             game.get_type().get_description(),
         )
         outbound_keyboard: list[list[Keyboard]] = [
+            # Accept button for opponent
             get_yes_no_keyboard(
                 screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
                 yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
                 primary_key=game.id,
                 exclude_no_button=True,
-            )
+            ),
+            # Start as global button
+            [
+                Keyboard(
+                    phrases.GRP_KEY_GAME_START_GLOBAL,
+                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
+                    screen=Screen.PVT_GAME_GLOBAL_START_CHALLENGER,
+                    is_deeplink=True,
+                )
+            ],
         ]
 
     button_delete_info = {
@@ -95,13 +113,15 @@ async def manage(
         ReservedKeyboardKeys.AUTHORIZED_USERS: [challenger.id],
         GameSelectionReservedKeys.CANCEL: True,
     }
-    outbound_keyboard.append([
-        Keyboard(
-            phrases.KEYBOARD_OPTION_CANCEL,
-            info=button_delete_info,
-            screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
-        )
-    ])
+    outbound_keyboard.append(
+        [
+            Keyboard(
+                phrases.KEYBOARD_OPTION_CANCEL,
+                info=button_delete_info,
+                screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+            )
+        ]
+    )
 
     await full_media_send(
         context,
