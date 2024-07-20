@@ -96,7 +96,8 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
                         try:
                             url = post.media["reddit_video"]["fallback_url"]
                             url = url.split("?")[0]
-                            saved_media.media_id = open(download_temp_file(url), "rb")
+                            with open(download_temp_file(url), "rb") as media_id:
+                                saved_media.media_id = media_id.read()
                         except KeyError:
                             logging.error("Reddit post {} has no video".format(post.shortlink))
                             continue
@@ -116,7 +117,8 @@ async def manage(context: ContextTypes.DEFAULT_TYPE, subreddit_name: str) -> Non
                         image_path = compress_image(
                             post.url, c.TG_DEFAULT_IMAGE_COMPRESSION_QUALITY
                         )
-                        saved_media.media_id = open(image_path, "rb")
+                        with open(image_path, "rb") as media_id:
+                            saved_media.media_id = media_id.read()
                         message: Message = await full_media_send(
                             context,
                             saved_media,

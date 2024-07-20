@@ -131,12 +131,14 @@ async def manage(
             )
             or user.is_arrested()
         ):
-            outbound_keyboard: list[list[Keyboard]] = [[
-                Keyboard(
-                    phrases.STATUS_PRIVATE_CHAT_KEY,
-                    url=get_start_with_command_url(Command.GRP_USER_STATUS.name),
-                )
-            ]]
+            outbound_keyboard: list[list[Keyboard]] = [
+                [
+                    Keyboard(
+                        phrases.STATUS_PRIVATE_CHAT_KEY,
+                        url=get_start_with_command_url(Command.GRP_USER_STATUS.name),
+                    )
+                ]
+            ]
 
             ot_text = (
                 phrases.PRISONER_STATUS_PRIVATE_CHAT_ONLY
@@ -338,7 +340,8 @@ async def send_bounty_poster(
 ) -> None:
     poster_path = await get_bounty_poster(update, user)
     poster: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO)
-    poster.media_id = open(poster_path, "rb")
+    with open(poster_path, "rb") as media_id:
+        poster.media_id = media_id.read()
 
     await full_media_send(
         context,

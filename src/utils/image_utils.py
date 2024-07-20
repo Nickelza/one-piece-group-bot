@@ -21,10 +21,10 @@ def compress_image(path: str, quality: int) -> str:
     if validators.url(path):
         path = download_temp_file(path)
 
-    image = Image.open(path)
-    compressed_image_path = os.path.join(
-        os.path.dirname(path), f"compressed_{os.path.basename(path)}"
-    )
-    image.save(compressed_image_path, quality=quality, optimize=True)
+    with Image.open(path) as image:
+        compressed_image_path = os.path.join(
+            os.path.dirname(path), f"compressed_{os.path.basename(path)}"
+        )
+        image.save(compressed_image_path, quality=quality, optimize=True)
 
     return compressed_image_path

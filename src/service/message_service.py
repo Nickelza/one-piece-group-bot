@@ -679,8 +679,9 @@ async def full_media_send(
                 raise KeyError
         except KeyError:
             # Load media id from file
-            saved_media.media_id = open(saved_media.file_name, "rb")
-            should_save_media_id = saved_media.name is not None
+            with open(saved_media.file_name, "rb") as m:
+                saved_media.media_id = m.read()
+                should_save_media_id = saved_media.name is not None
 
     topic_id = None
     if group_chat is not None:
