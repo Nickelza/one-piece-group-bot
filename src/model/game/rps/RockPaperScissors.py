@@ -1,17 +1,18 @@
-import json
-
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
 from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 
 
-class RockPaperScissors:
+class RockPaperScissors(GameBoard):
     def __init__(
         self,
         game_turn: GameTurn = GameTurn.CHALLENGER,
         challenger_choice: RPSChoice = RPSChoice.NONE,
         opponent_choice: RPSChoice = RPSChoice.NONE,
     ):
+        super().__init__()
+
         self.game_turn = game_turn
         self.challenger_choice: RPSChoice = challenger_choice
         self.opponent_choice: RPSChoice = opponent_choice
@@ -49,16 +50,6 @@ class RockPaperScissors:
             return GameOutcome.CHALLENGER_WON
 
         return GameOutcome.OPPONENT_WON
-
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(
-            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
-        )
 
     def set_turn(self):
         """

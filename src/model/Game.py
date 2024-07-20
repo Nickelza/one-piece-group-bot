@@ -7,6 +7,7 @@ from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.SavedMediaName import SavedMediaName
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameType import GameType
 from src.utils.string_utils import get_belly_formatted
@@ -345,6 +346,19 @@ class Game(BaseModel):
         """
 
         return self.get_status().is_finished()
+
+    def set_board(self, board: GameBoard, user: User) -> None:
+        """
+        Set the board for the user
+        :param board: The game board
+        :param user: The user
+        :return: None
+        """
+
+        if self.is_challenger(user) or not self.is_global():
+            self.board = board.get_as_json_string()
+        else:
+            self.opponent_board = board.get_as_json_string()
 
 
 Game.create_table()

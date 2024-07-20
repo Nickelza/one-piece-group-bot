@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 
 from resources import phrases
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
+from src.chat.common.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -22,7 +23,7 @@ from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(
-        update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
+    update: Update, context: ContextTypes.DEFAULT_TYPE, inbound_keyboard: Keyboard, user: User
 ) -> None:
     """
     Manage the game input screen
@@ -49,7 +50,9 @@ async def manage(
 
     # Collect wagers
     game.global_challenger_start_date = datetime.datetime.now()
-    await collect_game_wagers_and_set_in_progress(update, game, challenger=user, should_remove_bounty_opponent=False)
+    await collect_game_wagers_and_set_in_progress(
+        update, game, challenger=user, should_remove_bounty_opponent=False
+    )
 
     # Edit group message to show that it's now a global challenge, best effort
     if game.group_chat is not None:
@@ -88,11 +91,11 @@ async def manage(
 
 
 async def dispatch_global_game(
-        update: Update,
-        context: ContextTypes.DEFAULT_TYPE,
-        user: User,
-        inbound_keyboard: Keyboard,
-        game: Game,
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    user: User,
+    inbound_keyboard: Keyboard,
+    game: Game,
 ) -> None:
     """
     Dispatch game
@@ -109,9 +112,9 @@ async def dispatch_global_game(
         case GameType.ROCK_PAPER_SCISSORS:
             await manage_rps(update, context, user, inbound_keyboard, game)
 
-        # case GameType.RUSSIAN_ROULETTE:
-        #     await manage_rr(update, context, user, inbound_keyboard, game)
-        #
+        case GameType.RUSSIAN_ROULETTE:
+            await manage_rr(update, context, user, inbound_keyboard, game)
+
         # case GameType.SHAMBLES:
         #     await manage_shambles(update, context, inbound_keyboard, game)
         #

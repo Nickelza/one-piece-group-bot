@@ -7,9 +7,9 @@ import resources.phrases as phrases
 from src.chat.common.screens.screen_game_gol import manage as manage_gol
 from src.chat.common.screens.screen_game_pr import manage as manage_pr
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
+from src.chat.common.screens.screen_game_rr import manage as manage_rr
 from src.chat.common.screens.screen_game_shambles import manage as manage_shambles
 from src.chat.common.screens.screen_game_ww import manage as manage_ww
-from src.chat.group.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus

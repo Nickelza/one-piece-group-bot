@@ -1,8 +1,8 @@
-import json
 import random
 
 from src.model.Game import Game
 from src.model.User import User
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
 from src.model.game.russianroulette.RussianRouletteChamberStatus import (
@@ -10,7 +10,7 @@ from src.model.game.russianroulette.RussianRouletteChamberStatus import (
 )
 
 
-class RussianRoulette:
+class RussianRoulette(GameBoard):
     def __init__(
         self,
         rows: int = 3,
@@ -20,6 +20,8 @@ class RussianRoulette:
         bullet_y: int = -1,
         game_turn: GameTurn = GameTurn.CHALLENGER,
     ):
+        super().__init__()
+
         self.rows = rows
         self.columns = columns
         self.cylinder: list[[RRChamberStatus]] = (
@@ -54,13 +56,31 @@ class RussianRoulette:
                 self.bullet_y = y
                 break
 
-    def is_finished(self) -> bool:
+    def is_finished(self, other_board: "RussianRoulette" = None) -> bool:
         """
         Returns if the game is finished. The game is finished when all but one chamber is fired, except for the center
+        :param other_board: The other board, in case of global game
         :return: GameTurn
         """
+        other_is_finished = other_board is None or other_board.is_finished()
+
+        self_fired_correct_count = self.get_fired_correct_count()
+        other_fired_correct_count = (
+            other_board.get_fired_correct_count() if other_board is not None else 0
+        )
+
+        if not other_is_finished:
+            # If other board still in play, but I hit a bullet, then I lose if  I have less points
+            if self.bullet_is_fired() and self_fired_correct_count < other_fired_correct_count:
+                return True
+
+            return False
 
         if self.bullet_is_fired():
+            return True
+
+        # If in global game and the other board is finished, then I have already won if I currently have more points
+        if other_board is not None and self_fired_correct_count > other_fired_correct_count:
             return True
 
         not_fired_count = 0
@@ -89,14 +109,6 @@ class RussianRoulette:
 
         return self.cylinder[self.bullet_x][self.bullet_y]
 
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(self.__dict__)
-
     def set_turn(self):
         """
         Sets the turn
@@ -106,14 +118,33 @@ class RussianRoulette:
             GameTurn.CHALLENGER if self.game_turn is GameTurn.OPPONENT else GameTurn.OPPONENT
         )
 
-    def get_outcome(self) -> GameOutcome:
+    def get_outcome(
+        self, user_is_challenger: bool, other_board: "RussianRoulette" = None
+    ) -> GameOutcome:
         """
         Returns the outcome of the game
+        :param user_is_challenger: If the outcome is being evaluated by the challenger
+        :param other_board: The other board, in case of global game
         :return: GameTurn
         """
 
-        if not self.is_finished():
+        if not self.is_finished(other_board=other_board):
             return GameOutcome.NONE
+
+        if other_board is not None:  # Global game, wins how has more points
+            self_points = self.get_fired_correct_count()
+            other_points = other_board.get_fired_correct_count()
+
+            if self_points > other_points:
+                return (
+                    GameOutcome.CHALLENGER_WON if user_is_challenger else GameOutcome.OPPONENT_WON
+                )
+            elif self_points < other_points:
+                return (
+                    GameOutcome.OPPONENT_WON if user_is_challenger else GameOutcome.CHALLENGER_WON
+                )
+
+            return GameOutcome.DRAW
 
         if self.bullet_is_fired():
             if self.game_turn == GameTurn.CHALLENGER:
@@ -151,9 +182,27 @@ class RussianRoulette:
     def is_chamber_center(self, x: int, y: int) -> bool:
         """
         Returns if the chamber is the center
-        :param x: int
-        :param y: int
-        :return: bool
+        :param x: Location x
+        :param y: Location y
+        :return: If is the center of the chamber
         """
 
         return x == self.rows // 2 and y == self.columns // 2
+
+    def get_fired_correct_count(self) -> int:
+        """
+        Returns the number of chambers that have been fired and don't contain a bullet
+        :return: int
+        """
+
+        fired_correct_count = 0
+        for row_index, row in enumerate(self.cylinder):
+            for chamber_index, chamber in enumerate(row):
+                if chamber == RRChamberStatus.FIRED:
+                    fired_correct_count += 1
+
+        # If bullet is fired, subtract 1
+        if self.bullet_is_fired():
+            fired_correct_count -= 1
+
+        return fired_correct_count

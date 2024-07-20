@@ -173,6 +173,8 @@ def get_text(
     is_played_in_private_chat: bool = False,
     text_to_add_before_footer: str = None,
     is_for_group_global: bool = False,
+    challenger_has_finished: bool = False,
+    opponent_has_finished: bool = False,
 ) -> str:
     """
     Get the text
@@ -185,7 +187,9 @@ def get_text(
     :param remaining_seconds_to_start: The remaining seconds to start
     :param is_played_in_private_chat: Is the game played in private chat
     :param text_to_add_before_footer: The text to add before the footer
-        :param is_for_group_global: If the text is for a group and the game is global
+    :param is_for_group_global: If the text is for a group and the game is global
+    :param challenger_has_finished: If the challenger has finished playing
+    :param opponent_has_finished: If the opponent has finished playing
     :return: The text
     """
 
@@ -209,6 +213,11 @@ def get_text(
             added_ot_text += phrases.GAME_RESULT_WIN.format(mention_markdown_user(game.opponent))
         else:
             added_ot_text += phrases.GAME_RESULT_DRAW
+    elif game.is_global() and not is_for_group_global:
+        if game.is_challenger(user_turn) and not opponent_has_finished:
+            added_ot_text += phrases.GAME_GLOBAL_PENDING_CHALLENGER
+        elif not challenger_has_finished:
+            added_ot_text += phrases.GAME_GLOBAL_PENDING_OPPONENT
     elif not is_for_group_global:
         if is_turn_based:
             added_ot_text += phrases.GAME_TURN.format(mention_markdown_user(user_turn))
@@ -219,6 +228,23 @@ def get_text(
                 )
             elif is_played_in_private_chat:
                 added_ot_text += phrases.GAME_STARTED
+
+    # Add auto move warning
+    if (
+            is_turn_based
+            and (game.is_challenger(user_turn) and not challenger_has_finished)
+            or (game.is_opponent(user_turn) and not opponent_has_finished)
+    ):
+        added_ot_text += get_auto_move_warning(add_turn_notification_time=not game.is_global())
+
+    if game.opponent is None:  # Global
+        return phrases.GAME_TEXT_WITHOUT_PLAYERS.format(
+            game_type.get_name(),
+            game_type.get_description(),
+            get_belly_formatted(game.wager),
+            difficulty_text,
+            added_ot_text,
+        )
 
     return phrases.GAME_TEXT.format(
         game_type.get_name(),
@@ -1066,6 +1092,7 @@ async def enqueue_auto_move(
     game: Game,
     user: User,
     auto_move_function: Callable,
+    message_id: int,
     extra_wait_time: int = 0,
 ) -> None:
     """
@@ -1075,6 +1102,7 @@ async def enqueue_auto_move(
     :param game: The game
     :param user: The user
     :param auto_move_function: The auto move function
+    :param message_id: Identifier of the message that will be updated in auto move
     :param extra_wait_time: Extra time to wait
     :return: None
     """
@@ -1089,4 +1117,51 @@ async def enqueue_auto_move(
     if game.is_finished():
         return
 
-    await auto_move_function(update, context, updated_game, user)
+    await auto_move_function(update, context, updated_game, user, message_id, game)
+
+
+async def edit_other_player_message(
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    player: User,
+    sent_message_id: int,
+    challenger_text: str,
+    opponent_text: str,
+    outbound_keyboard: list[list[Keyboard]],
+):
+    """
+    Edit the other player message
+    :param context: The context object
+    :param game: The game object
+    :param player: The player object
+    :param sent_message_id: The id of the message that was just sent to the player
+    :param challenger_text: The challenger text
+    :param opponent_text: The opponent text
+    :param outbound_keyboard: The outbound keyboard
+    :return: None
+    """
+    if game.is_challenger(player):
+        game.challenger_message_id = sent_message_id
+        other_player: User = game.opponent
+        other_player_message_id = game.opponent_message_id
+        other_player_text = opponent_text
+    else:
+        game.opponent_message_id = sent_message_id
+        other_player: User = game.challenger
+        other_player_message_id = game.challenger_message_id
+        other_player_text = challenger_text
+
+    if other_player is not None:
+        await full_media_send(
+            context,
+            caption=other_player_text,
+            keyboard=outbound_keyboard,
+            authorized_users=game.get_players(),
+            chat_id=other_player.tg_user_id,
+            edit_message_id=other_player_message_id,
+            ignore_bad_request_exception=True,
+            ignore_forbidden_exception=True,
+            edit_only_caption_and_keyboard=True,
+        )
+
+    game.save()

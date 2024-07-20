@@ -184,6 +184,7 @@ TEXT_NOT_SET = "Not set"
 TEXT_RANDOM = "Random"
 TEXT_ONLY = "Only {}"
 TEXT_YOU = "You"
+TEXT_YOUR = "Your"
 TEXT_STOLE = "stole"
 TEXT_OWE = "[owe]({})"
 TEXT_NEVER = "Never"
@@ -544,6 +545,8 @@ GAME_GLOBAL_OPPONENT_CONFIRMATION_REQUEST = (
 GAME_GLOBAL_CHALLENGE_ACCEPTED_ALERT = "Challenge accepted"
 GAME_GLOBAL_CHALLENGE_ITEM_TEXT_FILL_IN = "Global Challenge"
 GAME_AUTO_MOVE_WARNING = "\n\n>In case of no selection, a move will be automatically made after {}"
+GAME_POINTS = "{} points: *{}/{}*"
+GAME_POINTS_FINISHED = " \\(Finished\\)"
 
 ROCK_PAPER_SCISSORS_GAME_NAME = "Rock Paper Scissors"
 ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = (
@@ -570,6 +573,13 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = (
 )
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
+RUSSIAN_ROULETTE_GAME_WAIT_FOR_OPPONENT = (
+    "Game ended, you will be notified of the result once your opponent has finished too"
+)
+GAME_GLOBAL_PENDING_CHALLENGER = (
+    "\n\n>You will be notified once another player has accepted the game and finished playing"
+)
+GAME_GLOBAL_PENDING_OPPONENT = "\n\n>You will be notified once the challenger has finished playing"
 
 GUESS_GAME_INPUT_CAPTION_HINT = "\n\n" + Emoji.NEW + "Hint: {}"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = "\n\nIn *{}* seconds, a hint will be sent"

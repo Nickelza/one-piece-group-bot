@@ -13,6 +13,7 @@ from src.chat.common.screens.screen_daily_reward_prize import (
 from src.chat.common.screens.screen_doc_q_game import manage as manage_screen_doc_q_game
 from src.chat.common.screens.screen_game import manage as manage_screen_game
 from src.chat.common.screens.screen_game_rps import manage as manage_screen_game_rps
+from src.chat.common.screens.screen_game_rr import manage as manage_screen_game_rr
 from src.chat.common.screens.screen_game_selection import manage as manage_screen_game_selection
 from src.chat.common.screens.screen_status import manage as manage_screen_status
 from src.chat.private.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
@@ -603,6 +604,9 @@ async def dispatch_screens(
 
             case Screen.PVT_ROCK_PAPER_SCISSORS_GAME:
                 await manage_screen_game_rps(update, context, user, inbound_keyboard)
+
+            case Screen.PVT_RUSSIAN_ROULETTE_GAME:
+                await manage_screen_game_rr(update, context, user, inbound_keyboard)
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

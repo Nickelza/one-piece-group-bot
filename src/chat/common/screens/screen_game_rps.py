@@ -2,7 +2,6 @@ import json
 import random
 from datetime import datetime
 from enum import StrEnum
-from typing import Tuple
 
 from telegram import Update, Message
 from telegram.error import BadRequest
@@ -20,7 +19,11 @@ from src.model.game.GameOutcome import GameOutcome
 from src.model.game.rps.RockPaperScissors import RockPaperScissors
 from src.model.game.rps.RockPaperScissorsChoice import RockPaperScissorsChoice as RPSChoice
 from src.model.pojo.Keyboard import Keyboard
-from src.service.game_service import get_auto_move_warning, enqueue_auto_move
+from src.service.game_service import (
+    get_auto_move_warning,
+    enqueue_auto_move,
+    edit_other_player_message,
+)
 from src.service.message_service import (
     full_message_send,
     mention_markdown_user,
@@ -46,6 +49,7 @@ async def manage(
     inbound_keyboard: Keyboard,
     game: Game = None,
     is_auto_move: bool = False,
+    edit_message_id: int = None,
 ) -> None:
     """
     Manage the Rock Paper Scissors game screen
@@ -55,6 +59,8 @@ async def manage(
     :param inbound_keyboard: The inbound keyboard
     :param game: The game object
     :param is_auto_move: If the interaction is from auto move
+    :param edit_message_id: Message to be edited. Useful for when a user does not interact with the private game before
+        auto-move is triggered, since the message tied with the update would be the start command
     :return: None
     """
 
@@ -63,7 +69,7 @@ async def manage(
     if game is None:
         return
 
-    game, rock_paper_scissors = get_board(game)
+    rock_paper_scissors: RockPaperScissors = get_board(game)
     game.last_interaction_date = datetime.now()
 
     if inbound_keyboard.screen == get_screen(update):
@@ -74,7 +80,7 @@ async def manage(
         else:
             rock_paper_scissors.opponent_choice = rps_choice
 
-        game.board = rock_paper_scissors.get_board_json()
+        game.board = rock_paper_scissors.get_as_json_string()
         game.save()
 
         # Alert showing choice, if not auto-move
@@ -112,6 +118,7 @@ async def manage(
             keyboard=get_outbound_keyboard(game, update),
             authorized_users=game.get_players(),
             edit_only_caption_and_keyboard=True,
+            edit_message_id=edit_message_id,
         )
 
         # Global game, modify opponent message
@@ -139,6 +146,7 @@ async def manage(
             keyboard=get_outbound_keyboard(game, update),
             authorized_users=game.get_players(),
             saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
+            edit_message_id=edit_message_id,
         )
 
         # Modify other player message and save current message id
@@ -186,7 +194,9 @@ async def manage(
 
             if should_auto_move_challenger:
                 context.application.create_task(
-                    enqueue_auto_move(update, context, game, game.challenger, auto_move)
+                    enqueue_auto_move(
+                        update, context, game, game.challenger, auto_move, message.id
+                    )
                 )
 
             if should_auto_move_opponent:
@@ -200,6 +210,7 @@ async def manage(
                         game,
                         game.opponent,
                         auto_move,
+                        message.id,
                         extra_wait_time=extra_wait_time,
                     )
                 )
@@ -207,53 +218,6 @@ async def manage(
     except BadRequest:
         # Possible when user changes a choice, so the output message stays the same
         pass
-
-
-async def edit_other_player_message(
-    context: ContextTypes.DEFAULT_TYPE,
-    game: Game,
-    player: User,
-    sent_message_id: int,
-    challenger_text: str,
-    opponent_text: str,
-    outbound_keyboard: list[list[Keyboard]],
-):
-    """
-    Edit the other player message
-    :param context: The context object
-    :param game: The game object
-    :param player: The player object
-    :param sent_message_id: The id of the message that was just sent to the player
-    :param challenger_text: The challenger text
-    :param opponent_text: The opponent text
-    :param outbound_keyboard: The outbound keyboard
-    :return: None
-    """
-    if game.is_challenger(player):
-        game.challenger_message_id = sent_message_id
-        other_player: User = game.opponent
-        other_player_message_id = game.opponent_message_id
-        other_player_text = opponent_text
-    else:
-        game.opponent_message_id = sent_message_id
-        other_player: User = game.challenger
-        other_player_message_id = game.challenger_message_id
-        other_player_text = challenger_text
-
-    if other_player is not None:
-        await full_media_send(
-            context,
-            caption=other_player_text,
-            keyboard=outbound_keyboard,
-            authorized_users=game.get_players(),
-            chat_id=other_player.tg_user_id,
-            edit_message_id=other_player_message_id,
-            ignore_bad_request_exception=True,
-            ignore_forbidden_exception=True,
-            edit_only_caption_and_keyboard=True,
-        )
-
-    game.save()
 
 
 def get_outbound_keyboard(game: Game, update: Update) -> list[list[Keyboard]]:
@@ -289,7 +253,7 @@ def get_outbound_keyboard(game: Game, update: Update) -> list[list[Keyboard]]:
     return outbound_keyboard
 
 
-def get_board(game: Game) -> Tuple[Game, RockPaperScissors]:
+def get_board(game: Game) -> RockPaperScissors:
     """
     Get the board
     :param game: The game object
@@ -299,12 +263,12 @@ def get_board(game: Game) -> Tuple[Game, RockPaperScissors]:
     # Create board
     if game.board is None:
         rock_paper_scissors = RockPaperScissors()
-        game.board = rock_paper_scissors.get_board_json()
+        game.board = rock_paper_scissors.get_as_json_string()
         game.save()
-        return game, rock_paper_scissors
+        return rock_paper_scissors
 
     rock_paper_scissors_dict = json.loads(game.board)
-    return game, RockPaperScissors(**rock_paper_scissors_dict)
+    return RockPaperScissors(**rock_paper_scissors_dict)
 
 
 def get_text(game: Game, rock_paper_scissors: RockPaperScissors, player: User) -> str:
@@ -350,7 +314,7 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors, player: User) -
             )
         ):
             added_ot_text = phrases.GAME_STATUS_AWAITING_CHOICE + get_auto_move_warning(
-                not game.is_global()
+                add_turn_notification_time=not game.is_global()
             )
         elif game.is_global():
             is_challenger = player == game.challenger
@@ -454,7 +418,12 @@ def get_screen(update: Update) -> Screen:
 
 
 async def auto_move(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, game: Game, player: User
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    player: User,
+    message_id: int,
+    _previous_game: Game,  # Unused
 ) -> None:
     """
     Auto-move for the given player
@@ -462,11 +431,13 @@ async def auto_move(
     :param context: The context object
     :param game: The game object
     :param player: The player object
+    :param message_id: Identifier of the message to be edited
+    :param _previous_game: Game object state during enqueue
     :return: None
     """
 
     # Check that user has not already made a move
-    game, board = get_board(game)
+    board: RockPaperScissors = get_board(game)
     if (
         (game.is_challenger(player) and board.challenger_choice != RPSChoice.NONE)
         or game.is_opponent(player)
@@ -494,4 +465,6 @@ async def auto_move(
     )
 
     player = User.get_by_id(player.id)  # Refresh
-    await manage(update, context, player, mock_keyboard, game, is_auto_move=True)
+    await manage(
+        update, context, player, mock_keyboard, game, is_auto_move=True, edit_message_id=message_id
+    )
