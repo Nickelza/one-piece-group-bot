@@ -93,16 +93,18 @@ async def manage(
                 )
 
                 # Pay all button
-                inline_keyboard.append([
-                    Keyboard(
-                        phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL,
-                        info={
-                            BountyLoanDetailActivateReservedKeys.PAY_ALL: 1,
-                            ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_CONFIRMATION,
-                        },
-                        inbound_info=inbound_keyboard.info,
-                    )
-                ])
+                inline_keyboard.append(
+                    [
+                        Keyboard(
+                            phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY_ALL,
+                            info={
+                                BountyLoanDetailActivateReservedKeys.PAY_ALL: 1,
+                                ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_CONFIRMATION,
+                            },
+                            inbound_info=inbound_keyboard.info,
+                        )
+                    ]
+                )
 
             case Step.REQUEST_CONFIRMATION:
                 if (

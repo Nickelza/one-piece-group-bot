@@ -1559,11 +1559,7 @@ def get_player_board(game: Game, user: User) -> PunkRecords | Shambles | WhosWho
     """
 
     challenger_board, opponent_board = get_generic_boards_for_guess_game(game)
-    return (
-        challenger_board
-        if game.is_challenger(user) or not game.is_global()
-        else opponent_board
-    )
+    return challenger_board if game.is_challenger(user) or not game.is_global() else opponent_board
 
 
 async def should_proceed_after_hint_sleep(

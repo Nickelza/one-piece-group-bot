@@ -37,59 +37,69 @@ async def manage(
 
     # Arrested user, show Post bail button if it's temporary
     if member.is_arrested_temporary():
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEY_POST_BAIL,
-                screen=Screen.PVT_POST_BAIL,
-                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEY_POST_BAIL,
+                    screen=Screen.PVT_POST_BAIL,
+                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        )
 
     # Captain buttons
     if user.is_crew_captain() and user != member:
         # Promote to First Mate (only Crew does not have a First Mate and can promote one)
         if not crew.has_first_mate() and crew.can_promote_first_mate:
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE,
-                    screen=Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_PROMOTE,
-                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
-                    inbound_info=inbound_keyboard.info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_CREW_MEMBER_FIRST_MATE_PROMOTE,
+                        screen=Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_PROMOTE,
+                        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ]
+            )
 
         # Demote from First Mate (only if the member is the First Mate)
         if member.is_crew_first_mate():
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE,
-                    screen=Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_DEMOTE,
-                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
-                    inbound_info=inbound_keyboard.info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_CREW_MEMBER_FIRST_MATE_DEMOTE,
+                        screen=Screen.PVT_CREW_MEMBER_DETAIL_FIRST_MATE_DEMOTE,
+                        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ]
+            )
 
         # Promote to Captain (only if the member is the First Mate)
         if member.is_crew_first_mate():
-            inline_keyboard.append([
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_CREW_MEMBER_CAPTAIN_PROMOTE,
+                        screen=Screen.PVT_CREW_MEMBER_DETAIL_CAPTAIN_PROMOTE,
+                        info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
+                        inbound_info=inbound_keyboard.info,
+                    )
+                ]
+            )
+
+        # Remove member
+        inline_keyboard.append(
+            [
                 Keyboard(
-                    phrases.PVT_KEY_CREW_MEMBER_CAPTAIN_PROMOTE,
-                    screen=Screen.PVT_CREW_MEMBER_DETAIL_CAPTAIN_PROMOTE,
+                    phrases.PVT_KEY_CREW_MEMBER_REMOVE,
+                    screen=Screen.PVT_CREW_MEMBER_DETAIL_REMOVE,
                     info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
                     inbound_info=inbound_keyboard.info,
                 )
-            ])
-
-        # Remove member
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_CREW_MEMBER_REMOVE,
-                screen=Screen.PVT_CREW_MEMBER_DETAIL_REMOVE,
-                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: member.id},
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+            ]
+        )
 
     await full_message_send(
         context,

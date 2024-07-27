@@ -47,9 +47,13 @@ async def manage(
         )
 
         # Davy back fight button
-        inline_keyboard.append([
-            Keyboard(phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT, screen=Screen.PVT_CREW_DAVY_BACK_FIGHT)
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT, screen=Screen.PVT_CREW_DAVY_BACK_FIGHT
+                )
+            ]
+        )
 
         # Modify button
         inline_keyboard.append([Keyboard(phrases.KEY_MODIFY, screen=Screen.PVT_CREW_MODIFY)])

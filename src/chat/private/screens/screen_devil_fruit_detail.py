@@ -42,53 +42,63 @@ async def manage(
     # Show eat and trade buttons if the user have not eaten the Devil Fruit
     if devil_fruit_status is DevilFruitStatus.COLLECTED:
         # Eat button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
-                screen=Screen.PVT_DEVIL_FRUIT_DETAIL_EAT,
-                info=button_info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_EAT,
+                    screen=Screen.PVT_DEVIL_FRUIT_DETAIL_EAT,
+                    info=button_info,
+                )
+            ]
+        )
 
         # Sell button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_SELL,
-                screen=Screen.PVT_DEVIL_FRUIT_DETAIL_SELL,
-                info=button_info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_SELL,
+                    screen=Screen.PVT_DEVIL_FRUIT_DETAIL_SELL,
+                    info=button_info,
+                )
+            ]
+        )
 
     # Discard button
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
-            screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
-            info=button_info,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_DEVIL_FRUIT_DETAIL_DISCARD,
+                screen=Screen.PVT_DEVIL_FRUIT_DETAIL_DISCARD,
+                info=button_info,
+            )
+        ]
+    )
 
     # View in shop button
     trade = DevilFruitTrade.get_pending_in_shop(devil_fruit)
     if trade is not None:
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
-                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
-                info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_DEVIL_FRUIT_VIEW_IN_SHOP,
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                    info={ReservedKeyboardKeys.DEFAULT_SECONDARY_KEY: trade.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        )
 
     # Shop button, adding here too because user could arrive here directly, without going through
     # list page
-    inline_keyboard.append([
-        Keyboard(
-            phrases.KEY_SHOP,
-            screen=Screen.PVT_DEVIL_FRUIT_SHOP,
-            inbound_info=inbound_keyboard.info,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.KEY_SHOP,
+                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                inbound_info=inbound_keyboard.info,
+            )
+        ]
+    )
 
     await full_message_send(
         context,

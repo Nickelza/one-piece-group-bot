@@ -125,13 +125,15 @@ async def manage(
     )
 
     # Shop button
-    items_keyboard.append([
-        Keyboard(
-            phrases.KEY_SHOP,
-            screen=Screen.PVT_DEVIL_FRUIT_SHOP,
-            inbound_info=inbound_keyboard.info,
-        )
-    ])
+    items_keyboard.append(
+        [
+            Keyboard(
+                phrases.KEY_SHOP,
+                screen=Screen.PVT_DEVIL_FRUIT_SHOP,
+                inbound_info=inbound_keyboard.info,
+            )
+        ]
+    )
 
     await full_message_send(
         context,

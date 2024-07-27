@@ -437,9 +437,9 @@ async def validate(
 
     # Always accept delete request in private chat
     if (
-            is_callback
-            and message_source is MessageSource.PRIVATE
-            and ReservedKeyboardKeys.DELETE in inbound_keyboard.info
+        is_callback
+        and message_source is MessageSource.PRIVATE
+        and ReservedKeyboardKeys.DELETE in inbound_keyboard.info
     ):
         await delete_message(update)
         return False

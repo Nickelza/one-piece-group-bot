@@ -39,11 +39,13 @@ async def manage(
 
     if user.is_crew_captain_or_first_mate() and len(active_abilities) < crew.max_abilities:
         # Activate ability button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_CREW_ABILITY_ACTIVATE, screen=Screen.PVT_CREW_ABILITY_ACTIVATE
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_CREW_ABILITY_ACTIVATE, screen=Screen.PVT_CREW_ABILITY_ACTIVATE
+                )
+            ]
+        )
 
     abilities_text = get_crew_abilities_text(active_abilities=active_abilities, add_duration=True)
 

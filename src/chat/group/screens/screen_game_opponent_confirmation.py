@@ -108,4 +108,3 @@ async def manage(
     )
 
     await dispatch_game(update, context, user, inbound_keyboard, game)
-

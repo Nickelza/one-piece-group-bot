@@ -53,24 +53,28 @@ async def manage(
                 ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id,
                 ReservedKeyboardKeys.SCREEN_STEP: StepPay.REQUEST_AMOUNT,
             }
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY,
-                    screen=Screen.PVT_BOUNTY_LOAN_DETAIL_PAY,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_PAY,
+                        screen=Screen.PVT_BOUNTY_LOAN_DETAIL_PAY,
+                        info=button_info,
+                    )
+                ]
+            )
 
         # If loaner, show forgive button
         if bounty_loan_list_page.user_is_loaner:
             button_info = {ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: loan.id}
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE,
-                    screen=Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_BOUNTY_LOAN_DETAIL_FORGIVE,
+                        screen=Screen.PVT_BOUNTY_LOAN_DETAIL_FORGIVE,
+                        info=button_info,
+                    )
+                ]
+            )
 
     await full_message_send(
         context,

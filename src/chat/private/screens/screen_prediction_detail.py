@@ -179,23 +179,27 @@ async def manage(
     if prediction.is_open():
         if should_show_place_bet_button(prediction, user):
             button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_PREDICTION_DETAIL_PLACE_BET,
-                    screen=Screen.PVT_PREDICTION_DETAIL_PLACE_BET,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_PREDICTION_DETAIL_PLACE_BET,
+                        screen=Screen.PVT_PREDICTION_DETAIL_PLACE_BET,
+                        info=button_info,
+                    )
+                ]
+            )
 
         if should_show_remove_bet_button(prediction, user):
             button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.PVT_KEY_PREDICTION_DETAIL_REMOVE_BET,
-                    screen=Screen.PVT_PREDICTION_DETAIL_REMOVE_BET,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.PVT_KEY_PREDICTION_DETAIL_REMOVE_BET,
+                        screen=Screen.PVT_PREDICTION_DETAIL_REMOVE_BET,
+                        info=button_info,
+                    )
+                ]
+            )
 
     # Creator management buttons
     if prediction.creator == user:
@@ -215,31 +219,39 @@ async def manage(
                 PredictionDetailReservedKeys.PREDICTION_ID: prediction.id,
                 PredictionDetailReservedKeys.CLOSE: True,
             }
-            inline_keyboard.append([
-                Keyboard(phrases.KEY_CLOSE, screen=Screen.PVT_PREDICTION_DETAIL, info=button_info)
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEY_CLOSE, screen=Screen.PVT_PREDICTION_DETAIL, info=button_info
+                    )
+                ]
+            )
 
         # Send to group if is sent status
         if prediction.get_status() is PredictionStatus.SENT:
             button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEY_SEND_TO_GROUP,
-                    screen=Screen.PVT_PREDICTION_DETAIL_SEND_TO_GROUP,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEY_SEND_TO_GROUP,
+                        screen=Screen.PVT_PREDICTION_DETAIL_SEND_TO_GROUP,
+                        info=button_info,
+                    )
+                ]
+            )
 
         # Set result button if is closed status
         if prediction.get_status() is PredictionStatus.BETS_CLOSED:
             button_info = {PredictionDetailReservedKeys.PREDICTION_ID: prediction.id}
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEY_SET_RESULT,
-                    screen=Screen.PVT_PREDICTION_DETAIL_SET_RESULT,
-                    info=button_info,
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEY_SET_RESULT,
+                        screen=Screen.PVT_PREDICTION_DETAIL_SET_RESULT,
+                        info=button_info,
+                    )
+                ]
+            )
 
         # Edit button
         from src.chat.private.screens.screen_prediction_create import Step as PredictionCreateStep
@@ -249,35 +261,41 @@ async def manage(
             PredictionDetailReservedKeys.EDIT: True,
             ReservedKeyboardKeys.SCREEN_STEP: PredictionCreateStep.REQUEST_SETTINGS,
         }
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_PREDICTION_DETAIL_EDIT,
-                screen=Screen.PVT_PREDICTION_CREATE,
-                info=button_info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_PREDICTION_DETAIL_EDIT,
+                    screen=Screen.PVT_PREDICTION_CREATE,
+                    info=button_info,
+                )
+            ]
+        )
 
         # Delete button
         button_info = {
             PredictionDetailReservedKeys.PREDICTION_ID: prediction.id,
             PredictionDetailReservedKeys.DELETE: True,
         }
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEYBOARD_OPTION_DELETE,
-                screen=Screen.PVT_PREDICTION_DETAIL,
-                info=button_info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEYBOARD_OPTION_DELETE,
+                    screen=Screen.PVT_PREDICTION_DETAIL,
+                    info=button_info,
+                )
+            ]
+        )
 
         # Share button if is sent
         if prediction.get_status() is PredictionStatus.SENT:
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEY_SHARE,
-                    switch_inline_query=get_share_text(context, user, prediction),
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEY_SHARE,
+                        switch_inline_query=get_share_text(context, user, prediction),
+                    )
+                ]
+            )
 
     await full_message_send(
         context,

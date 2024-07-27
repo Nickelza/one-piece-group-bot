@@ -76,100 +76,120 @@ async def manage(
         ReservedKeyboardKeys.IN_EDIT_ID: crew.id,
         ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_NAME,
     }
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_NAME, screen=Screen.PVT_CREW_CREATE_OR_EDIT, info=button_info
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_NAME,
+                screen=Screen.PVT_CREW_CREATE_OR_EDIT,
+                info=button_info,
+            )
+        ]
+    )
 
     # Description edit button
     button_info = {
         ReservedKeyboardKeys.IN_EDIT_ID: crew.id,
         ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_DESCRIPTION,
     }
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_DESCRIPTION,
-            screen=Screen.PVT_CREW_CREATE_OR_EDIT,
-            info=button_info,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_DESCRIPTION,
+                screen=Screen.PVT_CREW_CREATE_OR_EDIT,
+                info=button_info,
+            )
+        ]
+    )
 
     # Required bounty edit button
     button_info = {
         ReservedKeyboardKeys.IN_EDIT_ID: crew.id,
         ReservedKeyboardKeys.SCREEN_STEP: Step.REQUEST_REQUIRED_BOUNTY,
     }
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY,
-            screen=Screen.PVT_CREW_CREATE_OR_EDIT,
-            info=button_info,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_REQUIRED_BOUNTY,
+                screen=Screen.PVT_CREW_CREATE_OR_EDIT,
+                info=button_info,
+            )
+        ]
+    )
 
     # Allow view in search edit button
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_ALLOW_VIEW_IN_SEARCH.format(
-                get_enabled_emoji(not crew.allow_view_in_search)
-            ),
-            screen=inbound_keyboard.screen,
-            info={CrewModifyReservedKeys.TOGGLE_ALLOW_VIEW_IN_SEARCH: True},
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_ALLOW_VIEW_IN_SEARCH.format(
+                    get_enabled_emoji(not crew.allow_view_in_search)
+                ),
+                screen=inbound_keyboard.screen,
+                info={CrewModifyReservedKeys.TOGGLE_ALLOW_VIEW_IN_SEARCH: True},
+            )
+        ]
+    )
 
     # Allow join from search edit button
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_ALLOW_JOIN_FROM_SEARCH.format(
-                get_enabled_emoji(not crew.allow_join_from_search)
-            ),
-            screen=inbound_keyboard.screen,
-            info={CrewModifyReservedKeys.TOGGLE_ALLOW_JOIN_FROM_SEARCH: True},
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_ALLOW_JOIN_FROM_SEARCH.format(
+                    get_enabled_emoji(not crew.allow_join_from_search)
+                ),
+                screen=inbound_keyboard.screen,
+                info={CrewModifyReservedKeys.TOGGLE_ALLOW_JOIN_FROM_SEARCH: True},
+            )
+        ]
+    )
 
     # Auto accept join requests
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_JOIN.format(
-                get_enabled_emoji(not crew.auto_accept_join)
-            ),
-            screen=inbound_keyboard.screen,
-            info={CrewModifyReservedKeys.TOGGLE_ALLOW_AUTO_ACCEPT_JOIN: True},
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_JOIN.format(
+                    get_enabled_emoji(not crew.auto_accept_join)
+                ),
+                screen=inbound_keyboard.screen,
+                info={CrewModifyReservedKeys.TOGGLE_ALLOW_AUTO_ACCEPT_JOIN: True},
+            )
+        ]
+    )
 
     # Allow davy back fight request edit button
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_ALLOW_DAVY_BACK_FIGHT_REQUEST.format(
-                get_enabled_emoji(not crew.allow_davy_back_fight_request)
-            ),
-            screen=inbound_keyboard.screen,
-            info={CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST: True},
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_ALLOW_DAVY_BACK_FIGHT_REQUEST.format(
+                    get_enabled_emoji(not crew.allow_davy_back_fight_request)
+                ),
+                screen=inbound_keyboard.screen,
+                info={CrewModifyReservedKeys.TOGGLE_ALLOW_DAVY_BACK_FIGHT_REQUEST: True},
+            )
+        ]
+    )
 
     # Auto accept davy back fight request edit button
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST.format(
-                get_enabled_emoji(crew.auto_accept_davy_back_fight)
-            ),
-            screen=inbound_keyboard.screen,
-            info={CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST: True},
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST.format(
+                    get_enabled_emoji(crew.auto_accept_davy_back_fight)
+                ),
+                screen=inbound_keyboard.screen,
+                info={CrewModifyReservedKeys.TOGGLE_AUTO_ACCEPT_DAVY_BACK_FIGHT_REQUEST: True},
+            )
+        ]
+    )
 
     # Davy Back Fight default participants
-    inline_keyboard.append([
-        Keyboard(
-            phrases.PVT_KEY_CREW_EDIT_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
-            screen=Screen.PVT_CREW_MODIFY_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
-        )
-    ])
+    inline_keyboard.append(
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_EDIT_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
+                screen=Screen.PVT_CREW_MODIFY_DAVY_BACK_FIGHT_DEFAULT_PARTICIPANTS,
+            )
+        ]
+    )
 
     # Disband button
     inline_keyboard.append(

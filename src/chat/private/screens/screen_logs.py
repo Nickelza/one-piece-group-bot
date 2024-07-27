@@ -38,11 +38,15 @@ async def manage(
     for log_type, button_text in logs_sorted.items():
         log: Log = get_log_by_type(log_type)
         if not log.only_by_boss or user_is_boss(user):
-            inline_keyboard.append([
-                Keyboard(
-                    button_text, screen=Screen.PVT_LOGS_TYPE, info={LogReservedKeys.TYPE: log_type}
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        button_text,
+                        screen=Screen.PVT_LOGS_TYPE,
+                        info={LogReservedKeys.TYPE: log_type},
+                    )
+                ]
+            )
 
     await full_message_send(
         context,

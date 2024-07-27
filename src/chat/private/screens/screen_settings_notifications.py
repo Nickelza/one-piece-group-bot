@@ -31,13 +31,15 @@ async def manage(
         sorted(NOTIFICATION_CATEGORY_DESCRIPTIONS.items(), key=lambda x: x[1])
     )
     for category, description in notifications_sorted.items():
-        inline_keyboard.append([
-            Keyboard(
-                description,
-                screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
-                info={NotificationReservedKeys.CATEGORY: category},
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    description,
+                    screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE,
+                    info={NotificationReservedKeys.CATEGORY: category},
+                )
+            ]
+        )
 
     await full_message_send(
         context,

@@ -66,13 +66,15 @@ async def manage(
     inline_keyboard: list[list[Keyboard]] = []
     if user.timezone is not None:
         # Reset timezone key
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_SETTINGS_TIMEZONE_RESET,
-                screen=Screen.PVT_SETTINGS_TIMEZONE,
-                info={TimezoneReservedKeys.RESET: 1},
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_SETTINGS_TIMEZONE_RESET,
+                    screen=Screen.PVT_SETTINGS_TIMEZONE,
+                    info={TimezoneReservedKeys.RESET: 1},
+                )
+            ]
+        )
 
     await full_message_send(
         context,

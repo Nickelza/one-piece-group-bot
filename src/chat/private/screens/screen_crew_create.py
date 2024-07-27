@@ -178,16 +178,18 @@ async def manage(
             step in [Step.REQUEST_DESCRIPTION, Step.REQUEST_REQUIRED_BOUNTY]
             and inbound_keyboard is not None
         ):
-            inline_keyboard.append([
-                Keyboard(
-                    phrases.KEY_RESET,
-                    screen=Screen.PVT_CREW_CREATE_OR_EDIT,
-                    info={
-                        ReservedKeyboardKeys.RESET: True,
-                        ReservedKeyboardKeys.SCREEN_STEP: user.private_screen_step,
-                    },
-                )
-            ])
+            inline_keyboard.append(
+                [
+                    Keyboard(
+                        phrases.KEY_RESET,
+                        screen=Screen.PVT_CREW_CREATE_OR_EDIT,
+                        info={
+                            ReservedKeyboardKeys.RESET: True,
+                            ReservedKeyboardKeys.SCREEN_STEP: user.private_screen_step,
+                        },
+                    )
+                ]
+            )
 
         # Send message
         await full_message_send(

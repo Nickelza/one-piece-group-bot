@@ -59,13 +59,15 @@ async def manage(
 
     # Select participants button, only for Captain if the davy back fight is not started
     if dbf.get_status() is GameStatus.COUNTDOWN_TO_START and user.is_crew_captain():
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT,
-                inbound_info=inbound_keyboard.info,
-                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_SELECT,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_SELECT,
+                    inbound_info=inbound_keyboard.info,
+                    screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_SELECT,
+                )
+            ]
+        )
 
     await full_message_send(
         context,

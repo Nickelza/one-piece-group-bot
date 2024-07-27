@@ -33,21 +33,25 @@ async def manage(
 
     # If not owner, show buy button
     if user != devil_fruit_shop_list_page.object.giver:
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEY_BUY,
-                screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_BUY,
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEY_BUY,
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_BUY,
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        )
     else:  # Remove button
-        inline_keyboard.append([
-            Keyboard(
-                phrases.KEY_REMOVE,
-                screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_REMOVE,
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.KEY_REMOVE,
+                    screen=Screen.PVT_DEVIL_FRUIT_SHOP_DETAIL_REMOVE,
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        )
 
     await full_message_send(
         context,

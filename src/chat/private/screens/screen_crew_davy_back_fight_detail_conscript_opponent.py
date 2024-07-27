@@ -124,14 +124,16 @@ async def manage(
     )
 
     # Add view member button
-    inline_keyboard = [[
-        Keyboard(
-            phrases.KEY_VIEW,
-            screen=Screen.PVT_CREW_MEMBER_DETAIL,
-            info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: conscript.id},
-            previous_screen_list=[Screen.PVT_CREW],
-        )
-    ]]
+    inline_keyboard = [
+        [
+            Keyboard(
+                phrases.KEY_VIEW,
+                screen=Screen.PVT_CREW_MEMBER_DETAIL,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: conscript.id},
+                previous_screen_list=[Screen.PVT_CREW],
+            )
+        ]
+    ]
 
     await full_message_send(
         context,

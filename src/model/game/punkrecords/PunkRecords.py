@@ -14,7 +14,9 @@ class RevealedDetail:
 
 
 class PunkRecords(GameBoard):
-    def __init__(self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0):
+    def __init__(
+        self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0
+    ):
         """
         Constructor
 
@@ -119,11 +121,13 @@ class PunkRecords(GameBoard):
                 else:
                     # If a list, amount of revealed values is the length of the revealed values and total amount of
                     # values is the length of the list
-                    tuples_list.append((
-                        name,
-                        len(self.revealed_details[name]),
-                        len(self.character.info_box["Statistics"][name]),
-                    ))
+                    tuples_list.append(
+                        (
+                            name,
+                            len(self.revealed_details[name]),
+                            len(self.character.info_box["Statistics"][name]),
+                        )
+                    )
 
         # Sort the list by the amount of revealed values
         tuples_list.sort(key=lambda x: x[1])

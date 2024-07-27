@@ -30,14 +30,16 @@ async def manage(
     inline_keyboard: list[list[Keyboard]] = []
     category = NotificationCategory(inbound_keyboard.info[NotificationTypeReservedKeys.CATEGORY])
     for notification in get_notifications_by_category(category):
-        inline_keyboard.append([
-            Keyboard(
-                notification.button_text,
-                screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
-                info={NotificationTypeReservedKeys.TYPE: notification.type},
-                inbound_info=inbound_keyboard.info,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    notification.button_text,
+                    screen=Screen.PVT_SETTINGS_NOTIFICATIONS_TYPE_EDIT,
+                    info={NotificationTypeReservedKeys.TYPE: notification.type},
+                    inbound_info=inbound_keyboard.info,
+                )
+            ]
+        )
 
     await full_message_send(
         context,

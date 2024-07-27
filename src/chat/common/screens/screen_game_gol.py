@@ -185,11 +185,7 @@ def get_player_board(game: Game, user: User) -> GuessOrLife:
     """
 
     challenger_board, opponent_board = get_boards(game)
-    return (
-        challenger_board
-        if game.is_challenger(user) or not game.is_global()
-        else opponent_board
-    )
+    return challenger_board if game.is_challenger(user) or not game.is_global() else opponent_board
 
 
 def get_other_board(game: Game, user: User) -> GuessOrLife:

@@ -35,13 +35,15 @@ async def manage(
     dbf_list_page.set_object(inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY))
 
     # View participants button
-    inline_keyboard: list[list[Keyboard]] = [[
-        Keyboard(
-            phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW,
-            inbound_info=inbound_keyboard.info,
-            screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW,
-        )
-    ]]
+    inline_keyboard: list[list[Keyboard]] = [
+        [
+            Keyboard(
+                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_PARTICIPANT_VIEW,
+                inbound_info=inbound_keyboard.info,
+                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_PARTICIPANTS_VIEW,
+            )
+        ]
+    ]
 
     # Conscript opponent button, only for Captain
     dbf: DavyBackFight = dbf_list_page.object
@@ -52,13 +54,15 @@ async def manage(
         and dbf.in_penalty_period()
         and dbf.conscript is None
     ):
-        inline_keyboard.append([
-            Keyboard(
-                phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT,
-                inbound_info=inbound_keyboard.info,
-                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_CONSCRIPT_OPPONENT,
-            )
-        ])
+        inline_keyboard.append(
+            [
+                Keyboard(
+                    phrases.PVT_KEY_CREW_DAVY_BACK_FIGHT_CONSCRIPT_OPPONENT,
+                    inbound_info=inbound_keyboard.info,
+                    screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL_CONSCRIPT_OPPONENT,
+                )
+            ]
+        )
 
     if (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info

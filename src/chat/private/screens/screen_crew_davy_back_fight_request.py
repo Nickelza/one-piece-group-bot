@@ -385,16 +385,18 @@ async def send_request_to_captain(
         )
 
         # Manage DBF button
-        inline_keyboard = [[
-            Keyboard(
-                phrases.KEY_MANAGE,
-                screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
-                inbound_info={
-                    ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: davy_back_fight.id,
-                    ReservedKeyboardKeys.DIRECT_ITEM: False,
-                },
-            )
-        ]]
+        inline_keyboard = [
+            [
+                Keyboard(
+                    phrases.KEY_MANAGE,
+                    screen=Screen.PVT_CREW_DAVY_BACK_FIGHT_DETAIL,
+                    inbound_info={
+                        ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: davy_back_fight.id,
+                        ReservedKeyboardKeys.DIRECT_ITEM: False,
+                    },
+                )
+            ]
+        ]
 
         try:
             await full_message_send(

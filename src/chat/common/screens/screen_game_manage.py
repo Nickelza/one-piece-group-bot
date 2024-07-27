@@ -132,13 +132,9 @@ async def dispatch_game(
     # the timeout will be enqueued when they do
     if game.is_global() and should_start_immediately and game.is_opponent(user):
         if game.is_opponent(user):
-            context.application.create_task(
-                enqueue_timeout_opponent_guess_game(context, game)
-            )
+            context.application.create_task(enqueue_timeout_opponent_guess_game(context, game))
 
-    context.application.create_task(
-        restart_hint_thread_if_down(context, game, user=user)
-    )
+    context.application.create_task(restart_hint_thread_if_down(context, game, user=user))
 
     game_type: GameType = GameType(game.type)
     match game_type:
@@ -149,10 +145,7 @@ async def dispatch_game(
             await manage_rr(update, context, user, inbound_keyboard, game)
 
         case (
-            GameType.SHAMBLES
-            | GameType.WHOS_WHO
-            | GameType.GUESS_OR_LIFE
-            | GameType.PUNK_RECORDS
+            GameType.SHAMBLES | GameType.WHOS_WHO | GameType.GUESS_OR_LIFE | GameType.PUNK_RECORDS
         ):
             await manage(
                 update,
@@ -204,9 +197,7 @@ async def restart_hint_thread_if_down(
 
     # No user given (so from timer), if is global game, then also try restarting for opponent
     if user is None and game.is_global() and game.has_opponent():
-        context.application.create_task(
-            restart_hint_thread_if_down(context, game, game.opponent)
-        )
+        context.application.create_task(restart_hint_thread_if_down(context, game, game.opponent))
 
     if user is None:
         user = game.challenger
@@ -221,16 +212,12 @@ async def restart_hint_thread_if_down(
 
     # Give a 10-second margin in case in the same moment the hint is being issued by the regular thread
     if last_hint_date is None or datetime_is_after(
-        get_datetime_in_future_seconds(
-            hint_every_seconds + 10, start_time=last_hint_date
-        )
+        get_datetime_in_future_seconds(hint_every_seconds + 10, start_time=last_hint_date)
     ):
         return
 
     seconds_since_last_hint = get_elapsed_seconds(last_hint_date)
-    hints_to_issue, hint_seconds_remaining = divmod(
-        seconds_since_last_hint, hint_every_seconds
-    )
+    hints_to_issue, hint_seconds_remaining = divmod(seconds_since_last_hint, hint_every_seconds)
 
     # Issue all missing hints
     for _ in range(hints_to_issue):
