@@ -4,18 +4,11 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.chat.common.screens.screen_game_guess_manage import manage as manage_guess_game
-from src.chat.common.screens.screen_game_pr import manage as manage_pr
-from src.chat.common.screens.screen_game_rps import manage as manage_rps
-from src.chat.common.screens.screen_game_rr import manage as manage_rr
-from src.chat.common.screens.screen_game_shambles import manage as manage_shambles
-from src.chat.common.screens.screen_game_ww import manage as manage_ww
-from src.model.Game import Game
+from src.chat.common.screens.screen_game_manage import dispatch_game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.GroupChatError import GroupChatError, GroupChatException
-from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import (
     delete_game,
@@ -116,43 +109,3 @@ async def manage(
 
     await dispatch_game(update, context, user, inbound_keyboard, game)
 
-
-async def dispatch_game(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    user: User,
-    inbound_keyboard: Keyboard,
-    game: Game,
-) -> None:
-    """
-    Dispatch game
-    :param update: The update
-    :param context: The context
-    :param user: The user
-    :param inbound_keyboard: The inbound keyboard
-    :param game: The game
-    :return: None
-    """
-
-    game_type: GameType = GameType(game.type)
-    match game_type:
-        case GameType.ROCK_PAPER_SCISSORS:
-            await manage_rps(update, context, user, inbound_keyboard, game)
-
-        case GameType.RUSSIAN_ROULETTE:
-            await manage_rr(update, context, user, inbound_keyboard, game)
-
-        case GameType.SHAMBLES:
-            await manage_shambles(update, context, inbound_keyboard, game)
-
-        case GameType.WHOS_WHO:
-            await manage_ww(update, context, inbound_keyboard, game)
-
-        case GameType.GUESS_OR_LIFE:
-            await manage_guess_game(update, context, inbound_keyboard, user, game=game)
-
-        case GameType.PUNK_RECORDS:
-            await manage_pr(update, context, inbound_keyboard, game)
-
-        case _:
-            raise GroupChatException(GroupChatError.INVALID_GAME)

@@ -25,13 +25,16 @@ from src.model.enums.Screen import Screen
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
 from src.model.enums.income_tax.IncomeTaxEventType import IncomeTaxEventType
 from src.model.error.CommonChatError import CommonChatException
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
 from src.model.game.GameType import GameType
+from src.model.game.punkrecords.PunkRecords import PunkRecords
 from src.model.game.shambles.Shambles import Shambles
 from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
+from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
 from src.service.bot_service import get_bot_context_data, set_bot_context_data
 from src.service.bounty_service import add_or_remove_bounty, validate_amount
@@ -1465,7 +1468,7 @@ async def restart_hint_thread_if_down_all_games(context: ContextTypes.DEFAULT_TY
     :param context: The context object
     :return: None
     """
-    from src.chat.private.screens.screen_game_guess_input import restart_hint_thread_if_down
+    from src.chat.common.screens.screen_game_manage import restart_hint_thread_if_down
 
     # Get all guess games in progress
     games = Game.select().where(
@@ -1474,3 +1477,142 @@ async def restart_hint_thread_if_down_all_games(context: ContextTypes.DEFAULT_TY
 
     for game in games:
         context.application.create_task(restart_hint_thread_if_down(context, game))
+
+
+def get_generic_boards_for_guess_game(
+    game: Game, max_len: int = None, only_letters: bool = False
+) -> [GameBoard, GameBoard]:
+    """
+    Get the boards for a guess game
+    :param game: The game
+    :param max_len: The maximum length of the terminology to generate
+    :param only_letters: If True, only generate letters, if False, generate all characters
+    :return: The boards
+    """
+
+    match game.get_type():
+        case GameType.PUNK_RECORDS:
+            board_class = PunkRecords
+            terminology_type = Character
+
+        case GameType.SHAMBLES:
+            board_class = Shambles
+            terminology_type = Terminology
+
+        case GameType.WHOS_WHO:
+            board_class = WhosWho
+            terminology_type = Character
+
+        case _:
+            raise ValueError(f"Unsupported game type: {game.get_type()}")
+
+    # Create if not existing board
+    if game.board is None:
+        if terminology_type == Character:
+            random_terminology: Character = SupabaseRest.get_random_character(
+                game.get_difficulty()
+            )
+        else:
+            random_terminology: Terminology = SupabaseRest.get_random_terminology(
+                max_len=max_len, only_letters=only_letters
+            )
+
+        board = board_class(random_terminology)
+        save_game(game, board.get_as_json_string(), hint_was_issued=True)
+
+        if game.is_global():
+            save_game(game, board.get_as_json_string(), is_opponent_board=True)
+
+        return board, board
+
+    # Parse the JSON string and create a Terminology object
+    json_dict = json.loads(game.board)
+    opponent_json_dict = json.loads(game.opponent_board) if game.is_global() else None
+    opponent_board = None
+
+    if terminology_type == Character:
+        char_dict = json_dict.pop("character")
+        char: Character = Character(**char_dict)
+        board = board_class(character=char, **json_dict)
+
+        if opponent_json_dict:
+            opponent_json_dict.pop("character")
+            opponent_board = board_class(character=char, **opponent_json_dict)
+    else:
+        term_dict = json_dict.pop("terminology")
+        term: Terminology = Terminology(**term_dict)
+        board = board_class(terminology=term, **json_dict)
+
+        if opponent_json_dict:
+            opponent_json_dict.pop("terminology")
+            opponent_board = board_class(terminology=term, **opponent_json_dict)
+
+    return board, opponent_board
+
+
+def get_player_board(game: Game, user: User) -> PunkRecords | Shambles | WhosWho:
+    """
+    Get the player board
+    :param game: The game object
+    :param user: The user object
+    :return: The board
+    """
+
+    challenger_board, opponent_board = get_generic_boards_for_guess_game(game)
+    return (
+        challenger_board
+        if game.is_challenger(user) or not game.is_global()
+        else opponent_board
+    )
+
+
+async def should_proceed_after_hint_sleep(
+    context: ContextTypes.DEFAULT_TYPE, game: Game, user: User
+) -> bool:
+    """
+    Should proceed after hint sleep?
+    :param context: The context
+    :param game: The game
+    :param user: The user
+    :return: True if the hint sleep should be proceeded, False otherwise
+    """
+    if game.is_finished():
+        return False
+
+    if game.is_opponent(user) and await timeout_opponent_guess_game(context, game):
+        return False
+
+    # Challenger is playing and they have already guessed
+    if game.is_challenger(user) and game.challenger_has_finished():
+        return False
+
+    return True
+
+
+def get_winner_loser_text(
+    game: Game, specific_winner_text: str, specific_loser_text: str = None
+) -> [str, str]:
+    """
+    Get the winner and loser text
+    :param game: The game
+    :param specific_winner_text: The specific winner text
+    :param specific_loser_text: The specific loser text. If not set, will use the specific_winner_text
+    :return: The winner and loser text
+    """
+
+    if specific_loser_text is None:
+        specific_loser_text = specific_winner_text
+
+    winner_text = (
+        phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_winner_text)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
+    )
+
+    loser_text: str = (
+        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_loser_text)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
+    )
+
+    return winner_text, loser_text

@@ -25,9 +25,9 @@ from src.service.game_service import (
     get_global_text_challenger_finished,
     end_global_guess_game_challenger,
     timeout_opponent_guess_game,
+    get_winner_loser_text,
 )
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
-from src.utils.phrase_utils import get_outcome_text
 
 
 def get_specific_text(
@@ -187,7 +187,7 @@ def get_player_board(game: Game, user: User) -> GuessOrLife:
     challenger_board, opponent_board = get_boards(game)
     return (
         challenger_board
-        if not game.is_challenger(user) or not game.is_global()
+        if game.is_challenger(user) or not game.is_global()
         else opponent_board
     )
 
@@ -303,7 +303,6 @@ async def run_game(
 
     # Refresh game, resend only if it's still ongoing
     game: Game = Game.get_by_id(game.id)
-
     if game.is_finished():
         return
 
@@ -402,20 +401,14 @@ async def validate_answer(
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
-    specific_text = get_specific_text(game, board, is_finished=True, player_type=player_type)
-    winner_text: str = (
-        phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
-        + "\n\n"
-        + get_outcome_text(True, game.wager)
+    specific_winner_text = get_specific_text(
+        game, board, is_finished=True, player_type=player_type
     )
-
-    specific_text = get_specific_text(
+    specific_loser_text = get_specific_text(
         game, board, is_finished=True, player_type=get_player_type(game, loser)
     )
-    loser_text: str = (
-        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text)
-        + "\n\n"
-        + get_outcome_text(True, game.wager)
+    winner_text, loser_text = get_winner_loser_text(
+        game, specific_winner_text, specific_loser_text=specific_loser_text
     )
 
     group_text = get_specific_text(

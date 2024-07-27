@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
-from src.chat.private.screens.screen_game_global_start_challenger import dispatch_global_game
+from src.chat.common.screens.screen_game_manage import dispatch_game
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -44,7 +44,7 @@ async def manage(
 
     # Challenger trying to accept this own challenge, simply redirect
     if game.is_challenger(user):
-        await dispatch_global_game(update, context, user, inbound_keyboard, game)
+        await dispatch_game(update, context, user, inbound_keyboard, game)
         return
 
     # Challenge has an opponent
@@ -54,7 +54,7 @@ async def manage(
             await full_message_send(context, phrases.GAME_GLOBAL_ALREADY_ACCEPTED, update=update)
             return
 
-        await dispatch_global_game(update, context, user, inbound_keyboard, game)
+        await dispatch_game(update, context, user, inbound_keyboard, game)
         return
 
     if game_status is not GameStatus.IN_PROGRESS:
@@ -159,6 +159,6 @@ async def manage(
     game.last_hint_opponent_date = datetime.datetime.now()
     game.save()
 
-    await dispatch_global_game(
+    await dispatch_game(
         update, context, user, inbound_keyboard, game, should_start_immediately=True
     )

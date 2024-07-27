@@ -590,22 +590,26 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = (
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
 
-GUESS_GAME_INPUT_CAPTION_HINT = "\n\n" + Emoji.NEW + "Hint: {}"
-GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = "\n\nIn *{}* seconds, a hint will be sent"
+GUESS_GAME_INPUT_CAPTION_HINT = "\n\n" + Emoji.NEW + "*Hint*: {}"
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = (
+    "\n\n>In *{}* seconds, a hint will be sent"
+)
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = (
-    "\n\nIn *{}* seconds, an easier variation will be sent"
+    "\n\n>In *{}* seconds, an easier variation will be sent"
 )
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 = ">In *{}* seconds, a new life will be issued"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2 = ">A new life will be issued every {} seconds"
-GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL = "\n\nIn *{}* seconds, a new detail will be given"
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL = (
+    "\n\n>In *{}* seconds, a new detail will be given"
+)
 
 GUESS_CHARACTER_GAME_INPUT_CAPTION = (
-    "Send your guesses as text messages, you will be notified if you are correct. \nThe name must"
-    f" be the same as the one used on [One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})"
+    ">_Send your guesses as text messages, you will be notified if you are correct._"
+    f"\n>_The name must be the same as the one used on [One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})_"
 )
 GUESS_TERM_GAME_INPUT_CAPTION = (
-    "Send your guesses as text messages, you will be notified if you are correct. \nThe term must"
-    f" be the same as the one used on [One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})"
+    ">_Send your guesses as text messages, you will be notified if you are correct._"
+    f"\n>_The term must be the same as the one used on [One Piece Wiki]({Env.ONE_PIECE_WIKI_URL.get()})_"
 )
 GUESS_GAME_CORRECT_ANSWER = f"Congratulations, you guessed correctly{Emoji.CONFETTI}\n\n{{}}"
 GUESS_GAME_OPPONENT_CORRECT_ANSWER = (

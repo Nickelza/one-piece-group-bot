@@ -1,7 +1,7 @@
-import json
 import random
 
 import resources.Environment as Env
+from src.model.game.GameBoard import GameBoard
 from src.model.wiki.Character import Character
 
 REVEALABLE_DETAILS = ["Affiliations", "Occupations", "Residence", "Status"]
@@ -13,10 +13,8 @@ class RevealedDetail:
         self.value = value
 
 
-class PunkRecords:
-    def __init__(
-        self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0
-    ):
+class PunkRecords(GameBoard):
+    def __init__(self, character: Character, revealed_details: dict = None, revealed_letters_count: int = 0):
         """
         Constructor
 
@@ -25,6 +23,8 @@ class PunkRecords:
                                 and the value being the indexes of the values that have been revealed
         :param revealed_letters_count: The revealed letters count
         """
+        super().__init__()
+
         self.character = character
         self.revealed_details = {} if revealed_details is None else revealed_details
         self.revealed_letters_count = revealed_letters_count
@@ -37,16 +37,6 @@ class PunkRecords:
                     self.set_revealed_detail(new_detail)
                 except ValueError:  # No more details to reveal
                     break
-
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(
-            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
-        )
 
     def is_correct(self, answer: str) -> bool:
         """
