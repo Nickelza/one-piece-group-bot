@@ -114,21 +114,21 @@ async def manage(
         answer_callback=True,
     )
 
+    ot_text = get_text(game, False, is_for_group_global=True)
+    outbound_keyboard: list[list[Keyboard]] = [
+        # Play as global button
+        [
+            Keyboard(
+                phrases.GRP_KEY_GAME_PLAY,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
+                screen=Screen.PVT_GAME_GLOBAL_START_OPPONENT,
+                is_deeplink=True,
+            )
+        ],
+    ]
+
     # Update group message if present
     if game.group_chat is not None:
-        ot_text = get_text(game, False, is_for_group_global=True)
-        outbound_keyboard: list[list[Keyboard]] = [
-            # Play as global button
-            [
-                Keyboard(
-                    phrases.GRP_KEY_GAME_PLAY,
-                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
-                    screen=Screen.PVT_GAME_GLOBAL_START_OPPONENT,
-                    is_deeplink=True,
-                )
-            ],
-        ]
-
         context.application.create_task(
             full_media_send(
                 context,
@@ -143,4 +143,22 @@ async def manage(
             )
         )
 
-    await dispatch_global_game(update, context, user, inbound_keyboard, game)
+    # If is guess game, then also edit the message that was accepted in private chat
+    if game.is_guess_based():
+        context.application.create_task(
+            full_media_send(
+                context,
+                caption=ot_text,
+                keyboard=outbound_keyboard,
+                edit_only_caption_and_keyboard=True,
+                update=update,
+            )
+        )
+
+    # Opponent just started, first hint issued now
+    game.last_hint_opponent_date = datetime.datetime.now()
+    game.save()
+
+    await dispatch_global_game(
+        update, context, user, inbound_keyboard, game, should_start_immediately=True
+    )

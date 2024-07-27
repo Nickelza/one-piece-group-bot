@@ -12,6 +12,7 @@ class ContextDataKey(StrEnum):
     KEYBOARD_DATA = "keyboard_data"
     AMOUNT = "amount"
     LAST_REQUEST = "last_request"
+    GAME_OPPONENT_TIMEOUT = "game_opponent_timeout"
 
 
 class ContextDataType(StrEnum):

@@ -181,12 +181,15 @@ def cron_datetime_difference(cron_expression: str, start_datetime: datetime = No
 
 
 def get_remaining_duration(
-    end_datetime: datetime.datetime, start_datetime: datetime.datetime = None
+    end_datetime: datetime.datetime,
+    start_datetime: datetime.datetime = None,
+    show_full: bool = False,
 ) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
     :param start_datetime: The start datetime. If None, the current datetime is used
+    :param show_full: Whether to show all units when available
     :return: The remaining time in days and hours e.g. 1 day 2h hours
     """
     if end_datetime is None:
@@ -197,7 +200,9 @@ def get_remaining_duration(
 
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
-    return convert_seconds_to_duration(int((end_datetime - start_datetime).total_seconds()))
+    return convert_seconds_to_duration(
+        int((end_datetime - start_datetime).total_seconds()), show_full=show_full
+    )
 
 
 def get_elapsed_seconds(start_datetime: datetime) -> int:
@@ -223,14 +228,15 @@ def get_elapsed_hours(start_datetime: datetime) -> float:
     return get_elapsed_seconds(start_datetime) // 3600
 
 
-def get_elapsed_duration(start_datetime: datetime) -> str:
+def get_elapsed_duration(start_datetime: datetime, show_full: bool = False) -> str:
     """
     Get the elapsed time since the start_datetime
     :param start_datetime: The start datetime
+    :param show_full: Whether to show all units when available
     :return: The elapsed time in days and hours e.g. 1 day 2h hours
     """
 
-    return convert_seconds_to_duration(get_elapsed_seconds(start_datetime))
+    return convert_seconds_to_duration(get_elapsed_seconds(start_datetime), show_full=show_full)
 
 
 def get_remaining_time_from_next_cron(

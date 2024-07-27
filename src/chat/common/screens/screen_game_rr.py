@@ -14,6 +14,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.MessageSource import MessageSource
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameTurn import GameTurn
 from src.model.game.russianroulette.RussianRoulette import RussianRoulette
@@ -61,23 +62,11 @@ async def manage(
     if game is None:
         return
 
-    if not game.is_global():
-        board = get_board(game)
-        other_board = None
-    else:
-        board = (
-            get_board_challenger(game) if game.is_challenger(user) else get_board_opponent(game)
-        )
-        other_board = (
-            get_board_opponent(game) if game.is_challenger(user) else get_board_challenger(game)
-        )
-
-    if game.is_challenger(user):
-        challenger_board = board
-        opponent_board = other_board
-    else:
-        challenger_board = other_board
-        opponent_board = board
+    all_boards: list[RussianRoulette] = await get_all_boards(game, user)
+    board: RussianRoulette = all_boards[0]
+    other_board: RussianRoulette = all_boards[1]
+    challenger_board: RussianRoulette = all_boards[2]
+    opponent_board: RussianRoulette = all_boards[3]
 
     game.last_interaction_date = datetime.now()
 
@@ -110,7 +99,7 @@ async def manage(
         if board.is_finished():
             await full_message_send(
                 context,
-                phrases.RUSSIAN_ROULETTE_GAME_WAIT_FOR_OPPONENT,
+                phrases.GAME_GLOBAL_WAIT_FOR_OPPONENT,
                 update=update,
                 answer_callback=True,
                 show_alert=True,
@@ -157,7 +146,7 @@ async def manage(
 
         # Global game, modify opponent message
         if game.is_global():
-            await context.application.create_task(
+            context.application.create_task(
                 edit_other_player_message(
                     context,
                     game,
@@ -188,7 +177,7 @@ async def manage(
 
     # Global game, modify opponent message
     if game.is_global():
-        await context.application.create_task(
+        context.application.create_task(
             edit_other_player_message(
                 context,
                 game,
@@ -214,6 +203,38 @@ async def manage(
                 update, context, game, board.get_user_turn(game), auto_move, message.id
             )
         )
+
+
+async def get_all_boards(game: Game, user: User) -> [GameBoard, GameBoard, GameBoard, GameBoard]:
+    """
+    Get all boards
+    :param game: The game object
+    :param user: The user object
+    :return: Current board, other board, challenger board, opponent board
+    """
+    if not game.is_global():
+        board = get_board_challenger(game)
+        other_board = None
+    else:
+        board = (
+            get_board_challenger(game) if game.is_challenger(user) else get_board_opponent(game)
+        )
+        other_board = (
+            get_board_opponent(game) if game.is_challenger(user) else get_board_challenger(game)
+        )
+    if game.is_challenger(user):
+        challenger_board = board
+        opponent_board = other_board
+    else:
+        challenger_board = other_board
+        opponent_board = board
+
+    return (
+        board,
+        other_board,
+        challenger_board,
+        opponent_board,
+    )
 
 
 def get_outbound_keyboard(
@@ -265,9 +286,9 @@ def get_outbound_keyboard(
     return outbound_keyboard
 
 
-def get_board(game: Game) -> RussianRoulette:
+def get_board_challenger(game: Game) -> RussianRoulette:
     """
-    Get the board
+    Get the challenger board
     :param game: The game object
     :return: The board
     """
@@ -281,17 +302,6 @@ def get_board(game: Game) -> RussianRoulette:
 
     russian_roulette_dict = json.loads(game.board)
     return RussianRoulette(**russian_roulette_dict)
-
-
-def get_board_challenger(game: Game) -> RussianRoulette:
-    """
-    Get the challenger board
-    :param game: The game object
-    :return: The board
-    """
-
-    # Challenger board is the regular one
-    return get_board(game)
 
 
 def get_board_opponent(game: Game) -> RussianRoulette:
@@ -412,8 +422,8 @@ async def auto_move(
     """
 
     if not game.is_global() or game.is_challenger(player):
-        board: RussianRoulette = get_board(game)
-        previous_board = get_board(previous_game)
+        board: RussianRoulette = get_board_challenger(game)
+        previous_board = get_board_challenger(previous_game)
     else:
         board: RussianRoulette = get_board_opponent(game)
         previous_board = get_board_opponent(previous_game)

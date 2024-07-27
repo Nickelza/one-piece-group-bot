@@ -1490,15 +1490,18 @@ class PlunderAttackNotification(Notification):
 class GameOutcomeNotification(Notification):
     """Class for game outcome notifications."""
 
-    def __init__(self, game: Game = None, user: User = None):
+    def __init__(self, game: Game = None, user: User = None, footer_text: str = ""):
         """Constructor
 
         :param game: The game
         :param user: The user to send the outcome to
+        :param footer_text: Text to add as footer
         """
 
         self.game = game
         self.user = user
+        self.footer_text = footer_text
+
         super().__init__(
             NotificationCategory.GAME,
             NotificationType.GAME_OUTCOME,
@@ -1531,18 +1534,24 @@ class GameOutcomeNotification(Notification):
                 emoji = Emoji.LOG_NEGATIVE
                 text_won_lost = phrases.TEXT_LOST
 
-            return phrases.GAME_OUTCOME_NOTIFICATION.format(
-                emoji,
-                text_won_lost,
-                self.game.get_wager_formatted(),
-                GameType(self.game.type).get_name(),
-                mention_markdown_user(self.game.get_other_player(self.user)),
+            return (
+                phrases.GAME_OUTCOME_NOTIFICATION.format(
+                    emoji,
+                    text_won_lost,
+                    self.game.get_wager_formatted(),
+                    GameType(self.game.type).get_name(),
+                    mention_markdown_user(self.game.get_other_player(self.user)),
+                )
+                + self.footer_text
             )
 
-        return phrases.GAME_OUTCOME_NOTIFICATION_DRAW.format(
-            GameType(self.game.type).get_name(),
-            mention_markdown_user(self.game.get_other_player(self.user)),
-            self.game.get_half_wager_formatted(),
+        return (
+            phrases.GAME_OUTCOME_NOTIFICATION_DRAW.format(
+                GameType(self.game.type).get_name(),
+                mention_markdown_user(self.game.get_other_player(self.user)),
+                self.game.get_half_wager_formatted(),
+            )
+            + self.footer_text
         )
 
 

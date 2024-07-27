@@ -397,7 +397,7 @@ GRP_KEY_PREDICTION_VIEW_IN_PRIVATE_CHAT = "View in private chat"
 GRP_KEY_GAME_PLAY = "Play"
 GRP_KEY_DAILY_REWARD_PRIZE_ACCEPT = Emoji.MONEY + " Accept offer"
 GRP_KEY_DAILY_REWARD_PRIZE_RANDOM = Emoji.GIFT + " Random prize"
-GRP_KEY_GAME_START_GLOBAL = "Start as global"
+GRP_KEY_GAME_START_GLOBAL = "Start immediately as global"
 
 DATETIME_EXAMPLES = """
 Write the date using this format:
@@ -547,6 +547,22 @@ GAME_GLOBAL_CHALLENGE_ITEM_TEXT_FILL_IN = "Global Challenge"
 GAME_AUTO_MOVE_WARNING = "\n\n>In case of no selection, a move will be automatically made after {}"
 GAME_POINTS = "{} points: *{}/{}*"
 GAME_POINTS_FINISHED = " \\(Finished\\)"
+GAME_OPPONENT_AND_WAGER = "\n\n*Opponent*: {}" "\n*Wager*: ฿{}"
+GAME_GLOBAL_CURRENT_TIME = "Current time: {}"
+GAME_GLOBAL_COMPLETION_TIME = "Completion time: {}"
+GAME_GLOBAL_OPPONENT_TIME = "Opponent time: {}"
+GAME_GLOBAL_REMAINING_TIME = "\nRemaining time: *{}*"
+GAME_GLOBAL_WAIT_FOR_OPPONENT = (
+    "Game ended, you will be notified of the result once your opponent has finished too"
+)
+GAME_GLOBAL_PENDING_CHALLENGER = (
+    "\n\n>You will be notified once another player has accepted the game and finished playing"
+)
+GAME_GLOBAL_PENDING_OPPONENT = "\n\n>You will be notified once the challenger has finished playing"
+GAME_GLOBAL_GUESS_WAIT_OPPONENT = (
+    "\n\n>You will be notified of the result once your opponent has finished too"
+)
+GAME_GLOBAL_GUESS_ALREADY_GUESSED = "You have already guessed correctly.{}{}"
 
 ROCK_PAPER_SCISSORS_GAME_NAME = "Rock Paper Scissors"
 ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = (
@@ -573,21 +589,14 @@ RUSSIAN_ROULETTE_GAME_CHAMBER_ALREADY_FIRED = (
 )
 RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
-RUSSIAN_ROULETTE_GAME_WAIT_FOR_OPPONENT = (
-    "Game ended, you will be notified of the result once your opponent has finished too"
-)
-GAME_GLOBAL_PENDING_CHALLENGER = (
-    "\n\n>You will be notified once another player has accepted the game and finished playing"
-)
-GAME_GLOBAL_PENDING_OPPONENT = "\n\n>You will be notified once the challenger has finished playing"
 
 GUESS_GAME_INPUT_CAPTION_HINT = "\n\n" + Emoji.NEW + "Hint: {}"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = "\n\nIn *{}* seconds, a hint will be sent"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = (
     "\n\nIn *{}* seconds, an easier variation will be sent"
 )
-GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 = "In *{}* seconds, a new life will be issued"
-GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2 = "A new life will be issued every {} seconds"
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1 = ">In *{}* seconds, a new life will be issued"
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2 = ">A new life will be issued every {} seconds"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_DETAIL = "\n\nIn *{}* seconds, a new detail will be given"
 
 GUESS_CHARACTER_GAME_INPUT_CAPTION = (
@@ -1851,6 +1860,7 @@ PLUNDER_ATTACK_CANNOT_REVENGE = (
 
 # Notification - Game Outcome
 GAME_OUTCOME_NOTIFICATION = "{}You {} ฿*{}* in the *{}* challenge against {}"
+GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY = "{}\n\n{}"
 GAME_OUTCOME_NOTIFICATION_DRAW = (
     "The *{}* challenge against {} ended in a draw." "\nYour wager \\(฿*{}*\\) has been returned"
 )

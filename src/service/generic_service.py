@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from src.model.DavyBackFight import DavyBackFight
 from src.service.crew_service import end_all_conscription
 from src.service.davy_back_fight_service import start_all as start_dbf, end_all as end_dbf
+from src.service.game_service import restart_hint_thread_if_down_all_games
 from src.service.group_service import auto_delete
 
 
@@ -27,3 +28,6 @@ async def run_minute_tasks(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Auto delete messages
     context.application.create_task(auto_delete(context))
+
+    # Restart run thread for guess based games
+    context.application.create_task(restart_hint_thread_if_down_all_games(context))

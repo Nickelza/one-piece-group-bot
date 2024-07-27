@@ -14,6 +14,7 @@ from resources import phrases as phrases, Environment as Env
 from src.model.Game import Game
 from src.model.GroupChat import GroupChat
 from src.model.User import User
+from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.Notification import GameTurnNotification, GameOutcomeNotification
@@ -32,8 +33,13 @@ from src.model.game.whoswho.WhosWho import WhosWho
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.Terminology import Terminology
+from src.service.bot_service import get_bot_context_data, set_bot_context_data
 from src.service.bounty_service import add_or_remove_bounty, validate_amount
-from src.service.date_service import convert_seconds_to_duration, get_remaining_duration
+from src.service.date_service import (
+    convert_seconds_to_duration,
+    get_remaining_duration,
+    get_elapsed_duration,
+)
 from src.service.devil_fruit_service import get_ability_adjusted_datetime
 from src.service.message_service import (
     mention_markdown_user,
@@ -45,6 +51,7 @@ from src.service.message_service import (
     get_deeplink,
 )
 from src.service.notification_service import send_notification
+from src.utils.phrase_utils import get_outcome_text
 from src.utils.string_utils import get_belly_formatted
 
 
@@ -132,18 +139,43 @@ async def end_game(
     game.challenger = challenger
     game.opponent = opponent
 
+    # Save opponent time if relevant
+    if game.is_global() and game_outcome is GameOutcome.OPPONENT_WON:
+        game.global_opponent_end_date = datetime.now()
+
     challenger.save()
     if opponent is not None:
         opponent.save()
     game.save()
 
     if not is_forced_end:
+        notification_users: list[User] = []
         if send_outcome_to_user:
-            await send_notification(
-                context, send_outcome_to_user, GameOutcomeNotification(game, send_outcome_to_user)
-            )
+            notification_users.append(send_outcome_to_user)
 
-        # Edit message in group, if global
+        add_time_and_terminology = False
+        # If is global guess based game and someone won, always send notification
+        if game.is_guess_based() and game.is_global() and game.has_winner():
+            add_time_and_terminology = True
+
+            # Always send to challenger
+            notification_users.append(game.challenger)
+
+            # Send to opponent too only if they didn't win, so it's due to timeout
+            # If they won, no need for notification since the game specific text will contain it
+            if game_outcome is GameOutcome.CHALLENGER_WON:
+                notification_users.append(game.opponent)
+
+        for u in notification_users:
+            footer_text = ""
+            if add_time_and_terminology:
+                footer_text = phrases.GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY.format(
+                    get_global_time_based_text(game, u),
+                    get_guess_game_result_term_text(get_terminology_from_game(game)),
+                )
+            await send_notification(context, u, GameOutcomeNotification(game, u, footer_text))
+
+        # Edit message in group, if global and started from a group
         if game.is_global() and game.group_chat is not None:
             ot_text = get_text(game, True, game_outcome=game_outcome, is_for_group_global=True)
             context.application.create_task(
@@ -167,7 +199,6 @@ def get_text(
     is_finished: bool,
     game_outcome: GameOutcome = None,
     user_turn: User = None,
-    is_turn_based: bool = True,
     terminology: Terminology = None,
     remaining_seconds_to_start: int = None,
     is_played_in_private_chat: bool = False,
@@ -182,7 +213,6 @@ def get_text(
     :param is_finished: Is the game finished
     :param game_outcome: The game outcome
     :param user_turn: The user turn
-    :param is_turn_based: Is the game turn based
     :param terminology: The character, in case of Who's Who
     :param remaining_seconds_to_start: The remaining seconds to start
     :param is_played_in_private_chat: Is the game played in private chat
@@ -196,12 +226,17 @@ def get_text(
     added_ot_text = ""
     difficulty_text = ""
 
+    is_turn_based = game.is_turn_based()
+
     game_type: GameType = game.get_type()
     if game_type.has_difficulty_level():
         difficulty_text = phrases.GAME_DIFFICULTY.format(game.get_difficulty().get_name())
 
     if text_to_add_before_footer is not None:
         added_ot_text += text_to_add_before_footer
+
+    if game.is_guess_based() and game.is_global() and not is_for_group_global:
+        added_ot_text += get_global_time_based_text(game, user_turn)
 
     if is_finished and game_outcome is not None and game_outcome is not GameOutcome.NONE:
         if not is_turn_based and terminology is not None:
@@ -230,10 +265,9 @@ def get_text(
                 added_ot_text += phrases.GAME_STARTED
 
     # Add auto move warning
-    if (
-            is_turn_based
-            and (game.is_challenger(user_turn) and not challenger_has_finished)
-            or (game.is_opponent(user_turn) and not opponent_has_finished)
+    if is_turn_based and (
+        (game.is_challenger(user_turn) and not challenger_has_finished)
+        or (game.is_opponent(user_turn) and not opponent_has_finished)
     ):
         added_ot_text += get_auto_move_warning(add_turn_notification_time=not game.is_global())
 
@@ -254,6 +288,116 @@ def get_text(
         get_belly_formatted(game.wager),
         difficulty_text,
         added_ot_text,
+    )
+
+
+def get_global_time_based_text(game: Game, user: User) -> str:
+    """
+    Get the text for a time based game in global chat
+    :param game: The game
+    :param user: The user
+    :return: The text
+    """
+
+    if not game.is_global():
+        return ""
+
+    text_list = []
+    is_challenger = game.is_challenger(user)
+    is_opponent = not is_challenger
+    is_finished = game.is_finished()
+    outcome: GameOutcome = game.get_outcome()
+    challenger_has_finished = game.challenger_has_finished()
+
+    if is_challenger:
+        self_is_still_playing = not is_finished and not challenger_has_finished
+        self_start_time = game.global_challenger_start_date
+        self_end_time = game.global_challenger_end_date
+    else:
+        self_is_still_playing = not is_finished
+        self_start_time = game.global_opponent_start_date
+        self_end_time = game.global_opponent_end_date
+
+    # Current time, if user is still playing
+    if self_is_still_playing:
+        text_list.append(
+            phrases.GAME_GLOBAL_CURRENT_TIME.format(
+                get_elapsed_duration(self_start_time, show_full=True)
+            )
+        )
+
+    # Completion time
+    if (is_finished and not (outcome is GameOutcome.CHALLENGER_WON and is_opponent)) or (
+        (not is_finished and challenger_has_finished and is_challenger)
+    ):
+        text_list.append(
+            phrases.GAME_GLOBAL_COMPLETION_TIME.format(
+                get_remaining_duration(self_end_time, self_start_time, show_full=True)
+            )
+        )
+
+    challenger_seconds, opponent_seconds = game.get_players_time_seconds()
+
+    # Opponent time
+    if (not is_finished and challenger_has_finished and is_opponent) or (
+        (is_finished and not (outcome is GameOutcome.CHALLENGER_WON and is_challenger))
+    ):
+        other_time = challenger_seconds if is_opponent else challenger_seconds
+        text_list.append(
+            phrases.GAME_GLOBAL_OPPONENT_TIME.format(
+                convert_seconds_to_duration(other_time, show_full=True)
+            )
+        )
+
+    # Remaining time
+    if not is_finished and challenger_has_finished and is_opponent:
+        # Should never be negative, but better to be safe than sorry
+        remaining_time_seconds = max(challenger_seconds - opponent_seconds, 0)
+
+        text_list.append(
+            phrases.GAME_GLOBAL_REMAINING_TIME.format(
+                convert_seconds_to_duration(remaining_time_seconds, show_full=True)
+            )
+        )
+
+    return "\n\n" + "\n".join(text_list)
+
+
+def get_global_text_challenger_finished(
+    game: Game, should_add_already_guessed_text: bool = True
+) -> str:
+    """
+    Get the text for a time based game in global mode, when the challenger has finished playing
+    :param game: The game
+    :param should_add_already_guessed_text: If it should add "You have already guessed correctly" text prefix
+    :return: The text
+    """
+
+    if game.has_opponent():
+        wait_text = phrases.GAME_GLOBAL_GUESS_WAIT_OPPONENT
+    else:
+        wait_text = phrases.GAME_GLOBAL_PENDING_CHALLENGER
+
+    if not should_add_already_guessed_text:
+        return wait_text
+
+    return phrases.GAME_GLOBAL_GUESS_ALREADY_GUESSED.format(
+        get_opponent_and_wager_text(game), wait_text
+    )
+
+
+def get_opponent_and_wager_text(game: Game) -> str:
+    """
+    Get the opponent and wager text
+    :param game: The game
+    :return: The text
+    """
+
+    if game.opponent is None:
+        return ""
+
+    return phrases.GAME_OPPONENT_AND_WAGER.format(
+        mention_markdown_user(game.opponent), game.get_wager_formatted()
     )
 
 
@@ -605,7 +749,7 @@ async def guess_game_countdown_to_start(
     game: Game,
     remaining_seconds: int,
     run_game_function: Callable,
-    is_played_in_private_chat: bool = True,
+    player: User,
 ) -> None:
     """
     Countdown to start
@@ -614,38 +758,36 @@ async def guess_game_countdown_to_start(
     :param game: The game object
     :param remaining_seconds: The remaining time
     :param run_game_function: The function to run when the countdown is over
-    :param is_played_in_private_chat: If True, the game is played in private chat
+    :param player: The player who triggered the countdown
     :return: None
     """
 
-    play_deeplink_button = (
-        [[get_guess_game_play_deeplink_button(game)]] if is_played_in_private_chat else None
-    )
+    play_deeplink_button = [[get_guess_game_play_deeplink_button(game)]]
 
     if remaining_seconds <= 0:
         game.status = GameStatus.IN_PROGRESS
         game.save()
 
-        # Edit group message if the game is played in private chat
-        if is_played_in_private_chat:
-            ot_text = get_text(game, False, is_turn_based=False, is_played_in_private_chat=True)
+        # Edit group message if the game was started in a group
+        # In case of global game, it's edited in global_start_challenger
+        if game.group_chat is not None and not game.is_global():
+            ot_text = get_text(game, False, is_played_in_private_chat=True)
             await full_media_send(
                 context,
                 caption=ot_text,
                 update=update,
                 keyboard=play_deeplink_button,
                 edit_only_caption_and_keyboard=True,
+                edit_message_id=game.message_id,
             )
 
         # Run game
-        await run_game_function(context, game)
+        await run_game_function(context, game, player)
         return
 
     # Update message
     try:
-        ot_text = get_text(
-            game, False, is_turn_based=False, remaining_seconds_to_start=remaining_seconds
-        )
+        ot_text = get_text(game, False, remaining_seconds_to_start=remaining_seconds)
         await full_media_send(
             context,
             caption=ot_text,
@@ -662,22 +804,12 @@ async def guess_game_countdown_to_start(
     if remaining_seconds > 10:
         await asyncio.sleep(10)
         await guess_game_countdown_to_start(
-            update,
-            context,
-            game,
-            remaining_seconds - 10,
-            run_game_function,
-            is_played_in_private_chat=is_played_in_private_chat,
+            update, context, game, remaining_seconds - 10, run_game_function, player
         )
     else:
         await asyncio.sleep(5)
         await guess_game_countdown_to_start(
-            update,
-            context,
-            game,
-            remaining_seconds - 5,
-            run_game_function,
-            is_played_in_private_chat=is_played_in_private_chat,
+            update, context, game, remaining_seconds - 5, run_game_function, player
         )
 
 
@@ -694,16 +826,14 @@ async def get_guess_game_users_to_send_message_to(
     :return:
     """
 
-    if send_to_user is not None and should_send_to_all_players:
-        raise ValueError("Cannot send to user and all players")
-    if not should_send_to_all_players and schedule_next_send:
+    if not should_send_to_all_players and schedule_next_send and not game.is_global():
         raise ValueError("Cannot schedule next send if not sending to all players")
-    if send_to_user is not None:
+    if send_to_user is not None and not should_send_to_all_players:
         users: list[User] = [send_to_user]
     else:
-        challenger: User = game.challenger
-        opponent: User = game.opponent
-        users: list[User] = [challenger, opponent]
+        users: list[User] = [game.challenger]
+        if game.opponent is not None:
+            users.append(game.opponent)
 
     return users
 
@@ -725,7 +855,7 @@ async def guess_game_validate_answer(
     except AttributeError:
         return
 
-    terminology = await get_terminology_from_game(game)
+    terminology = get_terminology_from_game(game)
 
     if not terminology.name.lower() == answer.lower():
         return
@@ -754,7 +884,11 @@ async def guess_game_validate_answer(
 
     # Send message to winner
     await set_user_private_screen(user, should_reset=True)
-    winner_caption: str = phrases.GUESS_GAME_CORRECT_ANSWER.format(term_text_addition)
+    winner_caption: str = (
+        phrases.GUESS_GAME_CORRECT_ANSWER.format(term_text_addition)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
+    )
     await full_media_send(
         context,
         chat_id=user.tg_user_id,
@@ -766,7 +900,11 @@ async def guess_game_validate_answer(
 
     # Send message to loser
     await set_user_private_screen(loser, should_reset=True)
-    loser_caption: str = phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(term_text_addition)
+    loser_caption: str = (
+        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(term_text_addition)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
+    )
     await full_media_send(
         context,
         chat_id=loser.tg_user_id,
@@ -777,9 +915,7 @@ async def guess_game_validate_answer(
     )
 
     # Update group message
-    ot_text = get_text(
-        game, True, game_outcome=outcome, is_turn_based=False, terminology=terminology
-    )
+    ot_text = get_text(game, True, game_outcome=outcome, terminology=terminology)
     group_chat: GroupChat = game.group_chat
     await full_media_send(
         context,
@@ -790,7 +926,7 @@ async def guess_game_validate_answer(
     )
 
 
-async def get_terminology_from_game(game: Game) -> Terminology:
+def get_terminology_from_game(game: Game) -> Terminology:
     """
     Get the terminology from the game
     :param game: The game
@@ -824,15 +960,27 @@ def get_guess_game_play_deeplink_button(game: Game) -> Keyboard:
     )
 
 
-def save_game(game: Game, board: str) -> None:
+def save_game(
+    game: Game, board: str, is_opponent_board: bool = False, hint_was_issued: bool = False
+) -> None:
     """
     Save the game
     :param game: The game
     :param board: The board
+    :param is_opponent_board: If it's an opponent board
+    :param hint_was_issued: If the hint was issued
     :return: None
     """
 
-    game.board = board
+    if game.is_global() and is_opponent_board:
+        game.opponent_board = board
+        if hint_was_issued:
+            game.last_hint_opponent_date = datetime.now()
+    else:
+        game.board = board
+        if hint_was_issued:
+            game.last_hint_date = datetime.now()
+
     game.last_interaction_date = datetime.now()
     game.save()
 
@@ -859,7 +1007,7 @@ async def end_text_based_game(
     :param group_text: The group text
     """
 
-    terminology: Terminology = await get_terminology_from_game(game)
+    terminology: Terminology = get_terminology_from_game(game)
     term_text_addition = get_guess_game_result_term_text(terminology)
 
     # If winner or loser text doesn't end with 3 new lines (just enough to add 3)
@@ -873,15 +1021,18 @@ async def end_text_based_game(
     winner_text += term_text_addition
     loser_text += term_text_addition
 
-    # Go to game message in group button
-    outbound_keyboard: list[list[Keyboard]] = [
-        [
-            Keyboard(
-                text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                url=get_message_url(game.message_id, game.group_chat),
-            )
+    outbound_keyboard: list[list[Keyboard]] = []
+
+    if not game.is_global():
+        # Go to game message in group button
+        outbound_keyboard = [
+            [
+                Keyboard(
+                    text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                    url=get_message_url(game.message_id, game.group_chat),
+                )
+            ]
         ]
-    ]
 
     # Send message to winner
     await set_user_private_screen(winner, should_reset=True)
@@ -890,6 +1041,11 @@ async def end_text_based_game(
             context, winner_text, chat_id=winner.tg_user_id, keyboard=outbound_keyboard
         )
     )
+
+    # If global, we can stop here. No message sent to loser since the notification triggered in end_game will handle it,
+    # same for group message
+    if game.is_global():
+        return
 
     # Send message to loser
     await set_user_private_screen(loser, should_reset=True)
@@ -900,19 +1056,18 @@ async def end_text_based_game(
     )
 
     # Update group message
-    if group_text is None:
-        group_text = get_text(
-            game, True, game_outcome=outcome, is_turn_based=False, terminology=terminology
-        )
+    if game.group_chat is not None:
+        if group_text is None:
+            group_text = get_text(game, True, game_outcome=outcome, terminology=terminology)
 
-    group_chat: GroupChat = game.group_chat
-    await full_media_send(
-        context,
-        caption=group_text,
-        group_chat=group_chat,
-        edit_message_id=game.message_id,
-        edit_only_caption_and_keyboard=True,
-    )
+        group_chat: GroupChat = game.group_chat
+        await full_media_send(
+            context,
+            caption=group_text,
+            group_chat=group_chat,
+            edit_message_id=game.message_id,
+            edit_only_caption_and_keyboard=True,
+        )
 
 
 async def collect_game_wagers_and_set_in_progress(
@@ -1165,3 +1320,157 @@ async def edit_other_player_message(
         )
 
     game.save()
+
+
+async def timeout_opponent_guess_game(context: ContextTypes.DEFAULT_TYPE, game: Game) -> bool:
+    """
+    Check if opponent has timed out for guessing. If so, end game giving challenger the win.
+    In case this method returns False, every caller should exit, since it handles everything
+    :param context: The context
+    :param game: The game
+    :return: Whether the opponent has timed out
+    """
+
+    if not game.is_global():
+        return False
+
+    # Game already ended, no further action needed
+    if game.is_finished():
+        return True
+
+    if game.global_challenger_end_date is None:  # Challenger has not yet finished
+        return False
+
+    if game.global_opponent_start_date is None:  # Opponent has not yet started
+        return False
+
+    challenger_seconds, opponent_seconds = game.get_players_time_seconds()
+    if challenger_seconds > opponent_seconds:
+        return False
+
+    # End game
+    await end_game(game, GameOutcome.CHALLENGER_WON, context)
+
+    return True
+
+
+async def enqueue_timeout_opponent_guess_game(
+    context: ContextTypes.DEFAULT_TYPE, game: Game
+) -> None:
+    """
+    Enqueue timeout opponent guess game. If the game is not finished and timeout is not yet enqueued, waits till as much
+    time has passed as the challenger took to guess, and if the game is still ongoing, it means the opponent has lost
+    :param context: The context
+    :param game: The game
+    :return: None
+    """
+
+    if not game.is_global():
+        return
+
+    if game.is_finished():
+        return
+
+    # Game without opponent yet
+    if not game.has_opponent():
+        return
+
+    # Challenger has not yet finished
+    if game.global_challenger_end_date is None:
+        return
+
+    challenger_seconds, opponent_seconds = game.get_players_time_seconds()
+    remaining_seconds = challenger_seconds - opponent_seconds
+
+    if remaining_seconds <= 0:  # Opponent has already taken more time, how did it arrive here??
+        await timeout_opponent_guess_game(context, game)
+        return
+
+    # Already enqueued a timeout, do not enqueue more
+    try:
+        get_bot_context_data(
+            context,
+            ContextDataKey.GAME_OPPONENT_TIMEOUT,
+            inner_key=str(game.id),
+            tolerate_key_exception=False,
+        )
+        # Key exists, no error, so timeout already enqueued
+        return
+    except KeyError:
+        set_bot_context_data(
+            context, ContextDataKey.GAME_OPPONENT_TIMEOUT, game.id, inner_key=str(game.id)
+        )
+
+    # Wait for the remaining time, then try ending if game is not yet finished
+    await asyncio.sleep(remaining_seconds)
+    updated_game = Game.get_by_id(game.id)
+
+    # Game already ended
+    if game.is_finished():
+        return
+
+    await timeout_opponent_guess_game(context, updated_game)
+
+
+async def end_global_guess_game_challenger(context: ContextTypes.DEFAULT_TYPE, game: Game) -> None:
+    """
+    End the global guess game after a challenger has correctly guessed
+    :param context: The context object
+    :param game: The game object
+    """
+
+    # Save challenger end time
+    game.global_challenger_end_date = datetime.now()
+    game.save()
+
+    # Try enqueuing opponent timeout
+    context.application.create_task(enqueue_timeout_opponent_guess_game(context, game))
+
+
+async def challenger_has_finished_or_opponent_timeout(
+    context: ContextTypes.DEFAULT_TYPE, game: Game, user: User
+) -> bool:
+    """
+    Check if the challenger has finished or the opponent has timed out. If returns true, exit immediately since all
+    eventual messages/triggers are done internally
+    :param context: The context
+    :param game: The game
+    :param user: The user
+    :return: True if the challenger has finished or the opponent has timed out, False otherwise.
+    """
+    # Challenger still playing, no need to check timeout
+    if not game.challenger_has_finished():
+        return False
+
+    # Is challenger, and they have already guessed, so they should wait for the opponent to finish
+    if game.is_challenger(user):
+        await full_message_send(
+            context, get_global_text_challenger_finished(game), chat_id=user.tg_user_id
+        )
+
+        # Try checking if opponent already in timeout
+        await timeout_opponent_guess_game(context, game)
+        return True
+
+    # On opponent input, always try timeout in case the previously started thread to auto timeout has failed
+    if await timeout_opponent_guess_game(context, game):
+        return True
+
+    return False
+
+
+async def restart_hint_thread_if_down_all_games(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Restart the hint thread if it's down for all games
+    :param context: The context object
+    :return: None
+    """
+    from src.chat.private.screens.screen_game_guess_input import restart_hint_thread_if_down
+
+    # Get all guess games in progress
+    games = Game.select().where(
+        (Game.status == GameStatus.IN_PROGRESS) & (Game.type.in_(GameType.get_guess_based_list()))
+    )
+
+    for game in games:
+        context.application.create_task(restart_hint_thread_if_down(context, game))

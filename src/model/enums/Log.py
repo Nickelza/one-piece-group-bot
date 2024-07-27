@@ -51,6 +51,7 @@ from src.service.message_service import (
     get_deeplink,
 )
 from src.utils.math_utils import get_value_from_percentage, get_percentage_from_value
+from src.utils.phrase_utils import get_outcome_text
 from src.utils.string_utils import get_belly_formatted
 
 LOG_TYPE_BUTTON_TEXTS = {
@@ -248,14 +249,8 @@ class FightLog(Log):
         date = default_datetime_format(self.object.date, self.user)
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
-            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
-                self.legend.get_formatted(),
-                (
-                    phrases.TEXT_WON
-                    if GameStatus(self.legend.status) is GameStatus.WON
-                    else phrases.TEXT_LOST
-                ),
-                get_belly_formatted(self.object.belly),
+            outcome_text = get_outcome_text(
+                (GameStatus(self.legend.status) is GameStatus.WON), self.object.belly
             )
         else:
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
@@ -408,11 +403,7 @@ class DocQGameLog(Log):
         date = default_datetime_format(self.object.date, self.user)
         correct_apple = self.object.get_correct_apple_number()
         won = GameStatus(self.object.status) is GameStatus.WON
-        outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
-            (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
-            (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-            get_belly_formatted(self.object.belly),
-        )
+        outcome_text = get_outcome_text(won, self.object.belly)
 
         go_to_message_text = ""
         if self.object.group_chat is not None:
@@ -1374,7 +1365,7 @@ def get_log_by_type(log_type: LogType) -> Log:
 
     log: Log = next(log for log in LOGS if log.type is log_type)
 
-    # Need to re-initialize the class since it would be initialized only once on program start and it would keep in
+    # Need to re-initialize the class since it would be initialized only once on program start, and it would keep in
     # memory items like filters each user
     # noinspection PyArgumentList
     log.__init__()

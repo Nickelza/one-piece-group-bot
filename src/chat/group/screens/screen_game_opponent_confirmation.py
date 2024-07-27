@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 import resources.phrases as phrases
-from src.chat.common.screens.screen_game_gol import manage as manage_gol
+from src.chat.common.screens.screen_game_guess_manage import manage as manage_guess_game
 from src.chat.common.screens.screen_game_pr import manage as manage_pr
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
 from src.chat.common.screens.screen_game_rr import manage as manage_rr
@@ -149,7 +149,7 @@ async def dispatch_game(
             await manage_ww(update, context, inbound_keyboard, game)
 
         case GameType.GUESS_OR_LIFE:
-            await manage_gol(update, context, inbound_keyboard, game)
+            await manage_guess_game(update, context, inbound_keyboard, user, game=game)
 
         case GameType.PUNK_RECORDS:
             await manage_pr(update, context, inbound_keyboard, game)

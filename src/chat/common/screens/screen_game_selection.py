@@ -81,8 +81,7 @@ async def manage(
                 primary_key=game.id,
             )
         ]
-    else:
-        # Open to all
+    else:  # Open to all
         ot_text = phrases.GAME_REQUEST_OPEN.format(
             mention_markdown_user(challenger),
             game.get_type().get_name(),
@@ -90,13 +89,6 @@ async def manage(
             game.get_type().get_description(),
         )
         outbound_keyboard: list[list[Keyboard]] = [
-            # Accept button for opponent
-            get_yes_no_keyboard(
-                screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
-                yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
-                primary_key=game.id,
-                exclude_no_button=True,
-            ),
             # Start as global button
             [
                 Keyboard(
@@ -106,6 +98,13 @@ async def manage(
                     is_deeplink=True,
                 )
             ],
+            # Accept button for opponent
+            get_yes_no_keyboard(
+                screen=Screen.GRP_GAME_OPPONENT_CONFIRMATION,
+                yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
+                primary_key=game.id,
+                exclude_no_button=True,
+            ),
         ]
 
     button_delete_info = {

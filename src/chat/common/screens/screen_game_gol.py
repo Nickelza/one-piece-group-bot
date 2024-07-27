@@ -9,59 +9,25 @@ import resources.phrases as phrases
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.Emoji import Emoji
-from src.model.enums.GameStatus import GameStatus
-from src.model.enums.Screen import Screen
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.guessorlife.GuessOrLife import GuessOrLife, PlayerType, PlayerInfo
-from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
 from src.service.game_service import (
     save_game,
     get_players,
-    guess_game_countdown_to_start,
     get_guess_game_users_to_send_message_to,
     set_user_private_screen,
-    validate_game,
     end_game,
     get_text,
     end_text_based_game,
+    get_global_time_based_text,
+    get_global_text_challenger_finished,
+    end_global_guess_game_challenger,
+    timeout_opponent_guess_game,
 )
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
-
-
-async def manage(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    inbound_keyboard: Keyboard,
-    game: Game = None,
-) -> None:
-    """
-    Manage the Guess or Life game screen
-    :param update: The update object
-    :param context: The context object
-    :param inbound_keyboard: The inbound keyboard
-    :param game: The game object
-    :return: None
-    """
-
-    # Get the game from validation, will handle error messages
-    game = await validate_game(update, context, inbound_keyboard, game)
-    if game is None:
-        return
-
-    get_board(game)
-
-    # From opponent confirmation, start countdown
-    if inbound_keyboard.screen == Screen.GRP_GAME_OPPONENT_CONFIRMATION:
-        game.status = GameStatus.COUNTDOWN_TO_START
-        game.save()
-        context.application.create_task(
-            await guess_game_countdown_to_start(
-                update, context, game, Env.GAME_START_WAIT_TIME.get_int(), run_game
-            )
-        )
-        return
+from src.utils.phrase_utils import get_outcome_text
 
 
 def get_specific_text(
@@ -86,9 +52,15 @@ def get_specific_text(
     """
 
     challenger, opponent = get_players(game)
+    player = challenger if player_type is PlayerType.CHALLENGER else opponent
+    challenger_has_finished = game.challenger_has_finished()
 
     ot_text_list = []
     for pt in PlayerType:
+        # In case of global, skip text block of other player
+        if game.is_global() and pt is not player_type:
+            continue
+
         word_with_blanks = guess_or_life.get_word_with_blanks(
             pt, show_guessed_letters=(is_finished or pt is player_type)
         )
@@ -140,9 +112,23 @@ def get_specific_text(
     # Sending in private chat
     if not is_for_group:
         ot_text = "\n\n\n".join(ot_text_list)
-        if guess_or_life.can_issue_live() and not is_finished and not is_for_new_life:
+
+        if game.is_global():
+            ot_text += get_global_time_based_text(game, player)
+
+            if game.is_challenger(player) and challenger_has_finished:
+                ot_text += get_global_text_challenger_finished(
+                    game, should_add_already_guessed_text=False
+                )
+
+        if (
+            guess_or_life.can_issue_life()
+            and not is_finished
+            and not is_for_new_life
+            and not (game.is_challenger(player) and challenger_has_finished)
+        ):
             ot_text += "\n\n" + phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_2.format(
-                Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int()
+                game.get_seconds_for_every_hint()
             )
 
         return ot_text
@@ -153,13 +139,12 @@ def get_specific_text(
         game,
         is_finished,
         game_outcome=outcome,
-        is_turn_based=False,
         terminology=guess_or_life.terminology,
         text_to_add_before_footer=text_before_footer,
     )
 
 
-def get_board(game: Game) -> GuessOrLife:
+def get_boards(game: Game) -> [GuessOrLife, GuessOrLife]:
     """
     Get the board
     :param game: The game object
@@ -178,12 +163,54 @@ def get_board(game: Game) -> GuessOrLife:
                 game.get_difficulty()
             ),
         )
-        guess_or_life = GuessOrLife(random_terminology)
-        save_game(game, guess_or_life.get_board_json())
-        return guess_or_life
+        board = GuessOrLife(random_terminology)
+        save_game(game, board.get_as_json_string(), hint_was_issued=True)
 
-    # Parse the JSON string and create a Terminology object
-    json_dict = json.loads(game.board)
+        if game.is_global():
+            save_game(game, board.get_as_json_string(), is_opponent_board=True)
+
+        return board, board  # First initialization, both boards are the same
+
+    return get_board_object_from_json(json.loads(game.board)), (
+        (get_board_object_from_json(json.loads(game.opponent_board)) if game.is_global() else None)
+    )
+
+
+def get_player_board(game: Game, user: User) -> GuessOrLife:
+    """
+    Get the player board
+    :param game: The game object
+    :param user: The user object
+    :return: The board
+    """
+
+    challenger_board, opponent_board = get_boards(game)
+    return (
+        challenger_board
+        if not game.is_challenger(user) or not game.is_global()
+        else opponent_board
+    )
+
+
+def get_other_board(game: Game, user: User) -> GuessOrLife:
+    """
+    Get the other board
+    :param game: The game object
+    :param user: The user object
+    :return: The board
+    """
+
+    challenger_board, opponent_board = get_boards(game)
+    return opponent_board if game.is_challenger(user) else challenger_board
+
+
+def get_board_object_from_json(json_dict: dict) -> GuessOrLife:
+    """
+    Get the board
+    :param json_dict: The dictionary containing the board
+    :return: The board
+    """
+
     term_dict = json_dict.pop("terminology")
     term: Terminology = Terminology(**term_dict)
 
@@ -218,32 +245,40 @@ def get_player_type(game: Game, user: User) -> PlayerType:
 async def run_game(
     context: ContextTypes.DEFAULT_TYPE,
     game: Game,
-    send_to_user: User = None,
+    user: User,
     should_send_to_all_players: bool = True,
     schedule_next_send: bool = True,
+    hint_wait_seconds: int = None,
 ) -> None:
     """
     Issue lives to the players
     :param context: The context
     :param game: The game
-    :param send_to_user: The user to send the message to
+    :param user: The user to send the message to
     :param should_send_to_all_players: If the image should be sent to all players
     :param schedule_next_send: If the next send should be scheduled
+    :param hint_wait_seconds: How many seconds to wait before issuing next hint. If none, the game default is used
     """
 
+    hint_wait_seconds = (
+        hint_wait_seconds if hint_wait_seconds is not None else game.get_seconds_for_every_hint()
+    )
     users = await get_guess_game_users_to_send_message_to(
-        game, send_to_user, should_send_to_all_players, schedule_next_send
+        game,
+        user,
+        (should_send_to_all_players and not game.is_global()),
+        schedule_next_send,
     )
 
     # Get the board
-    guess_or_life = get_board(game)
+    board = get_player_board(game, user)
 
     # Send the message to the users
-    for user in users:
+    for u in users:
         specific_text = get_specific_text(
-            game, guess_or_life, player_type=get_player_type(game, user), is_for_new_life=True
+            game, board, player_type=get_player_type(game, u), is_for_new_life=True
         )
-        if guess_or_life.can_issue_live():
+        if board.can_issue_life():
             remaining_time_text = (
                 phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_LIFE_1
                 if should_send_to_all_players
@@ -251,37 +286,41 @@ async def run_game(
             )
             ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
                 specific_text,
-                remaining_time_text.format(Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int()),
+                remaining_time_text.format(hint_wait_seconds),
             )
         else:
             ot_text = specific_text
 
-        context.application.create_task(
-            full_message_send(context, ot_text, chat_id=user.tg_user_id)
-        )
+        context.application.create_task(full_message_send(context, ot_text, chat_id=u.tg_user_id))
 
         # Set private screen for input
-        context.application.create_task(set_user_private_screen(user, game))
+        context.application.create_task(set_user_private_screen(u, game))
 
     if not schedule_next_send:
         return
 
-    await asyncio.sleep(Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int())
+    await asyncio.sleep(hint_wait_seconds)
 
     # Refresh game, resend only if it's still ongoing
-    game = Game.get_by_id(game.id)
-    if GameStatus(game.status) is not GameStatus.IN_PROGRESS:
+    game: Game = Game.get_by_id(game.id)
+
+    if game.is_finished():
         return
 
-    # Issue live
-    guess_or_life: GuessOrLife = get_board(game)
-    if not guess_or_life.can_issue_live():
+    if game.is_opponent(user) and await timeout_opponent_guess_game(context, game):
         return
 
-    guess_or_life.issue_live()
-    save_game(game, guess_or_life.get_board_json())
+    board: GuessOrLife = get_player_board(game, user)
 
-    await run_game(context, game)
+    # Challenger is playing and they have already guessed
+    if game.is_challenger(user) and board.player_has_guessed(PlayerType.CHALLENGER):
+        return
+
+    # Issue life
+    if not issue_life_if_possible(game, user):
+        return
+
+    await run_game(context, game, user)
 
 
 async def validate_answer(
@@ -301,7 +340,7 @@ async def validate_answer(
     except AttributeError:
         return
 
-    guess_or_life: GuessOrLife = get_board(game)
+    board: GuessOrLife = get_player_board(game, user)
 
     # More than one letter sent
     if len(letter) > 1:
@@ -311,26 +350,25 @@ async def validate_answer(
     if not letter.isalpha():
         return
 
+    player_type: PlayerType = get_player_type(game, user)
     # Letter already used
-    if guess_or_life.has_used_letter(get_player_type(game, user), letter):
+    if board.has_used_letter(player_type, letter):
         return
 
     # No more lives remaining
-    if guess_or_life.get_player_info(get_player_type(game, user)).lives == 0:
+    if board.get_player_info(player_type).lives == 0:
         return
 
     # Add letter to used letters and refresh specific text
-    guess_or_life.add_used_letter(get_player_type(game, user), letter)
-    save_game(game, guess_or_life.get_board_json())
-    specific_text = get_specific_text(game, guess_or_life, player_type=get_player_type(game, user))
+    board.add_used_letter(player_type, letter)
+    save_game(game, board.get_as_json_string(), is_opponent_board=game.is_opponent(user))
+    specific_text = get_specific_text(game, board, player_type=player_type)
 
     # Letter not in word
-    if not guess_or_life.is_letter_is_in_word(letter):
-        guess_or_life.remove_life(get_player_type(game, user))
-        save_game(game, guess_or_life.get_board_json())
-        specific_text = get_specific_text(
-            game, guess_or_life, player_type=get_player_type(game, user)
-        )
+    if not board.is_letter_is_in_word(letter):
+        board.remove_life(player_type)
+        save_game(game, board.get_as_json_string(), is_opponent_board=game.is_opponent(user))
+        specific_text = get_specific_text(game, board, player_type=player_type)
         ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
             phrases.GUESS_OR_LIFE_GAME_WRONG_LETTER, specific_text
         )
@@ -338,7 +376,18 @@ async def validate_answer(
         return
 
     # Correct letter but game not finished
-    if not guess_or_life.is_finished(get_player_type(game, user)):
+    if not board.is_finished(player_type, get_other_board(game, user)):
+        # If challenger and they've guessed, show completion time and awaiting opponent to finish
+        if player_type is PlayerType.CHALLENGER and board.player_has_guessed(player_type):
+            # Set challenger and time and try enqueueing opponent timeout
+            await end_global_guess_game_challenger(context, game)
+
+            specific_text = get_specific_text(game, board, player_type=player_type)
+            ot_text = phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
+            await full_message_send(context, ot_text, update=update)
+
+            return
+
         ot_text = phrases.GUESS_OR_LIFE_GAME_PRIVATE_RECAP.format(
             phrases.GUESS_OR_LIFE_GAME_CORRECT_LETTER, specific_text
         )
@@ -347,26 +396,54 @@ async def validate_answer(
 
     # End game
     challenger, opponent = get_players(game)
-    outcome: GameOutcome = (
-        GameOutcome.CHALLENGER_WON if user == challenger else GameOutcome.OPPONENT_WON
-    )
+    outcome: GameOutcome = board.get_outcome(player_type)
+
     await end_game(game, outcome, context, update=update)
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
-    specific_text = get_specific_text(
-        game, guess_or_life, player_type=get_player_type(game, user), is_finished=True
+    specific_text = get_specific_text(game, board, is_finished=True, player_type=player_type)
+    winner_text: str = (
+        phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
     )
-    winner_text: str = phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
 
     specific_text = get_specific_text(
-        game, guess_or_life, player_type=get_player_type(game, loser), is_finished=True
+        game, board, is_finished=True, player_type=get_player_type(game, loser)
     )
-    loser_text: str = phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text)
+    loser_text: str = (
+        phrases.GUESS_GAME_OPPONENT_CORRECT_ANSWER.format(specific_text)
+        + "\n\n"
+        + get_outcome_text(True, game.wager)
+    )
 
     group_text = get_specific_text(
-        game, guess_or_life, is_finished=True, outcome=outcome, is_for_group=True
+        game, board, is_finished=True, outcome=outcome, is_for_group=True
     )
     await end_text_based_game(
         context, game, outcome, user, winner_text, loser, loser_text, group_text
     )
+
+
+def issue_life_if_possible(game: Game, user: User) -> bool:
+    """
+    Issue a life if possible, saving the game
+    :param game: The game
+    :param user: The user
+    :return: If a life was issued
+    """
+    board: GuessOrLife = get_player_board(game, user)
+
+    if not board.can_issue_life():
+        return False
+
+    board.issue_life()
+    save_game(
+        game,
+        board.get_as_json_string(),
+        is_opponent_board=game.is_opponent(user),
+        hint_was_issued=True,
+    )
+
+    return True

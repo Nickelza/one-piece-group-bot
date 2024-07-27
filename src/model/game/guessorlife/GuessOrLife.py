@@ -1,8 +1,8 @@
-import json
 import re
 from enum import IntEnum
 
 import resources.Environment as Env
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameOutcome import GameOutcome
 from src.model.wiki.Terminology import Terminology
@@ -22,7 +22,7 @@ class PlayerType(IntEnum):
     OPPONENT = 2
 
 
-class GuessOrLife:
+class GuessOrLife(GameBoard):
     def __init__(
         self,
         terminology: Terminology,
@@ -37,6 +37,7 @@ class GuessOrLife:
         :param opponent_info: The opponent info
         :param issued_lives: The issued lives
         """
+        super().__init__()
 
         self.terminology = terminology
         self.challenger_info = challenger_info
@@ -51,16 +52,6 @@ class GuessOrLife:
 
         if self.opponent_info is None:
             self.opponent_info = PlayerInfo(self.issued_lives)
-
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(
-            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
-        )
 
     def get_plain_word(self) -> str:
         """
@@ -92,19 +83,22 @@ class GuessOrLife:
 
         return letter.lower() in self.get_plain_word().lower()
 
-    def is_finished(self, player_type: PlayerType = None) -> bool:
+    def is_finished(self, player_type: PlayerType, other_board: "GuessOrLife" = None) -> bool:
         """
         Check if the game is finished
-        :param player_type: The player
+        :param player_type: The player type, challenger by default because in case it's not passed (so global board),
+        then it will always be the challenger in both boards
+        :param other_board: The other board, in case of global game
         :return: bool
         """
 
-        if player_type is not None:
-            return self.player_has_guessed(player_type)
+        if other_board is not None:  # Global mode
+            # Current player is challenger, the game can't be finished because even if they have guessed, the fact that
+            # they arrived to this point instead of being stopped earlier means that the opponent is still playing
+            if player_type is PlayerType.CHALLENGER:
+                return False
 
-        return self.player_has_guessed(PlayerType.CHALLENGER) or self.player_has_guessed(
-            PlayerType.OPPONENT
-        )
+        return self.player_has_guessed(player_type)
 
     def player_has_guessed(self, player_type: PlayerType):
         """
@@ -146,7 +140,7 @@ class GuessOrLife:
 
         return self.opponent_info
 
-    def can_issue_live(self):
+    def can_issue_life(self):
         """
         Check if a live can be issued
         :return: bool
@@ -154,13 +148,13 @@ class GuessOrLife:
 
         return self.issued_lives < 26
 
-    def issue_live(self):
+    def issue_life(self):
         """
         Issue a live
         :return: None
         """
 
-        if not self.can_issue_live():
+        if not self.can_issue_life():
             raise ValueError("Cannot issue live")
 
         self.challenger_info.lives += 1

@@ -123,7 +123,7 @@ async def manage(
 
         # Global game, modify opponent message
         if game.is_global():
-            await context.application.create_task(
+            context.application.create_task(
                 edit_other_player_message(
                     context,
                     game,
@@ -151,7 +151,7 @@ async def manage(
 
         # Modify other player message and save current message id
         if game.is_global():
-            await context.application.create_task(
+            context.application.create_task(
                 edit_other_player_message(
                     context,
                     game,

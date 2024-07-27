@@ -45,6 +45,28 @@ class GameType(IntEnum):
         """
         return self in GAME_TYPE_WITH_DIFFICULTY
 
+    def is_turn_based(self) -> bool:
+        """
+        Check if this game type is turn based
+        :return: True if it is turn based, False otherwise
+        """
+        return self in GAME_TYPE_TURN_BASED_LIST
+
+    def is_guess_based(self) -> bool:
+        """
+        Check if this game type is time based
+        :return: True if it is time based, False otherwise
+        """
+        return self in GAME_TYPE_GUESS_LIST
+
+    @staticmethod
+    def get_guess_based_list() -> list["GameType"]:
+        """
+        Get the list of game types that are guess based
+        :return: The list of game types
+        """
+        return GAME_TYPE_GUESS_LIST
+
 
 GAME_TYPE_SAVED_MEDIA_NAME_DICT = {
     GameType.ROCK_PAPER_SCISSORS: SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
@@ -82,6 +104,14 @@ GAME_TYPE_DESCRIPTION_DICT = {
 }
 
 GAME_TYPE_WITH_DIFFICULTY = [
+    GameType.GUESS_OR_LIFE,
+    GameType.SHAMBLES,
+    GameType.WHOS_WHO,
+    GameType.PUNK_RECORDS,
+]
+
+GAME_TYPE_TURN_BASED_LIST = [GameType.ROCK_PAPER_SCISSORS, GameType.RUSSIAN_ROULETTE]
+GAME_TYPE_GUESS_LIST = [
     GameType.GUESS_OR_LIFE,
     GameType.SHAMBLES,
     GameType.WHOS_WHO,

@@ -2,6 +2,7 @@ import datetime
 
 from peewee import *
 
+import resources.Environment as Env
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -9,6 +10,7 @@ from src.model.enums.GameStatus import GameStatus
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.game.GameBoard import GameBoard
 from src.model.game.GameDifficulty import GameDifficulty
+from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameType import GameType
 from src.utils.string_utils import get_belly_formatted
 
@@ -47,8 +49,13 @@ class Game(BaseModel):
         default=datetime.datetime.now
     )
     global_challenger_start_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    global_challenger_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     global_opponent_start_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
+    global_opponent_end_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     global_challenger_has_finished: bool | BooleanField = BooleanField(default=False)
+    last_hint_date = DateTimeField(null=True)
+    last_hint_opponent_date = DateTimeField(null=True)
+    thread_restart_count = IntegerField(default=0)
 
     class Meta:
         db_table = "game"
@@ -339,6 +346,31 @@ class Game(BaseModel):
 
         return None
 
+    def has_winner(self) -> bool:
+        """
+        Check if the game has a winner
+        :return: True if the game has a winner, False otherwise
+        """
+
+        return self.get_winner() is not None
+
+    def get_outcome(self) -> GameOutcome:
+        """
+        Get the outcome of the game
+        :return: The outcome
+        """
+
+        if self.get_status() is GameStatus.WON:
+            return GameOutcome.CHALLENGER_WON
+
+        if self.get_status() is GameStatus.LOST:
+            return GameOutcome.OPPONENT_WON
+
+        if self.get_status() is GameStatus.DRAW:
+            return GameOutcome.DRAW
+
+        return GameOutcome.NONE
+
     def is_finished(self) -> bool:
         """
         Check if the game is finished
@@ -359,6 +391,106 @@ class Game(BaseModel):
             self.board = board.get_as_json_string()
         else:
             self.opponent_board = board.get_as_json_string()
+
+    def is_turn_based(self) -> bool:
+        """
+        Check if the game is turn based
+        :return: True if the game is turn based, False otherwise
+        """
+
+        return self.get_type().is_turn_based()
+
+    def is_guess_based(self) -> bool:
+        """
+        Check if the game is time based
+        :return: True if the game is time based, False otherwise
+        """
+
+        return self.get_type().is_guess_based()
+
+    def has_opponent(self) -> bool:
+        """
+        Check if the game has an opponent
+        :return: True if the game has an opponent, False otherwise
+        """
+
+        return self.opponent is not None
+
+    def get_players_time_seconds(self) -> [int, int]:
+        """
+        Get the players time in seconds
+        :return: The players time in seconds
+        """
+
+        from src.service.date_service import get_remaining_time_in_seconds
+
+        challenger_total_time_seconds = get_remaining_time_in_seconds(
+            (
+                self.global_challenger_end_date
+                if self.global_challenger_end_date
+                else datetime.datetime.now()
+            ),
+            start_datetime=self.global_challenger_start_date,
+        )
+
+        opponent_total_time_seconds = get_remaining_time_in_seconds(
+            (
+                self.global_opponent_end_date
+                if self.global_opponent_end_date
+                else datetime.datetime.now()
+            ),
+            start_datetime=self.global_opponent_start_date,
+        )
+
+        return challenger_total_time_seconds, opponent_total_time_seconds
+
+    def challenger_has_finished(self) -> bool:
+        """
+        Check if the challenger has finished
+        :return: True if the challenger has finished, False otherwise
+        """
+
+        return self.is_global() and (
+            self.global_challenger_end_date is not None or self.is_finished()
+        )
+
+    def opponent_has_finished(self) -> bool:
+        """
+        Check if the opponent has finished
+        :return: True if the opponent has finished, False otherwise
+        """
+
+        return self.is_global() and (
+            self.global_opponent_end_date is not None or self.is_finished()
+        )
+
+    def get_challenger_time_seconds(self) -> int:
+        """
+        Get the challenger time in seconds
+        :return: The challenger time in seconds
+        """
+
+    def get_seconds_for_every_hint(self) -> int:
+        """
+        Get the seconds for every hint
+        :return: The seconds for every hint
+        """
+
+        match self.get_type():
+            case GameType.GUESS_OR_LIFE:
+                return Env.GUESS_OR_LIFE_NEW_LIFE_WAIT_TIME.get_int()
+
+            case GameType.PUNK_RECORDS:
+                return Env.PUNK_RECORDS_NEXT_DETAIL_WAIT_TIME.get_int()
+
+            case GameType.SHAMBLES:
+                return Env.SHAMBLES_NEXT_LEVEL_WAIT_TIME.get_int()
+
+            case GameType.WHOS_WHO:
+                return Env.WHOS_WHO_NEXT_LEVEL_WAIT_TIME.get_int()
+
+            case _:
+                raise ValueError(f"Unsupported game type: {self.get_type()}")
 
 
 Game.create_table()

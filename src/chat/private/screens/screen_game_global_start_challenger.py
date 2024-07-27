@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from resources import phrases
+from src.chat.common.screens.screen_game_guess_manage import manage as manage_guess_game
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
 from src.chat.common.screens.screen_game_rr import manage as manage_rr
 from src.model.Game import Game
@@ -17,6 +18,8 @@ from src.model.pojo.Keyboard import Keyboard
 from src.service.game_service import (
     get_game_from_keyboard,
     collect_game_wagers_and_set_in_progress,
+    enqueue_timeout_opponent_guess_game,
+    get_text,
 )
 from src.service.message_service import full_message_send, mention_markdown_user, full_media_send
 from src.utils.string_utils import get_belly_formatted
@@ -86,8 +89,34 @@ async def manage(
                 authorized_users=[game.challenger],
             )
         )
+    # If global and guess based started in private, edit that message too
+    elif game.is_global() and game.is_guess_based():
+        ot_text = get_text(game, False, is_for_group_global=True)
+        outbound_keyboard: list[list[Keyboard]] = [
+            # Play as global button
+            [
+                Keyboard(
+                    phrases.GRP_KEY_GAME_PLAY,
+                    info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
+                    screen=Screen.PVT_GAME_GLOBAL_START_CHALLENGER,
+                    is_deeplink=True,
+                )
+            ],
+        ]
 
-    await dispatch_global_game(update, context, user, inbound_keyboard, game)
+        context.application.create_task(
+            full_media_send(
+                context,
+                caption=ot_text,
+                keyboard=outbound_keyboard,
+                edit_only_caption_and_keyboard=True,
+                update=update,
+            )
+        )
+
+    await dispatch_global_game(
+        update, context, user, inbound_keyboard, game, should_start_immediately=True
+    )
 
 
 async def dispatch_global_game(
@@ -96,6 +125,7 @@ async def dispatch_global_game(
     user: User,
     inbound_keyboard: Keyboard,
     game: Game,
+    should_start_immediately: bool = False,
 ) -> None:
     """
     Dispatch game
@@ -104,8 +134,14 @@ async def dispatch_global_game(
     :param user: The user
     :param inbound_keyboard: The inbound keyboard
     :param game: The game
+    :param should_start_immediately: If the game should be started immediately, from challenger/opponent confirmation
     :return: None
     """
+    # Opponent just started, enqueue timeout if challenger has already finished. In case they have not
+    # the timeout will be enqueued when they do
+    if should_start_immediately and game.is_opponent(user):
+        if game.is_opponent(user):
+            context.application.create_task(enqueue_timeout_opponent_guess_game(context, game))
 
     game_type: GameType = GameType(game.type)
     match game_type:
@@ -121,9 +157,16 @@ async def dispatch_global_game(
         # case GameType.WHOS_WHO:
         #     await manage_ww(update, context, inbound_keyboard, game)
         #
-        # case GameType.GUESS_OR_LIFE:
-        #     await manage_gol(update, context, inbound_keyboard, game)
-        #
+        case GameType.GUESS_OR_LIFE:
+            await manage_guess_game(
+                update,
+                context,
+                inbound_keyboard,
+                user,
+                game,
+                should_start_immediately=should_start_immediately,
+            )
+
         # case GameType.PUNK_RECORDS:
         #     await manage_pr(update, context, inbound_keyboard, game)
 
