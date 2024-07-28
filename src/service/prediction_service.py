@@ -35,7 +35,7 @@ from src.service.group_service import (
 )
 from src.service.message_service import escape_valid_markdown_chars, full_message_send
 from src.service.notification_service import send_notification
-from src.utils.download_utils import get_random_string
+from src.utils.context_utils import get_random_user_context_inner_query_key
 from src.utils.math_utils import (
     get_percentage_from_value,
     get_value_from_percentage,
@@ -1078,7 +1078,7 @@ def get_share_text(context: ContextTypes.DEFAULT_TYPE, user: User, prediction: P
     """
 
     # Save get_text to context
-    inner_key = get_random_string()
+    inner_key = get_random_user_context_inner_query_key(context)
     keyboard: Keyboard = (
         get_prediction_deeplink_button(prediction)
         if prediction.get_status() is PredictionStatus.SENT

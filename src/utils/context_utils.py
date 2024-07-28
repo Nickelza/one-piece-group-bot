@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext, ContextTypes
 from resources import phrases
 from src.model.enums.ContextDataKey import ContextDataKey, ContextDataType
 from src.model.error.CommonChatError import CommonChatException
+from src.utils.download_utils import get_random_string
 
 
 def get_context_data(
@@ -179,3 +180,27 @@ def set_user_context_data(
     """
 
     set_context_data(context, ContextDataType.USER, key, value, inner_key)
+
+
+def get_random_user_context_inner_query_key(context: CallbackContext) -> str:
+    """
+    Get a random inner key for the user context data
+    :param context: The context
+    :return: The inner key
+    """
+
+    for i in range(100):
+        inner_key = get_random_string()
+        try:
+            get_user_context_data(
+                context,
+                ContextDataKey.INLINE_QUERY,
+                inner_key=inner_key,
+                tolerate_key_exception=False,
+            )
+            continue
+        except KeyError:
+            return inner_key
+
+    logging.error("Could not find a random inner key for the user context data")
+    raise CommonChatException("Failed to generate an inner key")

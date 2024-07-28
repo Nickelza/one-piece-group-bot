@@ -22,7 +22,12 @@ from src.model.game.russianroulette.RussianRouletteChamberStatus import (
     RussianRouletteChamberStatus as RRChamberStatus,
 )
 from src.model.pojo.Keyboard import Keyboard
-from src.service.game_service import edit_other_player_message, enqueue_auto_move
+from src.service.game_service import (
+    edit_other_player_message,
+    enqueue_auto_move,
+    get_global_share_keyboard,
+    end_global_game_player,
+)
 from src.service.message_service import full_message_send, full_media_send, get_message_source
 
 
@@ -119,6 +124,9 @@ async def manage(
 
         game.set_board(board, user)
 
+        if board.is_finished():
+            await end_global_game_player(context, game, is_challenger=game.is_challenger(user))
+
     # Game is finished
     if board.is_finished(other_board=other_board):
         game_outcome: GameOutcome = board.get_outcome(game.is_challenger(user), other_board)
@@ -138,7 +146,7 @@ async def manage(
             context,
             caption=get_specific_text(game, board, user, other_board),
             update=update,
-            keyboard=get_outbound_keyboard(game, board, update),
+            keyboard=get_outbound_keyboard(context, game, board, update, user),
             authorized_users=game.get_players(),
             edit_only_caption_and_keyboard=True,
             edit_message_id=edit_message_id,
@@ -154,7 +162,7 @@ async def manage(
                     message.id,
                     get_specific_text(game, challenger_board, game.challenger, opponent_board),
                     get_specific_text(game, opponent_board, game.opponent, challenger_board),
-                    get_outbound_keyboard(game, other_board, update),
+                    get_outbound_keyboard(context, game, other_board, update, user),
                 )
             )
 
@@ -169,7 +177,7 @@ async def manage(
         context,
         caption=get_specific_text(game, board, user, other_board),
         update=update,
-        keyboard=get_outbound_keyboard(game, board, update),
+        keyboard=get_outbound_keyboard(context, game, board, update, user),
         authorized_users=game.get_players(),
         saved_media_name=SavedMediaName.GAME_RUSSIAN_ROULETTE,
         edit_message_id=edit_message_id,
@@ -185,7 +193,7 @@ async def manage(
                 message.id,
                 get_specific_text(game, challenger_board, game.challenger, opponent_board),
                 get_specific_text(game, opponent_board, game.opponent, challenger_board),
-                get_outbound_keyboard(game, other_board, update),
+                get_outbound_keyboard(context, game, other_board, update, user),
             )
         )
 
@@ -238,13 +246,19 @@ async def get_all_boards(game: Game, user: User) -> [GameBoard, GameBoard, GameB
 
 
 def get_outbound_keyboard(
-    game: Game, russian_roulette: RussianRoulette, update: Update
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    russian_roulette: RussianRoulette,
+    update: Update,
+    user: User,
 ) -> list[list[Keyboard]]:
     """
     Get the outbound keyboard
+    :param context: The context
     :param game: The game object
     :param russian_roulette: The russian roulette object
     :param update: The update
+    :param user: The user
     :return: The outbound keyboard
     """
 
@@ -282,6 +296,12 @@ def get_outbound_keyboard(
                 keyboard_line.append(Keyboard(emoji, info=button_info, screen=get_screen(update)))
 
         outbound_keyboard.append(keyboard_line)
+
+    outbound_keyboard += (
+        get_global_share_keyboard(context, game)
+        if game.challenger_has_finished() and game.is_challenger(user)
+        else []
+    )
 
     return outbound_keyboard
 

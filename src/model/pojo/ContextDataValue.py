@@ -8,7 +8,7 @@ class ContextDataValue:
         self,
         title: str,
         text: any,
-        args: tuple = None,
+        args: any = None,
         description: str = None,
         keyboard: list[list[Keyboard]] = None,
     ):

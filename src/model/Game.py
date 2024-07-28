@@ -4,6 +4,7 @@ import json
 from peewee import *
 
 import resources.Environment as Env
+from resources import phrases
 from src.model.BaseModel import BaseModel
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -513,6 +514,16 @@ class Game(BaseModel):
             raise ValueError("No terminology or character in JSON string")
 
         return terminology
+
+    def get_global_item_text(self) -> str:
+        """
+        Get the global item text
+        :return: The global item text
+        """
+
+        return phrases.GAME_GLOBAL_ITEM_TEXT.format(
+            self.get_type().get_name(), self.get_wager_formatted()
+        )
 
 
 Game.create_table()

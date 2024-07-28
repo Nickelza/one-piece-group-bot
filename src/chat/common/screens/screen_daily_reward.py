@@ -8,7 +8,6 @@ from src.chat.common.screens.screen_daily_reward_prize import send_prize_request
 from src.model.DailyReward import DailyReward
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitTrade import DevilFruitTrade
-from src.model.Game import Game
 from src.model.GroupChat import GroupChat
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
@@ -20,7 +19,7 @@ from src.model.enums.devil_fruit.DevilFruitSource import DevilFruitSource
 from src.service.bounty_service import add_or_remove_bounty
 from src.service.daily_reward_service import get_text
 from src.service.date_service import is_same_day, get_next_run
-from src.service.game_service import get_global_game_item_text_deeplink
+from src.service.game_service import get_global_challenges_section_text
 from src.service.message_service import (
     full_message_send,
     get_deeplink,
@@ -174,33 +173,3 @@ async def manage(
     # Prize day
     if reward.should_award_prize():
         await send_prize_request(context, update, reward)
-
-
-def get_global_challenges_section_text(
-    user: User, max_items_per_category: int = c.STANDARD_LIST_SIZE
-) -> str:
-    """
-    Get global challenges section text
-    :param user: The user
-    :param max_items_per_category: Max items per category
-    :return: Global challenges section
-    """
-
-    global_challenges = Game.get_global_games()
-    global_challenges_text = ""
-
-    if len(global_challenges) == 0:
-        return ""
-
-    for i, game in enumerate(global_challenges):
-        # Limit max visible items
-        if i == max_items_per_category:
-            url = get_deeplink(screen=Screen.PVT_GAME_GLOBAL_LIST)
-            global_challenges_text += phrases.VIEW_ALL_WITH_EMOJI.format(url)
-            break
-
-        global_challenges_text += phrases.DAILY_REWARD_GLOBAL_CHALLENGE_ITEM.format(
-            get_global_game_item_text_deeplink(game, user)
-        )
-
-    return phrases.DAILY_REWARD_GLOBAL_CHALLENGE.format(global_challenges_text)

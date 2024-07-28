@@ -6,7 +6,6 @@ from telegram.ext import ContextTypes
 
 import resources.Environment as Env
 import resources.phrases as phrases
-from src.chat.common.screens.screen_daily_reward import get_global_challenges_section_text
 from src.model.Game import Game
 from src.model.GroupChat import GroupChat
 from src.model.User import User
@@ -21,6 +20,7 @@ from src.model.game.GameType import GameType
 from src.model.pojo.Keyboard import Keyboard
 from src.service.bounty_service import get_amount_from_string, validate_amount
 from src.service.date_service import get_remaining_duration
+from src.service.game_service import get_global_challenges_section_text
 from src.service.message_service import (
     full_message_send,
     get_message_url,

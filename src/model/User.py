@@ -22,7 +22,7 @@ from src.model.enums.Location import (
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.enums.income_tax.IncomeTaxBracket import IncomeTaxBracket
-from src.service.bot_service import (
+from src.utils.context_utils import (
     get_user_context_data,
     set_user_context_data,
     remove_context_data,

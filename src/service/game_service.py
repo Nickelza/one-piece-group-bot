@@ -32,11 +32,11 @@ from src.model.game.GameType import GameType
 from src.model.game.punkrecords.PunkRecords import PunkRecords
 from src.model.game.shambles.Shambles import Shambles
 from src.model.game.whoswho.WhosWho import WhosWho
+from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
 from src.model.wiki.Character import Character
 from src.model.wiki.SupabaseRest import SupabaseRest
 from src.model.wiki.Terminology import Terminology
-from src.service.bot_service import get_bot_context_data, set_bot_context_data
 from src.service.bounty_service import add_or_remove_bounty, validate_amount
 from src.service.date_service import (
     convert_seconds_to_duration,
@@ -54,6 +54,11 @@ from src.service.message_service import (
     get_deeplink,
 )
 from src.service.notification_service import send_notification
+from src.utils.context_utils import (
+    get_bot_context_data,
+    set_bot_context_data,
+    get_random_user_context_inner_query_key,
+)
 from src.utils.phrase_utils import get_outcome_text
 from src.utils.string_utils import get_belly_formatted
 
@@ -268,9 +273,13 @@ def get_text(
                 added_ot_text += phrases.GAME_STARTED
 
     # Add auto move warning
-    if is_turn_based and (
-        (game.is_challenger(user_turn) and not challenger_has_finished)
-        or (game.is_opponent(user_turn) and not opponent_has_finished)
+    if (
+        is_turn_based
+        and not is_for_group_global
+        and (
+            (game.is_challenger(user_turn) and not challenger_has_finished)
+            or (game.is_opponent(user_turn) and not opponent_has_finished)
+        )
     ):
         added_ot_text += get_auto_move_warning(add_turn_notification_time=not game.is_global())
 
@@ -1156,8 +1165,7 @@ def get_global_game_item_text_deeplink(game: Game, user: User) -> str:
 
     return phrases.GAME_GLOBAL_ITEM_DEEPLINK.format(
         self_emoji,
-        game.get_type().get_name(),
-        get_belly_formatted(game.wager),
+        game.get_global_item_text(),
         get_deeplink(
             info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
             screen=Screen.PVT_GAME_GLOBAL_START_OPPONENT,
@@ -1188,7 +1196,7 @@ def get_global_challenges_section_text(
             global_challenges_text += phrases.VIEW_ALL_WITH_EMOJI.format(url)
             break
 
-        global_challenges_text += phrases.DAILY_REWARD_GLOBAL_CHALLENGE_ITEM.format(
+        global_challenges_text += phrases.GLOBAL_CHALLENGE_ITEM.format(
             get_global_game_item_text_deeplink(game, user)
         )
 
@@ -1396,19 +1404,26 @@ async def enqueue_timeout_opponent_guess_game(
     await timeout_opponent_guess_game(context, updated_game)
 
 
-async def end_global_guess_game_challenger(context: ContextTypes.DEFAULT_TYPE, game: Game) -> None:
+async def end_global_game_player(
+    context: ContextTypes.DEFAULT_TYPE, game: Game, is_challenger: bool = True
+) -> None:
     """
-    End the global guess game after a challenger has correctly guessed
+    End the global guess game after a player has correctly finished
     :param context: The context object
     :param game: The game object
+    :param is_challenger: Whether the player is the challenger
     """
 
-    # Save challenger end time
-    game.global_challenger_end_date = datetime.now()
+    if is_challenger:
+        game.global_challenger_end_date = datetime.now()
+    else:
+        game.global_challenger_end_date = datetime.now()
+
     game.save()
 
-    # Try enqueuing opponent timeout
-    context.application.create_task(enqueue_timeout_opponent_guess_game(context, game))
+    if game.is_guess_based() and is_challenger:
+        # Try enqueuing opponent timeout
+        context.application.create_task(enqueue_timeout_opponent_guess_game(context, game))
 
 
 async def challenger_has_finished_or_opponent_timeout(
@@ -1429,7 +1444,10 @@ async def challenger_has_finished_or_opponent_timeout(
     # Is challenger, and they have already guessed, so they should wait for the opponent to finish
     if game.is_challenger(user):
         await full_message_send(
-            context, get_global_text_challenger_finished(game), chat_id=user.tg_user_id
+            context,
+            get_global_text_challenger_finished(game),
+            chat_id=user.tg_user_id,
+            keyboard=get_global_share_keyboard(context, game),
         )
 
         # Try checking if opponent already in timeout
@@ -1632,7 +1650,7 @@ async def guess_game_should_end_after_answer(
     # Correct word but game not finished
     if game.is_global() and game.is_challenger(user):
         # Set challenger and time and try enqueueing opponent timeout
-        await end_global_guess_game_challenger(context, game)
+        await end_global_game_player(context, game)
 
         ot_text = ""
         if detail_text is not None:
@@ -1646,8 +1664,88 @@ async def guess_game_should_end_after_answer(
         if detail_text is not None:  # Remove quadruple "\n"
             ot_text = ot_text.replace("\n\n\n\n", "\n\n\n")
 
-        await full_message_send(context, ot_text, update=update)
+        await full_message_send(
+            context,
+            ot_text,
+            update=update,
+            keyboard=get_global_share_keyboard(context, game),
+        )
 
         return False
 
     return True
+
+
+def get_text_for_inline_share(game: Game) -> str:
+    """
+    Get the text for the inline share
+    :param game: The game
+    :return: The text
+    """
+
+    return get_text(game, False, is_for_group_global=True)
+
+
+def set_and_get_global_share_item_key(context: ContextTypes.DEFAULT_TYPE, game: Game) -> str:
+    """
+    Set a game sharing info in the user context and get the key
+    :param context: The context
+    :param game: The game
+    :return: The key
+    """
+
+    # Save get_text to context
+    inner_key = get_random_user_context_inner_query_key(context)
+    outbound_keyboard: list[list[Keyboard]] = [
+        # Start as global button
+        [
+            Keyboard(
+                phrases.GRP_KEY_GAME_PLAY,
+                info={ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY: game.id},
+                screen=Screen.PVT_GAME_GLOBAL_START_OPPONENT,
+                is_deeplink=True,
+            )
+        ],
+    ]
+
+    context_data_value: ContextDataValue = ContextDataValue(
+        phrases.GAME_GLOBAL_INLINE_RESULT_SHARE,
+        get_text_for_inline_share,
+        args=[game],
+        description=game.get_global_item_text(),
+        keyboard=outbound_keyboard,
+    )
+    game.challenger.set_context_data(
+        context, ContextDataKey.INLINE_QUERY, context_data_value, inner_key=inner_key
+    )
+
+    return inner_key
+
+
+def get_global_share_keyboard(
+    context: ContextTypes.DEFAULT_TYPE, game: Game
+) -> list[list[Keyboard]]:
+    """
+    Get the global share button
+    :param context: The context
+    :param game: The game
+    :return: The global share button
+    """
+
+    if not game.is_global():
+        return []
+
+    if game.opponent is not None:
+        return []
+
+    if game.is_finished():
+        return []
+
+    return [
+        [
+            Keyboard(
+                phrases.KEY_SHARE,
+                switch_inline_query=set_and_get_global_share_item_key(context, game),
+            )
+        ]
+    ]

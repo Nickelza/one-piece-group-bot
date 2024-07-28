@@ -5,8 +5,8 @@ from resources import phrases
 from src.model.enums.ContextDataKey import ContextDataKey
 from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.ContextDataValue import ContextDataValue
-from src.service.bot_service import get_user_context_data
 from src.service.message_service import full_inline_query_answer
+from src.utils.context_utils import get_user_context_data
 
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

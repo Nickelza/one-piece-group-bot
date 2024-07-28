@@ -534,7 +534,8 @@ GAME_DIFFICULTY = "\nDifficulty: {}"
 GAME_DIFFICULTY_EASY = "Easy"
 GAME_DIFFICULTY_MEDIUM = "Medium"
 GAME_DIFFICULTY_HARD = "Hard"
-GAME_GLOBAL_ITEM_DEEPLINK = "{}[{} - ฿{}]({})"
+GAME_GLOBAL_ITEM_TEXT = "{} - ฿{}"
+GAME_GLOBAL_ITEM_DEEPLINK = "{}[{}]({})"
 GAME_GLOBAL_ALREADY_ACCEPTED = "This challenge has already been accepted by another player"
 GAME_GLOBAL_OPPONENT_CONFIRMATION_REQUEST = (
     "_*Description*: {}_"
@@ -556,13 +557,15 @@ GAME_GLOBAL_WAIT_FOR_OPPONENT = (
     "Game ended, you will be notified of the result once your opponent has finished too"
 )
 GAME_GLOBAL_PENDING_CHALLENGER = (
-    "\n\n>You will be notified once another player has accepted the game and finished playing"
+    "\n\n>You will be notified once another player has accepted the game and finished playing, or use the below "
+    "Share button to invite a friend to challenge your result"
 )
 GAME_GLOBAL_PENDING_OPPONENT = "\n\n>You will be notified once the challenger has finished playing"
 GAME_GLOBAL_GUESS_WAIT_OPPONENT = (
     "\n\n>You will be notified of the result once your opponent has finished too"
 )
 GAME_GLOBAL_GUESS_ALREADY_GUESSED = "You have already guessed correctly.{}{}"
+GAME_GLOBAL_INLINE_RESULT_SHARE = "Share game"
 
 ROCK_PAPER_SCISSORS_GAME_NAME = "Rock Paper Scissors"
 ROCK_PAPER_SCISSORS_GAME_DESCRIPTION = (
@@ -574,9 +577,6 @@ ROCK_PAPER_SCISSORS_CHOICE_ROCK = Emoji.ROCK + " Rock"
 ROCK_PAPER_SCISSORS_CHOICE_PAPER = Emoji.PAPER + " Paper"
 ROCK_PAPER_SCISSORS_CHOICE_SCISSORS = Emoji.SCISSORS + " Scissors"
 ROCK_PAPER_SCISSORS_CHOICES = "{} chose {} \n{} chose {}\n\n"
-ROCK_PAPER_SCISSORS_PENDING_CHALLENGER = (
-    "\n\n>You will be notified once another player has accepted the game and chosen an option"
-)
 ROCK_PAPER_SCISSORS_PENDING_OPPONENT = (
     "\n\n>You will be notified once the challenger has chosen an option"
 )
@@ -2270,7 +2270,7 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
 DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
 DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
 DAILY_REWARD_GLOBAL_CHALLENGE = "\n\n*Global Challenges*{}"
-DAILY_REWARD_GLOBAL_CHALLENGE_ITEM = "\n{}"
+GLOBAL_CHALLENGE_ITEM = "\n{}"
 DAILY_REWARD_PRIZE_REQUEST = (
     "{}\nYou can either accept the offered prize or"
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"

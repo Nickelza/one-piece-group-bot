@@ -35,13 +35,6 @@ from src.model.error.CustomException import (
 from src.model.error.GroupChatError import GroupChatException
 from src.model.error.PrivateChatError import PrivateChatException
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bot_service import (
-    get_context_data,
-    set_context_data,
-    get_user_context_data,
-    set_user_context_data,
-    remove_user_context_data,
-)
 from src.service.date_service import get_datetime_in_future_seconds
 from src.service.group_service import feature_is_enabled, get_group_or_topic_text, is_main_group
 from src.service.message_service import (
@@ -54,6 +47,13 @@ from src.service.message_service import (
     escape_valid_markdown_chars,
 )
 from src.service.user_service import user_is_boss, user_is_muted, get_effective_tg_user_id
+from src.utils.context_utils import (
+    get_context_data,
+    set_context_data,
+    get_user_context_data,
+    set_user_context_data,
+    remove_user_context_data,
+)
 from src.utils.string_utils import get_belly_formatted
 
 

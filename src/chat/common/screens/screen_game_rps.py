@@ -23,6 +23,8 @@ from src.service.game_service import (
     get_auto_move_warning,
     enqueue_auto_move,
     edit_other_player_message,
+    get_global_share_keyboard,
+    end_global_game_player,
 )
 from src.service.message_service import (
     full_message_send,
@@ -96,6 +98,9 @@ async def manage(
         # Update turn
         rock_paper_scissors.set_turn()
 
+        if game.is_global():
+            await end_global_game_player(context, game, is_challenger=game.is_challenger(user))
+
     # Game is finished
     if rock_paper_scissors.is_finished():
         game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
@@ -115,7 +120,7 @@ async def manage(
             context,
             caption=get_text(game, rock_paper_scissors, user),
             update=update,
-            keyboard=get_outbound_keyboard(game, update),
+            keyboard=get_outbound_keyboard(context, game, update, user),
             authorized_users=game.get_players(),
             edit_only_caption_and_keyboard=True,
             edit_message_id=edit_message_id,
@@ -131,7 +136,7 @@ async def manage(
                     message.id,
                     get_text(game, rock_paper_scissors, game.challenger),
                     get_text(game, rock_paper_scissors, game.opponent),
-                    get_outbound_keyboard(game, update),
+                    get_outbound_keyboard(context, game, update, user),
                 )
             )
 
@@ -143,7 +148,7 @@ async def manage(
             context,
             caption=get_text(game, rock_paper_scissors, user),
             update=update,
-            keyboard=get_outbound_keyboard(game, update),
+            keyboard=get_outbound_keyboard(context, game, update, user),
             authorized_users=game.get_players(),
             saved_media_name=SavedMediaName.GAME_ROCK_PAPER_SCISSORS,
             edit_message_id=edit_message_id,
@@ -159,7 +164,7 @@ async def manage(
                     message.id,
                     get_text(game, rock_paper_scissors, game.challenger),
                     get_text(game, rock_paper_scissors, game.opponent),
-                    get_outbound_keyboard(game, update),
+                    get_outbound_keyboard(context, game, update, user),
                 )
             )
 
@@ -220,11 +225,15 @@ async def manage(
         pass
 
 
-def get_outbound_keyboard(game: Game, update: Update) -> list[list[Keyboard]]:
+def get_outbound_keyboard(
+    context: ContextTypes.DEFAULT_TYPE, game: Game, update: Update, user: User
+) -> list[list[Keyboard]]:
     """
     Get the outbound keyboard
+    :param context: The context
     :param game: The game object
     :param update: The update object
+    :param user: The user
     :return: The outbound keyboard
     """
 
@@ -249,6 +258,12 @@ def get_outbound_keyboard(game: Game, update: Update) -> list[list[Keyboard]]:
         Keyboard(Emoji.SCISSORS, info=button_info_scissors, screen=get_screen(update))
     )
     outbound_keyboard.append(keyboard_line)
+
+    outbound_keyboard += (
+        get_global_share_keyboard(context, game)
+        if game.challenger_has_finished() and game.is_challenger(user)
+        else []
+    )
 
     return outbound_keyboard
 
@@ -324,7 +339,7 @@ def get_text(game: Game, rock_paper_scissors: RockPaperScissors, player: User) -
                 added_ot_text = phrases.ROCK_PAPER_SCISSORS_CHOICE.format(
                     get_choice_emoji(rock_paper_scissors.challenger_choice)
                 )
-                added_ot_text += phrases.ROCK_PAPER_SCISSORS_PENDING_CHALLENGER
+                added_ot_text += phrases.GAME_GLOBAL_PENDING_CHALLENGER
             else:
                 added_ot_text = phrases.ROCK_PAPER_SCISSORS_CHOICE.format(
                     get_choice_emoji(rock_paper_scissors.opponent_choice)

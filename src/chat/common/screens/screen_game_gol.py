@@ -23,9 +23,10 @@ from src.service.game_service import (
     end_text_based_game,
     get_global_time_based_text,
     get_global_text_challenger_finished,
-    end_global_guess_game_challenger,
+    end_global_game_player,
     timeout_opponent_guess_game,
     get_winner_loser_text,
+    get_global_share_keyboard,
 )
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
@@ -375,11 +376,16 @@ async def validate_answer(
         # If challenger and they've guessed, show completion time and awaiting opponent to finish
         if player_type is PlayerType.CHALLENGER and board.player_has_guessed(player_type):
             # Set challenger and time and try enqueueing opponent timeout
-            await end_global_guess_game_challenger(context, game)
+            await end_global_game_player(context, game)
 
             specific_text = get_specific_text(game, board, player_type=player_type)
             ot_text = phrases.GUESS_GAME_CORRECT_ANSWER.format(specific_text)
-            await full_message_send(context, ot_text, update=update)
+            await full_message_send(
+                context,
+                ot_text,
+                update=update,
+                keyboard=get_global_share_keyboard(context, game),
+            )
 
             return
 

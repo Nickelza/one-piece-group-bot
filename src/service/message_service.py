@@ -39,7 +39,7 @@ from src.model.enums.SavedMediaType import SavedMediaType
 from src.model.enums.Screen import Screen
 from src.model.pojo.ContextDataValue import ContextDataValue
 from src.model.pojo.Keyboard import Keyboard
-from src.service.bot_service import set_bot_context_data, get_bot_context_data
+from src.utils.context_utils import set_bot_context_data, get_bot_context_data
 
 
 def escape_invalid_markdown_chars(text: str) -> str:
