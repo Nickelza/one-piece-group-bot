@@ -80,9 +80,7 @@ async def manage(
         extra_text += phrases.DAILY_REWARD_DEVIL_FRUIT_SHOP.format(df_items_text)
 
     # Global challenges
-    extra_text += phrases.DAILY_REWARD_GLOBAL_CHALLENGE.format(
-        get_global_challenges_section_text(user, max_items_per_category)
-    )
+    extra_text += get_global_challenges_section_text(user, max_items_per_category)
 
     # Already used
     if not user.can_collect_daily_reward:
