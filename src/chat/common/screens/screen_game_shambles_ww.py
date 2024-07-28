@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 from telegram.ext import ContextTypes
 
@@ -8,9 +7,9 @@ from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.SavedMedia import SavedMedia
 from src.model.enums.SavedMediaType import SavedMediaType
+from src.model.game.GameType import GameType
+from src.model.game.shambles.Shambles import Shambles
 from src.model.game.whoswho.WhosWho import WhosWho
-from src.model.wiki.Character import Character
-from src.model.wiki.SupabaseRest import SupabaseRest
 from src.service.game_service import (
     set_user_private_screen,
     save_game,
@@ -22,29 +21,6 @@ from src.service.game_service import (
 from src.service.message_service import full_media_send
 
 
-def get_board(game: Game) -> WhosWho:
-    """
-    Get the board
-    :param game: The game object
-    :return: The board
-    """
-
-    # Create board
-    if game.board is None:
-        random_character: Character = SupabaseRest.get_random_character(game.get_difficulty())
-        whos_who = WhosWho(random_character)
-        save_game(game, whos_who.get_as_json_string())
-        return whos_who
-
-    # Parse the JSON string and create a Character object
-    json_dict = json.loads(game.board)
-    char_dict = json_dict.pop("character")
-    char: Character = Character(**char_dict)
-
-    # Create a WhosWho object with attribute unpacking
-    return WhosWho(character=char, **json_dict)
-
-
 async def run_game(
     context: ContextTypes.DEFAULT_TYPE,
     game: Game,
@@ -54,7 +30,7 @@ async def run_game(
     hint_wait_seconds: int = None,
 ) -> None:
     """
-    Send the blurred image
+    Send the image
     :param context: The context object
     :param game: The game object
     :param user: The user to send the image to
@@ -76,29 +52,34 @@ async def run_game(
     )
 
     # Get the board
-    board: WhosWho = get_player_board(game, user)
+    board: WhosWho | Shambles = get_player_board(game, user)
 
-    # Send the image
-    saved_media: SavedMedia = SavedMedia(
-        media_type=SavedMediaType.PHOTO, file_name=board.latest_blurred_image
+    file_name = (
+        board.image_path if game.get_type() is GameType.SHAMBLES else board.latest_blurred_image
     )
+    # Send the image
+    saved_media: SavedMedia = SavedMedia(media_type=SavedMediaType.PHOTO, file_name=file_name)
     caption = phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION
 
     if board.revealed_letters_count >= 1:
         # Add hint
-        hint = board.character.name[: board.revealed_letters_count]
+        hint = game.get_terminology().name[: board.revealed_letters_count]
         caption += phrases.GUESS_GAME_INPUT_CAPTION_HINT.format(hint)
 
     if game.is_global():
         caption += get_global_time_based_text(game, user)
 
     if should_send_to_all_players:
-        if board.level > 1:
+        if board.can_reduce_level():
             caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE.format(
                 hint_wait_seconds
             )
 
-    if should_send_to_all_players and board.level == 1 and not board.have_revealed_all_letters():
+    if (
+        should_send_to_all_players
+        and not board.can_reduce_level()
+        and not board.have_revealed_all_letters()
+    ):
         caption += phrases.GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT.format(hint_wait_seconds)
 
     for u in users:
@@ -140,7 +121,7 @@ def reduce_level_if_possible(game: Game, user: User) -> bool:
     :param user: The user
     :return: If a life was issued
     """
-    board: WhosWho = get_player_board(game, user)
+    board: WhosWho | Shambles = get_player_board(game, user)
 
     if not board.can_reduce_level() and board.have_revealed_all_letters():
         return False

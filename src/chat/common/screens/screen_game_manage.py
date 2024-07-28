@@ -15,9 +15,9 @@ from src.chat.common.screens.screen_game_pr import (
 )
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
 from src.chat.common.screens.screen_game_rr import manage as manage_rr
-from src.chat.common.screens.screen_game_ww import (
-    run_game as run_game_ww,
-    reduce_level_if_possible as issue_hint_if_possible_ww,
+from src.chat.common.screens.screen_game_shambles_ww import (
+    run_game as run_game_shambles_ww,
+    reduce_level_if_possible as issue_hint_if_possible_shambles_ww,
 )
 from src.model.Game import Game
 from src.model.User import User
@@ -73,12 +73,8 @@ async def manage(
             run_game_function = run_game_pr
             get_boards_function = get_generic_boards_for_guess_game
 
-        # case GameType.SHAMBLES:
-        #     run_game_function = run_game_shambles
-        #     get_boards_function = get_generic_boards_for_guess_game
-
-        case GameType.WHOS_WHO:
-            run_game_function = run_game_ww
+        case GameType.SHAMBLES | GameType.WHOS_WHO:
+            run_game_function = run_game_shambles_ww
             get_boards_function = get_generic_boards_for_guess_game
 
         case _:
@@ -189,15 +185,9 @@ async def restart_hint_thread_if_down(
             issue_hint_if_possible_function = issue_hint_if_possible_pr
             run_game_function = run_game_pr
 
-        # TODO
-        # case GameType.SHAMBLES:
-        #     issue_hint_if_possible_function = issue_hint_if_possible_shambles
-        #     run_game_function = run_game_shambles
-        #
-
-        case GameType.WHOS_WHO:
-            issue_hint_if_possible_function = issue_hint_if_possible_ww
-            run_game_function = run_game_ww
+        case GameType.SHAMBLES | GameType.WHOS_WHO:
+            issue_hint_if_possible_function = issue_hint_if_possible_shambles_ww
+            run_game_function = run_game_shambles_ww
 
         case _:
             raise ValueError(f"Unsupported game type: {game.get_type()}")

@@ -1,4 +1,3 @@
-import json
 import random
 import string
 
@@ -6,12 +5,13 @@ from PIL import Image, ImageDraw, ImageFont
 
 import resources.Environment as Env
 from src.model.enums.AssetPath import AssetPath
+from src.model.game.GameBoard import GameBoard
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.wiki.Terminology import Terminology
 from src.utils.download_utils import generate_temp_file_path
 
 
-class Shambles:
+class Shambles(GameBoard):
     def __init__(
         self,
         terminology: Terminology,
@@ -33,6 +33,7 @@ class Shambles:
         :param image_path: The crossword image path
         :param revealed_letters_count: The revealed letters count
         """
+        super().__init__()
 
         self.terminology = terminology
         self.grid_size = grid_size
@@ -57,16 +58,6 @@ class Shambles:
 
         if self.image_path is None:
             self.set_grid_image()
-
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(
-            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
-        )
 
     def create_grid(self):
         """
@@ -237,14 +228,22 @@ class Shambles:
                 if [x, y] not in self.excluded_coordinates and [x, y] not in self.word_coordinates:
                     non_excluded_coordinates.append((x, y))
 
-        # Select a random coordinate from the non-excluded coordinates
-        coordinate = random.choice(non_excluded_coordinates)
+        for _ in range(self.grid_size):
+            # Select a random coordinate from the non-excluded coordinates
+            coordinate = random.choice(non_excluded_coordinates)
 
-        # Remove the letter from the grid
-        self.grid[coordinate[1]][coordinate[0]] = "·"
+            # Remove the letter from the grid
+            self.grid[coordinate[1]][coordinate[0]] = "·"
 
-        # Add the coordinate to the excluded coordinates
-        self.excluded_coordinates.append(coordinate)
+            # Add the coordinate to the excluded coordinates
+            self.excluded_coordinates.append(coordinate)
+
+            # Remove the coordinate from the non excluded coordinates
+            non_excluded_coordinates.remove(coordinate)
+
+            # Can't exclude anymore
+            if len(non_excluded_coordinates) == 0:
+                break
 
         if should_set_image:
             self.set_grid_image()

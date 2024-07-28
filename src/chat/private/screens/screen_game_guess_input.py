@@ -13,8 +13,7 @@ from src.chat.common.screens.screen_game_pr import (
     run_game as run_game_pr,
     validate_answer as validate_answer_pr,
 )
-from src.chat.common.screens.screen_game_shambles import run_game as run_game_shambles
-from src.chat.common.screens.screen_game_ww import run_game as run_game_ww
+from src.chat.common.screens.screen_game_shambles_ww import run_game as run_game_shambles_ww
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -68,16 +67,8 @@ async def manage(
 
     if inbound_keyboard is not None:  # From deep link
         match game_type:
-            case GameType.SHAMBLES:
-                await run_game_shambles(
-                    context,
-                    game,
-                    user,
-                    should_send_to_all_players=False,
-                    schedule_next_send=False,
-                )
-            case GameType.WHOS_WHO:
-                await run_game_ww(
+            case GameType.SHAMBLES | GameType.WHOS_WHO:
+                await run_game_shambles_ww(
                     context,
                     game,
                     user,

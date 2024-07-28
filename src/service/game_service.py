@@ -174,7 +174,7 @@ async def end_game(
             if add_time_and_terminology:
                 footer_text = phrases.GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY.format(
                     get_global_time_based_text(game, u),
-                    get_guess_game_result_term_text(get_terminology_from_game(game)),
+                    get_guess_game_result_term_text(game.get_terminology()),
                 )
             await send_notification(context, u, GameOutcomeNotification(game, u, footer_text))
 
@@ -878,7 +878,7 @@ async def guess_game_validate_answer(
             ]
         ]
 
-    terminology: Terminology = get_terminology_from_game(game)
+    terminology: Terminology = game.get_terminology()
     term_text_addition = get_guess_game_result_term_text(terminology)
     image_path: str = get_guess_game_final_image_path(game)
 
@@ -929,27 +929,6 @@ async def guess_game_validate_answer(
             edit_message_id=game.message_id,
             edit_only_caption_and_keyboard=True,
         )
-
-
-def get_terminology_from_game(game: Game) -> Terminology:
-    """
-    Get the terminology from the game
-    :param game: The game
-    :return: The terminology
-    """
-
-    # Parse the JSON string and create a Terminology object
-    json_dict = json.loads(game.board)
-    if "terminology" in json_dict:
-        term_dict = json_dict.pop("terminology")
-        terminology: Terminology = Terminology(**term_dict)
-    elif "character" in json_dict:
-        char_dict = json_dict.pop("character")
-        terminology: Terminology = Character(**char_dict)
-    else:
-        raise ValueError("No terminology or character in JSON string")
-
-    return terminology
 
 
 def get_guess_game_play_deeplink_button(game: Game) -> Keyboard:
@@ -1012,7 +991,7 @@ async def end_text_based_game(
     :param group_text: The group text
     """
 
-    terminology: Terminology = get_terminology_from_game(game)
+    terminology: Terminology = game.get_terminology()
     term_text_addition = get_guess_game_result_term_text(terminology)
 
     # If winner or loser text doesn't end with 3 new lines (just enough to add 3)
@@ -1500,6 +1479,8 @@ def get_generic_boards_for_guess_game(
         case GameType.SHAMBLES:
             board_class = Shambles
             terminology_type = Terminology
+            max_len = Shambles.get_grid_size_by_difficulty(game.get_difficulty())
+            only_letters = True
 
         case GameType.WHOS_WHO:
             board_class = WhosWho
@@ -1518,8 +1499,13 @@ def get_generic_boards_for_guess_game(
             random_terminology: Terminology = SupabaseRest.get_random_terminology(
                 max_len=max_len, only_letters=only_letters
             )
+        match game.get_type():
+            case GameType.SHAMBLES:
+                board = Shambles(random_terminology, grid_size=max_len)
 
-        board = board_class(random_terminology)
+            case _:
+                board = board_class(random_terminology)
+
         save_game(game, board.get_as_json_string(), hint_was_issued=True)
 
         if game.is_global():
@@ -1638,7 +1624,7 @@ async def guess_game_should_end_after_answer(
     except AttributeError:
         return False
 
-    terminology = get_terminology_from_game(game)
+    terminology = game.get_terminology()
 
     if not terminology.name.lower() == answer.lower():
         return False

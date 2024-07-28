@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from peewee import *
 
@@ -12,6 +13,8 @@ from src.model.game.GameBoard import GameBoard
 from src.model.game.GameDifficulty import GameDifficulty
 from src.model.game.GameOutcome import GameOutcome
 from src.model.game.GameType import GameType
+from src.model.wiki.Character import Character
+from src.model.wiki.Terminology import Terminology
 from src.utils.string_utils import get_belly_formatted
 
 
@@ -491,6 +494,25 @@ class Game(BaseModel):
 
             case _:
                 raise ValueError(f"Unsupported game type: {self.get_type()}")
+
+    def get_terminology(self) -> Terminology:
+        """
+        Get the terminology from the game
+        :return: The terminology
+        """
+
+        # Parse the JSON string and create a Terminology object
+        json_dict = json.loads(self.board)
+        if "terminology" in json_dict:
+            term_dict = json_dict.pop("terminology")
+            terminology: Terminology = Terminology(**term_dict)
+        elif "character" in json_dict:
+            char_dict = json_dict.pop("character")
+            terminology: Terminology = Character(**char_dict)
+        else:
+            raise ValueError("No terminology or character in JSON string")
+
+        return terminology
 
 
 Game.create_table()
