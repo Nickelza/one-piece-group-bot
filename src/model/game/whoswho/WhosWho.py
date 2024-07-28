@@ -1,12 +1,11 @@
-import json
-
 from PIL import Image, ImageFilter
 
+from src.model.game.GameBoard import GameBoard
 from src.model.wiki.Character import Character
 from src.utils.download_utils import generate_temp_file_path, download_temp_file
 
 
-class WhosWho:
+class WhosWho(GameBoard):
     def __init__(
         self,
         character: Character,
@@ -23,6 +22,8 @@ class WhosWho:
         :param latest_blurred_image: The latest blurred image tg media id
         :param revealed_letters_count: The revealed letters count
         """
+        super().__init__()
+
         self.character = character
         self.image_path = image_path
         self.level = level
@@ -50,16 +51,6 @@ class WhosWho:
         if self.latest_blurred_image is None:
             self.set_blurred_image()
 
-    def get_board_json(self) -> str:
-        """
-        Returns the board as a json string
-        :return: string
-        """
-
-        return json.dumps(
-            self, default=lambda o: o.__dict__, sort_keys=True, separators=(",", ":")
-        )
-
     def set_blurred_image(self):
         """
         Set the blurred image
@@ -81,6 +72,13 @@ class WhosWho:
         if self.level > 0:
             self.level -= 1
             self.set_blurred_image()
+
+    def can_reduce_level(self) -> bool:
+        """
+        Check if the level can be reduced
+        :return: bool
+        """
+        return self.level > 1
 
     def is_correct(self, answer: str) -> bool:
         """

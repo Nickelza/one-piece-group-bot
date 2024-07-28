@@ -513,7 +513,7 @@ GAME_STATUS_LOST = "Lost"
 GAME_STATUS_DRAW = "Draw"
 GAME_STATUS_AWAITING_SELECTION = "Awaiting game selection"
 GAME_STATUS_AWAITING_OPPONENT_CONFIRMATION = "Awaiting opponent confirmation"
-GAME_STATUS_FORCED_END = "Forced end due to bounty reset"
+GAME_STATUS_FORCED_END = "End due to bounty reset or inactivity"
 GAME_STATUS_COUNTDOWN_TO_START = "Countdown to start"
 GAME_STATUS_WINNING = "Winning"
 GAME_STATUS_LOSING = "Losing"
@@ -591,9 +591,7 @@ RUSSIAN_ROULETTE_GAME_BULLET_SHOT = "You've died"
 RUSSIAN_ROULETTE_GAME_BULLET_NOT_SHOT = "You've survived another round"
 
 GUESS_GAME_INPUT_CAPTION_HINT = "\n\n" + Emoji.NEW + "*Hint*: {}"
-GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = (
-    "\n\n>In *{}* seconds, a hint will be sent"
-)
+GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_HINT = "\n\n>In *{}* seconds, a hint will be sent"
 GUESS_GAME_INPUT_CAPTION_SECONDS_TO_NEXT_IMAGE = (
     "\n\n>In *{}* seconds, an easier variation will be sent"
 )

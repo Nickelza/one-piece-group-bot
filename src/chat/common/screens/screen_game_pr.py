@@ -12,17 +12,15 @@ from src.model.game.punkrecords.PunkRecords import PunkRecords, RevealedDetail
 from src.service.game_service import (
     set_user_private_screen,
     save_game,
-    get_terminology_from_game,
     get_players,
     end_game,
     end_text_based_game,
     get_player_board,
     get_guess_game_users_to_send_message_to,
     should_proceed_after_hint_sleep,
-    end_global_guess_game_challenger,
     get_global_time_based_text,
-    get_global_text_challenger_finished,
     get_winner_loser_text,
+    guess_game_should_end_after_answer,
 )
 from src.service.message_service import full_message_send, escape_valid_markdown_chars
 
@@ -88,14 +86,9 @@ def get_recap_details(
     if hint_text is not None:
         ot_text += hint_text
 
-    if game.is_global():
+    if game.is_global() and not (game.is_challenger(user) and game.challenger_has_finished()):
         ot_text += "\n"
         ot_text += get_global_time_based_text(game, user)
-
-        if game.is_challenger(user) and game.challenger_has_finished():
-            ot_text += get_global_text_challenger_finished(
-                game, should_add_already_guessed_text=False
-            )
 
     if add_instructions:
         ot_text += "\n\n" + phrases.GUESS_CHARACTER_GAME_INPUT_CAPTION
@@ -214,26 +207,10 @@ async def validate_answer(
     :return: None
     """
 
-    try:
-        answer = update.effective_message.text
-    except AttributeError:
-        return
-
-    terminology = get_terminology_from_game(game)
-
-    if not terminology.name.lower() == answer.lower():
-        return
-
-    # Correct word but game not finished
-    if game.is_global() and game.is_challenger(user):
-        # Set challenger and time and try enqueueing opponent timeout
-        await end_global_guess_game_challenger(context, game)
-
-        details_text = phrases.PUNK_RECORDS_GAME_RECAP.format(get_recap_details(game, user), "")
-
-        ot_text = phrases.GUESS_GAME_CORRECT_ANSWER.format(details_text)
-        await full_message_send(context, ot_text, update=update)
-
+    details_text = phrases.PUNK_RECORDS_GAME_RECAP.format(get_recap_details(game, user), "")
+    if not await guess_game_should_end_after_answer(
+        update, context, game, user, detail_text=details_text
+    ):
         return
 
     # End game

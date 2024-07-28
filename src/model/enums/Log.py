@@ -494,6 +494,7 @@ class GameLog(Log):
             .where(
                 ((Game.challenger == self.user) | (Game.opponent == self.user))
                 & (Game.status.in_(GameStatus.get_finished() + [GameStatus.IN_PROGRESS]))
+                & (Game.opponent.is_null(False))
                 & (self.get_active_filter_list_condition())
             )  # Exclude because they don't have a type
             .order_by(Game.date.desc())

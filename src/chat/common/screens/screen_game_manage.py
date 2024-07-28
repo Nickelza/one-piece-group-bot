@@ -15,6 +15,10 @@ from src.chat.common.screens.screen_game_pr import (
 )
 from src.chat.common.screens.screen_game_rps import manage as manage_rps
 from src.chat.common.screens.screen_game_rr import manage as manage_rr
+from src.chat.common.screens.screen_game_ww import (
+    run_game as run_game_ww,
+    reduce_level_if_possible as issue_hint_if_possible_ww,
+)
 from src.model.Game import Game
 from src.model.User import User
 from src.model.enums.GameStatus import GameStatus
@@ -69,14 +73,13 @@ async def manage(
             run_game_function = run_game_pr
             get_boards_function = get_generic_boards_for_guess_game
 
-        # TODO
-        # case GameType.WHOS_WHO:
-        #     run_game_function = run_game_ww
-        #     get_boards_function = get_generic_boards_for_guess_game
-        #
         # case GameType.SHAMBLES:
         #     run_game_function = run_game_shambles
         #     get_boards_function = get_generic_boards_for_guess_game
+
+        case GameType.WHOS_WHO:
+            run_game_function = run_game_ww
+            get_boards_function = get_generic_boards_for_guess_game
 
         case _:
             raise ValueError(f"Unsupported game type: {game.get_type()}")
@@ -171,6 +174,9 @@ async def restart_hint_thread_if_down(
     :return: None
     """
 
+    if not game.is_guess_based():
+        return
+
     if game.is_finished():
         return
 
@@ -188,9 +194,10 @@ async def restart_hint_thread_if_down(
         #     issue_hint_if_possible_function = issue_hint_if_possible_shambles
         #     run_game_function = run_game_shambles
         #
-        # case GameType.WHOS_WHO:
-        #     issue_hint_if_possible_function = issue_hint_if_possible_ww
-        #     run_game_function = run_game_ww
+
+        case GameType.WHOS_WHO:
+            issue_hint_if_possible_function = issue_hint_if_possible_ww
+            run_game_function = run_game_ww
 
         case _:
             raise ValueError(f"Unsupported game type: {game.get_type()}")
@@ -201,6 +208,10 @@ async def restart_hint_thread_if_down(
 
     if user is None:
         user = game.challenger
+
+    # User is challenger and they have finished
+    if game.is_global() and user and game.is_challenger(user) and game.challenger_has_finished():
+        return
 
     last_hint_date = (
         game.last_hint_opponent_date

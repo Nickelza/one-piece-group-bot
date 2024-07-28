@@ -114,7 +114,7 @@ def get_specific_text(
         ot_text = "\n\n\n".join(ot_text_list)
 
         if game.is_global():
-            ot_text += get_global_time_based_text(game, player)
+            ot_text += "\n" + get_global_time_based_text(game, player)
 
             if game.is_challenger(player) and challenger_has_finished:
                 ot_text += get_global_text_challenger_finished(

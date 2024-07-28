@@ -14,5 +14,5 @@ def get_outcome_text(won: bool, amount: int) -> str:
     return phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
         (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
         (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-        get_belly_formatted(amount),
+        get_belly_formatted(amount) if won else get_belly_formatted(amount // 2),
     )

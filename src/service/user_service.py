@@ -208,6 +208,9 @@ async def get_effective_tg_user_id(
     :return: The effective Telegram user ID
     """
 
+    if effective_message is None:  # Encountered in item sharing from keyboard
+        return str(effective_user.id)
+
     if effective_message.sender_chat is None:
         return str(effective_user.id)
 

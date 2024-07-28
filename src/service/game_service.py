@@ -853,14 +853,7 @@ async def guess_game_validate_answer(
     :return: None
     """
 
-    try:
-        answer = update.effective_message.text
-    except AttributeError:
-        return
-
-    terminology = get_terminology_from_game(game)
-
-    if not terminology.name.lower() == answer.lower():
+    if not await guess_game_should_end_after_answer(update, context, game, user):
         return
 
     # End game
@@ -872,16 +865,20 @@ async def guess_game_validate_answer(
     user.should_update_model = False  # To avoid re-writing bounty
     loser = challenger if user == opponent else opponent
 
-    # Go to game message in group button
-    outbound_keyboard: list[list[Keyboard]] = [
-        [
-            Keyboard(
-                text=phrases.PVT_KEY_GO_TO_MESSAGE,
-                url=get_message_url(game.message_id, game.group_chat),
-            )
-        ]
-    ]
+    outbound_keyboard: list[list[Keyboard]] = []
 
+    if not game.is_global():
+        # Go to game message in group button
+        outbound_keyboard: list[list[Keyboard]] = [
+            [
+                Keyboard(
+                    text=phrases.PVT_KEY_GO_TO_MESSAGE,
+                    url=get_message_url(game.message_id, game.group_chat),
+                )
+            ]
+        ]
+
+    terminology: Terminology = get_terminology_from_game(game)
     term_text_addition = get_guess_game_result_term_text(terminology)
     image_path: str = get_guess_game_final_image_path(game)
 
@@ -901,6 +898,11 @@ async def guess_game_validate_answer(
         keyboard=outbound_keyboard,
     )
 
+    # If global, we can stop here. No message sent to loser since the notification triggered in end_game will handle it,
+    # same for group message
+    if game.is_global():
+        return
+
     # Send message to loser
     await set_user_private_screen(loser, should_reset=True)
     loser_caption: str = (
@@ -918,15 +920,15 @@ async def guess_game_validate_answer(
     )
 
     # Update group message
-    ot_text = get_text(game, True, game_outcome=outcome, terminology=terminology)
-    group_chat: GroupChat = game.group_chat
-    await full_media_send(
-        context,
-        caption=ot_text,
-        group_chat=group_chat,
-        edit_message_id=game.message_id,
-        edit_only_caption_and_keyboard=True,
-    )
+    if game.group_chat is not None:
+        ot_text = get_text(game, True, game_outcome=outcome, terminology=terminology)
+        await full_media_send(
+            context,
+            caption=ot_text,
+            group_chat=game.group_chat,
+            edit_message_id=game.message_id,
+            edit_only_caption_and_keyboard=True,
+        )
 
 
 def get_terminology_from_game(game: Game) -> Terminology:
@@ -1612,3 +1614,54 @@ def get_winner_loser_text(
     )
 
     return winner_text, loser_text
+
+
+async def guess_game_should_end_after_answer(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    game: Game,
+    user: User,
+    detail_text: str = "",
+) -> bool:
+    """
+    Should the guess game end after the answer is received?
+    :param update: The update received
+    :param context: The context
+    :param game: The game
+    :param user: The user
+    :param detail_text: The detail text to add in the challenger has finished message
+    :return: True if the guess game should end after the answer is received, False otherwise
+    """
+
+    try:
+        answer = update.effective_message.text
+    except AttributeError:
+        return False
+
+    terminology = get_terminology_from_game(game)
+
+    if not terminology.name.lower() == answer.lower():
+        return False
+
+    # Correct word but game not finished
+    if game.is_global() and game.is_challenger(user):
+        # Set challenger and time and try enqueueing opponent timeout
+        await end_global_guess_game_challenger(context, game)
+
+        ot_text = ""
+        if detail_text is not None:
+            ot_text += detail_text
+
+        ot_text += get_global_time_based_text(game, user)
+        ot_text += get_global_text_challenger_finished(game, should_add_already_guessed_text=False)
+
+        ot_text = phrases.GUESS_GAME_CORRECT_ANSWER.format(ot_text)
+
+        if detail_text is not None:  # Remove quadruple "\n"
+            ot_text = ot_text.replace("\n\n\n\n", "\n\n\n")
+
+        await full_message_send(context, ot_text, update=update)
+
+        return False
+
+    return True
