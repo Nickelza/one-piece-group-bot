@@ -86,7 +86,7 @@ async def end_game(
     is_forced_end: bool = False,
     update: Update = None,
     send_outcome_to_user: User = None,
-) -> Game:
+):
     """
     End the game, set the status and return the game
     :param game: The game
@@ -95,7 +95,7 @@ async def end_game(
     :param is_forced_end: If the game was forced to end
     :param update: The update
     :param send_outcome_to_user: End user to send game outcome notification
-    :return: The game
+    :return: None
     """
 
     challenger: User = game.challenger
@@ -156,50 +156,51 @@ async def end_game(
         opponent.save()
     game.save()
 
-    if not is_forced_end:
-        notification_users: list[User] = []
-        if send_outcome_to_user:
-            notification_users.append(send_outcome_to_user)
+    if is_forced_end:
+        # No notification or message edits required
+        return
 
-        add_time_and_terminology = False
-        # If is global guess based game and someone won, always send notification
-        if game.is_guess_based() and game.is_global() and game.has_winner():
-            add_time_and_terminology = True
+    notification_users: list[User] = []
+    if send_outcome_to_user:
+        notification_users.append(send_outcome_to_user)
 
-            # Always send to challenger
-            notification_users.append(game.challenger)
+    add_time_and_terminology = False
+    # If is global guess based game and someone won, always send notification
+    if game.is_guess_based() and game.is_global() and game.has_winner():
+        add_time_and_terminology = True
 
-            # Send to opponent too only if they didn't win, so it's due to timeout
-            # If they won, no need for notification since the game specific text will contain it
-            if game_outcome is GameOutcome.CHALLENGER_WON:
-                notification_users.append(game.opponent)
+        # Always send to challenger
+        notification_users.append(game.challenger)
 
-        for u in notification_users:
-            footer_text = ""
-            if add_time_and_terminology:
-                footer_text = phrases.GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY.format(
-                    get_global_time_based_text(game, u),
-                    get_guess_game_result_term_text(game.get_terminology()),
-                )
-            await send_notification(context, u, GameOutcomeNotification(game, u, footer_text))
+        # Send to opponent too only if they didn't win, so it's due to timeout
+        # If they won, no need for notification since the game specific text will contain it
+        if game_outcome is GameOutcome.CHALLENGER_WON:
+            notification_users.append(game.opponent)
 
-        # Edit message in group, if global and started from a group
-        if game.is_global() and game.group_chat is not None:
-            ot_text = get_text(game, True, game_outcome=game_outcome, is_for_group_global=True)
-            context.application.create_task(
-                full_media_send(
-                    context,
-                    caption=ot_text,
-                    chat_id=game.group_chat.group.tg_group_id,
-                    edit_message_id=game.message_id,
-                    add_delete_button=True,
-                    edit_only_caption_and_keyboard=True,
-                    group_chat=game.group_chat,
-                    authorized_users=[game.challenger],
-                )
+    for u in notification_users:
+        footer_text = ""
+        if add_time_and_terminology:
+            footer_text = phrases.GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY.format(
+                get_global_time_based_text(game, u),
+                get_guess_game_result_term_text(game.get_terminology()),
             )
+        await send_notification(context, u, GameOutcomeNotification(game, u, footer_text))
 
-    return game
+    # Edit message in group, if global and started from a group
+    if game.is_global() and game.group_chat is not None:
+        ot_text = get_text(game, True, game_outcome=game_outcome, is_for_group_global=True)
+        context.application.create_task(
+            full_media_send(
+                context,
+                caption=ot_text,
+                chat_id=game.group_chat.group.tg_group_id,
+                edit_message_id=game.message_id,
+                add_delete_button=True,
+                edit_only_caption_and_keyboard=True,
+                group_chat=game.group_chat,
+                authorized_users=[game.challenger],
+            )
+        )
 
 
 def get_text(

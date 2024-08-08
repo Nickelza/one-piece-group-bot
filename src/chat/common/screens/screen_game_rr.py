@@ -130,7 +130,7 @@ async def manage(
     # Game is finished
     if board.is_finished(other_board=other_board):
         game_outcome: GameOutcome = board.get_outcome(game.is_challenger(user), other_board)
-        game = await game_service.end_game(
+        await game_service.end_game(
             game,
             game_outcome,
             context,

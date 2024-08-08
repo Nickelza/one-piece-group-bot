@@ -104,7 +104,7 @@ async def manage(
     # Game is finished
     if rock_paper_scissors.is_finished():
         game_outcome: GameOutcome = rock_paper_scissors.get_outcome()
-        game = await game_service.end_game(
+        await game_service.end_game(
             game,
             game_outcome,
             context,
@@ -238,6 +238,9 @@ def get_outbound_keyboard(
     """
 
     outbound_keyboard: list[list[Keyboard]] = []
+
+    if game.is_finished():
+        return outbound_keyboard
 
     keyboard_line: list[Keyboard] = []
     button_info_rock = {
