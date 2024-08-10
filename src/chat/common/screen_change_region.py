@@ -8,10 +8,12 @@ import resources.phrases as phrases
 import src.model.enums.Command as Command
 from src.model.User import User
 from src.model.enums import Location
+from src.model.enums.CommandName import CommandName
+from src.model.enums.MessageSource import MessageSource
 from src.model.enums.Region import Region
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.error.GroupChatError import GroupChatError, GroupChatException
+from src.model.error.CommonChatError import CommonChatException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.date_service import cron_datetime_difference
 from src.service.location_service import update_location
@@ -20,6 +22,7 @@ from src.service.message_service import (
     mention_markdown_v2,
     get_image_preview,
     get_yes_no_keyboard,
+    get_message_source,
 )
 from src.utils.string_utils import get_belly_formatted
 
@@ -97,7 +100,7 @@ async def send_proposal(
     """
 
     if region is Region.ND:
-        raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
+        raise CommonChatException(phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST)
 
     ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL.format(
         get_region_image_preview(region),
@@ -108,7 +111,7 @@ async def send_proposal(
     inline_keyboard: list[list[Keyboard]] = [
         get_yes_no_keyboard(
             user,
-            screen=Screen.GRP_CHANGE_REGION,
+            screen=get_screen(update),
             yes_text=phrases.KEYBOARD_OPTION_ACCEPT,
             no_text=phrases.KEYBOARD_OPTION_REJECT,
             primary_key=region,
@@ -149,24 +152,18 @@ async def keyboard_interaction(
             return
 
         # Refresh location
+        user.can_change_region = False
         await update_location(
             user, context, update, cap_to_paradise=False, region=region, requested_by_user=True
         )
-        user.can_change_region = False
 
         return
 
     else:  # User rejected
-        command: Command.Command = (
-            Command.GRP_CHANGE_REGION_PARADISE
-            if region == Region.PARADISE
-            else Command.GRP_CHANGE_REGION_NEW_WORLD
-        )
         ot_text = phrases.LOCATION_CHANGE_REGION_PROPOSAL_REJECTED.format(
             get_region_image_preview(region),
-            mention_markdown_v2(user.tg_user_id, user.tg_first_name),
             get_region_text(region),
-            command.get_formatted(),
+            Command.get_other_region_command_name(user.location_level).get_formatted(),
         )
         await full_message_send(context, ot_text, update=update, add_delete_button=True)
         return
@@ -193,11 +190,9 @@ async def manage(
     if keyboard is not None:
         region = Region(keyboard.info[ChangeRegionReservedKeys.REGION])
     elif command is not None:
-        region = (
-            Region.PARADISE if command == Command.GRP_CHANGE_REGION_PARADISE else Region.NEW_WORLD
-        )
+        region = Region.PARADISE if command.name is CommandName.PARADISE else Region.NEW_WORLD
     else:
-        raise GroupChatException(GroupChatError.INVALID_CHANGE_REGION_REQUEST)
+        raise CommonChatException(phrases.LOCATION_INVALID_CHANGE_REGION_REQUEST)
 
     if not await validate_move_request(update, context, user, region):
         return
@@ -209,6 +204,19 @@ async def manage(
 
     # Interaction with keyboard
     if keyboard is None:
-        raise GroupChatException(GroupChatError.KEYBOARD_NOT_FOUND)
+        raise CommonChatException(phrases.KEYBOARD_NOT_FOUND)
 
     await keyboard_interaction(update, context, user, keyboard, region)
+
+
+def get_screen(update: Update) -> Screen:
+    """
+    Get the screen
+    :param update: The update object
+    :return: The screen
+    """
+
+    if get_message_source(update) is MessageSource.GROUP:
+        return Screen.GRP_CHANGE_REGION
+
+    return Screen.PVT_CHANGE_REGION

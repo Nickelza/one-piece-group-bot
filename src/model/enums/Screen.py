@@ -109,6 +109,7 @@ class Screen(StrEnum):
     PVT_GAME = "P75"
     PVT_GAME_SELECTION = "P76"
     PVT_RUSSIAN_ROULETTE_GAME = "P77"
+    PVT_CHANGE_REGION = "P78"
 
 
 ONLY_BY_CAPTAIN = [

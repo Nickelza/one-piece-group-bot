@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 
 import src.model.enums.Command as Command
 from resources import phrases
+from src.chat.common.screen_change_region import manage as manage_screen_change_region
 from src.chat.common.screens.screen_daily_reward import manage as manage_screen_daily_reward
 from src.chat.common.screens.screen_daily_reward_prize import (
     manage as manage_screen_daily_reward_prize,
@@ -607,6 +608,11 @@ async def dispatch_screens(
 
             case Screen.PVT_RUSSIAN_ROULETTE_GAME:
                 await manage_screen_game_rr(update, context, user, inbound_keyboard)
+
+            case Screen.PVT_CHANGE_REGION:  # Change region
+                await manage_screen_change_region(
+                    update, context, user, keyboard=inbound_keyboard, command=command
+                )
 
             case _:  # Unknown screen
                 if update.callback_query is not None or screen is not None:

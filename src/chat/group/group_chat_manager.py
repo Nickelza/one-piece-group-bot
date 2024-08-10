@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 import resources.Environment as Env
 import src.model.enums.Command as Command
 import src.model.enums.Location as Location
+from src.chat.common.screen_change_region import manage as manage_screen_change_region
 from src.chat.common.screens.screen_daily_reward import manage as manage_screen_daily_reward
 from src.chat.common.screens.screen_daily_reward_prize import (
     manage as manage_screen_daily_reward_prize,
@@ -19,7 +20,6 @@ from src.chat.common.screens.screen_game_selection import manage as manage_scree
 from src.chat.common.screens.screen_status import manage as manage_screen_show_status
 from src.chat.group.screens.screen_bounty_gift import manage as manage_screen_bounty_gift
 from src.chat.group.screens.screen_bounty_loan import manage as manage_screen_bounty_loan
-from src.chat.group.screens.screen_change_region import manage as manage_screen_change_region
 from src.chat.group.screens.screen_crew_invite import manage as manage_screen_crew_invite
 from src.chat.group.screens.screen_crew_join import manage as manage_screen_crew_join
 from src.chat.group.screens.screen_devil_fruit_sell import manage as manage_screen_devil_fruit_sell
@@ -306,7 +306,7 @@ async def validate(
 
     # Forwarded
     try:
-        if update.message.forward_from is not None and not await validate_location_level(
+        if update.message.forward_from is not None and not await validate_location_level(  # FIXME
             update,
             context,
             user,

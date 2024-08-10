@@ -204,7 +204,7 @@ RESET_SUCCESSFUL = "Reset successful"
 VIEW_ALL_WITH_EMOJI = "\n" + Emoji.RIGHT_ARROW + " [View all]({})"
 
 LOCATION_CHANGE_REGION_PROPOSAL = "{}{} would you like to move to {}?"
-LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = "{}{} You can move to {} later with {} command"
+LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = "{}You can move to {} later with {} command"
 LOCATION_NEW_WORLD_REQUEST_REJECTED_NOT_ENOUGH_BOUNTY = (
     "You need a bounty of at least ฿*{}* to move to the New World."
 )

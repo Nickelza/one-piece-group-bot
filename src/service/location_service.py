@@ -35,7 +35,7 @@ async def update_location(
     :return: The user object
     """
 
-    from src.chat.group.screens.screen_change_region import (
+    from src.chat.common.screen_change_region import (
         send_proposal as send_new_world_proposal,
     )
 
@@ -81,6 +81,7 @@ async def update_location(
         and user.location_level
         == Location.get_last_paradise().level  # Capped location is last of Paradise
         and user.should_propose_new_world  # User has not been proposed to move to New World yet
+        and user.can_change_region  # User can change region
         and (
             requested_by_user  # User requested the update
             or Env.SEND_MESSAGE_MOVE_TO_NEW_WORLD_PROPOSAL.get_bool()

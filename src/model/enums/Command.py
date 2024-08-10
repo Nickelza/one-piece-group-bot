@@ -3,6 +3,7 @@ import src.model.enums.Location as Location
 from src.model.enums.CommandName import CommandName
 from src.model.enums.Feature import Feature
 from src.model.enums.MessageSource import MessageSource
+from src.model.enums.Region import Region
 from src.model.enums.Screen import (
     Screen,
     ONLY_BY_CAPTAIN_OR_FIRST_MATE,
@@ -189,6 +190,16 @@ PVT_GAME = Command(
     required_location=Location.get_by_level(Env.REQUIRED_LOCATION_LEVEL_GAME.get_int()),
 )
 COMMANDS.append(PVT_GAME)
+
+PVT_CHANGE_REGION_NEW_WORLD = Command(
+    CommandName.NEW_WORLD, Screen.PVT_CHANGE_REGION, required_location=Location.get_last_paradise()
+)
+COMMANDS.append(PVT_CHANGE_REGION_NEW_WORLD)
+
+PVT_CHANGE_REGION_PARADISE = Command(
+    CommandName.PARADISE, Screen.PVT_CHANGE_REGION, required_location=Location.get_last_paradise()
+)
+COMMANDS.append(PVT_CHANGE_REGION_PARADISE)
 
 # Merge all lists with limitations
 limitations_list = set(
@@ -434,3 +445,18 @@ def get_by_screen(screen: Screen):
             return command
 
     raise ValueError("Command not found: {}".format(screen))
+
+
+def get_other_region_command_name(current_location_level: int) -> CommandName:
+    """
+    Returns the command name for the other region.
+    :param current_location_level: The current location level
+    :return: The command name to move to the other region
+    """
+
+    other_region: Region = Location.get_by_level(current_location_level).region.get_other()
+
+    if other_region is Region.PARADISE:
+        return CommandName.PARADISE
+
+    return CommandName.NEW_WORLD
