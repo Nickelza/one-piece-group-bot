@@ -544,7 +544,6 @@ class GameLog(Log):
             date,
             get_belly_formatted(self.object.wager),
             outcome_text,
-            get_message_url(self.object.message_id, self.object.group_chat),
             go_to_message_text,
         )
 

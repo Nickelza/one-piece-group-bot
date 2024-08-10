@@ -1953,7 +1953,7 @@ DOC_Q_GAME_LOG_STATS_TEXT = (  # Logs - Game
 GAME_LOG_KEY = "Challenges"
 GAME_LOG_ITEM_DETAIL_TEXT_FILL_IN = "Challenge"
 GAME_LOG_ITEM_TEXT = "{} vs {} \\(฿{}\\)"
-GAME_LOG_ITEM_DETAIL_TEXT = "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*: ฿{}\n\n{}"
+GAME_LOG_ITEM_DETAIL_TEXT = "*{}*: {}\n*Game*: {}\n*Date*: {}\n*Wager*: ฿{}\n\n{}{}"
 GAME_LOG_STATS_TEXT = (
     "*Total challenges*: {}\n*Wins*: {} \\({}%\\)\n*Losses*: {} \\({}%\\)\n*Draws*: {}"
     " \\({}%\\)\n*Belly won*: ฿{}\n*Belly lost*: ฿{}\n*Max belly won*: [฿{} \\({}\\)]({})\n*Max"
