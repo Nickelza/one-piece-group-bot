@@ -1866,7 +1866,9 @@ GAME_OUTCOME_NOTIFICATION_TIME_TERMINOLOGY = "{}\n\n{}"
 GAME_OUTCOME_NOTIFICATION_DRAW = (
     "The *{}* challenge against {} ended in a draw." "\nYour wager \\(฿*{}*\\) has been returned"
 )
-GAME_OUTCOME_NOTIFICATION_DESCRIPTION = "If to be notified of the outcome of a game (only global)"
+GAME_OUTCOME_NOTIFICATION_DESCRIPTION = (
+    "If to be notified of the outcome of a game \\(only global\\)"
+)
 GAME_OUTCOME_NOTIFICATION_KEY = "Game outcome"
 
 # List
