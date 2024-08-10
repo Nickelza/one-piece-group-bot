@@ -23,6 +23,7 @@ from src.service.message_service import (
     get_yes_no_keyboard,
     full_media_send,
 )
+from src.utils.string_utils import get_belly_formatted
 
 
 async def manage(
@@ -59,6 +60,15 @@ async def manage(
 
     if game_status is not GameStatus.IN_PROGRESS:
         await full_message_send(context, phrases.ITEM_IN_WRONG_STATUS, update=update)
+        return
+
+    # Opponent does not have enough bounty
+    if user.bounty < game.wager:
+        await full_message_send(
+            context,
+            phrases.ACTION_INSUFFICIENT_BOUNTY.format(get_belly_formatted(game.wager)),
+            update=update,
+        )
         return
 
     if user.game_accept_global_cooldown_end_date and datetime_is_after(
