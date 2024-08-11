@@ -40,6 +40,7 @@ async def validate(
     Validate the Davy Back Fight participants select screen
     :param update: The update
     :param context: The context
+    :param user: The user
     :param inbound_keyboard: The inbound keyboard
     :param crew: The crew
     :param davy_back_fight: The Davy Back Fight if already created
