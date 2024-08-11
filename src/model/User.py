@@ -94,7 +94,7 @@ class User(BaseModel):
     )
     # For Legendary Pirate
     is_exempt_from_global_leaderboard_requirements: bool | BooleanField = BooleanField(
-        default=True
+        default=False
     )
     can_collect_daily_reward: bool | BooleanField = BooleanField(default=True)
     fight_scout_count: int | IntegerField = IntegerField(default=0)
