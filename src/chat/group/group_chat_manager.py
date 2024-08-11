@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Tuple
 
-from telegram import Update
+from telegram import Update, MessageOriginUser, MessageOriginChat, MessageOriginChannel
 from telegram.ext import ContextTypes
 
 import resources.Environment as Env
@@ -306,14 +306,22 @@ async def validate(
 
     # Forwarded
     try:
-        if update.message.forward_from is not None and not await validate_location_level(  # FIXME
+        identifier = None
+        if isinstance(update.message.forward_origin, MessageOriginUser):
+            identifier = update.message.forward_origin.sender_user.id
+        elif isinstance(update.message.forward_origin, MessageOriginChat):
+            identifier = update.message.forward_origin.sender_chat.id
+        elif isinstance(update.message.forward_origin, MessageOriginChannel):
+            identifier = update.message.forward_origin.chat.id
+
+        if not await validate_location_level(
             update,
             context,
             user,
             Env.REQUIRED_LOCATION_LEVEL_FORWARD_MESSAGE.get_int(),
             group_chat,
-            identifier=str(update.message.forward_from.id),
-            allowed_identifiers=Env.WHITELIST_FORWARD_MESSAGE.get_list(),
+            self_chat_user_id=identifier,
+            allowed_chat_user_ids=Env.WHITELIST_FORWARD_MESSAGE.get_list(),
         ):
             return False
     except AttributeError:
@@ -340,8 +348,8 @@ async def validate(
             user,
             Env.REQUIRED_LOCATION_LEVEL_USE_INLINE_BOTS.get_int(),
             group_chat,
-            identifier=str(update.message.via_bot.id),
-            allowed_identifiers=Env.WHITELIST_INLINE_BOTS.get_list(),
+            self_chat_user_id=str(update.message.via_bot.id),
+            allowed_chat_user_ids=Env.WHITELIST_INLINE_BOTS.get_list(),
         ):
             return False
     except AttributeError:
@@ -356,8 +364,8 @@ async def validate_location_level(
     user: User,
     location_level: int,
     group_chat: GroupChat,
-    identifier: str = None,
-    allowed_identifiers: list[str] = None,
+    self_chat_user_id: str = None,
+    allowed_chat_user_ids: list[str] = None,
 ) -> bool:
     """
     Validates the location level of the user
@@ -366,16 +374,16 @@ async def validate_location_level(
     :param user: User object
     :param location_level: Location level to validate
     :param group_chat: The group chat
-    :param identifier: If not None, check if is in the list of allowed identifiers
-    :param allowed_identifiers: Identifiers to allow. If not None, identifier must be not None
+    :param self_chat_user_id: Chat or user id object of control. If not None, check if is in the list of allowed ids
+    :param allowed_chat_user_ids: Chat or user ids to allow
     :return: True if valid, False otherwise
     """
 
-    if identifier is not None and allowed_identifiers is None:
+    if self_chat_user_id is not None and allowed_chat_user_ids is None:
         raise ValueError("allowed_identifiers must be not None if identifier is not None")
 
     try:
-        if identifier is not None and identifier in allowed_identifiers:
+        if self_chat_user_id is not None and str(self_chat_user_id) in allowed_chat_user_ids:
             return True
 
         if user.is_arrested() and location_level > 1:
