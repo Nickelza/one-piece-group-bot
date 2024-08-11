@@ -268,7 +268,7 @@ async def manage_after_db(
                 if message_is_reply(update):  # REPLY_TO_MESSAGE_BUG_FIX
                     tg_user_id = await get_effective_tg_user_id(
                         update.effective_message.reply_to_message.from_user,
-                        update.effective_message,
+                        update.effective_message.reply_to_message,
                     )
                     target_user: User = await get_user(
                         tg_user_id, update.effective_message.reply_to_message.from_user
@@ -542,6 +542,7 @@ async def validate(
                 if (
                     _message_is_reply
                     and update.effective_message.reply_to_message.from_user.is_bot
+                    and target_user is None
                 ):
                     raise CommandValidationException(phrases.COMMAND_IN_REPLY_TO_BOT_ERROR)
             except AttributeError:

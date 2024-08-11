@@ -34,7 +34,6 @@ from src.service.message_service import (
     mention_markdown_v2,
     get_start_with_command_url,
     escape_valid_markdown_chars,
-    message_is_reply,
 )
 from src.service.user_service import user_is_boss, get_boss_type
 from src.utils.string_utils import get_belly_formatted
@@ -47,6 +46,7 @@ async def manage(
     user: User,
     inbound_keyboard: Keyboard = None,
     group_chat: GroupChat = None,
+    target_user: User = None,
 ) -> None:
     """
     Displays a user's status
@@ -56,36 +56,15 @@ async def manage(
     :param user: The original user
     :param inbound_keyboard: Inbound keyboard
     :param group_chat: Group chat
+    :param target_user: Target user
     :return: None
     """
-
-    try:
-        in_reply_to_message = message_is_reply(update)  # REPLY_TO_MESSAGE_BUG_FIX
-    except AttributeError:  # In case of a callback in private chat
-        in_reply_to_message = False
 
     can_delete_users: list[User] = []
     inline_keyboard: list[list[Keyboard]] = []
 
-    # If used in reply to a message, get the user from the message
-    if in_reply_to_message:
-        # Used in reply to a bot
-        if update.effective_message.reply_to_message.from_user.is_bot:
-            await full_message_send(
-                context,
-                phrases.COMMAND_IN_REPLY_TO_BOT_ERROR,
-                update=update,
-                add_delete_button=True,
-            )
-            return
-
-        target_user: User = User.get_or_none(
-            User.tg_user_id == update.effective_message.reply_to_message.from_user.id
-        )
-        own_status = False
-    else:
-        target_user: User = user
-        own_status = True
+    self_status = True if target_user is None else False
+    target_user = target_user if target_user is not None else user
 
     # If the user is not in the database, error
     if target_user is None:
@@ -95,7 +74,7 @@ async def manage(
 
     # If used in reply to a message, verify that requesting user ranks above the user being replied
     # to
-    if in_reply_to_message and not target_user.is_arrested():  # Arrested users are always viewable
+    if not self_status and not target_user.is_arrested():  # Arrested users are always viewable
         # Add the requested user to the list of users that can delete the message
         can_delete_users.append(target_user)
 
@@ -182,7 +161,7 @@ async def manage(
         )
 
     # Extra info visible only if checking own status or being checked by a boss
-    if own_status or user_is_boss(user, group_chat=group_chat):
+    if self_status or user_is_boss(user, group_chat=group_chat):
         # Remaining sentence if arrested
         if target_user.is_arrested():
             if not user.impel_down_is_permanent:
@@ -273,7 +252,7 @@ async def manage(
                 message_text += bounty_deduction_text
 
             # Abilities visible only if checking own status
-            if own_status:
+            if self_status:
                 # Devil Fruit
                 eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)
                 if eaten_devil_fruit is not None:
@@ -293,13 +272,13 @@ async def manage(
                             )
                         )
 
-        if own_status:
+        if self_status:
             if target_user.can_collect_daily_reward:
                 message_text += phrases.SHOW_USER_STATUS_DAILY_REWARD
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None
-    if in_reply_to_message:
+    if not self_status:
         message_text += "\n\n" + phrases.SHOW_USER_STATUS_ADD_REPLY.format(
             user.get_markdown_mention()
         )
@@ -308,7 +287,7 @@ async def manage(
     # Send bounty poster if not in reply to a message bounty_poster_limit is -1 or higher than 0
     # and user is not jailed
 
-    if should_send_poster(target_user, group_chat, own_status):
+    if should_send_poster(target_user, group_chat, self_status):
         await send_bounty_poster(context, update, target_user, message_text, reply_to_message_id)
 
         # Reduce bounty poster limit by 1 if it is not None
