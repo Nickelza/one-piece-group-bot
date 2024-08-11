@@ -500,14 +500,14 @@ async def set_results(context: ContextTypes.DEFAULT_TYPE, prediction: Prediction
     prediction_options_users: list[PredictionOptionUser] = get_prediction_options_users(prediction)
 
     # Dictionary with key: user_id, value: list (user, total_win, list of prediction_options)
-    users_total_win: dict[int, list[User, int, list[PredictionOption]]] = {}
+    users_total_win: dict[int, (User, int, list[PredictionOption])] = {}
 
     for prediction_option_user in prediction_options_users:
         user: User = prediction_option_user.user
 
         # If user is not in dictionary, add it
         if user.id not in users_total_win:
-            users_total_win[user.id] = [user, 0, []]
+            users_total_win[user.id] = (user, 0, [])
 
         # Add prediction option to list
         prediction_option: PredictionOption = prediction_option_user.prediction_option
