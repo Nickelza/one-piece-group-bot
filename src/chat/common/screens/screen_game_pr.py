@@ -141,7 +141,7 @@ async def run_game(
     hint_text = ""
     new_detail = None
     # First iteration, do not reveal new detail or hint
-    if not is_first_run:  # FIXME
+    if not is_first_run:
         issue_hint_if_possible(game, user)
         board: PunkRecords = get_player_board(game, user)
 
