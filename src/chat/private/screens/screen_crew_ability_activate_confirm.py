@@ -12,7 +12,6 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.crew.CrewAbilityAcquiredMethod import CrewAbilityAcquiredMethod
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
 from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityType
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew, add_crew_ability, add_powerup
 from src.service.message_service import full_message_send, get_yes_no_keyboard
@@ -40,13 +39,7 @@ async def manage(
     :return: None
     """
 
-    try:
-        crew: Crew = get_crew(user=user)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    crew: Crew = get_crew(user=user)
 
     if not await validate(update, context, inbound_keyboard, crew):
         return

@@ -106,7 +106,7 @@ def get_items_paginate(
 def get_items_text_keyboard(
     inbound_keyboard: Keyboard,
     list_page: ListPage,
-    item_detail_key: StrEnum = None,  # TODO default PRIMARY_KEY, switch with screen
+    item_detail_key: StrEnum = None,
     item_detail_screen: Screen = None,
     text_fill_in: str = None,
     text_overview: str = None,

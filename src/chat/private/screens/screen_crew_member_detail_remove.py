@@ -8,7 +8,6 @@ import resources.phrases as phrases
 from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import remove_member, get_crew
 from src.service.date_service import get_remaining_time_from_next_cron
@@ -42,13 +41,7 @@ async def manage(
     # Get member
     member: User = User.get_by_id(inbound_keyboard.info[CrewMemberRemoveReservedKeys.MEMBER_ID])
 
-    try:
-        get_crew(user=member, validate_against_crew=user.crew)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    get_crew(user=member, validate_against_crew=user.crew)
 
     if ReservedKeyboardKeys.CONFIRM not in inbound_keyboard.info:
         # Send remove confirmation request

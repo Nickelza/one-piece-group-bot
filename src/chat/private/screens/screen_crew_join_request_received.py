@@ -13,6 +13,7 @@ from src.model.enums.Notification import (
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewJoinRequestStatus import CrewJoinRequestStatus
+from src.model.error.ChatWarning import ChatWarning
 from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew, add_member
@@ -39,11 +40,9 @@ async def manage(
 
     try:
         crew: Crew = get_crew(user=user, validate_against_crew=join_request.crew)
-    except CrewValidationException as cve:
+    except ChatWarning as cw:
         await send_outcome_notification(context, join_request, False)
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
+        await full_message_send(context, str(cw), update=update, inbound_keyboard=inbound_keyboard)
         return
 
     requesting_user: User = join_request.user

@@ -10,16 +10,12 @@ from src.model.User import User
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.SavedMediaName import SavedMediaName
 from src.model.enums.Screen import Screen
-from src.model.error.CustomException import (
-    CrewValidationException,
-)
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import add_member, get_crew
 from src.service.message_service import (
     mention_markdown_user,
     get_yes_no_keyboard,
     full_media_send,
-    full_message_or_media_send_or_edit,
 )
 
 
@@ -50,23 +46,18 @@ async def manage(
     :return: None
     """
 
-    try:
-        crew: Crew = get_crew(
-            user=target_user,
-            inbound_keyboard=inbound_keyboard,
-            crew_id_key=CrewReservedKeys.CREW_ID,
-        )
+    crew: Crew = get_crew(
+        user=target_user,
+        inbound_keyboard=inbound_keyboard,
+        crew_id_key=CrewReservedKeys.CREW_ID,
+    )
 
-        # Request to join a Crew
-        if inbound_keyboard is None:
-            await send_request(update, context, user, crew)
-            return
+    # Request to join a Crew
+    if inbound_keyboard is None:
+        await send_request(update, context, user, crew)
+        return
 
-        await keyboard_interaction(update, context, crew, inbound_keyboard)
-    except CrewValidationException as cve:
-        await full_message_or_media_send_or_edit(
-            context, cve.message, update=update, add_delete_button=True
-        )
+    await keyboard_interaction(update, context, crew, inbound_keyboard)
 
 
 async def send_request(

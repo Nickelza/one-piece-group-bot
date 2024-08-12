@@ -136,7 +136,7 @@ LIMIT_TO_AUTHORIZED_GROUPS = Environment("LIMIT_TO_AUTHORIZED_GROUPS", default_v
 # List of authorized groups
 AUTHORIZED_GROUPS = Environment("AUTHORIZED_GROUPS", default_value="")
 # Group chat id
-MAIN_GROUP_ID = Environment("MAIN_GROUP_ID", can_be_empty=True)  # TODO should go
+MAIN_GROUP_ID = Environment("MAIN_GROUP_ID", can_be_empty=True)
 # Chat ID for error logs
 ERROR_LOG_CHAT_ID = Environment("ERROR_LOG_CHAT_ID", can_be_empty=True)
 # OPMA bot id

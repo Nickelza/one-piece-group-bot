@@ -26,13 +26,7 @@ async def manage(
     :return: None
     """
 
-    try:
-        crew: Crew = get_crew(user=user)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    crew: Crew = get_crew(user=user)
 
     if not await validate(update, context, inbound_keyboard, crew):
         return

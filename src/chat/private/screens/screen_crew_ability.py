@@ -6,7 +6,6 @@ from src.model.Crew import Crew
 from src.model.User import User
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewChestSpendingReason import CrewChestSpendingReason
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import get_crew, get_crew_abilities_text
 from src.service.message_service import full_message_send
@@ -24,13 +23,7 @@ async def manage(
     :return: None
     """
 
-    try:
-        crew: Crew = get_crew(user=user)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    crew: Crew = get_crew(user=user)
 
     # Get all active abilities
     active_abilities = crew.get_active_abilities()

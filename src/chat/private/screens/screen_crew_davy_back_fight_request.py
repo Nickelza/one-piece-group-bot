@@ -51,13 +51,7 @@ async def manage(
     :return: None
     """
 
-    try:
-        challenger_crew: Crew = get_crew(user)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    challenger_crew: Crew = get_crew(user)
 
     opponent_crew: Crew = Crew.logical_get(
         inbound_keyboard.get_int(ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY)

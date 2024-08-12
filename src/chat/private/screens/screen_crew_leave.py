@@ -11,7 +11,6 @@ from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.enums.Screen import Screen
 from src.model.enums.crew.CrewRole import CrewRole
 from src.model.error.ChatWarning import ChatWarning
-from src.model.error.CustomException import CrewValidationException
 from src.model.pojo.Keyboard import Keyboard
 from src.service.crew_service import remove_member, get_crew
 from src.service.date_service import get_remaining_time_from_next_cron
@@ -42,13 +41,7 @@ async def manage(
     :return: None
     """
 
-    try:
-        get_crew(user=user)
-    except CrewValidationException as cve:
-        await full_message_send(
-            context, cve.message, update=update, inbound_keyboard=inbound_keyboard
-        )
-        return
+    get_crew(user=user)
 
     # User is a conscript
     if user.get_crew_role() is CrewRole.CONSCRIPT:

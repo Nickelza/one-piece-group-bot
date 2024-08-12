@@ -149,8 +149,6 @@ def get_crew(
     :return: The crew
     """
 
-    # TODO no longer raising CrewValidationException, so no need to catch it in callers
-
     if user is None and crew_id is None and inbound_keyboard is None:
         raise ValueError("Either user or crew_id or inbound_keyboard must be provided")
 

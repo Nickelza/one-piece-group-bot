@@ -39,7 +39,6 @@ async def manage(
         ],
     ]
 
-    # TODO Don't show DBF button if target crew can't participate
     # Davy Back Fight, only in case user is crew captain
     if user.is_crew_captain() and crew_search_list_page.object != user.crew:
         inline_keyboard.append(
