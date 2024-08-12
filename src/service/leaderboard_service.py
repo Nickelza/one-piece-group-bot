@@ -321,7 +321,9 @@ def create_leaderboard_users(
 
     # Ids of eligible users for the leaderboard
     if group is None:
-        eligible_leaderboard_user_ids: list[int] = User.select(User.id)
+        eligible_leaderboard_user_ids: list[int] = User.select(User.id).where(
+            User.is_active == True
+        )
     else:
         eligible_leaderboard_user_ids: list[int] = User.select(User.id).where(
             User.id.in_(group.get_active_users_ids())
