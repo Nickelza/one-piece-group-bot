@@ -221,7 +221,7 @@ async def disband_inactive_crews(context: ContextTypes.DEFAULT_TYPE) -> None:
     :return: None
     """
 
-    # Find captains of a Crew that have not been in the latest required leaderboards
+    # Find Crews which Captain has been inactive since before the previous bounty reset
     inactive_crew_captains = get_inactive_captains()
 
     # Disband inactive crews
