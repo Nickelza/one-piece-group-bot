@@ -480,6 +480,7 @@ class GameLog(Log):
         self.opponent: User = User()
         self.effective_status: GameStatus = GameStatus.ND
         self.user_is_challenger: bool = False
+        self.effective_wager = None
 
     def set_object(self, object_id: int) -> None:
         self.object = Game.get(Game.id == object_id)
@@ -487,6 +488,11 @@ class GameLog(Log):
         self.opponent = self.object.opponent if self.user_is_challenger else self.object.challenger
         self.legend = self.get_emoji_legend()
         self.effective_status = self.legend.get_game_status()
+        self.effective_wager = (
+            self.object.wager // 2
+            if self.effective_status is GameStatus.LOST
+            else self.object.wager
+        )
 
     def get_items(self, page, limit=ListPage.DEFAULT_LIMIT) -> list[Game]:
         return (
@@ -521,10 +527,10 @@ class GameLog(Log):
 
         if self.effective_status in [GameStatus.WON, GameStatus.LOST]:
             won = self.effective_status is GameStatus.WON
-            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_TEXT.format(
+            outcome_text = phrases.LOG_ITEM_DETAIL_OUTCOME_BELLY_TEXT.format(
                 (Emoji.LOG_POSITIVE if won else Emoji.LOG_NEGATIVE),
                 (phrases.TEXT_WON if won else phrases.TEXT_LOST),
-                get_belly_formatted(self.object.wager),
+                get_belly_formatted(self.effective_wager),
             )
         else:
             outcome_text = phrases.LOG_ITEM_DETAIL_STATUS_TEXT.format(
@@ -579,7 +585,7 @@ class GameLog(Log):
             get_belly_formatted(max_won_game.wager),
             max_won_game.get_name(),
             self.get_deeplink(max_won_game.id),
-            get_belly_formatted(max_lost_game.wager),
+            get_belly_formatted(max_lost_game.wager // 2),
             max_lost_game.get_name(),
             self.get_deeplink(max_lost_game.id),
             most_challenged_user.get_markdown_mention(),
