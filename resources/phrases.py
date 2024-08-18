@@ -79,7 +79,7 @@ NOT_ALLOWED_TO_VIEW_REPLIED_STATUS = (
 )
 SHOW_USER_STATUS_DAILY_REWARD = (
     f"\n\n>You have a daily reward awaiting, use {CommandName.DAILY_REWARD.get_non_formatted()} in"
-    " a group to claim it!"
+    " private chat with the Bot or in a group to claim it!"
 )
 ROOKIE_STATUS_PRIVATE_CHAT_ONLY = "Rookies can only view their status in Private Chat"
 PRISONER_STATUS_PRIVATE_CHAT_ONLY = "Prisoners can only view their status in Private Chat"
