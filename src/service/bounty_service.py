@@ -109,10 +109,21 @@ async def reset_bounty(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Delete tax events
     IncomeTaxEvent.delete().execute()
 
-    # Erase all crew chests and delete all contributions from previous crew members
+    # If Crew chest is higher than allowed amount, cap it. Else, keep it
+    conditions: list[tuple[bool, int]] = [
+        (
+            Crew.chest_amount > Env.CREW_MAX_CHEST_AMOUNT_RESET.get_int(),
+            Env.CREW_MAX_CHEST_AMOUNT_RESET.get_int(),
+        )
+    ]
+    case_stmt = Case(None, conditions, Crew.chest_amount)
+    Crew.update(
+        chest_amount=case_stmt, from_reset_chest_amount=case_stmt, total_gained_chest_amount=0
+    ).execute()
+
+    # Delete all contributions from previous crew members
     # For some reason a direct delete query does not work, had to first get all valid contributions
     # and then delete
-    Crew.update(chest_amount=0, total_gained_chest_amount=0).execute()
 
     # Still valid contributions
     valid_contributions = CrewMemberChestContribution.select().where(

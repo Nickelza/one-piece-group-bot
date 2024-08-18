@@ -898,6 +898,11 @@ CREW_JOIN_REQUEST_COOLDOWN_DURATION = Environment(
 CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION = Environment(
     "CREW_JOIN_REQUEST_COOLDOWN_SAME_CREW_DURATION", default_value="7"
 )
+# On bounty reset, max amount allowed in Crew chest. Default: 1 billion
+CREW_MAX_CHEST_AMOUNT_RESET = Environment(
+    "CREW_MAX_CHEST_AMOUNT_RESET", default_value="1000000000"
+)
+
 # After long in minutes before a Davy Back Fight request expire. Default: 15 minutes
 DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME = Environment(
     "DAVY_BACK_FIGHT_REQUEST_EXPIRATION_TIME", default_value="15"

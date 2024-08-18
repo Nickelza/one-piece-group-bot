@@ -25,6 +25,7 @@ class Crew(BaseModel):
     disband_date: datetime.datetime | DateTimeField = DateTimeField(null=True)
     chest_amount: int | BigIntegerField = BigIntegerField(default=0)
     total_gained_chest_amount: int | BigIntegerField = BigIntegerField(default=0)
+    from_reset_chest_amount: int | BigIntegerField = BigIntegerField(default=0)
     level: int | IntegerField = IntegerField(default=1)
     max_abilities: int | IntegerField = IntegerField(default=Env.CREW_MAX_ABILITIES.get_int())
     can_promote_first_mate: bool = BooleanField(default=True)
