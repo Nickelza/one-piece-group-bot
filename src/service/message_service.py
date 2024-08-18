@@ -49,7 +49,7 @@ def escape_invalid_markdown_chars(text: str) -> str:
     :return: Escaped text
     """
 
-    escape_chars = r"~#+-=|{}.!"
+    escape_chars = r"#+-={}.!"
 
     text = re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 

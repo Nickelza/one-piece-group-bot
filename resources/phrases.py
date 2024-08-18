@@ -201,7 +201,7 @@ KEYBOARD_USE_UNAUTHORIZED = "You are not authorized to use this keyboard"
 
 SWAP_SUCCESSFUL = "Swap successful"
 RESET_SUCCESSFUL = "Reset successful"
-VIEW_ALL_WITH_EMOJI = "\n" + Emoji.RIGHT_ARROW + " [View all]({})"
+VIEW_ALL_WITH_EMOJI = "\n>" + Emoji.RIGHT_ARROW + " [View all]({})"
 
 LOCATION_CHANGE_REGION_PROPOSAL = "{}{} would you like to move to {}?"
 LOCATION_CHANGE_REGION_PROPOSAL_REJECTED = "{}You can move to {} later with {} command"
@@ -2233,14 +2233,18 @@ PLUNDER_REVENGE_TOO_LATE = (
 PLUNDER_REVENGE_ALREADY_REVENGED = "This plunder has already been revenged\n\n[View revenge]({})"
 
 DAILY_REWARD_ALREADY_COLLECTED = "Your next reward will be available in *{}*{}"
-DAILY_REWARD = f"Base reward: ฿*{{}}*\n\n*Bonus*{{}}\n\n{Emoji.LOG_POSITIVE}Total reward: ฿*{{}}*"
+DAILY_REWARD = (
+    f"{Emoji.LOG_POSITIVE}Reward: ฿*{{}}*" f"\n\n>*Breakdown*" f"\n>Base reward: ฿*{{}}*{{}}"
+)
 DAILY_REWARD_GROUP_MESSAGE = (
-    "Welcome back {}, here's your daily reward for today!\n\n{}\n\nCurrent streak: *{}"
-    " {}*\nNext prize in: *{} {}*\n>_For every"
-    f" {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you claim the daily reward, you"
+    "Welcome back {}, here's your daily reward for today!\n\n{}"
+    "\n>\n>*Streak*"
+    "\n>Current streak: *{} {}*"
+    "\n>Next prize in: *{} {}*"
+    f"\n>_For every {Env.DAILY_REWARD_STREAK_DAYS.get_int()} consecutive days you claim the daily reward, you"
     " will receive a special prize!_"
 )
-DAILY_REWARD_BONUS = "\n• {}: *+{}%* \\(฿{}\\)\n>_{}_"
+DAILY_REWARD_BONUS = "\n>\n>• {}: *+{}%* \\(฿{}\\)\n>_{}_"
 DAILY_REWARD_BONUS_LIMITATION_LOCATION_PARADISE = (
     "\n>No bonus available due to being in Paradise while having enough Bounty for New World"
     " \\(฿{}\\)"
@@ -2249,8 +2253,10 @@ DAILY_REWARD_BONUS_LIMITATION_LOCATION_NEW_WORLD = (
     "\n>No bonus available due having more than ฿{} and being in the final New World location"
 )
 DAILY_REWARD_BONUS_LIMITATION_ARRESTED = "\n>No bonus available due to being arrested"
-DAILY_REWARD_NEXT = "\n\n>Next reward available in *{}*"
-DAILY_REWARD_NEXT_SPLIT = "\n\n>Daily reward is split into {} parts, next reward available in *{}*"
+DAILY_REWARD_NEXT = "\n>\n>Next reward available in *{}*||"
+DAILY_REWARD_NEXT_SPLIT = (
+    "\n>\n>Daily reward is split into {} parts, next reward available in *{}*||"
+)
 DAILY_REWARD_BONUS_DESCRIPTION_STREAK = "Streak"
 DAILY_REWARD_BONUS_DESCRIPTION_STREAK_EXPLANATION = (
     f"+{Env.DAILY_REWARD_BONUS_BASE_STREAK.get_int()}% for every consecutive day you claim the"
@@ -2269,10 +2275,10 @@ DAILY_REWARD_BONUS_DESCRIPTION_CREW_MVP_EXPLANATION = (
     "If your bounty is higher than your Crew's average bounty"
 )
 
-DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n*Devil Fruit Shop*{}"
-DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n•[{} - ฿{}]({})"
-DAILY_REWARD_GLOBAL_CHALLENGE = "\n\n*Global Challenges*{}"
-GLOBAL_CHALLENGE_ITEM = "\n{}"
+DAILY_REWARD_DEVIL_FRUIT_SHOP = "\n\n>*Devil Fruit Shop*{}||"
+DAILY_REWARD_DEVIL_FRUIT_SHOP_ITEM = "\n>•[{} - ฿{}]({})"
+DAILY_REWARD_GLOBAL_CHALLENGE = "\n\n>*Global Challenges*{}||"
+GLOBAL_CHALLENGE_ITEM = "\n>{}"
 DAILY_REWARD_PRIZE_REQUEST = (
     "{}\nYou can either accept the offered prize or"
     " try your luck for a better prize.\n\nOffered prize: ฿*{}*\n\nIn case you choose to try"

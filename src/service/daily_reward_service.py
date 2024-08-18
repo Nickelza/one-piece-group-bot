@@ -44,7 +44,7 @@ def get_text(reward: DailyReward) -> str:
             )
 
     return phrases.DAILY_REWARD.format(
+        get_belly_formatted(reward.total_amount),
         get_belly_formatted(reward.base_amount),
         bonus_text,
-        get_belly_formatted(reward.total_amount),
     )
