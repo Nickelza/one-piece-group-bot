@@ -7,6 +7,7 @@ import resources.Environment as Env
 import resources.phrases as phrases
 import src.model.enums.Command as Command
 import src.model.enums.LeaderboardRank as LeaderboardRank
+from resources.phrases import surround_with_expandable_quote
 from src.model.Crew import Crew
 from src.model.DevilFruit import DevilFruit
 from src.model.GroupChat import GroupChat
@@ -146,35 +147,35 @@ async def manage(
         location_name = Location.get_by_level(target_user.location_level).name
         target_user_rank = leaderboard_target_user_rank.get_emoji_and_rank_message()
 
-    message_text = phrases.SHOW_USER_STATUS.format(
-        mention_markdown_v2(target_user.tg_user_id, target_user.tg_first_name),
-        bounty_string,
-        pending_bounty_addendum,
-        target_user_rank,
-        escape_valid_markdown_chars(location_name),
-    )
-
     # Add Crew if in one
+    crew_text = ""
     if target_user.is_crew_member():
-        message_text += phrases.SHOW_USER_STATUS_CREW.format(
+        crew_text = phrases.SHOW_USER_STATUS_CREW.format(
             get_crew_name_with_deeplink(target_user.crew)
         )
 
+    extra_text = ""
+
     # Extra info visible only if checking own status or being checked by a boss
     if self_status or user_is_boss(user, group_chat=group_chat):
+        # Location
+        extra_text = phrases.SHOW_USER_STATUS_LOCATION.format(
+            escape_valid_markdown_chars(location_name)
+        )
+
         # Remaining sentence if arrested
         if target_user.is_arrested():
             if not user.impel_down_is_permanent:
                 remaining_time = get_remaining_duration(target_user.impel_down_release_date)
             else:
                 remaining_time = phrases.SHOW_USER_STATUS_PERMANENT_IMPEL_DOWN
-            message_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
+            extra_text += phrases.SHOW_USER_STATUS_REMAINING_SENTENCE.format(remaining_time)
 
-            message_text += phrases.SHOW_USER_STATUS_RESTRICTIONS.format(
+            extra_text += phrases.SHOW_USER_STATUS_RESTRICTIONS.format(
                 phrases.IMPEL_DOWN_RESTRICTIONS
             )
             if not user.impel_down_is_permanent:
-                message_text += phrases.IMPEL_DOWN_RESTRICTION_BAIL_GUIDE
+                extra_text += phrases.IMPEL_DOWN_RESTRICTION_BAIL_GUIDE
 
                 inline_keyboard.append(
                     [get_post_bail_deeplink_button(target_user.get_current_impel_down_log())]
@@ -188,7 +189,7 @@ async def manage(
             ):
                 # Get remaining time
                 remaining_time = get_remaining_duration(target_user.fight_immunity_end_date)
-                message_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
+                extra_text += phrases.SHOW_USER_STATUS_FIGHT_IMMUNITY.format(remaining_time)
 
             # Add fight cooldown if active
             if (
@@ -197,7 +198,7 @@ async def manage(
             ):
                 # Get remaining time
                 remaining_time = get_remaining_duration(target_user.fight_cooldown_end_date)
-                message_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
+                extra_text += phrases.SHOW_USER_STATUS_FIGHT_COOLDOWN.format(remaining_time)
 
             # Add plunder immunity if active
             if (
@@ -206,7 +207,7 @@ async def manage(
             ):
                 # Get remaining time
                 remaining_time = get_remaining_duration(target_user.plunder_immunity_end_date)
-                message_text += phrases.SHOW_USER_STATUS_PLUNDER_IMMUNITY.format(remaining_time)
+                extra_text += phrases.SHOW_USER_STATUS_PLUNDER_IMMUNITY.format(remaining_time)
 
             # Add plunder cooldown if active
             if (
@@ -215,14 +216,14 @@ async def manage(
             ):
                 # Get remaining time
                 remaining_time = get_remaining_duration(target_user.plunder_cooldown_end_date)
-                message_text += phrases.SHOW_USER_STATUS_PLUNDER_COOLDOWN.format(remaining_time)
+                extra_text += phrases.SHOW_USER_STATUS_PLUNDER_COOLDOWN.format(remaining_time)
 
             # Add warlord remaining time if available
             if target_user.is_warlord():
                 remaining_time = get_remaining_duration(
                     Warlord.get_latest_active_by_user(target_user).end_date
                 )
-                message_text += phrases.SHOW_USER_STATUS_WARLORD_REMAINING_TIME.format(
+                extra_text += phrases.SHOW_USER_STATUS_WARLORD_REMAINING_TIME.format(
                     remaining_time
                 )
 
@@ -249,14 +250,14 @@ async def manage(
                 has_bounty_deduction = True
 
             if has_bounty_deduction:
-                message_text += bounty_deduction_text
+                extra_text += bounty_deduction_text
 
             # Abilities visible only if checking own status
             if self_status:
                 # Devil Fruit
                 eaten_devil_fruit = DevilFruit.get_by_owner_if_eaten(target_user)
                 if eaten_devil_fruit is not None:
-                    message_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
+                    extra_text += phrases.SHOW_USER_STATUS_DEVIL_FRUIT.format(
                         eaten_devil_fruit.get_full_name(),
                         get_devil_fruit_abilities_text(eaten_devil_fruit, add_header=False),
                     )
@@ -266,15 +267,24 @@ async def manage(
                     crew: Crew = target_user.crew
                     crew_active_abilities = crew.get_active_abilities()
                     if len(crew_active_abilities) > 0:
-                        message_text += phrases.SHOW_USER_STATUS_CREW_ABILITIES.format(
+                        extra_text += phrases.SHOW_USER_STATUS_CREW_ABILITIES.format(
                             get_crew_abilities_text(
                                 active_abilities=crew_active_abilities, add_emoji=True
                             )
                         )
 
-        if self_status:
-            if target_user.can_collect_daily_reward:
-                message_text += phrases.SHOW_USER_STATUS_DAILY_REWARD
+    message_text = phrases.SHOW_USER_STATUS.format(
+        mention_markdown_v2(target_user.tg_user_id, target_user.tg_first_name),
+        bounty_string,
+        pending_bounty_addendum,
+        target_user_rank,
+        crew_text,
+        surround_with_expandable_quote(extra_text) if len(extra_text) > 0 else "",
+    )
+
+    if self_status:
+        if target_user.can_collect_daily_reward:
+            message_text += phrases.SHOW_USER_STATUS_DAILY_REWARD
 
     # If used in reply to a message, reply to original message
     reply_to_message_id = None

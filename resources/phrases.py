@@ -12,6 +12,29 @@ def surround_with_arrows(text: str) -> str:
     return Emoji.RIGHT_ARROW + text + Emoji.LEFT_ARROW
 
 
+def surround_with_expandable_quote(text: str) -> str:
+    """
+    Surround the text with expandable quote
+    :param text: The text
+    :return: The text surrounded with expandable quote
+    """
+
+    # Add quote to every line
+    text = text.replace("\n", "\n>")
+    # Remove double quotes
+    text = text.replace("\n>>", "\n>")
+
+    # Add quote to beginning of the text if not already present
+    if not text.startswith(">") and not text.startswith("\n"):
+        text = ">" + text
+
+    # Add || to the end of the text if not already present
+    if not text.endswith("||"):
+        text += "||"
+
+    return text
+
+
 ANTI_SPAM_WARNING = "Too many messages sent, please slow down..."
 SUPPORT_GROUP_DEEPLINK = f"[Support Group]({Env.SUPPORT_GROUP_LINK.get()})"
 
@@ -53,7 +76,8 @@ COMMAND_FEATURE_DISABLED_ERROR = (
 )
 COMMAND_NOT_ALLOWED_FROM_DEEPLINK_ERROR = "This command is not allowed from a deeplink"
 
-SHOW_USER_STATUS = "User: {}\nBounty: ฿*{}*{}\nRank: {}\nLocation: {}"
+SHOW_USER_STATUS = "User: {}\nBounty: ฿*{}*{}\nRank: {}{}{}"
+SHOW_USER_STATUS_LOCATION = "\nLocation: {}"
 SHOW_USER_STATUS_FROZEN_BOUNTY = " \\(Frozen\\)"
 SHOW_USER_STATUS_RANK_PRISONER = Emoji.PRISONER + " Prisoner"
 SHOW_USER_STATUS_IMPEL_DOWN = "Impel Down"
