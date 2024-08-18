@@ -120,7 +120,7 @@ def get_leaderboard_message(
         view_global_leaderboard_text,
         phrases.LEADERBOARD_VIEW_BOUNTIES_RESET if leaderboard.is_bounty_reset else "",
         default_date_format(next_bounty_reset_time),
-        get_remaining_duration(next_bounty_reset_time),
+        get_remaining_duration(next_bounty_reset_time, start_is_midnight=True),
     )
 
 

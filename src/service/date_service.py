@@ -184,12 +184,14 @@ def get_remaining_duration(
     end_datetime: datetime.datetime,
     start_datetime: datetime.datetime = None,
     show_full: bool = False,
+    start_is_midnight: bool = False,
 ) -> str:
     """
     Get the remaining time until the end_datetime
     :param end_datetime: The end datetime
     :param start_datetime: The start datetime. If None, the current datetime is used
     :param show_full: Whether to show all units when available
+    :param start_is_midnight: Whether to use midnight as the start time
     :return: The remaining time in days and hours e.g. 1 day 2h hours
     """
     if end_datetime is None:
@@ -197,6 +199,9 @@ def get_remaining_duration(
 
     if start_datetime is None:
         start_datetime = datetime.datetime.now()
+
+        if start_is_midnight:
+            start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
 
     # Remove offset awareness from end_datetime
     end_datetime = end_datetime.replace(tzinfo=None)
