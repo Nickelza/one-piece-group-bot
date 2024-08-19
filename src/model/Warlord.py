@@ -11,11 +11,9 @@ class Warlord(BaseModel):
     Warlord class
     """
 
-    id = PrimaryKeyField()
     user = ForeignKeyField(User, backref="warlords", on_delete="CASCADE", on_update="CASCADE")
     epithet = CharField(max_length=99, null=True)
     reason = CharField(max_length=999, null=True)
-    date = DateTimeField(default=datetime.datetime.now)
     end_date = DateTimeField()
     original_end_date = DateTimeField()  # In case it was ended early
     revoke_reason = CharField(max_length=999, null=True)

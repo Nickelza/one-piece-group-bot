@@ -9,7 +9,6 @@ class DisabledNotification(BaseModel):
     DisabledNotification class
     """
 
-    id = PrimaryKeyField()
     user = ForeignKeyField(
         User, backref="disabled_notification_users", on_delete="CASCADE", on_update="CASCADE"
     )

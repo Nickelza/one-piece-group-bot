@@ -411,7 +411,6 @@ async def add_crew_ability(
     ability.value = ability_value
     ability.acquired_method = acquired_method
     ability.acquired_user = acquired_user
-    ability.acquired_date = now
     ability.expiration_date = get_datetime_in_future_days(
         Env.CREW_ABILITY_DURATION_DAYS.get_int(), start_time=now
     )
@@ -549,8 +548,8 @@ def get_crew_overview_text(crew: Crew, user: User, from_search: bool = True) -> 
         ),
         captain.get_markdown_mention(),
         first_mate_text,
-        user.get_date_formatted(crew.creation_date),
-        get_elapsed_duration(crew.creation_date),
+        user.get_date_formatted(crew.date),
+        get_elapsed_duration(crew.date),
         len(crew.get_members()),
         crew.max_members,
         active_abilities_count_text,

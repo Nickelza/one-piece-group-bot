@@ -16,7 +16,6 @@ class DevilFruitTrade(BaseModel):
     Devil Fruit Trade class
     """
 
-    id = PrimaryKeyField()
     devil_fruit: DevilFruit | ForeignKeyField = ForeignKeyField(
         DevilFruit,
         null=True,
@@ -42,7 +41,6 @@ class DevilFruitTrade(BaseModel):
     price: int | BigIntegerField = BigIntegerField(null=True)
     tax_percentage: float | FloatField = FloatField(null=True)
     reason: str | CharField = CharField(max_length=100, null=True)
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     date_sold: datetime.datetime | DateTimeField = DateTimeField(null=True)
     status: DevilFruitTradeStatus | SmallIntegerField = SmallIntegerField(
         default=DevilFruitTradeStatus.PENDING

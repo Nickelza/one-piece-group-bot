@@ -11,7 +11,6 @@ class LeaderboardCrew(BaseModel):
     Leaderboard class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     leaderboard: Leaderboard | ForeignKeyField = ForeignKeyField(
         Leaderboard, backref="leaderboard_crews", on_delete="CASCADE", on_update="CASCADE"
     )

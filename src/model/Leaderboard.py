@@ -9,7 +9,6 @@ class Leaderboard(BaseModel):
     Leaderboard class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     year: int | SmallIntegerField = SmallIntegerField()
     week: int | SmallIntegerField = SmallIntegerField()
     group: Group | ForeignKeyField = ForeignKeyField(Group, null=True, backref="leaderboards")

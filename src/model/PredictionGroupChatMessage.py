@@ -12,7 +12,6 @@ class PredictionGroupChatMessage(BaseModel):
     Prediction group chat message class
     """
 
-    id = PrimaryKeyField()
     prediction = ForeignKeyField(
         Prediction,
         backref="prediction_group_chat_messages",
@@ -26,7 +25,7 @@ class PredictionGroupChatMessage(BaseModel):
         on_update="CASCADE",
     )
     message_id = BigIntegerField()
-    sent_date = DateTimeField(default=datetime.now)
+    date = DateTimeField(default=datetime.now)
 
     class Meta:
         db_table = "prediction_group_chat_message"

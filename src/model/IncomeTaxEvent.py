@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -15,11 +13,9 @@ class IncomeTaxEvent(BaseModel):
     IncomeTaxEvent class
     """
 
-    id = PrimaryKeyField()
     user = ForeignKeyField(User, backref="income_tax_events")
     event_id = IntegerField()
     event_type = CharField()
-    date = DateTimeField(default=datetime.datetime.now)
     starting_amount = BigIntegerField()
     amount = BigIntegerField()
     breakdown_list = TextField()

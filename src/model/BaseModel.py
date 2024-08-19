@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import *
 
 from resources.Database import Database
@@ -12,6 +14,7 @@ class BaseModel(Model):
     """
 
     id: int | PrimaryKeyField = PrimaryKeyField()
+    date = DateTimeField(default=datetime.now)
 
     class Meta:
         database = db_obj.get_db()

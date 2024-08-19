@@ -1023,9 +1023,7 @@ class CrewAbilityActivatedNotification(Notification):
         return self.text.format(
             escape_valid_markdown_chars(self.crew_ability.get_description()),
             self.crew_ability.get_value_with_sign(),
-            get_remaining_duration(
-                self.crew_ability.expiration_date, self.crew_ability.acquired_date
-            ),
+            get_remaining_duration(self.crew_ability.expiration_date, self.crew_ability.date),
         )
 
 

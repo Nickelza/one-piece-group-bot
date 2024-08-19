@@ -55,7 +55,7 @@ class PredictionListPage(ListPage):
         """
         return (
             self.get_select_items_statement()
-            .order_by(Prediction.creation_date.desc(), Prediction.send_date.desc())
+            .order_by(Prediction.date.desc(), Prediction.send_date.desc())
             .paginate(page, limit)
         )
 

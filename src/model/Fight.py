@@ -19,7 +19,6 @@ class Fight(BaseModel):
     Fight class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     challenger: User | ForeignKeyField = ForeignKeyField(
         User, backref="fight_challengers", on_delete="CASCADE", on_update="CASCADE"
     )

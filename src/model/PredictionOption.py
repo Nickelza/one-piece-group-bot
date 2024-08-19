@@ -9,7 +9,6 @@ class PredictionOption(BaseModel):
     Prediction option class
     """
 
-    id = PrimaryKeyField()
     prediction = ForeignKeyField(
         Prediction, backref="prediction_options", on_delete="CASCADE", on_update="CASCADE"
     )

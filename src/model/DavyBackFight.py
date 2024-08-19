@@ -18,7 +18,6 @@ class DavyBackFight(BaseModel):
     DavyBackFight class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     challenger_crew: Crew | ForeignKeyField = ForeignKeyField(
         Crew, backref="davy_back_fights_challengers"
     )
@@ -30,7 +29,6 @@ class DavyBackFight(BaseModel):
     participants_count: int | IntegerField = IntegerField()
     duration_hours: int | IntegerField = IntegerField()
     penalty_days = IntegerField()
-    date = DateTimeField(default=datetime.datetime.now)
     status: int | SmallIntegerField = SmallIntegerField(
         default=GameStatus.AWAITING_OPPONENT_CONFIRMATION
     )

@@ -24,7 +24,6 @@ class Game(BaseModel):
     Game class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     challenger: User | ForeignKeyField = ForeignKeyField(
         User, backref="game_challengers", on_delete="CASCADE", on_update="CASCADE"
     )
@@ -34,7 +33,6 @@ class Game(BaseModel):
     type: GameType | SmallIntegerField = SmallIntegerField(null=True)
     board: str | CharField = CharField(max_length=9999, null=True)
     opponent_board: str | CharField = CharField(max_length=9999, null=True)
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     status: GameStatus | SmallIntegerField = SmallIntegerField(
         default=GameStatus.AWAITING_SELECTION
     )

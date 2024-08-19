@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 import resources.Environment as Env
@@ -21,7 +19,6 @@ class Plunder(BaseModel):
     Plunder class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     challenger: User | ForeignKeyField = ForeignKeyField(
         User, backref="plunder_challengers", on_delete="CASCADE", on_update="CASCADE"
     )
@@ -29,7 +26,6 @@ class Plunder(BaseModel):
         User, backref="plunder_opponents", on_delete="CASCADE", on_update="CASCADE"
     )
     win_probability: float | FloatField = FloatField()
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     status: bool | SmallIntegerField = SmallIntegerField(default=GameStatus.IN_PROGRESS)
     group_chat: GroupChat | ForeignKeyField = ForeignKeyField(
         GroupChat,

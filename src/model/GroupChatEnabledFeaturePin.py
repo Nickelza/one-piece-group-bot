@@ -9,7 +9,6 @@ class GroupChatEnabledFeaturePin(BaseModel):
     GroupChat Enabled Feature Pin class
     """
 
-    id = PrimaryKeyField()
     group_chat = ForeignKeyField(
         GroupChat, backref="enabled_features_pin", on_delete="CASCADE", on_update="CASCADE"
     )

@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 import constants as c
@@ -14,11 +12,9 @@ class DocQGame(BaseModel):
     Doc Q Game class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     user: User | ForeignKeyField = ForeignKeyField(
         User, backref="doc_q_game_users", on_delete="CASCADE", on_update="CASCADE"
     )
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     status: GameStatus | SmallIntegerField = SmallIntegerField(default=GameStatus.IN_PROGRESS)
     correct_choices_index: str | CharField = CharField(max_length=99, null=True)
     group_chat: GroupChat | ForeignKeyField = ForeignKeyField(

@@ -12,7 +12,6 @@ class CrewMemberChestContribution(BaseModel):
     CrewMemberChestContribution class
     """
 
-    id = PrimaryKeyField()
     crew = ForeignKeyField(Crew, backref="crew_member_chest_contributions")
     user = ForeignKeyField(User, backref="crew_member_chest_contributions")
     amount = BigIntegerField(default=0)

@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -10,10 +8,8 @@ class SystemUpdate(BaseModel):
     SystemUpdate class
     """
 
-    id = PrimaryKeyField()
     title = CharField()
     description = CharField(max_length=999)
-    date = DateTimeField(default=datetime.datetime.now)
     chat_id = CharField()
     message_id = BigIntegerField()
 

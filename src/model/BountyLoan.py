@@ -14,10 +14,10 @@ from src.model.enums.Screen import Screen
 
 
 class BountyLoan(BaseModel):
-    id = PrimaryKeyField()
     """
     BountyLoan class
     """
+
     loaner = ForeignKeyField(
         User, backref="bounty_loaners", on_delete="CASCADE", on_update="CASCADE"
     )
@@ -32,7 +32,6 @@ class BountyLoan(BaseModel):
     deadline_date = DateTimeField()
     last_payment_date = DateTimeField(null=True)
     forgiven_date = DateTimeField(null=True)
-    date = DateTimeField(default=datetime.now)
     status = SmallIntegerField(default=BountyLoanStatus.AWAITING_LOANER_CONFIRMATION)
     group_chat = ForeignKeyField(
         GroupChat,

@@ -14,10 +14,8 @@ class CrewJoinRequest(BaseModel):
     CrewJoinRequest class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     user: User | ForeignKeyField = ForeignKeyField(User, backref="crew_join_requests")
     crew: Crew | ForeignKeyField = ForeignKeyField(Crew, backref="crew_join_requests")
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     status: CrewJoinRequestStatus | SmallIntegerField = SmallIntegerField(
         default=CrewJoinRequestStatus.PENDING
     )

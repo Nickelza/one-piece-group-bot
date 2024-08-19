@@ -11,7 +11,6 @@ class GroupChat(BaseModel):
     Group Chat class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     group: Group | ForeignKeyField = ForeignKeyField(
         Group, backref="group_chats", on_delete="CASCADE", on_update="CASCADE"
     )

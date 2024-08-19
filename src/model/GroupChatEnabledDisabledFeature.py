@@ -9,7 +9,6 @@ class GroupChatEnabledDisabledFeature(BaseModel):
     GroupChat Enabled/Disabled Feature class
     """
 
-    id = PrimaryKeyField()
     group_chat = ForeignKeyField(
         GroupChat, backref="enabled_disabled_features", on_delete="CASCADE", on_update="CASCADE"
     )

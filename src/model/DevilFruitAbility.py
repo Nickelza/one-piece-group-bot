@@ -14,7 +14,6 @@ class DevilFruitAbility(BaseModel):
     Devil Fruit Ability class
     """
 
-    id = PrimaryKeyField()
     devil_fruit = ForeignKeyField(
         DevilFruit, backref="devil_fruit_abilities", on_delete="CASCADE", on_update="CASCADE"
     )

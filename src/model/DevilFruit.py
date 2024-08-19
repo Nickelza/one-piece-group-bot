@@ -16,7 +16,6 @@ class DevilFruit(BaseModel):
     DevilFruit class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     category: int | DevilFruitCategory = SmallIntegerField()
     name: str | CharField = CharField(max_length=50)
     model: str | CharField = CharField(max_length=50, null=True, unique=True)

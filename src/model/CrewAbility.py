@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -13,13 +11,11 @@ class CrewAbility(BaseModel):
     CrewAbility class
     """
 
-    id = PrimaryKeyField()
     crew = ForeignKeyField(Crew, backref="crew_abilities")
     ability_type = SmallIntegerField()
     value = SmallIntegerField()
     acquired_method = SmallIntegerField()
     acquired_user = ForeignKeyField(User, backref="crew_abilities_acquired", null=True)
-    acquired_date = DateTimeField(default=datetime.datetime.now)
     expiration_date = DateTimeField(null=True)
     was_removed = BooleanField(default=False)
     removed_user = ForeignKeyField(User, backref="crew_abilities_removed", null=True)

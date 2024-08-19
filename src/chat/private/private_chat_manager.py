@@ -648,7 +648,7 @@ async def send_system_update_message(
         return
 
     # Don't send update if user joined after the update was made
-    if user.join_date > system_update.date:
+    if user.date > system_update.date:
         return
 
     ot_text = phrases.SYSTEM_UPDATE.format(

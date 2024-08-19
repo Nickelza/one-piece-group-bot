@@ -1,5 +1,3 @@
-import datetime
-
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -12,11 +10,9 @@ class CrewChestSpendingRecord(BaseModel):
     CrewChestSpendingRecord class
     """
 
-    id = PrimaryKeyField()
     crew = ForeignKeyField(Crew, backref="crew_chest_spending_records")
     amount = BigIntegerField()
     reason = CharField()
-    date = DateTimeField(default=datetime.datetime.now)
     by_user = ForeignKeyField(User, backref="crew_chest_spending_records")
     to_user = ForeignKeyField(User, backref="crew_chest_spending_records", null=True)
 

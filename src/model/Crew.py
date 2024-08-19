@@ -17,9 +17,7 @@ class Crew(BaseModel):
     Crew class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     name: str | CharField = CharField(max_length=Env.CREW_NAME_MAX_LENGTH.get_int())
-    creation_date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     can_accept_new_members: bool | BooleanField = BooleanField(default=True)
     is_active: bool | BooleanField = BooleanField(default=True)
     disband_date: datetime.datetime | DateTimeField = DateTimeField(null=True)

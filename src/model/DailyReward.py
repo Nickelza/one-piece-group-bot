@@ -19,9 +19,7 @@ class DailyReward(BaseModel):
     DailyReward class
     """
 
-    id: int | PrimaryKeyField = PrimaryKeyField()
     user: User | ForeignKeyField = ForeignKeyField(User, backref="daily_bonuses")
-    date: datetime.datetime | DateTimeField = DateTimeField(default=datetime.datetime.now)
     base_amount: int | BigIntegerField = BigIntegerField()
     bonus_list: str | TextField = TextField()
     total_amount: int | BigIntegerField = BigIntegerField()

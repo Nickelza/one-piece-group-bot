@@ -12,7 +12,6 @@ class GroupUser(BaseModel):
     Group User class
     """
 
-    id = PrimaryKeyField()
     group = ForeignKeyField(Group, backref="groups", on_delete="RESTRICT", on_update="CASCADE")
     user = ForeignKeyField(User, backref="users", on_delete="RESTRICT", on_update="CASCADE")
     last_message_date = DateTimeField(default=datetime.datetime.now)
