@@ -716,8 +716,11 @@ LOCATION_WHOLE_CAKE_ISLAND_IMAGE_URL = Environment(
 LOCATION_WANO_COUNTRY_IMAGE_URL = Environment(
     "LOCATION_WANO_COUNTRY_IMAGE_URL", default_value="https://i.imgur.com/vznQ3W2.jpg"
 )
+# For some reason, imgur link preview was showing whole post instead on only image
 LOCATION_EGGHEAD_IMAGE_URL = Environment(
-    "LOCATION_EGGHEAD_IMAGE_URL", default_value="https://i.imgur.com/mPsUp7x.jpeg"
+    "LOCATION_EGGHEAD_IMAGE_URL",
+    default_value="https://api.grouphelp.top/chelp/index.php?f=AgACAgEAAxkBMjPmtWbDLnZbY5xmMdybNxcwAZYkAAFhZAACY64xG-Wj"
+    "GEZP3shweOhqeAEAAwIAA3kAAzUE",
 )
 
 # How long fight immunity lasts in hours. Default: 6 hours
