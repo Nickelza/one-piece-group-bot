@@ -195,7 +195,7 @@ class Log(ListPage):
         :return: The keyboard
         """
 
-        pass
+        return []
 
 
 # noinspection DuplicatedCode

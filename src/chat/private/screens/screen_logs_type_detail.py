@@ -40,5 +40,8 @@ async def manage(
             log.get_item_detail_text(),
             update=update,
             inbound_keyboard=inbound_keyboard,
-            keyboard=log.get_keyboard(),
+            keyboard=log.get_previous_and_next_object_keyboard(
+                inbound_keyboard, LogTypeReservedKeys.ITEM_ID
+            )
+            + log.get_keyboard(),
         )

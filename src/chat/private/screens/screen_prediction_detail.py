@@ -301,7 +301,8 @@ async def manage(
         context,
         prediction_list_page.get_item_detail_text(),
         update=update,
-        keyboard=inline_keyboard,
+        keyboard=prediction_list_page.get_previous_and_next_object_keyboard(inbound_keyboard)
+        + inline_keyboard,
         inbound_keyboard=inbound_keyboard,
     )
 

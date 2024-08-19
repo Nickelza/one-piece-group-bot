@@ -9,6 +9,7 @@ from src.model.enums.Emoji import Emoji
 from src.model.enums.GameStatus import GameStatus
 from src.model.enums.ReservedKeyboardKeys import ReservedKeyboardKeys
 from src.model.error.CustomException import UnauthorizedToViewItemException
+from src.model.pojo.Keyboard import Keyboard
 
 
 class EmojiLegend:
@@ -94,6 +95,8 @@ class ListPage(ABC):
         self.default_limit = c.STANDARD_LIST_SIZE
         self.legend: EmojiLegend | None = None
         self.show_legend_list: bool = True  # If to show legend list if available
+        self.previous_object: BaseModel | None = None
+        self.next_object: BaseModel | None = None
 
         # Adding list of all items grouped by legend emoji, as to find out the emoji for each item
         self.legend_filter_results: dict[EmojiLegend, list[BaseModel]] = {}
@@ -185,6 +188,16 @@ class ListPage(ABC):
         """
         if self.object not in self.get_all_items():
             raise UnauthorizedToViewItemException()
+
+        # Set previous and next items
+        all_items = list(self.get_all_items())
+        current_item_index = all_items.index(self.object)
+        self.previous_object = (
+            all_items[current_item_index - 1] if current_item_index > 0 else None
+        )
+        self.next_object = (
+            all_items[current_item_index + 1] if current_item_index < len(all_items) - 1 else None
+        )
 
         return ""
 
@@ -332,3 +345,37 @@ class ListPage(ABC):
         """
 
         return self.get_direct_item() is not None
+
+    def get_previous_and_next_object_keyboard(
+        self, inbound_keyboard: Keyboard, item_key: str = ReservedKeyboardKeys.DEFAULT_PRIMARY_KEY
+    ) -> list[list[Keyboard]]:
+        """
+        Get the previous and next object keyboard
+        :param inbound_keyboard: The inbound keyboard
+        :param item_key: Key to access the item
+        return The keyboard for previous and next object
+        """
+
+        keyboard_line: list[Keyboard] = []
+
+        # Previous object button
+        if self.previous_object is not None:
+            keyboard_line.append(
+                Keyboard(
+                    Emoji.LEFT_ARROW,
+                    info={item_key: self.previous_object.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            )
+
+        # Next object button
+        if self.next_object is not None:
+            keyboard_line.append(
+                Keyboard(
+                    Emoji.RIGHT_ARROW,
+                    info={item_key: self.next_object.id},
+                    inbound_info=inbound_keyboard.info,
+                )
+            )
+
+        return [keyboard_line]

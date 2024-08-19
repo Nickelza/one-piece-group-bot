@@ -11,6 +11,8 @@ class BaseModel(Model):
     Used to manage Entities and Database connection
     """
 
+    id: int | PrimaryKeyField = PrimaryKeyField()
+
     class Meta:
         database = db_obj.get_db()
         only_save_dirty = True

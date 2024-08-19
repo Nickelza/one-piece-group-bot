@@ -64,17 +64,24 @@ async def manage(
             ]
         )
 
+    is_direct_item = False
     if (
         ReservedKeyboardKeys.DIRECT_ITEM in inbound_keyboard.info
         and inbound_keyboard.info[ReservedKeyboardKeys.DIRECT_ITEM]
     ):
         # Show list button
         inline_keyboard.append([get_show_list_button(inbound_keyboard)])
+        is_direct_item = True
 
     await full_message_send(
         context,
         dbf_list_page.get_item_detail_text(),
         update=update,
-        keyboard=inline_keyboard,
+        keyboard=(
+            dbf_list_page.get_previous_and_next_object_keyboard(inbound_keyboard)
+            if not is_direct_item
+            else []
+        )
+        + inline_keyboard,
         inbound_keyboard=inbound_keyboard,
     )

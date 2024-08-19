@@ -80,6 +80,7 @@ async def manage(
         context,
         bounty_loan_list_page.get_item_detail_text(),
         update=update,
-        keyboard=inline_keyboard,
+        keyboard=bounty_loan_list_page.get_previous_and_next_object_keyboard(inbound_keyboard)
+        + inline_keyboard,
         inbound_keyboard=inbound_keyboard,
     )
