@@ -477,11 +477,10 @@ async def validate_game(
     status: GameStatus = game.get_status()
 
     if status is GameStatus.FORCED_END:
-        await full_media_send(
+        await full_message_or_media_send_or_edit(
             context,
-            caption=phrases.GAME_FORCED_END,
+            text=phrases.GAME_FORCED_END,
             update=update,
-            edit_only_caption_and_keyboard=True,
         )
         return None
 
