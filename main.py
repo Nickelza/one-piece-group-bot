@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 from zoneinfo import ZoneInfo
@@ -63,6 +64,7 @@ def main() -> None:
     :return: None
     """
     # Set timezone: Only on linux
+    os.environ["TZ"] = Env.TZ.get()
     try:
         time.tzset()
     except AttributeError:
