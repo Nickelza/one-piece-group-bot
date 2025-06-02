@@ -518,6 +518,9 @@ def get_leaderboard_user(
     if leaderboard is None and group_chat is not None:
         leaderboard = get_leaderboard(index)
 
+    if leaderboard is None:
+        return None
+
     leaderboard_user: LeaderboardUser = leaderboard.leaderboard_users.where(
         LeaderboardUser.user == user
     ).first()
