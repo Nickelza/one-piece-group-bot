@@ -96,6 +96,10 @@ class Environment:
 
 
 if len(sys.argv) > 1:
+    # Check if the first argument is valid file path
+    if not os.path.isfile(sys.argv[1]):
+        raise Exception(f"Environment file {sys.argv[1]} does not exist")
+
     load_dotenv(sys.argv[1])
 else:
     load_dotenv()
@@ -720,7 +724,7 @@ LOCATION_WANO_COUNTRY_IMAGE_URL = Environment(
 LOCATION_EGGHEAD_IMAGE_URL = Environment(
     "LOCATION_EGGHEAD_IMAGE_URL",
     default_value="https://api.grouphelp.top/chelp/index.php?f=AgACAgEAAxkBMjPmtWbDLnZbY5xmMdybNxcwAZYkAAFhZAACY64xG-Wj"
-    "GEZP3shweOhqeAEAAwIAA3kAAzUE",
+                  "GEZP3shweOhqeAEAAwIAA3kAAzUE",
 )
 
 # How long fight immunity lasts in hours. Default: 6 hours
