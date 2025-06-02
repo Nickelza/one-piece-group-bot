@@ -248,17 +248,19 @@ def get_inactive_captains() -> list[User]:
     Find captains of a Crew that have not been active since the last bounty reset
     :return: The inactive captains
     """
-    from src.service.bounty_service import get_previous_bounty_reset_time
 
-    previous_bounty_reset: datetime = get_previous_bounty_reset_time()
-    inactive_captains = User.select().where(
-        (User.crew_role == CrewRole.CAPTAIN)
-        & (User.last_system_interaction_date < previous_bounty_reset)
-        & (User.is_admin == False)
-        & (User.is_exempt_from_global_leaderboard_requirements == False)
-    )
+    # FIXME - To encourage more Crews, do not currently disband any Crews
+    return []
 
-    return inactive_captains
+    # previous_bounty_reset: datetime = get_previous_bounty_reset_time()
+    # inactive_captains = User.select().where(
+    #     (User.crew_role == CrewRole.CAPTAIN)
+    #     & (User.last_system_interaction_date < previous_bounty_reset)
+    #     & (User.is_admin == False)
+    #     & (User.is_exempt_from_global_leaderboard_requirements == False)
+    # )
+    #
+    # return inactive_captains
 
 
 def add_to_crew_chest(user: User, amount: int) -> None:
